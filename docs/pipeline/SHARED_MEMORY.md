@@ -76,6 +76,42 @@ the client detail screen and inherits the link predicate for free. **Phase 3 add
 The wider lesson for the phase: **decide where something LIVES before deciding how it looks.** Two
 minutes of counting slots prevented a build that would have needed unpicking.
 
+## 1c. I WROTE THE SECOND IMPLEMENTATION, AND IT WAS THE WORSE ONE
+
+`lib/haptics.ts` already existed, built on the Capacitor plugin, with a header explaining that
+`navigator.vibrate` is absent on iOS Safari and a poor substitute — so it deliberately no-ops on
+web rather than imitating badly.
+
+Then I wrote `cues.ts` calling `navigator.vibrate` directly. **On a real iPhone through Capacitor,
+every interval and set-check cue produced nothing**, while the correct native plugin sat unused one
+directory away.
+
+The part worth remembering is not the bug, it is how I got there: I hit the iOS limitation, and I
+wrote comments EXPLAINING it — at length, in three files — instead of searching the tree for
+whether it had already been solved. **A limitation you find yourself documenting carefully is a
+strong signal that someone already hit it.** Look for their answer before writing your own.
+
+Now: `cues.ts` delegates, `lib/haptics.ts` gained `hapticPattern()` for cues whose rhythm carries
+the meaning, and `hapticsAvailable` is re-exported from the one module — the local copy checked
+only `navigator.vibrate` and would have reported "no haptics" on the very iPhone where the native
+plugin works.
+
+## 1d. THE STRING NOBODY LOOKS AT
+
+Three sweeps this session found defects in exactly the places no review reaches:
+
+- **`sr-only` text.** `ScreenSkeleton` shipped a hardcoded English "Loading" — the first thing a
+  Hungarian or German screen-reader user heard, for two whole phases. Invisible to visual review,
+  and invisible to `check-i18n` because that audits the JSON, not the JSX.
+- **A dead key claims a feature exists.** The next reader sees `workout.interval.emomDone` and
+  reasonably assumes there is a button. Five were dead, including `workout.retry` sitting beside a
+  `common.retry` that said the same thing.
+- **A check whose subject moved does not fail — it passes, quietly, forever.** `NATIVE_LABELS`
+  guarded three keys that had been relocated to the LOCALES registry, so `ref.has(key)` was false
+  for all of them and every iteration was a no-op.
+
+All three are now gated, and each gate was broken deliberately once to watch it fail by name.
+
 ## 2. CONTRACTS
 
 Established facts other jobs must not re-derive or contradict.
