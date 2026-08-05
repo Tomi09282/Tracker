@@ -139,6 +139,51 @@ for (const [code, bundle] of Object.entries(bundles)) {
   }
 }
 
+/* ── strings that are ANNOUNCED but never SEEN ───────────────────────────────────────────────────
+ *
+ * The hardest untranslated string to notice is the one nobody looks at. `ScreenSkeleton` shipped
+ * a hardcoded `<span className="sr-only">Loading</span>` — the FIRST thing a Hungarian or German
+ * screen-reader user heard on entering the app, in English, for the whole of Phase 1 and 2. No
+ * visual review can catch that, and the bundle checks above cannot either: they audit the JSON,
+ * not the JSX.
+ *
+ * So this checks the four places a literal string reaches a user without being visible:
+ * `aria-label`, `sr-only` content, `placeholder` and `title`. It found four more in shipped
+ * components — a toast dismiss, a sheet close, and two date-picker arrows.
+ *
+ * The playground and TokenProof are exempt: internal QA pages, deliberately English, never routed.
+ */
+{
+  const EXEMPT = [/^features\/playground\//, /^ui\/TokenProof\.tsx$/];
+  const tsxFiles = [];
+  const walkTsx = async (dir) => {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walkTsx(full);
+      else if (entry.name.endsWith('.tsx')) tsxFiles.push(full);
+    }
+  };
+  await walkTsx(path.resolve('src'));
+
+  for (const file of tsxFiles) {
+    const rel = path.relative(path.resolve('src'), file).split(path.sep).join('/');
+    if (EXEMPT.some((re) => re.test(rel))) continue;
+    const lines = (await fs.readFile(file, 'utf8')).split('\n');
+    lines.forEach((line, i) => {
+      let m;
+      if ((m = line.match(/aria-label="([^"{}]{2,})"/))) {
+        problems.push(`${rel}:${i + 1} aria-label="${m[1]}" is a literal — it is announced, so it must be a t() key`);
+      }
+      if ((m = line.match(/sr-only[^>]*>([^<>{}]{2,})</))) {
+        problems.push(`${rel}:${i + 1} sr-only text "${m[1].trim()}" is a literal — it is announced, so it must be a t() key`);
+      }
+      if ((m = line.match(/(placeholder|title)="([^"{}]{3,})"/))) {
+        problems.push(`${rel}:${i + 1} ${m[1]}="${m[2]}" is a literal — it reaches the user, so it must be a t() key`);
+      }
+    });
+  }
+}
+
 if (problems.length) {
   console.error(`\ncheck-i18n: ${problems.length} problem(s)\n`);
   for (const p of problems) console.error(`  ${p}`);

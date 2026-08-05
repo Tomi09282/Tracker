@@ -10,7 +10,11 @@
     "next": "Weiter",
     "more": "Mehr",
     "less": "Weniger",
-    "minutesShort": "Min."
+    "minutesShort": "Min.",
+    "dismiss": "Schließen",
+    "close": "Schließen",
+    "prevMonth": "Voriger Monat",
+    "nextMonth": "Nächster Monat"
   },
   "auth": {
     "loginTitle": "Bei deinem Konto anmelden",
@@ -38,7 +42,8 @@
     "settings": "Einstellungen",
     "admin": "Admin",
     "coach": "Trainer",
-    "plans": "Pläne"
+    "plans": "Pläne",
+    "primary": "Hauptnavigation"
   },
   "home": {
     "greeting": "Hallo!",

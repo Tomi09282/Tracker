@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, Plus, X } from 'lucide-react';
@@ -22,6 +23,7 @@ export function Sheet({
   /** Variant E flashes a confirmation in place of the sheet instead of just closing. */
   succeeded?: boolean;
 }) {
+  const { t } = useTranslation();
   const variant = useElementVariant('E14');
   const motionSafe = useMotionSafe();
   const panel = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ export function Sheet({
               <>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <h2 className="text-title-3 text-text-1">{title}</h2>
-                  <Pressable shape="icon" variant="ghost" aria-label="Close" onClick={onClose}>
+                  <Pressable shape="icon" variant="ghost" aria-label={t('common.close')} onClick={onClose}>
                     <X size={20} strokeWidth={2} aria-hidden />
                   </Pressable>
                 </div>

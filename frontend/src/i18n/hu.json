@@ -10,7 +10,11 @@
     "next": "Tovább",
     "more": "Több",
     "less": "Kevesebb",
-    "minutesShort": "perc"
+    "minutesShort": "perc",
+    "dismiss": "Bezárás",
+    "close": "Bezárás",
+    "prevMonth": "Előző hónap",
+    "nextMonth": "Következő hónap"
   },
   "auth": {
     "loginTitle": "Jelentkezz be a fiókodba",
@@ -38,7 +42,8 @@
     "settings": "Beállítások",
     "admin": "Admin",
     "coach": "Edző",
-    "plans": "Tervek"
+    "plans": "Tervek",
+    "primary": "Fő navigáció"
   },
   "home": {
     "greeting": "Szia!",

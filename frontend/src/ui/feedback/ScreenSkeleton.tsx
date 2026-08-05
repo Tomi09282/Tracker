@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/cn';
 
 /**
@@ -22,11 +23,19 @@ export function Skeleton({ className }: { className?: string }) {
   );
 }
 
-/** Full-screen placeholder used while the session is still unknown. */
+/**
+ * Full-screen placeholder used while the session is still unknown.
+ *
+ * The announcement is TRANSLATED, which it was not: a hardcoded "Loading" was the first thing a
+ * Hungarian or German screen-reader user heard on entering the app. It is invisible, so no visual
+ * review would ever have caught it — and `check-i18n` could not either, because it audits the
+ * bundles, not the JSX. `common.loading` already existed and simply was not used.
+ */
 export function ScreenSkeleton() {
+  const { t } = useTranslation();
   return (
     <div className="screen-x col-mobile py-6" role="status" aria-busy="true">
-      <span className="sr-only">Loading</span>
+      <span className="sr-only">{t('common.loading')}</span>
       <Skeleton className="h-8 w-40" />
       <Skeleton className="mt-2 h-4 w-24" />
       <Skeleton className="mt-6 h-32 w-full rounded-card" />

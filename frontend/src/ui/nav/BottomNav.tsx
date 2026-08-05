@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -21,12 +22,13 @@ export interface NavTab {
  * menu is the correct answer there, and silently shrinking five tabs into six is not.
  */
 export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
+  const { t } = useTranslation();
   const variant = useElementVariant('E11');
   const visible = tabs.slice(0, 5);
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t('nav.primary')}
       className={cn(
         'fixed inset-x-0 bottom-0 z-[var(--z-nav)]',
         'border-t border-[var(--surface-border)] bg-[var(--nav-bg)] backdrop-blur-xl',

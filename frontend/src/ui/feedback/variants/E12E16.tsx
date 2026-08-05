@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Check, Info, TriangleAlert, X } from 'lucide-react';
@@ -111,6 +112,7 @@ const TOAST_TONE: Record<ToastKind, string> = {
 };
 
 export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number) => void }) {
+  const { t } = useTranslation();
   const variant = useElementVariant('E15');
   const motionSafe = useMotionSafe();
   const [undone, setUndone] = useState(false);
@@ -175,7 +177,7 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
 
         <button
           type="button"
-          aria-label="Dismiss"
+          aria-label={t('common.dismiss')}
           onClick={() => onDismiss(toast.id)}
           className="inline-flex size-[var(--target-min)] shrink-0 cursor-pointer items-center justify-center rounded-chip text-text-3 outline-none hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
         >

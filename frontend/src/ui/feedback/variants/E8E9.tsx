@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, ChevronDown, Search } from 'lucide-react';
@@ -213,6 +214,7 @@ export function DatePicker({
   onChange: (next: Date) => void;
   label: string;
 }) {
+  const { t } = useTranslation();
   const variant = useElementVariant('E9');
   const motionSafe = useMotionSafe();
   const [month, setMonth] = useState(() => startOfDay(value ?? new Date()));
@@ -260,7 +262,7 @@ export function DatePicker({
           <Pressable
             shape="icon"
             variant="ghost"
-            aria-label="Previous month"
+            aria-label={t('common.prevMonth')}
             onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
           >
             <ChevronDown size={20} strokeWidth={2} aria-hidden className="rotate-90" />
@@ -269,7 +271,7 @@ export function DatePicker({
           <Pressable
             shape="icon"
             variant="ghost"
-            aria-label="Next month"
+            aria-label={t('common.nextMonth')}
             onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
           >
             <ChevronDown size={20} strokeWidth={2} aria-hidden className="-rotate-90" />

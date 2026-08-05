@@ -10,7 +10,11 @@
     "next": "Next",
     "more": "More",
     "less": "Less",
-    "minutesShort": "min"
+    "minutesShort": "min",
+    "dismiss": "Dismiss",
+    "close": "Close",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month"
   },
   "auth": {
     "loginTitle": "Sign in to your account",
@@ -38,7 +42,8 @@
     "settings": "Settings",
     "admin": "Admin",
     "coach": "Coach",
-    "plans": "Plans"
+    "plans": "Plans",
+    "primary": "Primary navigation"
   },
   "home": {
     "greeting": "Hi there!",
