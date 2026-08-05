@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { LogOut } from 'lucide-react';
+import { Link } from 'react-router';
+import { LogOut, ShieldCheck } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ThemeStudio } from './ThemeStudio';
@@ -51,6 +52,24 @@ export function SettingsPage() {
       <Section title={t('settings.cues.title')}>
         <CueSettings />
       </Section>
+
+      {/* Admin lives HERE, not in the bottom bar. A coach already fills all five nav slots, so
+          pushing an admin tab made six and the bar silently clamped the sixth away — an admin
+          could not reach /admin from the navigation at all. It belongs in Settings on its own
+          merits anyway: it is role-specific and infrequent, which is the definition of secondary
+          navigation. The link is a convenience; the route and every endpoint behind it enforce the
+          role on the server regardless. */}
+      {user?.role === 'admin' ? (
+        <Section title={t('nav.admin')}>
+          <Link
+            to="/admin"
+            className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body text-accent"
+          >
+            <ShieldCheck className="size-icon-s" aria-hidden />
+            {t('settings.openAdmin')}
+          </Link>
+        </Section>
+      ) : null}
 
       <Section title={t('common.language')}>
         <LanguageToggle />

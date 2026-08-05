@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Home, Dumbbell, Settings, ShieldCheck, Users, ClipboardList } from 'lucide-react';
+import { Home, Dumbbell, Settings, Users, ClipboardList } from 'lucide-react';
 import { BottomNav, type NavTab } from '../ui/nav/BottomNav';
 import { useSession } from '../features/auth/useSession';
 import { OfflineIndicator } from '../ui/shell/OfflineIndicator';
@@ -29,9 +29,19 @@ export function AppLayout() {
     tabs.push({ to: '/coach', icon: Users, label: t('nav.coach') });
     tabs.push({ to: '/coach/plans', icon: ClipboardList, label: t('nav.plans') });
   }
-  if (user?.role === 'admin') {
-    tabs.push({ to: '/admin', icon: ShieldCheck, label: t('nav.admin') });
-  }
+  // ADMIN IS NOT A BOTTOM-NAV DESTINATION, and used to be one by accident.
+  //
+  // A coach already fills all five slots (home, library, settings, coach, plans). Pushing admin
+  // made SIX, and `BottomNav` clamps with `slice(0, 5)` exactly as its own comment promises — so
+  // an admin saw five tabs and /admin was not among them. The route worked, the role check
+  // worked, and there was no way to reach it. Measured, not theorised.
+  //
+  // It belongs in Settings regardless: it is the least-used destination in the product and it
+  // belongs to a ROLE rather than to the daily loop. Primary navigation and role-specific areas
+  // are different things, and mixing them is what filled the bar in the first place.
+  //
+  // This also leaves the fifth slot free, which is what Phase 3 needed — see
+  // [[Messaging and Notifications]] for why chat and notifications take no tab either.
 
   return (
     <div className="min-h-dvh bg-surface-0">

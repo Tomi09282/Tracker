@@ -94,7 +94,8 @@
       "toneHint": "Ein kurzer Ton für den 3-2-1-Countdown und jeden Phasenwechsel. Auf dem iPhone ist das der einzige hörbare Hinweis.",
       "haptics": "Vibration",
       "hapticsHint": "Ein Vibrieren beim Abhaken eines Satzes, bei einem Rekord und bei jedem Rundenwechsel."
-    }
+    },
+    "openAdmin": "Admin-Bereich öffnen"
   },
   "library": {
     "search": "Suche",

@@ -94,7 +94,8 @@
       "toneHint": "Rövid hang a 3-2-1 visszaszámláláshoz és a fázisváltáshoz. iPhone-on ez az egyetlen hallható jelzés.",
       "haptics": "Rezgés",
       "hapticsHint": "Rezgés sorozat pipálásakor, rekordnál és körváltáskor."
-    }
+    },
+    "openAdmin": "Admin felület megnyitása"
   },
   "library": {
     "search": "Keresés",

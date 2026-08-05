@@ -47,10 +47,34 @@ Pipeline: **Opus 5 solo, all roles** (D-P1). There is no PVP loop to hand off to
 
 ---
 
-**PHASE 2 AS OF 2026-08-05: 63 of 66 done.** 78 endpoints · schema v12 · smoke 313/313 ·
-verify:schema 21/21 · check-routes OK (74 routes, 8 public by design) · npm audit 0 · 3 languages ×
-406 keys · vault in sync. Open: two ui-ux-pro-max passes (T2.0.3, T2.0.4) and the per-coach seat
-cap (T2.3.5), which is reserved for the billing phase by design.
+**PHASE 3 OPEN — F5 notifications + F6 chat.** 0 of 28.
+
+Behind it: **Phase 0 18/18 · Phase 1 57/58 CLOSED (owner sign-off 2026-08-06) · Phase 2 65/66.**
+The two carried-forward items are T1.31 (gender/body variants and 3D on the muscle map) and T2.3.5
+(per-coach seat cap, reserved for the billing phase). Neither blocks this phase.
+
+Baseline entering Phase 3: 78 endpoints · schema v12 · smoke 316/316 · verify:schema 21/21 ·
+check-routes OK · check-worker-tx OK · npm audit 0 · 3 languages x 412 keys · vault in sync ·
+5 commits on `master`, the first one 2026-08-06 (this project had none until then).
+
+## 1b. THE NAV WAS FULL, AND NOBODY COUNTED
+
+Planning where Phase 3's chat and notifications would live surfaced a defect that was already
+shipping: `BottomNav` clamps at five slots — deliberately, and its comment says an overflow menu
+is the right answer for a sixth — but `AppLayout` handed an **admin six tabs**. Measured: an admin
+saw five and `/admin` was not among them. The route worked, the role check worked, and there was
+no way to get there.
+
+**The clamp did exactly what it promised. Nobody counted the callers.** Same shape as every other
+defect in this project: two things that must agree, drifting, with neither side wrong on its own.
+
+Fixed by moving admin into Settings — where it belongs regardless, because role-specific and
+infrequent IS secondary navigation — and by deciding that neither chat nor notifications takes a
+tab either. Notifications are a header bell; coach-side chat is the Chat tab that already exists on
+the client detail screen and inherits the link predicate for free. **Phase 3 adds no nav tabs.**
+
+The wider lesson for the phase: **decide where something LIVES before deciding how it looks.** Two
+minutes of counting slots prevented a build that would have needed unpicking.
 
 ## 2. CONTRACTS
 

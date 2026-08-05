@@ -94,7 +94,8 @@
       "toneHint": "A short tone for the 3-2-1 countdown and every phase change. On iPhone this is the only audible cue.",
       "haptics": "Vibration",
       "hapticsHint": "A buzz when a set is checked, on a record, and at every round change."
-    }
+    },
+    "openAdmin": "Open the admin area"
   },
   "library": {
     "search": "Search",
