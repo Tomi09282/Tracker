@@ -186,6 +186,30 @@ Established facts other jobs must not re-derive or contradict.
 
 ---
 
+## 4aa. A CHART'S X AXIS IS TIME, OR THE CHART IS LYING
+
+The progress chart shipped positioning points by INDEX. It is the obvious implementation and it is
+wrong for this chart: five sessions in a week then a two-month break renders identically to seven
+consecutive days. The whole question a progress chart answers is **how fast**, and index spacing
+destroys precisely that — a coach reads evenly-spaced points as steady training.
+
+Fixed by positioning on the date. The cost is that clustered sessions crowd and gaps open up; that
+is the truth, and a visible gap is information.
+
+Two supporting decisions:
+
+- **The geometry moved to a pure module** (`chartGeometry.ts`), because where the points go is the
+  one thing a chart can get silently, misleadingly wrong — and pure arithmetic can be checked
+  exhaustively without a DOM. Same reasoning as `intervalPlan.ts`.
+- **A break of 14 days or more is NAMED in the axis row.** Once the axis is honest the gap is
+  visible, but visible and understood are different things: the caption is what stops the drop
+  after a break being read as lost strength. Fourteen days because a week off is ordinary.
+
+Deliberately NOT changed, so it is not re-raised: there is no y-axis scale (this is a sparkline —
+the caption carries the current value and the change, which is what a coach reads), and the delta
+is first-to-last over the window rather than since the previous point (a single-session dip is
+noise; where they started versus where they are is the question).
+
 ## 5. HANDOFF QUEUE
 
 Phase 2's 20 accumulated lessons were PRUNED from this hot file on 2026-08-05, after

@@ -489,6 +489,7 @@
   "progress": {
     "heading": "Fortschritt",
     "date": "Datum",
-    "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Trainingstage sind nötig — zwei Punkte sind kein Trend."
+    "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Trainingstage sind nötig — zwei Punkte sind kein Trend.",
+    "gap": "{{count}} Tage Pause"
   }
 }

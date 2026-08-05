@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { plot, linePath, areaPath, longestGapDays } from './chartGeometry';
 
 export interface ProgressPoint {
   date: string;
@@ -63,22 +64,16 @@ export function ProgressChart({
   const H = 90;
   const PAD = 4;
 
-  const values = series.map((p) => p.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  // A flat series would divide by zero and, worse, draw a line at the top of the box implying a
-  // peak. A single horizontal line through the middle is the honest picture of "no change".
-  const span = max - min || 1;
-  const flat = max === min;
-
-  const x = (i: number) => PAD + (i * (W - PAD * 2)) / (series.length - 1);
-  const y = (v: number) => (flat ? H / 2 : H - PAD - ((v - min) / span) * (H - PAD * 2));
-
-  const line = series.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
-  const area = `${line} L${x(series.length - 1).toFixed(1)},${H} L${x(0).toFixed(1)},${H} Z`;
+  // Geometry lives in a pure module so the one thing a chart can silently get wrong — where the
+  // points go — is testable without a DOM. See `chartGeometry.ts` for why x is TIME, not index.
+  const pts = plot(series, { w: W, h: H, pad: PAD });
+  const line = linePath(pts);
+  const area = areaPath(pts, H);
+  const gap = longestGapDays(series);
 
   const first = series[0];
   const last = series[series.length - 1];
+  const lastPt = pts[pts.length - 1];
   const delta = last.value - first.value;
 
   return (
@@ -123,11 +118,16 @@ export function ProgressChart({
           // This keeps the line one consistent weight at every screen width.
           vectorEffect="non-scaling-stroke"
         />
-        <circle cx={x(series.length - 1)} cy={y(last.value)} r="3" fill="var(--accent)" vectorEffect="non-scaling-stroke" />
+        <circle cx={lastPt.x} cy={lastPt.y} r="3" fill="var(--accent)" vectorEffect="non-scaling-stroke" />
       </svg>
 
-      <div className="text-caption flex justify-between text-text-3">
+      <div className="text-caption flex justify-between gap-2 text-text-3">
         <span>{first.date}</span>
+        {/* A break that dominates the window is named, not merely drawn. The honest x axis makes
+            the gap VISIBLE; saying how long it was is what stops a coach reading the drop after it
+            as lost strength rather than as two weeks off. Two weeks is the threshold because a
+            week's break is ordinary and does not need explaining. */}
+        {gap >= 14 ? <span className="truncate text-warning">{t('progress.gap', { count: gap })}</span> : null}
         <span>{last.date}</span>
       </div>
 

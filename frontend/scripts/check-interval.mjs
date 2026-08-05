@@ -221,6 +221,76 @@ const build = (members, kind = 'circuit') => {
   check('nor is a superset — heavy paired work is not conditioning', superset.length === 0, `${superset.length} blocks`);
 }
 
+
+/* ── chart geometry ─────────────────────────────────────────────────────────────────────────────
+ *
+ * The one thing a chart can get silently, misleadingly wrong is where it puts the points. These
+ * assertions exist because the first version of this chart positioned by INDEX, which renders a
+ * two-month break identically to a one-day gap — on a PROGRESS chart, a false statement.
+ */
+const { plot, linePath, longestGapDays } = await import('../src/ui/feedback/chartGeometry.ts');
+
+const BOX = { w: 300, h: 90, pad: 4 };
+const at = (pts, date) => pts.find((p) => p.date === date);
+
+{
+  // Evenly spaced days must land evenly. The baseline: no regression in the ordinary case.
+  const pts = plot(
+    [{ date: '2026-01-01', value: 10 }, { date: '2026-01-02', value: 20 }, { date: '2026-01-03', value: 30 }],
+    BOX,
+  );
+  check('three consecutive days are evenly spaced', Math.abs((pts[1].x - pts[0].x) - (pts[2].x - pts[1].x)) < 0.01,
+    pts.map((p) => Math.round(p.x)).join(','));
+  check('the first point sits at the left pad and the last at the right', pts[0].x === 4 && Math.abs(pts[2].x - 296) < 0.01,
+    `${pts[0].x} .. ${pts[2].x}`);
+}
+{
+  // THE ONE THAT MATTERS. Two sessions a day apart, then a two-month break, then one more.
+  // Under index spacing all three gaps render equal; under time spacing the break dominates.
+  const pts = plot(
+    [{ date: '2026-01-01', value: 10 }, { date: '2026-01-02', value: 20 }, { date: '2026-03-03', value: 30 }],
+    BOX,
+  );
+  const firstGap = pts[1].x - pts[0].x;
+  const breakGap = pts[2].x - pts[1].x;
+  check(
+    'a two-month break is drawn as a two-month break, not as one step',
+    breakGap > firstGap * 20,
+    `1-day gap ${firstGap.toFixed(1)}px vs 60-day gap ${breakGap.toFixed(1)}px`,
+  );
+  check('and the break is reported in days so it can be named', longestGapDays([
+    { date: '2026-01-01' }, { date: '2026-01-02' }, { date: '2026-03-03' },
+  ]) === 60, String(longestGapDays([{ date: '2026-01-01' }, { date: '2026-01-02' }, { date: '2026-03-03' }])));
+}
+{
+  // A flat series: no division by zero, and the line sits in the MIDDLE rather than along the top
+  // where it would imply a peak.
+  const pts = plot([{ date: '2026-01-01', value: 5 }, { date: '2026-01-05', value: 5 }, { date: '2026-01-09', value: 5 }], BOX);
+  check('a flat series draws through the middle, not along the top', pts.every((p) => p.y === 45), pts.map((p) => p.y).join(','));
+  check('and no coordinate is NaN', pts.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y)), 'ok');
+}
+{
+  // Every point on the same day — the time span is zero and must not divide by it.
+  const same = plot([{ date: '2026-01-01', value: 1 }, { date: '2026-01-01', value: 2 }], BOX);
+  check('a zero time span falls back to index spacing rather than NaN',
+    same.every((p) => Number.isFinite(p.x)), same.map((p) => Math.round(p.x)).join(','));
+  const one = plot([{ date: '2026-01-01', value: 1 }], BOX);
+  check('a single point is centred, not at x=NaN', one[0].x === 150, String(one[0].x));
+}
+{
+  // Higher value = higher on screen. SVG y grows downward, so this is the sign error that would
+  // draw every progress chart upside down.
+  const pts = plot([{ date: '2026-01-01', value: 10 }, { date: '2026-01-02', value: 50 }, { date: '2026-01-03', value: 30 }], BOX);
+  check('a bigger number is drawn HIGHER, not lower', at(pts, '2026-01-02').y < at(pts, '2026-01-01').y,
+    `max y=${at(pts, '2026-01-02').y}, min y=${at(pts, '2026-01-01').y}`);
+  check('every point stays inside the box', pts.every((p) => p.y >= BOX.pad && p.y <= BOX.h - BOX.pad), 'ok');
+  check('the path starts with M and continues with L', /^M[\d.]+,[\d.]+ L/.test(linePath(pts)), linePath(pts).slice(0, 24));
+}
+{
+  check('no gap is reported for consecutive days', longestGapDays([{ date: '2026-01-01' }, { date: '2026-01-02' }]) === 1, 'ok');
+  check('an empty series plots nothing rather than throwing', plot([], BOX).length === 0, 'ok');
+}
+
 console.log('');
 if (failures.length) {
   console.log(`check-interval FAILED — ${passed} passed, ${failures.length} failed`);

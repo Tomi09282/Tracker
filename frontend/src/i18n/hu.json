@@ -489,6 +489,7 @@
   "progress": {
     "heading": "Fejlődés",
     "date": "Dátum",
-    "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három edzésnap kell hozzá — két pont még nem trend."
+    "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három edzésnap kell hozzá — két pont még nem trend.",
+    "gap": "{{count}} nap kihagyás"
   }
 }
