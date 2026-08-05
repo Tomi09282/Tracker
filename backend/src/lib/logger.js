@@ -35,6 +35,18 @@ export const logger = pino(
         '*.accessToken',
         'password',
         'token',
+        // pino matches a path LITERALLY: `*.password` does not cover `temporaryPassword`. Nothing
+        // logs these today — checked — but they are the values in this codebase that would do the
+        // most damage in a log file, and the cost of listing them before someone adds a debug line
+        // is nothing. Defence for the change that has not happened yet.
+        '*.temporaryPassword',
+        'temporaryPassword',
+        '*.password_hash',
+        'password_hash',
+        '*.token_hash',
+        'token_hash',
+        // The ICS feed URL carries its bearer token inline and is returned exactly once.
+        '*.url',
       ],
       censor: '[redacted]',
     },
