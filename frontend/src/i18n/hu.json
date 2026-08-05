@@ -432,7 +432,14 @@
       "spokenDone": "Blokk kész",
       "spokenResume": "Folytatjuk"
     },
-    "restRemaining": "Pihenő: {{time}}"
+    "restRemaining": "Pihenő: {{time}}",
+    "retry": "Újra",
+    "checkFailed": {
+      "conflict": "Már rögzítve, más értékkel",
+      "offline": "Nincs kapcsolat",
+      "failed": "Nem sikerült rögzíteni"
+    },
+    "withdrawn": "Visszavonva"
   },
   "plans": {
     "eyebrow": "Tervezés",

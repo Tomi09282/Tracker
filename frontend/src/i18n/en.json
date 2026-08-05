@@ -432,7 +432,14 @@
       "spokenDone": "Block complete",
       "spokenResume": "Resuming"
     },
-    "restRemaining": "Rest: {{time}}"
+    "restRemaining": "Rest: {{time}}",
+    "retry": "Retry",
+    "checkFailed": {
+      "conflict": "Already recorded, with different values",
+      "offline": "No connection",
+      "failed": "Could not record"
+    },
+    "withdrawn": "Withdrawn"
   },
   "plans": {
     "eyebrow": "Authoring",

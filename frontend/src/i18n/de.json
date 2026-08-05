@@ -432,7 +432,14 @@
       "spokenDone": "Block fertig",
       "spokenResume": "Weiter geht es"
     },
-    "restRemaining": "Pause: {{time}}"
+    "restRemaining": "Pause: {{time}}",
+    "retry": "Erneut",
+    "checkFailed": {
+      "conflict": "Bereits erfasst, mit anderen Werten",
+      "offline": "Keine Verbindung",
+      "failed": "Konnte nicht erfasst werden"
+    },
+    "withdrawn": "Zurückgenommen"
   },
   "plans": {
     "eyebrow": "Planung",

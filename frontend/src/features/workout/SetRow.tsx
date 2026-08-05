@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
-import type { LogSet, PrRecord } from './useWorkout';
+import { ApiError, type LogSet, type PrRecord } from './useWorkout';
 
 export interface SetRowProps {
   set: LogSet;
@@ -51,7 +51,16 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
   const { t } = useTranslation();
   const variant = useElementVariant('E21');
   const motionSafe = useMotionSafe();
-  const done = set.completed_at != null;
+  // THREE STATES, not two. A voided set is neither pending nor done:
+  //   - It cannot be shown as DONE — the undo already removed it from the session totals, so a
+  //     green check puts the screen at odds with the record. That is exactly what shipped: the row
+  //     kept its check after an undo while `total_sets` had already dropped to 3 of 4.
+  //   - It cannot be shown as PENDING either — `trg_log_set_void_terminal` makes a void terminal
+  //     and `recordSetTx` requires `voided_at IS NULL`, so tapping it would earn a 409. Offering a
+  //     control that cannot succeed is worse than offering none.
+  // So it renders as WITHDRAWN, and says so.
+  const voided = set.voided_at != null;
+  const done = set.completed_at != null && !voided;
 
   // Seeded from the row, then owned by the input. A completed set shows what was recorded; a
   // pending one shows the target as a placeholder, never as a value — pre-filling the target is
@@ -60,6 +69,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
   const [reps, setReps] = useState(() => (set.reps ?? '').toString());
   const [records, setRecords] = useState<PrRecord[]>([]);
   const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [flashing, setFlashing] = useState(false);
 
@@ -97,8 +107,9 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
   );
 
   const submit = async () => {
-    if (busy || done) return;
+    if (busy || done || voided) return;
     setBusy(true);
+    setFailed(null);
     try {
       const earned = await onCheck({
         weight: weight === '' ? null : Number(weight),
@@ -115,6 +126,17 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         setUndoOffered(true);
         undoTimer.current = setTimeout(() => setUndoOffered(false), UNDO_MS);
       }
+    } catch (err) {
+      // A CHECK THAT FAILS MUST SAY SO. Without this the row had try/finally and no catch: the
+      // spinner stopped, the row stayed pending, and the lifter — mid-set, not looking closely —
+      // had no way to tell a recorded set from a lost one. That is the single worst thing this
+      // screen could do quietly.
+      //
+      // 409 is its own message because it is not a failure to record, it is a REFUSAL to
+      // overwrite: the set already carries different values, and the server returns them
+      // precisely so the row can offer void-and-relog rather than a shrug.
+      const status = err instanceof ApiError ? err.status : 0;
+      setFailed(status === 409 ? 'conflict' : status === 0 ? 'offline' : 'failed');
     } finally {
       setBusy(false);
     }
@@ -129,7 +151,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
   // `pointercancel` matters as much as `pointerup` — the browser fires it when a scroll takes over
   // the gesture, and without it a hold that turned into a scroll would still record the set.
   const startHold = () => {
-    if (busy || done || disabled) return;
+    if (busy || done || voided || disabled) return;
     setHolding(true);
     holdTimer.current = setTimeout(() => {
       setHolding(false);
@@ -154,7 +176,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
   const dragFrom = useRef<{ x: number; base: number } | null>(null);
 
   const onDragStart = (e: React.PointerEvent) => {
-    if (variant !== 'C' || done || disabled) return;
+    if (variant !== 'C' || done || voided || disabled) return;
     dragFrom.current = { x: e.clientX, base: weight === '' ? (set.target_weight_kg ?? 0) : Number(weight) };
   };
 
@@ -221,9 +243,10 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         'relative grid h-14 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 rounded-card px-2',
         'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
         done ? 'bg-success/10' : 'bg-surface-1',
+        voided && 'bg-surface-1 opacity-55 line-through decoration-text-3',
         flashing && 'bg-warning/25 ring-2 ring-[var(--warning)]',
         // Only variant C claims horizontal gestures, and only while the row is still pending.
-        variant === 'C' && !done && 'touch-pan-y select-none',
+        variant === 'C' && !done && !voided && 'touch-pan-y select-none',
         // The handover is announced by a ring, not by a jump: nothing moves under the thumb.
         autoFocus && !done && 'ring-2 ring-[var(--accent)]',
       )}
@@ -245,7 +268,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         aria-label={t('workout.weight')}
         placeholder={set.target_weight_kg != null ? String(set.target_weight_kg) : t('workout.kg')}
         value={weight}
-        disabled={done || disabled}
+        disabled={done || voided || disabled}
         onChange={(e) => setWeight(e.target.value.replace(/[^0-9.]/g, ''))}
         className={cn(
           'h-14 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums',
@@ -258,7 +281,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         aria-label={t('workout.reps')}
         placeholder={set.target_reps != null ? String(set.target_reps) : t('workout.reps')}
         value={reps}
-        disabled={done || disabled}
+        disabled={done || voided || disabled}
         onChange={(e) => setReps(e.target.value.replace(/[^0-9]/g, ''))}
         className={cn(
           'h-14 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums',
@@ -270,10 +293,10 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
       <Pressable
         shape="icon"
         variant={done ? 'primary' : 'secondary'}
-        aria-label={done ? t('workout.recorded') : variant === 'B' ? t('workout.holdToCheck') : t('workout.check')}
+        aria-label={voided ? t('workout.withdrawn') : done ? t('workout.recorded') : variant === 'B' ? t('workout.holdToCheck') : t('workout.check')}
         aria-pressed={done}
         busy={busy}
-        disabled={done || disabled}
+        disabled={done || voided || disabled}
         className={cn(
           'relative size-14 overflow-hidden',
           // The hold's own feedback: the button fills over HOLD_MS so the lifter can see the
@@ -316,6 +339,33 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         <span role="status" className="sr-only">
           {t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) })}
         </span>
+      ) : null}
+
+      {/* A FAILED CHECK, SAID OUT LOUD. `role="alert"` rather than `status`, because unlike a
+          record this is something the lifter has to act on — and mid-set they are not watching the
+          screen closely enough to notice a colour change.
+
+          It overlays like the undo pill rather than displacing anything: the set list must not
+          reflow when a check fails, or every row below shifts under the thumb that is about to
+          retry. */}
+      {failed ? (
+        <div className="absolute inset-y-1 right-1 flex items-center gap-1" role="alert">
+          <span className="text-caption rounded-chip bg-danger/15 px-2 py-0.5 text-danger">
+            {t(`workout.checkFailed.${failed}`)}
+          </span>
+          {/* A conflict is not retryable — the stored values differ, so re-sending the same request
+              cannot help. Undo is the actual way forward, which is what the server's 409 is for. */}
+          {failed === 'conflict' && onUndo ? (
+            <Pressable shape="chip" density="compact" variant="secondary" busy={undoing} onClick={() => void undo()}>
+              <Undo2 className="size-icon-s" aria-hidden />
+              {t('workout.undo')}
+            </Pressable>
+          ) : (
+            <Pressable shape="chip" density="compact" variant="secondary" onClick={() => void submit()}>
+              {t('workout.retry')}
+            </Pressable>
+          )}
+        </div>
       ) : null}
     </li>
   );

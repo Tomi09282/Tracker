@@ -210,6 +210,39 @@ the caption carries the current value and the change, which is what a coach read
 is first-to-last over the window rather than since the previous point (a single-session dip is
 noise; where they started versus where they are is the question).
 
+## 4ab. THE FAILURE PATH IS THE ONE NOBODY WALKS
+
+The T2.0.3 review found two defects and both were in code that only runs when something goes
+wrong — which is exactly where a self-review pays, because the happy path gets exercised a hundred
+times a day and the failure path never.
+
+**`SetRow.submit()` had `try/finally` and no `catch`.** A failed check stopped the spinner and
+said NOTHING. The row stayed pending, no message appeared, and a lifter mid-set — not watching the
+screen closely — had no way to tell a recorded set from a lost one. For a logging app that is the
+worst thing a screen can do quietly.
+
+Now: 0 is offline, 409 is a conflict, anything else is a failure, and each says so with
+`role="alert"` rather than `status` because the lifter has to ACT. **A 409 offers Undo, not
+Retry** — re-sending cannot help when the stored values differ, and the server returns those values
+precisely so the row can offer void-and-relog. The message overlays like the undo pill so the list
+never reflows under the thumb about to retry.
+
+**A voided set still rendered as done.** `done = set.completed_at != null` never consulted
+`voided_at`, so after an undo the row kept its green check while the session totals had already
+dropped to 3 of 4. **The screen was disagreeing with the record.**
+
+The fix is a THIRD state, and the reasoning matters more than the CSS:
+  - It cannot show as DONE — the undo already removed it from the totals.
+  - It cannot show as PENDING — `trg_log_set_void_terminal` makes a void terminal and
+    `recordSetTx` requires `voided_at IS NULL`, so a tap would earn a 409. **Offering a control
+    that cannot succeed is worse than offering none.**
+
+So: WITHDRAWN, struck through, dimmed, every control disabled, and the label says it.
+
+The general lesson: **a feature is not finished when its write lands, it is finished when every
+screen that displays the affected row agrees with the new state.** The undo shipped correct on the
+server and incomplete on the client, and nothing caught it because no test looked at a voided row.
+
 ## 5. HANDOFF QUEUE
 
 Phase 2's 20 accumulated lessons were PRUNED from this hot file on 2026-08-05, after
