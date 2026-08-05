@@ -93,7 +93,7 @@
       "tone": "Sípszó",
       "toneHint": "Rövid hang a 3-2-1 visszaszámláláshoz és a fázisváltáshoz. iPhone-on ez az egyetlen hallható jelzés.",
       "haptics": "Rezgés",
-      "hapticsHint": "Rezgés sorozat pipálásakor, rekordnál és körváltáskor."
+      "hapticsHint": "Rezgés a sorozat pipálásakor, rekordnál és körváltáskor."
     },
     "openAdmin": "Admin felület megnyitása"
   },
@@ -406,7 +406,7 @@
       "skip": "Átugrás",
       "stop": "Leállítás",
       "prepare": "Felkészülés",
-      "work": "Munka",
+      "work": "Hajrá",
       "rest": "Pihenő",
       "setBreak": "Blokkszünet",
       "setBreakLength": "Blokkszünet hossza",
@@ -421,7 +421,7 @@
       "retry": "Újraküldés",
       "failed": "A(z) {{round}}. kört nem lehet rögzíteni",
       "notConfigured": "Ehhez a blokkhoz nincs megadva időtartam",
-      "blockTooLong": "Ez a blokk 50 sornál többre bomlana",
+      "blockTooLong": "Ez a blokk túl sok kört tartalmaz (max. 50)",
       "emomDone": "Kör kész",
       "amrapCap": "Időkeret: {{total}}",
       "amrapEnter": "Írd be a teljesített körök számát",

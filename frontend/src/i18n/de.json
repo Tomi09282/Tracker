@@ -421,7 +421,7 @@
       "retry": "Erneut senden",
       "failed": "Runde {{round}} kann nicht erfasst werden",
       "notConfigured": "Für diesen Block sind keine Zeiten hinterlegt",
-      "blockTooLong": "Dieser Block ergäbe mehr als 50 Sätze",
+      "blockTooLong": "Dieser Block hat zu viele Runden (max. 50)",
       "emomDone": "Runde fertig",
       "amrapCap": "Zeitlimit: {{total}}",
       "amrapEnter": "Trage die geschafften Runden ein",

@@ -421,7 +421,7 @@
       "retry": "Send again",
       "failed": "Round {{round}} cannot be recorded",
       "notConfigured": "This block has no prescribed durations",
-      "blockTooLong": "This block would expand past 50 sets",
+      "blockTooLong": "This block has too many rounds (50 max)",
       "emomDone": "Round done",
       "amrapCap": "Time cap: {{total}}",
       "amrapEnter": "Enter the rounds you completed",
