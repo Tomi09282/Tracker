@@ -45,7 +45,13 @@ implementations.
 - [x] **T1.8** `user_theme_prefs` persistence, cross-device sync — `done` · user_theme_prefs via migration 002; GET/PUT /me/theme, round-trip verified
 - [x] **T1.9** Pre-paint inline theme script, no FOUC, CSP sha256-hashed — `done` · pre-paint inline script in index.html reads localStorage before the first paint
 - [x] **T1.10** Bottom navbar as the only primary nav; mobile full-width + safe-area, desktop floating dock (owner req 12) — `done` · BottomNav measured at 360px: bar 65px (64 + hairline), icon 24×24, label 11px, flush to bottom with safe-area; at 1440px a centred floating pill dock, 16px off the bottom, backdrop-blur(24px)
-- [ ] **T1.11** Animate UI source-installed + Motion runtime + Lucide icons — `pending` · **DEVIATION**: Animate UI was NOT installed. Motion is the animation runtime and Lucide the icon set, as specified, but the component bases are hand-built on the `Pressable` primitive instead of source-installed from Animate UI. Reason: the 44px floor and the five interaction states had to live in ONE primitive that the build can enforce, and vendored components would each need patching to obey it. Revisit if the owner wants Animate UI specifically
+- [x] **T1.11** Animate UI source-installed + Motion runtime + Lucide icons — `done (accepted deviation)` ·
+      **OWNER DECISION 2026-08-06: deviation accepted.** Motion and Lucide are in as specified;
+      Animate UI is not. Every control composes ONE primitive instead, because the 44 px floor and
+      the five interaction states have to live somewhere the BUILD can enforce — the token gate
+      rejects a raw `<button>` outside `src/ui/` precisely because there is exactly one control
+      implementation to check. A vendored set would move that enforcement back into memory. Full
+      reasoning and the revisit conditions in [[0011-animate-ui-deviation]]
 - [x] **T1.12** Feedback catalog E1–E20, all five variants each (owner req 24) — `done` · **all 20 elements, 100 of 100 variants**: E1–E20. E21–E26 catalogued and DB-seeded for their own phases
 - [x] **T1.13** E21–E26 rows seeded inert with framework hooks for later phases — `done` · E21–E26 rows seeded and catalogued with labels; playground lists them as not-yet-built rather than faking a demo
 - [x] **T1.14** `element_style_config` global table (26 rows, E→variant), admin-switchable without redeploy — `done` · element_style_config seeded with all 26 curated defaults; admin-only PUT, audited
@@ -116,7 +122,7 @@ implementations.
 - [x] **T1.44** VISUAL DESIGN BIBLE re-audit of every Phase 1 screen — `done` · the measurable half was already verified; the Phase 2 pass extended the same method to the type scale, motion tokens, surfaces and headings across every screen, and the two `h1` defects above came out of it. See [[Bible Audit Phase-2]]. The remaining half needs the Bible document itself, which lives outside this repo — named as not covered rather than claimed
 - [x] **T1.45** Banned-patterns sweep (AI-generic gradients, emoji icons, default Tailwind look, pure black, flat hierarchy, <44px targets, spinners-for-content, non-tabular numbers) — `done` · banned-patterns sweep clean at 360 and 1440: no emoji in chrome (a ✓ dingbat was caught and replaced with a Lucide icon), no default-Tailwind palette, no pure #000, no horizontal scroll, 0 targets under 44×44, 0 controls without an accessible name, tabular-nums on every counter, skeletons not spinners, images in reserved boxes
 - [x] **T1.46** Screen blueprint conformance: Auth (1), Library (4), Exercise detail (5), Profile/Settings (9), Admin (10), Empty states (11), Skeletons (12) — `done` · Auth, Library, Exercise detail, Profile/Settings, Admin, Empty states and Skeletons all measured conformant on the axes that can be measured without the blueprint source: 44px targets, no overflow at 360 and 1440, one h1 per route, token-only values. The Admin and Empty-state blueprints changed as a result — see the `heading` prop on `EmptyState`
-- [ ] **T1.47** Fill the Phase Report outcome section + flip `approved: true` — `blocked` · **OQ-1**
+- [x] **T1.47** Fill the Phase Report outcome section + flip `approved: true` — `done` · **OWNER SIGN-OFF 2026-08-06.** Outcome section written from measured facts, E2E matrix attached ([[E2E Matrix Phase-1]]), and the commit hash the report was waiting for now exists: `ca680c8`. OQ-1 answered
 - [x] **T1.48** Retro-create `docs/pipeline/SHARED_MEMORY.md` seeded with Phase 1 contracts — `done` · docs/pipeline/SHARED_MEMORY.md, 180 lines, all five fixed sections
 
 ## Related

@@ -2,9 +2,9 @@
 type: phase-report
 phase: 1
 title: Phase 1 — report (rebuild)
-status: in_progress
-approved: false
-updated: 2026-08-04
+status: closed
+approved: true
+updated: 2026-08-06
 tags: [pipeline, phase-1]
 ---
 
@@ -68,4 +68,50 @@ Recorded because each was invisible to code review and only a running check caug
 
 ## Outcome
 
-_Pending. Fills in at approval, with the E2E matrix and the commit hash._
+**Approved by the owner on 2026-08-06. Commit `ca680c8`.**
+
+57 of 58 tasks. The one that did not ship as specified is T1.11, and it closed as an **accepted
+deviation** rather than a gap — see [[0011-animate-ui-deviation]]. One task, T1.31 (gender/body
+variants and 3D rotation on the muscle map), moves forward as a feature rather than a phase blocker.
+
+### What actually closed the phase
+
+Three items sat open for two phases and were closed by doing them, not by lowering the bar:
+
+- **T1.43 — the E2E walk had never run.** It ran at 360x740 and 1440x900 in BOTH roles, 27
+  route/role/width combinations. See [[E2E Matrix Phase-1]]. It found two defects, both on
+  ROLE-GATED pages: `/admin` for a non-admin and `/coach` for a non-coach each rendered nothing
+  but an `EmptyState`, which emits an `h2` — leaving those pages with no `h1` and a
+  screen-reader user with nothing to navigate by. **A gated page is the one nobody walks**, which
+  is exactly why the walk had to be done in both roles.
+- **T1.42 — the worker-tx review item.** ADR-0005's third clause was a code-review checklist item;
+  it became `npm run check:worker-tx`, and **found a live violation on its first run**.
+  `copyDaysTx` grew a plan's cycle BEFORE checking the destination slots, and better-sqlite3
+  commits on return — so a refused copy committed the growth. Because the schedule is
+  `starts_on + k*cycle_days + day_index`, that silently re-dated every future occurrence for the
+  client. The bug outlived the full rebuild that ADR-0005's own banner describes.
+- **T1.51 — screenshots.** The stated blocker (the browser pane not compositing frames) stopped
+  being true; it was verified by capturing frames rather than by assuming.
+
+### Verification at close
+
+| Gate | Result |
+|---|---|
+| `npm run build` — check-tokens + check-i18n + check-interval + tsc + vite | PASS |
+| `npm run smoke` | PASS — 316 checks |
+| `npm run check:routes` | PASS — 74 routes, 8 public by design, 45 writes all limited |
+| `npm run check:worker-tx` | PASS — 6 transaction bodies, no conditional return after a write |
+| `npm run verify:schema` | PASS — 21 invariants |
+| `npm audit` backend / frontend | PASS — 0 vulnerabilities |
+| E2E at 360 px and 1440 px, both roles | PASS — 27 combinations, 0 defects |
+| Screenshot capture | PASS — the OQ-5 blocker no longer holds |
+
+Every one of those gates was proven load-bearing by breaking the thing it guards and watching it
+fail by name. A gate never seen to fail is not evidence.
+
+### What the phase report cannot claim
+
+The visual half of the Bible audit still needs the Bible document, which lives outside this repo.
+Real-device rendering (iOS Safari, Android WebView) and actual screen-reader behaviour are asserted
+structurally, not observed. Both are named in [[Bible Audit Phase-2]] rather than quietly folded
+into a pass.
