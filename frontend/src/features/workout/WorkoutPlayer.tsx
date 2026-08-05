@@ -287,7 +287,11 @@ export function WorkoutPlayer() {
       <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={t('workout.exercises')}>
         {exercises.map((ex, i) => {
           const total = (data.sets ?? []).filter((s) => s.log_exercise_id === ex.id);
-          const done = total.filter((s) => s.completed_at != null).length;
+          // `voided_at` matters here for the same reason it matters on the row: the server dropped
+          // a voided set from the session totals, so counting it would make this chip say 4/4 while
+          // the record says 3. Second instance of that drift found by sweeping every read of
+          // `completed_at` after the row defect — the row was not the only place that had to agree.
+          const done = total.filter((s) => s.completed_at != null && s.voided_at == null).length;
           return (
             <Pressable
               key={ex.id}

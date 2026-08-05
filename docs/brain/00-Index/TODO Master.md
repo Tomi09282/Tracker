@@ -48,9 +48,9 @@ Checkbox `[x]` is set only for `done`. Every item carries a one-line note.
 | Phase | Scope | Status | Note |
 |---|---|---|---|
 | **0** | Foundation — repo, env, design system built byte-exact to the Bible, backend scaffold | `done` | **18/18 — complete.** Design system, build gate, backend, auth all verified |
-| [[TODO Phase-1\|1]] | F14 UI foundation + F1 exercise library + F8-lite | `pending` | Next. Foundation is green, so screens can start |
-| [[TODO Phase-2\|2]] | F2 coach↔client + teams + join codes + F11 onboarding + F3 plans/logging | `pending` | |
-| [[TODO Phase-3\|3]] | F5 notifications + F6 chat | `pending` | |
+| [[TODO Phase-1\|1]] | F14 UI foundation + F1 exercise library + F8-lite | `done` | **57/58 — CLOSED 2026-08-06, owner sign-off.** The one open item is T1.31 (gender/body variants + 3D on the muscle map), carried forward as a feature rather than a blocker. T1.11 closed as an accepted deviation ([[0011-animate-ui-deviation]]) |
+| [[TODO Phase-2\|2]] | F2 coach↔client + teams + join codes + F11 onboarding + F3 plans/logging | `in_progress` | **65/66.** Both halves work end to end. The one open item is T2.3.5 (per-coach seat cap), reserved for the billing phase by design |
+| [[TODO Phase-3\|3]] | F5 notifications + F6 chat | `pending` | **Next.** |
 | [[TODO Phase-4\|4]] | F4 nutrition + F10 progress/measurements | `pending` | |
 | [[TODO Phase-5\|5]] | F7 coins + store + F12 gamification + marketplace | `pending` | |
 | [[TODO Phase-6\|6]] | F15 public marketplace & community | `pending` | |

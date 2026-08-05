@@ -222,6 +222,21 @@ const build = (members, kind = 'circuit') => {
 }
 
 
+// ── a VOIDED round is skipped, like a completed one ────────────────────────────────────────────
+{
+  // A voided round CANNOT be re-checked: the void is terminal and `recordSetTx` requires
+  // `voided_at IS NULL`, so emitting a segment for it would run a countdown whose post is
+  // guaranteed to 409. It must be treated exactly like a completed round — which is why
+  // `intervalPlan` folds `voided_at` into `completed` while the ROW and the exercise chip
+  // deliberately do the opposite. Three reads of the same column, three different right answers.
+  const m = member(1, 5, 20, 10);
+  m.rows[2].voided_at = 123;   // round 3 taken back
+  const [vblock] = groupIntervalBlocks([{ ...m, block_kind: 'circuit' }], m.rows);
+  const vrounds = buildSchedule(vblock, { prepareSeconds: 0 }).filter((x) => x.kind === 'work').map((x) => x.round);
+  check('a voided round is skipped, not scheduled into a guaranteed 409', !vrounds.includes(3), vrounds.join(','));
+  check('and the rest of the block still runs', vrounds.join(',') === '1,2,4,5', vrounds.join(','));
+}
+
 /* ── chart geometry ─────────────────────────────────────────────────────────────────────────────
  *
  * The one thing a chart can get silently, misleadingly wrong is where it puts the points. These

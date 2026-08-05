@@ -85,7 +85,16 @@ export function groupIntervalBlocks(exercises: LogExercise[], sets: LogSet[]): I
         logExerciseId: ex.id,
         name: ex.exercise_name_snapshot,
         setIds: rows.map((r) => r.id),
-        completed: rows.map((r) => r.completed_at != null),
+        // A VOIDED round counts as `completed` here, and that is correct rather than sloppy: the
+        // flag drives whether `buildSchedule` emits a segment for the round, and a voided round
+        // CANNOT be re-checked — `trg_log_set_void_terminal` makes the void terminal and
+        // `recordSetTx` requires `voided_at IS NULL`. Emitting a segment for it would run a
+        // countdown whose post is guaranteed to 409. Skipping it is the only outcome that works.
+        //
+        // Spelled out because the neighbouring reads of `completed_at` needed `voided_at` added and
+        // this one deliberately does not — an unexplained inconsistency invites a "fix" that breaks
+        // the block.
+        completed: rows.map((r) => r.completed_at != null || r.voided_at != null),
         targetSeconds: rows.map((r) => r.target_seconds),
         targetRestSeconds: rows.map((r) => r.target_rest_seconds),
       };
