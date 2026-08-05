@@ -1,0 +1,44 @@
+{
+  "name": "tracker-backend",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node run-server.js",
+    "dev": "node run-server.js",
+    "smoke": "node scripts/smoke-run.mjs",
+    "smoke:limits": "node scripts/smoke-run.mjs --limits",
+    "rekey": "node scripts/rekey.js",
+    "migrate": "node scripts/migrate.mjs",
+    "seed:exercises": "node scripts/seed-exercises.mjs",
+    "seed:translations": "node scripts/seed-translations.mjs",
+    "seed:dev-users": "node scripts/seed-dev-users.mjs",
+    "brain:gen": "node scripts/brain-gen.mjs",
+    "check:languages": "node scripts/check-languages.mjs",
+    "verify:schema": "node scripts/verify-schema.mjs",
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:worker-tx": "node scripts/check-worker-tx.mjs",
+    "check:all": "npm run check:routes && npm run check:worker-tx && npm run verify:schema"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "better-sqlite3-multiple-ciphers": "^12.11.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.1",
+    "file-type": "^22.0.1",
+    "helmet": "^8.3.0",
+    "jose": "^6.2.8",
+    "multer": "^2.2.0",
+    "pino": "^10.3.1",
+    "piscina": "^5.3.0",
+    "sharp": "^0.35.3",
+    "zod": "^4.4.3"
+  }
+}

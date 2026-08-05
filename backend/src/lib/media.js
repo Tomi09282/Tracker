@@ -1,0 +1,122 @@
+// src/lib/media.js — the upload pipeline.
+//
+// Every step here exists because the client cannot be trusted about ANY property of a file:
+// not its name, not its extension, not its Content-Type, not even its declared dimensions.
+//
+//   1. multipart lands in a QUARANTINE directory, never in the served tree
+//   2. the real type is sniffed from magic bytes and checked against an allowlist
+//   3. the file is stat-ed before decode, so a decompression bomb never reaches sharp
+//   4. sharp re-encodes it, which strips EXIF (including GPS) as a side effect of re-encoding
+//   5. the result is stored under a random key — the uploaded filename never touches the disk
+//   6. serving is gated on the DB visibility of the owning row, with nosniff and a disposition
+import { randomUUID } from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileTypeFromFile } from 'file-type';
+import sharp from 'sharp';
+
+export const STORAGE_ROOT = path.resolve('storage');
+export const MEDIA_DIR = path.join(STORAGE_ROOT, 'media');
+export const QUARANTINE_DIR = path.join(STORAGE_ROOT, 'tmp');
+
+/**
+ * Allowlist, keyed by the SNIFFED mime. SVG is deliberately absent: it is a document format
+ * that can carry script, and "an image" that executes is not an image.
+ */
+const ALLOWED_IMAGE = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif']);
+
+export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+/** Guards against decompression bombs: a 40MP image is not a product photo. */
+const MAX_PIXELS = 40_000_000;
+const OUTPUT_MAX_EDGE = 1600;
+
+export async function ensureDirs() {
+  await fs.mkdir(MEDIA_DIR, { recursive: true });
+  await fs.mkdir(QUARANTINE_DIR, { recursive: true });
+}
+
+export class MediaError extends Error {
+  constructor(reason) {
+    super(reason);
+    this.name = 'MediaError';
+    this.reason = reason;
+  }
+}
+
+/**
+ * Validate and re-encode one quarantined upload.
+ *
+ * Returns the stored descriptor. Throws `MediaError` for anything a client did wrong, so the
+ * route can answer 400 without leaking which internal step objected.
+ */
+export async function ingestImage(tmpPath) {
+  try {
+    // stat BEFORE decode. Checking size after sharp has opened the file is checking after the
+    // damage is done.
+    const stat = await fs.stat(tmpPath);
+    if (stat.size === 0) throw new MediaError('empty file');
+    if (stat.size > MAX_IMAGE_BYTES) throw new MediaError('file too large');
+
+    // The client's Content-Type and the filename extension are both ignored. This reads the
+    // first bytes off disk and reports what the file ACTUALLY is.
+    const sniffed = await fileTypeFromFile(tmpPath);
+    if (!sniffed || !ALLOWED_IMAGE.has(sniffed.mime)) {
+      throw new MediaError('unsupported image type');
+    }
+
+    const image = sharp(tmpPath, { limitInputPixels: MAX_PIXELS, failOn: 'error' });
+    const meta = await image.metadata();
+    if (!meta.width || !meta.height) throw new MediaError('unreadable image');
+    if (meta.width * meta.height > MAX_PIXELS) throw new MediaError('image dimensions too large');
+
+    // Re-encoding is the sanitisation: the output is built from decoded pixels, so EXIF, GPS,
+    // colour-profile payloads and any trailing appended data simply do not come along.
+    const storageKey = `${randomUUID()}.webp`;
+    const outPath = path.join(MEDIA_DIR, storageKey);
+    const info = await image
+      .rotate() // apply the EXIF orientation before it is discarded, or portraits come out sideways
+      .resize({ width: OUTPUT_MAX_EDGE, height: OUTPUT_MAX_EDGE, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toFile(outPath);
+
+    return {
+      storageKey,
+      mime: 'image/webp', // what the SERVER produced, never what the client claimed
+      width: info.width,
+      height: info.height,
+      bytes: info.size,
+    };
+  } finally {
+    // The quarantined original is always removed, on success and on every failure path.
+    await fs.rm(tmpPath, { force: true });
+  }
+}
+
+/**
+ * Resolve a storage key to an absolute path, refusing anything that is not a plain key.
+ *
+ * The key comes from the database, not from the URL — but this check is cheap and it is the
+ * difference between a bug and a path traversal if that ever stops being true.
+ */
+export function resolveStoredPath(storageKey) {
+  if (!/^[0-9a-f-]{36}\.webp$/.test(storageKey)) return null;
+  const full = path.join(MEDIA_DIR, storageKey);
+  // Belt and braces: the resolved path must still be inside the media directory.
+  if (!full.startsWith(MEDIA_DIR + path.sep)) return null;
+  return full;
+}
+
+/** Sweeps quarantined files older than an hour — crashed uploads must not accumulate. */
+export async function sweepQuarantine(maxAgeMs = 60 * 60 * 1000) {
+  let removed = 0;
+  const now = Date.now();
+  for (const name of await fs.readdir(QUARANTINE_DIR).catch(() => [])) {
+    const full = path.join(QUARANTINE_DIR, name);
+    const stat = await fs.stat(full).catch(() => null);
+    if (stat && now - stat.mtimeMs > maxAgeMs) {
+      await fs.rm(full, { force: true });
+      removed += 1;
+    }
+  }
+  return removed;
+}

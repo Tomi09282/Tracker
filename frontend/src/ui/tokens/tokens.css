@@ -1,0 +1,406 @@
+/* src/ui/tokens/tokens.css — the design system's single source of raw values.
+ *
+ * THIS IS THE ONLY FILE IN src/ ALLOWED TO CONTAIN A RAW COLOR, RADIUS OR DURATION.
+ * `npm run check:tokens` fails the build on any raw value found elsewhere.
+ *
+ *   Layer 1  primitives  — theme-independent scales (@theme, becomes Tailwind utilities)
+ *   Layer 2  semantics   — one block per [data-theme], identical token names across packs
+ *   Layer 3  component   — thin aliases over layer 2, referenced by components
+ *
+ * Every value below is dictated by the VISUAL DESIGN BIBLE. Where the Bible gives an exact
+ * number, that number is here verbatim — the previous implementation drifted on all of them
+ * (see ADR-0006) and every screen inherited the drift.
+ */
+
+/* ── Layer 1 — primitives ─────────────────────────────────────────────────────────────── */
+/* `static` is load-bearing: Tailwind tree-shakes @theme variables it sees no utility for, and
+   half of this layer is consumed through var() from component CSS and from JS (the motion
+   config, the theme engine, the min-target lint). Without it, --duration-base, --ease-standard,
+   --icon-lg, --nav-h and the column widths silently resolve to the empty string. */
+@theme static {
+  /* Fonts. Two families, no more (Bible: TYPOGRAPHY LAW). Self-hosted via @fontsource so the
+     strict CSP never has to allow a third-party font origin. */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body);
+
+  /* Type scale — Bible: size/line-height/weight/tracking, exactly. Tailwind 4 attaches the
+     line-height, weight and tracking to the utility, so `text-body` carries all four. */
+  --text-display: 2.125rem;              /* 34px */
+  --text-display--line-height: 2.5rem;   /* 40px */
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.02em;
+
+  /* The interval countdown. 3rem and not more: the player's hero is 193px tall at 375px wide
+     (343px content x 9/16), and the stage has to fit a phase word, this number, a progress bar,
+     an info line and a 44px control row inside it. 48px is a lock-screen-clock size and is
+     legible from the floor at arm's length, which is the actual requirement — the phone is not
+     in the lifter's hand. A raw `text-[3rem]` at the call site would slip past check-tokens and
+     could never be re-scaled by a theme pack. */
+  --text-timer: 3rem;                    /* 48px */
+  --text-timer--line-height: 3rem;
+  --text-timer--font-weight: 700;
+  --text-timer--letter-spacing: -0.03em;
+
+  --text-title-1: 1.625rem;              /* 26px */
+  --text-title-1--line-height: 2rem;     /* 32px */
+  --text-title-1--font-weight: 700;
+  --text-title-1--letter-spacing: -0.01em;
+
+  --text-title-2: 1.25rem;               /* 20px */
+  --text-title-2--line-height: 1.625rem; /* 26px */
+  --text-title-2--font-weight: 600;
+
+  --text-title-3: 1.0625rem;             /* 17px */
+  --text-title-3--line-height: 1.5rem;   /* 24px */
+  --text-title-3--font-weight: 600;
+
+  --text-body: 0.9375rem;                /* 15px */
+  --text-body--line-height: 1.375rem;    /* 22px */
+  --text-body--font-weight: 400;
+
+  --text-body-s: 0.8125rem;              /* 13px */
+  --text-body-s--line-height: 1.125rem;  /* 18px */
+  --text-body-s--font-weight: 400;
+
+  --text-caption: 0.75rem;               /* 12px */
+  --text-caption--line-height: 1rem;     /* 16px */
+  --text-caption--font-weight: 500;
+
+  --text-micro: 0.6875rem;               /* 11px — nothing in the product goes below this */
+  --text-micro--line-height: 0.875rem;   /* 14px */
+  --text-micro--font-weight: 600;
+  --text-micro--letter-spacing: 0.06em;
+
+  /* Spacing: Tailwind's --spacing IS the 4px grid of record (p-1=4 … p-12=48). Declaring a
+     parallel scale would give the app two sources of truth, so we do not. */
+  --spacing: 0.25rem;
+
+  /* Radius scale. Themes pick from it structurally; components never name a raw step. */
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --radius-3: 8px;
+  --radius-4: 12px;   /* Bible: buttons */
+  --radius-5: 16px;   /* Bible: cards */
+  --radius-6: 20px;
+  --radius-7: 24px;
+  --radius-8: 28px;
+  --radius-full: 9999px; /* Bible: chips */
+
+  /* Motion — Bible: MOTION LAW. UI never exceeds 500ms. */
+  --duration-instant: 100ms;  /* state flips */
+  --duration-fast: 150ms;     /* hover */
+  --duration-base: 250ms;     /* most transitions */
+  --duration-slow: 400ms;     /* sheets, large surfaces */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-linear: linear;      /* progress only */
+
+  /* Sizing. --target-min is the a11y floor: no interactive element may render below it. */
+  --target-min: 44px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;   /* Bible: bottom-nav icon size */
+  --nav-h: 64px;
+
+  /* How much room the layout reserves below its content for the bottom nav.
+     ONE definition, because two places need to agree exactly: `AppLayout`'s `<main>` pads by it,
+     and any full-height screen (the workout player) subtracts it. They did not agree — the layout
+     reserved nav + 16px while the player subtracted only the nav, and the page scrolled by exactly
+     16px. On the player that is not cosmetic: the Bible's law is that the page must NOT scroll
+     while sets are being checked, because a check button that moves is a check button that records
+     the wrong set. */
+  --content-pad-b: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+  --content-pad-b-lg: calc(var(--nav-h) + 32px);
+  --nav-dock-offset: 16px;  /* Bible: desktop dock sits 16px above the screen bottom */
+  --col-mobile: 480px;      /* mobile-shaped flows stay in this column on desktop */
+  --col-wide: 1120px;       /* admin / dashboards / grids */
+
+  /* Z-index ladder */
+  --z-nav: 40;
+  --z-sheet: 50;
+  --z-toast: 60;
+  --z-tooltip: 70;
+}
+
+/* ── Layer 2 — semantics ──────────────────────────────────────────────────────────────── */
+
+/*
+ * Surfaces are ELEVATION, never new colors. Text is one ink at three opacities, so it stays
+ * legible on every surface — the previous build froze three opaque hexes and broke the moment
+ * text sat on anything but surface-0.
+ *
+ * The :root copy is the pre-paint fallback: a cold, storage-less boot renders Midnight rather
+ * than an unstyled flash.
+ */
+:root,
+[data-theme='midnight'] {
+  --surface-0: #0B0D10;
+  --surface-1: #12151A;
+  --surface-2: #181C22;
+  --surface-3: #20252D;
+  --surface-border: rgb(255 255 255 / 0.07);
+
+  --ink: 242 245 247;                    /* #F2F5F7 */
+  --accent: #6E8CFB;
+  --accent-fg: #0B0D10;                  /* recomputed against WCAG by the theme engine */
+
+  --success: #34D399;  --on-success: #04150E;
+  --warning: #FBBF24;  --on-warning: #241703;
+  --danger:  #F87171;  --on-danger:  #2A0A0C;
+  --info:    #60A5FA;  --on-info:    #06152B;
+
+  /* Structural identity of the pack (Bible: themes change size/radius/shadow/border, not
+     just color). Midnight = calm, medium radius, hairline border, shadow on overlays only. */
+  --radius-button: var(--radius-4);
+  --radius-field: var(--radius-4);
+  --radius-card: var(--radius-5);
+  --radius-sheet: var(--radius-7);
+  --radius-chip: var(--radius-full);
+  --border-width: 1px;
+  --control-h: var(--target-min);
+  --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-glow: none;
+}
+
+[data-theme='solar'] {
+  --surface-0: #12100B;
+  --surface-1: #191510;
+  --surface-2: #201B14;
+  --surface-3: #292219;
+  --surface-border: rgb(255 255 255 / 0.07);
+
+  --ink: 247 243 236;
+  --accent: #FB9E3A;
+  --accent-fg: #12100B;
+
+  --success: #34D399;  --on-success: #04150E;
+  --warning: #FBBF24;  --on-warning: #241703;
+  --danger:  #F87171;  --on-danger:  #2A0A0C;
+  --info:    #60A5FA;  --on-info:    #06152B;
+
+  /* Solar = soft: larger radii, deeper shadow, taller controls. */
+  --radius-button: var(--radius-6);
+  --radius-field: var(--radius-5);
+  --radius-card: var(--radius-7);
+  --radius-sheet: var(--radius-8);
+  --radius-chip: var(--radius-full);
+  --border-width: 1px;
+  --control-h: 48px;
+  --shadow-overlay: 0 16px 40px rgb(0 0 0 / 0.45);
+  --shadow-glow: none;
+}
+
+[data-theme='forest'] {
+  --surface-0: #0A0F0C;
+  --surface-1: #101711;
+  --surface-2: #161E18;
+  --surface-3: #1D2720;
+  --surface-border: rgb(255 255 255 / 0.07);
+
+  --ink: 237 245 239;
+  --accent: #3FCF8E;
+  --accent-fg: #04150E;
+
+  --success: #34D399;  --on-success: #04150E;
+  --warning: #FBBF24;  --on-warning: #241703;
+  --danger:  #F87171;  --on-danger:  #2A0A0C;
+  --info:    #60A5FA;  --on-info:    #06152B;
+
+  --radius-button: var(--radius-4);
+  --radius-field: var(--radius-4);
+  --radius-card: var(--radius-5);
+  --radius-sheet: var(--radius-7);
+  --radius-chip: var(--radius-full);
+  --border-width: 1px;
+  --control-h: var(--target-min);
+  --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-glow: none;
+}
+
+[data-theme='neon'] {
+  /* Darkest pack, but never #000 — pure black smears on OLED and the Bible bans it. */
+  --surface-0: #06070A;
+  --surface-1: #0B0D12;
+  --surface-2: #11141B;
+  --surface-3: #171B25;
+  --surface-border: rgb(255 255 255 / 0.09);
+
+  --ink: 240 244 255;
+  --accent: #00E0FF;
+  --accent-fg: #04141A;
+
+  --success: #34D399;  --on-success: #04150E;
+  --warning: #FBBF24;  --on-warning: #241703;
+  --danger:  #F87171;  --on-danger:  #2A0A0C;
+  --info:    #60A5FA;  --on-info:    #06152B;
+
+  /* Neon = pill + glow, no drop shadow. */
+  --radius-button: var(--radius-full);
+  --radius-field: var(--radius-full);
+  --radius-card: var(--radius-6);
+  --radius-sheet: var(--radius-8);
+  --radius-chip: var(--radius-full);
+  --border-width: 1px;
+  --control-h: var(--target-min);
+  --shadow-overlay: 0 0 32px color-mix(in srgb, var(--accent) 22%, transparent);
+  --shadow-glow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+[data-theme='mono'] {
+  --surface-0: #0A0A0A;
+  --surface-1: #101010;
+  --surface-2: #171717;
+  --surface-3: #1F1F1F;
+  --surface-border: rgb(255 255 255 / 0.12);
+
+  --ink: 245 245 245;
+  --accent: #FAFAFA;
+  --accent-fg: #0A0A0A;
+
+  /* Destructive stays red even in a monochrome pack — color carries meaning here. */
+  --success: #34D399;  --on-success: #04150E;
+  --warning: #FBBF24;  --on-warning: #241703;
+  --danger:  #F87171;  --on-danger:  #2A0A0C;
+  --info:    #60A5FA;  --on-info:    #06152B;
+
+  /* Mono = sharp + flat: no radius, heavier border, no shadow at all. */
+  --radius-button: var(--radius-0);
+  --radius-field: var(--radius-0);
+  --radius-card: var(--radius-1);
+  --radius-sheet: var(--radius-0);
+  --radius-chip: var(--radius-0);
+  --border-width: 2px;
+  --control-h: var(--target-min);
+  --shadow-overlay: none;
+  --shadow-glow: none;
+}
+
+/* ── Derived semantics ────────────────────────────────────────────────────────────────── */
+/*
+ * Declared once, resolved against whichever --accent / --ink the active pack (or a user's
+ * custom accent, written straight onto the element by the theme engine) put in scope.
+ */
+:root {
+  /* Text: one ink, three opacities (Bible: 92 / 62 / 42 %). */
+  --text-1: rgb(var(--ink) / 0.92);
+  --text-2: rgb(var(--ink) / 0.62);
+  --text-3: rgb(var(--ink) / 0.42);
+
+  /* Accent ramp 50–950, interpolated in OKLab so a custom accent gets the same perceptual
+     spacing as the built-in packs. --accent is step 500. */
+  --accent-50:  color-mix(in oklab, var(--accent), white 92%);
+  --accent-100: color-mix(in oklab, var(--accent), white 84%);
+  --accent-200: color-mix(in oklab, var(--accent), white 68%);
+  --accent-300: color-mix(in oklab, var(--accent), white 50%);
+  --accent-400: color-mix(in oklab, var(--accent), white 28%);
+  --accent-500: var(--accent);
+  --accent-600: color-mix(in oklab, var(--accent), black 14%);
+  --accent-700: color-mix(in oklab, var(--accent), black 28%);
+  --accent-800: color-mix(in oklab, var(--accent), black 42%);
+  --accent-900: color-mix(in oklab, var(--accent), black 56%);
+  --accent-950: color-mix(in oklab, var(--accent), black 70%);
+
+  /* Interaction states derive from the ramp — never hand-picked per component. */
+  --accent-hover: var(--accent-400);
+  --accent-pressed: var(--accent-600);
+  --accent-subtle: color-mix(in srgb, var(--accent) 12%, transparent);
+
+  /* Every semantic color carries all four forms the Bible requires. */
+  --success-subtle: color-mix(in srgb, var(--success) 12%, transparent);
+  --success-border: color-mix(in srgb, var(--success) 30%, transparent);
+  --warning-subtle: color-mix(in srgb, var(--warning) 12%, transparent);
+  --warning-border: color-mix(in srgb, var(--warning) 30%, transparent);
+  --danger-subtle:  color-mix(in srgb, var(--danger) 12%, transparent);
+  --danger-border:  color-mix(in srgb, var(--danger) 30%, transparent);
+  --info-subtle:    color-mix(in srgb, var(--info) 12%, transparent);
+  --info-border:    color-mix(in srgb, var(--info) 30%, transparent);
+
+  --focus-ring: var(--accent);
+
+  /* Brand gradient. Bible: 2–3 stops, 135°, ONE gradient surface per screen, same hue family,
+     never behind body text — and explicitly never the blue→purple "AI-generic" combination
+     that sank the previous build (F-04). This stays inside the accent's own hue. */
+  --gradient-brand: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-700) 100%);
+}
+
+/* ── Layer 3 — component tokens ───────────────────────────────────────────────────────── */
+:root {
+  --btn-bg: var(--accent);
+  --btn-fg: var(--accent-fg);
+  --btn-bg-hover: var(--accent-hover);
+  --btn-bg-pressed: var(--accent-pressed);
+  --btn-radius: var(--radius-button);
+
+  --field-bg: var(--surface-2);
+  --field-border: var(--surface-border);
+  --field-radius: var(--radius-field);
+
+  /* Cards separate by border OR shadow, never both (Bible; the old build did both — F-09). */
+  --card-bg: var(--surface-1);
+  --card-border: var(--surface-border);
+  --card-radius: var(--radius-card);
+  --card-pad: --spacing(4);            /* 16px — Bible allows 16–20, the old build used 24 */
+
+  --sheet-bg: var(--surface-3);
+  --sheet-radius: var(--radius-sheet);
+  --sheet-shadow: var(--shadow-overlay);
+
+  --nav-bg: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  --nav-fg-active: var(--accent);
+  --nav-fg-idle: var(--text-3);
+
+  --toast-bg: var(--surface-3);
+  --skeleton-base: var(--surface-2);
+  --skeleton-sheen: var(--surface-3);
+}
+
+/* ── Tailwind mapping ─────────────────────────────────────────────────────────────────── */
+/* `inline` so the utilities resolve the var at use time: switching [data-theme] repaints the
+   whole app without a single component re-render. */
+@theme inline {
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-token: var(--surface-border);
+
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-pressed: var(--accent-pressed);
+  --color-accent-subtle: var(--accent-subtle);
+
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-border: var(--success-border);
+  --color-on-success: var(--on-success);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-border: var(--warning-border);
+  --color-on-warning: var(--on-warning);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-border: var(--danger-border);
+  --color-on-danger: var(--on-danger);
+  --color-info: var(--info);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-border: var(--info-border);
+  --color-on-info: var(--on-info);
+
+  /* These five resolve against the theme-scoped declarations in Layer 2, so a pack swap
+     re-radiuses the whole app. They are safe to self-reference because a real CSS declaration
+     for each exists on [data-theme]. */
+  --radius-button: var(--radius-button);
+  --radius-field: var(--radius-field);
+  --radius-card: var(--radius-card);
+  --radius-sheet: var(--radius-sheet);
+  --radius-chip: var(--radius-chip);
+
+  /* --ease-standard is deliberately NOT re-declared here: it is theme-independent, lives in
+     Layer 1, and an inline self-reference with no Layer-2 backing resolves to nothing. */
+}

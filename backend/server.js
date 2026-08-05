@@ -1,0 +1,189 @@
+// server.js — application entry.
+// The env import must come FIRST: configuration is validated before a database is opened or a
+// port is bound, so a misconfigured process dies with a named error instead of a half-boot.
+import { env, corsOrigins } from './src/lib/env.js';
+import express from 'express';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { logger } from './src/lib/logger.js';
+import * as db from './src/db/index.js';
+import { ERR, sendError, requestContext, errorHandler, asyncRoute } from './src/lib/http.js';
+import { csrfProtection, AUTH_PATH } from './src/auth/middleware.js';
+import authRoutes from './src/auth/routes.js';
+import themeRoutes from './src/theme/routes.js';
+import exerciseRoutes from './src/exercises/routes.js';
+import mediaRoutes from './src/exercises/media.js';
+import adminRoutes from './src/admin/routes.js';
+import coachingRoutes from './src/coaching/routes.js';
+import onboardingRoutes from './src/onboarding/routes.js';
+import planRoutes from './src/plans/routes.js';
+import logRoutes from './src/logs/routes.js';
+import icsRoutes from './src/plans/ics.js';
+import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
+
+// Last-resort handlers: log with a full stack, then exit non-zero so run-server.js restarts us.
+// Staying alive after an uncaught exception means running with unknown state.
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'uncaughtException');
+  process.exit(1);
+});
+process.on('unhandledRejection', (err) => {
+  logger.fatal({ err }, 'unhandledRejection');
+  process.exit(1);
+});
+
+const migration = await db.migrate();
+logger.info({ applied: migration.applied, version: migration.version }, 'schema up to date');
+
+// Housekeeping at boot: drop refresh tokens that are expired, and revoked ones older than a
+// month. The absolute session cap survives this because family_created_at lives on every row
+// rather than being derived from the oldest surviving one.
+const purged = await db.run(
+  'DELETE FROM refresh_tokens WHERE expires_at <= unixepoch() OR (revoked = 1 AND created_at <= unixepoch() - 2592000)',
+);
+if (purged.changes > 0) logger.info({ removed: purged.changes }, 'purged stale refresh tokens');
+
+await ensureDirs();
+// Uploads that crashed between quarantine and ingest would otherwise sit on disk forever.
+const sweptAtBoot = await sweepQuarantine();
+if (sweptAtBoot > 0) logger.info({ removed: sweptAtBoot }, 'swept stale quarantined uploads');
+setInterval(() => {
+  sweepQuarantine().catch((err) => logger.warn({ err }, 'quarantine sweep failed'));
+}, 60 * 60 * 1000).unref();
+
+const app = express();
+
+// TRUST_PROXY is the number of reverse-proxy hops. It MUST stay 0 when the server is directly
+// exposed: trusting a proxy that is not in front of us lets any client spoof X-Forwarded-For,
+// rotate req.ip at will, and walk straight through the per-IP rate limits.
+if (env.TRUST_PROXY > 0) app.set('trust proxy', env.TRUST_PROXY);
+app.disable('x-powered-by');
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // No 'unsafe-inline' anywhere. The frontend's pre-paint theme script will ship as a
+        // sha256 hash added here when it lands — a nonce cannot work for a static index.html.
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        mediaSrc: ["'self'", 'blob:'],
+        fontSrc: ["'self'"], // fonts are self-hosted; no third-party font origin is allowed
+        connectSrc: ["'self'"],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
+    hsts: env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginResourcePolicy: { policy: 'same-origin' },
+  }),
+);
+
+app.use((req, res, next) => {
+  // Deny by default: only capabilities the product actually uses get turned on later.
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  next();
+});
+
+// Exact-origin allowlist, never a wildcard with credentials. In dev this list is empty because
+// Vite proxies /api and everything is same-origin — which also means the cookie flags behave in
+// development exactly as they will in production.
+if (corsOrigins.length > 0) {
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && corsOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Vary', 'Origin');
+    }
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-CSRF');
+      return res.sendStatus(204);
+    }
+    next();
+  });
+}
+
+app.use(requestContext(logger));
+// Global body cap. Individual routes tighten this further; auth and upload routes especially.
+app.use(express.json({ limit: '64kb' }));
+app.use(cookieParser());
+
+// --- Health -----------------------------------------------------------------------------
+// /healthz answers "is the process alive" and must never touch a dependency: if it did, a slow
+// database would get the container killed instead of merely marked unready.
+app.get('/healthz', (req, res) => res.json({ ok: true }));
+
+// /readyz answers "can this instance serve traffic", which does require the database.
+app.get(
+  '/readyz',
+  asyncRoute(async (req, res) => {
+    try {
+      await db.ping();
+      res.json({ ok: true });
+    } catch (err) {
+      req.log.error({ err }, 'readyz: database unreachable');
+      sendError(res, 503, ERR.INTERNAL, 'not ready');
+    }
+  }),
+);
+
+// Public, non-secret client configuration. The app name comes from here, never from a string
+// baked into the frontend bundle.
+app.get('/api/v1/config', (req, res) => res.json({ appName: env.APP_NAME }));
+
+// --- API --------------------------------------------------------------------------------
+// CSRF guards every state-changing request from here down. It sits BELOW the health and config
+// routes (which are GET-only and must answer an unadorned probe) and ABOVE everything else, so
+// a future router cannot forget to opt in.
+// Media is mounted ABOVE the global CSRF middleware because that middleware requires a JSON
+// content type, which a multipart upload cannot have. The media router runs its own CSRF check
+// with the same Sec-Fetch-Site and X-CSRF requirements — the rule is narrowed for one route,
+// not waived.
+app.use('/api/v1', mediaRoutes);
+
+app.use(csrfProtection);
+app.use(AUTH_PATH, authRoutes);
+app.use('/api/v1', themeRoutes);
+app.use('/api/v1', exerciseRoutes);
+app.use('/api/v1', adminRoutes);
+app.use('/api/v1', coachingRoutes);
+app.use('/api/v1', onboardingRoutes);
+app.use('/api/v1', planRoutes);
+app.use('/api/v1', logRoutes);
+app.use('/api/v1', icsRoutes);
+
+app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));
+app.use(errorHandler(logger));
+
+const server = app.listen(env.PORT, () =>
+  logger.info({ port: env.PORT, app: env.APP_NAME }, 'server started'),
+);
+
+// A bind failure must kill the process. Without this the supervisor sees a live child that
+// serves nothing, and the real error scrolls past in the terminal.
+server.on('error', (err) => {
+  logger.fatal({ err, port: env.PORT }, 'could not bind port');
+  process.exit(1);
+});
+
+let shuttingDown = false;
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  logger.info({ signal }, 'shutting down');
+  server.close(async () => {
+    await db.closePool(); // drain the worker pool so no query is cut off mid-transaction
+    process.exit(0);
+  });
+  // Hard exit if draining hangs — a stuck shutdown holds the port and blocks the next start.
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));

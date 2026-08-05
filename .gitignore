@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+
+# secrets — never committed
+.env
+.env.*
+!.env.example
+
+# runtime data (encrypted DB, WAL/SHM sidecars) and logs
+backend/data/
+backend/logs/
+backend/storage/
+backend/seed/cache/
+
+# tooling noise
+.DS_Store
+Thumbs.db
+*.local
+coverage/
+.vite/

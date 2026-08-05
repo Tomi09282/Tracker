@@ -1,0 +1,163 @@
+@import 'tailwindcss';
+
+/* Self-hosted fonts — the strict CSP allows no third-party font or style origin.
+   Inter ships as a variable font (one file, every weight); Space Grotesk is display-only, so
+   we pull just the three weights the type scale actually uses. */
+@import '@fontsource-variable/inter/index.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/space-grotesk/700.css';
+
+@import './ui/tokens/tokens.css';
+
+@layer base {
+  html {
+    /* Native controls (scrollbars, date pickers, form widgets) follow the app, not the OS. */
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--surface-0);
+    color: var(--text-1);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display face is opt-in per element (headings, brand, big numbers) — never global. */
+  .font-display,
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
+
+  /* Numbers never jitter width while counting (Bible: banned pattern). Timers, weights, reps,
+     balances and counters all inherit this from the elements that carry data. */
+  .tnum,
+  time,
+  output,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Focus is never removed — only redrawn on the token ring. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-2);
+  }
+
+  ::selection {
+    background: var(--accent-subtle);
+    color: var(--text-1);
+  }
+
+  /* Browser-default scrollbars leaking through is a named banned pattern. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-3) transparent;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface-3);
+    border-radius: var(--radius-full);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--surface-border); }
+
+  /* Links are never browser-blue-underlined. */
+  a { color: inherit; text-decoration: none; }
+
+  /* Images always reserve their box, so async content cannot shift the layout (banned pattern
+     F-13 in the previous build: 20 unreserved images on one list). */
+  img, video { display: block; max-width: 100%; height: auto; }
+}
+
+@layer utilities {
+  /* Capacitor safe areas. */
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+  /* The screen's horizontal gutter: 16px mobile, 24px from the tablet breakpoint up. */
+  .screen-x { padding-inline: --spacing(4); }
+  @media (width >= 48rem) { .screen-x { padding-inline: --spacing(6); } }
+
+  /* Mobile-shaped flows (player, chat, today) stay in a centred column on wide screens;
+     dashboards and grids use the wide column instead. */
+  .col-mobile { width: 100%; max-width: var(--col-mobile); margin-inline: auto; }
+  .col-wide { width: 100%; max-width: var(--col-wide); margin-inline: auto; }
+
+  /* Body copy never runs wider than 70ch. */
+  .measure { max-width: 70ch; }
+
+  /* The Bible's three icon sizes, as real classes.
+     They are here because `size-icon-s` was written in three components as if Tailwind generated
+     it from `--icon-sm`. It does not — there is no `--size-*` theme namespace — so the class was
+     INERT: every icon fell back to lucide's default 24px, and `check-tokens.mjs` passed because
+     it rejects raw VALUES, not names that resolve to nothing. Measured in the browser:
+     `size-icon-s` computed to 360px, i.e. no width constraint at all.
+     Defined against the same tokens the Bible specifies, so a size change stays a token change. */
+  .size-icon-s { width: var(--icon-sm); height: var(--icon-sm); }
+  .size-icon-m { width: var(--icon-md); height: var(--icon-md); }
+  .size-icon-l { width: var(--icon-lg); height: var(--icon-lg); }
+
+  @keyframes skeleton-sweep {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  /* E15-B: the auto-dismiss timer, drawn as a hairline. Declared here rather than inline so it
+     can be paused from the component without re-declaring the animation. */
+  @keyframes toast-timer {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+
+  /* E16-B: the "still working" stripe. */
+  @keyframes stripe-flow {
+    from { background-position: 0 0; }
+    to { background-position: 32px 0; }
+  }
+
+  /* E11-D: an unread badge announces itself once, then sits still. */
+  @keyframes badge-pop {
+    0% { transform: scale(0.4); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* E18-B: a slow breath instead of a sweep. Opacity stays well above 0.2 — the Bible forbids
+     a fading element lingering below that, where it reads as broken rather than loading. */
+  @keyframes skeleton-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.85; }
+  }
+
+  /* E21-B: the hold-to-confirm fill. Its duration is set at the call site to the SAME constant the
+     hold timer uses, so the bar finishing and the set recording are the same instant — a fill that
+     completes early teaches the lifter to let go too soon. Linear on purpose: an eased fill would
+     misreport how much of the hold is left. */
+  @keyframes hold-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+/*
+ * Reduced-motion backstop. The Bible requires an INSTANT state change, not a missing one, so
+ * durations collapse to ~0 rather than animations being disabled — the element still lands in
+ * its final state. This is the safety net; components also branch on the preference so they can
+ * skip transform-based motion entirely.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

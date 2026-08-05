@@ -1,0 +1,567 @@
+/**
+ * Muscle-map geometry.
+ *
+ * Hand-built SVG rather than a cut-out illustration, for two reasons a bitmap cannot satisfy:
+ * every region must be addressable ONE MUSCLE AT A TIME by the same slug the database uses, and
+ * every region must take its fill from a theme token so the figure recolours with the rest of the
+ * app. A third reason is licensing — the exercise dataset is CC-BY-SA and properly attributed, and
+ * an anatomy plate of unknown provenance is not something to smuggle into the bundle.
+ *
+ * Everything here is measured from `landmarks.ts`. No shape carries its own free-floating
+ * coordinates, and every paired muscle is drawn once and mirrored. That is the fix for the first
+ * version, where the silhouette was one blob and each muscle was an independently typed string:
+ * nothing tied a shape to the body under it, so the pecs floated above the ribcage, the head read
+ * as a martini glass, and the halves were not actually symmetrical.
+ */
+import { CX, Y, W, x, M, L, C, Z, path, pair, type P } from './landmarks';
+
+export type BodySide = 'front' | 'back';
+
+export interface MuscleShape {
+  /** Matches `muscle_groups.slug` in the database — the map and the data cannot drift apart. */
+  slug: string;
+  side: BodySide;
+  /** One or more path definitions; paired muscles carry two, the second mirrored. */
+  d: string[];
+}
+
+const p = (px: number, py: number): P => [px, py];
+
+/** Outer and inner edges of a limb, given its axis and half-width at that height. */
+const out = (axis: number, half: number) => axis + half;
+const inn = (axis: number, half: number) => axis - half;
+
+/* ── the body outline ───────────────────────────────────────────────────────────────────────
+ *
+ * Separate anatomical parts rather than one continuous silhouette. The old single path is why the
+ * head rendered as a martini glass: skull, jaw and neck shared an outline, so a curve that was
+ * slightly wrong anywhere deformed all three. Parts can each be right on their own.
+ *
+ * Torso and limbs are drawn as LEFT halves and mirrored, so the two sides are identical by
+ * construction rather than by careful typing.
+ */
+
+/** Cranium tapering into a jaw. One centred shape — the head is not a paired muscle. */
+const HEAD = path(
+  M(p(CX, Y.skull)),
+  C(p(x(W.skull), Y.skull + 3), p(x(W.skull), Y.brow - 6), p(x(W.skull), Y.brow + 6)),
+  C(p(x(W.skull - 1), Y.chin - 16), p(x(W.jaw), Y.chin - 4), p(CX, Y.chin)),
+  C(p(x(W.jaw, 1), Y.chin - 4), p(x(W.skull - 1, 1), Y.chin - 16), p(x(W.skull, 1), Y.brow + 6)),
+  C(p(x(W.skull, 1), Y.brow - 6), p(x(W.skull, 1), Y.skull + 3), p(CX, Y.skull)),
+  Z,
+);
+
+/** Neck, widening into the trapezius at its base so it does not read as a stalk. */
+const NECK = path(
+  M(p(x(W.neck - 5), Y.chin - 8)),
+  C(p(x(W.neck - 4), Y.jaw + 4), p(x(W.neck - 1), Y.jaw + 10), p(x(W.neck), Y.sternumTop + 2)),
+  L(p(x(W.neck, 1), Y.sternumTop + 2)),
+  C(p(x(W.neck - 1, 1), Y.jaw + 10), p(x(W.neck - 4, 1), Y.jaw + 4), p(x(W.neck - 5, 1), Y.chin - 8)),
+  Z,
+);
+
+/**
+ * Torso: neck base → out along the clavicle to the deltoid → down the flank → in at the waist →
+ * out over the hip → in to the crotch. Left half, mirrored to complete.
+ */
+const TORSO_HALF = path(
+  M(p(CX, Y.sternumTop - 6)),
+  L(p(x(W.neck - 1), Y.sternumTop - 2)),
+  // The trapezius slope out to the shoulder. This one line is what makes a figure read as
+  // athletic rather than as a rectangle with arms attached.
+  C(p(x(28), Y.shoulder - 8), p(x(46), Y.shoulder - 6), p(x(W.chest + 4), Y.shoulder + 8)),
+  // Down the outside of the ribcage, past the armpit.
+  C(p(x(W.chest + 2), Y.armpit + 10), p(x(W.chest - 2), Y.nipple + 20), p(x(W.ribcage), Y.ribcage)),
+  // Into the waist — the narrowest point of the whole figure, and the reason the figure has a
+  // shape at all.
+  C(p(x(W.ribcage - 6), Y.waist - 6), p(x(W.waist + 2), Y.waist - 2), p(x(W.waist), Y.waist + 10)),
+  // Back out over the iliac crest to the hip.
+  C(p(x(W.waist + 5), Y.navel + 14), p(x(W.hip - 1), Y.hip - 14), p(x(W.hip), Y.hip + 4)),
+  // The hip crease down to the crotch.
+  C(p(x(W.hip - 4), Y.crotch - 16), p(x(24), Y.crotch - 4), p(CX, Y.crotch + 2)),
+  Z,
+);
+
+/**
+ * Arm: deltoid cap → upper arm → elbow → forearm → wrist → hand, then back up the inner edge.
+ *
+ * Built around its OWN axis (`W.armAxis*`) rather than hung off the torso outline. The first
+ * version measured the arm from the shoulder half-width, which put its inner edge inside the
+ * ribcage — the arm and torso merged into one blob and the figure appeared to have no arms.
+ */
+const ARM_HALF = path(
+  // Deltoid cap, the widest part of the arm.
+  M(p(x(inn(W.armAxisTop, 12)), Y.shoulder + 2)),
+  C(
+    p(x(out(W.armAxisTop, 14)), Y.shoulder + 4),
+    p(x(out(W.armAxisTop, 16)), Y.armpit),
+    p(x(out(W.armAxisTop, 14)), Y.armpit + 14),
+  ),
+  // Outer edge of the upper arm down to the elbow.
+  C(
+    p(x(out(W.armAxisElbow, 15)), Y.nipple + 30),
+    p(x(out(W.armAxisElbow, 14)), Y.elbow - 20),
+    p(x(out(W.armAxisElbow, 12)), Y.elbow),
+  ),
+  // Forearm, tapering to the wrist.
+  C(
+    p(x(out(W.armAxisWrist, 12)), Y.elbow + 30),
+    p(x(out(W.armAxisWrist, 10)), Y.wrist - 24),
+    p(x(out(W.armAxisWrist, 7)), Y.wrist),
+  ),
+  // The hand: a closed mitt. Fingers at this scale would be four grey specks.
+  C(
+    p(x(out(W.armAxisWrist, 9)), Y.wrist + 18),
+    p(x(out(W.armAxisWrist, 8)), Y.fingertip),
+    p(x(W.armAxisWrist), Y.fingertip),
+  ),
+  C(
+    p(x(inn(W.armAxisWrist, 8)), Y.fingertip),
+    p(x(inn(W.armAxisWrist, 9)), Y.wrist + 18),
+    p(x(inn(W.armAxisWrist, 7)), Y.wrist),
+  ),
+  // Inner edge back up: forearm, elbow, biceps, into the armpit.
+  C(
+    p(x(inn(W.armAxisWrist, 10)), Y.wrist - 24),
+    p(x(inn(W.armAxisElbow, 12)), Y.elbow + 26),
+    p(x(inn(W.armAxisElbow, 12)), Y.elbow),
+  ),
+  C(
+    p(x(inn(W.armAxisElbow, 14)), Y.elbow - 24),
+    p(x(inn(W.armAxisTop, 14)), Y.nipple),
+    p(x(inn(W.armAxisTop, 12)), Y.armpit + 2),
+  ),
+  Z,
+);
+
+/**
+ * Leg: crotch → inner thigh → knee → calf → ankle → foot → back up the outside to the hip.
+ *
+ * Built around its own axis, like the arm. Both edges are measured from the LEG's centre line, so
+ * the limb has a real thickness at every height instead of two edges that happen to be near each
+ * other.
+ */
+const LEG_HALF = path(
+  M(p(CX - 4, Y.crotch - 6)),
+  // Inner thigh down to the knee.
+  C(
+    p(x(inn(W.legAxisHip, W.thighTop - 4)), Y.thighMid - 30),
+    p(x(inn(W.legAxisKnee, W.thighMidW - 2)), Y.thighMid + 20),
+    p(x(inn(W.legAxisKnee, W.kneeW)), Y.kneeTop),
+  ),
+  // Knee, then the inner calf and ankle.
+  C(
+    p(x(inn(W.legAxisKnee, W.kneeW - 1)), Y.kneeBottom + 10),
+    p(x(inn(W.legAxisAnkle, W.calfW - 2)), Y.calfMid + 10),
+    p(x(inn(W.legAxisAnkle, W.ankleW)), Y.ankle),
+  ),
+  C(p(x(inn(W.legAxisAnkle, W.ankleW)), Y.ankle + 10), p(x(inn(W.legAxisAnkle, W.ankleW + 1)), Y.foot - 4), p(x(inn(W.legAxisAnkle, W.ankleW + 2)), Y.foot)),
+  // The foot, pointing outward.
+  L(p(x(out(W.legAxisAnkle, W.ankleW + 8)), Y.foot + 1)),
+  C(
+    p(x(out(W.legAxisAnkle, W.ankleW + 11)), Y.foot - 6),
+    p(x(out(W.legAxisAnkle, W.ankleW + 2)), Y.foot - 12),
+    p(x(out(W.legAxisAnkle, W.ankleW + 1)), Y.ankle),
+  ),
+  // Outer calf, swelling at the gastrocnemius.
+  C(
+    p(x(out(W.legAxisAnkle, W.calfW)), Y.calfMid + 16),
+    p(x(out(W.legAxisKnee, W.calfW + 1)), Y.calfMid - 26),
+    p(x(out(W.legAxisKnee, W.kneeW)), Y.kneeBottom),
+  ),
+  // Knee up the outside of the thigh to the hip.
+  C(
+    p(x(out(W.legAxisKnee, W.kneeW + 3)), Y.kneeTop - 14),
+    p(x(out(W.legAxisHip, W.thighMidW + 3)), Y.thighMid - 40),
+    p(x(W.hip - 1), Y.hip + 6),
+  ),
+  C(p(x(W.hip - 8), Y.crotch - 20), p(x(16), Y.crotch - 12), p(CX - 4, Y.crotch - 6)),
+  Z,
+);
+
+/**
+ * The body under the muscles. An array rather than one string so each part can be simple, and so
+ * a part that is wrong is obvious on its own instead of deforming its neighbours.
+ *
+ * Front and back share the outline — a mirrored silhouette would be the same pixels. They differ
+ * in the muscles drawn on top, which is the only difference that carries information.
+ */
+export const SILHOUETTE: Record<BodySide, string[]> = {
+  front: [HEAD, NECK, ...pair(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
+  back: [HEAD, NECK, ...pair(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
+};
+
+/* ── front-view muscles ─────────────────────────────────────────────────────────────────── */
+
+/** Sternocleidomastoid: the cord from behind the ear down to the sternum. */
+const NECK_FRONT = path(
+  M(p(x(W.neck - 5), Y.chin - 4)),
+  C(p(x(W.neck - 6), Y.jaw + 8), p(x(9), Y.jaw + 14), p(x(3), Y.sternumTop)),
+  C(p(x(1), Y.sternumTop - 4), p(x(5), Y.jaw + 8), p(x(6), Y.chin - 6)),
+  Z,
+);
+
+/** Pectoralis major: broad at the sternum, tucking under the deltoid. */
+/**
+ * Pectoralis major in its two visible parts: the clavicular head running up towards the collarbone
+ * and the sternal mass below it. One slug, two shapes — the seam between them is what stops the
+ * chest reading as a single rounded plate.
+ */
+const CHEST_UPPER = path(
+  M(p(CX - 3, Y.sternumTop + 6)),
+  C(p(x(24), Y.sternumTop + 2), p(x(42), Y.shoulder + 6), p(x(W.chest - 2), Y.armpit + 2)),
+  C(p(x(W.chest - 10), Y.armpit + 10), p(x(24), Y.armpit + 14), p(CX - 3, Y.armpit + 16)),
+  Z,
+);
+
+const CHEST_LOWER = path(
+  M(p(CX - 3, Y.armpit + 20)),
+  C(p(x(26), Y.armpit + 18), p(x(W.chest - 6), Y.armpit + 12), p(x(W.chest - 4), Y.nipple)),
+  C(p(x(W.chest - 6), Y.nipple + 14), p(x(W.chest - 14), Y.nipple + 26), p(x(30), Y.ribcage - 4)),
+  C(p(x(18), Y.ribcage), p(x(6), Y.ribcage - 6), p(CX - 3, Y.ribcage - 12)),
+  Z,
+);
+
+/** Anterior deltoid: the front third of the shoulder cap. */
+const FRONT_DELT = path(
+  M(p(x(W.chest - 4), Y.shoulder + 4)),
+  C(p(x(inn(W.armAxisTop, 4)), Y.shoulder + 4), p(p(x(inn(W.armAxisTop, 2)), Y.armpit)[0], Y.armpit), p(x(inn(W.armAxisTop, 4)), Y.armpit + 14)),
+  C(p(x(W.chest - 8), Y.armpit + 12), p(x(W.chest - 8), Y.armpit - 8), p(x(W.chest - 4), Y.shoulder + 4)),
+  Z,
+);
+
+/** Lateral deltoid: the outer cap that gives the shoulder its width. */
+const SIDE_DELT = path(
+  M(p(x(inn(W.armAxisTop, 6)), Y.shoulder + 2)),
+  C(p(x(out(W.armAxisTop, 13)), Y.shoulder + 6), p(x(out(W.armAxisTop, 15)), Y.armpit), p(x(out(W.armAxisTop, 13)), Y.armpit + 14)),
+  C(p(x(W.armAxisTop), Y.armpit + 14), p(x(inn(W.armAxisTop, 5)), Y.armpit - 6), p(x(inn(W.armAxisTop, 6)), Y.shoulder + 2)),
+  Z,
+);
+
+/** Biceps: the belly of the upper arm, stopping short of both joints. */
+const BICEPS = path(
+  M(p(x(out(W.armAxisTop, 11)), Y.armpit + 20)),
+  C(p(x(out(W.armAxisElbow, 11)), Y.nipple + 30), p(x(out(W.armAxisElbow, 10)), Y.elbow - 26), p(x(out(W.armAxisElbow, 8)), Y.elbow - 12)),
+  C(p(x(inn(W.armAxisElbow, 8)), Y.elbow - 10), p(x(inn(W.armAxisTop, 10)), Y.nipple + 26), p(x(inn(W.armAxisTop, 9)), Y.armpit + 22)),
+  Z,
+);
+
+/** Forearm flexors, tapering to the wrist. */
+const FOREARM_FRONT = path(
+  M(p(x(out(W.armAxisElbow, 10)), Y.elbow - 2)),
+  C(p(x(out(W.armAxisWrist, 10)), Y.elbow + 32), p(x(out(W.armAxisWrist, 8)), Y.wrist - 26), p(x(out(W.armAxisWrist, 5)), Y.wrist - 6)),
+  C(p(x(inn(W.armAxisWrist, 5)), Y.wrist - 6), p(x(inn(W.armAxisWrist, 9)), Y.elbow + 30), p(x(inn(W.armAxisElbow, 10)), Y.elbow)),
+  Z,
+);
+
+/**
+ * Rectus abdominis, drawn as one column per side with the linea alba as the gap between them,
+ * rather than as six separate blocks. At this size individual segments would be four-pixel
+ * slivers that read as noise, and the slug is `abs`, not `abs-upper-left`.
+ */
+/**
+ * One segment of the rectus abdominis. Three of these per side, separated by the tendinous
+ * inscriptions — the gaps between them are as much of the information as the segments are, and
+ * they are what makes an abdominal wall read as one rather than as a slab.
+ *
+ * The measured height of the whole column is 73 units, so a third of it is ~24: at the
+ * component's rendered size that is roughly 26 px per segment, comfortably visible. The earlier
+ * decision to draw one block was made on an assumption about size that turned out to be wrong.
+ */
+const absSegment = (top: number, bottom: number, outerTop: number, outerBottom: number) =>
+  path(
+    M(p(x(4), top)),
+    C(p(x(outerTop - 4), top - 2), p(p(x(outerTop), top + 4)[0], top + 4), p(x(outerTop), top + 8)),
+    C(p(x(outerBottom + 1), bottom - 10), p(x(outerBottom), bottom - 4), p(x(outerBottom - 3), bottom)),
+    L(p(x(4), bottom)),
+    Z,
+  );
+
+const ABS_SEGMENTS = [
+  absSegment(Y.ribcage + 2, Y.ribcage + 24, 21, 21),
+  absSegment(Y.ribcage + 29, Y.navel + 18, 21, 19),
+  // The lowest segment is longer and tapers hardest — it runs to the pubis, not to the navel.
+  absSegment(Y.navel + 23, Y.crotch - 16, 18, 10),
+];
+
+/** External oblique: the flank between the ribcage and the hip. */
+const OBLIQUES = path(
+  M(p(x(31), Y.ribcage - 4)),
+  C(p(x(W.ribcage - 3), Y.ribcage + 14), p(x(W.waist), Y.waist + 12), p(x(W.waist - 5), Y.hip - 8)),
+  // The inner edge stops at half-width 23. The rectus abdominis reaches out to 21.4, measured, so
+  // anything smaller here has the flank lying on top of the abdominals — which is what a
+  // point-sampled overlap check found at 16%. The oblique is LATERAL to the rectus, not over it.
+  C(p(x(27), Y.hip - 12), p(x(24), Y.navel + 10), p(x(23), Y.navel - 14)),
+  C(p(x(26), Y.ribcage + 6), p(x(29), Y.ribcage - 2), p(x(31), Y.ribcage - 4)),
+  Z,
+);
+
+/**
+ * Quadriceps: from the hip crease to just above the knee.
+ *
+ * Inset from the leg outline on BOTH edges. The first version was measured from the hip half-width
+ * and spilled past the inner edge of the thigh, so it rendered as a green pill floating outside
+ * the leg — clearly visible the moment the figure was drawn at size.
+ */
+/**
+ * Quadriceps, as its three visible heads rather than one slab:
+ *   vastus lateralis — the outer sweep, from the hip to just above the knee;
+ *   rectus femoris   — the central column;
+ *   vastus medialis  — the teardrop low on the inside, which only exists in the bottom third.
+ *
+ * All three carry the `quads` slug, so they light together and report one muscle. The division is
+ * visual, and it is the single biggest reason the thigh now reads as a thigh.
+ */
+const VASTUS_LATERALIS = path(
+  M(p(x(out(W.legAxisHip, W.thighTop - 6)), Y.crotch - 6)),
+  C(
+    p(x(out(W.legAxisHip, W.thighTop - 4)), Y.crotch + 20),
+    p(x(out(W.legAxisHip, W.thighMidW - 1)), Y.thighMid + 10),
+    p(x(out(W.legAxisKnee, W.kneeW - 3)), Y.kneeTop - 6),
+  ),
+  C(
+    p(x(out(W.legAxisKnee, W.kneeW - 9)), Y.kneeTop - 2),
+    p(x(out(W.legAxisKnee, W.kneeW - 11)), Y.kneeTop - 10),
+    p(x(out(W.legAxisKnee, W.kneeW - 10)), Y.thighMid + 20),
+  ),
+  C(
+    p(x(out(W.legAxisHip, W.thighTop - 16)), Y.thighMid - 20),
+    p(x(out(W.legAxisHip, W.thighTop - 13)), Y.crotch + 10),
+    p(x(out(W.legAxisHip, W.thighTop - 6)), Y.crotch - 6),
+  ),
+  Z,
+);
+
+const RECTUS_FEMORIS = path(
+  M(p(x(out(W.legAxisHip, W.thighTop - 19)), Y.crotch - 4)),
+  C(
+    p(x(out(W.legAxisHip, W.thighTop - 15)), Y.crotch + 16),
+    p(x(out(W.legAxisKnee, W.kneeW - 12)), Y.thighMid + 20),
+    p(x(out(W.legAxisKnee, W.kneeW - 13)), Y.kneeTop - 12),
+  ),
+  C(
+    p(x(inn(W.legAxisKnee, W.kneeW - 8)), Y.kneeTop - 8),
+    p(x(inn(W.legAxisKnee, W.kneeW - 6)), Y.thighMid + 24),
+    p(x(inn(W.legAxisHip, W.thighTop - 17)), Y.crotch + 12),
+  ),
+  C(
+    p(x(inn(W.legAxisHip, W.thighTop - 20)), Y.crotch),
+    p(x(out(W.legAxisHip, W.thighTop - 21)), Y.crotch - 6),
+    p(x(out(W.legAxisHip, W.thighTop - 19)), Y.crotch - 4),
+  ),
+  Z,
+);
+
+const VASTUS_MEDIALIS = path(
+  M(p(x(inn(W.legAxisKnee, W.kneeW - 7)), Y.thighMid + 6)),
+  C(
+    p(x(inn(W.legAxisKnee, W.kneeW - 10)), Y.thighMid + 40),
+    p(x(inn(W.legAxisKnee, W.kneeW - 9)), Y.kneeTop - 14),
+    p(x(inn(W.legAxisKnee, W.kneeW - 4)), Y.kneeTop - 8),
+  ),
+  C(
+    p(x(inn(W.legAxisKnee, W.kneeW - 1)), Y.kneeTop - 10),
+    p(x(inn(W.legAxisKnee, W.kneeW - 2)), Y.thighMid + 30),
+    p(x(inn(W.legAxisKnee, W.kneeW - 7)), Y.thighMid + 6),
+  ),
+  Z,
+);
+
+/** Adductors: the inner thigh, medial to the quadriceps. */
+const ADDUCTORS = path(
+  M(p(CX - 4, Y.crotch - 4)),
+  C(
+    p(x(inn(W.legAxisHip, W.thighTop - 16)), Y.crotch + 10),
+    p(x(inn(W.legAxisHip, W.thighTop - 15)), Y.thighMid - 14),
+    p(x(inn(W.legAxisKnee, W.thighMidW - 9)), Y.thighMid + 22),
+  ),
+  C(p(x(9), Y.thighMid + 12), p(x(5), Y.crotch + 22), p(CX - 4, Y.crotch - 4)),
+  Z,
+);
+
+/** Abductors / gluteus medius: the outer hip, seen from the front as the flare above the thigh. */
+const ABDUCTORS = path(
+  M(p(x(W.waist + 3), Y.navel + 12)),
+  C(p(x(W.hip - 1), Y.hip - 12), p(x(W.hip - 2), Y.hip + 10), p(x(W.thigh + 11), Y.crotch - 2)),
+  C(p(x(W.thigh + 3), Y.crotch - 10), p(x(28), Y.hip - 6), p(x(W.waist + 3), Y.navel + 12)),
+  Z,
+);
+
+/** Tibialis anterior — the shin. The `calves` slug lights from either view. */
+const SHIN = path(
+  M(p(x(out(W.legAxisKnee, W.kneeW - 3)), Y.kneeBottom + 2)),
+  C(
+    p(x(out(W.legAxisAnkle, W.calfW - 2)), Y.calfMid - 14),
+    p(x(out(W.legAxisAnkle, W.calfW - 4)), Y.calfMid + 20),
+    p(x(out(W.legAxisAnkle, W.ankleW - 1)), Y.ankle - 8),
+  ),
+  C(
+    p(x(inn(W.legAxisAnkle, W.ankleW - 2)), Y.ankle - 8),
+    p(x(inn(W.legAxisAnkle, W.calfW - 3)), Y.calfMid + 4),
+    p(x(inn(W.legAxisKnee, W.kneeW - 3)), Y.kneeBottom + 4),
+  ),
+  Z,
+);
+
+/* ── back-view muscles ──────────────────────────────────────────────────────────────────── */
+
+/** Upper trapezius: the diamond from the base of the skull out to the shoulders. */
+const TRAPS = path(
+  M(p(CX - 2, Y.sternumTop - 8)),
+  C(p(x(16), Y.sternumTop - 8), p(x(38), Y.shoulder - 4), p(x(W.chest - 2), Y.shoulder + 10)),
+  C(p(x(38), Y.armpit + 16), p(x(20), Y.nipple + 6), p(CX - 2, Y.nipple + 22)),
+  Z,
+);
+
+/** Latissimus dorsi: the wing sweeping from the armpit down into the lower back. */
+const LATS = path(
+  M(p(x(W.chest - 6), Y.armpit)),
+  C(p(x(W.chest - 2), Y.nipple + 14), p(x(W.ribcage - 1), Y.ribcage + 10), p(x(W.waist - 1), Y.waist + 16)),
+  C(p(x(22), Y.waist + 6), p(x(14), Y.ribcage - 2), p(x(13), Y.nipple + 10)),
+  C(p(x(24), Y.nipple - 2), p(x(34), Y.armpit - 2), p(x(W.chest - 6), Y.armpit)),
+  Z,
+);
+
+/** Posterior deltoid. */
+const REAR_DELT = path(
+  M(p(x(W.chest - 4), Y.shoulder + 4)),
+  C(p(x(out(W.armAxisTop, 12)), Y.shoulder + 8), p(x(out(W.armAxisTop, 14)), Y.armpit + 2), p(x(out(W.armAxisTop, 12)), Y.armpit + 16)),
+  C(p(x(W.chest - 10), Y.armpit + 14), p(x(W.chest - 10), Y.armpit - 6), p(x(W.chest - 4), Y.shoulder + 4)),
+  Z,
+);
+
+/** Triceps: the back of the upper arm, larger than the biceps as it should be. */
+const TRICEPS = path(
+  M(p(x(out(W.armAxisTop, 12)), Y.armpit + 18)),
+  C(p(x(out(W.armAxisElbow, 12)), Y.nipple + 32), p(x(out(W.armAxisElbow, 11)), Y.elbow - 24), p(x(out(W.armAxisElbow, 9)), Y.elbow - 10)),
+  C(p(x(inn(W.armAxisElbow, 9)), Y.elbow - 8), p(x(inn(W.armAxisTop, 11)), Y.nipple + 24), p(x(inn(W.armAxisTop, 10)), Y.armpit + 20)),
+  Z,
+);
+
+/** Forearm extensors. */
+const FOREARM_BACK = path(
+  M(p(x(out(W.armAxisElbow, 10)), Y.elbow)),
+  C(p(x(out(W.armAxisWrist, 10)), Y.elbow + 34), p(x(out(W.armAxisWrist, 8)), Y.wrist - 24), p(x(out(W.armAxisWrist, 5)), Y.wrist - 4)),
+  C(p(x(inn(W.armAxisWrist, 5)), Y.wrist - 4), p(x(inn(W.armAxisWrist, 9)), Y.elbow + 32), p(x(inn(W.armAxisElbow, 10)), Y.elbow + 2)),
+  Z,
+);
+
+/**
+ * The neck seen from BEHIND: the strip between the base of the skull and the trapezius.
+ *
+ * The back view used to reuse the sternocleidomastoid, which is a front-of-neck muscle. Measured
+ * by sampling points, it sat 42% inside the trapezius — so a click there returned whichever of the
+ * two happened to be painted last.
+ */
+const NECK_BACK = path(
+  M(p(x(11), Y.chin - 6)),
+  C(p(x(11), Y.jaw + 2), p(x(9), Y.jaw + 6), p(x(7), Y.sternumTop - 10)),
+  C(p(x(2), Y.sternumTop - 8), p(x(3), Y.jaw + 2), p(x(4), Y.chin - 8)),
+  Z,
+);
+
+/** Erector spinae: the columns either side of the spine. */
+const LOWER_BACK = path(
+  M(p(x(3), Y.nipple + 10)),
+  C(p(x(20), Y.ribcage - 4), p(x(23), Y.waist + 10), p(x(19), Y.hip - 6)),
+  C(p(x(12), Y.hip - 2), p(x(5), Y.waist + 8), p(x(3), Y.nipple + 10)),
+  Z,
+);
+
+/** Gluteus maximus. */
+const GLUTES = path(
+  M(p(CX - 4, Y.hip - 14)),
+  C(p(x(20), Y.hip - 18), p(x(W.hip - 3), Y.hip - 8), p(x(W.hip - 5), Y.hip + 18)),
+  C(p(x(W.hip - 9), Y.crotch), p(x(20), Y.crotch + 10), p(CX - 4, Y.crotch - 2)),
+  Z,
+);
+
+/** Hamstrings: the back of the thigh, from the glute fold to the knee. */
+const HAMSTRINGS = path(
+  M(p(x(inn(W.legAxisHip, W.thighTop - 11)), Y.crotch + 4)),
+  C(
+    p(x(out(W.legAxisHip, W.thighTop - 3)), Y.crotch),
+    p(x(out(W.legAxisHip, W.thighMidW + 1)), Y.thighMid + 8),
+    p(x(out(W.legAxisKnee, W.kneeW - 5)), Y.kneeTop - 8),
+  ),
+  C(
+    p(x(W.legAxisKnee), Y.kneeTop),
+    p(x(inn(W.legAxisKnee, W.kneeW - 6)), Y.kneeTop),
+    p(x(inn(W.legAxisKnee, W.kneeW - 5)), Y.kneeTop - 10),
+  ),
+  C(
+    p(x(inn(W.legAxisKnee, W.thighMidW - 5)), Y.thighMid + 14),
+    p(x(inn(W.legAxisHip, W.thighTop - 7)), Y.thighMid - 26),
+    p(x(inn(W.legAxisHip, W.thighTop - 11)), Y.crotch + 4),
+  ),
+  Z,
+);
+
+/** Gastrocnemius: the calf, widest just below the knee. */
+/** Gastrocnemius, drawn as its two heads — the lateral one sits slightly higher than the medial. */
+const CALF_LATERAL = path(
+  M(p(x(out(W.legAxisKnee, W.kneeW - 2)), Y.kneeBottom + 2)),
+  C(
+    p(x(out(W.legAxisAnkle, W.calfW - 1)), Y.calfMid - 18),
+    p(x(out(W.legAxisAnkle, W.calfW - 2)), Y.calfMid + 16),
+    p(x(out(W.legAxisAnkle, W.ankleW + 1)), Y.ankle - 12),
+  ),
+  C(
+    p(x(out(W.legAxisAnkle, W.ankleW + 3)), Y.ankle - 16),
+    p(x(W.legAxisKnee), Y.calfMid + 2),
+    p(x(out(W.legAxisKnee, W.kneeW - 8)), Y.kneeBottom + 4),
+  ),
+  Z,
+);
+
+const CALF_MEDIAL = path(
+  M(p(x(out(W.legAxisKnee, W.kneeW - 10)), Y.kneeBottom + 4)),
+  C(
+    p(x(inn(W.legAxisKnee, W.kneeW - 12)), Y.calfMid - 6),
+    p(x(inn(W.legAxisAnkle, W.ankleW - 4)), Y.calfMid + 22),
+    p(x(out(W.legAxisAnkle, W.ankleW - 1)), Y.ankle - 12),
+  ),
+  C(
+    p(x(inn(W.legAxisAnkle, W.ankleW - 1)), Y.ankle - 14),
+    p(x(inn(W.legAxisAnkle, W.calfW - 3)), Y.calfMid + 2),
+    p(x(inn(W.legAxisKnee, W.kneeW - 2)), Y.kneeBottom + 4),
+  ),
+  Z,
+);
+
+/* ── the map ────────────────────────────────────────────────────────────────────────────── */
+
+export const MUSCLES: MuscleShape[] = [
+  // front
+  { slug: 'neck', side: 'front', d: pair(NECK_FRONT) },
+  { slug: 'chest', side: 'front', d: [...pair(CHEST_UPPER), ...pair(CHEST_LOWER)] },
+  { slug: 'front-delts', side: 'front', d: pair(FRONT_DELT) },
+  { slug: 'side-delts', side: 'front', d: pair(SIDE_DELT) },
+  { slug: 'biceps', side: 'front', d: pair(BICEPS) },
+  { slug: 'forearms', side: 'front', d: pair(FOREARM_FRONT) },
+  { slug: 'abs', side: 'front', d: ABS_SEGMENTS.flatMap(pair) },
+  { slug: 'obliques', side: 'front', d: pair(OBLIQUES) },
+  { slug: 'quads', side: 'front', d: [...pair(VASTUS_LATERALIS), ...pair(RECTUS_FEMORIS), ...pair(VASTUS_MEDIALIS)] },
+  { slug: 'adductors', side: 'front', d: pair(ADDUCTORS) },
+  { slug: 'abductors', side: 'front', d: pair(ABDUCTORS) },
+  { slug: 'calves', side: 'front', d: pair(SHIN) },
+
+  // back
+  { slug: 'neck', side: 'back', d: pair(NECK_BACK) },
+  { slug: 'traps', side: 'back', d: pair(TRAPS) },
+  { slug: 'rear-delts', side: 'back', d: pair(REAR_DELT) },
+  { slug: 'lats', side: 'back', d: pair(LATS) },
+  { slug: 'triceps', side: 'back', d: pair(TRICEPS) },
+  { slug: 'forearms', side: 'back', d: pair(FOREARM_BACK) },
+  { slug: 'lower-back', side: 'back', d: pair(LOWER_BACK) },
+  { slug: 'glutes', side: 'back', d: pair(GLUTES) },
+  { slug: 'hamstrings', side: 'back', d: pair(HAMSTRINGS) },
+  { slug: 'calves', side: 'back', d: [...pair(CALF_LATERAL), ...pair(CALF_MEDIAL)] },
+];
+
+export const MUSCLES_BY_SIDE: Record<BodySide, MuscleShape[]> = {
+  front: MUSCLES.filter((m) => m.side === 'front'),
+  back: MUSCLES.filter((m) => m.side === 'back'),
+};
+
+export { VIEW, mirror } from './landmarks';
