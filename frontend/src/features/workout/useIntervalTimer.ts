@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildSchedule, segmentAt, type IntervalBlock, type Segment } from './intervalPlan';
-import { acquireWakeLock, releaseWakeLock, wakeLockWanted } from './wakeLock';
+import { acquireWakeLock, releaseWakeLock, wakeLockWanted, setWakeLockLostHandler } from './wakeLock';
 
 export type IntervalPhase = 'idle' | 'prepare' | 'work' | 'rest' | 'setBreak' | 'paused' | 'done';
 
@@ -53,6 +53,10 @@ export function useIntervalTimer(cues: IntervalCues) {
   const pendingConfirmRef = useRef<Segment[]>([]);
   const frozenIdxRef = useRef(0);
   const [failedRounds, setFailedRounds] = useState<number[]>([]);
+  // The screen may sleep. Worth SAYING, not just handling: a lifter who knows the screen can lock
+  // puts the phone somewhere it will not, and a lifter who does not know gets the
+  // "was that interrupted?" prompt with no idea why. The handler existed and was wired to nothing.
+  const [screenMaySleep, setScreenMaySleep] = useState(false);
 
   /** THE one derivation. A frozen `pausedAt` is what makes pause actually pause. */
   const elapsed = useCallback(() => (pausedAtRef.current ?? Date.now()) - anchorRef.current, []);
@@ -165,6 +169,7 @@ export function useIntervalTimer(cues: IntervalCues) {
       const schedule = buildSchedule(block, { prepareSeconds });
       scheduleRef.current = schedule;
       setFailedRounds([]);
+      setScreenMaySleep(false);
       setInterrupted(false);
       pendingConfirmRef.current = [];
       if (!schedule.length) {
@@ -280,6 +285,11 @@ export function useIntervalTimer(cues: IntervalCues) {
     setPhase('paused');
   }, []);
 
+  useEffect(() => {
+    setWakeLockLostHandler(() => setScreenMaySleep(true));
+    return () => setWakeLockLostHandler(null);
+  }, []);
+
   // Returning to the foreground: re-evaluate immediately rather than waiting up to 250 ms, and
   // take the wake lock back — the browser releases it on every tab hide by specification.
   useEffect(() => {
@@ -328,6 +338,7 @@ export function useIntervalTimer(cues: IntervalCues) {
     totalRounds: roundsIn(schedule),
     running: phase !== 'idle' && phase !== 'done' && phase !== 'paused',
     interrupted,
+    screenMaySleep,
     pendingCount: pendingConfirmRef.current.length,
     failedRounds,
     start,

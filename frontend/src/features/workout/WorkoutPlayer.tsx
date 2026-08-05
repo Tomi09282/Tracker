@@ -183,6 +183,7 @@ export function WorkoutPlayer() {
             interrupted={interval.interrupted}
             pendingCount={interval.pendingCount}
             failedRounds={interval.failedRounds}
+            screenMaySleep={interval.screenMaySleep}
             nextName={
               interval.segment && intervalBlock.members.length > 1
                 ? (intervalBlock.members[interval.segment.memberIndex + 1]?.name ?? null)

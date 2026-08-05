@@ -16,6 +16,7 @@ export interface IntervalStageProps {
   interrupted: boolean;
   pendingCount: number;
   failedRounds: number[];
+  screenMaySleep: boolean;
   nextName: string | null;
   onStart: () => void;
   onPause: () => void;
@@ -192,6 +193,12 @@ export function IntervalStage(props: IntervalStageProps) {
           <Square className="size-icon-s" aria-hidden />
         </Pressable>
       </div>
+
+      {/* The screen can sleep, so SAY so. The lifter can move the phone; being told after the
+          block, by a prompt asking whether they kept going, helps nobody. */}
+      {props.screenMaySleep ? (
+        <p className="text-caption text-center text-warning">{t('workout.interval.wakeLockLost')}</p>
+      ) : null}
 
       {props.failedRounds.length ? (
         <p className={cn('text-caption text-center', 'text-warning')}>
