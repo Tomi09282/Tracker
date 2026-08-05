@@ -26,7 +26,7 @@ tags: [data-model, generated]
 
 ## Foreign keys
 
-- `coach_client_id` → `coach_clients.id` (on delete CASCADE)
+- `coach_client_id` → `coach_clients.id` (on delete SET NULL)
 - `user_id` → `users.id` (on delete CASCADE)
 
 ## Indexes

@@ -1,7 +1,7 @@
 ---
 type: table
 table: conversations
-summary: 8 columns, 0 rows
+summary: 9 columns, 0 rows
 rows: 0
 tags: [data-model, generated]
 ---
@@ -15,9 +15,10 @@ tags: [data-model, generated]
 | Column | Type | Notes |
 |---|---|---|
 | `id` | INTEGER | PK |
-| `coach_client_id` | INTEGER | NOT NULL, → coach_clients.id |
-| `coach_id` | INTEGER | NOT NULL, → users.id |
+| `coach_client_id` | INTEGER | → coach_clients.id |
 | `client_id` | INTEGER | NOT NULL, → users.id |
+| `coach_id` | INTEGER | → users.id |
+| `coach_name_snapshot` | TEXT | NOT NULL |
 | `blocked_by` | INTEGER | → users.id |
 | `blocked_at` | INTEGER |  |
 | `last_message_at` | INTEGER |  |
@@ -26,9 +27,9 @@ tags: [data-model, generated]
 ## Foreign keys
 
 - `blocked_by` → `users.id` (on delete SET NULL)
+- `coach_id` → `users.id` (on delete SET NULL)
 - `client_id` → `users.id` (on delete CASCADE)
-- `coach_id` → `users.id` (on delete CASCADE)
-- `coach_client_id` → `coach_clients.id` (on delete CASCADE)
+- `coach_client_id` → `coach_clients.id` (on delete SET NULL)
 
 ## Indexes
 
@@ -43,7 +44,8 @@ tags: [data-model, generated]
 
 ## Constraints
 
-- `coach_id <> client_id`
+- `length(coach_name_snapshot`
+- `coach_id IS NULL OR coach_id <> client_id`
 - `(blocked_at IS NULL`
 
 Back to [[ERD]].

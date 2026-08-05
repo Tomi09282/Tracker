@@ -1,11 +1,11 @@
 ---
 type: data-model
 title: Data model
-schema_version: 13
+schema_version: 14
 tags: [data-model, erd, generated]
 ---
 
-# Data model — schema version 13
+# Data model — schema version 14
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -21,8 +21,8 @@ erDiagram
   users ||--o{ coach_clients : "client_id"
   users ||--o{ coach_clients : "coach_id"
   users ||--o{ conversations : "blocked_by"
-  users ||--o{ conversations : "client_id"
   users ||--o{ conversations : "coach_id"
+  users ||--o{ conversations : "client_id"
   coach_clients ||--o{ conversations : "coach_client_id"
   users ||--o{ element_style_config : "updated_by"
   equipment ||--o{ exercise_equipment_map : "equipment_id"
@@ -103,7 +103,7 @@ erDiagram
 | [[audit_log]] | 9 | 0 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[coach_clients]] | 11 | 3 |
-| [[conversations]] | 8 | 0 |
+| [[conversations]] | 9 | 0 |
 | [[element_style_config]] | 4 | 27 |
 | [[equipment]] | 4 | 16 |
 | [[exercise_equipment_map]] | 2 | 1432 |
@@ -116,7 +116,7 @@ erDiagram
 | [[languages]] | 6 | 25 |
 | [[message_attachments]] | 7 | 0 |
 | [[message_reports]] | 10 | 0 |
-| [[messages]] | 7 | 0 |
+| [[messages]] | 8 | 0 |
 | [[muscle_groups]] | 5 | 20 |
 | [[notifications]] | 9 | 0 |
 | [[onboarding_equipment]] | 2 | 6 |

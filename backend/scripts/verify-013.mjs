@@ -35,15 +35,15 @@ c.exec('BEGIN');
 try {
   // A conversation whose denormalised pair does not match the link it names.
   refused('a conversation cannot claim a link it does not belong to', () =>
-    c.prepare('INSERT INTO conversations (coach_client_id, coach_id, client_id) VALUES (?, ?, ?)')
+    c.prepare(`INSERT INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot) VALUES (?, ?, ?, 'coach')`)
       .run(link.id, other.id, link.client_id));
 
-  const conv = c.prepare('INSERT INTO conversations (coach_client_id, coach_id, client_id) VALUES (?, ?, ?)')
+  const conv = c.prepare(`INSERT INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot) VALUES (?, ?, ?, 'coach')`)
     .run(link.id, link.coach_id, link.client_id).lastInsertRowid;
   check('the honest conversation inserts', !!conv);
 
   refused('a second conversation for the same link is refused', () =>
-    c.prepare('INSERT INTO conversations (coach_client_id, coach_id, client_id) VALUES (?, ?, ?)')
+    c.prepare(`INSERT INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot) VALUES (?, ?, ?, 'coach')`)
       .run(link.id, link.coach_id, link.client_id));
 
   refused('the parties cannot be changed afterwards', () =>
@@ -51,19 +51,19 @@ try {
 
   // Messages.
   refused('a stranger cannot post into the thread', () =>
-    c.prepare('INSERT INTO messages (conversation_id, sender_id, body) VALUES (?, ?, ?)')
+    c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
       .run(conv, other.id, 'hello'));
 
-  const m1 = c.prepare('INSERT INTO messages (conversation_id, sender_id, body) VALUES (?, ?, ?)')
+  const m1 = c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
     .run(conv, link.coach_id, 'first').lastInsertRowid;
   check('a party can post', !!m1);
 
   refused('an empty body is refused', () =>
-    c.prepare('INSERT INTO messages (conversation_id, sender_id, body) VALUES (?, ?, ?)')
+    c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
       .run(conv, link.coach_id, ''));
 
   refused('a 4001-character body is refused', () =>
-    c.prepare('INSERT INTO messages (conversation_id, sender_id, body) VALUES (?, ?, ?)')
+    c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
       .run(conv, link.coach_id, 'x'.repeat(4001)));
 
   refused('a sent message cannot be rewritten', () =>
@@ -81,7 +81,7 @@ try {
   // Block.
   c.prepare('UPDATE conversations SET blocked_at = unixepoch(), blocked_by = ? WHERE id = ?').run(link.client_id, conv);
   refused('a blocked conversation accepts nothing further', () =>
-    c.prepare('INSERT INTO messages (conversation_id, sender_id, body) VALUES (?, ?, ?)')
+    c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
       .run(conv, link.coach_id, 'after the block'));
   refused('a block cannot be recorded without an actor', () =>
     c.prepare('UPDATE conversations SET blocked_at = unixepoch(), blocked_by = NULL WHERE id = ?').run(conv));
@@ -125,13 +125,24 @@ try {
     c.prepare('INSERT INTO push_devices (user_id, platform, token_hash) VALUES (?, ?, ?)')
       .run(link.coach_id, 'ios', 'abc'));
 
-  // Archiving the link must cascade the conversation away.
-  const before = c.prepare('SELECT COUNT(*) n FROM conversations WHERE coach_client_id = ?').get(link.id).n;
-  c.prepare('DELETE FROM coach_clients WHERE id = ?').run(link.id);
-  const after = c.prepare('SELECT COUNT(*) n FROM conversations WHERE coach_client_id = ?').get(link.id).n;
-  check('deleting the link takes the conversation with it', before === 1 && after === 0, `${before} -> ${after}`);
-  const orphanNotifs = c.prepare('SELECT COUNT(*) n FROM notifications WHERE coach_client_id = ?').get(link.id).n;
-  check('and the notifications about it', orphanNotifs === 0, String(orphanNotifs));
+  // THE ASSERTION THAT WAS WRONG, and the reason 014 exists.
+  //
+  // This block used to read 'deleting the link takes the conversation with it' and call a cascade
+  // a pass. It was encoding the bug as the expectation — a departing coach destroyed the CLIENT's
+  // entire chat history, which is migration 011's harm arriving through a different door. A test
+  // can defend a defect just as firmly as it defends a feature.
+  const msgsBefore = c.prepare('SELECT COUNT(*) n FROM messages WHERE conversation_id = ?').get(conv).n;
+  c.prepare('DELETE FROM users WHERE id = ?').run(link.coach_id);
+  const msgsAfter = c.prepare('SELECT COUNT(*) n FROM messages WHERE conversation_id = ?').get(conv).n;
+  check("a departing coach does NOT delete the client's history", msgsBefore === msgsAfter, `${msgsBefore} -> ${msgsAfter}`);
+
+  const orphan = c.prepare('SELECT coach_id, coach_client_id, coach_name_snapshot FROM conversations WHERE id = ?').get(conv);
+  check('the thread still names who it was with', !!orphan.coach_name_snapshot, orphan.coach_name_snapshot);
+  check('and the coach reference is released, not dangling', orphan.coach_id === null && orphan.coach_client_id === null, 'null / null');
+
+  refused('but a thread whose relationship ended accepts nothing further', () =>
+    c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
+      .run(conv, link.client_id, 'still here?'));
 } finally {
   c.exec('ROLLBACK');   // a probe leaves nothing behind
   c.close();

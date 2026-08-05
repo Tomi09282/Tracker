@@ -36,6 +36,8 @@ export const writeTx = (steps) => pool.run({ steps }, { name: 'writeTx' });
 export const startWorkout = (args) => pool.run(args, { name: 'startWorkoutTx' });
 export const recordSet = (args) => pool.run(args, { name: 'recordSetTx' });
 export const voidSet = (args) => pool.run(args, { name: 'voidSetTx' });
+export const sendMessage = (args) => pool.run(args, { name: 'sendMessageTx' });
+export const openConversation = (args) => pool.run(args, { name: 'openConversationTx' });
 /** Deep-copy a plan. All-or-nothing: a plan with days but no exercises is worse than no plan. */
 export const clonePlan = (args) => pool.run(args, { name: 'clonePlanTx' });
 /** Copy days within one plan, growing the cycle when the target lands outside it. */

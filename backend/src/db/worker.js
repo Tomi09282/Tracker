@@ -803,6 +803,124 @@ export function migrate({ files }) {
   return { applied, version: conn.pragma('user_version', { simple: true }) };
 }
 
+/**
+ * Send a message, and tell the other party — as ONE act.
+ *
+ * A NAMED transaction because these two writes must not be separable. Split across two pool calls
+ * there is a window in which a message exists that nobody has been told about, and the recipient's
+ * badge never catches up: nothing recomputes it, because a notification is an event rather than a
+ * derived count. A message that arrives silently is worse than one that fails to send.
+ *
+ * THE CONVERSATION IS RE-READ INSIDE THE TRANSACTION, not trusted from the route. Not because the
+ * route's check is wrong — it is the same predicate — but because this is where the sender, the
+ * block state and the recipient are all decided, and deciding them twice in two places is the
+ * drift this codebase keeps deleting. `tx.immediate()` takes the write lock at BEGIN, so the read
+ * and the insert cannot be interleaved.
+ *
+ * EVERY early return happens BEFORE the first write (ADR-0005): better-sqlite3 commits on return,
+ * so a conditional return after an insert would leave the message sent and the caller told it
+ * failed. `check-worker-tx` now enforces that, after it caught a live violation elsewhere.
+ */
+export function sendMessageTx({ conversationId, senderId, body, attachment }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    current = 'SELECT the conversation (ownership + block state)';
+    // The LINK's status is what authorises, not the denormalised pair: an archived relationship
+    // must stop accepting messages on the very next request, with nothing having to remember.
+    const conv = stmt(
+      `SELECT c.id, c.coach_id, c.client_id, c.blocked_at
+         FROM conversations c
+         JOIN coach_clients cc ON cc.id = c.coach_client_id
+        WHERE c.id = ? AND (c.coach_id = ? OR c.client_id = ?) AND cc.status = 'active'`,
+    ).get(conversationId, senderId, senderId);
+
+    // Not yours, never existed, or the relationship is over. One answer for all three.
+    if (!conv) return { outcome: 'missing' };
+    if (conv.blocked_at != null) return { outcome: 'blocked' };
+
+    const recipientId = conv.coach_id === senderId ? conv.client_id : conv.coach_id;
+
+    // ── from here on, nothing may conditionally return ─────────────────────────────────────────
+    current = 'INSERT the message';
+    const message = stmt(
+      'INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, ?, ?)',
+    ).run(conversationId, senderId, conv.coach_id === senderId ? 1 : 0, body);
+    const messageId = Number(message.lastInsertRowid);
+
+    if (attachment) {
+      current = 'INSERT the attachment';
+      stmt(
+        `INSERT INTO message_attachments (message_id, storage_key, mime, bytes, duration_seconds)
+         VALUES (?, ?, ?, ?, ?)`,
+      ).run(messageId, attachment.storageKey, attachment.mime, attachment.bytes, attachment.durationSeconds ?? null);
+    }
+
+    current = 'INSERT the recipient notification';
+    // The title is written HERE, by the server, from the sender's own name. Nothing the sender
+    // typed reaches the notification — that is the leak defence, and it is a property of this code
+    // path rather than a promise, because no route accepts notification text.
+    const senderName = stmt('SELECT email FROM users WHERE id = ?').get(senderId)?.email ?? '';
+    stmt(
+      `INSERT INTO notifications (user_id, coach_client_id, type, title, link_path)
+       SELECT ?, c.coach_client_id, 'chat.message', ?, '/chat/' || c.id
+         FROM conversations c WHERE c.id = ?`,
+    ).run(recipientId, senderName.split('@')[0], conversationId);
+
+    return { outcome: 'sent', messageId, recipientId };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Open the conversation for a link, or hand back the one that exists.
+ *
+ * `INSERT ... SELECT ... WHERE` rather than a check followed by a write: `VALUES` admits no
+ * ownership predicate, and the check-then-write pair has a window this does not. The same shape as
+ * every other create in this codebase.
+ *
+ * Idempotent by construction — `conversations.coach_client_id` is UNIQUE, so the second caller
+ * inserts nothing and reads the same row. Two people opening a chat at once is the ordinary case,
+ * not an error.
+ */
+export function openConversationTx({ linkId, userId }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    current = 'INSERT the conversation through the link';
+    stmt(
+      `INSERT OR IGNORE INTO conversations (coach_client_id, coach_id, client_id)
+       SELECT cc.id, cc.coach_id, cc.client_id
+         FROM coach_clients cc
+        WHERE cc.id = ? AND (cc.coach_id = ? OR cc.client_id = ?) AND cc.status = 'active'`,
+    ).run(linkId, userId, userId);
+
+    current = 'SELECT the conversation';
+    const conv = stmt(
+      `SELECT c.id, c.coach_id, c.client_id, c.blocked_at, c.last_message_at
+         FROM conversations c
+         JOIN coach_clients cc ON cc.id = c.coach_client_id
+        WHERE c.coach_client_id = ? AND (c.coach_id = ? OR c.client_id = ?) AND cc.status = 'active'`,
+    ).get(linkId, userId, userId);
+
+    // The link was not theirs, or not active. Indistinguishable from one that never existed.
+    return conv ? { outcome: 'ok', conversation: conv } : { outcome: 'missing' };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
 export function readMigration({ path }) {
   return readFileSync(path, 'utf8');
 }

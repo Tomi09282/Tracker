@@ -18,6 +18,7 @@ import coachingRoutes from './src/coaching/routes.js';
 import onboardingRoutes from './src/onboarding/routes.js';
 import planRoutes from './src/plans/routes.js';
 import logRoutes from './src/logs/routes.js';
+import chatRoutes from './src/chat/routes.js';
 import icsRoutes from './src/plans/ics.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 
@@ -157,6 +158,7 @@ app.use('/api/v1', coachingRoutes);
 app.use('/api/v1', onboardingRoutes);
 app.use('/api/v1', planRoutes);
 app.use('/api/v1', logRoutes);
+app.use('/api/v1', chatRoutes);
 app.use('/api/v1', icsRoutes);
 
 app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));

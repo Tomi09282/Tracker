@@ -1,11 +1,11 @@
 ---
 type: api-index
 title: API surface
-count: 78
+count: 88
 tags: [api, moc, generated]
 ---
 
-# API surface — 78 endpoints
+# API surface — 88 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -38,6 +38,14 @@ protection the code does not have.
 | GET | `/api/v1/clients/:id/records` | `requireAuth` |
 | GET | `/api/v1/clients/:id/workouts` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/clients/pregenerate` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/coaches/:linkId/leave` | `requireAuth` |
+| GET | `/api/v1/conversations` | `requireAuth` |
+| POST | `/api/v1/conversations` | `requireAuth` |
+| POST | `/api/v1/conversations/:id/block` | `requireAuth` |
+| GET | `/api/v1/conversations/:id/messages` | `requireAuth` |
+| POST | `/api/v1/conversations/:id/messages` | `requireAuth` |
+| POST | `/api/v1/conversations/:id/read` | `requireAuth` |
+| POST | `/api/v1/conversations/:id/unblock` | `requireAuth` |
 | GET | `/api/v1/exercises` | `requireAuth` |
 | POST | `/api/v1/exercises` | `requireAuth` |
 | DELETE | `/api/v1/exercises/:id` | `requireAuth` |
@@ -54,6 +62,8 @@ protection the code does not have.
 | PUT | `/api/v1/me/theme` | `requireAuth` |
 | DELETE | `/api/v1/media/:id` | `requireAuth` |
 | GET | `/api/v1/media/:key` | `requireAuth` |
+| DELETE | `/api/v1/messages/:id` | `requireAuth` |
+| POST | `/api/v1/messages/:id/report` | `requireAuth` |
 | GET | `/api/v1/my-plans` | `requireAuth` |
 | GET | `/api/v1/my-plans/today` | `requireAuth` |
 | GET | `/api/v1/my-plans/week` | `requireAuth` |
