@@ -6,9 +6,6 @@
     "save": "Speichern",
     "saving": "Speichert",
     "language": "Sprache",
-    "hungarian": "Magyar",
-    "english": "English",
-    "german": "Deutsch",
     "back": "Zurück",
     "next": "Weiter",
     "more": "Mehr",
@@ -63,7 +60,6 @@
     "title": "Einstellungen",
     "account": "Konto",
     "appearance": "Darstellung",
-    "theme": "Design",
     "themePacks": "Design-Pakete",
     "accent": "Akzentfarbe",
     "accentDefault": "Standard",
@@ -434,7 +430,6 @@
       "spokenResume": "Weiter geht es"
     },
     "restRemaining": "Pause: {{time}}",
-    "retry": "Erneut",
     "checkFailed": {
       "conflict": "Bereits erfasst, mit anderen Werten",
       "offline": "Keine Verbindung",

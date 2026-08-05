@@ -6,14 +6,11 @@
     "save": "Save",
     "saving": "Saving",
     "language": "Language",
-    "hungarian": "Magyar",
-    "english": "English",
     "back": "Back",
     "next": "Next",
     "more": "More",
     "less": "Less",
-    "minutesShort": "min",
-    "german": "Deutsch"
+    "minutesShort": "min"
   },
   "auth": {
     "loginTitle": "Sign in to your account",
@@ -63,7 +60,6 @@
     "title": "Settings",
     "account": "Account",
     "appearance": "Appearance",
-    "theme": "Theme",
     "themePacks": "Theme packs",
     "accent": "Accent color",
     "accentDefault": "Default",
@@ -434,7 +430,6 @@
       "spokenResume": "Resuming"
     },
     "restRemaining": "Rest: {{time}}",
-    "retry": "Retry",
     "checkFailed": {
       "conflict": "Already recorded, with different values",
       "offline": "No connection",

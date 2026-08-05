@@ -6,14 +6,11 @@
     "save": "Mentés",
     "saving": "Mentés folyamatban",
     "language": "Nyelv",
-    "hungarian": "Magyar",
-    "english": "English",
     "back": "Vissza",
     "next": "Tovább",
     "more": "Több",
     "less": "Kevesebb",
-    "minutesShort": "perc",
-    "german": "Deutsch"
+    "minutesShort": "perc"
   },
   "auth": {
     "loginTitle": "Jelentkezz be a fiókodba",
@@ -63,7 +60,6 @@
     "title": "Beállítások",
     "account": "Fiók",
     "appearance": "Megjelenés",
-    "theme": "Téma",
     "themePacks": "Témacsomagok",
     "accent": "Kiemelőszín",
     "accentDefault": "Alapértelmezett",
@@ -434,7 +430,6 @@
       "spokenResume": "Folytatjuk"
     },
     "restRemaining": "Pihenő: {{time}}",
-    "retry": "Újra",
     "checkFailed": {
       "conflict": "Már rögzítve, más értékkel",
       "offline": "Nincs kapcsolat",

@@ -362,7 +362,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
             </Pressable>
           ) : (
             <Pressable shape="chip" density="compact" variant="secondary" onClick={() => void submit()}>
-              {t('workout.retry')}
+              {t('common.retry')}
             </Pressable>
           )}
         </div>

@@ -60,7 +60,17 @@ for (const code of Object.keys(bundles)) {
 
 const ref = bundles[REFERENCE];
 const placeholders = (s) => [...s.matchAll(/\{\{\s*([a-z_]+)\s*\}\}/gi)].map((m) => m[1]).sort().join(',');
-const NATIVE_LABELS = ['common.hungarian', 'common.english', 'common.german'];
+/**
+ * The native-label check USED to guard `common.hungarian` / `common.english` / `common.german`.
+ * Those keys were deleted on 2026-08-06 — the labels moved into the LOCALES registry in
+ * `i18n/index.ts`, where they are plain strings and cannot be translated by anyone.
+ *
+ * That is a strictly better home, and it also means this loop had been silently guarding nothing:
+ * `ref.has(key)` was false for all three, so every iteration was a no-op. **A check whose subject
+ * has moved does not fail — it passes, quietly, forever.** The list is kept empty and named rather
+ * than deleted, so the next person adding a must-not-translate key has somewhere obvious to put it.
+ */
+const NATIVE_LABELS = [];
 
 for (const [code, bundle] of Object.entries(bundles)) {
   if (code === REFERENCE) continue;
@@ -89,6 +99,43 @@ for (const [code, bundle] of Object.entries(bundles)) {
     if (other >= code) continue;
     const same = [...bundle].filter(([k, v]) => otherBundle.get(k) === v).length;
     if (same === bundle.size) problems.push(`${code}.json is identical to ${other}.json — it was copied, not translated`);
+  }
+}
+
+/* ── keys no code references ─────────────────────────────────────────────────────────────────────
+ *
+ * A dead key is not merely waste. It is a claim that a feature exists — the next person reads
+ * `workout.interval.emomDone` and reasonably assumes there is an EMOM done button. And a key that
+ * duplicates one already present is worse: this check found `workout.retry` sitting beside a
+ * `common.retry` that said the same thing, which is the same "collapse to one definition" failure
+ * this codebase keeps finding in predicates, applied to copy.
+ *
+ * Template keys — `t(\`workout.record.${kind}\`)` — are resolved by checking whether any PREFIX of
+ * the key appears before an interpolation. Without that, every dynamic key would read as dead.
+ */
+{
+  const srcFiles = [];
+  const walk = async (dir) => {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full);
+      else if (/\.(ts|tsx)$/.test(entry.name)) srcFiles.push(full);
+    }
+  };
+  await walk(path.resolve('src'));
+  const code = (await Promise.all(srcFiles.map((f) => fs.readFile(f, 'utf8')))).join('\n');
+
+  const reference = bundles[REFERENCE];
+  for (const key of reference.keys()) {
+    if (code.includes(`'${key}'`) || code.includes(`"${key}"`) || code.includes(`\`${key}\``)) continue;
+    // A dynamic key: some prefix of it is built by interpolation.
+    const parts = key.split('.');
+    let dynamic = false;
+    for (let i = parts.length - 1; i > 0 && !dynamic; i -= 1) {
+      const prefix = `${parts.slice(0, i).join('.')}.`;
+      if (code.includes(`${prefix}\${`) || code.includes(`${prefix}\``)) dynamic = true;
+    }
+    if (!dynamic) problems.push(`${key} is in every bundle and referenced by no code — delete it or use it`);
   }
 }
 
