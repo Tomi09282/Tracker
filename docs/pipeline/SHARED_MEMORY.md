@@ -112,6 +112,36 @@ Three sweeps this session found defects in exactly the places no review reaches:
 
 All three are now gated, and each gate was broken deliberately once to watch it fail by name.
 
+## 1e. THE REVIEW'S REAL FINDING WAS THE SCOPE
+
+Four adversarial lenses attacked a proposed migration 013 and returned roughly thirty defects. The
+useful signal was not any single one — it was **where they clustered**: every severe finding sat in
+the elaborate parts. Collapse upserts, quiet-hours triggers, an automated retention sweep, a dedupe
+key bounded by a GLOB that turned out to be a no-op because GLOB is not a regex. The core —
+conversations, messages, notifications — they reported sound.
+
+One of those defects, `CHECK (deliver_after <= created_at + 2678400)`, would have bricked every
+collapsed notification 31 days after it was raised. **SQLite cannot alter a CHECK**, so that is a
+12-step rebuild of the largest table in the product, discovered by a user.
+
+So 013 ships the core and nothing else. Quiet hours, collapsing, automated retention and a
+moderation queue get their own migration IF traffic asks for them. **ADD COLUMN is legal; a wrong
+CHECK is not removable.** The right response to "the reviewers found thirty problems" was to build
+less, not to fold in thirty fixes.
+
+Three decisions inside the core worth carrying:
+
+- **A conversation belongs to the LINK, not to the pair of user ids.** The same two people can be
+  linked, archived and linked again; those are different working relationships, and keying on the
+  link means the second starts clean instead of inheriting the first one's year of messages. It is
+  also what makes archiving withdraw access on the next request with no code remembering.
+- **The notification payload is a SNAPSHOT** — 010's `exercise_name_snapshot` decision applied
+  again. "Your coach added Tuesday" must still read correctly after Tuesday is deleted, and the
+  alternative makes every future feature that emits a notification responsible for cleaning up
+  after itself.
+- **Block names WHO blocked.** A coach blocking a client and a client blocking a coach are
+  different events with different remedies; a boolean cannot tell a moderator which happened.
+
 ## 2. CONTRACTS
 
 Established facts other jobs must not re-derive or contradict.

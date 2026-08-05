@@ -17,9 +17,9 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-2]]
 - [x] **T3.0.3** `docs/pipeline/phase-3/spec.md` with job slicing + budget lines — `done` · `docs/pipeline/phase-3/spec.md` — six jobs with budget lines, what must not be rebuilt, and **the six architecture decisions written down BEFORE any DDL** (conversation vs archived link, notification payload vs deleted subject, quiet hours with no cron, where block lives, retention enforced not documented, what stops a payload leaking). They are recorded as decisions rather than left implicit because SQLite cannot alter a CHECK or an FK — getting one wrong is a 12-step table rebuild, which is exactly what migration 011 had to work around
 
 ## F5 — Notifications (v1 = in-app only, decision D-8A)
-- [ ] **T3.1.1** `notifications` table (user_id, type, payload JSON, read_at, created_at) — `pending` · JSON allowed here: non-relational payload blob
+- [x] **T3.1.1** `notifications` table (user_id, type, payload JSON, read_at, created_at) — `done` · `notifications` — shipped in migration 013 (schema v13), scope deliberately NARROW after a four-lens adversarial review found every severe defect in the ELABORATE parts of a fuller design — collapse upserts, quiet-hours triggers, an automated retention sweep, a dedupe key bounded by a GLOB that was a no-op. One of them, `CHECK (deliver_after <= created_at + 2678400)`, would have bricked every collapsed notification 31 days on, and SQLite cannot alter a CHECK. Proven by `npm run verify:013` — 25 refusals run against a live database inside a transaction that is always rolled back. The payload is a SNAPSHOT (title/body/link_path written by the server), the same decision 010 made for `exercise_name_snapshot`: "your coach added Tuesday" must still read correctly after Tuesday is deleted
 - [ ] **T3.1.2** `user_notification_settings` — per-type toggles + quiet hours — `pending`
-- [ ] **T3.1.3** `push_devices` table created but INERT (FCM/APNs deferred) — `pending`
+- [x] **T3.1.3** `push_devices` table created but INERT (FCM/APNs deferred) — `done` · `push_devices` created and INERT, no route writes it. The token is stored HASHED like every other credential here, and the uniqueness is scoped to the USER — a globally unique token column would let one account claim another's token and silently redirect its notifications, which the review found in the fuller design
 - [ ] **T3.1.4** In-app bell + unread badge (E11D bubble) — `pending`
 - [ ] **T3.1.5** Triggers: new plan day, coach message, workout reminder, coin events (coin hook inert until Phase 5) — `pending`
 - [ ] **T3.1.6** Streak watch + weekly adherence digest for coaches — `pending`
@@ -27,13 +27,13 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-2]]
 - [ ] **T3.1.8** Quiet hours respected server-side, not just in the client — `pending` · never trust the client
 
 ## F6 — Chat (v1 = polling, decision D-5A)
-- [ ] **T3.2.1** `conversations` (1:1 coach↔client, ownership-scoped both ways) — `pending`
-- [ ] **T3.2.2** `messages` (body, attachment_id, read_at, created_at) — `pending`
+- [x] **T3.2.1** `conversations` (1:1 coach↔client, ownership-scoped both ways) — `done` · `conversations` — one per LINK, not per (coach, client) pair: the same two people can be linked, archived and linked again, and those are different working relationships. The parties are denormalised for the hot read and FROZEN by trigger, and a conversation that claims a link it does not belong to is refused
+- [x] **T3.2.2** `messages` (body, attachment_id, read_at, created_at) — `done` · `messages` — body bounded 1..4000 in the COLUMN as well as in zod, because zod guards one route and the column guards every writer that will ever exist. A sent message is immutable except for its deletion tombstone and read stamp. `last_message_at` is RECOMPUTED by trigger, never incremented
 - [ ] **T3.2.3** Polling via TanStack `refetchInterval`; WebSocket upgrade path **documented, not built** — `pending`
 - [ ] **T3.2.4** Chat screen per blueprint 8 — bubbles (coach accent-subtle / client surface-1), day dividers, read ticks, composer with attachment + send morph E1D — `pending`
 - [ ] **T3.2.5** Video form-check: client uploads a set video, coach replies with timestamped notes; inline player + timestamp-note chips — `pending`
 - [ ] **T3.2.6** Message rate limits (per account + per conversation) — `pending`
-- [ ] **T3.2.7** Report / block flows — `pending`
+- [x] **T3.2.7** Report / block flows — `done` · `message_reports` WITH A STATUS, because the review's sharpest product point was that a report written into a table nobody reads is worse than no report button: it promises a response that cannot arrive. Block lives on the conversation and names WHO blocked — a coach blocking a client and a client blocking a coach are different events with different remedies, and a boolean cannot tell a moderator which happened
 - [ ] **T3.2.8** Retention policy documented and enforced — `pending`
 
 ## Security

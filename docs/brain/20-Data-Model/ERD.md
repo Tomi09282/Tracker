@@ -1,17 +1,17 @@
 ---
 type: data-model
 title: Data model
-schema_version: 12
+schema_version: 13
 tags: [data-model, erd, generated]
 ---
 
-# Data model — schema version 12
+# Data model — schema version 13
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
 > Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-05.
 
-34 tables, plus 1 FTS5 shadow table (`exercise_translations_fts`).
+40 tables, plus 1 FTS5 shadow table (`exercise_translations_fts`).
 
 ```mermaid
 erDiagram
@@ -20,6 +20,10 @@ erDiagram
   teams ||--o{ coach_clients : "team_id"
   users ||--o{ coach_clients : "client_id"
   users ||--o{ coach_clients : "coach_id"
+  users ||--o{ conversations : "blocked_by"
+  users ||--o{ conversations : "client_id"
+  users ||--o{ conversations : "coach_id"
+  coach_clients ||--o{ conversations : "coach_client_id"
   users ||--o{ element_style_config : "updated_by"
   equipment ||--o{ exercise_equipment_map : "equipment_id"
   exercises ||--o{ exercise_equipment_map : "exercise_id"
@@ -32,10 +36,19 @@ erDiagram
   users ||--o{ invite_codes : "coach_id"
   users ||--o{ invite_redemptions : "user_id"
   invite_codes ||--o{ invite_redemptions : "code_id"
+  messages ||--o{ message_attachments : "message_id"
+  users ||--o{ message_reports : "resolved_by"
+  users ||--o{ message_reports : "reporter_id"
+  messages ||--o{ message_reports : "message_id"
+  users ||--o{ messages : "sender_id"
+  conversations ||--o{ messages : "conversation_id"
+  coach_clients ||--o{ notifications : "coach_client_id"
+  users ||--o{ notifications : "user_id"
   equipment ||--o{ onboarding_equipment : "equipment_id"
   onboarding_profiles ||--o{ onboarding_equipment : "user_id"
   onboarding_profiles ||--o{ onboarding_limitations : "user_id"
   users ||--o{ onboarding_profiles : "user_id"
+  users ||--o{ push_devices : "user_id"
   invite_codes ||--o{ referrals : "code_id"
   users ||--o{ referrals : "referred_user_id"
   users ||--o{ referrals : "coach_id"
@@ -90,6 +103,7 @@ erDiagram
 | [[audit_log]] | 9 | 0 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[coach_clients]] | 11 | 3 |
+| [[conversations]] | 8 | 0 |
 | [[element_style_config]] | 4 | 27 |
 | [[equipment]] | 4 | 16 |
 | [[exercise_equipment_map]] | 2 | 1432 |
@@ -100,10 +114,15 @@ erDiagram
 | [[invite_codes]] | 11 | 6 |
 | [[invite_redemptions]] | 6 | 3 |
 | [[languages]] | 6 | 25 |
+| [[message_attachments]] | 7 | 0 |
+| [[message_reports]] | 10 | 0 |
+| [[messages]] | 7 | 0 |
 | [[muscle_groups]] | 5 | 20 |
+| [[notifications]] | 9 | 0 |
 | [[onboarding_equipment]] | 2 | 6 |
 | [[onboarding_limitations]] | 6 | 3 |
 | [[onboarding_profiles]] | 18 | 3 |
+| [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
 | [[refresh_tokens]] | 9 | 89 |
 | [[taxonomy_translations]] | 7 | 252 |
