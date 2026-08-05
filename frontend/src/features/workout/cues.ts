@@ -8,6 +8,7 @@
  * blocked entirely in some embedded webviews; speech needs voices the OS may not have loaded yet.
  * Neither is allowed to throw into a set-check — the workout matters, the buzz does not.
  */
+import { hapticPattern, hapticsAvailable as nativeHapticsAvailable } from '../../lib/haptics';
 
 /** Respect the OS setting. Someone who asked for less motion did not ask for a buzzing phone. */
 const reducedMotion = () =>
@@ -110,17 +111,35 @@ const PATTERNS = {
 
 export type Cue = keyof typeof PATTERNS;
 
+/**
+ * Roughly how hard each cue should feel, for the native path. The PATTERN carries the rhythm; this
+ * carries the weight.
+ */
+const INTENSITY: Record<Cue, 'light' | 'medium' | 'heavy'> = {
+  setChecked: 'light',
+  restOver: 'medium',
+  personalRecord: 'heavy',
+  intervalTick: 'light',
+  intervalWork: 'medium',
+  intervalRest: 'light',
+  intervalDone: 'heavy',
+};
+
+/**
+ * DELEGATES TO `lib/haptics.ts`, which is the app's only haptic path.
+ *
+ * This function used to call `navigator.vibrate` itself — the exact API that `lib/haptics.ts` was
+ * written to avoid, because it does not exist on iOS Safari. The result was that on a real iPhone
+ * through Capacitor these cues produced NOTHING, while the correct native plugin sat unused a
+ * directory away. Two implementations of one concern, and the newer one was the worse one.
+ *
+ * Fire-and-forget: a haptic is a hint, and awaiting it inside a set-check would put a plugin round
+ * trip in front of the thing the lifter actually pressed.
+ */
 export function vibrate(cue: Cue) {
   if (!cueEnabled('haptics')) return;
   if (reducedMotion()) return;
-  // `navigator.vibrate` is absent on iOS and present-but-ignored inside some webviews. Both are
-  // fine; the call is a hint, never a dependency.
-  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
-  try {
-    navigator.vibrate(PATTERNS[cue] as unknown as number[]);
-  } catch {
-    /* a refused vibration is not an error worth surfacing mid-set */
-  }
+  void hapticPattern(PATTERNS[cue], INTENSITY[cue]);
 }
 
 /**
@@ -208,8 +227,12 @@ export function tone(hz: number, ms: number, gain = 0.16) {
   }
 }
 
-/** Whether the device can vibrate at all — for showing the toggle honestly rather than always. */
-export const hapticsAvailable = () =>
-  typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+/**
+ * Whether the device can produce haptics at all — for showing the toggle honestly rather than
+ * always. Re-exported from the one haptic module so the settings screen and the player cannot
+ * disagree about what the device can do; the local copy checked only `navigator.vibrate`, which
+ * would have reported "no haptics" on the very iPhone where the native plugin works.
+ */
+export const hapticsAvailable = nativeHapticsAvailable;
 
 export const speechAvailable = () => typeof speechSynthesis !== 'undefined';
