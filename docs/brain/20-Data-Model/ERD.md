@@ -105,7 +105,7 @@ erDiagram
 | [[onboarding_limitations]] | 6 | 3 |
 | [[onboarding_profiles]] | 18 | 3 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 66 |
+| [[refresh_tokens]] | 9 | 89 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[user_theme_prefs]] | 6 | 4 |
@@ -119,7 +119,7 @@ erDiagram
 | [[workout_plan_days]] | 11 | 14 |
 | [[workout_plan_exercises]] | 23 | 15 |
 | [[workout_plan_set_targets]] | 14 | 0 |
-| [[workout_plans]] | 20 | 10 |
+| [[workout_plans]] | 20 | 11 |
 | [[workout_pr_events]] | 17 | 11 |
 
 ## Conventions that hold everywhere

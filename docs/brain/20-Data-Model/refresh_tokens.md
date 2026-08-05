@@ -1,8 +1,8 @@
 ---
 type: table
 table: refresh_tokens
-summary: 9 columns, 66 rows
-rows: 66
+summary: 9 columns, 89 rows
+rows: 89
 tags: [data-model, generated]
 ---
 

@@ -83,7 +83,26 @@ function constraintFault(err) {
 
   if (withoutSql.startsWith('SQLITE_CONSTRAINT_TRIGGER')) {
     const humanText = withoutSql.replace(/^SQLITE_CONSTRAINT_TRIGGER:\s*/, '').trim();
-    if (humanText) return humanText;
+    // FORWARD ONLY WHAT WAS WRITTEN FOR A HUMAN.
+    //
+    // Trigger messages serve two audiences and most of them were written for the second. Passing
+    // every one through sent a client sentences like
+    // "workout_plan_days.day_index must be inside the plan cycle" — a table and a column name, to
+    // a coach, in a toast. Twelve of them read that way.
+    //
+    // Two things wrong with that. It contradicts the house rule that clients get generic errors
+    // and details go to the log; and it is schema reconnaissance handed over for free, which is
+    // the cheapest possible thing to withhold.
+    //
+    // The filter is MECHANICAL rather than a mapping table, because a mapping table is one more
+    // pair of things that must agree — a trigger reworded next year would silently fall back to
+    // the generic text with nobody the wiser. An identifier is what makes a message internal:
+    // a snake_case token, or a `table.column` pair. If it has neither, it was written for a
+    // person and it is safe to show them.
+    //
+    // The raw message is untouched in the server log, where the requestId leads to it.
+    const looksInternal = /\b[a-z]+_[a-z_]+\b/.test(humanText) || /\b\w+\.\w+\b/.test(humanText);
+    if (humanText && !looksInternal) return humanText;
   }
   return 'this change is not allowed by the data model';
 }

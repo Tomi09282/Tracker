@@ -1,8 +1,8 @@
 ---
 type: table
 table: workout_plans
-summary: 20 columns, 10 rows
-rows: 10
+summary: 20 columns, 11 rows
+rows: 11
 tags: [data-model, generated]
 ---
 

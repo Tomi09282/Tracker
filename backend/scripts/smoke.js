@@ -1352,7 +1352,19 @@ if (seeded) {
     const { res, json } = await call(`/api/v1/plans/${templateId}/days`, {
       method: 'POST', jar: coachA, body: { day_index: 40, name: 'ghost' },
     });
-    check('a day outside the cycle -> 400 with the rule stated', res.status === 400, `${res.status}: ${json?.error}`);
+    // The message is GENERIC on purpose. It used to forward the trigger's own text, which read
+    // "workout_plan_days.day_index must be inside the plan cycle" — a table and a column name, in
+    // a toast, to a coach. `constraintFault` now withholds any trigger message containing an
+    // identifier: it is schema reconnaissance, and the house rule is that details go to the log.
+    //
+    // Nothing is lost for the user, because this trigger is a BACKSTOP — the plan editor already
+    // knows `cycle_days` and offers only free indexes. The old assertion checked the status alone
+    // while its name claimed "with the rule stated", so it would have passed either way.
+    check(
+      'a day outside the cycle -> 400, and the message names no table or column',
+      res.status === 400 && !/[a-z]+_[a-z_]+|\w+\.\w+/.test(json?.error ?? ''),
+      `${res.status}: ${json?.error}`,
+    );
   }
   {
     const { res } = await call(`/api/v1/plans/${templateId}/days`, {
