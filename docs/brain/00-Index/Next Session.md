@@ -9,29 +9,42 @@ tags: [handoff, moc]
 
 ## Do this first
 
-Phase 2 is **63 of 66 done**. Both halves of the product work end to end, and the three that remain are two UX-review passes and a seat cap deliberately reserved for the billing phase.
+**Phase 3 is 18 of 28.** Chat and notifications work end to end, both backend and UI.
+Phase 0 18/18 · Phase 1 **57/58, CLOSED with owner sign-off** · Phase 2 **65/66**.
 
-**Coach**: plan list → editor (days, blocks, supersets, exercise picker, up/down reorder) →
-**clone to a client** (deep copy, independence proven in both directions) → copy day / copy week →
-calendar week view → client detail with the questionnaire and a Progress tab showing sessions and
-records → a subscribable ICS feed **of a client's schedule**, held through the link.
+**Coach**: plans, days, blocks (single / superset / circuit / EMOM / AMRAP), an exercise picker
+that flags what a client cannot do, clone-to-client as a deep copy, copy day / week, a calendar
+week view, client detail with questionnaire, progress charts and **a live chat tab**, plus an ICS
+feed of a client's schedule held through the link.
 
-**Client**: Home reads the real schedule → start → the guided player (56 px set rows, wall-clock
-rest timer, PR flash, haptic and spoken cues, **undo**, page provably never scrolls) → history,
-record book, and their own ICS calendar feed.
+**Client**: home schedule → the guided player (56 px set rows in five variants, wall-clock rest
+timer in five variants, HIIT/Tabata interval stage, haptic/tone/spoken cues each switchable, undo,
+page provably never scrolls) → history, record book, own ICS feed, **a notification bell and a chat
+with their coach**, and the ability to end the relationship themselves.
 
-**78 endpoints · schema v12 · smoke 313/313 · verify:schema 21/21 · check-routes OK · npm audit 0 ·
-3 languages × 406 keys · vault 66/66.**
+**91 endpoints · schema v14 · smoke 336/336 · verify:schema 21/21 · verify:013 27/27 ·
+check-routes 87 routes OK · check-worker-tx OK · npm audit 0 · 3 languages × 436 keys ·
+vault 75/75 · 15 commits on `master`.**
 
 ### Next, in the order that adds most
 
-**Phase 2 is effectively finished — 63 of 66.** What is left in it:
+Phase 3's remaining ten:
 
-1. **T2.0.3 / T2.0.4** — the two ui-ux-pro-max review passes (`--domain ux` over the interactions
-   built here, `--domain chart` over the progress graphs). Review passes, not builds.
-2. **T2.3.5 per-coach seat cap** — deliberately reserved for the billing phase; interface only.
+1. **T3.2.5 video form-check** — a client uploads a set video, the coach replies with timestamped
+   notes. The schema is ready (`message_attachments` carries `duration_seconds`); the upload must
+   REUSE the Phase 1 media pipeline and must check conversation membership BEFORE bytes hit disk.
+2. **T3.2.8 retention** — documented AND enforced. There is no cron in this product, so the read
+   predicate does the work and any sweeper only bounds storage.
+3. **T3.3.2 / T3.3.5** — the attachment security pass and the abuse-path suite for the new routes.
+4. **T3.4.1–4** — the phase gate: build + smoke + audit, screenshots at 360/1440, the E2E matrix,
+   the Bible audit, brain synced and SHARED_MEMORY pruned.
 
-Then **Phase 3**. Phase 1 also still has eight open items, mostly audit — see the bottom of this note.
+Deliberately deferred out of Phase 3, recorded so it is not re-litigated: quiet hours, notification
+collapsing, automated retention machinery and a moderation queue. A four-lens review found every
+severe defect of a fuller design in exactly those parts — see the spec.
+
+Carried forward from earlier phases: **T1.31** (gender/body variants and 3D on the muscle map) and
+**T2.3.5** (per-coach seat cap, reserved for the billing phase).
 
 ### The gates a change must pass now
 

@@ -1,8 +1,8 @@
 ---
 type: table
 table: messages
-summary: 8 columns, 0 rows
-rows: 0
+summary: 8 columns, 2 rows
+rows: 2
 tags: [data-model, generated]
 ---
 

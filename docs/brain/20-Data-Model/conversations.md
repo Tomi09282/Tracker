@@ -1,8 +1,8 @@
 ---
 type: table
 table: conversations
-summary: 9 columns, 0 rows
-rows: 0
+summary: 9 columns, 1 rows
+rows: 1
 tags: [data-model, generated]
 ---
 

@@ -1,8 +1,8 @@
 ---
 type: table
 table: notifications
-summary: 9 columns, 0 rows
-rows: 0
+summary: 9 columns, 2 rows
+rows: 2
 tags: [data-model, generated]
 ---
 

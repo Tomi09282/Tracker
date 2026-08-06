@@ -103,7 +103,7 @@ erDiagram
 | [[audit_log]] | 9 | 0 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[coach_clients]] | 11 | 3 |
-| [[conversations]] | 9 | 0 |
+| [[conversations]] | 9 | 1 |
 | [[element_style_config]] | 4 | 27 |
 | [[equipment]] | 4 | 16 |
 | [[exercise_equipment_map]] | 2 | 1432 |
@@ -116,15 +116,15 @@ erDiagram
 | [[languages]] | 6 | 25 |
 | [[message_attachments]] | 7 | 0 |
 | [[message_reports]] | 10 | 0 |
-| [[messages]] | 8 | 0 |
+| [[messages]] | 8 | 2 |
 | [[muscle_groups]] | 5 | 20 |
-| [[notifications]] | 9 | 0 |
+| [[notifications]] | 9 | 2 |
 | [[onboarding_equipment]] | 2 | 6 |
 | [[onboarding_limitations]] | 6 | 3 |
 | [[onboarding_profiles]] | 18 | 3 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 89 |
+| [[refresh_tokens]] | 9 | 91 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[user_theme_prefs]] | 6 | 4 |
