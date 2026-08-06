@@ -63,9 +63,9 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-4]]
 ## Phase gate
 - [x] **T5.5.1** build + smoke + `npm audit` green — `done` · build clean · smoke 468/468 · verify:019 56/56 · verify:schema 23/23 · verify:015 30/30 · check-routes 130 · check-worker-tx 11 bodies · check-tokens · check-i18n 534 × 3 · npm audit 0
 - [x] **T5.5.2** Security checklist per-endpoint gate walked for EVERY coin route — `done` · every coin route walked: authenticated, rate-limited on both axes, `.strict()` body, no client-supplied amount, object-miss 404 and the single deliberate 403 named in the contracts
-- [ ] **T5.5.3** Screenshots 360/1440 + Bible line-by-line audit — `pending`
-- [ ] **T5.5.4** Webview E2E ✅/❌ matrix incl. replay + race attempts — `pending`
-- [ ] **T5.5.5** Brain updated + sync; SHARED_MEMORY pruned — `pending`
+- [x] **T5.5.3** Screenshots 360/1440 + Bible line-by-line audit — `done` · measured at 360 across all three coin tabs and — for the first time — `/settings`. Type scale, motion, targets, overflow and headings all clean. **Ten pure-black foregrounds found on the accent swatches**: pre-existing since Phase 1, defensible (`readableOn` picks black or white for maximum contrast on a colour the user chose from a continuous picker, which no token can be guaranteed legible on), and reported clean by FOUR previous phases because none of them walked that route. Recorded as a named exception, and the matrix now says ROUTES WALKED. See [[Bible Audit Phase-5]]
+- [x] **T5.5.4** Webview E2E ✅/❌ matrix incl. replay + race attempts — `done` · the money path DRIVEN through the UI: 600 coins → buy Aurora for 250 → 350, with the item flipping to owned and the header rolling from the previous value. Replay and race live in the smoke suite, because a browser cannot issue two genuinely concurrent requests with controlled ordering — **exactly one of two concurrent purchases wins**, and a replayed receipt is byte-identical except for its flag. See [[E2E Matrix Phase-5]]
+- [x] **T5.5.5** Brain updated + sync; SHARED_MEMORY pruned — `done` · [[0013-phase-5-lessons]] written, [[Bible Audit Phase-5]] and [[E2E Matrix Phase-5]] added, SHARED_MEMORY status board updated, brain-sync run
 
 ## Related
 [[TODO Master]] · [[TODO Phase-4]] · [[TODO Phase-6]]
