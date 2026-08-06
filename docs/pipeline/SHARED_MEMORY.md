@@ -47,7 +47,17 @@ Pipeline: **Opus 5 solo, all roles** (D-P1). There is no PVP loop to hand off to
 
 ---
 
-**PHASE 3 CODE-COMPLETE — F5 notifications + F6 chat.** 25 done · 2 deferred · 1 open.
+**PHASE 4 CODE-COMPLETE — F4 nutrition + F10 progress & measurements.** 24 done · 3 deferred · 2 open.
+
+The two still open are follow-ups this phase deliberately did NOT take, both recorded with reasons:
+coach visibility into a client's FOOD LOG (needs the same explicit consent design `progress_shares`
+got — *coaching seems to imply it* is not a reason), and running a larger USDA import (the script is
+written and exercised; `fdc.nal.usda.gov` is unreachable from this host).
+
+Leaving Phase 4: **schema v17 · 121 routes · smoke 438/438 · verify:015 30/30 · verify:schema 21/21
+· check-i18n 511 × 3, now bidirectional · check-tokens · check-interval 50 · npm audit 0.**
+
+Behind it: **PHASE 3 — F5 notifications + F6 chat.** 26 done · 2 deferred · 0 open.
 
 The two deferred are **T3.1.2** (quiet hours) and the digest half of **T3.1.6**, both waiting on
 the same missing thing: a scheduler. Neither is deferred for effort — each would have to store a
