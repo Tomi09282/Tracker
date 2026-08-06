@@ -20,6 +20,7 @@ import planRoutes from './src/plans/routes.js';
 import logRoutes from './src/logs/routes.js';
 import chatRoutes from './src/chat/routes.js';
 import notificationRoutes from './src/notifications/routes.js';
+import attachmentRoutes from './src/chat/attachments.js';
 import icsRoutes from './src/plans/ics.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 
@@ -149,6 +150,11 @@ app.get('/api/v1/config', (req, res) => res.json({ appName: env.APP_NAME }));
 // with the same Sec-Fetch-Site and X-CSRF requirements — the rule is narrowed for one route,
 // not waived.
 app.use('/api/v1', mediaRoutes);
+// Chat attachments join media ABOVE the global CSRF middleware for the same reason and with the
+// same compensation: a multipart body cannot carry a JSON content type, so the router runs its own
+// Sec-Fetch-Site + X-CSRF check. It additionally proves conversation MEMBERSHIP in a middleware
+// that runs before multer, so a stranger cannot make the server write 128 MiB to disk.
+app.use('/api/v1', attachmentRoutes);
 
 app.use(csrfProtection);
 app.use(AUTH_PATH, authRoutes);

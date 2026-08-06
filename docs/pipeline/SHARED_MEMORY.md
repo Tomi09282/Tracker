@@ -180,6 +180,29 @@ Second, smaller trap from the same gate: it scans COMMENTS, so a comment explain
 avoided will itself trip the rule that rejects the class. Correct behaviour — a commented-out class
 can be uncommented — but it means prose about a class has to name it indirectly.
 
+## 1h. THE GATE MUST RUN BEFORE MULTER, AND THE STATUS CODE CANNOT TELL YOU IT DOES
+
+The exercise upload checks ownership in its HANDLER, which runs after `upload.single()` has
+written the file. For an 8 MB image that is tolerable. For a 128 MiB chat video it is a stranger
+filling the disk of a server they have no account on the far side of — they need a session and a
+conversation id, and the id is guessable.
+
+So chat attachments prove membership in a middleware that runs BEFORE multer, where
+`req.params.id` and `req.user.id` both already exist and nothing has been written.
+
+**The trap is that the status code is identical either way.** A gate placed after multer also
+returns 404; the difference is only on disk. The first version of this smoke check asserted the
+status and PASSED with the gate deliberately moved after multer — a test that cannot distinguish
+the fix from the bug.
+
+The assertion now counts the quarantine directory across the attempt. Proven load-bearing: with
+the gate after multer it fails with `10 -> 11 quarantined files`; with it first, `12 -> 12`.
+
+**Related, and stated because it is easy to assume otherwise: THE KEY IS NOT THE PERMISSION.** A
+48-hex storage key is unguessable but not private — it appears in URLs, browser histories and
+proxy logs. The read therefore carries the same conversation predicate the upload did, and a
+stranger holding the exact key gets 404.
+
 ## 2. CONTRACTS
 
 Established facts other jobs must not re-derive or contradict.

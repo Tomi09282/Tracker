@@ -6,7 +6,8 @@
 //
 // Usage: node scripts/smoke.js   (server must already be running)
 import 'dotenv/config';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
 
 const BASE = process.env.SMOKE_BASE ?? `http://localhost:${process.env.PORT ?? 3000}`;
 const stamp = Date.now();
@@ -2747,6 +2748,98 @@ if (seeded) {
     check('the blocker can lift it', mine.res.status === 200, `status ${mine.res.status}`);
   }
 
+  // ── attachments: the gate runs BEFORE any byte is written ────────────────────────────────────
+  //
+  // A multipart POST needs a real body, so these use fetch directly rather than the JSON helper.
+  const postFile = async (path, jar, bytes, fields = {}) => {
+    const boundary = '----smoke' + stamp;
+    const parts = [];
+    for (const [k, v] of Object.entries(fields)) {
+      parts.push(Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="' + k + '"\r\n\r\n' + v + '\r\n'));
+    }
+    parts.push(Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="file"; filename="v.mp4"\r\nContent-Type: video/mp4\r\n\r\n'));
+    parts.push(bytes);
+    parts.push(Buffer.from('\r\n--' + boundary + '--\r\n'));
+    const r = await fetch(BASE + path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data; boundary=' + boundary,
+        'X-CSRF': '1',
+        Cookie: jar.header(),
+      },
+      body: Buffer.concat(parts),
+    });
+    let j = null;
+    try { j = await r.json(); } catch {}
+    return { status: r.status, json: j };
+  };
+
+  // A minimal but genuine MP4 header: 'ftyp' at offset 4 is what the sniffer keys on.
+  const mp4 = Buffer.concat([
+    Buffer.from([0, 0, 0, 0x18]),
+    Buffer.from('ftypisom'),
+    Buffer.alloc(64),
+  ]);
+
+  {
+    const { status, json } = await postFile(
+      '/api/v1/conversations/' + conversationId + '/attachments', coach, mp4,
+      { body: 'Nézd meg a 14. másodpercet', duration_seconds: '30' },
+    );
+    check('a party can attach a video', status === 201 && /^[a-f0-9]{48}\.mp4$/.test(json?.storage_key ?? ''),
+      status + ': ' + (json?.storage_key ?? json?.error));
+  }
+  {
+    // THE ONE THAT MATTERS, and the status code alone does NOT test it.
+    //
+    // A membership check placed after multer also returns 404 — the difference is that multer has
+    // already written the file. So this counts the quarantine directory across the attempt: a
+    // stranger with a session and a guessable conversation id must not be able to make the server
+    // write 128 MiB, and only the ORDERING of the middleware decides that.
+    //
+    // The first version of this check asserted the status and passed with the gate deliberately
+    // moved after multer. A test that cannot distinguish the fix from the bug is not a test.
+    const quarantine = path.resolve('storage/tmp');
+    const countFiles = async () => {
+      try { return (await readdir(quarantine)).length; } catch { return 0; }
+    };
+    const before = await countFiles();
+    const { status } = await postFile(
+      '/api/v1/conversations/' + conversationId + '/attachments', stranger, mp4, { body: 'hello' },
+    );
+    const after = await countFiles();
+    check("a stranger cannot attach to someone else's conversation -> 404", status === 404, 'status ' + status);
+    check('and the refusal happens BEFORE any byte reaches the disk', after === before,
+      before + ' -> ' + after + ' quarantined files');
+  }
+  {
+    // Magic bytes decide, not the filename or the declared type. This is sent AS video/mp4 with a
+    // .mp4 filename and is refused anyway, because its first bytes are not a video.
+    const { status } = await postFile(
+      '/api/v1/conversations/' + conversationId + '/attachments', coach,
+      Buffer.from('<html><script>alert(1)</script></html>'), { body: 'not a video' },
+    );
+    check('a file that only CLAIMS to be a video is refused', status === 400, 'status ' + status);
+  }
+  {
+    const { json } = await call('/api/v1/conversations/' + conversationId + '/messages', { jar: client });
+    const withFile = (json?.messages ?? []).find((m) => m.storage_key);
+    check('the attachment reaches the other party with its duration',
+      !!withFile && withFile.duration_seconds === 30, JSON.stringify({ mime: withFile?.mime, d: withFile?.duration_seconds }));
+
+    const key = withFile?.storage_key;
+    const mine = await call('/api/v1/chat-media/' + key, { jar: client });
+    check('a party can fetch the bytes', mine.res.status === 200, 'status ' + mine.res.status);
+    const theirs = await call('/api/v1/chat-media/' + key, { jar: stranger });
+    check('THE KEY IS NOT THE PERMISSION — a stranger with the exact key gets 404',
+      theirs.res.status === 404, 'status ' + theirs.res.status);
+  }
+  {
+    const traversal = await call('/api/v1/chat-media/' + encodeURIComponent('../../../.env'), { jar: coach });
+    check('a traversal-shaped key never reaches the filesystem -> 404', traversal.res.status === 404,
+      'status ' + traversal.res.status);
+  }
+
   // ── leaving ──────────────────────────────────────────────────────────────────────────────────
   {
     const { res } = await call(`/api/v1/coaches/${link}/leave`, { method: 'POST', jar: stranger });
@@ -2774,6 +2867,9 @@ if (seeded) {
     });
     check('and the thread accepts nothing further -> 404', res.status === 404, `status ${res.status}`);
   }
+
+
+
 }
 
 // --- the calendar feed ------------------------------------------------------------------------

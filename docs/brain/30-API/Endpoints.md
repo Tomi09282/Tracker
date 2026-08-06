@@ -1,11 +1,11 @@
 ---
 type: api-index
 title: API surface
-count: 91
+count: 93
 tags: [api, moc, generated]
 ---
 
-# API surface — 91 endpoints
+# API surface — 93 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -31,6 +31,7 @@ protection the code does not have.
 | POST | `/api/v1/calendar-feeds` | `requireAuth` |
 | POST | `/api/v1/calendar-feeds/:id/revoke` | `requireAuth` |
 | GET | `/api/v1/calendar/:token.ics` | — |
+| GET | `/api/v1/chat-media/:key` | `requireAuth` |
 | GET | `/api/v1/clients` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/clients/:id` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/clients/:id/archive` | `requireAuth`, `requireCoach` |
@@ -41,6 +42,7 @@ protection the code does not have.
 | POST | `/api/v1/coaches/:linkId/leave` | `requireAuth` |
 | GET | `/api/v1/conversations` | `requireAuth` |
 | POST | `/api/v1/conversations` | `requireAuth` |
+| POST | `/api/v1/conversations/:id/attachments` | `requireAuth`, `multipartCsrf`, `multerMiddleware` |
 | POST | `/api/v1/conversations/:id/block` | `requireAuth` |
 | GET | `/api/v1/conversations/:id/messages` | `requireAuth` |
 | POST | `/api/v1/conversations/:id/messages` | `requireAuth` |
