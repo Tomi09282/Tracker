@@ -615,5 +615,32 @@
       "title": "Táplálkozás",
       "open": "Megnyitás"
     }
-  }
+  },
+  "coins": {
+    "title": "Érmék",
+    "balanceLabel": "{{count}} érme",
+    "tab": {
+      "store": "Bolt",
+      "achievements": "Eredmények",
+      "statement": "Kimutatás"
+    },
+    "owned": "Megvan",
+    "storeEmptyTitle": "A bolt üres",
+    "storeEmptyBody": "Most nincs megvásárolható tétel.",
+    "purchaseRefused": "A vásárlás nem ment át. Ellenőrizd az egyenleged — lehet, hogy közben változott az ár.",
+    "alreadyProcessed": "Ez a vásárlás már megtörtént, nem terheltünk újra.",
+    "unlockedCount": "{{done}} / {{total}} feloldva",
+    "paidYou": "{{count}} érmét adott",
+    "pays": "{{count}} érmét ad",
+    "awardedNote": "Ezeket az app adja oda magától, amikor teljesíted őket — nincs mit begyűjteni.",
+    "noHistoryTitle": "Még nincs mozgás",
+    "noHistoryBody": "Az érmék akkor jelennek meg itt, amikor kiérdemelted vagy elköltötted őket."
+  },
+  "achievement.workout.first": "Az első edzés",
+  "achievement.workout.sessions.10": "10 edzés",
+  "achievement.workout.sessions.100": "100 edzés",
+  "achievement.pr.first": "Az első csúcs",
+  "achievement.streak.workout.7": "7 napos sorozat",
+  "achievement.streak.workout.30": "30 napos sorozat",
+  "achievement.nutrition.logged.7": "7 nap naplózva"
 }

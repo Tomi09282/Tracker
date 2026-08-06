@@ -615,5 +615,32 @@
       "title": "Nutrition",
       "open": "Open"
     }
-  }
+  },
+  "coins": {
+    "title": "Coins",
+    "balanceLabel": "{{count}} coins",
+    "tab": {
+      "store": "Store",
+      "achievements": "Achievements",
+      "statement": "Statement"
+    },
+    "owned": "Owned",
+    "storeEmptyTitle": "The store is empty",
+    "storeEmptyBody": "Nothing is for sale right now.",
+    "purchaseRefused": "That purchase did not go through. Check your balance — the price may have changed.",
+    "alreadyProcessed": "That purchase had already gone through. You were not charged again.",
+    "unlockedCount": "{{done}} of {{total}} unlocked",
+    "paidYou": "paid you {{count}}",
+    "pays": "pays {{count}}",
+    "awardedNote": "These are awarded automatically when you earn them — there is nothing to collect.",
+    "noHistoryTitle": "Nothing yet",
+    "noHistoryBody": "Coins appear here as you earn and spend them."
+  },
+  "achievement.workout.first": "First session",
+  "achievement.workout.sessions.10": "10 sessions",
+  "achievement.workout.sessions.100": "100 sessions",
+  "achievement.pr.first": "First record",
+  "achievement.streak.workout.7": "7-day streak",
+  "achievement.streak.workout.30": "30-day streak",
+  "achievement.nutrition.logged.7": "7 days logged"
 }

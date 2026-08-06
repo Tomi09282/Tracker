@@ -47,6 +47,9 @@ const NutritionPage = lazy(() =>
 const ProgressPage = lazy(() =>
   import('../features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
 );
+const CoinsPage = lazy(() =>
+  import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
+);
 const SettingsPage = lazy(() =>
   import('../features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -70,6 +73,7 @@ export const router = createBrowserRouter([
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
+      { path: 'coins', element: suspended(<CoinsPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },

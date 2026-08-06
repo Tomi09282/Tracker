@@ -615,5 +615,32 @@
       "title": "Ernährung",
       "open": "Öffnen"
     }
-  }
+  },
+  "coins": {
+    "title": "Münzen",
+    "balanceLabel": "{{count}} Münzen",
+    "tab": {
+      "store": "Shop",
+      "achievements": "Erfolge",
+      "statement": "Übersicht"
+    },
+    "owned": "Gekauft",
+    "storeEmptyTitle": "Der Shop ist leer",
+    "storeEmptyBody": "Derzeit ist nichts im Angebot.",
+    "purchaseRefused": "Der Kauf ging nicht durch. Prüfe dein Guthaben — der Preis kann sich geändert haben.",
+    "alreadyProcessed": "Dieser Kauf war bereits erfolgt. Es wurde nichts erneut abgebucht.",
+    "unlockedCount": "{{done}} von {{total}} freigeschaltet",
+    "paidYou": "brachte dir {{count}}",
+    "pays": "bringt {{count}}",
+    "awardedNote": "Diese werden automatisch vergeben, sobald du sie erreichst — es gibt nichts abzuholen.",
+    "noHistoryTitle": "Noch nichts",
+    "noHistoryBody": "Münzen erscheinen hier, sobald du sie verdienst oder ausgibst."
+  },
+  "achievement.workout.first": "Erste Einheit",
+  "achievement.workout.sessions.10": "10 Einheiten",
+  "achievement.workout.sessions.100": "100 Einheiten",
+  "achievement.pr.first": "Erster Rekord",
+  "achievement.streak.workout.7": "7-Tage-Serie",
+  "achievement.streak.workout.30": "30-Tage-Serie",
+  "achievement.nutrition.logged.7": "7 Tage erfasst"
 }
