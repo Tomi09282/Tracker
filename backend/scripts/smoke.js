@@ -2840,6 +2840,108 @@ if (seeded) {
       'status ' + traversal.res.status);
   }
 
+
+  // ── the five abuse categories, against the chat routes (T3.3.5) ──────────────────────────────
+  //
+  // FORGE / REPLAY / RACE / IDOR / EXTREMES. They fail differently, which is the whole reason all
+  // five run: a route can be perfectly ownership-scoped and still be replayable into a duplicate,
+  // or idempotent and still accept a number a CHECK turns into a 500.
+  {
+    // FORGE — a server-owned field sent by the client is rejected, not quietly dropped.
+    const { res } = await call('/api/v1/conversations/' + conversationId + '/messages', {
+      method: 'POST', jar: coach, body: { body: 'hi', sender_id: 1, read_at: 123 },
+    });
+    check('chat FORGE: server-owned fields on a send are rejected', res.status === 400, 'status ' + res.status);
+  }
+  {
+    const { res } = await call('/api/v1/conversations', {
+      method: 'POST', jar: coach, body: { coach_client_id: link, coach_id: 1 },
+    });
+    check('chat FORGE: an unknown field on open is rejected', res.status === 400, 'status ' + res.status);
+  }
+  {
+    // EXTREMES — the column bound and the zod bound must agree, and neither may 500.
+    const { res } = await call('/api/v1/conversations/' + conversationId + '/messages', {
+      method: 'POST', jar: coach, body: { body: 'x'.repeat(4001) },
+    });
+    check('chat EXTREMES: a 4001-character body -> 400, never a 500', res.status === 400, 'status ' + res.status);
+  }
+  {
+    const { res } = await call('/api/v1/conversations/' + conversationId + '/messages', {
+      method: 'POST', jar: coach, body: { body: '   ' },
+    });
+    check('chat EXTREMES: whitespace-only is not a message', res.status === 400, 'status ' + res.status);
+  }
+  {
+    const { res } = await call('/api/v1/notifications?limit=999', { jar: client });
+    check('notifications EXTREMES: an over-large page -> 400', res.status === 400, 'status ' + res.status);
+  }
+  {
+    const { res } = await call('/api/v1/conversations/' + Number.MAX_SAFE_INTEGER + '/messages', { jar: coach });
+    check('chat EXTREMES: an absurd conversation id -> 404, not a crash', res.status === 404, 'status ' + res.status);
+  }
+  {
+    // FORGE via SQL — an injection-shaped id never reaches SQLite.
+    const { res } = await call('/api/v1/conversations/' + encodeURIComponent("1 OR 1=1") + '/messages', { jar: coach });
+    check('chat FORGE: an injection-shaped id is rejected by zod', res.status === 400, 'status ' + res.status);
+  }
+  {
+    // REPLAY — blocking twice must not raise, and must not re-stamp who blocked.
+    await call('/api/v1/conversations/' + conversationId + '/block', { method: 'POST', jar: client });
+    const { res } = await call('/api/v1/conversations/' + conversationId + '/block', { method: 'POST', jar: coach });
+    check('chat REPLAY: blocking an already-blocked thread -> 404, not a second block',
+      res.status === 404, 'status ' + res.status);
+    await call('/api/v1/conversations/' + conversationId + '/unblock', { method: 'POST', jar: client });
+  }
+  {
+    // RACE — two sends at once are two messages, never one lost or one duplicated. The badge must
+    // match: a notification per message, because the two are written in ONE transaction.
+    const { json: before } = await call('/api/v1/notifications/unread-count', { jar: client });
+    const [a, b] = await Promise.all([
+      call('/api/v1/conversations/' + conversationId + '/messages', { method: 'POST', jar: coach, body: { body: 'race A' } }),
+      call('/api/v1/conversations/' + conversationId + '/messages', { method: 'POST', jar: coach, body: { body: 'race B' } }),
+    ]);
+    const { json: after } = await call('/api/v1/notifications/unread-count', { jar: client });
+    check('chat RACE: two concurrent sends are two messages and two notifications',
+      a.res.status === 201 && b.res.status === 201 && after.unread === before.unread + 2,
+      before.unread + ' -> ' + after.unread);
+  }
+  {
+    // IDOR — every id in a URL, checked against the caller.
+    const probes = [
+      ['/api/v1/conversations/' + conversationId + '/read', 'POST'],
+      ['/api/v1/conversations/' + conversationId + '/block', 'POST'],
+      ['/api/v1/conversations/' + conversationId + '/unblock', 'POST'],
+    ];
+    const statuses = [];
+    for (const [url, method] of probes) {
+      const { res } = await call(url, { method, jar: stranger, body: {} });
+      statuses.push(res.status);
+    }
+    check('chat IDOR: none of the thread actions touch a conversation that is not the caller\'s -> all 404',
+      statuses.every((s) => s === 404), statuses.join(','));
+  }
+  {
+    // A message id from ANOTHER conversation must be unreachable — the T3.3.1 requirement stated
+    // as an attack rather than as a claim.
+    const { json: mine } = await call('/api/v1/conversations/' + conversationId + '/messages', { jar: coach });
+    const id = mine?.messages?.[0]?.id;
+    const del = await call('/api/v1/messages/' + id, { method: 'DELETE', jar: stranger });
+    check('chat IDOR: a stranger cannot withdraw a message -> 404', del.res.status === 404, 'status ' + del.res.status);
+    const rep = await call('/api/v1/messages/' + id + '/report', { method: 'POST', jar: stranger, body: { reason: 'spam' } });
+    check('chat IDOR: nor report one from a thread they are not in -> 404', rep.res.status === 404, 'status ' + rep.res.status);
+  }
+  {
+    // You cannot report your own message: it is not a moderation signal, and it is a way to make a
+    // permanent copy of your own text after withdrawing it.
+    const { json: mine } = await call('/api/v1/conversations/' + conversationId + '/messages', { jar: coach });
+    const own = mine?.messages?.find((m) => m.body);
+    const { res } = await call('/api/v1/messages/' + own.id + '/report', {
+      method: 'POST', jar: coach, body: { reason: 'spam' },
+    });
+    check('chat: you cannot report your own message -> 404', res.status === 404, 'status ' + res.status);
+  }
+
   // ── leaving ──────────────────────────────────────────────────────────────────────────────────
   {
     const { res } = await call(`/api/v1/coaches/${link}/leave`, { method: 'POST', jar: stranger });

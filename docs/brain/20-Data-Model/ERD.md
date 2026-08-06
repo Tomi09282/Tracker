@@ -124,7 +124,7 @@ erDiagram
 | [[onboarding_profiles]] | 18 | 3 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 92 |
+| [[refresh_tokens]] | 9 | 93 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[user_theme_prefs]] | 6 | 4 |

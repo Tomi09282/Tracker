@@ -23,6 +23,7 @@ import notificationRoutes from './src/notifications/routes.js';
 import attachmentRoutes from './src/chat/attachments.js';
 import icsRoutes from './src/plans/ics.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
+import { sweepChatRetention } from './src/chat/retention.js';
 
 // Last-resort handlers: log with a full stack, then exit non-zero so run-server.js restarts us.
 // Staying alive after an uncaught exception means running with unknown state.
@@ -52,6 +53,11 @@ const sweptAtBoot = await sweepQuarantine();
 if (sweptAtBoot > 0) logger.info({ removed: sweptAtBoot }, 'swept stale quarantined uploads');
 setInterval(() => {
   sweepQuarantine().catch((err) => logger.warn({ err }, 'quarantine sweep failed'));
+  // Retention is already ENFORCED by the read predicate; this only stops the disk growing, so a
+  // failure is a warning rather than anything that should stop the server.
+  sweepChatRetention()
+    .then(({ rows, files }) => { if (rows > 0) logger.info({ rows, files }, 'chat retention swept'); })
+    .catch((err) => logger.warn({ err }, 'chat retention sweep failed'));
 }, 60 * 60 * 1000).unref();
 
 const app = express();

@@ -14,6 +14,7 @@ import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth } from '../auth/middleware.js';
+import { WITHIN_RETENTION } from './retention.js';
 
 const router = Router();
 
@@ -133,7 +134,7 @@ router.get(
               a.storage_key, a.mime, a.bytes, a.duration_seconds
          FROM messages m
          LEFT JOIN message_attachments a ON a.message_id = m.id
-        WHERE m.conversation_id = ? ${qs.before ? 'AND m.id < ?' : ''}
+        WHERE m.conversation_id = ? AND ${WITHIN_RETENTION} ${qs.before ? 'AND m.id < ?' : ''}
         ORDER BY m.id DESC
         LIMIT ?`,
       qs.before ? [conversationId, qs.before, qs.limit] : [conversationId, qs.limit],

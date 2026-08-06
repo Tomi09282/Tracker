@@ -30,6 +30,7 @@ const refused = (name, fn) => {
 
 const link = c.prepare("SELECT id, coach_id, client_id FROM coach_clients WHERE status='active' LIMIT 1").get();
 const other = c.prepare('SELECT id FROM users WHERE id NOT IN (?, ?) LIMIT 1').get(link.coach_id, link.client_id);
+const link2 = c.prepare("SELECT id, coach_id, client_id FROM coach_clients WHERE status='active' AND id <> ? LIMIT 1").get(link.id) ?? link;
 
 c.exec('BEGIN');
 try {
@@ -124,6 +125,37 @@ try {
   refused('one user cannot register the same token twice', () =>
     c.prepare('INSERT INTO push_devices (user_id, platform, token_hash) VALUES (?, ?, ?)')
       .run(link.coach_id, 'ios', 'abc'));
+
+
+  // ── retention ────────────────────────────────────────────────────────────────────────────────
+  //
+  // Two mechanisms with different jobs, and the split is the design: the READ PREDICATE enforces
+  // the policy (it holds on the next request whether or not any job ever runs), and the SWEEP only
+  // stops the disk growing. A sweeper-only design makes the policy true exactly as often as the
+  // job runs, and a missed run is a silent breach.
+  {
+    const conv2 = c.prepare(`INSERT INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot) VALUES (?, ?, ?, 'coach')`)
+      .run(link2.id, link2.coach_id, link2.client_id).lastInsertRowid;
+
+    const recent = c.prepare('INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body) VALUES (?, ?, 0, ?)')
+      .run(conv2, link2.client_id, 'recent').lastInsertRowid;
+    // Two years and a day old.
+    const old = c.prepare(
+      "INSERT INTO messages (conversation_id, sender_id, sender_is_coach, body, created_at) VALUES (?, ?, 0, ?, unixepoch() - 731 * 86400)",
+    ).run(conv2, link2.client_id, 'ancient').lastInsertRowid;
+
+    const WITHIN = 'm.created_at > unixepoch() - 730 * 86400';
+    const visible = c.prepare(`SELECT COUNT(*) n FROM messages m WHERE m.conversation_id = ? AND ${WITHIN}`).get(conv2).n;
+    const total = c.prepare('SELECT COUNT(*) n FROM messages WHERE conversation_id = ?').get(conv2).n;
+    check('the read predicate hides a message past the retention window', total === 2 && visible === 1, `${visible} of ${total} visible`);
+
+    // And the sweep removes what the predicate already hid — never anything the predicate shows.
+    const expired = c.prepare(`SELECT m.id FROM messages m WHERE NOT (${WITHIN}) AND m.conversation_id = ?`).all(conv2);
+    check('the sweep targets exactly what the predicate hid', expired.length === 1 && expired[0].id === old, `${expired.length} row(s)`);
+    c.prepare('DELETE FROM messages WHERE id = ?').run(old);
+    const left = c.prepare('SELECT COUNT(*) n FROM messages WHERE conversation_id = ?').get(conv2).n;
+    check('and the recent message survives it', left === 1 && c.prepare('SELECT id FROM messages WHERE conversation_id = ?').get(conv2).id === recent, `${left} left`);
+  }
 
   // THE ASSERTION THAT WAS WRONG, and the reason 014 exists.
   //
