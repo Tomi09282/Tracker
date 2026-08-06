@@ -59,7 +59,7 @@ export function NutritionPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5 p-4">
+    <div className="col-mobile screen-x flex flex-col gap-5 py-4">
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-title-2">{t('nutrition.title')}</h1>
         <input

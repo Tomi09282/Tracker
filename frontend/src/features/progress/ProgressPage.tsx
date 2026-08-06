@@ -39,7 +39,7 @@ export function ProgressPage() {
   const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
       <h1 className="text-title-2">{t('progress.title')}</h1>
 
       {/* A TAB IS A FILTER, NOT A NEW SCREEN — the Phase 2 lesson, applied. One route, one URL,

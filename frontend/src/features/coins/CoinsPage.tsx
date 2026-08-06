@@ -39,7 +39,7 @@ export function CoinsPage() {
   const wallet = useWallet();
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-title-2">{t('coins.title')}</h1>
         {wallet.isLoading ? (

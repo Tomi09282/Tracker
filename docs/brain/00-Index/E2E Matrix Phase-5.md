@@ -13,9 +13,9 @@ walked it. A ✅ is a statement about coverage first.
 
 | route | 360 | 1440 |
 |---|---|---|
-| `/coins` · Store | ✅ | — |
-| `/coins` · Achievements | ✅ | — |
-| `/coins` · Statement | ✅ | — |
+| `/coins` · Store | ✅ | ✅ |
+| `/coins` · Achievements | ✅ | ✅ |
+| `/coins` · Statement | ✅ | ✅ |
 | `/settings` (theme picker with paid packs) | ⚠️ named exception | — |
 
 ## Driven, not rendered
@@ -49,12 +49,27 @@ called any of it; the assertion exists because the feature did not.
 A second session does not pay it again — award-once holds against the EVALUATOR, not only against
 a duplicate request.
 
+## The gap this matrix left open, closed — and what it found
+
+1440 was listed as uncovered here rather than assumed fine, and walking it found a REAL defect that
+no Bible axis measures. `/coins`, `/progress` and `/nutrition` each opened with a bare
+`flex flex-col gap-4 p-4` and stretched to the full window: a statement row **1408 px wide** with a
+label at one end and a number at the other, which the eye cannot track.
+
+The app already had the answer — `col-mobile screen-x`, a 480 px centred column that Home, Library
+and Settings all use. **The convention existed and three screens I built did not use it.** That is
+the seventh instance of this project's second-most-common defect and the first by OMISSION rather
+than duplication: no competing container was written, none was written at all.
+
+Every Bible axis was clean at 1440 before the fix, because none of them is about line length. It
+took measuring the thing the axes do not cover. Now 480 px and 432 px rows at 1440, matching the
+rest of the app, with 360 unchanged at 328 px.
+
 ## Not covered
 
 - Real iOS/Android hardware. Chromium in a webview only.
 - Screenshots — the pane does not composite in this session.
-- 1440 on the coin screens. Single-column lists with no breakpoint behaviour; recorded as
-  uncovered rather than assumed fine.
+
 - The admin coin console has no UI yet — the endpoints are exercised from the smoke suite only.
 - A ledger long enough to need its cursor. The endpoint pages and the cap is stated; behaviour
   past 50 entries is untested through the UI.
