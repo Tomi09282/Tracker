@@ -37,6 +37,7 @@ import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
 import { normalizeText, toFtsQuery } from '../lib/normalize.js';
 import { resolveLang, languages } from '../lib/lang.js';
+import { evaluateInBackground } from '../coins/achievements.js';
 
 const router = Router();
 
@@ -1029,6 +1030,16 @@ router.post(
       ],
     );
     if (r.changes === 0) return sendError(res, 404, ERR.NOT_FOUND);
+
+    // Same shape as the workout finish: after the write, never blocking it, and idempotent because
+    // "have they logged seven consecutive days?" is a question about the log rather than about
+    // this request.
+    evaluateInBackground(req, {
+      userId: req.user.id,
+      sourceType: 'nutrition_log_item',
+      sourceId: Number(r.lastInsertRowid),
+    });
+
     res.status(201).json({ id: r.lastInsertRowid });
   }),
 );

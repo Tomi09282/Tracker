@@ -4321,6 +4321,89 @@ if (seeded) {
     check('the buyer CAN apply it', res.status === 200 && read.json?.theme?.pack === 'aurora', `status ${res.status}, pack ${read.json?.theme?.pack}`);
   }
 
+  // --- AN ACHIEVEMENT IS ACTUALLY EARNABLE ------------------------------------------------------
+  //
+  // The catalogue, the unlock table, the transaction and the ledger path all shipped in migration
+  // 019 and NOTHING CALLED ANY OF IT — every piece correct, and the feature did not exist. This is
+  // the assertion that would have caught that, and it is the whole reason it is here: a badge
+  // nobody can earn is a chart with no data behind it.
+  {
+    const earner = new Jar();
+    const earnerEmail = `coin-earn-${stamp}@example.com`;
+    await call('/api/v1/auth/register', { method: 'POST', body: { email: earnerEmail, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: earnerEmail, password: PASSWORD }, jar: earner });
+
+    const before = await call('/api/v1/coins/wallet', { jar: earner });
+
+    // Log one food entry. 'nutrition.logged.7' needs seven days so it must NOT fire — what is
+    // being proven here is that the evaluator RUNS, not that it awards everything it sees.
+    const seeded = await call('/api/v1/foods?q=zabpehely&lang=hu', { jar: earner });
+    const oats = seeded.json?.foods?.[0]?.id;
+    await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: earner,
+      body: { food_id: oats, grams: 50, local_date: '2026-10-01' },
+    });
+    await new Promise((r) => setTimeout(r, 700));
+
+    const after = await call('/api/v1/coins/wallet', { jar: earner });
+    const ach = await call('/api/v1/coins/achievements', { jar: earner });
+    const oneDayUnlocked = (ach.json?.achievements ?? []).filter((a) => a.unlockId !== null);
+    check(
+      'one logged day earns nothing — a 7-day achievement needs seven days',
+      before.json?.balanceMinor === 0 && after.json?.balanceMinor === 0 && oneDayUnlocked.length === 0,
+      `${before.json?.balanceMinor} -> ${after.json?.balanceMinor}, ${oneDayUnlocked.length} unlocked`,
+    );
+  }
+  {
+    // Now the one that MUST fire. A completed workout is 'workout.first', which pays 2500 minor.
+    const lifter = new Jar();
+    const lifterEmail = `coin-lift-${stamp}@example.com`;
+    await call('/api/v1/auth/register', { method: 'POST', body: { email: lifterEmail, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: lifterEmail, password: PASSWORD }, jar: lifter });
+
+    const started = await call('/api/v1/workouts/start', {
+      method: 'POST', jar: lifter, body: { title: 'coin probe' },
+    });
+    const logId = started.json?.logId;
+    const finished = await call(`/api/v1/workouts/${logId}/finish`, { method: 'POST', jar: lifter, body: {} });
+    await new Promise((r) => setTimeout(r, 900));
+
+    const wallet = await call('/api/v1/coins/wallet', { jar: lifter });
+    const ach = await call('/api/v1/coins/achievements', { jar: lifter });
+    const first = (ach.json?.achievements ?? []).find((a) => a.key === 'workout.first');
+    check(
+      'AN ACHIEVEMENT IS ACTUALLY EARNABLE: finishing a session unlocks it and PAYS',
+      finished.res.status === 200 && first?.unlockId !== null && first?.paidMinor === 2500
+        && wallet.json?.balanceMinor === 2500,
+      `finish ${finished.res.status}, unlock ${first?.unlockId}, paid ${first?.paidMinor}, balance ${wallet.json?.balanceMinor}`,
+    );
+
+    // The reward arrived through the LEDGER, not a side channel. That is T5.3.2 as a measurement.
+    const ledger = await call('/api/v1/coins/ledger', { jar: lifter });
+    const reward = (ledger.json?.entries ?? []).find((e) => e.reasonKey === 'achievement.reward');
+    check(
+      'and it arrived through the ledger, with a reference to the unlock',
+      reward?.amountMinor === 2500 && reward.refType === 'user_achievement' && reward.refId === first?.unlockId,
+      `${reward?.amountMinor} via ${reward?.reasonKey}, ref ${reward?.refType}:${reward?.refId}`,
+    );
+
+    // IDEMPOTENT UNDER REPEATED EVALUATION. Finishing again is a 404 (the session is closed), but
+    // the evaluator also runs on every future session — so award-once must hold against the
+    // evaluator itself, not only against a duplicate request.
+    const second = await call('/api/v1/workouts/start', {
+      method: 'POST', jar: lifter, body: { title: 'coin probe 2' },
+    });
+    await call(`/api/v1/workouts/${second.json?.logId}/finish`, { method: 'POST', jar: lifter, body: {} });
+    await new Promise((r) => setTimeout(r, 900));
+
+    const wallet2 = await call('/api/v1/coins/wallet', { jar: lifter });
+    check(
+      'REPLAY: a second session does not pay the first-session badge again',
+      wallet2.json?.balanceMinor === 2500,
+      `${wallet2.json?.balanceMinor}`,
+    );
+  }
+
   // --- RECONCILIATION -----------------------------------------------------------------------------
   {
     const { res, json } = await call('/api/v1/admin/coins/audit', { jar: adminJar });

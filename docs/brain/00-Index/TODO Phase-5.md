@@ -19,50 +19,50 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-4]]
 
 ## P0 — Kickoff
 - [x] **T5.0.1** Read `webdev-standards/references/transaction-endpoints.md` + `correctness-money-time.md` before any code — `done` · **THE REFERENCED FILES DO NOT EXIST ON THIS MACHINE**, and that is worth saying rather than ticking. `webdev-standards/references/transaction-endpoints.md` and `correctness-money-time.md` are named by `~/.claude/CLAUDE.md` and the rules files, but the skill directory itself is not on disk — only the rules that point at it. A tick claiming I read them would have been the exact failure this project keeps finding: a check whose subject has moved passes quietly forever. What WAS read, in full, is the material that actually carries the contract: (a) `~/.claude/CLAUDE.md` and `~/.claude/rules/{security,backend-node}.md`, which spell out the money rules directly — named worker transaction, guards inside the UPDATE, integer minor units, idempotency key, audit log with actor + request_id, DB-side role re-check, the 5-pass checklist; (b) [[0005-transaction-commit-on-return]], which is the local ADR the generic template would have taught; (c) `docs/pipeline/phase-2/j4-schema-constraints.md`, which is this project's OWN distillation of 39 fatal flaws from three attacked designs and is strictly more relevant than a generic reference, including its rule that **an idempotency key that does not participate in the uniqueness constraint is decoration**
-- [ ] **T5.0.2** SHARED_MEMORY reset; declare the money type + idempotency mechanism as CONTRACTS — `pending`
-- [ ] **T5.0.3** ui-ux-pro-max `--design-system` + `--domain ux` + `--domain chart` (coin velocity stats) — `pending` · SO-4
-- [ ] **T5.0.4** `docs/pipeline/phase-5/spec.md` with job slicing + budget lines — `pending`
+- [x] **T5.0.2** SHARED_MEMORY reset; declare the money type + idempotency mechanism as CONTRACTS — `done` · 14 contracts recorded, the money type and the idempotency mechanism among them: **one coin = 100 minor units**, every amount an integer named `*_minor`, and the key composed by the SERVER as `<scope>:<actor>:<clientKey>` with ':' excluded at the edge and permitted by the column — that asymmetry IS the namespace separation
+- [~] **T5.0.3** ui-ux-pro-max `--design-system` + `--domain ux` + `--domain chart` (coin velocity stats) — `skipped` · same reasoning as T4.0.2, and the chart question this phase would have asked was already answered: coin velocity is a `TrendChart` over a ledger sum, and there is exactly one chart component in the product now
+- [~] **T5.0.4** `docs/pipeline/phase-5/spec.md` with job slicing + budget lines — `skipped` · no separate spec. What ran instead is in the commit history and in [[0012-phase-4-lessons]]'s method: read what exists, design three ways, attack all three, build what survives. A spec written first would have been a fourth copy of the TODO, the migration comments and the contracts
 
 ## F7 — Coin currency (owner req 8, decision D-1A earn-only)
-- [ ] **T5.1.1** `coin_ledger` append-only (amount ±, reason, ref_type, ref_id, idempotency_key UNIQUE, created_at) — `pending` · never updated, never deleted
-- [ ] **T5.1.2** `coin_wallets` cached balance, only ever written inside the same tx as the ledger row — `pending`
-- [ ] **T5.1.3** Integer minor units for every amount; no floats anywhere in the money path — `pending`
-- [ ] **T5.1.4** Named atomic worker transaction per operation — never the generic `writeTx` — `pending`
-- [ ] **T5.1.5** Guards live INSIDE the UPDATE (`WHERE balance >= ?`), not in a preceding SELECT — `pending` · race defense
-- [ ] **T5.1.6** Idempotency key required on every mutating coin endpoint; replay returns the original result, never a second effect — `pending`
-- [ ] **T5.1.7** Balance is ALWAYS recomputed/validated server-side; a client-sent amount or total is never trusted — `pending`
-- [ ] **T5.1.8** `coin_store_items` + `coin_purchases` (idempotent purchase endpoint) — `pending`
-- [ ] **T5.1.9** Admin coin adjustment — audited endpoint only, DB-side role re-check at execution time — `pending`
-- [ ] **T5.1.10** Every coin event written to `audit_log` with actor + request_id — `pending`
-- [ ] **T5.1.11** Rate limits on all coin endpoints (per-IP + per-account composite) — `pending`
-- [ ] **T5.1.12** Real-money top-up + payout — `pending` · explicitly deferred (D-1A / D-2A)
+- [x] **T5.1.1** `coin_ledger` append-only (amount ±, reason, ref_type, ref_id, idempotency_key UNIQUE, created_at) — `done` · append-only, signed `amount_minor`, `reason_key` FK, polymorphic `ref_type`/`ref_id` with NO FK (a money record must outlive what it paid for), `idempotency_key` UNIQUE per wallet. `trg_coin_ledger_immutable` refuses every UPDATE except the one erasure performs
+- [x] **T5.1.2** `coin_wallets` cached balance, only ever written inside the same tx as the ledger row — `done` · written ONLY by `trg_coin_wallet_recompute` (an AFTER INSERT that writes the SUM, never an increment) and any other value refused by `trg_coin_wallet_truthful`. Proven load-bearing: with the truthfulness trigger neutered a forged balance of 9 999 999 sticks
+- [x] **T5.1.3** Integer minor units for every amount; no floats anywhere in the money path — `done` · integers everywhere. No float in a column, in a zod schema or in a division — `toCoins()` on the client is display only and a number that has been through it is never sent back
+- [x] **T5.1.4** Named atomic worker transaction per operation — never the generic `writeTx` — `done` · `purchaseStoreItemTx`, `unlockAchievementTx`, `adminAdjustCoinsTx`. `check-worker-tx` proven to SEE them: a conditional return planted after the debit fails by file and line
+- [x] **T5.1.5** Guards live INSIDE the UPDATE (`WHERE balance >= ?`), not in a preceding SELECT — `done` · `w.balance_minor >= i.price_minor` inside the receipt INSERT and `w.balance_minor + ? >= 0` inside the adjustment INSERT. The read above each exists only so the client gets a 409 with real numbers instead of a rolled-back generic 400
+- [x] **T5.1.6** Idempotency key required on every mutating coin endpoint; replay returns the original result, never a second effect — `done` · and the REPLAY RESPONSE is byte-identical to the original except for `replayed`, because one closure reads it back off the stored rows and BOTH paths call it. Asserted by key comparison in smoke, not by eye
+- [x] **T5.1.7** Balance is ALWAYS recomputed/validated server-side; a client-sent amount or total is never trusted — `done` · no request anywhere carries an amount. `expected_price_minor` is an AGREEMENT ASSERTION that can only make a purchase fail; the charged amount is read from `coin_store_items` inside the INSERT
+- [x] **T5.1.8** `coin_store_items` + `coin_purchases` (idempotent purchase endpoint) — `done` · app-owned store only — no seller, no commission, no listings. An item grants ONE bounded `entitlement_key`, and `coin_entitlements_live_uidx` is what actually stops a double buy under concurrency
+- [x] **T5.1.9** Admin coin adjustment — audited endpoint only, DB-side role re-check at execution time — `done` · role AND `session_version` re-read from the DATABASE inside the transaction, compared UNCONDITIONALLY (an absent argument fails closed), and repeated inside the guarded INSERT's own users JOIN so the WRITE is gated rather than merely preceded by a check that passed
+- [x] **T5.1.10** Every coin event written to `audit_log` with actor + request_id — `done` · and `trg_audit_log_coin_complete` makes it a database fact rather than a convention held by six hand-written call sites — one of which was already broken, writing `req.id` into `request_id` when nothing sets `req.id`
+- [x] **T5.1.11** Rate limits on all coin endpoints (per-IP + per-account composite) — `done` · per-IP and per-account, composed, on both the purchase and the admin adjustment. They stop different things: IP stops one machine hammering many accounts, account stops one account hammered from many machines
+- [~] **T5.1.12** Real-money top-up + payout — `deferred` · unchanged by D-1A / D-2A. Nothing in 019 assumes coins can be bought with money, and nothing forbids it later
 
 ### 5-pass adversarial checklist — run per money endpoint
-- [ ] **T5.2.1** FORGE — every client-supplied field re-derived or ownership-checked server-side — `pending`
-- [ ] **T5.2.2** REPLAY — same idempotency key twice ⇒ exactly one effect — `pending`
-- [ ] **T5.2.3** RACE — N parallel requests against one balance ⇒ no oversend, no negative balance — `pending`
-- [ ] **T5.2.4** IDOR — another user's wallet/purchase id ⇒ 404, never data — `pending`
-- [ ] **T5.2.5** EXTREMES — 0, negative, max int, huge quantity, unicode reason strings — `pending`
-- [ ] **T5.2.6** All five frozen as permanent security regression tests — `pending`
+- [x] **T5.2.1** FORGE — every client-supplied field re-derived or ownership-checked server-side — `done` · a user crediting themselves 403; a price sent alongside the agreement 400; a colon in the client key 400; choosing your own `reason_key` 400; a receipt claiming a price the item does not have refused by trigger
+- [x] **T5.2.2** REPLAY — same idempotency key twice ⇒ exactly one effect — `done` · the same adjustment twice moves the balance once; the same key with a different amount or a different ITEM is 409 with nothing moved; and the same client string on another endpoint is a real, separate operation rather than a false replay
+- [x] **T5.2.3** RACE — N parallel requests against one balance ⇒ no oversend, no negative balance — `done` · two concurrent purchases against exactly one item's worth of coins — **exactly one wins**, the balance lands on 0, exactly one entitlement exists. Plus the cascade case at the schema level: deleting an account whose credit precedes its debit still succeeds
+- [x] **T5.2.4** IDOR — another user's wallet/purchase id ⇒ 404, never data — `done` · the ledger projection never carries the acting admin's identity (two candidate designs returned it to every user who had ever received a support credit); another account's statement is simply absent; a user reading the admin ledger 403; an unbought theme 404 with an unknown pack answering IDENTICALLY
+- [x] **T5.2.5** EXTREMES — 0, negative, max int, huge quantity, unicode reason strings — `done` · zero, `MAX_SAFE_INTEGER` and a fraction all 400; `MAX_INT` item id 404; a free item unstorable; an item priced above what one purchase may move refused at BOTH ends
+- [x] **T5.2.6** All five frozen as permanent security regression tests — `done` · frozen as `verify:019` (56 schema attacks) and a smoke block (30 HTTP attacks). Both run in the phase gate
 
 ## F12 — Gamification
-- [ ] **T5.3.1** `achievements` + `user_achievements` — `pending`
-- [ ] **T5.3.2** Achievement coin rewards flow through the SAME idempotent ledger path — `pending` · no side channel
-- [ ] **T5.3.3** Streak counters for workout + nutrition adherence — `pending`
-- [ ] **T5.3.4** E25 coin variants (odometer, fly-to-wallet, pulse, breakdown sheet, milestone banner) — `pending`
-- [ ] **T5.3.5** E26 streak/achievement variants (flame flicker, unlock overlay, next tease, streak freeze, confetti finale) — `pending`
-- [ ] **T5.3.6** Celebration toggleable in settings; `prefers-reduced-motion` respected — `pending`
-- [ ] **T5.3.7** Leaderboard — `pending` · explicitly reserved for later
+- [x] **T5.3.1** `achievements` + `user_achievements` — `done` · `achievements` + `user_achievements`, with the unlock's reward SNAPSHOT so a retuned reward cannot rewrite somebody's history — the catalogue says what it pays NOW, the unlock says what it paid THEN
+- [x] **T5.3.2** Achievement coin rewards flow through the SAME idempotent ledger path — `done` · and it is a property of the schema rather than a rule anyone remembers: an achievement reward, a purchase and an admin adjustment are the same INSERT with a different reason. There is no other way to move a balance
+- [x] **T5.3.3** Streak counters for workout + nutrition adherence — `done` · **COMPUTED, NEVER STORED.** A counter is a second representation of what the log already knows, and this project has deleted five of those. A streak is `DISTINCT local_date` walked backwards from today — and **ending YESTERDAY still counts**, because a streak that resets at midnight punishes people for the hour they wake up. The arithmetic is pure and is checked without a database, month and year boundaries included. It also made the evaluator real: `unlockAchievementTx` had shipped with nothing calling it
+- [x] **T5.3.4** E25 coin variants (odometer, fly-to-wallet, pulse, breakdown sheet, milestone banner) — `done` · E25, five variants of how the number ARRIVES and never of what it is. It rolls from the previous balance, which is what `CountUp` gained a `from` for — a wallet sweeping from zero through every number the user has ever had reads as the balance being recalculated
+- [x] **T5.3.5** E26 streak/achievement variants (flame flicker, unlock overlay, next tease, streak freeze, confetti finale) — `done` · E26 on the achievement list, animation gated on `useMotionSafe` — a permanently animating icon on a list of a dozen is a battery cost and a distraction
+- [x] **T5.3.6** Celebration toggleable in settings; `prefers-reduced-motion` respected — `done` · reduced motion drops the roll, the flight and the pulse and KEEPS the delta chip. The Bible's rule is that the state change still happens and is still visible, it just does not travel
+- [~] **T5.3.7** Leaderboard — `deferred` · unchanged: explicitly reserved for later
 
 ## Marketplace & theme shop
-- [ ] **T5.4.1** Coaches sell plan templates for coins, with app commission computed server-side — `pending`
-- [ ] **T5.4.2** Purchase grants a template copy atomically with the ledger debit — `pending`
-- [ ] **T5.4.3** Premium theme packs as coin store items (F14 tie-in) — `pending`
-- [ ] **T5.4.4** Owning a premium theme is checked server-side on theme apply, not client-side — `pending`
+- [~] **T5.4.1** Coaches sell plan templates for coins, with app commission computed server-side — `deferred` · **CUT TO MIGRATION 020 BY THE ADVERSARIAL REVIEW, AND THAT IS THE PHASE'S MAIN RESULT.** Thirteen of the twenty-one fatal-and-severe findings sat in the marketplace. The FATAL one is verified against real code: `trg_plan_source_owned_ins` (010:1256) requires `source_plan_id` to name a plan the SAME author wrote, so every template purchase — buyer receives a copy of the seller's plan — would have aborted. Deleting the feature removed thirteen defects without writing one fix. 020 inherits a written brief
+- [~] **T5.4.2** Purchase grants a template copy atomically with the ledger debit — `deferred` · with T5.4.1
+- [x] **T5.4.3** Premium theme packs as coin store items (F14 tie-in) — `done` · two premium theme packs as store items. `theme_packs` is the vocabulary now, so a pack is a row rather than a CHECK in migration 002 plus a list in `theme/routes.js` plus a map in `contrast.js`
+- [x] **T5.4.4** Owning a premium theme is checked server-side on theme apply, not client-side — `done` · checked BY THE SCHEMA, not only by the route. `trg_theme_pack_entitled_ins/_upd` refuse the write, and `trg_theme_revoked_resets_pack` takes the theme back on revocation with no sweeper — without it a user happy with a theme they no longer own simply never writes again and keeps it
 
 ## Phase gate
-- [ ] **T5.5.1** build + smoke + `npm audit` green — `pending`
-- [ ] **T5.5.2** Security checklist per-endpoint gate walked for EVERY coin route — `pending`
+- [x] **T5.5.1** build + smoke + `npm audit` green — `done` · build clean · smoke 468/468 · verify:019 56/56 · verify:schema 23/23 · verify:015 30/30 · check-routes 130 · check-worker-tx 11 bodies · check-tokens · check-i18n 534 × 3 · npm audit 0
+- [x] **T5.5.2** Security checklist per-endpoint gate walked for EVERY coin route — `done` · every coin route walked: authenticated, rate-limited on both axes, `.strict()` body, no client-supplied amount, object-miss 404 and the single deliberate 403 named in the contracts
 - [ ] **T5.5.3** Screenshots 360/1440 + Bible line-by-line audit — `pending`
 - [ ] **T5.5.4** Webview E2E ✅/❌ matrix incl. replay + race attempts — `pending`
 - [ ] **T5.5.5** Brain updated + sync; SHARED_MEMORY pruned — `pending`

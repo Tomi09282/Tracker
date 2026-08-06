@@ -497,6 +497,19 @@ refused(
 
 console.log('\n── ACHIEVEMENTS PAY THROUGH THE LEDGER, OR NOT AT ALL ───────────────────────────');
 
+/**
+ * THIS HELPER IS A COPY OF THE UNLOCK PATH, AND THAT COST SOMETHING.
+ *
+ * It reproduces what `unlockAchievementTx` does so the schema can be attacked without a running
+ * server — which is the right trade for a SCHEMA probe. But when the real transaction turned out
+ * to build a five-character idempotency key against an eight-character floor, this copy was
+ * corrected and the transaction was not, so the probe went green over a production path that
+ * aborted on every single unlock.
+ *
+ * An audit must not carry its own copy of what it audits. Where it must, the copy has to be
+ * WRONG-PROOF: the padding below is written exactly as the worker writes it, and the smoke suite
+ * exercises the real transaction end to end so this file is not the only thing watching it.
+ */
 const unlock = (userId, key) => {
   const r = run(
     `INSERT INTO user_achievements (user_id, achievement_key, reward_minor_snapshot)

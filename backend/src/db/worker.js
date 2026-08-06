@@ -1237,7 +1237,18 @@ export function unlockAchievementTx({ userId, achievementKey, sourceType = null,
          (user_id, amount_minor, reason_key, ref_type, ref_id, idempotency_key,
           actor_user_id, request_id)
        SELECT ua.user_id, ua.reward_minor_snapshot, 'achievement.reward', 'user_achievement',
-              ua.id, 'ach:' || ua.id, NULL, ?
+              -- PADDED TO TEN DIGITS, and the story of this line is the point.
+              --
+              -- The column's CHECK demands 8..96 characters. The unpadded form was FIVE, so the first
+              -- achievement anybody unlocked aborted. That was found once, in the migration
+              -- comment, and fixed there — and in verify-019, which carries its own copy of this
+              -- SQL. Both copies were corrected and THIS ONE, the only one that runs, was not.
+              --
+              -- So the probe passed while the production path was broken, which is the exact rule
+              -- written down one phase earlier: an audit must not carry its own copy of what it
+              -- audits. It was caught by the evaluator failing silently in a fire-and-forget
+              -- catch, which is the second lesson in one line.
+              ua.id, 'ach:' || printf('%010d', ua.id), NULL, ?
          FROM user_achievements ua
         WHERE ua.id = ? AND ua.reward_minor_snapshot > 0`,
     ).run(requestId, unlockId);

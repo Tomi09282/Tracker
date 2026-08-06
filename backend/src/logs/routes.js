@@ -14,6 +14,7 @@ import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { evaluateInBackground } from '../coins/achievements.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
 // The schedule rule and the calendar-day derivation both live in ONE place now. `local_date`
 // decides which day a record belongs to, so it is never taken from the request: a phone with a
@@ -440,6 +441,17 @@ const endSession = (status) =>
     // Not yours, never existed, or already closed. One answer for all three: a client that lost the
     // response and retried gets the same thing as one probing a stranger's id.
     if (result.changes === 0) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    // AFTER the session is safely closed, and never blocking it. A badge that did not land is
+    // recoverable on the next session because every check the evaluator makes is a state question
+    // ("have they done ten?") rather than an event ("this was the tenth") — a missed run
+    // self-heals. A workout that failed to save because of a badge would not.
+    //
+    // Only on a COMPLETED session. Abandoning one is not an achievement.
+    if (status === 'completed') {
+      evaluateInBackground(req, { userId: req.user.id, sourceType: 'workout_log', sourceId: id });
+    }
+
     res.json({ status });
   });
 
