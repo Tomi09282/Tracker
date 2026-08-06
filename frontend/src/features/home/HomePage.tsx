@@ -10,6 +10,7 @@ import { useSession } from '../auth/useSession';
 import { useStartWorkout, useCurrentWorkout } from '../workout/useWorkout';
 import { useToday, type TodayDay } from './useToday';
 import { WeekStrip } from './WeekStrip';
+import { NutritionCard } from '../nutrition/NutritionCard';
 
 /**
  * Today / Home — Bible blueprint 2.
@@ -159,6 +160,16 @@ export function HomePage() {
           </ul>
         )}
       </section>
+
+      {/* Below the session, because training is what this screen is for and food is context. */}
+      <NutritionCard date={todayLocal()} />
     </div>
   );
+}
+
+/** Local calendar day. toISOString() is UTC and would be yesterday at 01:00 in Budapest. */
+function todayLocal() {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }

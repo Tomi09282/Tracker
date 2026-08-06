@@ -145,6 +145,30 @@ const visibleFood = (t = 'foods') => `(
           AND np.status <> 'draft'
           AND (np.coach_client_id IS NULL OR cc.status = 'active')))`;
 
+/**
+ * The name to snapshot, in the WRITER'S language.
+ *
+ * Found in the browser rather than by reading the code: a Hungarian user logged "Zabpehely" and
+ * their own food diary read "Oats, rolled, dry" back at them, because the snapshot was taken from
+ * `foods.name` — the canonical English fallback, which exists so a row is always nameable and is
+ * not what anybody should be shown.
+ *
+ * The snapshot's job is to preserve WHAT THIS SAID WHEN IT WAS RECORDED. That is a statement about
+ * the person who recorded it, so the language is theirs: their reading language first, the system
+ * fallback second, the canonical name last. Same decision as `coach_name_snapshot` and
+ * `exercise_name_snapshot` — a snapshot records what the actor saw.
+ *
+ * It does NOT retranslate later. A coach who prescribed "Csirkemell" and then switches the app to
+ * English still sees "Csirkemell" on that prescription, which is correct: they are looking at a
+ * record of something they wrote, not at a live food.
+ *
+ * Params: (lang, fallback), bound immediately before the food id.
+ */
+const SNAPSHOT_NAME = `COALESCE(
+  (SELECT ft.name FROM food_translations ft WHERE ft.food_id = f.id AND ft.lang = ?),
+  (SELECT ft.name FROM food_translations ft WHERE ft.food_id = f.id AND ft.lang = ?),
+  f.name)`;
+
 /* ── validation ──────────────────────────────────────────────────────────────────────────────── */
 
 const GOALS = ['strength', 'muscle', 'fat-loss', 'endurance', 'mobility', 'health', 'sport'];
@@ -849,6 +873,9 @@ router.post(
     if (!p.success || !parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const b = parsed.data;
 
+    const lang = await resolveLang(req);
+    const { fallback } = await languages();
+
     const r = await db.run(
       `INSERT INTO meal_items (plan_id, meal_id, food_id, position, grams_x10, note,
                                food_name_snapshot, kcal_per_100g_x10_snapshot,
@@ -857,7 +884,7 @@ router.post(
        SELECT p.id, m.id, f.id,
               COALESCE(?, (SELECT COUNT(*) FROM meal_items WHERE meal_id = m.id)),
               ?, ?,
-              f.name, f.kcal_per_100g_x10, f.protein_mg_per_100g,
+              ${SNAPSHOT_NAME}, f.kcal_per_100g_x10, f.protein_mg_per_100g,
               f.carb_mg_per_100g, f.fat_mg_per_100g, f.fiber_mg_per_100g
          FROM (${COACH_PLAN_SUBQUERY}) p
          JOIN meals m ON m.id = ? AND m.plan_id = p.id
@@ -866,6 +893,8 @@ router.post(
         b.position ?? null,
         b.grams,
         b.note ?? null,
+        lang,
+        fallback,
         p.data.id,
         req.user.id,
         req.user.id,
@@ -967,6 +996,9 @@ router.post(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const b = parsed.data;
 
+    const lang = await resolveLang(req);
+    const { fallback } = await languages();
+
     const r = await db.run(
       `INSERT INTO nutrition_log_items (client_user_id, local_date, tz_name, meal_label,
                                         plan_day_id, food_id, grams_x10, food_name_snapshot,
@@ -977,7 +1009,7 @@ router.post(
               (SELECT d.id FROM nutrition_plan_days d
                  JOIN nutrition_plans np ON np.id = d.plan_id
                 WHERE d.id = ? AND np.client_user_id = ?),
-              f.id, ?, f.name, f.kcal_per_100g_x10, f.protein_mg_per_100g,
+              f.id, ?, ${SNAPSHOT_NAME}, f.kcal_per_100g_x10, f.protein_mg_per_100g,
               f.carb_mg_per_100g, f.fat_mg_per_100g, f.fiber_mg_per_100g
          FROM foods f
         WHERE f.id = ? AND ${visibleFood('f')}`,
@@ -989,6 +1021,8 @@ router.post(
         b.plan_day_id ?? null,
         req.user.id,
         b.grams,
+        lang,
+        fallback,
         b.food_id,
         req.user.id,
         req.user.id,

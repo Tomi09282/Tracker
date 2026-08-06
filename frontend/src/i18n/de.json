@@ -499,7 +499,58 @@
     "heading": "Fortschritt",
     "date": "Datum",
     "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Trainingstage sind nötig — zwei Punkte sind kein Trend.",
-    "gap": "{{count}} Tage Pause"
+    "gap": "{{count}} Tage Pause",
+    "title": "Fortschritt",
+    "record": "Messung erfassen",
+    "metric": "Was",
+    "value": "Wert",
+    "on": "Wann",
+    "entries": "Einträge",
+    "emptyTitle": "Noch keine Messungen",
+    "emptyBody": "Erfasse mindestens drei, dann erscheint der Trend.",
+    "outOfRange": "Dieser Wert liegt außerhalb des plausiblen Bereichs. Prüfe auf einen Tippfehler.",
+    "tab": {
+      "body": "Körper",
+      "photos": "Fotos",
+      "sharing": "Freigabe"
+    },
+    "addPhoto": "Foto hinzufügen",
+    "chooseFile": "Datei wählen",
+    "photoPrivacyNote": "Standardmäßig sieht NIEMAND deine Fotos — auch dein Coach nicht, bis du es erlaubst.",
+    "uploadFailed": "Upload fehlgeschlagen. Nur JPEG, PNG oder WebP.",
+    "noPhotosTitle": "Noch keine Fotos",
+    "noPhotosBody": "Ein Vergleich braucht mindestens zwei, in derselben Pose.",
+    "photoAlt": "Fortschrittsfoto, {{date}}",
+    "whoCanSee": "Wer das sehen kann",
+    "whoLooked": "Wer geschaut hat",
+    "sharingNote": "Messungen und Fotos sind getrennte Entscheidungen. Ein Widerruf gilt sofort.",
+    "noShares": "Kein Coach zum Teilen.",
+    "noLooks": "Bisher hat niemand geschaut.",
+    "shareMeasurements": "Messungen teilen",
+    "sharePhotos": "Fotos teilen",
+    "revokeAll": "Allen Zugriff widerrufen",
+    "linkEnded": "Beendet",
+    "looked": {
+      "photo": "Hat ein Foto angesehen",
+      "measurements": "Hat deine Messungen angesehen"
+    },
+    "metricName": {
+      "weight": "Gewicht",
+      "body_fat": "Körperfett",
+      "neck": "Hals",
+      "shoulder": "Schultern",
+      "chest": "Brust",
+      "waist": "Taille",
+      "hip": "Hüfte",
+      "thigh_left": "Oberschenkel (links)",
+      "thigh_right": "Oberschenkel (rechts)",
+      "calf_left": "Wade (links)",
+      "calf_right": "Wade (rechts)",
+      "arm_left": "Arm (links)",
+      "arm_right": "Arm (rechts)",
+      "forearm_left": "Unterarm (links)",
+      "forearm_right": "Unterarm (rechts)"
+    }
   },
   "chat": {
     "thread": "Unterhaltung",
@@ -527,5 +578,29 @@
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
     "daysAgo": "vor {{count}} Tg."
+  },
+  "nutrition": {
+    "title": "Ernährung",
+    "date": "Datum",
+    "totals": "Heute",
+    "add": "Hinzufügen",
+    "searchPlaceholder": "Lebensmittel suchen…",
+    "noResults": "Keine Treffer",
+    "grams": "Gramm",
+    "logged": "Erfasst",
+    "unlabelled": "Sonstiges",
+    "emptyTitle": "Noch nichts erfasst",
+    "emptyBody": "Suche ein Lebensmittel und füge es dem Tag hinzu.",
+    "noTargetToday": "Kein Ziel für dieses Datum — der Planzyklus fällt nicht hierher.",
+    "macro": {
+      "kcal": "Kalorien",
+      "protein": "Eiweiß",
+      "carb": "Kohlenhydrate",
+      "fat": "Fett"
+    },
+    "card": {
+      "title": "Ernährung",
+      "open": "Öffnen"
+    }
   }
 }

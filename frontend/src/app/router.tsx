@@ -41,6 +41,12 @@ const AdminPage = lazy(() =>
 const PlaygroundPage = lazy(() =>
   import('../features/playground/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
 );
+const NutritionPage = lazy(() =>
+  import('../features/nutrition/NutritionPage').then((m) => ({ default: m.NutritionPage })),
+);
+const ProgressPage = lazy(() =>
+  import('../features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
+);
 const SettingsPage = lazy(() =>
   import('../features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -62,6 +68,8 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: suspended(<NotificationsPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+      { path: 'nutrition', element: suspended(<NutritionPage />) },
+      { path: 'progress', element: suspended(<ProgressPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },

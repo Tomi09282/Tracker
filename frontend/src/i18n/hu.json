@@ -499,7 +499,58 @@
     "heading": "Fejlődés",
     "date": "Dátum",
     "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három edzésnap kell hozzá — két pont még nem trend.",
-    "gap": "{{count}} nap kihagyás"
+    "gap": "{{count}} nap kihagyás",
+    "title": "Haladás",
+    "record": "Mérés rögzítése",
+    "metric": "Mit mérsz",
+    "value": "Érték",
+    "on": "Mikor",
+    "entries": "Bejegyzések",
+    "emptyTitle": "Még nincs mérés",
+    "emptyBody": "Rögzíts legalább három mérést, és megjelenik a trend.",
+    "outOfRange": "Ez az érték kívül esik a hihető tartományon. Ellenőrizd, nem ütöttél-e el valamit.",
+    "tab": {
+      "body": "Test",
+      "photos": "Fotók",
+      "sharing": "Megosztás"
+    },
+    "addPhoto": "Fotó hozzáadása",
+    "chooseFile": "Fájl választása",
+    "photoPrivacyNote": "A fotóidat alapból SENKI nem látja — az edződ sem, amíg te nem engeded meg.",
+    "uploadFailed": "A feltöltés nem sikerült. Csak JPEG, PNG vagy WebP kép tölthető fel.",
+    "noPhotosTitle": "Még nincs fotó",
+    "noPhotosBody": "Az összehasonlításhoz legalább kettő kell, ugyanabban a pózban.",
+    "photoAlt": "Haladási fotó, {{date}}",
+    "whoCanSee": "Ki láthatja",
+    "whoLooked": "Ki nézte meg",
+    "sharingNote": "Külön dönthetsz a mérésekről és a fotókról. Bármikor visszavonhatod, és azonnal érvényes.",
+    "noShares": "Nincs edződ, akivel megoszthatnád.",
+    "noLooks": "Még senki nem nézte meg.",
+    "shareMeasurements": "Mérések megosztása",
+    "sharePhotos": "Fotók megosztása",
+    "revokeAll": "Minden hozzáférés visszavonása",
+    "linkEnded": "Lezárult",
+    "looked": {
+      "photo": "Megnézett egy fotót",
+      "measurements": "Megnézte a méréseidet"
+    },
+    "metricName": {
+      "weight": "Testsúly",
+      "body_fat": "Testzsír",
+      "neck": "Nyak",
+      "shoulder": "Váll",
+      "chest": "Mellkas",
+      "waist": "Derék",
+      "hip": "Csípő",
+      "thigh_left": "Comb (bal)",
+      "thigh_right": "Comb (jobb)",
+      "calf_left": "Vádli (bal)",
+      "calf_right": "Vádli (jobb)",
+      "arm_left": "Kar (bal)",
+      "arm_right": "Kar (jobb)",
+      "forearm_left": "Alkar (bal)",
+      "forearm_right": "Alkar (jobb)"
+    }
   },
   "chat": {
     "thread": "Beszélgetés",
@@ -527,5 +578,29 @@
     "minutesAgo": "{{count}} perce",
     "hoursAgo": "{{count}} órája",
     "daysAgo": "{{count}} napja"
+  },
+  "nutrition": {
+    "title": "Táplálkozás",
+    "date": "Dátum",
+    "totals": "A mai nap",
+    "add": "Hozzáadás",
+    "searchPlaceholder": "Étel keresése…",
+    "noResults": "Nincs találat",
+    "grams": "gramm",
+    "logged": "Naplózva",
+    "unlabelled": "Egyéb",
+    "emptyTitle": "Még nincs bejegyzés",
+    "emptyBody": "Keress rá egy ételre, és add hozzá a naphoz.",
+    "noTargetToday": "Erre a napra nincs előírt cél — az étrend ciklusa nem esik ide.",
+    "macro": {
+      "kcal": "Kalória",
+      "protein": "Fehérje",
+      "carb": "Szénhidrát",
+      "fat": "Zsír"
+    },
+    "card": {
+      "title": "Táplálkozás",
+      "open": "Megnyitás"
+    }
   }
 }

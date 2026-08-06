@@ -3618,6 +3618,45 @@ if (seeded) {
     );
   }
   {
+    // THE SNAPSHOT RECORDS WHAT THE WRITER SAW, INCLUDING THE LANGUAGE.
+    //
+    // Found in the browser, not in the code: a Hungarian user logged "Zabpehely" and their own
+    // diary read "Oats, rolled, dry" back at them, because the snapshot came from foods.name — the
+    // canonical English fallback, which exists so a row is always nameable and is not what anybody
+    // should be shown. The same two writes in two languages must produce two different names.
+    const seeded = await call('/api/v1/foods?q=zabpehely&lang=hu', { jar: eater });
+    const oats = seeded.json?.foods?.[0]?.id;
+
+    await call('/api/v1/nutrition-log?lang=hu', {
+      method: 'POST', jar: eater,
+      body: { food_id: oats, grams: 50, local_date: '2026-09-01' },
+    });
+    await call('/api/v1/nutrition-log?lang=en', {
+      method: 'POST', jar: eater,
+      body: { food_id: oats, grams: 50, local_date: '2026-09-02' },
+    });
+
+    const hu = await call('/api/v1/nutrition-log/2026-09-01', { jar: eater });
+    const en = await call('/api/v1/nutrition-log/2026-09-02', { jar: eater });
+
+    check(
+      'the log snapshots the food name in the WRITER\'s language',
+      hu.json?.items?.[0]?.name === 'Zabpehely, száraz' && en.json?.items?.[0]?.name === 'Oats, rolled, dry',
+      `hu "${hu.json?.items?.[0]?.name}", en "${en.json?.items?.[0]?.name}"`,
+    );
+  }
+  {
+    // ...and it does NOT retranslate afterwards. Reading the Hungarian entry with the app in
+    // English still shows what was written, because the row is a record of a past act rather than
+    // a live view of a food.
+    const { json } = await call('/api/v1/nutrition-log/2026-09-01?lang=en', { jar: eater });
+    check(
+      'and switching language does not rewrite an existing entry',
+      json?.items?.[0]?.name === 'Zabpehely, száraz',
+      `"${json?.items?.[0]?.name}"`,
+    );
+  }
+  {
     // FORGE: the client sends a macro with their log.
     const { res } = await call('/api/v1/nutrition-log', {
       method: 'POST', jar: eater,

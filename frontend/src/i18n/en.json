@@ -499,7 +499,58 @@
     "heading": "Progress",
     "date": "Date",
     "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three training days are needed — two points are not a trend.",
-    "gap": "{{count}}-day break"
+    "gap": "{{count}}-day break",
+    "title": "Progress",
+    "record": "Record a measurement",
+    "metric": "What",
+    "value": "Value",
+    "on": "When",
+    "entries": "Entries",
+    "emptyTitle": "No measurements yet",
+    "emptyBody": "Record at least three and the trend appears.",
+    "outOfRange": "That value is outside the plausible range. Check for a typo.",
+    "tab": {
+      "body": "Body",
+      "photos": "Photos",
+      "sharing": "Sharing"
+    },
+    "addPhoto": "Add a photo",
+    "chooseFile": "Choose a file",
+    "photoPrivacyNote": "By default NOBODY can see your photos — not even your coach, until you say so.",
+    "uploadFailed": "Upload failed. Only JPEG, PNG or WebP images are accepted.",
+    "noPhotosTitle": "No photos yet",
+    "noPhotosBody": "Comparing needs at least two, in the same pose.",
+    "photoAlt": "Progress photo, {{date}}",
+    "whoCanSee": "Who can see this",
+    "whoLooked": "Who has looked",
+    "sharingNote": "Measurements and photos are separate decisions. Revoking takes effect immediately.",
+    "noShares": "No coach to share with.",
+    "noLooks": "Nobody has looked yet.",
+    "shareMeasurements": "Share measurements",
+    "sharePhotos": "Share photos",
+    "revokeAll": "Revoke all access",
+    "linkEnded": "Ended",
+    "looked": {
+      "photo": "Viewed a photo",
+      "measurements": "Viewed your measurements"
+    },
+    "metricName": {
+      "weight": "Weight",
+      "body_fat": "Body fat",
+      "neck": "Neck",
+      "shoulder": "Shoulders",
+      "chest": "Chest",
+      "waist": "Waist",
+      "hip": "Hips",
+      "thigh_left": "Thigh (left)",
+      "thigh_right": "Thigh (right)",
+      "calf_left": "Calf (left)",
+      "calf_right": "Calf (right)",
+      "arm_left": "Arm (left)",
+      "arm_right": "Arm (right)",
+      "forearm_left": "Forearm (left)",
+      "forearm_right": "Forearm (right)"
+    }
   },
   "chat": {
     "thread": "Conversation",
@@ -527,5 +578,29 @@
     "minutesAgo": "{{count}} min ago",
     "hoursAgo": "{{count}} h ago",
     "daysAgo": "{{count}} d ago"
+  },
+  "nutrition": {
+    "title": "Nutrition",
+    "date": "Date",
+    "totals": "Today",
+    "add": "Add",
+    "searchPlaceholder": "Search for a food…",
+    "noResults": "No matches",
+    "grams": "grams",
+    "logged": "Logged",
+    "unlabelled": "Other",
+    "emptyTitle": "Nothing logged yet",
+    "emptyBody": "Search for a food and add it to the day.",
+    "noTargetToday": "No target for this date — the plan cycle does not land here.",
+    "macro": {
+      "kcal": "Calories",
+      "protein": "Protein",
+      "carb": "Carbs",
+      "fat": "Fat"
+    },
+    "card": {
+      "title": "Nutrition",
+      "open": "Open"
+    }
   }
 }
