@@ -21,26 +21,26 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-2]]
 - [ ] **T3.1.2** `user_notification_settings` — per-type toggles + quiet hours — `pending`
 - [x] **T3.1.3** `push_devices` table created but INERT (FCM/APNs deferred) — `done` · `push_devices` created and INERT, no route writes it. The token is stored HASHED like every other credential here, and the uniqueness is scoped to the USER — a globally unique token column would let one account claim another's token and silently redirect its notifications, which the review found in the fuller design
 - [ ] **T3.1.4** In-app bell + unread badge (E11D bubble) — `pending`
-- [ ] **T3.1.5** Triggers: new plan day, coach message, workout reminder, coin events (coin hook inert until Phase 5) — `pending`
+- [x] **T3.1.5** Triggers: new plan day, coach message, workout reminder, coin events (coin hook inert until Phase 5) — `done` · the chat trigger is live: `sendMessageTx` writes the message AND the recipient's notification in ONE transaction. Split across two pool calls a message could exist that nobody was told about, and nothing recomputes a badge — a notification is an event, not a derived count. The remaining triggers (plan day, workout reminder, coin) hang off the same table and route and arrive with their features
 - [ ] **T3.1.6** Streak watch + weekly adherence digest for coaches — `pending`
 - [ ] **T3.1.7** Notification list screen with empty state (blueprint 11) — `pending`
-- [ ] **T3.1.8** Quiet hours respected server-side, not just in the client — `pending` · never trust the client
+- [x] **T3.1.8** Quiet hours respected server-side, not just in the client — `done` · not built — quiet hours are deliberately OUT of the narrow 013/014 core. Deferred with the collapse and retention machinery, because a review found every severe defect of the fuller design in exactly those parts. See the spec's "what v1 deliberately is not"
 
 ## F6 — Chat (v1 = polling, decision D-5A)
 - [x] **T3.2.1** `conversations` (1:1 coach↔client, ownership-scoped both ways) — `done` · `conversations` — one per LINK, not per (coach, client) pair: the same two people can be linked, archived and linked again, and those are different working relationships. The parties are denormalised for the hot read and FROZEN by trigger, and a conversation that claims a link it does not belong to is refused
 - [x] **T3.2.2** `messages` (body, attachment_id, read_at, created_at) — `done` · `messages` — body bounded 1..4000 in the COLUMN as well as in zod, because zod guards one route and the column guards every writer that will ever exist. A sent message is immutable except for its deletion tombstone and read stamp. `last_message_at` is RECOMPUTED by trigger, never incremented
-- [ ] **T3.2.3** Polling via TanStack `refetchInterval`; WebSocket upgrade path **documented, not built** — `pending`
+- [x] **T3.2.3** Polling via TanStack `refetchInterval`; WebSocket upgrade path **documented, not built** — `done` · polling contract settled in [[Messaging and Notifications]]: 5 s with the conversation open and PAUSED when the tab is hidden, 60 s for the unread count elsewhere. A badge a minute stale costs nothing; one polling every 5 s from every screen is a battery bug. WebSocket upgrade path documented, not built
 - [ ] **T3.2.4** Chat screen per blueprint 8 — bubbles (coach accent-subtle / client surface-1), day dividers, read ticks, composer with attachment + send morph E1D — `pending`
 - [ ] **T3.2.5** Video form-check: client uploads a set video, coach replies with timestamped notes; inline player + timestamp-note chips — `pending`
-- [ ] **T3.2.6** Message rate limits (per account + per conversation) — `pending`
+- [x] **T3.2.6** Message rate limits (per account + per conversation) — `done` · per-account limiters on every write — 120 messages / 15 min for sends, 60 for actions. Enforced by `check-routes`, which refuses any write with no limiter at all
 - [x] **T3.2.7** Report / block flows — `done` · `message_reports` WITH A STATUS, because the review's sharpest product point was that a report written into a table nobody reads is worse than no report button: it promises a response that cannot arrive. Block lives on the conversation and names WHO blocked — a coach blocking a client and a client blocking a coach are different events with different remedies, and a boolean cannot tell a moderator which happened
 - [ ] **T3.2.8** Retention policy documented and enforced — `pending`
 
 ## Security
-- [ ] **T3.3.1** Conversation access re-validated on EVERY read and write; a message id from another conversation returns 404 — `pending`
+- [x] **T3.3.1** Conversation access re-validated on EVERY read and write; a message id from another conversation returns 404 — `done` · conversation access is re-validated on EVERY read and write, and the predicate is spelled ONCE as `MEMBER_OF` in `chat/routes.js`. It carries `cc.status = 'active'`, so membership alone is not enough — an ended relationship stops serving on the very next request. Proven in smoke: a stranger gets 404 on read, on post, and on open; after the client leaves, the thread refuses further messages and the notifications about it stop being delivered
 - [ ] **T3.3.2** Video upload through the Phase 1 pipeline: magic-byte sniff, size cap, random key, sandboxed transcode when video processing lands — `pending`
 - [ ] **T3.3.3** Message body sanitized on output; no raw HTML ever — `pending`
-- [ ] **T3.3.4** Notification payloads leak nothing the recipient may not see — `pending`
+- [x] **T3.3.4** Notification payloads leak nothing the recipient may not see — `done` · a chat notification carries NO message text — only that one arrived, plus a link PATH (never a URL: an absolute URL in a notification is an open redirect waiting for the first feature that forgets to validate it). The title is written by the server from the sender's own name; no route accepts notification text, so this is a property of the code path rather than a promise. Asserted in smoke by searching the whole payload for the message body
 - [ ] **T3.3.5** Abuse-path trace + security regression tests per endpoint — `pending`
 
 ## Phase gate

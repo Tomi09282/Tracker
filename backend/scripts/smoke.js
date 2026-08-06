@@ -2641,6 +2641,141 @@ if (seeded) {
   );
 }
 
+
+// --- chat and notifications (F5 + F6) ----------------------------------------------------------
+//
+// The two features are tested together because their whole point is that they are ONE act: a
+// message that arrives without telling the recipient is a message nobody reads, and
+// \`sendMessageTx\` exists to make that impossible.
+{
+  const coach = new Jar();
+  const client = new Jar();
+  const stranger = new Jar();
+  const email = `chat-${stamp}@example.com`;
+  const strangerEmail = `chat-out-${stamp}@example.com`;
+
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: coach });
+  await call('/api/v1/auth/register', { method: 'POST', body: { email, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD }, jar: client });
+  await call('/api/v1/auth/register', { method: 'POST', body: { email: strangerEmail, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: strangerEmail, password: PASSWORD }, jar: stranger });
+
+  const { json: code } = await call('/api/v1/invite-codes', { method: 'POST', jar: coach, body: { kind: 'multi', max_uses: 5 } });
+  await call('/api/v1/join', { method: 'POST', jar: client, body: { code: code.code } });
+  const { json: roster } = await call('/api/v1/clients', { jar: coach });
+  const link = (roster?.clients ?? []).find((c) => c.email === email)?.link_id;
+
+  let conversationId = null;
+  {
+    const { res, json } = await call('/api/v1/conversations', { method: 'POST', jar: coach, body: { coach_client_id: link } });
+    conversationId = json?.conversation?.id ?? null;
+    check('a coach opens the conversation through the link', res.status === 201 && conversationId > 0, `status ${res.status}`);
+  }
+  {
+    // Opening twice must hand back the SAME thread. Two people tapping chat at once is ordinary.
+    const { json } = await call('/api/v1/conversations', { method: 'POST', jar: client, body: { coach_client_id: link } });
+    check('the client opening it gets the same thread, not a second one', json?.conversation?.id === conversationId,
+      `${json?.conversation?.id} vs ${conversationId}`);
+  }
+  {
+    const { res } = await call('/api/v1/conversations', { method: 'POST', jar: stranger, body: { coach_client_id: link } });
+    check("a stranger cannot open someone else's conversation -> 404", res.status === 404, `status ${res.status}`);
+  }
+
+  // ── the message and its notification are ONE act ───────────────────────────────────────────────
+  {
+    const { json: before } = await call('/api/v1/notifications/unread-count', { jar: client });
+    const { res } = await call(`/api/v1/conversations/${conversationId}/messages`, {
+      method: 'POST', jar: coach, body: { body: 'Szia, hogy ment a mai?' },
+    });
+    const { json: after } = await call('/api/v1/notifications/unread-count', { jar: client });
+    check('sending a message raises the recipient badge in the same act',
+      res.status === 201 && after.unread === before.unread + 1, `${before.unread} -> ${after.unread}`);
+  }
+  {
+    const { json } = await call('/api/v1/notifications', { jar: client });
+    const n = (json?.notifications ?? [])[0];
+    check('the notification carries no message text — only that one arrived',
+      n?.type === 'chat.message' && !/hogy ment/.test(JSON.stringify(n)), JSON.stringify(n?.title));
+    check('and its link is a PATH, never a URL', (n?.link_path ?? '').startsWith('/'), n?.link_path);
+  }
+  {
+    const { res } = await call(`/api/v1/conversations/${conversationId}/messages`, { jar: stranger });
+    check("a stranger cannot read the thread -> 404", res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/conversations/${conversationId}/messages`, {
+      method: 'POST', jar: stranger, body: { body: 'let me in' },
+    });
+    check('nor post into it -> 404', res.status === 404, `status ${res.status}`);
+  }
+
+  // ── the badge and the inbox must agree ────────────────────────────────────────────────────────
+  {
+    const { json: count } = await call('/api/v1/notifications/unread-count', { jar: client });
+    const { json: list } = await call('/api/v1/notifications', { jar: client });
+    const unreadInList = (list?.notifications ?? []).filter((n) => n.read_at == null).length;
+    check('the badge and the inbox agree', count.unread === unreadInList, `badge ${count.unread}, inbox ${unreadInList}`);
+  }
+  {
+    await call('/api/v1/notifications/read', { method: 'POST', jar: client, body: {} });
+    const { json } = await call('/api/v1/notifications/unread-count', { jar: client });
+    check('marking read clears the badge', json.unread === 0, `${json.unread}`);
+    const again = await call('/api/v1/notifications/read', { method: 'POST', jar: client, body: {} });
+    check('and marking read twice re-stamps nothing', again.json?.read === 0, `${again.json?.read} rows`);
+  }
+  {
+    // THE ONE THAT MATTERS for the badge: a forged id must not let one account clear another's.
+    const { json: mine } = await call('/api/v1/notifications', { jar: client });
+    const id = mine?.notifications?.[0]?.id;
+    const { json } = await call('/api/v1/notifications/read', { method: 'POST', jar: stranger, body: { ids: [id] } });
+    check("a stranger cannot mark someone else's notification read", json?.read === 0, `${json?.read} rows`);
+  }
+
+  // ── block ────────────────────────────────────────────────────────────────────────────────────
+  {
+    await call(`/api/v1/conversations/${conversationId}/block`, { method: 'POST', jar: client });
+    const { res } = await call(`/api/v1/conversations/${conversationId}/messages`, {
+      method: 'POST', jar: coach, body: { body: 'still here' },
+    });
+    check('a blocked conversation refuses further messages -> 409', res.status === 409, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/conversations/${conversationId}/unblock`, { method: 'POST', jar: coach });
+    check('and only the person who blocked can lift it -> 404 for the other side', res.status === 404, `status ${res.status}`);
+    const mine = await call(`/api/v1/conversations/${conversationId}/unblock`, { method: 'POST', jar: client });
+    check('the blocker can lift it', mine.res.status === 200, `status ${mine.res.status}`);
+  }
+
+  // ── leaving ──────────────────────────────────────────────────────────────────────────────────
+  {
+    const { res } = await call(`/api/v1/coaches/${link}/leave`, { method: 'POST', jar: stranger });
+    check("a stranger cannot end someone else's coaching -> 404", res.status === 404, `status ${res.status}`);
+  }
+  {
+    // Until this endpoint existed only the COACH could archive a link — a client had no exit.
+    const { res } = await call(`/api/v1/coaches/${link}/leave`, { method: 'POST', jar: client });
+    check('the client can end the relationship themselves', res.status === 200, `status ${res.status}`);
+  }
+  {
+    const { json } = await call('/api/v1/clients', { jar: coach });
+    check('and the coach loses them from the roster on the next request',
+      !(json?.clients ?? []).some((c) => c.email === email), `${json?.clients?.length} clients`);
+  }
+  {
+    // The archived relationship stops delivering, with no sweeper and nothing remembering to act.
+    const { json } = await call('/api/v1/notifications', { jar: client });
+    check('notifications about an ended relationship stop being delivered',
+      !(json?.notifications ?? []).some((n) => n.type === 'chat.message'), `${json?.notifications?.length} left`);
+  }
+  {
+    const { res } = await call(`/api/v1/conversations/${conversationId}/messages`, {
+      method: 'POST', jar: client, body: { body: 'anyone there?' },
+    });
+    check('and the thread accepts nothing further -> 404', res.status === 404, `status ${res.status}`);
+  }
+}
+
 // --- the calendar feed ------------------------------------------------------------------------
 //
 // An ICS URL is a BEARER capability: no cookie, no session, just a token in a URL a calendar app

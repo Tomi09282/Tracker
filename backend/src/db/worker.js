@@ -896,8 +896,11 @@ export function openConversationTx({ linkId, userId }) {
   const tx = conn.transaction(() => {
     current = 'INSERT the conversation through the link';
     stmt(
-      `INSERT OR IGNORE INTO conversations (coach_client_id, coach_id, client_id)
-       SELECT cc.id, cc.coach_id, cc.client_id
+      // The coach's name is SNAPSHOTTED at creation, so the thread still says who it was with
+      // after they delete their account — see 014, which exists because a departing coach was
+      // otherwise taking the client's entire history with them.
+      `INSERT OR IGNORE INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot)
+       SELECT cc.id, cc.coach_id, cc.client_id, (SELECT u.email FROM users u WHERE u.id = cc.coach_id)
          FROM coach_clients cc
         WHERE cc.id = ? AND (cc.coach_id = ? OR cc.client_id = ?) AND cc.status = 'active'`,
     ).run(linkId, userId, userId);

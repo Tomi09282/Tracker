@@ -165,6 +165,7 @@ const routers = [
   ['/api/v1', '../src/plans/routes.js'],
   ['/api/v1', '../src/logs/routes.js'],
   ['/api/v1', '../src/chat/routes.js'],
+  ['/api/v1', '../src/notifications/routes.js'],
   ['/api/v1', '../src/plans/ics.js'],
 ];
 

@@ -142,6 +142,26 @@ Three decisions inside the core worth carrying:
 - **Block names WHO blocked.** A coach blocking a client and a client blocking a coach are
   different events with different remedies; a boolean cannot tell a moderator which happened.
 
+## 1f. THE BADGE AND THE INBOX ARE ONE PREDICATE
+
+`VISIBLE` in `notifications/routes.js` is the only definition of "a notification I can see", and
+the list, the unread count and the mark-read guard all use it. A badge reading 3 over an inbox
+showing 2 is the defect users actually notice, and it happens the moment the two are spelled
+separately — this codebase's one recurring bug class, applied to a number in the corner.
+
+It carries the LINK's liveness, not just `user_id`. An ended relationship stops delivering on the
+very next request with no sweeper: proven in smoke, where a client leaving their coach makes the
+chat notifications disappear from their inbox in the same breath.
+
+**The unread count is capped at 100 and says so.** The difference between 100 and 342 unread
+changes no decision, and an uncapped COUNT over a table that grows without bound is the query that
+quietly becomes the slowest thing in the app. The cap lives inside the subquery so the partial
+index stops scanning at a hundred.
+
+**Mark-read carries the same visibility predicate as the list.** `read_at` is the only thing that
+clears a badge, so a forged id would otherwise let one account silently clear another's. Asserted:
+a stranger marking someone else's notification read changes zero rows.
+
 ## 2. CONTRACTS
 
 Established facts other jobs must not re-derive or contradict.
