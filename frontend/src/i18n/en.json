@@ -499,5 +499,32 @@
     "date": "Date",
     "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three training days are needed — two points are not a trend.",
     "gap": "{{count}}-day break"
+  },
+  "chat": {
+    "thread": "Conversation",
+    "compose": "Write a message",
+    "send": "Send",
+    "sending": "Sending…",
+    "read": "Read",
+    "emptyTitle": "No messages yet",
+    "emptyBody": "Write the first one — the other person gets a notification.",
+    "blocked": "This conversation is closed.",
+    "block": "Block",
+    "unblock": "Unblock",
+    "report": "Report",
+    "reported": "Reported",
+    "withdrawn": "This message was withdrawn",
+    "sendFailed": "The message could not be sent. Your text is still here.",
+    "unavailable": "This conversation is no longer available."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "withUnread": "Notifications, {{count}} unread",
+    "emptyTitle": "Nothing yet",
+    "emptyBody": "Messages and plan changes show up here.",
+    "markAllRead": "Mark all as read",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} d ago"
   }
 }

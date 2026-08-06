@@ -11,6 +11,9 @@ import { HomePage } from '../features/home/HomePage';
 const LibraryPage = lazy(() =>
   import('../features/library/LibraryPage').then((m) => ({ default: m.LibraryPage })),
 );
+const NotificationsPage = lazy(() =>
+  import('../features/chat/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
+);
 const ExerciseDetailPage = lazy(() =>
   import('../features/library/ExerciseDetailPage').then((m) => ({ default: m.ExerciseDetailPage })),
 );
@@ -56,6 +59,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'notifications', element: suspended(<NotificationsPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },

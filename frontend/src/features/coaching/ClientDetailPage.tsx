@@ -9,6 +9,7 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
 import { ProgressTab } from './ProgressTab';
 import { PlanTab } from './PlanTab';
+import { ChatTab } from './ChatTab';
 
 /* ── tabs ─────────────────────────────────────────────────────────────────────────────────── */
 // The four tabs the blueprint specifies. Three of them have no feature behind them yet, and they
@@ -229,6 +230,8 @@ export function ClientDetailPage() {
           <ProgressTab linkId={linkId} />
         ) : tab === 'plan' ? (
           <PlanTab linkId={linkId} />
+        ) : tab === 'chat' ? (
+          <ChatTab linkId={linkId} />
         ) : (
           // The tabs with no feature behind them yet NAME THE PHASE they arrive in. A coach who
           // cannot find the nutrition tab assumes the product lacks it; one that says when it

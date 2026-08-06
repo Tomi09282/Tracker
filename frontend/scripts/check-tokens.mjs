@@ -105,7 +105,17 @@ const violations = [];
  * This is the gate that would have caught them at build time instead.
  */
 const tokenSource = await fs.readFile(TOKEN_FILE, 'utf8');
-const declared = new Set([...tokenSource.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)].map((m) => m[1]));
+// NOT anchored to the line start. It used to be `/^\s*(--[a-z0-9-]+)\s*:/gim`, which sees only the
+// FIRST declaration on a line — and `tokens.css` puts pairs together for readability:
+//
+//     --danger:  #F87171;  --on-danger:  #2A0A0C;
+//
+// so `--on-danger`, `--on-success`, `--on-warning` and `--on-info` were invisible to this gate.
+// Four legitimately declared tokens that the build would reject on use, which is how a gate stops
+// being a guard and starts being an obstacle people route around.
+//
+// Measured when found: 163 tokens visible, 167 declared.
+const declared = new Set([...tokenSource.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
 // Tailwind declares its own; `env()` and inherited CSS vars are not ours to verify.
 const IGNORED_PREFIXES = ['--tw-', '--radix-', '--safe-'];
 

@@ -499,5 +499,32 @@
     "date": "Dátum",
     "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három edzésnap kell hozzá — két pont még nem trend.",
     "gap": "{{count}} nap kihagyás"
+  },
+  "chat": {
+    "thread": "Beszélgetés",
+    "compose": "Írj üzenetet",
+    "send": "Küldés",
+    "sending": "Küldés…",
+    "read": "Olvasva",
+    "emptyTitle": "Még nincs üzenet",
+    "emptyBody": "Írj elsőként — a másik fél értesítést kap róla.",
+    "blocked": "Ez a beszélgetés le van zárva.",
+    "block": "Letiltás",
+    "unblock": "Feloldás",
+    "report": "Jelentés",
+    "reported": "Jelentve",
+    "withdrawn": "Az üzenetet visszavonták",
+    "sendFailed": "Az üzenetet nem sikerült elküldeni. A szöveg megmaradt.",
+    "unavailable": "Ez a beszélgetés már nem elérhető."
+  },
+  "notifications": {
+    "title": "Értesítések",
+    "withUnread": "Értesítések, {{count}} olvasatlan",
+    "emptyTitle": "Nincs értesítés",
+    "emptyBody": "Ha üzenetet kapsz vagy változik a terved, itt jelenik meg.",
+    "markAllRead": "Összes olvasottnak jelölése",
+    "minutesAgo": "{{count}} perce",
+    "hoursAgo": "{{count}} órája",
+    "daysAgo": "{{count}} napja"
   }
 }

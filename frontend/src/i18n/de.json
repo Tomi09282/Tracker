@@ -499,5 +499,32 @@
     "date": "Datum",
     "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Trainingstage sind nötig — zwei Punkte sind kein Trend.",
     "gap": "{{count}} Tage Pause"
+  },
+  "chat": {
+    "thread": "Unterhaltung",
+    "compose": "Nachricht schreiben",
+    "send": "Senden",
+    "sending": "Senden…",
+    "read": "Gelesen",
+    "emptyTitle": "Noch keine Nachrichten",
+    "emptyBody": "Schreib die erste — die andere Person wird benachrichtigt.",
+    "blocked": "Diese Unterhaltung ist geschlossen.",
+    "block": "Blockieren",
+    "unblock": "Freigeben",
+    "report": "Melden",
+    "reported": "Gemeldet",
+    "withdrawn": "Diese Nachricht wurde zurückgezogen",
+    "sendFailed": "Die Nachricht konnte nicht gesendet werden. Dein Text ist noch da.",
+    "unavailable": "Diese Unterhaltung ist nicht mehr verfügbar."
+  },
+  "notifications": {
+    "title": "Mitteilungen",
+    "withUnread": "Mitteilungen, {{count}} ungelesen",
+    "emptyTitle": "Noch nichts",
+    "emptyBody": "Nachrichten und Planänderungen erscheinen hier.",
+    "markAllRead": "Alle als gelesen markieren",
+    "minutesAgo": "vor {{count}} Min.",
+    "hoursAgo": "vor {{count}} Std.",
+    "daysAgo": "vor {{count}} Tg."
   }
 }

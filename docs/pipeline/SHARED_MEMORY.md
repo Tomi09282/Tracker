@@ -162,6 +162,24 @@ index stops scanning at a hundred.
 clears a badge, so a forged id would otherwise let one account silently clear another's. Asserted:
 a stranger marking someone else's notification read changes zero rows.
 
+## 1g. THE TOKEN GATE COULD NOT SEE FOUR OF ITS OWN TOKENS
+
+`check-tokens` collected declared tokens with `/^\s*(--[a-z0-9-]+)\s*:/gim` — anchored to the
+line start. But `tokens.css` pairs declarations for readability:
+
+    --danger:  #F87171;  --on-danger:  #2A0A0C;
+
+so only the first on each line was ever collected. **163 tokens visible, 167 declared.**
+`--on-danger`, `--on-success`, `--on-warning` and `--on-info` were invisible, and using any of
+them failed the build as "undeclared" — four legitimately declared tokens the gate rejected.
+
+That is how a gate stops being a guard and starts being an obstacle people route around. Found by
+using `--on-danger` for the notification badge, which is exactly what it is for.
+
+Second, smaller trap from the same gate: it scans COMMENTS, so a comment explaining why a class was
+avoided will itself trip the rule that rejects the class. Correct behaviour — a commented-out class
+can be uncommented — but it means prose about a class has to name it indirectly.
+
 ## 2. CONTRACTS
 
 Established facts other jobs must not re-derive or contradict.

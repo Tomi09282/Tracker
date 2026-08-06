@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from '../chat/NotificationBell';
 import { Link } from 'react-router';
 import { Users, KeyRound, UserPlus, TriangleAlert, Archive, Ticket } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -95,8 +96,16 @@ export function CoachDashboard() {
 
   return (
     <div className="col-wide screen-x py-6">
-      <p className="text-micro uppercase text-accent">{t('coaching.eyebrow')}</p>
-      <h1 className="text-title-1 mt-1 text-text-1">{t('coaching.title')}</h1>
+      {/* The bell rides this screen's OWN heading rather than a global app bar. An app bar would
+          cost vertical space on every screen including the workout player, whose height is the
+          thing its entire layout is built around. */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-micro uppercase text-accent">{t('coaching.eyebrow')}</p>
+          <h1 className="text-title-1 mt-1 text-text-1">{t('coaching.title')}</h1>
+        </div>
+        <NotificationBell className="-mr-2 shrink-0" />
+      </div>
 
       {clients.isPending ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-3">

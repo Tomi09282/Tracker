@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from '../chat/NotificationBell';
 import { useNavigate } from 'react-router';
 import { CalendarDays, Dumbbell, Moon, PlayCircle, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -42,9 +43,12 @@ export function HomePage() {
   return (
     <div className="col-mobile screen-x py-6">
       <header>
+        <div className="flex items-start justify-between gap-2">
         <h1 className="text-title-2 text-text-1">{t('home.greeting')}</h1>
         <p className="text-caption mt-1 text-text-3 first-letter:uppercase">{dateLabel}</p>
         {user ? <p className="text-body-s mt-1 text-text-3">{user.email}</p> : null}
+                <NotificationBell className="-mr-2 shrink-0" />
+</div>
       </header>
 
       {today.data?.date ? (
