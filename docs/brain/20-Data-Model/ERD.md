@@ -9,7 +9,7 @@ tags: [data-model, erd, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-05.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-06.
 
 40 tables, plus 1 FTS5 shadow table (`exercise_translations_fts`).
 
