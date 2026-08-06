@@ -42,6 +42,12 @@ export const openConversation = (args) => pool.run(args, { name: 'openConversati
 export const clonePlan = (args) => pool.run(args, { name: 'clonePlanTx' });
 /** Copy days within one plan, growing the cycle when the target lands outside it. */
 export const copyDays = (args) => pool.run(args, { name: 'copyDaysTx' });
+
+// Coins (019). Every one is a NAMED transaction: the owner's rule is that a business-critical
+// write — money, inventory, anything with a guard — never goes through the generic writeTx.
+export const purchaseStoreItem = (args) => pool.run(args, { name: 'purchaseStoreItemTx' });
+export const unlockAchievement = (args) => pool.run(args, { name: 'unlockAchievementTx' });
+export const adminAdjustCoins = (args) => pool.run(args, { name: 'adminAdjustCoinsTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);

@@ -23,7 +23,15 @@ const writeLimiter = rateLimit({
 });
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
-const PACKS = ['midnight', 'solar', 'forest', 'neon', 'mono'];
+/**
+ * THE PACK VOCABULARY IS A TABLE, NOT A LIST IN THIS FILE.
+ *
+ * It used to be `['midnight', 'solar', 'forest', 'neon', 'mono']` here and a CHECK in migration
+ * 002 — two copies, and migration 019 needed a sixth. The regex below bounds the SHAPE only; which
+ * packs exist, whether one is active and whether the caller may wear it are all decided by the
+ * database, in one statement, at write time.
+ */
+const PACK_KEY = /^[a-z][a-z0-9_]{1,31}$/;
 
 const GradientSchema = z
   .object({
@@ -47,7 +55,7 @@ const GradientSchema = z
 
 const ThemeSchema = z
   .object({
-    pack: z.enum(PACKS),
+    pack: z.string().regex(PACK_KEY),
     accent: z.string().regex(HEX).nullable(),
     gradient: GradientSchema.nullable(),
   })
@@ -61,10 +69,26 @@ router.get(
       'SELECT pack, accent, gradient FROM user_theme_prefs WHERE user_id = ?',
       [req.user.id],
     );
+    // The roster travels with the preference so the client does not carry its own copy of the
+    // surfaces either — the same second-copy this commit deleted from contrast.js. `locked` is
+    // UX for greying the picker; trg_theme_pack_entitled_* is the control.
+    const packs = await db.all(
+      `SELECT t.key, t.label, t.surface_hex AS surfaceHex,
+              CASE WHEN t.entitlement_key IS NULL THEN 0
+                   WHEN EXISTS (SELECT 1 FROM coin_entitlements e
+                                 WHERE e.user_id = ? AND e.entitlement_key = t.entitlement_key
+                                   AND e.revoked_at IS NULL) THEN 0
+                   ELSE 1 END AS locked
+         FROM theme_packs t
+        WHERE t.active = 1
+        ORDER BY t.sort_order, t.key`,
+      [req.user.id],
+    );
     res.json({
       theme: row
         ? { pack: row.pack, accent: row.accent, gradient: row.gradient ? JSON.parse(row.gradient) : null }
         : { pack: 'midnight', accent: null, gradient: null },
+      packs,
     });
   }),
 );
@@ -84,7 +108,15 @@ router.put(
     // black or white reads on the accent would be vacuous: those two curves cross at 4.58, so
     // the better of the pair can never fall below 4.5 for any colour at all.
     if (body.accent) {
-      const verdict = checkAccent(body.accent, body.pack);
+      // The surface comes from the pack's own row. A pack that does not exist has no surface, so
+      // there is nothing to fall back to and the write below answers 404 — which is strictly
+      // better than validating against a guessed background and then refusing for another reason.
+      const packRow = await db.get(
+        'SELECT surface_hex FROM theme_packs WHERE key = ? AND active = 1',
+        [body.pack],
+      );
+      if (!packRow) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+      const verdict = checkAccent(body.accent, packRow.surface_hex);
       if (!verdict.ok) {
         return sendError(
           res,
@@ -97,14 +129,34 @@ router.put(
 
     // The write is scoped to the caller's own row by construction — there is no user_id in the
     // body to forge, and none is accepted (`.strict()` would reject it anyway).
-    await db.run(
+    // ONE STATEMENT, WITH THE ENTITLEMENT GUARD INSIDE ITS OWN SELECT. `changes === 0` IS the
+    // 404 — there is no preceding ownership read for a concurrent revocation to slip past.
+    //
+    // AN UNKNOWN PACK AND AN UNOWNED ONE ANSWER IDENTICALLY, and that is the point: a 403 here
+    // would confirm the pack is real, which is enough to enumerate the paid catalogue for free.
+    // It is also 404 and not 403 because this is an OBJECT-level miss, and the rule this codebase
+    // follows has exactly one exception, which is the admin coin adjustment.
+    const wrote = await db.run(
       `INSERT INTO user_theme_prefs (user_id, pack, accent, gradient)
-       VALUES (?, ?, ?, ?)
+       SELECT ?, t.key, ?, ?
+         FROM theme_packs t
+        WHERE t.key = ? AND t.active = 1
+          AND (t.entitlement_key IS NULL
+            OR EXISTS (SELECT 1 FROM coin_entitlements e
+                        WHERE e.user_id = ? AND e.entitlement_key = t.entitlement_key
+                          AND e.revoked_at IS NULL))
        ON CONFLICT(user_id) DO UPDATE SET pack = excluded.pack,
                                           accent = excluded.accent,
                                           gradient = excluded.gradient`,
-      [req.user.id, body.pack, body.accent, body.gradient ? JSON.stringify(body.gradient) : null],
+      [
+        req.user.id,
+        body.accent,
+        body.gradient ? JSON.stringify(body.gradient) : null,
+        body.pack,
+        req.user.id,
+      ],
     );
+    if (wrote.changes === 0) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     res.json({ ok: true });
   }),
 );

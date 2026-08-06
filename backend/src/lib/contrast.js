@@ -51,13 +51,20 @@ export const AA_NORMAL = 4.5;
  * without it the server cannot validate an accent at all, and "the picker wouldn't let you"
  * is not a control. The smoke suite asserts these stay in step with tokens.css.
  */
-export const PACK_SURFACES = {
-  midnight: '#0B0D10',
-  solar: '#12100B',
-  forest: '#0A0F0C',
-  neon: '#06070A',
-  mono: '#0A0A0A',
-};
+/**
+ * THE SURFACES MAP USED TO LIVE HERE AND IT WAS A SECOND COPY.
+ *
+ * It listed five packs and `checkAccent` fell back to 'midnight' for anything it did not know —
+ * which, the day migration 019 added a sixth pack, would have silently validated that pack's
+ * accent against the WRONG surface. And midnight is the near-black one, so the fallback was also
+ * the most PERMISSIVE: a new pack's accent would have been checked against the easiest possible
+ * background and passed things that are illegible on the real one.
+ *
+ * That is this project's recurring defect wearing a fifth costume: two things that must agree,
+ * with one of them able to fall silently out of date. `theme_packs.surface_hex` is now the single
+ * authority and the caller reads it from there, so an unknown pack has no fallback to be wrong
+ * with — it simply does not exist.
+ */
 
 /**
  * Whether an accent may be used, and why not if it may not.
@@ -70,8 +77,15 @@ export const PACK_SURFACES = {
  * `accent-fg` on top, it is also TEXT — links, the active nav item, eyebrow labels — drawn on
  * the app's own dark surface. A dark accent fails there, and that is what this rejects.
  */
-export function checkAccent(hex, pack = 'midnight') {
-  const surface = PACK_SURFACES[pack] ?? PACK_SURFACES.midnight;
+/**
+ * There is NO DEFAULT here any more, and its absence is the guard.
+ *
+ * The old signature was `(hex, pack = 'midnight')`, so a caller that forgot the second argument
+ * silently validated against the darkest, most permissive surface and got an "ok" it had not
+ * earned. A required argument means a caller that forgets it fails at the call site instead.
+ */
+export function checkAccent(hex, surfaceHex) {
+  const surface = surfaceHex;
   const asText = contrastRatio(hex, surface);
   const { fg, ratio: fgRatio } = readableOn(hex);
   return {

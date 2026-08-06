@@ -4068,6 +4068,270 @@ if (seeded) {
   }
 }
 
+// --- F7 COINS: THE FIVE PASSES AT THE HTTP LAYER ----------------------------------------------
+//
+// The schema was attacked first (verify:019, 56 assertions). This block attacks what a person with
+// a proxy can actually reach: the routes. Every guarantee below is really the schema's or the
+// worker transaction's — what is being tested here is that the translation layer does not leak
+// one, and that the outcomes reach the client as the right status codes.
+{
+  const rich = new Jar();
+  const poor = new Jar();
+  const adminJar = new Jar();
+  const richEmail = `coin-rich-${stamp}@example.com`;
+  const poorEmail = `coin-poor-${stamp}@example.com`;
+
+  for (const [email, jar] of [[richEmail, rich], [poorEmail, poor]]) {
+    await call('/api/v1/auth/register', { method: 'POST', body: { email, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD }, jar });
+  }
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.admin.email, password: seeded.admin.password }, jar: adminJar });
+
+  const richId = (await call('/api/v1/auth/me', { jar: rich })).json?.user?.id;
+  const poorId = (await call('/api/v1/auth/me', { jar: poor })).json?.user?.id;
+
+  {
+    const { res, json } = await call('/api/v1/coins/wallet', { jar: rich });
+    check('a new account has a wallet, and it is empty', res.status === 200 && json?.balanceMinor === 0, `${json?.balanceMinor}`);
+  }
+
+  // --- the store ---------------------------------------------------------------------------------
+  let aurora = null;
+  let ember = null;
+  {
+    const { res, json } = await call('/api/v1/coins/store', { jar: rich });
+    aurora = (json?.items ?? []).find((i) => i.sku === 'theme.aurora');
+    ember = (json?.items ?? []).find((i) => i.sku === 'theme.ember');
+    check('the store lists the premium packs, unowned', res.status === 200 && aurora?.owned === 0 && ember?.owned === 0, `${json?.items?.length} items`);
+  }
+
+  // --- the admin adjustment, which is the only way coins enter --------------------------------
+  {
+    // FORGE: an ordinary user calling the admin endpoint. The JWT gate answers first.
+    const { res } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: rich, body: { amount_minor: 100000, note: 'self-serve', idempotency_key: 'selfserve1' },
+    });
+    check('FORGE: a user crediting themselves -> 403', res.status === 403, `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 100000, note: 'launch grant', idempotency_key: `grant-${stamp}`.slice(0, 60) },
+    });
+    check('an admin credits the account', res.status === 200 && json?.balanceMinor === 100000, `status ${res.status}, balance ${json?.balanceMinor}`);
+  }
+  {
+    // REPLAY: the identical request. Exactly one effect, and the SAME numbers back.
+    const again = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 100000, note: 'launch grant', idempotency_key: `grant-${stamp}`.slice(0, 60) },
+    });
+    const wallet = await call('/api/v1/coins/wallet', { jar: rich });
+    check(
+      'REPLAY: the same adjustment twice moves the balance once, and says so',
+      again.res.status === 200 && again.json?.replayed === true && wallet.json?.balanceMinor === 100000,
+      `replayed=${again.json?.replayed}, balance ${wallet.json?.balanceMinor}`,
+    );
+  }
+  {
+    // REPLAY, THIRD CASE: same key, DIFFERENT intent. Never a second effect and never a silent
+    // success reporting the first one.
+    const { res } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 500000, note: 'different', idempotency_key: `grant-${stamp}`.slice(0, 60) },
+    });
+    const wallet = await call('/api/v1/coins/wallet', { jar: rich });
+    check('REPLAY: the same key with a different amount -> 409, nothing moved', res.status === 409 && wallet.json?.balanceMinor === 100000, `status ${res.status}, balance ${wallet.json?.balanceMinor}`);
+  }
+  {
+    // EXTREMES.
+    const zero = await call(`/api/v1/admin/users/${richId}/coins`, { method: 'POST', jar: adminJar, body: { amount_minor: 0, note: 'n', idempotency_key: 'zeroamount1' } });
+    const huge = await call(`/api/v1/admin/users/${richId}/coins`, { method: 'POST', jar: adminJar, body: { amount_minor: Number.MAX_SAFE_INTEGER, note: 'n', idempotency_key: 'hugeamount1' } });
+    const float = await call(`/api/v1/admin/users/${richId}/coins`, { method: 'POST', jar: adminJar, body: { amount_minor: 10.5, note: 'n', idempotency_key: 'floatamount' } });
+    check('EXTREMES: zero, MAX_SAFE_INTEGER and a fraction are all 400', zero.res.status === 400 && huge.res.status === 400 && float.res.status === 400, `${zero.res.status}/${huge.res.status}/${float.res.status}`);
+  }
+  {
+    // FORGE: ':' is the server's namespace separator and the client may not use it.
+    const { res } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 1000, note: 'n', idempotency_key: 'ach:0000000001' },
+    });
+    check("FORGE: a colon in the client's idempotency key -> 400", res.status === 400, `status ${res.status}`);
+  }
+  {
+    // FORGE: an unknown body field. .strict() rejects rather than ignores.
+    const { res } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 1000, note: 'n', idempotency_key: 'unknownfld1', reason_key: 'achievement.reward' },
+    });
+    check('FORGE: choosing your own reason_key -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // IDOR: an admin adjusting an account that does not exist is 404, not a leak and not a 403.
+    const { res } = await call('/api/v1/admin/users/2147483647/coins', {
+      method: 'POST', jar: adminJar, body: { amount_minor: 1000, note: 'n', idempotency_key: 'ghosttarget' },
+    });
+    check('IDOR: adjusting a non-existent account -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // A debit that would go below zero is refused with the real numbers.
+    const { res, json } = await call(`/api/v1/admin/users/${poorId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: -5000, note: 'clawback', idempotency_key: 'overdrawpoor' },
+    });
+    check('a debit below zero -> 409 carrying the real balance', res.status === 409 && json?.balanceMinor === 0, `status ${res.status}, balance ${json?.balanceMinor}`);
+  }
+
+  // --- the purchase ------------------------------------------------------------------------------
+  {
+    // FORGE: the client sends the price it wants to pay.
+    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'cheapbuy001', expected_price_minor: aurora.priceMinor, price_minor: 1 },
+    });
+    check('FORGE: sending a price alongside the agreement -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // FORGE: the agreement itself is wrong. It can only make the purchase FAIL.
+    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'wrongprice1', expected_price_minor: 1 },
+    });
+    const wallet = await call('/api/v1/coins/wallet', { jar: rich });
+    check('FORGE: disagreeing about the price -> 409 with the real one, nothing charged', res.status === 409 && json?.priceMinor === aurora.priceMinor && wallet.json?.balanceMinor === 100000, `status ${res.status}, priceMinor ${json?.priceMinor}`);
+  }
+  let receipt = null;
+  {
+    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    });
+    receipt = json;
+    check(
+      'a purchase debits exactly the item price and grants the entitlement',
+      res.status === 200 && json?.pricePaidMinor === aurora.priceMinor
+        && json.balanceMinor === 100000 - aurora.priceMinor && Number.isInteger(json.entitlementId),
+      `status ${res.status}, paid ${json?.pricePaidMinor}, balance ${json?.balanceMinor}`,
+    );
+  }
+  {
+    // REPLAY: byte-identical except for `replayed`. This is the defect the review found in every
+    // candidate — a fresh path reporting a JS variable and a replay path reporting the stored row.
+    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    });
+    const differing = Object.keys({ ...receipt, ...json }).filter((k) => k !== 'replayed' && JSON.stringify(receipt[k]) !== JSON.stringify(json[k]));
+    check(
+      'REPLAY: the replayed receipt is byte-identical except for `replayed`',
+      res.status === 200 && json?.replayed === true && receipt.replayed === false && differing.length === 0,
+      differing.length ? `differing keys: ${differing.join(', ')}` : 'identical',
+    );
+  }
+  {
+    const wallet = await call('/api/v1/coins/wallet', { jar: rich });
+    check('and the replay charged nothing', wallet.json?.balanceMinor === 100000 - aurora.priceMinor, `${wallet.json?.balanceMinor}`);
+  }
+  {
+    // REPLAY, THIRD CASE: same key, different ITEM.
+    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: ember.priceMinor },
+    });
+    check('REPLAY: the same key for a different item -> 409, not somebody else\'s receipt', res.status === 409, `status ${res.status}`);
+  }
+  {
+    // NAMESPACE: the same CLIENT string on the admin endpoint is a DIFFERENT operation, because
+    // the server composes `buy:<id>:` and `adj:<id>:`. Without that it would false-replay.
+    const { res, json } = await call(`/api/v1/admin/users/${richId}/coins`, {
+      method: 'POST', jar: adminJar, body: { amount_minor: 1000, note: 'same string', idempotency_key: 'buyaurora01' },
+    });
+    check('NAMESPACE: the same client key on another endpoint is a real, separate operation', res.status === 200 && json?.replayed === false, `status ${res.status}, replayed ${json?.replayed}`);
+  }
+  {
+    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyagain001', expected_price_minor: aurora.priceMinor },
+    });
+    check('buying what you already own -> 409', res.status === 409, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
+      method: 'POST', jar: poor, body: { idempotency_key: 'poorbuy0001', expected_price_minor: ember.priceMinor },
+    });
+    check('buying with an empty wallet -> 409', res.status === 409, `status ${res.status}`);
+  }
+  {
+    const { res } = await call('/api/v1/coins/store/2147483647/purchase', {
+      method: 'POST', jar: rich, body: { idempotency_key: 'ghostitem01', expected_price_minor: 1 },
+    });
+    check('EXTREMES: MAX_INT item id -> 404', res.status === 404, `status ${res.status}`);
+  }
+
+  // --- RACE ---------------------------------------------------------------------------------------
+  {
+    // Two DIFFERENT items, DIFFERENT keys, both affordable alone and not together. Exactly one may
+    // win. This is the assertion that would fail if the balance guard were moved out of the
+    // INSERT's own WHERE into the preceding SELECT.
+    const raceEmail = `coin-race-${stamp}@example.com`;
+    const raceJar = new Jar();
+    await call('/api/v1/auth/register', { method: 'POST', body: { email: raceEmail, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: raceEmail, password: PASSWORD }, jar: raceJar });
+    const raceId = (await call('/api/v1/auth/me', { jar: raceJar })).json?.user?.id;
+
+    await call(`/api/v1/admin/users/${raceId}/coins`, {
+      method: 'POST', jar: adminJar,
+      body: { amount_minor: aurora.priceMinor, note: 'exactly one purchase', idempotency_key: `race-${stamp}`.slice(0, 60) },
+    });
+
+    const [a, b] = await Promise.all([
+      call(`/api/v1/coins/store/${aurora.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceaurora1', expected_price_minor: aurora.priceMinor } }),
+      call(`/api/v1/coins/store/${ember.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceember01', expected_price_minor: ember.priceMinor } }),
+    ]);
+    const wallet = await call('/api/v1/coins/wallet', { jar: raceJar });
+    const won = [a, b].filter((r) => r.res.status === 200).length;
+    check(
+      'RACE: two concurrent purchases against one item\'s worth of coins — exactly one wins',
+      won === 1 && wallet.json?.balanceMinor === 0,
+      `${won} succeeded, balance ${wallet.json?.balanceMinor}`,
+    );
+    const ents = await call('/api/v1/coins/entitlements', { jar: raceJar });
+    check('RACE: and exactly one entitlement exists', (ents.json?.entitlements ?? []).length === 1, `${ents.json?.entitlements?.length}`);
+  }
+
+  // --- IDOR on the reads --------------------------------------------------------------------------
+  {
+    const { json } = await call('/api/v1/coins/ledger', { jar: rich });
+    const keys = Object.keys(json?.entries?.[0] ?? {});
+    check(
+      'IDOR: the ledger projection never carries the acting admin\'s identity',
+      keys.length > 0 && !keys.includes('actorUserId') && !keys.some((k) => /email/i.test(k)),
+      keys.join(', '),
+    );
+  }
+  {
+    const { json } = await call('/api/v1/coins/ledger', { jar: poor });
+    check('IDOR: another account\'s statement is simply not there', (json?.entries ?? []).length === 0, `${json?.entries?.length} entries`);
+  }
+  {
+    const { res } = await call('/api/v1/admin/coins/ledger', { jar: rich });
+    check('IDOR: a user reading the admin ledger -> 403', res.status === 403, `status ${res.status}`);
+  }
+
+  // --- THE THEME IS THE THING THE COINS BOUGHT ----------------------------------------------------
+  {
+    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'aurora', accent: null, gradient: null } });
+    check('IDOR: applying a theme you have not bought -> 404, not 403', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'nosuchpack', accent: null, gradient: null } });
+    check('and an unknown pack answers IDENTICALLY, so the paid catalogue cannot be enumerated', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: rich, body: { pack: 'aurora', accent: null, gradient: null } });
+    const read = await call('/api/v1/me/theme', { jar: rich });
+    check('the buyer CAN apply it', res.status === 200 && read.json?.theme?.pack === 'aurora', `status ${res.status}, pack ${read.json?.theme?.pack}`);
+  }
+
+  // --- RECONCILIATION -----------------------------------------------------------------------------
+  {
+    const { res, json } = await call('/api/v1/admin/coins/audit', { jar: adminJar });
+    check(
+      'the books balance: no drift, no unpaid receipt, no orphan debit, no unbacked grant',
+      res.status === 200 && json?.clean === true,
+      json?.clean ? 'clean' : JSON.stringify({ d: json?.drifting?.length, u: json?.unpaidPurchases?.length, o: json?.orphanDebits?.length, e: json?.unbackedEntitlements?.length }),
+    );
+  }
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

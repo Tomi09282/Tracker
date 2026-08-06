@@ -927,3 +927,495 @@ export function openConversationTx({ linkId, userId }) {
 export function readMigration({ path }) {
   return readFileSync(path, 'utf8');
 }
+
+
+/* ═══ COINS (019) ═══════════════════════════════════════════════════════════════════════════════
+ *
+ * Three named transactions, because every one of them is a money movement and the owner's rule is
+ * that business-critical writes never go through the generic `writeTx`.
+ *
+ * They share one shape, and the shape is ADR-0005:
+ *
+ *   1. Everything that can produce an ERROR RESULT happens before the first write. A
+ *      `.transaction()` COMMITS ON RETURN — only a throw rolls back — so a function that writes
+ *      and then decides it should not have has already committed.
+ *   2. After the first write there is at most one conditional return, and it is a
+ *      `changes === 0` probe on a guarded INSERT, which `check-worker-tx.mjs` exempts precisely
+ *      because nothing was written.
+ *   3. Anything genuinely impossible after that is a THROW, which rolls back.
+ *
+ * And one more, which is the answer to the defect the adversarial review found in every candidate:
+ * THE RESULT IS READ BACK OFF THE STORED ROWS BY ONE CLOSURE THAT BOTH THE FRESH AND THE REPLAY
+ * PATH CALL. A replayed response is byte-identical to the original by construction rather than by
+ * discipline. One design's fresh path reported a number from a JS variable it had never SELECTed
+ * while its replay path reported the true value off the row — same key, two different receipts,
+ * and the wrong one written to an append-only audit log.
+ *
+ * The guard is always INSIDE the INSERT. The read above it exists only so the client gets a 409
+ * with real numbers instead of a rolled-back generic 400; `tx.immediate()` takes the single write
+ * lock at BEGIN, so the read and the write cannot disagree.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Buy one store item.
+ *
+ * WHAT THE CLIENT SENDS: an item id, an idempotency key, and the price it was SHOWN. It does not
+ * send an amount, a balance, a user id or an entitlement, and none is accepted. The price it does
+ * send can only make the purchase FAIL — it is an agreement assertion, never the amount. It is
+ * MANDATORY: a candidate design made it optional and the reviewer's finding stands, that an
+ * omitted agreement field is a surprise charge waiting for the first price change.
+ *
+ * THE KEY IS COMPOSED BY THE SERVER: `buy:<userId>:<clientKey>`. ':' is excluded by the route's
+ * zod regex, so a client can never occupy a server-minted slot; the `buy:` scope means the same
+ * client string used on the admin endpoint is a DIFFERENT operation rather than a false replay or
+ * an unexplained 400; and the actor segment means one principal cannot squat another's key.
+ *
+ * ONE CONSTRUCTION SITE FOR THE ANSWER. `receipt()` reads the stored rows and is called by BOTH
+ * the fresh path and the replay path, so a replayed response is byte-identical to the original by
+ * construction rather than by discipline. This is the direct fix for the defect where one design's
+ * fresh path reported commission 0 from a JS variable that was never SELECTed while its replay
+ * path reported the true value off the row — same key, two different receipts, and the wrong one
+ * written to an append-only audit log.
+ *
+ * ADR-0005. Every check that can produce an error RESULT runs before the first write. After the
+ * marker there is exactly one conditional return — the `changes === 0` probe on the guarded
+ * receipt insert, which is the exemption check-worker-tx.mjs:68-70 grants because nothing was
+ * written. Everything after that is unconditional or a THROW, which rolls back.
+ *
+ * THE GUARD IS INSIDE THE INSERT. `w.balance_minor >= i.price_minor`, on the balance the database
+ * holds. The pre-read above it exists only so the client gets a 409 with real numbers instead of a
+ * rolled-back generic 400; under tx.immediate() the write lock is taken at BEGIN, so the two
+ * cannot disagree (worker.js:236-239).
+ */
+export function purchaseStoreItemTx({
+  userId, itemId, expectedPriceMinor, idempotencyKey, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+  const writeUid = `buy:${userId}:${idempotencyKey}`;
+
+  const tx = conn.transaction(() => {
+    // Defined before anything else so its `return` is textually above the first write and the
+    // ADR-0005 gate never has to reason about it. It only reads.
+    const receipt = (purchaseId, replayed) => {
+      current = 'SELECT the receipt';
+      const row = stmt(
+        `SELECT p.id AS purchaseId, p.item_id AS itemId, p.sku_snapshot AS sku,
+                p.title_snapshot AS title, p.entitlement_key AS entitlementKey,
+                p.price_minor_snapshot AS pricePaidMinor, p.created_at AS purchasedAt,
+                l.id AS ledgerId,
+                (SELECT e.id FROM coin_entitlements e
+                  WHERE e.purchase_id = p.id AND e.revoked_at IS NULL) AS entitlementId,
+                (SELECT w.balance_minor FROM coin_wallets w
+                  WHERE w.user_id = p.user_id) AS balanceMinor
+           FROM coin_purchases p
+           JOIN coin_ledger l ON l.reason_key = 'store.purchase'
+                            AND l.ref_type = 'coin_purchase' AND l.ref_id = p.id
+          WHERE p.id = ?`,
+      ).get(purchaseId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error runs BEFORE the first write (ADR-0005) ────────────
+
+    // THE REPLAY PROBE, against the ONE key namespace. Because the stored key encodes the scope
+    // and the actor, a hit here is necessarily this user's own prior purchase — so the only
+    // remaining question is whether it bought the same thing.
+    current = 'SELECT the prior attempt (idempotency)';
+    const prior = stmt(
+      `SELECT l.ref_id AS purchaseId, p.item_id AS itemId
+         FROM coin_ledger l
+         LEFT JOIN coin_purchases p ON p.id = l.ref_id
+        WHERE l.user_id = ? AND l.idempotency_key = ?`,
+    ).get(userId, writeUid);
+    if (prior && prior.itemId !== itemId) {
+      // Same key, different intent — the third case of the write_uid trichotomy, and the one the
+      // review found every candidate design getting wrong. 409, never a second effect.
+      return { outcome: 'key_reused', storedPurchaseId: prior.purchaseId, storedItemId: prior.itemId };
+    }
+    if (prior) return receipt(prior.purchaseId, true);
+
+    // Availability is in the predicate, so a miss is ONE answer for every reason: never existed,
+    // inactive, delisted. Object-level miss is 404, never 403.
+    current = 'SELECT the item';
+    const item = stmt(
+      `SELECT id, sku, title, price_minor, entitlement_key
+         FROM coin_store_items
+        WHERE id = ? AND active = 1 AND delisted_at IS NULL`,
+    ).get(itemId);
+    if (!item) return { outcome: 'missing' };
+
+    // The agreement check. It can ONLY cause a failure; it is never used as the amount.
+    if (expectedPriceMinor !== item.price_minor) {
+      return { outcome: 'price_changed', priceMinor: item.price_minor };
+    }
+
+    current = 'SELECT a live entitlement';
+    const owned = stmt(
+      `SELECT id FROM coin_entitlements
+        WHERE user_id = ? AND entitlement_key = ? AND revoked_at IS NULL`,
+    ).get(userId, item.entitlement_key);
+    // The authoritative control is coin_entitlements_live_uidx, which makes two concurrent buys
+    // impossible; this read only turns the constraint into a sentence.
+    if (owned) return { outcome: 'already_owned', entitlementId: owned.id };
+
+    current = 'SELECT the wallet';
+    const wallet = stmt('SELECT balance_minor FROM coin_wallets WHERE user_id = ?').get(userId);
+    if (!wallet) return { outcome: 'missing' };
+    if (wallet.balance_minor < item.price_minor) {
+      return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, priceMinor: item.price_minor };
+    }
+
+    // ── from here on, nothing may conditionally return ─────────────────────────────────────────
+
+    // Price, sku and title are read from the item INSIDE the statement (015's nutrition rule: the
+    // client sends an id, the server copies its own numbers in) and `trg_coin_purchase_truthful`
+    // re-derives them. `w.balance_minor >= i.price_minor` is the funds guard.
+    current = 'INSERT coin_purchases (the guard)';
+    const bought = stmt(
+      `INSERT INTO coin_purchases
+         (user_id, item_id, sku_snapshot, title_snapshot, entitlement_key,
+          price_minor_snapshot, request_id)
+       SELECT w.user_id, i.id, i.sku, i.title, i.entitlement_key, i.price_minor, ?
+         FROM coin_store_items i
+         JOIN coin_wallets w ON w.user_id = ?
+        WHERE i.id = ? AND i.active = 1 AND i.delisted_at IS NULL
+          AND w.balance_minor >= i.price_minor`,
+    ).run(requestId, userId, itemId);
+    if (bought.changes === 0) {
+      // Nothing was written, so returning here cannot leave a half-committed state. Every other
+      // predicate in that WHERE was established above under the same write lock and none of them
+      // can move, so this means the funds guard and nothing else. (Note there is no availability
+      // WINDOW on an item in this migration — a candidate design had one, evaluated unixepoch()
+      // per statement, and answered `insufficient` to a full wallet whose item had just expired.)
+      return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, priceMinor: item.price_minor };
+    }
+    const purchaseId = Number(bought.lastInsertRowid);
+
+    // The debit. Amount read from the receipt, guard repeated in its own WHERE rather than
+    // inherited from the statement above.
+    current = 'INSERT coin_ledger (the debit)';
+    const paid = stmt(
+      `INSERT INTO coin_ledger
+         (user_id, amount_minor, reason_key, ref_type, ref_id, idempotency_key,
+          actor_user_id, request_id)
+       SELECT p.user_id, -p.price_minor_snapshot, 'store.purchase', 'coin_purchase', p.id, ?,
+              p.user_id, p.request_id
+         FROM coin_purchases p
+         JOIN coin_wallets w ON w.user_id = p.user_id
+        WHERE p.id = ? AND w.balance_minor >= p.price_minor_snapshot`,
+    ).run(writeUid, purchaseId);
+    // Impossible: the receipt insert proved the funds one statement ago under the same lock. A
+    // THROW rather than a return, because a return would COMMIT a receipt with no payment behind
+    // it — which is the exact ADR-0005 bug this project already paid for once.
+    if (paid.changes !== 1) throw new Error('the debit did not match the receipt that authorised it');
+
+    current = 'INSERT coin_entitlements';
+    stmt(
+      `INSERT INTO coin_entitlements (user_id, item_id, purchase_id, entitlement_key)
+       SELECT p.user_id, p.item_id, p.id, p.entitlement_key
+         FROM coin_purchases p WHERE p.id = ?`,
+    ).run(purchaseId);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'coin.store.purchase', 'coin_purchase', ?, ?, ?, ?)`,
+    ).run(
+      userId, purchaseId,
+      // Read back off the stored row, never rebuilt from a JS variable — the audit trail and the
+      // ledger must not be able to disagree.
+      JSON.stringify(
+        stmt(
+          `SELECT item_id AS itemId, sku_snapshot AS sku, entitlement_key AS entitlementKey,
+                  price_minor_snapshot AS priceMinor
+             FROM coin_purchases WHERE id = ?`,
+        ).get(purchaseId),
+      ),
+      requestId, ip,
+    );
+
+    return receipt(purchaseId, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Award an achievement and pay for it.
+ *
+ * THERE IS NO CLIENT-FACING CLAIM ENDPOINT, and that is the design rather than an omission.
+ * Earning is never client-initiated: this is called from the server's own paths, so "claim a badge
+ * I did not earn" has no request to forge. The strongest anti-mint control in this subsystem is
+ * the endpoint that does not exist.
+ *
+ * IDEMPOTENT WITHOUT A CLIENT TOKEN, and that is the house test rather than laziness: a token is
+ * needed when a request carries VALUES two attempts could disagree about (worker.js:461-465).
+ * This one carries none — the reward comes from the catalogue and the natural key is
+ * (user, achievement). voidSetTx and openConversationTx are idempotent on the same grounds.
+ *
+ * The ledger key is SERVER-MINTED as `ach:<unlock id>`. It contains ':', which every route's zod
+ * regex forbids, so a client cannot pre-register it — the defect where a user squatted
+ * 'ach-0000000123' with a purchase and made their own future payout abort forever, deterministically,
+ * with no recovery path. It is also derived from a numeric id rather than the achievement key, so
+ * no reference-table string can ever collide with the key column's length bound.
+ *
+ * TWO INDEPENDENT DOUBLE-AWARD GUARDS, both in the database: user_achievements_once_uidx on
+ * (user, achievement) and coin_ledger_ref_uidx on (reason, ref_type, ref_id). One constraint per
+ * requirement — the workout_pr_events discipline, no third mechanism invented here.
+ *
+ * A ZERO-REWARD ACHIEVEMENT IS A PREDICATE, NOT A BRANCH. The payment statement carries
+ * `reward_minor_snapshot > 0`, and its row count is ASSERTED against the reward read before the
+ * first write. A candidate design had the predicate and never read `changes`, so a wallet in the
+ * wrong state consumed the natural key, paid nothing, returned 200 with the reward it had not
+ * paid, and made the coins unrecoverable forever. An unread `changes` on a money statement is the
+ * bug; the assertion is the fix.
+ */
+export function unlockAchievementTx({ userId, achievementKey, sourceType = null, sourceId = null, requestId }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const result = (unlockId, replayed) => {
+      current = 'SELECT the unlock';
+      const row = stmt(
+        `SELECT ua.id AS unlockId, ua.achievement_key AS achievementKey,
+                ua.reward_minor_snapshot AS rewardMinor, ua.unlocked_at AS unlockedAt,
+                (SELECT l.id FROM coin_ledger l
+                  WHERE l.reason_key = 'achievement.reward'
+                    AND l.ref_type = 'user_achievement' AND l.ref_id = ua.id) AS ledgerId,
+                (SELECT w.balance_minor FROM coin_wallets w
+                  WHERE w.user_id = ua.user_id) AS balanceMinor
+           FROM user_achievements ua WHERE ua.id = ?`,
+      ).get(unlockId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error runs BEFORE the first write (ADR-0005) ────────────
+
+    current = 'SELECT the prior award (replay)';
+    const prior = stmt(
+      'SELECT id FROM user_achievements WHERE user_id = ? AND achievement_key = ?',
+    ).get(userId, achievementKey);
+    if (prior) return result(prior.id, true);
+
+    current = 'SELECT the achievement (catalogue)';
+    const achievement = stmt(
+      'SELECT key, reward_minor FROM achievements WHERE key = ? AND active = 1',
+    ).get(achievementKey);
+    if (!achievement) return { outcome: 'missing' };
+
+    current = 'SELECT the wallet';
+    const wallet = stmt('SELECT user_id FROM coin_wallets WHERE user_id = ?').get(userId);
+    if (!wallet) return { outcome: 'missing' };
+
+    const expectedPaidRows = achievement.reward_minor > 0 ? 1 : 0;
+
+    // ── from here on, nothing may conditionally return ─────────────────────────────────────────
+
+    // The reward is copied from the catalogue INSIDE the statement, so no caller can name an
+    // amount, and trg_user_achievement_truthful proves it again. A plain INSERT, not OR IGNORE:
+    // under a concurrent unlock the unique index must ABORT so the whole transaction rolls back —
+    // swallowing the conflict would leave a paid ledger row with no achievement behind it.
+    current = 'INSERT user_achievements';
+    const unlocked = stmt(
+      `INSERT INTO user_achievements
+         (user_id, achievement_key, source_type, source_id, reward_minor_snapshot)
+       SELECT ?, a.key, ?, ?, a.reward_minor
+         FROM achievements a WHERE a.key = ? AND a.active = 1`,
+    ).run(userId, sourceType, sourceId, achievementKey);
+    if (unlocked.changes !== 1) throw new Error('the achievement was retired under the write lock');
+    const unlockId = Number(unlocked.lastInsertRowid);
+
+    current = 'INSERT coin_ledger (the reward)';
+    const paid = stmt(
+      `INSERT INTO coin_ledger
+         (user_id, amount_minor, reason_key, ref_type, ref_id, idempotency_key,
+          actor_user_id, request_id)
+       SELECT ua.user_id, ua.reward_minor_snapshot, 'achievement.reward', 'user_achievement',
+              ua.id, 'ach:' || ua.id, NULL, ?
+         FROM user_achievements ua
+        WHERE ua.id = ? AND ua.reward_minor_snapshot > 0`,
+    ).run(requestId, unlockId);
+    // THE ASSERTION, and it is the whole reason a zero reward is allowed to exist. A throw rolls
+    // the unlock back too, so a later evaluation retries cleanly instead of finding the natural
+    // key spent and the coins gone.
+    if (paid.changes !== expectedPaidRows) throw new Error('the reward did not follow its unlock');
+
+    // actor NULL — 001:71's "NULL = the system itself". Nobody did this; the training did.
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (NULL, 'coin.achievement.award', 'user_achievement', ?, ?, ?, NULL)`,
+    ).run(
+      unlockId,
+      JSON.stringify({ userId, achievementKey, rewardMinor: achievement.reward_minor }),
+      requestId,
+    );
+
+    return result(unlockId, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Move a wallet by hand. The most heavily gated write in the product, because it is the only one
+ * where a human chooses an amount.
+ *
+ * THE ROLE RE-CHECK LIVES HERE, TWICE, AND IT FAILS CLOSED. requireRole('admin') reads a JWT claim
+ * that can be fifteen minutes stale. assertAdmin() (admin/routes.js:27-36) reads the database but
+ * in a SEPARATE pool call, which is a TOCTOU against a concurrent demotion — fine for approving an
+ * exercise, not fine for minting currency. So the role AND `session_version` are read under the
+ * same write lock as the movement, before the first write, and the guarded INSERT's own JOIN
+ * repeats both so the WRITE is gated rather than merely preceded by a check that passed.
+ *
+ * NOTE THE MISSING `!= null`. A candidate design wrote
+ * `if (actorSessionVersion != null && actor.session_version !== actorSessionVersion)` — which
+ * SKIPS THE ENTIRE CHECK when the argument is absent, on the one endpoint that creates currency
+ * from nothing, silently, with the audit row still written. Here an omitted argument is
+ * `undefined !== <number>` and the answer is forbidden.
+ *
+ * THE REPLAY PROBE IS SCOPED TO THIS OPERATION, and that is not paranoia. The composed key is
+ * `adj:<adminId>:<clientKey>` and it is stored on the TARGET's row, so it cannot collide with the
+ * target's own purchase keys (`buy:<userId>:...`) — the defect where a support clawback keyed on a
+ * ticket id matched the victim's own store debit, returned 200 replayed, moved nothing, and wrote
+ * NO audit row because the return preceded it. The intent comparison includes the NOTE as well as
+ * the amount: two different corrections of the same size are two operations.
+ *
+ * THE SIGN IS NOT A JS DECISION. The reason is chosen in SQL by a CASE and
+ * trg_coin_ledger_reason_shape then refuses the row if the sign and the reason disagree, so a
+ * caller that passes a negative amount cannot land on 'admin.credit'.
+ *
+ * A DEBIT IS GUARDED LIKE ANY OTHER. `w.balance_minor + ? >= 0` covers both directions in one
+ * expression. Correcting an over-grant that has already been spent is a business conversation,
+ * not a negative balance — and because that rule is a droppable TRIGGER rather than a CHECK, the
+ * day it changes is a DROP TRIGGER and not a rebuild of the money table.
+ */
+export function adminAdjustCoinsTx({
+  actorUserId, actorSessionVersion, targetUserId, amountMinor, note,
+  idempotencyKey, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+  const writeUid = `adj:${actorUserId}:${idempotencyKey}`;
+
+  const tx = conn.transaction(() => {
+    const result = (entryId, replayed) => {
+      current = 'SELECT the entry';
+      const row = stmt(
+        `SELECT l.id AS entryId, l.amount_minor AS amountMinor, l.note AS note,
+                l.created_at AS movedAt,
+                (SELECT w.balance_minor FROM coin_wallets w
+                  WHERE w.user_id = l.user_id) AS balanceMinor
+           FROM coin_ledger l WHERE l.id = ?`,
+      ).get(entryId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error runs BEFORE the first write (ADR-0005) ────────────
+
+    current = 'SELECT the actor (DB-side role + session re-check)';
+    const actor = stmt(
+      'SELECT id, role, session_version FROM users WHERE id = ? AND disabled_at IS NULL',
+    ).get(actorUserId);
+    if (!actor || actor.role !== 'admin') return { outcome: 'forbidden' };
+    if (actor.session_version !== actorSessionVersion) return { outcome: 'forbidden' };
+
+    current = 'SELECT the prior adjustment (idempotency)';
+    const prior = stmt(
+      `SELECT id, amount_minor, note FROM coin_ledger
+        WHERE user_id = ? AND idempotency_key = ?
+          AND reason_key IN ('admin.credit', 'admin.debit')`,
+    ).get(targetUserId, writeUid);
+    if (prior && (prior.amount_minor !== amountMinor || (prior.note ?? null) !== (note ?? null))) {
+      return { outcome: 'key_reused', storedAmountMinor: prior.amount_minor, storedNote: prior.note };
+    }
+    if (prior) return result(prior.id, true);
+
+    current = 'SELECT the target wallet';
+    const wallet = stmt(
+      `SELECT w.balance_minor FROM coin_wallets w
+         JOIN users u ON u.id = w.user_id AND u.disabled_at IS NULL
+        WHERE w.user_id = ?`,
+    ).get(targetUserId);
+    // 404, never 403: an admin probing for account existence still gets the object-level rule.
+    if (!wallet) return { outcome: 'missing' };
+
+    const reasonKey = amountMinor > 0 ? 'admin.credit' : 'admin.debit';
+
+    current = 'SELECT the reason ceiling';
+    const reason = stmt('SELECT max_minor FROM coin_reasons WHERE key = ? AND active = 1').get(reasonKey);
+    if (!reason) return { outcome: 'out_of_bounds' };
+    if (amountMinor === 0 || Math.abs(amountMinor) > reason.max_minor) {
+      return { outcome: 'out_of_bounds', maxMinor: reason.max_minor };
+    }
+
+    if (wallet.balance_minor + amountMinor < 0) {
+      return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, amountMinor };
+    }
+
+    // ── from here on, nothing may conditionally return ─────────────────────────────────────────
+
+    current = 'INSERT coin_ledger (role, session and balance guards all inside the statement)';
+    const moved = stmt(
+      `INSERT INTO coin_ledger
+         (user_id, amount_minor, reason_key, ref_type, ref_id, idempotency_key,
+          actor_user_id, request_id, note)
+       SELECT w.user_id, ?, CASE WHEN ? > 0 THEN 'admin.credit' ELSE 'admin.debit' END,
+              NULL, NULL, ?, a.id, ?, ?
+         FROM coin_wallets w
+         JOIN users a ON a.id = ? AND a.role = 'admin'
+                     AND a.session_version = ? AND a.disabled_at IS NULL
+        WHERE w.user_id = ? AND w.balance_minor + ? >= 0`,
+    ).run(
+      amountMinor, amountMinor, writeUid, requestId, note ?? null,
+      actorUserId, actorSessionVersion, targetUserId, amountMinor,
+    );
+    if (moved.changes === 0) {
+      // Nothing was written, so committing nothing is a no-op. Every predicate was established
+      // above under the same write lock; this is the balance guard.
+      return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, amountMinor };
+    }
+    const entryId = Number(moved.lastInsertRowid);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'coin.admin.adjust', 'user', ?, ?, ?, ?)`,
+    ).run(
+      actorUserId, targetUserId,
+      // READ BACK, NOT RECOMPUTED. The first version of this line built balanceAfterMinor as
+      // `wallet.balance_minor + amountMinor` in JavaScript — a second arithmetic of the balance,
+      // written into an append-only table, able to disagree with the ledger the moment anything
+      // about the recompute changes. It is the same rule the purchase path already followed and
+      // the same rule contract 6 states; the admin path simply had not been held to it.
+      JSON.stringify({
+        ...stmt(
+          `SELECT l.id AS entryId, l.amount_minor AS amountMinor, l.note AS note,
+                  (SELECT w.balance_minor FROM coin_wallets w WHERE w.user_id = l.user_id)
+                    AS balanceAfterMinor
+             FROM coin_ledger l WHERE l.id = ?`,
+        ).get(entryId),
+        balanceBeforeMinor: wallet.balance_minor,
+      }),
+      requestId, ip,
+    );
+
+    return result(entryId, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
