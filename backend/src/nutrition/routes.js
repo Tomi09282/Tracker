@@ -35,7 +35,8 @@ import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
-import { normalizeText } from '../lib/normalize.js';
+import { normalizeText, toFtsQuery } from '../lib/normalize.js';
+import { resolveLang, languages } from '../lib/lang.js';
 
 const router = Router();
 
@@ -256,6 +257,12 @@ const searchQuery = z
     q: z.string().trim().min(1).max(80).optional(),
     limit: z.coerce.number().int().min(1).max(50).optional(),
     cursor: z.coerce.number().int().min(0).max(2_147_483_647).optional(),
+    // Shape only. WHICH languages are acceptable is decided by `resolveLang` against the enabled
+    // set in the database, never by this regex — the same split exercises/routes.js uses.
+    lang: z
+      .string()
+      .regex(/^[a-z]{2}$/)
+      .optional(),
   })
   .strict();
 
@@ -298,38 +305,71 @@ router.get(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { q, limit = 25, cursor } = parsed.data;
 
-    // FTS5 MATCH is its own expression language: a raw user string can be a syntax error (a bare
-    // `"`), or worse, a column filter. It is quoted as a literal phrase and given one trailing
-    // prefix star, which is the only operator a search box needs.
-    const rows = q
+    // Language resolution happens once per request. Both are codes from the enabled set, never raw
+    // client input, so they are safe as bound parameters.
+    const lang = await resolveLang(req);
+    const { fallback } = await languages();
+
+    // `toFtsQuery` rather than a hand-rolled `"${q}"*`. FTS5 has its own query syntax — quotes,
+    // NEAR, column filters — and passing raw input into MATCH is the FTS equivalent of
+    // string-concatenating SQL. The first draft here escaped one quote character inline, which is
+    // the FOURTH time in this feature I wrote a second implementation of something lib/ already
+    // had. It also tokenises, so "csirke mell" matches, which the inline version did not.
+    const fts = q ? toFtsQuery(q) : null;
+
+    // Search runs against the TRANSLATIONS index so a Hungarian query matches Hungarian text, with
+    // the requested language AND the fallback searched — someone browsing in Hungarian who types
+    // an English food name should still find it. Copied from exercises/routes.js, which is where
+    // this problem was solved.
+    //
+    // The index knows nothing about ownership. `visibleFood` still applies to the BASE row and
+    // must never be the only thing between a user and someone else's private list.
+    const rows = fts
       ? await db.all(
-          `SELECT f.id, f.name, f.brand, f.source, f.verified,
+          `SELECT DISTINCT f.id, COALESCE(t.name, tf.name, f.name) AS name,
+                  f.brand, f.source, f.verified,
                   f.kcal_per_100g_x10 / 10.0     AS kcal_per_100g,
                   f.protein_mg_per_100g / 1000.0 AS protein_g_per_100g,
                   f.carb_mg_per_100g / 1000.0    AS carb_g_per_100g,
                   f.fat_mg_per_100g / 1000.0     AS fat_g_per_100g,
                   f.fiber_mg_per_100g / 1000.0   AS fiber_g_per_100g,
                   f.serving_g_x10 / 10.0         AS serving_g, f.serving_label
-             FROM foods_fts
-             JOIN foods f ON f.id = foods_fts.rowid
-            WHERE foods_fts MATCH ? AND ${visibleFood('f')}
-            ORDER BY f.verified DESC, rank, f.id
+             FROM foods f
+             LEFT JOIN food_translations t  ON t.food_id  = f.id AND t.lang  = ?
+             LEFT JOIN food_translations tf ON tf.food_id = f.id AND tf.lang = ?
+            WHERE ${visibleFood('f')}
+              AND (
+                -- a translated match, in the reader's language or the fallback...
+                EXISTS (SELECT 1 FROM food_translations st
+                          JOIN food_translations_fts ftx ON ftx.rowid = st.id
+                         WHERE st.food_id = f.id AND st.lang IN (?, ?)
+                           AND food_translations_fts MATCH ?)
+                -- ...or a match on the canonical row, which is what finds a hand-typed food.
+                -- A personal food has no translations, so without this arm a user could not find
+                -- what they themselves typed in — the exact gap the translation join introduces.
+                OR EXISTS (SELECT 1 FROM foods_fts
+                            WHERE foods_fts.rowid = f.id AND foods_fts MATCH ?)
+              )
+            ORDER BY f.verified DESC, name, f.id
             LIMIT ?`,
-          [`"${q.replaceAll('"', '""')}"*`, req.user.id, req.user.id, limit],
+          [lang, fallback, req.user.id, req.user.id, lang, fallback, fts, fts, limit],
         )
       : await db.all(
-          `SELECT id, name, brand, source, verified,
-                  kcal_per_100g_x10 / 10.0     AS kcal_per_100g,
-                  protein_mg_per_100g / 1000.0 AS protein_g_per_100g,
-                  carb_mg_per_100g / 1000.0    AS carb_g_per_100g,
-                  fat_mg_per_100g / 1000.0     AS fat_g_per_100g,
-                  fiber_mg_per_100g / 1000.0   AS fiber_g_per_100g,
-                  serving_g_x10 / 10.0         AS serving_g, serving_label
-             FROM foods
-            WHERE ${visibleFood()} AND id > ?
-            ORDER BY verified DESC, id
+          `SELECT f.id, COALESCE(t.name, tf.name, f.name) AS name,
+                  f.brand, f.source, f.verified,
+                  f.kcal_per_100g_x10 / 10.0     AS kcal_per_100g,
+                  f.protein_mg_per_100g / 1000.0 AS protein_g_per_100g,
+                  f.carb_mg_per_100g / 1000.0    AS carb_g_per_100g,
+                  f.fat_mg_per_100g / 1000.0     AS fat_g_per_100g,
+                  f.fiber_mg_per_100g / 1000.0   AS fiber_g_per_100g,
+                  f.serving_g_x10 / 10.0         AS serving_g, f.serving_label
+             FROM foods f
+             LEFT JOIN food_translations t  ON t.food_id  = f.id AND t.lang  = ?
+             LEFT JOIN food_translations tf ON tf.food_id = f.id AND tf.lang = ?
+            WHERE ${visibleFood('f')} AND f.id > ?
+            ORDER BY f.verified DESC, f.id
             LIMIT ?`,
-          [req.user.id, req.user.id, cursor ?? 0, limit],
+          [lang, fallback, req.user.id, req.user.id, cursor ?? 0, limit],
         );
 
     res.json({ foods: rows, next_cursor: rows.length === limit ? rows.at(-1).id : null });

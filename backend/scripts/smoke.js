@@ -3367,6 +3367,60 @@ if (seeded) {
     check('a coach can add a food', res.status === 201 && Number.isInteger(foodId), `status ${res.status}`);
   }
   {
+    // THE SEEDED DATABASE, IN THREE LANGUAGES. Migration 016 ships 95 curated foods with hu/en/de
+    // names, and the whole point of the translations table is that a Hungarian user searching in
+    // Hungarian finds them. A seeded row is owner-less, so it is visible to everyone.
+    const hu = await call('/api/v1/foods?q=zabpehely&lang=hu', { jar: eater });
+    const de = await call('/api/v1/foods?q=Haferflocken&lang=de', { jar: eater });
+    const en = await call('/api/v1/foods?q=oats&lang=en', { jar: eater });
+    const sameRow = hu.json?.foods?.[0]?.id && hu.json.foods[0].id === de.json?.foods?.[0]?.id
+      && hu.json.foods[0].id === en.json?.foods?.[0]?.id;
+    check(
+      'one seeded food is findable in hu, de and en, and it is the SAME row',
+      sameRow,
+      `hu ${hu.json?.foods?.[0]?.id}, de ${de.json?.foods?.[0]?.id}, en ${en.json?.foods?.[0]?.id}`,
+    );
+  }
+  {
+    // The name comes back in the READER's language, not the canonical English.
+    const { json } = await call('/api/v1/foods?q=zabpehely&lang=hu', { jar: eater });
+    check(
+      'the name is returned in the reader\'s language',
+      json?.foods?.[0]?.name === 'Zabpehely, száraz',
+      `"${json?.foods?.[0]?.name}"`,
+    );
+  }
+  {
+    // THE FALLBACK ARM. Someone browsing in Hungarian who types the English name still finds it —
+    // this is what `lang IN (?, ?)` buys, and without the fallback this search returns nothing.
+    const { json } = await call('/api/v1/foods?q=salmon&lang=hu', { jar: eater });
+    check(
+      'an English query while browsing in Hungarian still finds the food',
+      (json?.foods ?? []).some((f) => f.name === 'Lazac, atlanti, nyers'),
+      `${json?.foods?.length} hits, first "${json?.foods?.[0]?.name}"`,
+    );
+  }
+  {
+    // The macros survived the integer round-trip out of the migration and back.
+    const { json } = await call('/api/v1/foods?q=csirkemell&lang=hu', { jar: eater });
+    const seeded = (json?.foods ?? []).find((f) => f.source === 'system');
+    check(
+      'a seeded food carries exact macros through the integer scale',
+      seeded && Math.abs(seeded.kcal_per_100g - 165) < 0.001 && Math.abs(seeded.protein_g_per_100g - 31) < 0.001,
+      `${seeded?.kcal_per_100g} kcal, ${seeded?.protein_g_per_100g} g protein`,
+    );
+  }
+  {
+    // Diacritics: the user types without them, the food has them. `remove_diacritics 2` on both
+    // FTS indexes is what makes this work, and it is the single most common Hungarian search.
+    const bare = await call('/api/v1/foods?q=turo&lang=hu', { jar: eater });
+    check(
+      'searching "turo" finds "Túró Rudi"',
+      (bare.json?.foods ?? []).some((f) => f.name === 'Túró Rudi'),
+      `${bare.json?.foods?.length} hits`,
+    );
+  }
+  {
     // FORGE: `verified` and `source` are server-owned and are not in the schema at all.
     const { res } = await call('/api/v1/foods', {
       method: 'POST', jar: coach,
