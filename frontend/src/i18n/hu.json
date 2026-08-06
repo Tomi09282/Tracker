@@ -248,7 +248,8 @@
     "noHistoryBody": "Amint a kliens elvégzi az első edzést, itt jelenik meg.",
     "setsCount": "{{count}} sorozat",
     "repsCount": "{{count}} ismétlés",
-    "stillRunning": "folyamatban"
+    "stillRunning": "folyamatban",
+    "sessions28d": "{{count}} edzés / 28 nap"
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",

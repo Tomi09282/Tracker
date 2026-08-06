@@ -14,6 +14,15 @@ export interface ClientRow {
   accepted_at: number | null;
   /** 1 while a pre-generated account still holds the coach's temporary password. */
   must_change_credentials: 0 | 1;
+  /**
+   * Completed sessions in the last 28 days, computed at READ time.
+   *
+   * A COUNT, never a percentage. A percentage needs a denominator, and "how many sessions were
+   * prescribed" is the schedule rule — arithmetic over a window rather than a column. Showing a
+   * made-up denominator would be worse than showing none.
+   */
+  sessions_28d: number;
+  last_session_on: string | null;
 }
 
 export interface TeamRow {

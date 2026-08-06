@@ -47,161 +47,21 @@ Pipeline: **Opus 5 solo, all roles** (D-P1). There is no PVP loop to hand off to
 
 ---
 
-**PHASE 3 OPEN — F5 notifications + F6 chat.** 0 of 28.
+**PHASE 3 CODE-COMPLETE — F5 notifications + F6 chat.** 25 done · 2 deferred · 1 open.
+
+The two deferred are **T3.1.2** (quiet hours) and the digest half of **T3.1.6**, both waiting on
+the same missing thing: a scheduler. Neither is deferred for effort — each would have to store a
+promise the delivery path cannot keep. Reasons in [[0011-phase-3-lessons]]. The one still open is
+T3.4.4, this prune itself.
 
 Behind it: **Phase 0 18/18 · Phase 1 57/58 CLOSED (owner sign-off 2026-08-06) · Phase 2 65/66.**
 The two carried-forward items are T1.31 (gender/body variants and 3D on the muscle map) and T2.3.5
 (per-coach seat cap, reserved for the billing phase). Neither blocks this phase.
 
-Baseline entering Phase 3: 78 endpoints · schema v12 · smoke 316/316 · verify:schema 21/21 ·
-check-routes OK · check-worker-tx OK · npm audit 0 · 3 languages x 412 keys · vault in sync ·
-5 commits on `master`, the first one 2026-08-06 (this project had none until then).
-
-## 1b. THE NAV WAS FULL, AND NOBODY COUNTED
-
-Planning where Phase 3's chat and notifications would live surfaced a defect that was already
-shipping: `BottomNav` clamps at five slots — deliberately, and its comment says an overflow menu
-is the right answer for a sixth — but `AppLayout` handed an **admin six tabs**. Measured: an admin
-saw five and `/admin` was not among them. The route worked, the role check worked, and there was
-no way to get there.
-
-**The clamp did exactly what it promised. Nobody counted the callers.** Same shape as every other
-defect in this project: two things that must agree, drifting, with neither side wrong on its own.
-
-Fixed by moving admin into Settings — where it belongs regardless, because role-specific and
-infrequent IS secondary navigation — and by deciding that neither chat nor notifications takes a
-tab either. Notifications are a header bell; coach-side chat is the Chat tab that already exists on
-the client detail screen and inherits the link predicate for free. **Phase 3 adds no nav tabs.**
-
-The wider lesson for the phase: **decide where something LIVES before deciding how it looks.** Two
-minutes of counting slots prevented a build that would have needed unpicking.
-
-## 1c. I WROTE THE SECOND IMPLEMENTATION, AND IT WAS THE WORSE ONE
-
-`lib/haptics.ts` already existed, built on the Capacitor plugin, with a header explaining that
-`navigator.vibrate` is absent on iOS Safari and a poor substitute — so it deliberately no-ops on
-web rather than imitating badly.
-
-Then I wrote `cues.ts` calling `navigator.vibrate` directly. **On a real iPhone through Capacitor,
-every interval and set-check cue produced nothing**, while the correct native plugin sat unused one
-directory away.
-
-The part worth remembering is not the bug, it is how I got there: I hit the iOS limitation, and I
-wrote comments EXPLAINING it — at length, in three files — instead of searching the tree for
-whether it had already been solved. **A limitation you find yourself documenting carefully is a
-strong signal that someone already hit it.** Look for their answer before writing your own.
-
-Now: `cues.ts` delegates, `lib/haptics.ts` gained `hapticPattern()` for cues whose rhythm carries
-the meaning, and `hapticsAvailable` is re-exported from the one module — the local copy checked
-only `navigator.vibrate` and would have reported "no haptics" on the very iPhone where the native
-plugin works.
-
-## 1d. THE STRING NOBODY LOOKS AT
-
-Three sweeps this session found defects in exactly the places no review reaches:
-
-- **`sr-only` text.** `ScreenSkeleton` shipped a hardcoded English "Loading" — the first thing a
-  Hungarian or German screen-reader user heard, for two whole phases. Invisible to visual review,
-  and invisible to `check-i18n` because that audits the JSON, not the JSX.
-- **A dead key claims a feature exists.** The next reader sees `workout.interval.emomDone` and
-  reasonably assumes there is a button. Five were dead, including `workout.retry` sitting beside a
-  `common.retry` that said the same thing.
-- **A check whose subject moved does not fail — it passes, quietly, forever.** `NATIVE_LABELS`
-  guarded three keys that had been relocated to the LOCALES registry, so `ref.has(key)` was false
-  for all of them and every iteration was a no-op.
-
-All three are now gated, and each gate was broken deliberately once to watch it fail by name.
-
-## 1e. THE REVIEW'S REAL FINDING WAS THE SCOPE
-
-Four adversarial lenses attacked a proposed migration 013 and returned roughly thirty defects. The
-useful signal was not any single one — it was **where they clustered**: every severe finding sat in
-the elaborate parts. Collapse upserts, quiet-hours triggers, an automated retention sweep, a dedupe
-key bounded by a GLOB that turned out to be a no-op because GLOB is not a regex. The core —
-conversations, messages, notifications — they reported sound.
-
-One of those defects, `CHECK (deliver_after <= created_at + 2678400)`, would have bricked every
-collapsed notification 31 days after it was raised. **SQLite cannot alter a CHECK**, so that is a
-12-step rebuild of the largest table in the product, discovered by a user.
-
-So 013 ships the core and nothing else. Quiet hours, collapsing, automated retention and a
-moderation queue get their own migration IF traffic asks for them. **ADD COLUMN is legal; a wrong
-CHECK is not removable.** The right response to "the reviewers found thirty problems" was to build
-less, not to fold in thirty fixes.
-
-Three decisions inside the core worth carrying:
-
-- **A conversation belongs to the LINK, not to the pair of user ids.** The same two people can be
-  linked, archived and linked again; those are different working relationships, and keying on the
-  link means the second starts clean instead of inheriting the first one's year of messages. It is
-  also what makes archiving withdraw access on the next request with no code remembering.
-- **The notification payload is a SNAPSHOT** — 010's `exercise_name_snapshot` decision applied
-  again. "Your coach added Tuesday" must still read correctly after Tuesday is deleted, and the
-  alternative makes every future feature that emits a notification responsible for cleaning up
-  after itself.
-- **Block names WHO blocked.** A coach blocking a client and a client blocking a coach are
-  different events with different remedies; a boolean cannot tell a moderator which happened.
-
-## 1f. THE BADGE AND THE INBOX ARE ONE PREDICATE
-
-`VISIBLE` in `notifications/routes.js` is the only definition of "a notification I can see", and
-the list, the unread count and the mark-read guard all use it. A badge reading 3 over an inbox
-showing 2 is the defect users actually notice, and it happens the moment the two are spelled
-separately — this codebase's one recurring bug class, applied to a number in the corner.
-
-It carries the LINK's liveness, not just `user_id`. An ended relationship stops delivering on the
-very next request with no sweeper: proven in smoke, where a client leaving their coach makes the
-chat notifications disappear from their inbox in the same breath.
-
-**The unread count is capped at 100 and says so.** The difference between 100 and 342 unread
-changes no decision, and an uncapped COUNT over a table that grows without bound is the query that
-quietly becomes the slowest thing in the app. The cap lives inside the subquery so the partial
-index stops scanning at a hundred.
-
-**Mark-read carries the same visibility predicate as the list.** `read_at` is the only thing that
-clears a badge, so a forged id would otherwise let one account silently clear another's. Asserted:
-a stranger marking someone else's notification read changes zero rows.
-
-## 1g. THE TOKEN GATE COULD NOT SEE FOUR OF ITS OWN TOKENS
-
-`check-tokens` collected declared tokens with `/^\s*(--[a-z0-9-]+)\s*:/gim` — anchored to the
-line start. But `tokens.css` pairs declarations for readability:
-
-    --danger:  #F87171;  --on-danger:  #2A0A0C;
-
-so only the first on each line was ever collected. **163 tokens visible, 167 declared.**
-`--on-danger`, `--on-success`, `--on-warning` and `--on-info` were invisible, and using any of
-them failed the build as "undeclared" — four legitimately declared tokens the gate rejected.
-
-That is how a gate stops being a guard and starts being an obstacle people route around. Found by
-using `--on-danger` for the notification badge, which is exactly what it is for.
-
-Second, smaller trap from the same gate: it scans COMMENTS, so a comment explaining why a class was
-avoided will itself trip the rule that rejects the class. Correct behaviour — a commented-out class
-can be uncommented — but it means prose about a class has to name it indirectly.
-
-## 1h. THE GATE MUST RUN BEFORE MULTER, AND THE STATUS CODE CANNOT TELL YOU IT DOES
-
-The exercise upload checks ownership in its HANDLER, which runs after `upload.single()` has
-written the file. For an 8 MB image that is tolerable. For a 128 MiB chat video it is a stranger
-filling the disk of a server they have no account on the far side of — they need a session and a
-conversation id, and the id is guessable.
-
-So chat attachments prove membership in a middleware that runs BEFORE multer, where
-`req.params.id` and `req.user.id` both already exist and nothing has been written.
-
-**The trap is that the status code is identical either way.** A gate placed after multer also
-returns 404; the difference is only on disk. The first version of this smoke check asserted the
-status and PASSED with the gate deliberately moved after multer — a test that cannot distinguish
-the fix from the bug.
-
-The assertion now counts the quarantine directory across the attempt. Proven load-bearing: with
-the gate after multer it fails with `10 -> 11 quarantined files`; with it first, `12 -> 12`.
-
-**Related, and stated because it is easy to assume otherwise: THE KEY IS NOT THE PERMISSION.** A
-48-hex storage key is unguessable but not private — it appears in URLs, browser histories and
-proxy logs. The read therefore carries the same conversation predicate the upload did, and a
-stranger holding the exact key gets 404.
+Baseline entering Phase 3: 78 endpoints · schema v12 · smoke 316/316 · 412 keys x 3 · 5 commits.
+Leaving it: **93 endpoints · schema v14 · smoke 357/357 · verify:013 30/30 · verify:schema 21/21 ·
+check-routes 89 routes · check-worker-tx OK · check-tokens OK · check-interval 50 · npm audit 0 ·
+437 keys x 3 · Bible audit 360 + 1440 clean with the probe proven to fire.**
 
 ## 2. CONTRACTS
 
@@ -337,63 +197,6 @@ Established facts other jobs must not re-derive or contradict.
 
 ---
 
-## 4aa. A CHART'S X AXIS IS TIME, OR THE CHART IS LYING
-
-The progress chart shipped positioning points by INDEX. It is the obvious implementation and it is
-wrong for this chart: five sessions in a week then a two-month break renders identically to seven
-consecutive days. The whole question a progress chart answers is **how fast**, and index spacing
-destroys precisely that — a coach reads evenly-spaced points as steady training.
-
-Fixed by positioning on the date. The cost is that clustered sessions crowd and gaps open up; that
-is the truth, and a visible gap is information.
-
-Two supporting decisions:
-
-- **The geometry moved to a pure module** (`chartGeometry.ts`), because where the points go is the
-  one thing a chart can get silently, misleadingly wrong — and pure arithmetic can be checked
-  exhaustively without a DOM. Same reasoning as `intervalPlan.ts`.
-- **A break of 14 days or more is NAMED in the axis row.** Once the axis is honest the gap is
-  visible, but visible and understood are different things: the caption is what stops the drop
-  after a break being read as lost strength. Fourteen days because a week off is ordinary.
-
-Deliberately NOT changed, so it is not re-raised: there is no y-axis scale (this is a sparkline —
-the caption carries the current value and the change, which is what a coach reads), and the delta
-is first-to-last over the window rather than since the previous point (a single-session dip is
-noise; where they started versus where they are is the question).
-
-## 4ab. THE FAILURE PATH IS THE ONE NOBODY WALKS
-
-The T2.0.3 review found two defects and both were in code that only runs when something goes
-wrong — which is exactly where a self-review pays, because the happy path gets exercised a hundred
-times a day and the failure path never.
-
-**`SetRow.submit()` had `try/finally` and no `catch`.** A failed check stopped the spinner and
-said NOTHING. The row stayed pending, no message appeared, and a lifter mid-set — not watching the
-screen closely — had no way to tell a recorded set from a lost one. For a logging app that is the
-worst thing a screen can do quietly.
-
-Now: 0 is offline, 409 is a conflict, anything else is a failure, and each says so with
-`role="alert"` rather than `status` because the lifter has to ACT. **A 409 offers Undo, not
-Retry** — re-sending cannot help when the stored values differ, and the server returns those values
-precisely so the row can offer void-and-relog. The message overlays like the undo pill so the list
-never reflows under the thumb about to retry.
-
-**A voided set still rendered as done.** `done = set.completed_at != null` never consulted
-`voided_at`, so after an undo the row kept its green check while the session totals had already
-dropped to 3 of 4. **The screen was disagreeing with the record.**
-
-The fix is a THIRD state, and the reasoning matters more than the CSS:
-  - It cannot show as DONE — the undo already removed it from the totals.
-  - It cannot show as PENDING — `trg_log_set_void_terminal` makes a void terminal and
-    `recordSetTx` requires `voided_at IS NULL`, so a tap would earn a 409. **Offering a control
-    that cannot succeed is worse than offering none.**
-
-So: WITHDRAWN, struck through, dimmed, every control disabled, and the label says it.
-
-The general lesson: **a feature is not finished when its write lands, it is finished when every
-screen that displays the affected row agrees with the new state.** The undo shipped correct on the
-server and incomplete on the client, and nothing caught it because no test looked at a voided row.
-
 ## 5. HANDOFF QUEUE
 
 Phase 2's 20 accumulated lessons were PRUNED from this hot file on 2026-08-05, after
@@ -432,6 +235,40 @@ The five evidence rules distilled from them are the part worth carrying into Pha
   3. An audit you run once is a snapshot; a gate is what keeps being true.
   4. An audit must not carry its own copy of what it audits.
   5. A path exercised only one way is one untested branch from never having worked.
+
+## 5b. PHASE 3 LESSONS — PRUNED TO THE COLD BRAIN
+
+Phase 3's nine accumulated lessons were PRUNED from this hot file on 2026-08-06, after being
+distilled into `docs/brain/60-Decisions/0011-phase-3-lessons.md` — which, unlike this file, IS
+mirrored to the Obsidian vault. Same reason as the Phase 2 prune above: this file is a scratchpad
+for one phase, the vault is what survives it.
+
+Nothing was lost. What was pruned, by title, so a reader can tell whether the cold note covers what
+they are looking for:
+
+  - 1b. THE NAV WAS FULL, AND NOBODY COUNTED
+  - 1c. I WROTE THE SECOND IMPLEMENTATION, AND IT WAS THE WORSE ONE
+  - 1d. THE STRING NOBODY LOOKS AT
+  - 1e. THE REVIEW'S REAL FINDING WAS THE SCOPE
+  - 1f. THE BADGE AND THE INBOX ARE ONE PREDICATE
+  - 1g. THE TOKEN GATE COULD NOT SEE FOUR OF ITS OWN TOKENS
+  - 1h. THE GATE MUST RUN BEFORE MULTER, AND THE STATUS CODE CANNOT TELL YOU IT DOES
+  - 4aa. A CHART'S X AXIS IS TIME, OR THE CHART IS LYING
+  - 4ab. THE FAILURE PATH IS THE ONE NOBODY WALKS
+
+Also removed: a SECOND `## 5. HANDOFF QUEUE` section left over from Phase 0. It announced that
+Phase 0 was complete as news and stated "Nothing is committed yet" — three phases and eighteen
+commits stale. **A hot file with two sections of the same name has one that is lying**, which is
+this project's own recurring bug class arriving in the notes rather than the code.
+
+The evidence rules, now six, are the part worth carrying into Phase 4:
+
+  1. A test never seen to fail is not evidence.
+  2. A screenshot is evidence of a frame; a measurement is evidence of a fact.
+  3. An audit you run once is a snapshot; a gate is what keeps being true.
+  4. An audit must not carry its own copy of what it audits.
+  5. A path exercised only one way is one untested branch from never having worked.
+  6. A probe never seen to fire cannot be told apart from a clean subject.
 
 ## 4z. A SNAPSHOT IS A FALLBACK, NOT A DISPLAY VALUE
 
@@ -779,18 +616,3 @@ older version of the code.
 
 One command does both: `npm run brain:gen` (schema + API, derived) then `node scripts/brain-sync.mjs`.
 
-## 5. HANDOFF QUEUE
-
-What the next job needs to know:
-
-1. **Phase 0 is complete.** Build every control from `src/ui/primitives/Pressable`; the build
-   rejects a raw `<button>` outside `src/ui/`. Variants: primary | secondary | ghost | danger,
-   shapes button | icon | chip | field, densities compact | default | large. Density changes
-   padding and type size ONLY — never the hit area.
-2. **Blocked:** screenshot audits (SO-6). The in-app Browser pane does not composite frames on
-   this machine, so visual verification currently comes from DOM measurement plus the owner
-   looking at `localhost:5173` directly. See OQ-5.
-3. **Seed is back:** `npm run seed:exercises` imports 1652 global exercises and is idempotent.
-   Media files were NOT re-fetched — the upload pipeline (J5c) comes first.
-4. Nothing is committed yet. 56+ files staged; the owner has been asked about a
-   `chore: phase 0 foundation` commit.

@@ -45,8 +45,16 @@ function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; v
  * Coach dashboard — Bible blueprint 6.
  *
  * Stat row, then the alerts that are actually actionable today, then the client list grouped by
- * team. Adherence and last-active are deliberately absent rather than faked: nothing logs a
- * workout yet, so a "0% adherence" column would be a lie about every client on the screen.
+ * team.
+ *
+ * ACTIVITY ARRIVED WHEN ITS REASON FOR BEING ABSENT EXPIRED. This block used to say adherence was
+ * "deliberately absent rather than faked: nothing logs a workout yet". That was true when it was
+ * written and stopped being true the day the player shipped — a comment asserting a state of the
+ * world rather than a rule, quietly outliving the world it described.
+ *
+ * It is a COUNT of completed sessions in 28 days, never a percentage. A percentage needs a
+ * denominator, and "how many were prescribed" is the schedule rule — arithmetic over a window, not
+ * a column. An invented denominator would be exactly the faking the old comment refused.
  */
 export function CoachDashboard() {
   const { t } = useTranslation();
@@ -291,6 +299,12 @@ export function CoachDashboard() {
                         <span className="text-body block truncate text-text-1">{c.email}</span>
                         <span className="text-caption mt-0.5 flex items-center gap-2 text-text-3">
                           {t(`coaching.origin.${c.origin}`)}
+                          {/* Activity, as a count over 28 days. A client with none gets a warning
+                              tone rather than a zero in the same grey as everything else — the
+                              whole value of this column is that the quiet ones stand out. */}
+                          <span className={c.sessions_28d === 0 ? 'text-warning' : undefined}>
+                            {t('coaching.sessions28d', { count: c.sessions_28d ?? 0 })}
+                          </span>
                           {c.must_change_credentials === 1 ? (
                             <span className="text-micro uppercase rounded-chip bg-[var(--warning-subtle)] px-1.5 text-warning">
                               {t('coaching.pending')}

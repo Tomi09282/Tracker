@@ -248,7 +248,8 @@
     "noHistoryBody": "Sie erscheint, sobald der Klient eine Einheit abschließt.",
     "setsCount": "{{count}} Sätze",
     "repsCount": "{{count}} Wiederholungen",
-    "stillRunning": "läuft"
+    "stillRunning": "läuft",
+    "sessions28d": "{{count}} Einheiten / 28 T"
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",

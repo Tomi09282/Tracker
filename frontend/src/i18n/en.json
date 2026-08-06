@@ -248,7 +248,8 @@
     "noHistoryBody": "It appears here as soon as the client finishes a session.",
     "setsCount": "{{count}} sets",
     "repsCount": "{{count}} reps",
-    "stillRunning": "in progress"
+    "stillRunning": "in progress",
+    "sessions28d": "{{count}} sessions / 28 d"
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",

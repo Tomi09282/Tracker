@@ -105,9 +105,27 @@ router.get(
   asyncRoute(async (req, res) => {
     // Scoped to the caller by construction. There is no coach_id in the query string to forge.
     const clients = await db.all(
+      // ADHERENCE, COMPUTED AT READ TIME rather than stored or digested by a job.
+      //
+      // This column used to be deliberately absent, and the dashboard said why: "nothing logs a
+      // workout yet, so a 0% adherence column would be a lie about every client on the screen".
+      // That reason expired when Phase 2 shipped the player — the comment outlived the condition
+      // it described, which is its own small lesson about comments that assert a state of the
+      // world rather than a rule.
+      //
+      // Read time, not a digest: this product has no scheduler, and a stored figure is one that is
+      // accurate exactly as often as the job runs. `sessions_28d` is the honest raw number and the
+      // UI renders it as a count, never as a percentage — a percentage needs a denominator, and
+      // "how many sessions were PRESCRIBED" is the schedule rule, which is arithmetic over a
+      // window rather than a column this query can join.
       `SELECT c.id AS link_id, c.status, c.origin, c.team_id, c.invited_at, c.accepted_at,
               u.id AS client_id, u.email, u.must_change_credentials,
-              t.name AS team_name
+              t.name AS team_name,
+              (SELECT COUNT(*) FROM workout_logs l
+                WHERE l.client_user_id = u.id AND l.status = 'completed'
+                  AND l.local_date >= date('now', '-28 days')) AS sessions_28d,
+              (SELECT MAX(l.local_date) FROM workout_logs l
+                WHERE l.client_user_id = u.id AND l.status = 'completed') AS last_session_on
          FROM coach_clients c
          JOIN users u ON u.id = c.client_id
          LEFT JOIN teams t ON t.id = c.team_id
