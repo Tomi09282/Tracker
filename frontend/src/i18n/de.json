@@ -14,7 +14,9 @@
     "dismiss": "Schließen",
     "close": "Schließen",
     "prevMonth": "Voriger Monat",
-    "nextMonth": "Nächster Monat"
+    "nextMonth": "Nächster Monat",
+    "add": "Hinzufügen",
+    "delete": "Löschen"
   },
   "auth": {
     "loginTitle": "Bei deinem Konto anmelden",
@@ -235,7 +237,6 @@
     "clientMissingTitle": "Dieser Klient ist nicht verfügbar",
     "clientMissingBody": "Entweder gehört er nicht zu dir, oder die Verknüpfung wurde archiviert.",
     "tabs": "Klientenansichten",
-    "tabPending": "Dieser Bereich kommt in Phase {{phase}}.",
     "tab": {
       "plan": "Plan",
       "nutrition": "Ernährung",
@@ -249,7 +250,19 @@
     "setsCount": "{{count}} Sätze",
     "repsCount": "{{count}} Wiederholungen",
     "stillRunning": "läuft",
-    "sessions28d": "{{count}} Einheiten / 28 T"
+    "sessions28d": "{{count}} Einheiten / 28 T",
+    "nutrition": {
+      "emptyTitle": "Kein Ernährungsplan",
+      "emptyBody": "Erstelle einen für diesen Klienten. Solange er ein Entwurf ist, sieht ihn niemand.",
+      "create": "Neuer Plan",
+      "defaultName": "Ernährungsplan",
+      "cycle": "{{count}}-Tage-Zyklus",
+      "addDay": "Tag hinzufügen",
+      "addMeal": "Mahlzeit hinzufügen",
+      "mealDefault": "Mahlzeit",
+      "draftNote": "Dieser Plan ist noch ein Entwurf — der Klient sieht ihn erst nach der Aktivierung.",
+      "activate": "Aktivieren"
+    }
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",

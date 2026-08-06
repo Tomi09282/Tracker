@@ -14,7 +14,9 @@
     "dismiss": "Bezárás",
     "close": "Bezárás",
     "prevMonth": "Előző hónap",
-    "nextMonth": "Következő hónap"
+    "nextMonth": "Következő hónap",
+    "delete": "Törlés",
+    "add": "Hozzáadás"
   },
   "auth": {
     "loginTitle": "Jelentkezz be a fiókodba",
@@ -235,7 +237,6 @@
     "clientMissingTitle": "Ez a kliens nem érhető el",
     "clientMissingBody": "Vagy nem hozzád tartozik, vagy archiválva lett.",
     "tabs": "Kliens nézetek",
-    "tabPending": "Ez a rész a(z) {{phase}}. fázisban készül el.",
     "tab": {
       "plan": "Terv",
       "nutrition": "Táplálkozás",
@@ -249,7 +250,19 @@
     "setsCount": "{{count}} sorozat",
     "repsCount": "{{count}} ismétlés",
     "stillRunning": "folyamatban",
-    "sessions28d": "{{count}} edzés / 28 nap"
+    "sessions28d": "{{count}} edzés / 28 nap",
+    "nutrition": {
+      "emptyTitle": "Nincs étrend",
+      "emptyBody": "Készíts egy étrendet ehhez a klienshez. Amíg vázlat, ő nem látja.",
+      "create": "Új étrend",
+      "defaultName": "Étrend",
+      "cycle": "{{count}} napos ciklus",
+      "addDay": "Nap hozzáadása",
+      "addMeal": "Étkezés hozzáadása",
+      "mealDefault": "Étkezés",
+      "draftNote": "Ez az étrend még vázlat — a kliens nem látja, amíg nem aktiválod.",
+      "activate": "Aktiválás"
+    }
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, TriangleAlert, Dumbbell, Apple, TrendingUp, MessageSquare, UserX, Hourglass } from 'lucide-react';
+import { ArrowLeft, TriangleAlert, Dumbbell, Apple, TrendingUp, MessageSquare, UserX } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NutritionTab } from './NutritionTab';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
 import { ProgressTab } from './ProgressTab';
@@ -16,10 +17,10 @@ import { ChatTab } from './ChatTab';
 // say so rather than being hidden: a coach who cannot find the nutrition tab assumes the product
 // lacks it, while a tab that names its phase tells them it is coming and stops them looking.
 const TABS = [
-  { key: 'plan', icon: Dumbbell, phase: 2 },
-  { key: 'nutrition', icon: Apple, phase: 4 },
-  { key: 'progress', icon: TrendingUp, phase: 2 },
-  { key: 'chat', icon: MessageSquare, phase: 3 },
+  { key: 'plan', icon: Dumbbell },
+  { key: 'nutrition', icon: Apple },
+  { key: 'progress', icon: TrendingUp },
+  { key: 'chat', icon: MessageSquare },
 ] as const;
 type TabKey = (typeof TABS)[number]['key'];
 
@@ -165,7 +166,6 @@ export function ClientDetailPage() {
   }
 
   const c = data.client;
-  const active = TABS.find((x) => x.key === tab)!;
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-5 py-6">
@@ -233,14 +233,12 @@ export function ClientDetailPage() {
         ) : tab === 'chat' ? (
           <ChatTab linkId={linkId} />
         ) : (
-          // The tabs with no feature behind them yet NAME THE PHASE they arrive in. A coach who
-          // cannot find the nutrition tab assumes the product lacks it; one that says when it
-          // arrives stops them looking.
-          <EmptyState
-            icon={Hourglass}
-            title={t(`coaching.tab.${tab}`)}
-            body={t('coaching.tabPending', { phase: active.phase })}
-          />
+          // ALL FOUR TABS NOW HAVE A FEATURE, and TypeScript is what said so: with nutrition
+          // wired, `tab` narrowed to `never` in the fallback and the "arrives in phase N"
+          // placeholder stopped compiling. A placeholder that outlives the thing it was waiting
+          // for is the same shape as the dashboard comment that still said nothing logs a workout
+          // — except the compiler catches this one.
+          <NutritionTab linkId={linkId} />
         )}
       </div>
     </div>

@@ -139,6 +139,58 @@ for (const [code, bundle] of Object.entries(bundles)) {
   }
 }
 
+/* ── keys the CODE references that no bundle has ─────────────────────────────────────────────────
+ *
+ * THE MIRROR OF THE CHECK ABOVE, AND IT WAS MISSING FOR FOUR PHASES.
+ *
+ * This file's own header opens by explaining the exact defect: *"a missing key does not throw.
+ * i18next renders the key PATH — a user sees the literal text where a sentence belongs."* Every
+ * check under it then compares the bundles to EACH OTHER. Nothing compared the CODE to the
+ * bundles, so a key referenced by a component and present in no bundle passed cleanly.
+ *
+ * Found the way it always is: in a browser. `t('common.add')` rendered as the literal string
+ * `common.add` on a button, with this gate green. `common.delete` was the same. Both had been
+ * written by hand into new components, in the reasonable belief that a key that basic must exist.
+ *
+ * **A gate that only checks one direction is a gate with a blind side**, and this is the second one
+ * this file has had: `NATIVE_LABELS` guarded three keys that had moved, so it passed forever while
+ * checking nothing.
+ *
+ * `defaultValue` is honoured — `t('x.y', { defaultValue: 'z' })` is a deliberate soft reference and
+ * is not a defect.
+ */
+{
+  const srcFiles = [];
+  const walk = async (dir) => {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full);
+      else if (/\.(ts|tsx)$/.test(entry.name)) srcFiles.push(full);
+    }
+  };
+  await walk(path.resolve('src'));
+
+  const seen = new Map(); // key → "file:line"
+  for (const file of srcFiles) {
+    const rel = path.relative(path.resolve('src'), file).split(path.sep).join('/');
+    const lines = (await fs.readFile(file, 'utf8')).split('\n');
+    lines.forEach((line, i) => {
+      // Static keys only. A template literal is a dynamic key and is covered by the prefix logic
+      // in the dead-key check above; asserting on it here would be guesswork.
+      for (const m of line.matchAll(/\bt\(\s*'([a-zA-Z][\w.]*)'/g)) {
+        // A soft reference with its own fallback is not a missing string.
+        if (line.includes('defaultValue')) continue;
+        if (!seen.has(m[1])) seen.set(m[1], `${rel}:${i + 1}`);
+      }
+    });
+  }
+
+  for (const [key, where] of seen) {
+    if (ref.has(key)) continue;
+    problems.push(`${where} references t('${key}') and no bundle has it — the user sees the key path`);
+  }
+}
+
 /* ── strings that are ANNOUNCED but never SEEN ───────────────────────────────────────────────────
  *
  * The hardest untranslated string to notice is the one nobody looks at. `ScreenSkeleton` shipped

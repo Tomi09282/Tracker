@@ -14,7 +14,9 @@
     "dismiss": "Dismiss",
     "close": "Close",
     "prevMonth": "Previous month",
-    "nextMonth": "Next month"
+    "nextMonth": "Next month",
+    "add": "Add",
+    "delete": "Delete"
   },
   "auth": {
     "loginTitle": "Sign in to your account",
@@ -235,7 +237,6 @@
     "clientMissingTitle": "This client is not available",
     "clientMissingBody": "Either they are not yours, or the link was archived.",
     "tabs": "Client views",
-    "tabPending": "This section arrives in phase {{phase}}.",
     "tab": {
       "plan": "Plan",
       "nutrition": "Nutrition",
@@ -249,7 +250,19 @@
     "setsCount": "{{count}} sets",
     "repsCount": "{{count}} reps",
     "stillRunning": "in progress",
-    "sessions28d": "{{count}} sessions / 28 d"
+    "sessions28d": "{{count}} sessions / 28 d",
+    "nutrition": {
+      "emptyTitle": "No nutrition plan",
+      "emptyBody": "Build one for this client. While it is a draft they cannot see it.",
+      "create": "New plan",
+      "defaultName": "Nutrition plan",
+      "cycle": "{{count}}-day cycle",
+      "addDay": "Add a day",
+      "addMeal": "Add a meal",
+      "mealDefault": "Meal",
+      "draftNote": "This plan is still a draft — the client cannot see it until you activate it.",
+      "activate": "Activate"
+    }
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",
