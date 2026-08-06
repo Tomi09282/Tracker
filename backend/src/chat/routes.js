@@ -340,7 +340,10 @@ router.post(
     await db.run(
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, request_id)
        VALUES (?, 'coach_client.left', 'coach_client', ?, ?)`,
-      [req.user.id, linkId, req.id ?? null],
+      // res.locals.requestId, NOT req.id — nothing sets req.id, so this row landed with a
+      // NULL request_id and could not be correlated with the server log. The one audit call site
+      // in the product that had invented its own accessor was also the only one that was wrong.
+      [req.user.id, linkId, res.locals.requestId],
     );
     res.json({ left: true });
   }),

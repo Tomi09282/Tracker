@@ -9,10 +9,33 @@ import { useMotionSafe } from './useMotionSafe';
  *
  * With reduced motion the final value is rendered immediately — the information is the point,
  * the count is the flourish.
+ *
+ * ═══ `from` EXISTS FOR BALANCES, AND ITS DEFAULT IS WHY ════════════════════════════════════════
+ *
+ * A statistic counts up from nothing: "1652 exercises" starts at 0 because it is being revealed.
+ * A BALANCE does not. A wallet going 1400 → 1450 must roll those fifty coins, not sweep from zero
+ * through every number the user has ever had — that reads as the balance being recalculated, and
+ * on a screen about money "the number just did something unexplained" is the one impression to
+ * avoid.
+ *
+ * The default stays 0 so the two existing callers (admin stats, coach roster) are untouched. This
+ * is an extension of the component that exists rather than a second odometer, which is the shape
+ * this project has got wrong five times now: `cues.ts` vs `lib/haptics.ts`, a food-visibility
+ * predicate vs `exercises/visibility.js`, an inline FTS escape vs `toFtsQuery`, a second search
+ * without the language join, and a share predicate patched with `.replaceAll`. A coin odometer
+ * would have been the sixth.
  */
-export function CountUp({ to, duration = 900 }: { to: number; duration?: number }) {
+export function CountUp({
+  to,
+  from = 0,
+  duration = 900,
+}: {
+  to: number;
+  from?: number;
+  duration?: number;
+}) {
   const motionSafe = useMotionSafe();
-  const [value, setValue] = useState(motionSafe ? 0 : to);
+  const [value, setValue] = useState(motionSafe ? from : to);
   const frame = useRef(0);
 
   useEffect(() => {
@@ -21,7 +44,6 @@ export function CountUp({ to, duration = 900 }: { to: number; duration?: number 
       return;
     }
     const start = performance.now();
-    const from = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       // Same easing curve as the rest of the system, so the count decelerates like everything else.
@@ -41,7 +63,7 @@ export function CountUp({ to, duration = 900 }: { to: number; duration?: number 
       cancelAnimationFrame(frame.current);
       clearTimeout(floor);
     };
-  }, [to, duration, motionSafe]);
+  }, [to, from, duration, motionSafe]);
 
   return <span className="tabular-nums">{value.toLocaleString()}</span>;
 }

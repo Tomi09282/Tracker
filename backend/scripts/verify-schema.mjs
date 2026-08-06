@@ -368,11 +368,62 @@ if (!setCols.includes('plan_set_target_id')) {
     custom,
   );
 
+  // THE TEST PASSED BECAUSE ITS SUBJECT WAS ABSENT.
+  //
+  // This assertion has shipped since Phase 1 and never once exercised the thing that actually
+  // blocks erasure: `audit_log.actor_id` is ON DELETE SET NULL, and `audit_log_no_update` was a
+  // BEFORE UPDATE trigger with no WHEN clause — an FK action IS an UPDATE, so the SET NULL fired
+  // the trigger, the trigger aborted, and the whole DELETE aborted with it.
+  //
+  // The departing coach here simply had no audit rows, so the delete never touched that path. A
+  // check whose subject is absent does not fail; it passes, quietly, forever — the same shape as
+  // NATIVE_LABELS in check-i18n and the sr-only string nobody heard.
+  //
+  // Now they have one, of each kind that matters: an audit row naming them as ACTOR (the FK that
+  // fires) and one naming them as TARGET (which must survive untouched, because the record of
+  // what was done TO someone is not theirs to erase).
+  ins(
+    `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+     VALUES (?, 'user.credentials.change', 'user', ?, '{"probe":1}', 'verify-req', '10.0.0.1')`,
+    departing,
+    departing,
+  );
+  ins(
+    `INSERT INTO audit_log (actor_id, action, target_type, target_id, request_id)
+     VALUES (NULL, 'probe.about.them', 'user', ?, 'verify-req-2')`,
+    departing,
+  );
+
   const gdpr = attempt(() => db.prepare('DELETE FROM users WHERE id = ?').run(departing));
   check(
     "deleting a coach's account still succeeds",
     !gdpr.aborted,
     gdpr.aborted ? gdpr.message.slice(0, 80) : 'deleted',
+  );
+
+  const anonymised = db
+    .prepare(`SELECT actor_id, action, detail, request_id, ip FROM audit_log
+                WHERE action = 'user.credentials.change' AND target_id = ?`)
+    .get(departing);
+  check(
+    'the audit row survives with its actor anonymised and NOTHING else touched',
+    anonymised
+      && anonymised.actor_id === null
+      && anonymised.detail === '{"probe":1}'
+      && anonymised.request_id === 'verify-req'
+      && anonymised.ip === '10.0.0.1',
+    anonymised
+      ? `actor_id=${anonymised.actor_id}, detail=${anonymised.detail}, ip=${anonymised.ip}`
+      : 'the audit row is GONE — erasure must unlink the actor, never delete the history',
+  );
+
+  const aboutThem = db
+    .prepare("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'probe.about.them' AND target_id = ?")
+    .get(departing);
+  check(
+    'and a row recording what was done TO them is not erased with them',
+    aboutThem.n === 1,
+    `${aboutThem.n} rows`,
   );
 
   const survived = db.prepare('SELECT owner_id, status FROM exercises WHERE id = ?').get(custom);
