@@ -22,6 +22,7 @@ import chatRoutes from './src/chat/routes.js';
 import notificationRoutes from './src/notifications/routes.js';
 import attachmentRoutes from './src/chat/attachments.js';
 import icsRoutes from './src/plans/ics.js';
+import nutritionRoutes from './src/nutrition/routes.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -174,6 +175,7 @@ app.use('/api/v1', logRoutes);
 app.use('/api/v1', chatRoutes);
 app.use('/api/v1', notificationRoutes);
 app.use('/api/v1', icsRoutes);
+app.use('/api/v1', nutritionRoutes);
 
 app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));
 app.use(errorHandler(logger));

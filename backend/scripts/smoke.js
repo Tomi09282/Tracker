@@ -3330,6 +3330,355 @@ if (seeded) {
   }
 }
 
+// --- F4 NUTRITION -----------------------------------------------------------------------------
+//
+// The five-pass adversarial checklist the owner's rules require of any endpoint that a coach and a
+// client both touch: FORGE, REPLAY, RACE, IDOR, EXTREMES. Plus the one this feature adds:
+// **the client never sends a macro**, and the proof is that sending one is a 400 and that a food
+// edit does not move a prescription.
+{
+  const coach = new Jar();
+  const eater = new Jar();
+  const stranger = new Jar();
+  const coach2 = new Jar();
+  const eaterEmail = `nutri-eater-${stamp}@example.com`;
+  const strangerEmail = `nutri-stranger-${stamp}@example.com`;
+
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: coach });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: coach2 });
+  for (const [email, jar] of [[eaterEmail, eater], [strangerEmail, stranger]]) {
+    await call('/api/v1/auth/register', { method: 'POST', body: { email, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD }, jar });
+  }
+
+  const { json: code } = await call('/api/v1/invite-codes', { method: 'POST', jar: coach, body: { kind: 'multi', max_uses: 5 } });
+  await call('/api/v1/join', { method: 'POST', jar: eater, body: { code: code.code } });
+  const { json: roster } = await call('/api/v1/clients', { jar: coach });
+  const linkId = (roster?.clients ?? []).find((c) => c.email === eaterEmail)?.link_id;
+
+  // --- foods ------------------------------------------------------------------------------------
+  let foodId = null;
+  {
+    const { res, json } = await call('/api/v1/foods', {
+      method: 'POST', jar: coach,
+      body: { name: `Csirkemell ${stamp}`, kcal_per_100g: 165, protein_g_per_100g: 31, carb_g_per_100g: 0, fat_g_per_100g: 3.6 },
+    });
+    foodId = json?.id;
+    check('a coach can add a food', res.status === 201 && Number.isInteger(foodId), `status ${res.status}`);
+  }
+  {
+    // FORGE: `verified` and `source` are server-owned and are not in the schema at all.
+    const { res } = await call('/api/v1/foods', {
+      method: 'POST', jar: coach,
+      body: { name: 'Fake USDA', kcal_per_100g: 100, protein_g_per_100g: 1, carb_g_per_100g: 1, fat_g_per_100g: 1, verified: 1, source: 'usda' },
+    });
+    check('FORGE: claiming verified/usda on a food -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // EXTREMES: nothing on earth is denser than pure fat.
+    const { res } = await call('/api/v1/foods', {
+      method: 'POST', jar: coach,
+      body: { name: 'Neutronium', kcal_per_100g: 99999, protein_g_per_100g: 0, carb_g_per_100g: 0, fat_g_per_100g: 0 },
+    });
+    check('EXTREMES: 99999 kcal per 100 g -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/foods?q=Csirkemell`, { jar: coach });
+    check('food search finds it', res.status === 200 && json?.foods?.some((f) => f.id === foodId), `${json?.foods?.length} hits`);
+  }
+  {
+    // IDOR: a personal food is its author's. A stranger searching must not see it, and the exact
+    // id is not a permission either — the prescription write below is where that is proven.
+    const { json } = await call(`/api/v1/foods?q=Csirkemell`, { jar: stranger });
+    check('IDOR: a stranger does not see another user\'s personal food', !(json?.foods ?? []).some((f) => f.id === foodId), `${json?.foods?.length} hits`);
+  }
+  {
+    // EXTREMES: FTS5 MATCH is an expression language. A bare quote must be a search, not a 500.
+    const { res } = await call(`/api/v1/foods?q=${encodeURIComponent('" OR name:x')}`, { jar: coach });
+    check('EXTREMES: an FTS metacharacter is a search term, not a syntax error', res.status === 200, `status ${res.status}`);
+  }
+
+  // --- plans ------------------------------------------------------------------------------------
+  let planId = null; let dayId = null; let mealId = null; let itemId = null;
+  {
+    const { res, json } = await call('/api/v1/nutrition-plans', {
+      method: 'POST', jar: coach,
+      body: { name: 'Cut phase', coach_client_id: linkId, starts_on: '2026-08-01', goal: 'fat-loss' },
+    });
+    planId = json?.id;
+    check('a coach can assign a nutrition plan', res.status === 201 && Number.isInteger(planId), `status ${res.status}`);
+  }
+  {
+    // FORGE: the link belongs to the other coach. The INSERT has no WHERE — the link is proved
+    // inside the SELECT, so a forged id inserts zero rows.
+    const { res } = await call('/api/v1/nutrition-plans', {
+      method: 'POST', jar: coach2,
+      body: { name: 'Injected', coach_client_id: linkId },
+    });
+    check('FORGE: assigning a plan through another coach\'s link -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/nutrition-plans/${planId}/days`, {
+      method: 'POST', jar: coach,
+      body: { day_index: 0, name: 'Training day', kcal_target: 2500, protein_g_target: 180, carb_g_target: 250, fat_g_target: 80 },
+    });
+    dayId = json?.id;
+    check('a day with macro targets', res.status === 201 && Number.isInteger(dayId), `status ${res.status}`);
+  }
+  {
+    // EXTREMES: the cycle is 7, so day 7 does not exist. The trigger says so and the route must
+    // turn that into a client error rather than a 500.
+    const { res } = await call(`/api/v1/nutrition-plans/${planId}/days`, {
+      method: 'POST', jar: coach, body: { day_index: 27 },
+    });
+    check('EXTREMES: a day outside the cycle -> 400, not 500', res.status === 400, `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/nutrition-plans/${planId}/meals`, {
+      method: 'POST', jar: coach, body: { day_id: dayId, name: 'Reggeli', time_hint: '08:00' },
+    });
+    mealId = json?.id;
+    check('a meal in the day', res.status === 201 && Number.isInteger(mealId), `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/nutrition-plans/${planId}/items`, {
+      method: 'POST', jar: coach, body: { meal_id: mealId, food_id: foodId, grams: 150 },
+    });
+    itemId = json?.id;
+    check('a prescribed portion', res.status === 201 && Number.isInteger(itemId), `status ${res.status}`);
+  }
+  {
+    // THE RULE OF THIS FEATURE. The body carries no macro field at all, so sending one is not
+    // "ignored" — it is rejected, which is the difference between a strict schema and a lenient one.
+    const { res } = await call(`/api/v1/nutrition-plans/${planId}/items`, {
+      method: 'POST', jar: coach,
+      body: { meal_id: mealId, food_id: foodId, grams: 150, kcal: 5 },
+    });
+    check('FORGE: sending a kcal figure with a portion -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: coach });
+    const item = (json?.items ?? [])[0];
+    const exact = item && Math.abs(item.kcal - 247.5) < 0.001 && Math.abs(item.protein_g - 46.5) < 0.001;
+    check('150 g of 165 kcal/100 g reads back as exactly 247.5 kcal', res.status === 200 && exact, `${item?.kcal} kcal, ${item?.protein_g} g protein`);
+  }
+  {
+    // IDOR: the plan tree belongs to the coach who wrote it and the client it names. Nobody else.
+    const { res } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: stranger });
+    check('IDOR: a stranger reading the plan -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/nutrition-plans/${planId}/items/${itemId}`, {
+      method: 'PATCH', jar: coach2, body: { grams: 999 },
+    });
+    check('IDOR: another coach editing a portion -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // The plan is still a draft, so the client cannot see it yet.
+    const { res } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: eater });
+    check('a draft plan is invisible to the client -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // BOTH BORROWED CLAUSES, PROVEN. This is the first: the plan is still a DRAFT, so the client
+    // cannot see it — and must not be able to reach its food either. Without `status <> 'draft'`
+    // in visibleFood, a client could log an ingredient out of a plan they are not shown yet.
+    const { res } = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater,
+      body: { food_id: foodId, grams: 100, local_date: '2026-08-05' },
+    });
+    check('a food reachable only through a DRAFT plan is not loggable -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    await call(`/api/v1/nutrition-plans/${planId}`, { method: 'PATCH', jar: coach, body: { status: 'active' } });
+    const { res, json } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: eater });
+    check('activating it makes the client the reader', res.status === 200 && json?.items?.length === 1, `status ${res.status}`);
+  }
+  {
+    // EXTREMES: an id no row will ever have must be a 404 and never a 500.
+    const { res } = await call(`/api/v1/nutrition-plans/2147483647`, { jar: coach });
+    check('EXTREMES: MAX_INT plan id -> 404', res.status === 404, `status ${res.status}`);
+  }
+
+  // --- the client's log -------------------------------------------------------------------------
+  let logId = null;
+  {
+    const { res, json } = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater,
+      body: { food_id: foodId, grams: 200, local_date: '2026-08-06', tz_name: 'Europe/Budapest', meal_label: 'Ebéd' },
+    });
+    logId = json?.id;
+    check('a client logs a food', res.status === 201 && Number.isInteger(logId), `status ${res.status}`);
+  }
+  {
+    const { res, json } = await call('/api/v1/nutrition-log/2026-08-06', { jar: eater });
+    const exact = Math.abs((json?.totals?.kcal ?? 0) - 330) < 0.001;
+    check('200 g of 165 kcal/100 g totals exactly 330 kcal', res.status === 200 && exact, `${json?.totals?.kcal} kcal`);
+  }
+  {
+    // ADHERENCE IS A COMPARISON, NOT A PERCENTAGE. 2026-08-06 is five days after starts_on with a
+    // 7-day cycle, so the schedule rule lands on day_index 5 — which has no row, so no target.
+    // Day 0 is 2026-08-01. Assert the arithmetic rather than assuming it.
+    const { json } = await call('/api/v1/nutrition-log/2026-08-01', { jar: eater });
+    check('the target for the date comes from the schedule rule', json?.targets?.kcal_target === 2500, `target ${json?.targets?.kcal_target}`);
+  }
+  {
+    const { json } = await call('/api/v1/nutrition-log/2026-08-06', { jar: eater });
+    check('a date the cycle gives no day has no invented target', json?.targets === null, `targets ${JSON.stringify(json?.targets)}`);
+  }
+  {
+    // THE THIRD CLAUSE IS NARROW, AND THIS IS WHAT PROVES IT.
+    //
+    // `visibleFood` grants a client access to foods USED IN a plan assigned to them. The obvious
+    // way to get that wrong is to widen it to "any food belonging to my coach", which would be
+    // simpler, would make the assertion above pass identically, and would hand every client the
+    // coach's entire private food list. So: a second coach food that is never prescribed.
+    const { json: secret } = await call('/api/v1/foods', {
+      method: 'POST', jar: coach,
+      body: { name: `Titkos recept ${stamp}`, kcal_per_100g: 500, protein_g_per_100g: 10, carb_g_per_100g: 50, fat_g_per_100g: 25 },
+    });
+    const search = await call(`/api/v1/foods?q=Titkos`, { jar: eater });
+    const logIt = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater,
+      body: { food_id: secret.id, grams: 100, local_date: '2026-08-06' },
+    });
+    check(
+      'a coach food that was never prescribed stays invisible to the client',
+      (search.json?.foods ?? []).length === 0 && logIt.res.status === 404,
+      `${search.json?.foods?.length} hits, log ${logIt.res.status}`,
+    );
+  }
+  {
+    // ...and the prescribed one IS searchable, so the client can find what they were told to eat
+    // rather than having to type it in again from the plan screen.
+    const { json } = await call(`/api/v1/foods?q=Csirkemell`, { jar: eater });
+    check(
+      'the prescribed food IS searchable by the client it was prescribed to',
+      (json?.foods ?? []).some((f) => f.id === foodId),
+      `${json?.foods?.length} hits`,
+    );
+  }
+  {
+    // FORGE: the client sends a macro with their log.
+    const { res } = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater,
+      body: { food_id: foodId, grams: 100, local_date: '2026-08-06', kcal: 1 },
+    });
+    check('FORGE: a client sending their own kcal -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // FORGE: tagging a log entry against a plan day belonging to somebody else. The subquery scopes
+    // plan_day_id to a plan assigned to THIS user, so the tag silently becomes NULL rather than
+    // linking two unrelated people's data.
+    const { res, json: created } = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: stranger,
+      body: { food_id: foodId, grams: 100, local_date: '2026-08-06', plan_day_id: dayId },
+    });
+    // The stranger cannot see the coach's personal food either, so this is a 404 first.
+    check('FORGE: a stranger logging another user\'s personal food -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // IDOR: the log is single-table on client_user_id. A stranger's day is empty, not forbidden.
+    const { res, json } = await call('/api/v1/nutrition-log/2026-08-06', { jar: stranger });
+    check('IDOR: a stranger sees their own empty day, not the client\'s', res.status === 200 && json?.items?.length === 0, `${json?.items?.length} items`);
+  }
+  {
+    const { res } = await call(`/api/v1/nutrition-log/${logId}`, { method: 'DELETE', jar: stranger });
+    check('IDOR: a stranger deleting the client\'s log entry -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // EXTREMES: a date that is not a date.
+    const { res } = await call('/api/v1/nutrition-log/6-August-2026', { jar: eater });
+    check('EXTREMES: a malformed date -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // EXTREMES: a range wider than a year is refused rather than served slowly.
+    const { res, json } = await call('/api/v1/nutrition-log?from=1000-01-01&to=3000-01-01', { jar: eater });
+    check('EXTREMES: a 2000-year range returns nothing rather than scanning', res.status === 200 && json?.days?.length === 0, `${json?.days?.length} days`);
+  }
+  {
+    // RACE: two concurrent logs are two rows. Nothing here is an upsert, and if the day cap or the
+    // insert had a read-then-write shape this is where it would show.
+    const [a, b] = await Promise.all([
+      call('/api/v1/nutrition-log', { method: 'POST', jar: eater, body: { food_id: foodId, grams: 50, local_date: '2026-08-07' } }),
+      call('/api/v1/nutrition-log', { method: 'POST', jar: eater, body: { food_id: foodId, grams: 50, local_date: '2026-08-07' } }),
+    ]);
+    const { json } = await call('/api/v1/nutrition-log/2026-08-07', { jar: eater });
+    check('RACE: two concurrent logs are two rows', a.res.status === 201 && b.res.status === 201 && json?.items?.length === 2, `${json?.items?.length} items`);
+  }
+  {
+    // REPLAY: deleting the same entry twice. The second is a 404 because the row is gone, not
+    // because a flag says it was already deleted.
+    const first = await call(`/api/v1/nutrition-log/${logId}`, { method: 'DELETE', jar: eater });
+    const second = await call(`/api/v1/nutrition-log/${logId}`, { method: 'DELETE', jar: eater });
+    check('REPLAY: deleting a log entry twice -> 204 then 404', first.res.status === 204 && second.res.status === 404, `${first.res.status} then ${second.res.status}`);
+  }
+
+  // --- THE SNAPSHOT IS THE VALUE ----------------------------------------------------------------
+  {
+    // Correcting the food must not rewrite what was prescribed or what was eaten. This is the
+    // single most important assertion in this block: without it, an admin fixing a typo in the
+    // food database silently rewrites every coach's prescriptions and every client's history.
+    const { json: before } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: coach });
+    const kcalBefore = before?.items?.[0]?.kcal;
+
+    await call(`/api/v1/foods/${foodId}`, { method: 'DELETE', jar: coach });
+
+    const { res, json: after } = await call(`/api/v1/nutrition-plans/${planId}`, { jar: coach });
+    const item = after?.items?.[0];
+    check(
+      'deleting the food leaves the prescription readable and unchanged',
+      res.status === 200 && item && item.food_id === null && Math.abs(item.kcal - kcalBefore) < 0.001,
+      `food_id ${item?.food_id}, ${item?.kcal} kcal (was ${kcalBefore})`,
+    );
+
+    const { json: day } = await call('/api/v1/nutrition-log/2026-08-07', { jar: eater });
+    check(
+      'and the client\'s own log survives the food being deleted',
+      day?.items?.length === 2 && day.items.every((i) => i.food_id === null && i.name.startsWith('Csirkemell')),
+      `${day?.items?.length} items, first "${day?.items?.[0]?.name}"`,
+    );
+  }
+  {
+    // The second borrowed clause: the coach ARCHIVES the client. `archived_at` on the plan is
+    // untouched by that — archiving acts on the LINK — so `archived_at IS NULL` alone would leave
+    // the departed coach's private food readable forever. The link-active condition is what makes
+    // it stop on the very next request, with the same unexpired token.
+    const { json: food2 } = await call('/api/v1/foods', {
+      method: 'POST', jar: coach,
+      body: { name: `Utolso etel ${stamp}`, kcal_per_100g: 200, protein_g_per_100g: 20, carb_g_per_100g: 10, fat_g_per_100g: 8 },
+    });
+    await call(`/api/v1/nutrition-plans/${planId}/items`, {
+      method: 'POST', jar: coach, body: { meal_id: mealId, food_id: food2.id, grams: 100 },
+    });
+    const before = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater, body: { food_id: food2.id, grams: 100, local_date: '2026-08-08' },
+    });
+
+    await call(`/api/v1/clients/${linkId}/archive`, { method: 'POST', jar: coach });
+
+    const after = await call('/api/v1/nutrition-log', {
+      method: 'POST', jar: eater, body: { food_id: food2.id, grams: 100, local_date: '2026-08-09' },
+    });
+    check(
+      'archiving the client withdraws the coach food on the next request',
+      before.res.status === 201 && after.res.status === 404,
+      `${before.res.status} while linked, ${after.res.status} after archiving`,
+    );
+
+    const kept = await call('/api/v1/nutrition-log/2026-08-08', { jar: eater });
+    check(
+      'and what they already ate is still theirs, snapshot intact',
+      kept.json?.items?.length === 1 && Math.abs(kept.json.items[0].kcal - 200) < 0.001,
+      `${kept.json?.items?.length} items, ${kept.json?.items?.[0]?.kcal} kcal`,
+    );
+  }
+  {
+    // IDOR on the delete: the food was the coach's, so a stranger holding the exact id gets 404.
+    const { res } = await call(`/api/v1/foods/${foodId}`, { method: 'DELETE', jar: stranger });
+    check('IDOR: deleting a food you do not own -> 404', res.status === 404, `status ${res.status}`);
+  }
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

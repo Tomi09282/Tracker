@@ -17,7 +17,8 @@
     "check:routes": "node scripts/check-routes.mjs",
     "check:worker-tx": "node scripts/check-worker-tx.mjs",
     "check:all": "npm run check:routes && npm run check:worker-tx && npm run verify:schema && npm run verify:013",
-    "verify:013": "node scripts/verify-013.mjs"
+    "verify:013": "node scripts/verify-013.mjs",
+    "verify:015": "node scripts/verify-015.mjs"
   },
   "author": "",
   "license": "ISC",
