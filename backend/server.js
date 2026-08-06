@@ -23,6 +23,7 @@ import notificationRoutes from './src/notifications/routes.js';
 import attachmentRoutes from './src/chat/attachments.js';
 import icsRoutes from './src/plans/ics.js';
 import nutritionRoutes from './src/nutrition/routes.js';
+import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -163,6 +164,12 @@ app.use('/api/v1', mediaRoutes);
 // that runs before multer, so a stranger cannot make the server write 128 MiB to disk.
 app.use('/api/v1', attachmentRoutes);
 
+// Progress photo UPLOAD joins media and chat attachments above the global CSRF middleware, for
+// the same reason and with the same compensation: a multipart body cannot carry a JSON content
+// type, so the router runs its own Sec-Fetch-Site + X-CSRF check. Only the upload moves; every
+// other progress route stays below and is fully protected.
+app.use('/api/v1', progressUploadRoutes);
+
 app.use(csrfProtection);
 app.use(AUTH_PATH, authRoutes);
 app.use('/api/v1', themeRoutes);
@@ -176,6 +183,7 @@ app.use('/api/v1', chatRoutes);
 app.use('/api/v1', notificationRoutes);
 app.use('/api/v1', icsRoutes);
 app.use('/api/v1', nutritionRoutes);
+app.use('/api/v1', progressRoutes);
 
 app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));
 app.use(errorHandler(logger));

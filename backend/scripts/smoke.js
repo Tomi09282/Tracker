@@ -114,13 +114,19 @@ class Jar {
 
 async function call(path, { method = 'GET', body, jar, headers = {}, csrf = true } = {}) {
   const h = { ...headers };
-  if (body !== undefined) h['Content-Type'] = 'application/json';
+  // A FormData body is passed through untouched, and the Content-Type is left for fetch to set —
+  // it has to carry the multipart boundary, which nothing here can know. The earlier version
+  // JSON-stringified everything, so a FormData silently became the string "[object FormData]"
+  // with an application/json header, and every upload route answered 415. That is a harness that
+  // lies about what it sent, which is worse than one that cannot send it at all.
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+  if (body !== undefined && !isForm) h['Content-Type'] = 'application/json';
   if (csrf && method !== 'GET') h['X-CSRF'] = '1';
   if (jar) h.Cookie = jar.header();
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: h,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     redirect: 'manual',
   });
   if (jar) jar.absorb(res);
@@ -3730,6 +3736,296 @@ if (seeded) {
     // IDOR on the delete: the food was the coach's, so a stranger holding the exact id gets 404.
     const { res } = await call(`/api/v1/foods/${foodId}`, { method: 'DELETE', jar: stranger });
     check('IDOR: deleting a food you do not own -> 404', res.status === 404, `status ${res.status}`);
+  }
+}
+
+// --- F10 PROGRESS: MEASUREMENTS, PHOTOS, AND THE CONSENT THAT GATES THEM -----------------------
+//
+// The privacy model is four conditions in one predicate, and every one of them is attacked here.
+// The failure mode this block exists to prevent is the one where a coach can see a photograph of
+// somebody's body that nobody said they could see.
+{
+  const coach = new Jar();
+  const coach2 = new Jar();
+  const subject = new Jar();
+  const stranger = new Jar();
+  const subjectEmail = `progress-subject-${stamp}@example.com`;
+  const strangerEmail = `progress-stranger-${stamp}@example.com`;
+
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: coach });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: coach2 });
+  for (const [email, jar] of [[subjectEmail, subject], [strangerEmail, stranger]]) {
+    await call('/api/v1/auth/register', { method: 'POST', body: { email, password: PASSWORD } });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email, password: PASSWORD }, jar });
+  }
+
+  const { json: code } = await call('/api/v1/invite-codes', { method: 'POST', jar: coach, body: { kind: 'multi', max_uses: 5 } });
+  await call('/api/v1/join', { method: 'POST', jar: subject, body: { code: code.code } });
+  const { json: roster } = await call('/api/v1/clients', { jar: coach });
+  const link = (roster?.clients ?? []).find((c) => c.email === subjectEmail)?.link_id;
+  const { json: me } = await call('/api/v1/auth/me', { jar: subject });
+  const subjectId = me?.user?.id ?? me?.id;
+
+  // --- measurements ----------------------------------------------------------------------------
+  {
+    const { json } = await call('/api/v1/measurement-metrics', { jar: subject });
+    check('the metric vocabulary is a table, not a hardcoded enum', (json?.metrics ?? []).length === 15, `${json?.metrics?.length} metrics`);
+  }
+  {
+    const { res } = await call('/api/v1/measurements', {
+      method: 'POST', jar: subject, body: { metric_key: 'weight', measured_on: '2026-08-01', value: 82.35 },
+    });
+    check('a measurement is recorded', res.status === 201, `status ${res.status}`);
+  }
+  {
+    const { json } = await call('/api/v1/measurements?metric_key=weight', { jar: subject });
+    check('82.35 kg round-trips exactly through the integer scale', Math.abs(json?.measurements?.[0]?.value - 82.35) < 0.0001, `${json?.measurements?.[0]?.value}`);
+  }
+  {
+    // ONE VALUE PER METRIC PER DAY. Weighing yourself twice on one morning replaces rather than
+    // making the chart show two points for one day.
+    await call('/api/v1/measurements', { method: 'POST', jar: subject, body: { metric_key: 'weight', measured_on: '2026-08-01', value: 82.1 } });
+    const { json } = await call('/api/v1/measurements?metric_key=weight', { jar: subject });
+    check('a second weighing on the same day REPLACES the first', json?.measurements?.length === 1 && Math.abs(json.measurements[0].value - 82.1) < 0.0001, `${json?.measurements?.length} rows, ${json?.measurements?.[0]?.value} kg`);
+  }
+  {
+    // EXTREMES: the bounds live in a table and a trigger enforces them, so a wrong bound is an
+    // UPDATE and not a table rebuild. 400, never 500.
+    const low = await call('/api/v1/measurements', { method: 'POST', jar: subject, body: { metric_key: 'weight', measured_on: '2026-08-02', value: 3 } });
+    const high = await call('/api/v1/measurements', { method: 'POST', jar: subject, body: { metric_key: 'weight', measured_on: '2026-08-02', value: 900 } });
+    check('EXTREMES: implausible weights -> 400, not 500', low.res.status === 400 && high.res.status === 400, `${low.res.status} / ${high.res.status}`);
+  }
+  {
+    // FORGE: an unknown metric is rejected by the FOREIGN KEY, not by an enum in the code — which
+    // is what lets a new metric ship as an INSERT rather than a 12-step table rebuild.
+    const { res } = await call('/api/v1/measurements', { method: 'POST', jar: subject, body: { metric_key: 'wingspan', measured_on: '2026-08-02', value: 180 } });
+    check('FORGE: an unknown metric -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    // FORGE: client_user_id is not in the body schema at all, so there is no id to forge.
+    const { res } = await call('/api/v1/measurements', { method: 'POST', jar: stranger, body: { metric_key: 'weight', measured_on: '2026-08-03', value: 70, client_user_id: subjectId } });
+    check('FORGE: naming somebody else as the subject -> 400', res.status === 400, `status ${res.status}`);
+  }
+
+  // --- THE DEFAULT IS NOBODY --------------------------------------------------------------------
+  {
+    const { res, json } = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach });
+    check(
+      'with NO share, the coach sees nothing — the default is deny, not allow',
+      res.status === 200 && json?.measurements?.length === 0,
+      `${json?.measurements?.length} rows`,
+    );
+  }
+  {
+    const { json } = await call('/api/v1/progress-access-log', { jar: subject });
+    check('...and that empty look was still logged', (json?.entries ?? []).some((e) => e.kind === 'measurements'), `${json?.entries?.length} entries`);
+  }
+
+  // --- sharing ----------------------------------------------------------------------------------
+  {
+    // FORGE: only the CLIENT may grant. A coach POSTing to their own client's link inserts zero
+    // rows, because the statement binds cc.client_id and requires it to equal the caller.
+    const { res } = await call(`/api/v1/progress-shares/${link}`, { method: 'POST', jar: coach, body: { share_measurements: true } });
+    check('FORGE: a coach granting themselves access -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/progress-shares/${link}`, { method: 'POST', jar: subject, body: { share_measurements: true } });
+    check('the client grants measurements', res.status === 204, `status ${res.status}`);
+  }
+  {
+    const { json } = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach });
+    check('the coach now sees the measurements', json?.measurements?.length === 1, `${json?.measurements?.length} rows`);
+  }
+  {
+    // THE TWO FLAGS ARE SEPARATE DECISIONS. Granting measurements must not carry photos with it.
+    const { json } = await call(`/api/v1/progress-photos?client_id=${subjectId}`, { jar: coach });
+    check('granting MEASUREMENTS did not also grant PHOTOS', (json?.photos ?? []).length === 0, `${json?.photos?.length} photos`);
+  }
+  {
+    // IDOR: the other coach has no link at all, so the share cannot possibly reach them.
+    const { json } = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach2 });
+    check('IDOR: a coach with no link sees nothing', (json?.measurements ?? []).length === 0, `${json?.measurements?.length} rows`);
+  }
+  {
+    const { json } = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: stranger });
+    check('IDOR: a stranger sees nothing', (json?.measurements ?? []).length === 0, `${json?.measurements?.length} rows`);
+  }
+
+  // --- photos -----------------------------------------------------------------------------------
+  //
+  // A 1x1 PNG, built here rather than read from disk so the smoke has no fixture file to lose.
+  const PNG = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+  );
+  const uploadPhoto = async (jar, takenOn) => {
+    const form = new FormData();
+    form.append('file', new Blob([PNG], { type: 'image/png' }), 'p.png');
+    form.append('taken_on', takenOn);
+    form.append('pose', 'front');
+    return call('/api/v1/progress-photos', { method: 'POST', jar, body: form });
+  };
+
+  let photoKey = null;
+  let photoId = null;
+  {
+    const { res, json } = await uploadPhoto(subject, '2026-08-01');
+    photoKey = json?.storage_key;
+    photoId = json?.id;
+    check('a progress photo uploads', res.status === 201 && /^[a-f0-9]{48}$/.test(photoKey ?? ''), `status ${res.status}, key ${photoKey?.slice(0, 12)}…`);
+  }
+  {
+    // NARROWED, NOT WAIVED. The upload is mounted ABOVE the global CSRF middleware because a
+    // multipart body cannot carry a JSON content type. That is only acceptable if the route's own
+    // check is real, so: the same upload with the X-CSRF header removed, and with a cross-site
+    // Sec-Fetch-Site. Both must be refused, or moving the route was a hole rather than a
+    // narrowing.
+    const noHeader = new FormData();
+    noHeader.append('file', new Blob([PNG], { type: 'image/png' }), 'p.png');
+    noHeader.append('taken_on', '2026-08-02');
+    const a = await fetch(`${BASE}/api/v1/progress-photos`, {
+      method: 'POST', headers: { Cookie: subject.header() }, body: noHeader,
+    });
+
+    const crossSite = new FormData();
+    crossSite.append('file', new Blob([PNG], { type: 'image/png' }), 'p.png');
+    crossSite.append('taken_on', '2026-08-02');
+    const b = await fetch(`${BASE}/api/v1/progress-photos`, {
+      method: 'POST',
+      headers: { Cookie: subject.header(), 'X-CSRF': '1', 'Sec-Fetch-Site': 'cross-site' },
+      body: crossSite,
+    });
+
+    check(
+      'the upload above the global CSRF guard runs its OWN, and it fires',
+      a.status === 403 && b.status === 403,
+      `no header ${a.status}, cross-site ${b.status}`,
+    );
+  }
+  {
+    // ...and a JSON content type on that route is refused too, so the multipart exception cannot
+    // be used as a general CSRF bypass for anything else.
+    const c = await fetch(`${BASE}/api/v1/progress-photos`, {
+      method: 'POST',
+      headers: { Cookie: subject.header(), 'X-CSRF': '1', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taken_on: '2026-08-02' }),
+    });
+    check('a JSON body on the multipart-only route -> 415', c.status === 415, `status ${c.status}`);
+  }
+  {
+    // MAGIC BYTES, not the filename and not the declared type. A text file claiming image/png is
+    // refused by what its first bytes actually are.
+    const form = new FormData();
+    form.append('file', new Blob([Buffer.from('not a picture')], { type: 'image/png' }), 'evil.png');
+    form.append('taken_on', '2026-08-01');
+    const { res } = await call('/api/v1/progress-photos', { method: 'POST', jar: subject, body: form });
+    check('a text file claiming to be a PNG -> 400', res.status === 400, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/progress-media/${photoKey}`, { jar: subject });
+    check('the owner can read their own photo', res.status === 200, `status ${res.status}`);
+  }
+  {
+    // THE KEY IS NOT THE PERMISSION. The exact 48-hex key, in the hands of the linked coach who
+    // was granted MEASUREMENTS but not photos.
+    const { res } = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    check('THE KEY IS NOT THE PERMISSION: the exact key without a photo share -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const { res } = await call(`/api/v1/progress-media/${photoKey}`, { jar: stranger });
+    check('...and a stranger with the exact key -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    await call(`/api/v1/progress-shares/${link}`, { method: 'POST', jar: subject, body: { share_photos: true } });
+    const { res } = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    check('after the client grants photos, the coach can read it', res.status === 200, `status ${res.status}`);
+  }
+  {
+    // Granting photos must not have quietly cleared the measurements grant.
+    const { json } = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach });
+    check('granting photos left the measurements grant alone', json?.measurements?.length === 1, `${json?.measurements?.length} rows`);
+  }
+  {
+    // T4.3.1: the READ is logged, with the viewer named.
+    const { json } = await call('/api/v1/progress-access-log', { jar: subject });
+    const photoLook = (json?.entries ?? []).find((e) => e.kind === 'photo');
+    check(
+      'the photo read is logged, naming the viewer',
+      photoLook?.viewer === seeded.coach.email && photoLook.target_id === photoId,
+      `viewer "${photoLook?.viewer}", target ${photoLook?.target_id}`,
+    );
+  }
+  {
+    // IDOR on the log itself: it is the SUBJECT's read and only theirs.
+    const { json } = await call('/api/v1/progress-access-log', { jar: coach });
+    check('IDOR: the coach cannot read the client\'s access log', !(json?.entries ?? []).some((e) => e.kind === 'photo' && e.target_id === photoId), `${json?.entries?.length} entries`);
+  }
+
+  // --- REVOCATION IS IMMEDIATE ------------------------------------------------------------------
+  {
+    const before = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    await call(`/api/v1/progress-shares/${link}`, { method: 'DELETE', jar: subject });
+    const after = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    const meas = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach });
+    check(
+      'revoking cuts access on the very next request, with the same token',
+      before.res.status === 200 && after.res.status === 404 && meas.json?.measurements?.length === 0,
+      `photo ${before.res.status} -> ${after.res.status}, ${meas.json?.measurements?.length} measurements`,
+    );
+  }
+  {
+    // REPLAY: revoking twice is not a second success.
+    const { res } = await call(`/api/v1/progress-shares/${link}`, { method: 'DELETE', jar: subject });
+    check('REPLAY: revoking an already-revoked share -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // A client who revokes must be able to change their mind, or the control is a trap.
+    await call(`/api/v1/progress-shares/${link}`, { method: 'POST', jar: subject, body: { share_photos: true } });
+    const { res } = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    check('re-granting after a revocation works', res.status === 200, `status ${res.status}`);
+  }
+  {
+    // THE FOURTH CONDITION. The client never revokes; the COACH archives them. Access must still
+    // stop, because leaving is leaving — this is what a `revoked_at`-only design gets wrong.
+    await call(`/api/v1/clients/${link}/archive`, { method: 'POST', jar: coach });
+    const photo = await call(`/api/v1/progress-media/${photoKey}`, { jar: coach });
+    const meas = await call(`/api/v1/measurements?client_id=${subjectId}`, { jar: coach });
+    check(
+      'archiving the link withdraws access even with the share still granted',
+      photo.res.status === 404 && meas.json?.measurements?.length === 0,
+      `photo ${photo.res.status}, ${meas.json?.measurements?.length} measurements`,
+    );
+  }
+  {
+    const { json } = await call('/api/v1/progress-shares', { jar: subject });
+    check('and the client can still SEE what they shared and when', (json?.shares ?? []).length === 1 && json.shares[0].share_photos === 1, `${json?.shares?.length} shares`);
+  }
+
+  // --- deletion ---------------------------------------------------------------------------------
+  {
+    const { res } = await call(`/api/v1/progress-photos/${photoId}`, { method: 'DELETE', jar: stranger });
+    check('IDOR: a stranger deleting the photo -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    const del = await call(`/api/v1/progress-photos/${photoId}`, { method: 'DELETE', jar: subject });
+    const gone = await call(`/api/v1/progress-media/${photoKey}`, { jar: subject });
+    check('the owner deletes it, and the bytes stop being served', del.res.status === 204 && gone.res.status === 404, `${del.res.status} then ${gone.res.status}`);
+  }
+  {
+    // The access log SURVIVES the photo being deleted. "Who saw my pictures" must not be erasable
+    // by deleting the pictures — that is the question the table exists to answer.
+    const { json } = await call('/api/v1/progress-access-log', { jar: subject });
+    check(
+      'the access log outlives the photo it recorded',
+      (json?.entries ?? []).some((e) => e.kind === 'photo' && e.target_id === photoId),
+      `${json?.entries?.length} entries`,
+    );
+  }
+  {
+    // EXTREMES: a malformed key never reaches the database or the filesystem.
+    const bad = await call('/api/v1/progress-media/..%2F..%2Fetc%2Fpasswd', { jar: subject });
+    const short = await call('/api/v1/progress-media/abc', { jar: subject });
+    check('EXTREMES: traversal and short keys -> 404, never a file read', bad.res.status === 404 && short.res.status === 404, `${bad.res.status} / ${short.res.status}`);
   }
 }
 
