@@ -776,31 +776,92 @@ export function copyDaysTx({ planId, coachUserId, dayIds, targetOffset }) {
 }
 
 /**
- * Numbered migrations gated by PRAGMA user_version.
+ * Numbered migrations, gated by A LEDGER OF WHAT HAS ACTUALLY BEEN APPLIED.
  *
  * The version bump happens INSIDE the same transaction as the migration body: if the process
  * dies mid-file, the whole file rolls back together with the bump, so the next boot re-applies
  * it cleanly. A bump outside the transaction can leave a schema that claims to be newer than
  * it is — which is unrecoverable without manual surgery.
+ *
+ * ═══ WHY A LEDGER AND NOT `user_version` ═══════════════════════════════════════════════════════
+ *
+ * This loop used to be `if (version <= current) continue` — a HIGH-WATER MARK. It tracks one
+ * number, so it cannot tell "already applied" apart from "numbered below something that was".
+ *
+ * That is not theoretical. Phase 5's review cut the coach marketplace and RESERVED 020 for it;
+ * Phase 6 would ship 021. The moment 021 committed, the 020 file written afterwards would be
+ * `20 <= 21` and skipped FOREVER — no error, no log line, no failure until the first query hit a
+ * table that was never created.
+ *
+ * MEASURED, NOT INFERRED. A throwaway database was given 019 and 021, then 020 was added:
+ *
+ *     first run:  applied 19, 21 → user_version 21
+ *     second run: applied (nothing) → user_version 21
+ *     t20_marketplace exists: false
+ *
+ * The ledger fixes the class rather than the instance. A file is applied when its version is not
+ * in `schema_migrations`, whatever its number, so reserving a number is safe again and so is
+ * inserting a migration into a gap.
+ *
+ * OUT-OF-ORDER APPLICATION IS REPORTED, NOT REFUSED. A file numbered below the highest applied one
+ * is applied — silently skipping it is strictly worse — but it comes back in `outOfOrder` so the
+ * caller can say so out loud. Refusing would recreate the original problem wearing an error
+ * message: the operator's only move would be renumbering, which is exactly the manual discipline
+ * that failed here.
+ *
+ * `user_version` is still bumped, because verify-schema and the probes read it and because a
+ * database should still be able to say how far along it is without a join.
  */
 export function migrate({ files }) {
   const conn = getDb();
   const applied = [];
+  const outOfOrder = [];
   let currentFile = null;
+
+  // The ledger is RUNNER INFRASTRUCTURE, not schema, so it is created here rather than in a
+  // numbered file — a migration that creates the thing that decides which migrations run has an
+  // ordering problem of its own. It also leaves 020 genuinely free.
+  conn.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (
+    version    INTEGER PRIMARY KEY,
+    applied_at INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+
+  // BACKFILL, ONCE. An existing database has no ledger but a truthful `user_version`, so every
+  // file at or below it is already applied and must not run again. Reading the mark for THIS and
+  // nothing else is the last thing it is trusted with.
+  const mark = conn.pragma('user_version', { simple: true });
+  if (conn.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n === 0 && mark > 0) {
+    const seed = conn.prepare('INSERT OR IGNORE INTO schema_migrations (version) VALUES (?)');
+    for (const { version } of files) if (version <= mark) seed.run(version);
+  }
+
+  const isApplied = conn.prepare('SELECT 1 FROM schema_migrations WHERE version = ?');
+  const record = conn.prepare('INSERT OR IGNORE INTO schema_migrations (version) VALUES (?)');
+
   for (const { version, sql } of files) {
     currentFile = version;
+    if (isApplied.get(version)) continue;
     const current = conn.pragma('user_version', { simple: true });
-    if (version <= current) continue;
+    if (version < current) outOfOrder.push(version);
     const tx = conn.transaction(() => {
       conn.exec(sql);
+      // The ledger row goes in the SAME transaction as the body, for the reason the version bump
+      // does: a file that ran but was not recorded would run again next boot, against a schema it
+      // has already changed.
+      record.run(version);
       // pragma cannot be parameterized; `version` comes from the filename, validated by the
       // caller against /^\d+/ before it ever reaches here.
-      conn.pragma(`user_version = ${version}`);
+      //
+      // MAX(), not assignment: an out-of-order file must not drag the mark BACKWARDS. Applying a
+      // late 020 to a database at 21 would otherwise report 20, and every probe that reads
+      // user_version would then believe the schema had regressed.
+      const mark = conn.pragma('user_version', { simple: true });
+      conn.pragma(`user_version = ${Math.max(mark, version)}`);
     });
     try { tx.immediate(); } catch (err) { return rethrow(err, `migration ${currentFile}`); }
     applied.push(version);
   }
-  return { applied, version: conn.pragma('user_version', { simple: true }) };
+  return { applied, outOfOrder, version: conn.pragma('user_version', { simple: true }) };
 }
 
 /**

@@ -42,6 +42,19 @@ process.on('unhandledRejection', (err) => {
 const migration = await db.migrate();
 logger.info({ applied: migration.applied, version: migration.version }, 'schema up to date');
 
+// AN OUT-OF-ORDER MIGRATION IS APPLIED, AND THEN SAID OUT LOUD.
+//
+// The runner used to gate on `user_version` alone, so a file numbered below the mark was skipped
+// forever with no error. The ledger applies it instead — but applying it QUIETLY would trade a
+// silent skip for a silent surprise, and a schema that changed without anybody noticing is the
+// same failure wearing better clothes. `warn`, not `info`: it is legitimate and it is unusual.
+if (migration.outOfOrder?.length) {
+  logger.warn(
+    { outOfOrder: migration.outOfOrder, version: migration.version },
+    'a migration numbered below the current schema version was applied — check it was written against this schema',
+  );
+}
+
 // Housekeeping at boot: drop refresh tokens that are expired, and revoked ones older than a
 // month. The absolute session cap survives this because family_created_at lives on every row
 // rather than being derived from the oldest surviving one.

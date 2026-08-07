@@ -19,7 +19,8 @@
     "check:all": "npm run check:routes && npm run check:worker-tx && npm run verify:schema && npm run verify:013",
     "verify:013": "node scripts/verify-013.mjs",
     "verify:015": "node scripts/verify-015.mjs",
-    "verify:019": "node scripts/verify-019.mjs"
+    "verify:019": "node scripts/verify-019.mjs",
+    "verify:migrations": "node scripts/verify-migration-order.mjs"
   },
   "author": "",
   "license": "ISC",
