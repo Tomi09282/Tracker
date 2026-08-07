@@ -41,9 +41,18 @@ const check = (label, ok, detail = '') => {
   ok ? (passed += 1) : (failed += 1);
 };
 
+/**
+ * A migration file, WITH ITS OWN PRAGMA — which is how every real one in this project ends.
+ *
+ * That detail is load-bearing and it caught a bug in the very fix this file guards. The runner
+ * also sets user_version, so reading the mark AFTER exec reads what the FILE just wrote, not what
+ * the database was at. The first version of the MAX guard did exactly that, so a late 020 dragged
+ * a schema at 21 back to reporting 20. A helper that emitted no PRAGMA would have passed.
+ */
 const f = (version, table) => ({
   version,
-  sql: `CREATE TABLE ${table} (id INTEGER PRIMARY KEY);`,
+  sql: `CREATE TABLE ${table} (id INTEGER PRIMARY KEY);
+PRAGMA user_version = ${version};`,
 });
 
 // ── day one: 019 and 021 exist; 020 has not been written ──────────────────────────────────────

@@ -843,6 +843,18 @@ export function migrate({ files }) {
     if (isApplied.get(version)) continue;
     const current = conn.pragma('user_version', { simple: true });
     if (version < current) outOfOrder.push(version);
+    // READ THE MARK BEFORE THE BODY RUNS, and this line is a bug fix rather than a style choice.
+    //
+    // Every migration file in this project ends with its own `PRAGMA user_version = N;`, so
+    // `conn.exec(sql)` sets the mark itself. Reading it AFTER exec therefore reads what the FILE
+    // just wrote, not what the database was at — so `Math.max` compared 20 against 20 and the
+    // late-020 case reported `user_version 20` on a schema that was at 21.
+    //
+    // Caught by running it: the probe applied a real 020 to the real database and the CLI printed
+    // `applied 20 → user_version 20`. Two mechanisms were setting one value and I had guarded the
+    // wrong one.
+    const before = conn.pragma('user_version', { simple: true });
+
     const tx = conn.transaction(() => {
       conn.exec(sql);
       // The ledger row goes in the SAME transaction as the body, for the reason the version bump
@@ -852,11 +864,10 @@ export function migrate({ files }) {
       // pragma cannot be parameterized; `version` comes from the filename, validated by the
       // caller against /^\d+/ before it ever reaches here.
       //
-      // MAX(), not assignment: an out-of-order file must not drag the mark BACKWARDS. Applying a
-      // late 020 to a database at 21 would otherwise report 20, and every probe that reads
-      // user_version would then believe the schema had regressed.
-      const mark = conn.pragma('user_version', { simple: true });
-      conn.pragma(`user_version = ${Math.max(mark, version)}`);
+      // MAX of what the database was and what this file claims — never assignment. An out-of-order
+      // file must not drag the mark BACKWARDS, or every probe that reads `user_version` believes
+      // the schema regressed.
+      conn.pragma(`user_version = ${Math.max(before, version)}`);
     });
     try { tx.immediate(); } catch (err) { return rethrow(err, `migration ${currentFile}`); }
     applied.push(version);
