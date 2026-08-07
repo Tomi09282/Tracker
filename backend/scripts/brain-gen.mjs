@@ -168,14 +168,39 @@ const routers = [
   ['/api/v1', '../src/notifications/routes.js'],
   ['/api/v1', '../src/chat/attachments.js'],
   ['/api/v1', '../src/plans/ics.js'],
+  ['/api/v1', '../src/nutrition/routes.js'],
+  ['/api/v1', '../src/progress/routes.js'],
+  ['/api/v1', '../src/coins/routes.js'],
+  ['/api/v1', '../src/public/routes.js'],
 ];
 
 // Cross-check against server.js so adding a router without adding it here is caught here,
 // rather than by someone noticing months later that an endpoint was never documented.
 const serverSrc = await fs.readFile(new URL('../server.js', import.meta.url), 'utf8');
-const mounted = [...serverSrc.matchAll(/import\s+\w+\s+from\s+'(\.\/src\/[^']+routes?\.js|\.\/src\/[^']+media\.js)'/g)].map(
-  (m) => m[1].replace('./src/', '../src/'),
-);
+// THE CROSS-CHECK HAD A BLIND SPOT, AND IT COST A PHASE OF DOCUMENTATION.
+//
+// The old pattern was `import\s+\w+\s+from` — a single default binding and nothing else. So
+// `import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js'`
+// did not match, the router was invisible to the guard, and the whole F10 progress API has been
+// undocumented since Phase 4 with nothing saying so.
+//
+// That is the failure mode this file's own comment warns about — "confidently incomplete" — and
+// the guard against it was itself confidently incomplete. The clause now accepts a default
+// binding, a named list, or both, so the only way to hide a router from it is not to import it.
+// A ROUTER IS ALWAYS A DEFAULT EXPORT, and that is what makes this precise rather than merely
+// wide. The first widening accepted named-only imports too and immediately flagged
+// `import { ensureDirs, sweepQuarantine } from './src/lib/media.js'` — a LIBRARY that happens to
+// end in media.js. Requiring the default binding separates the two exactly: a router is mounted
+// with `app.use`, so it has one; a helper module does not.
+//
+// The optional `, { … }` after it is the clause that was missing and cost a phase: `import
+// progressRoutes, { uploadRouter as progressUploadRoutes } from …` did not match the old pattern,
+// so the F10 progress API was invisible to this guard and undocumented since Phase 4.
+const mounted = [
+  ...serverSrc.matchAll(
+    /import\s+\w+\s*(?:,\s*\{[^}]*\}\s*)?from\s+'(\.\/src\/[^']+routes?\.js|\.\/src\/[^']+media\.js)'/g,
+  ),
+].map((m) => m[1].replace('./src/', '../src/'));
 const missing = mounted.filter((m) => !routers.some(([, file]) => file === m));
 if (missing.length) {
   console.error(`brain-gen: server.js mounts routers this script does not know about: ${missing.join(', ')}`);

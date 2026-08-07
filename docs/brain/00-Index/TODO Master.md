@@ -45,17 +45,31 @@ Checkbox `[x]` is set only for `done`. Every item carries a one-line note.
 
 ## Phase status board
 
+**The counts are COMPUTED from the phase files, never typed** — a hand-maintained summary of eight
+other documents is a ninth thing that can disagree with them, which is this project's single
+recurring defect turned on its own notes. Regenerate with `scratchpad/refresh-master.mjs`.
+
+**The status is part computed and part judged, and the difference is stated rather than hidden.**
+`done` and `pending` fall out of the numbers. **`closed` does not**: it means the remaining open
+boxes are deliberate carry-forwards rather than unfinished work, and no count can decide that — so
+it is declared beside its reason.
+
 | Phase | Scope | Status | Note |
 |---|---|---|---|
-| **0** | Foundation — repo, env, design system built byte-exact to the Bible, backend scaffold | `done` | **18/18 — complete.** Design system, build gate, backend, auth all verified |
-| [[TODO Phase-1\|1]] | F14 UI foundation + F1 exercise library + F8-lite | `done` | **57/58 — CLOSED 2026-08-06, owner sign-off.** The one open item is T1.31 (gender/body variants + 3D on the muscle map), carried forward as a feature rather than a blocker. T1.11 closed as an accepted deviation ([[0011-animate-ui-deviation]]) |
-| [[TODO Phase-2\|2]] | F2 coach↔client + teams + join codes + F11 onboarding + F3 plans/logging | `in_progress` | **65/66.** Both halves work end to end. The one open item is T2.3.5 (per-coach seat cap), reserved for the billing phase by design |
-| [[TODO Phase-3\|3]] | F5 notifications + F6 chat | `pending` | **Next.** |
-| [[TODO Phase-4\|4]] | F4 nutrition + F10 progress/measurements | `pending` | |
-| [[TODO Phase-5\|5]] | F7 coins + store + F12 gamification + marketplace | `pending` | |
-| [[TODO Phase-6\|6]] | F15 public marketplace & community | `pending` | |
-| [[TODO Phase-7\|7]] | F8 full admin + F9 polish (PWA, i18n, GDPR) | `pending` | |
-| [[TODO Phase-8\|8]] | Later bucket — F13 health sync, payment processor | `pending` | White-label parked — do NOT build |
+| **0** | Foundation — repo, env, design system byte-exact to the Bible, backend scaffold | `done` | **18/18.** Design system, build gate, backend and auth all verified |
+| [[TODO Phase-1\|1]] | F14 UI foundation + F1 exercise library + F8-lite | `closed` | **57/58** · 1 open. Owner sign-off 2026-08-06. The one open item is T1.31 (gender/body variants + 3D on the muscle map), carried forward as a feature rather than a blocker |
+| [[TODO Phase-2\|2]] | F2 coach↔client + teams + join codes + F11 onboarding + F3 plans/logging | `closed` | **65/66** · 1 open. Both halves work end to end. The one open item is T2.3.5 (per-coach seat cap), reserved for the billing phase by design |
+| [[TODO Phase-3\|3]] | F5 notifications + F6 chat | `done` | **26/28** · 2 cut/deferred. The two deferred both wait on a scheduler — quiet hours and the weekly digest would each store a promise the delivery path cannot keep, which is worse than no setting at all |
+| [[TODO Phase-4\|4]] | F4 nutrition + F10 progress/measurements | `closed` | **24/29** · 3 cut/deferred · 2 open. Two open follow-ups this phase deliberately did NOT take: coach visibility into a client FOOD LOG (needs the same explicit consent design `progress_shares` got — *coaching seems to imply it* is not a reason) and running a larger USDA import (the script works and is exercised; `fdc.nal.usda.gov` is unreachable from this host) |
+| [[TODO Phase-5\|5]] | F7 coins + store + F12 gamification | `done` | **32/38** · 6 cut/deferred. The coach template marketplace was CUT to migration 020 by the adversarial review — thirteen of the twenty-one fatal-and-severe findings sat in it, including a FATAL one verified against real code, and deleting it removed thirteen defects without writing a single fix |
+| [[TODO Phase-6\|6]] | F15 public marketplace | `in_progress` | **20/31** · 8 cut/deferred · 3 open. Backend complete. Comments, replies, reactions and person-level blocking were CUT: all four FATAL defects and ~15 severe sat there. Two gate items are **blocked** on a frontend that does not exist yet — a Bible audit measures rendered screens, so running one now would produce green ticks about screens nobody has written |
+| [[TODO Phase-7\|7]] | F8 full admin + F9 polish (PWA, i18n, GDPR) | `pending` | **0/38** · 38 open. Next. |
+| [[TODO Phase-8\|8]] | Later bucket — F13 health sync, payment processor | `pending` | **0/17** · 17 open. White-label parked — do NOT build |
+
+**Across all eight: 224 done · 19 cut or deferred · 62 open.**
+Every cut and every deferral carries the reason it is not simply unfinished; three of them were
+decided by an adversarial review finding that the severity had piled into one feature, and in each
+case deleting that feature removed more defects than fixing them would have.
 
 ## Phase 0 — foundation (active)
 
@@ -128,7 +142,7 @@ vulnerabilities.
 - [ ] **SO-3** Per-agent context budget 120k in / 120k work / 60k reserve; oversized job → SPLIT — `in_progress`
 - [ ] **SO-4** ui-ux-pro-max per phase: one `--design-system`, one `--domain ux`, one `--domain chart` when stats ship — `pending`
 - [ ] **SO-5** Security self-review walks the SECURITY STANDARD item by item — `in_progress`
-- [ ] **SO-6** Screenshots at 360px AND 1440px, audited line-by-line against the Bible — `blocked` · the in-app Browser pane does not composite frames on this machine (OQ-5)
+- [ ] **SO-6** Screenshots at 360px AND 1440px, audited line-by-line against the Bible — `resolved-differently` · **the pane still does not composite, and five phase gates shipped anyway.** Every Bible audit since Phase 3 is a live DOM MEASUREMENT: type scale, motion durations, 44px targets, pure-black/white surfaces, horizontal overflow and heading count, read out of the running app. That is evidence rule 2 — *a screenshot is evidence of a frame, a measurement is evidence of a fact* — and where the two disagreed in Phase 2, the measurement won. What a screenshot would still add is composition and hierarchy, which no probe can judge; that half is named as uncovered in every audit rather than claimed
 - [ ] **SO-7** Verify gate: build + smoke + `npm audit` 0 high/critical — `in_progress` · all three green as of 2026-08-04
 - [ ] **SO-8** Update this map the moment any status changes — `in_progress`
 - [ ] **SO-9** No feature creep beyond the current phase — `in_progress`

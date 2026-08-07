@@ -1,8 +1,8 @@
 ---
 type: table
 table: users
-summary: 12 columns, 12 rows
-rows: 12
+summary: 12 columns, 14 rows
+rows: 14
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-06.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -39,6 +39,7 @@ tags: [data-model, generated]
 ## Triggers
 
 - `trg_user_delete_keeps_exercises`
+- `trg_user_opens_wallet`
 - `users_updated_at`
 
 ## Constraints

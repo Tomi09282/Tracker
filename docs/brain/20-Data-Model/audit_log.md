@@ -1,8 +1,8 @@
 ---
 type: table
 table: audit_log
-summary: 9 columns, 0 rows
-rows: 0
+summary: 9 columns, 2 rows
+rows: 2
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-06.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -30,6 +30,8 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `audit_log_marketplace_idx` (partial)
+- `audit_log_coin_idx` (partial)
 - `audit_log_action_idx`
 - `audit_log_actor_idx`
 
@@ -37,6 +39,8 @@ tags: [data-model, generated]
 
 - `audit_log_no_delete`
 - `audit_log_no_update`
+- `trg_audit_log_coin_complete`
+- `trg_audit_log_marketplace_complete`
 
 
 Back to [[ERD]].

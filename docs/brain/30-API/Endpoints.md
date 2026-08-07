@@ -1,24 +1,27 @@
 ---
 type: api-index
 title: API surface
-count: 93
+count: 140
 tags: [api, moc, generated]
 ---
 
-# API surface — 93 endpoints
+# API surface — 140 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-06.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.
 
 | Method | Path | Guards |
 |---|---|---|
+| GET | `/api/v1/admin/coins/audit` | `requireAuth` |
+| GET | `/api/v1/admin/coins/ledger` | `requireAuth` |
 | GET | `/api/v1/admin/moderation` | `requireAuth` |
 | POST | `/api/v1/admin/moderation/:id` | `requireAuth` |
 | GET | `/api/v1/admin/stats` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/coins` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/role` | `requireAuth` |
 | POST | `/api/v1/auth/change-credentials` | `requireAuth` |
 | POST | `/api/v1/auth/login` | — |
@@ -40,6 +43,12 @@ protection the code does not have.
 | GET | `/api/v1/clients/:id/workouts` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/clients/pregenerate` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/coaches/:linkId/leave` | `requireAuth` |
+| GET | `/api/v1/coins/achievements` | `requireAuth` |
+| GET | `/api/v1/coins/entitlements` | `requireAuth` |
+| GET | `/api/v1/coins/ledger` | `requireAuth` |
+| GET | `/api/v1/coins/store` | `requireAuth` |
+| POST | `/api/v1/coins/store/:id/purchase` | `requireAuth` |
+| GET | `/api/v1/coins/wallet` | `requireAuth` |
 | GET | `/api/v1/conversations` | `requireAuth` |
 | POST | `/api/v1/conversations` | `requireAuth` |
 | POST | `/api/v1/conversations/:id/attachments` | `requireAuth`, `multipartCsrf`, `multerMiddleware` |
@@ -55,6 +64,9 @@ protection the code does not have.
 | PATCH | `/api/v1/exercises/:id` | `requireAuth` |
 | POST | `/api/v1/exercises/:id/media` | `requireAuth`, `multipartCsrf`, `multerMiddleware` |
 | POST | `/api/v1/exercises/:id/submit` | `requireAuth` |
+| GET | `/api/v1/foods` | `requireAuth` |
+| POST | `/api/v1/foods` | `requireAuth` |
+| DELETE | `/api/v1/foods/:id` | `requireAuth` |
 | GET | `/api/v1/invite-codes` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/invite-codes` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/invite-codes/:id/revoke` | `requireAuth`, `requireCoach` |
@@ -62,6 +74,10 @@ protection the code does not have.
 | GET | `/api/v1/languages` | — |
 | GET | `/api/v1/me/theme` | `requireAuth` |
 | PUT | `/api/v1/me/theme` | `requireAuth` |
+| GET | `/api/v1/measurement-metrics` | `requireAuth` |
+| GET | `/api/v1/measurements` | `requireAuth` |
+| POST | `/api/v1/measurements` | `requireAuth` |
+| DELETE | `/api/v1/measurements/:id` | `requireAuth` |
 | DELETE | `/api/v1/media/:id` | `requireAuth` |
 | GET | `/api/v1/media/:key` | `requireAuth` |
 | DELETE | `/api/v1/messages/:id` | `requireAuth` |
@@ -72,6 +88,24 @@ protection the code does not have.
 | GET | `/api/v1/notifications` | `requireAuth` |
 | POST | `/api/v1/notifications/read` | `requireAuth` |
 | GET | `/api/v1/notifications/unread-count` | `requireAuth` |
+| GET | `/api/v1/nutrition-log` | `requireAuth` |
+| POST | `/api/v1/nutrition-log` | `requireAuth` |
+| GET | `/api/v1/nutrition-log/:date` | `requireAuth` |
+| DELETE | `/api/v1/nutrition-log/:id` | `requireAuth` |
+| GET | `/api/v1/nutrition-plans` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/nutrition-plans` | `requireAuth`, `requireCoach` |
+| DELETE | `/api/v1/nutrition-plans/:id` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/nutrition-plans/:id` | `requireAuth` |
+| PATCH | `/api/v1/nutrition-plans/:id` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/nutrition-plans/:id/days` | `requireAuth`, `requireCoach` |
+| DELETE | `/api/v1/nutrition-plans/:id/days/:childId` | `requireAuth`, `requireCoach` |
+| PATCH | `/api/v1/nutrition-plans/:id/days/:childId` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/nutrition-plans/:id/items` | `requireAuth`, `requireCoach` |
+| DELETE | `/api/v1/nutrition-plans/:id/items/:childId` | `requireAuth`, `requireCoach` |
+| PATCH | `/api/v1/nutrition-plans/:id/items/:childId` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/nutrition-plans/:id/meals` | `requireAuth`, `requireCoach` |
+| DELETE | `/api/v1/nutrition-plans/:id/meals/:childId` | `requireAuth`, `requireCoach` |
+| PATCH | `/api/v1/nutrition-plans/:id/meals/:childId` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/onboarding` | `requireAuth` |
 | PATCH | `/api/v1/onboarding` | `requireAuth` |
 | POST | `/api/v1/onboarding/complete` | `requireAuth` |
@@ -94,6 +128,19 @@ protection the code does not have.
 | PATCH | `/api/v1/plans/:planId/exercises/:rowId` | `requireAuth`, `requireCoach` |
 | PUT | `/api/v1/plans/:planId/exercises/order` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/progress` | `requireAuth` |
+| GET | `/api/v1/progress-access-log` | `requireAuth` |
+| GET | `/api/v1/progress-media/:key` | `requireAuth` |
+| GET | `/api/v1/progress-photos` | `requireAuth` |
+| DELETE | `/api/v1/progress-photos/:id` | `requireAuth` |
+| GET | `/api/v1/progress-shares` | `requireAuth` |
+| DELETE | `/api/v1/progress-shares/:id` | `requireAuth` |
+| POST | `/api/v1/progress-shares/:id` | `requireAuth` |
+| GET | `/api/v1/public/coaches` | — |
+| GET | `/api/v1/public/coaches/:handle` | — |
+| GET | `/api/v1/public/posts` | — |
+| GET | `/api/v1/public/posts/:publicId` | — |
+| GET | `/api/v1/public/search` | — |
+| GET | `/api/v1/public/taxonomy` | — |
 | GET | `/api/v1/records` | `requireAuth` |
 | POST | `/api/v1/sets/:id/check` | `requireAuth` |
 | POST | `/api/v1/sets/:id/void` | `requireAuth` |
