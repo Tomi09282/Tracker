@@ -47,7 +47,34 @@ Pipeline: **Opus 5 solo, all roles** (D-P1). There is no PVP loop to hand off to
 
 ---
 
-**PHASE 5 CODE-COMPLETE — F7 coins + F12 gamification.** 32 done · 6 deferred · 0 open.
+**PHASE 6 BACKEND COMPLETE — F15 public marketplace.** 20 done · 8 cut · 3 gate items, two of
+them BLOCKED on a frontend that does not exist yet.
+
+THE ATTACK CUT THE FEATURE, FOR THE THIRD TIME. 99 defects across three designs — 4 fatal, 41
+severe, 16 unalterable-if-missed. **All four fatal and ~15 severe sat in the comment subsystem**,
+so comments, replies, reactions and person-level blocking are not built. A comment thread has
+THREE actors plus a parent commenter; all three designs modelled two, and five reviewers each
+found a DIFFERENT missing clause in the same predicate.
+
+THE PROPERTY THAT BOUGHT: **the public predicate binds ZERO parameters.** A pure function of the
+row, so a signed-in visitor gets byte-identical bytes to an anonymous one — asserted, and held by
+a gate that greps `src/public/routes.js` for `req.user` and fails by file and line.
+
+NO MARKDOWN LIBRARY AND NO SANITIZER. `src/public/markdown.js`, ~330 lines, zero dependencies,
+50 attacks. Measured before deciding: the frontend has ZERO HTML sinks, and the only grep hit is a
+comment promising it. Depth is STRUCTURAL — block → li → inline — so 399 quote markers give a tree
+three levels deep and a React renderer needs no depth prop.
+
+ALSO FIXED THIS PHASE, and it was a trap I armed myself: the migration runner gated on
+`user_version` alone, so RESERVING 020 for the cut coach marketplace meant a 020 written after
+021 shipped would be skipped FOREVER, silently. Replaced with a ledger (`schema_migrations`);
+out-of-order files apply and are logged at warn. Measured, and the fix's own bug — reading the
+mark AFTER the file's own PRAGMA clobbered it — was caught by running it.
+
+Leaving Phase 6 backend: **schema v21 · 136 routes · smoke 488/488 · verify:021 38/38 ·
+verify:markdown 50/50 · verify:schema 23/23 · verify:migrations 6/6 · npm audit 0.**
+
+Behind it: **PHASE 5 CODE-COMPLETE — F7 coins + F12 gamification.** 32 done · 6 deferred · 0 open.
 
 THE MARKETPLACE IS CUT TO MIGRATION 020, and that is the phase's main result rather than a
 shortfall. Three designs were attacked by five adversarial lenses; of the 21 fatal-and-severe
