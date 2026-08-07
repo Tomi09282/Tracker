@@ -47,6 +47,7 @@ const PUBLIC = new Map([
   ['GET /public/coaches', 'the coach directory, which is the point of a public marketplace'],
   ['GET /public/coaches/:handle', 'a public profile page, addressed by handle so no user id is exposed'],
   ['GET /public/search', 'discovery; capped at one page with no cursor, because a paginated public search is a scraping API with a nice interface'],
+  ['GET /public/media/:key', 'post images for anonymous readers; THE KEY IS NOT THE PERMISSION — the read carries the same PUBLIC_POST predicate the feed does, so removing a coach removes their pictures on the next request'],
   ['GET /public/taxonomy', 'the cities, kinds and specialties the filter UI renders from — the same list the filters offer, and secret from nobody'],
 ]);
 

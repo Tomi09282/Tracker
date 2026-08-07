@@ -642,5 +642,31 @@
   "achievement.pr.first": "Erster Rekord",
   "achievement.streak.workout.7": "7-Tage-Serie",
   "achievement.streak.workout.30": "30-Tage-Serie",
-  "achievement.nutrition.logged.7": "7 Tage erfasst"
+  "achievement.nutrition.logged.7": "7 Tage erfasst",
+  "marketplace": {
+    "title": "Marktplatz",
+    "searchPlaceholder": "Programme, Events, Coaches…",
+    "allKinds": "Alle",
+    "everywhere": "Überall",
+    "kind": {
+      "program": "Programm",
+      "event": "Event",
+      "announcement": "Ankündigung"
+    },
+    "verified": "Verifizierter Coach",
+    "capacity": "{{count}} Plätze",
+    "emptyTitle": "Hier ist noch nichts",
+    "emptyBody": "Sobald Coaches Programme und Events veröffentlichen, erscheinen sie hier.",
+    "noResultsTitle": "Keine Treffer",
+    "noResultsBody": "Versuche andere Wörter oder entferne den Stadtfilter.",
+    "searchCapped": "Die Suche liefert eine Seite Ergebnisse. Grenze sie mit Wörtern oder Stadt ein, falls das nicht passt.",
+    "backToFeed": "Zurück zum Marktplatz",
+    "postGoneTitle": "Dieser Beitrag ist nicht verfügbar",
+    "postGoneBody": "Er wurde vielleicht verschoben oder vom Autor entfernt. Der Marktplatz steht weiter offen.",
+    "coachGoneTitle": "Dieses Profil ist nicht verfügbar",
+    "coachGoneBody": "Es ist vielleicht noch nicht veröffentlicht oder nicht mehr verfügbar.",
+    "priceNote": "Der Preis dient der Information. Die Anmeldung läuft direkt über den Coach — die Zahlung geht noch nicht über die App.",
+    "theirPosts": "Seine Beiträge",
+    "noPostsYet": "Noch nichts veröffentlicht."
+  }
 }

@@ -642,5 +642,31 @@
   "achievement.pr.first": "Az első csúcs",
   "achievement.streak.workout.7": "7 napos sorozat",
   "achievement.streak.workout.30": "30 napos sorozat",
-  "achievement.nutrition.logged.7": "7 nap naplózva"
+  "achievement.nutrition.logged.7": "7 nap naplózva",
+  "marketplace": {
+    "title": "Piactér",
+    "searchPlaceholder": "Programok, események, edzők…",
+    "allKinds": "Minden",
+    "everywhere": "Bárhol",
+    "kind": {
+      "program": "Program",
+      "event": "Esemény",
+      "announcement": "Közlemény"
+    },
+    "verified": "Ellenőrzött edző",
+    "capacity": "{{count}} hely",
+    "emptyTitle": "Még nincs itt semmi",
+    "emptyBody": "Amint edzők közzétesznek programokat vagy eseményeket, itt fognak megjelenni.",
+    "noResultsTitle": "Nincs találat",
+    "noResultsBody": "Próbálj más szót, vagy vedd le a városszűrőt.",
+    "searchCapped": "A keresés egy oldalnyi találatot ad. Szűkíts a szavakkal vagy a várossal, ha nem ezt kerested.",
+    "backToFeed": "Vissza a piactérre",
+    "postGoneTitle": "Ez a bejegyzés nem érhető el",
+    "postGoneBody": "Lehet, hogy elköltözött, vagy a szerzője levette. A piactéren továbbra is böngészhetsz.",
+    "coachGoneTitle": "Ez a profil nem érhető el",
+    "coachGoneBody": "Lehet, hogy még nincs közzétéve, vagy már nem elérhető.",
+    "priceNote": "Az ár tájékoztató. A jelentkezés az edzővel közvetlenül történik — a fizetés még nem az appon keresztül megy.",
+    "theirPosts": "Bejegyzései",
+    "noPostsYet": "Még nincs közzétett bejegyzése."
+  }
 }

@@ -50,6 +50,15 @@ const ProgressPage = lazy(() =>
 const CoinsPage = lazy(() =>
   import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
 );
+const MarketplacePage = lazy(() =>
+  import('../features/marketplace/MarketplacePage').then((m) => ({ default: m.MarketplacePage })),
+);
+const PostPage = lazy(() =>
+  import('../features/marketplace/PostPage').then((m) => ({ default: m.PostPage })),
+);
+const CoachProfilePage = lazy(() =>
+  import('../features/marketplace/CoachProfilePage').then((m) => ({ default: m.CoachProfilePage })),
+);
 const SettingsPage = lazy(() =>
   import('../features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -59,6 +68,24 @@ const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton
 export const router = createBrowserRouter([
   { path: '/login', element: <AuthPage mode="login" /> },
   { path: '/register', element: <AuthPage mode="register" /> },
+
+  // ── THE PUBLIC MARKETPLACE, OUTSIDE RequireAuth ─────────────────────────────────────────────
+  //
+  // These were first written as children of the authenticated layout, and the whole surface was
+  // defeated at the client: the server served `/api/v1/public/*` to anybody, and the app bounced
+  // every visitor to /login before a request was ever made. Measured — a browser with its cookies
+  // cleared landed on the login screen.
+  //
+  // That is worth stating rather than quietly fixing, because it is the shape of the mistake: the
+  // BACKEND had six allowlisted public routes, a gate forbidding `req.user`, and sixteen assertions
+  // proving anonymous access — and one line of routing made all of it unreachable. A guarantee is
+  // only as public as its least public layer.
+  //
+  // No AppLayout either: the nav is for people with an account, and a bottom bar full of tabs that
+  // demand a login is a worse first impression than no bar at all.
+  { path: '/m', element: suspended(<MarketplacePage />) },
+  { path: '/m/p/:publicId', element: suspended(<PostPage />) },
+  { path: '/m/c/:handle', element: suspended(<CoachProfilePage />) },
   {
     path: '/',
     element: (

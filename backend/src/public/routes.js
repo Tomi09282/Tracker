@@ -28,9 +28,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
+import path from 'node:path';
+import { createReadStream } from 'node:fs';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { toFtsQuery } from '../lib/normalize.js';
+import { MEDIA_DIR } from '../lib/media.js';
 import {
   PUBLIC_POST,
   PUBLIC_PROFILE,
@@ -302,6 +305,57 @@ router.get(
     );
 
     res.json({ posts: rows.map(withDoc) });
+  }),
+);
+
+/* ── media ──────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Serve a post image.
+ *
+ * THE KEY IS NOT THE PERMISSION — the same rule as chat attachments and progress photos, and the
+ * third time this file's family has had to say it. A storage key is unguessable and NOT private:
+ * it appears in a page source, a browser history, a proxy log and every "copy image address".
+ *
+ * So the read carries the SAME `PUBLIC_POST` predicate the feed does. A key belonging to a draft,
+ * to a removed post, or to a post whose author was removed is as invisible as one that never
+ * existed — which is what makes "remove this coach" actually remove their pictures, on the next
+ * request, with no sweep to be behind.
+ *
+ * The key regex is checked BEFORE the database and long before the filesystem, so path traversal
+ * is unreachable rather than guarded against.
+ */
+router.get(
+  '/public/media/:key',
+  publicLimiter,
+  asyncRoute(async (req, res) => {
+    // `pub_` + 32 hex + `.webp`, exactly 41 characters. The shape is a fact about the bytes: every
+    // stored file was re-encoded by the ingest, so the extension is not a claim anybody made.
+    const key = z
+      .string()
+      .regex(/^pub_[a-f0-9]{32}\.webp$/)
+      .safeParse(req.params.key);
+    if (!key.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const row = await db.get(
+      `SELECT m.storage_key AS storageKey, m.bytes
+         FROM post_media m
+         JOIN coach_posts p ON p.id = m.post_id
+         JOIN coach_profiles c ON c.user_id = p.author_user_id
+        WHERE (m.storage_key = ? OR m.thumb_key = ?)
+          AND m.deleted_at IS NULL
+          AND ${PUBLIC_POST}`,
+      [key.data, key.data],
+    );
+    if (!row) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    res.setHeader('Content-Type', 'image/webp');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // PUBLIC and cacheable, which is only safe because the predicate binds no viewer: the same URL
+    // is the same bytes for everybody, so there is no `Vary` question and no way for one reader's
+    // response to reach another. An immutable key means the cache never needs to revalidate.
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    createReadStream(path.join(MEDIA_DIR, key.data)).pipe(res);
   }),
 );
 

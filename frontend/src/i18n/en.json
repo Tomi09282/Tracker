@@ -642,5 +642,31 @@
   "achievement.pr.first": "First record",
   "achievement.streak.workout.7": "7-day streak",
   "achievement.streak.workout.30": "30-day streak",
-  "achievement.nutrition.logged.7": "7 days logged"
+  "achievement.nutrition.logged.7": "7 days logged",
+  "marketplace": {
+    "title": "Marketplace",
+    "searchPlaceholder": "Programmes, events, coaches…",
+    "allKinds": "All",
+    "everywhere": "Everywhere",
+    "kind": {
+      "program": "Programme",
+      "event": "Event",
+      "announcement": "Announcement"
+    },
+    "verified": "Verified coach",
+    "capacity": "{{count}} places",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "As coaches publish programmes and events, they will appear here.",
+    "noResultsTitle": "No matches",
+    "noResultsBody": "Try different words, or clear the city filter.",
+    "searchCapped": "Search returns one page of results. Narrow it by words or by city if this is not what you were after.",
+    "backToFeed": "Back to the marketplace",
+    "postGoneTitle": "This post is not available",
+    "postGoneBody": "It may have moved, or its author may have taken it down. The marketplace is still there to browse.",
+    "coachGoneTitle": "This profile is not available",
+    "coachGoneBody": "It may not be published yet, or it may no longer be available.",
+    "priceNote": "The price is for information. Signing up happens with the coach directly — payment does not go through the app yet.",
+    "theirPosts": "Their posts",
+    "noPostsYet": "Nothing published yet."
+  }
 }
