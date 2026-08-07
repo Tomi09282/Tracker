@@ -20,7 +20,8 @@
     "verify:013": "node scripts/verify-013.mjs",
     "verify:015": "node scripts/verify-015.mjs",
     "verify:019": "node scripts/verify-019.mjs",
-    "verify:migrations": "node scripts/verify-migration-order.mjs"
+    "verify:migrations": "node scripts/verify-migration-order.mjs",
+    "verify:021": "node scripts/verify-021.mjs"
   },
   "author": "",
   "license": "ISC",
