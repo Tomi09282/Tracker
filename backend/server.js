@@ -25,6 +25,7 @@ import icsRoutes from './src/plans/ics.js';
 import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
+import publicRoutes from './src/public/routes.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -183,6 +184,13 @@ app.use('/api/v1', attachmentRoutes);
 // type, so the router runs its own Sec-Fetch-Site + X-CSRF check. Only the upload moves; every
 // other progress route stays below and is fully protected.
 app.use('/api/v1', progressUploadRoutes);
+
+// The public marketplace reads. Mounted ABOVE csrfProtection because every route here is a
+// GET that must answer with no session, no cookie and no CSRF header — a search engine, a shared
+// link opened in a fresh browser, a person who has never signed up. There is NO WRITE in this
+// router, which is what makes the placement safe rather than an exception: CSRF protects
+// state-changing requests, and there is no state to change.
+app.use('/api/v1', publicRoutes);
 
 app.use(csrfProtection);
 app.use(AUTH_PATH, authRoutes);

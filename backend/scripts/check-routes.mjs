@@ -32,6 +32,22 @@ const PUBLIC = new Map([
   ['GET /languages', 'the language picker renders before anyone has logged in'],
   ['GET /ui/element-styles', 'one global admin setting the login screen itself is styled by'],
   ['GET /calendar/:token.ics', 'a calendar client is not a browser and carries no cookie; the TOKEN authenticates and the LINK authorises, checked in the fetch predicate'],
+
+  // ── THE PUBLIC MARKETPLACE (021) ────────────────────────────────────────────────────────────
+  //
+  // Eight deliberate public reads, and the allowlist is doing exactly its job here: this is the
+  // largest single expansion of the unauthenticated surface in the product's history, so it is
+  // eight lines somebody has to write and defend rather than eight missing middlewares.
+  //
+  // Every one is a GET. Every one composes PUBLIC_POST or PUBLIC_PROFILE from
+  // src/public/visibility.js, which binds NO VIEWER — the response is a pure function of the row,
+  // so there is nothing about the caller for any of these to get wrong.
+  ['GET /public/posts', 'the marketplace feed; a shared link must open in a browser that has never signed in'],
+  ['GET /public/posts/:publicId', 'a deep link to one post — addressed by an opaque 12-char id, never an enumerable one'],
+  ['GET /public/coaches', 'the coach directory, which is the point of a public marketplace'],
+  ['GET /public/coaches/:handle', 'a public profile page, addressed by handle so no user id is exposed'],
+  ['GET /public/search', 'discovery; capped at one page with no cursor, because a paginated public search is a scraping API with a nice interface'],
+  ['GET /public/taxonomy', 'the cities, kinds and specialties the filter UI renders from — the same list the filters offer, and secret from nobody'],
 ]);
 
 const files = [];
@@ -138,6 +154,46 @@ console.log(
   `check-routes: ${routes.length} routes — ${routes.length - PUBLIC.size} authenticated, ` +
     `${PUBLIC.size} public by design, ${writes.length} writes`,
 );
+
+/* ── 4. THE PUBLIC ROUTER MUST NOT KNOW WHO IS ASKING ─────────────────────────────────────────
+ *
+ * `src/public/routes.js` answers requests that carry no session. Its entire safety argument is
+ * that every response is a PURE FUNCTION OF THE ROW — so the same request produces the same bytes
+ * for everybody, and there is no cache-correctness question, no `Vary: Cookie`, no block oracle
+ * and no second query shape for the anonymous case.
+ *
+ * That argument holds only while the file does not read `req.user`. It is one line to break and
+ * it would break silently: the tests would still pass, because the anonymous path would still
+ * work. So it is a gate rather than a comment.
+ *
+ * The property was bought by cutting comments from Phase 6 — all four FATAL defects in that
+ * review lived in a subsystem whose reads had to know who was asking. This is what stops the cut
+ * being quietly undone.
+ */
+{
+  const publicRouter = path.join(ROOT, 'public', 'routes.js');
+  if (fs.existsSync(publicRouter)) {
+    const src = fs.readFileSync(publicRouter, 'utf8');
+    src.split('\n').forEach((line, i) => {
+      // Skip comments — the file EXPLAINS the rule, and a gate that trips on its own
+      // documentation is a gate somebody deletes.
+      const code = line.replace(/\/\/.*$/, '').replace(/^\s*\*.*$/, '');
+      if (/\breq\.user\b/.test(code)) {
+        problems.push(
+          `${publicRouter}:${i + 1} — the public router read req.user. Every response here must be ` +
+            'a pure function of the row; a viewer-dependent public read brings back the cache hazard ' +
+            'and the block-oracle class that cutting comments removed.',
+        );
+      }
+      if (/requireAuth|requireRole/.test(code)) {
+        problems.push(
+          `${publicRouter}:${i + 1} — an auth middleware in the PUBLIC router. If a route needs one ` +
+            'it belongs in a different file, below csrfProtection.',
+        );
+      }
+    });
+  }
+}
 
 if (problems.length) {
   console.log('');

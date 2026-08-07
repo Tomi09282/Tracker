@@ -4415,6 +4415,145 @@ if (seeded) {
   }
 }
 
+// --- F15 THE PUBLIC SURFACE: EVERY READ WITH NO SESSION AT ALL --------------------------------
+//
+// The defining property is that these answer with NO cookie, NO CSRF header and no account behind
+// them — a shared link opened in a fresh browser, a search engine, somebody who has never signed
+// up. `csrf: false` and no jar is not laziness here, it IS the assertion.
+{
+  const noJar = { csrf: false };
+
+  for (const [label, path] of [
+    ['the feed', '/api/v1/public/posts'],
+    ['the coach directory', '/api/v1/public/coaches'],
+    ['the taxonomy the filters render from', '/api/v1/public/taxonomy'],
+  ]) {
+    const { res, json } = await call(path, noJar);
+    check(`${label} answers with no session`, res.status === 200 && json !== null, `status ${res.status}`);
+  }
+
+  {
+    const { res, json } = await call('/api/v1/public/taxonomy', noJar);
+    check(
+      'the taxonomy carries the cities, kinds and specialties as DATA',
+      res.status === 200 && json?.cities?.length > 0 && json?.kinds?.length >= 3 && json?.specialties?.length > 0,
+      `${json?.cities?.length} cities, ${json?.kinds?.length} kinds, ${json?.specialties?.length} specialties`,
+    );
+  }
+
+  // --- NOTHING UNPUBLISHED IS REACHABLE, AND A MISS IS ALWAYS THE SAME MISS ---------------------
+  {
+    const { res } = await call('/api/v1/public/posts/aaaaaaaaaaaa', noJar);
+    check('a post id that never existed -> 404', res.status === 404, `status ${res.status}`);
+  }
+  {
+    // A MALFORMED id answers IDENTICALLY to a well-formed miss. Answering 400 here would tell a
+    // prober which ids are even shaped right, which is the first step of walking the space.
+    const short = await call('/api/v1/public/posts/abc', noJar);
+    const bad = await call('/api/v1/public/posts/%2E%2E%2F%2E%2E%2Fetc', noJar);
+    check(
+      'a malformed id answers 404 too — the shape is not an oracle either',
+      short.res.status === 404 && bad.res.status === 404,
+      `${short.res.status} / ${bad.res.status}`,
+    );
+  }
+  {
+    const { res } = await call('/api/v1/public/coaches/nobody-here', noJar);
+    check('an unknown handle -> 404', res.status === 404, `status ${res.status}`);
+  }
+
+  // --- THE PROJECTION IS A WHITELIST, AND WHAT IS ABSENT IS THE CONTROL -------------------------
+  {
+    const { json } = await call('/api/v1/public/posts', noJar);
+    const leaked = JSON.stringify(json ?? {});
+    check(
+      'no email, no user id and no author id appears anywhere in a public feed response',
+      !/"(email|userId|user_id|authorUserId|author_user_id)"/.test(leaked),
+      leaked.slice(0, 120),
+    );
+  }
+  {
+    const { json } = await call('/api/v1/public/coaches', noJar);
+    const leaked = JSON.stringify(json ?? {});
+    check(
+      'nor in the directory — a public profile names a handle, never an account',
+      !/"(email|userId|user_id)"/.test(leaked) && !/@/.test(leaked),
+      leaked.slice(0, 120),
+    );
+  }
+
+  // --- FORGE: EVERY FILTER AND SORT IS A CLOSED SET --------------------------------------------
+  {
+    const sort = await call('/api/v1/public/posts?sort=id%3B+DROP+TABLE+coach_posts', noJar);
+    const kind = await call('/api/v1/public/posts?kind=%27+OR+1%3D1--', noJar);
+    const unknown = await call('/api/v1/public/posts?orderBy=published_at', noJar);
+    check(
+      'FORGE: an injected sort, an injected kind and an unknown filter are all 400',
+      sort.res.status === 400 && kind.res.status === 400 && unknown.res.status === 400,
+      `${sort.res.status} / ${kind.res.status} / ${unknown.res.status}`,
+    );
+  }
+  {
+    // And the tables are still there, which is the assertion the one above is really making.
+    const { res, json } = await call('/api/v1/public/taxonomy', noJar);
+    check('and the schema survived the attempt', res.status === 200 && json?.kinds?.length >= 3);
+  }
+
+  // --- EXTREMES --------------------------------------------------------------------------------
+  {
+    const big = await call('/api/v1/public/posts?limit=10000', noJar);
+    const neg = await call('/api/v1/public/posts?limit=-1', noJar);
+    const cursor = await call(`/api/v1/public/posts?cursor=${Number.MAX_SAFE_INTEGER}`, noJar);
+    check(
+      'EXTREMES: an oversized page and a negative one are 400; MAX_SAFE_INTEGER is a valid empty cursor',
+      big.res.status === 400 && neg.res.status === 400 && cursor.res.status === 200,
+      `${big.res.status} / ${neg.res.status} / ${cursor.res.status}`,
+    );
+  }
+  {
+    const { res, json } = await call('/api/v1/public/posts', noJar);
+    check(
+      'the page is hard-capped whatever is asked for',
+      res.status === 200 && (json?.posts ?? []).length <= 24,
+      `${json?.posts?.length} posts`,
+    );
+  }
+  {
+    const short = await call('/api/v1/public/search?q=a', noJar);
+    const ok = await call('/api/v1/public/search?q=' + encodeURIComponent('" OR name:x'), noJar);
+    check(
+      'search: a one-character query is 400, an FTS metacharacter is a search term and not a 500',
+      short.res.status === 400 && ok.res.status === 200,
+      `${short.res.status} / ${ok.res.status}`,
+    );
+  }
+  {
+    // NO CURSOR ON SEARCH, deliberately — a paginated public text search is a scraping API with a
+    // nice interface. Asking for one is an unknown key, and .strict() refuses it.
+    const { res } = await call('/api/v1/public/search?q=edzes&cursor=1', noJar);
+    check('search has no cursor, and asking for one is refused', res.status === 400, `status ${res.status}`);
+  }
+
+  // --- AND A SESSION CHANGES NOTHING -----------------------------------------------------------
+  {
+    // THE PROPERTY THE WHOLE CUT BOUGHT. The public predicate binds no viewer, so a signed-in
+    // request and an anonymous one must produce byte-identical bodies. If they ever diverge, the
+    // cache story and the block-oracle class both come back.
+    const signedIn = new Jar();
+    await call('/api/v1/auth/login', {
+      method: 'POST', jar: signedIn,
+      body: { email: seeded.coach.email, password: seeded.coach.password },
+    });
+    const anon = await call('/api/v1/public/posts', noJar);
+    const auth = await call('/api/v1/public/posts', { jar: signedIn, csrf: false });
+    check(
+      'a signed-in visitor gets BYTE-IDENTICAL bytes to an anonymous one',
+      JSON.stringify(anon.json) === JSON.stringify(auth.json),
+      `anon ${JSON.stringify(anon.json).length}b, auth ${JSON.stringify(auth.json).length}b`,
+    );
+  }
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {
