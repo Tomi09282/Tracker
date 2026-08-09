@@ -149,6 +149,41 @@
       "owner": "Eingereicht von",
       "media": "Medien",
       "actions": "Aktion"
+    },
+    "marketplace": {
+      "title": "Marktplatz-Meldungen",
+      "emptyTitle": "Nichts zu entscheiden",
+      "emptyBody": "Wenn jemand einen Beitrag oder ein Profil meldet, erscheint es hier.",
+      "openLive": "Live-Seite öffnen",
+      "snapshot": "Der Text zum Zeitpunkt der Meldung",
+      "snapshotTruncated": "Der Text war länger; die Kopie ist gekürzt.",
+      "reporters": "{{count}} verschiedene Meldende",
+      "decide": "Entscheiden",
+      "upholdAndRemove": "Bestätigen und entfernen",
+      "reject": "Ablehnen",
+      "cancel": "Abbrechen",
+      "removalReason": "Grund für die Entfernung",
+      "removalReasonHint": "Das landet im Audit-Log. Der Autor sieht es nicht.",
+      "resolutionNote": "Interne Notiz",
+      "reasonRequired": "Eine Entfernung braucht einen Grund.",
+      "status": {
+        "open": "Offen",
+        "triaged": "Gesichtet",
+        "upheld": "Bestätigt",
+        "rejected": "Abgelehnt"
+      },
+      "reason": {
+        "illegal": "Rechtswidrig",
+        "sexual": "Sexueller Inhalt",
+        "violence": "Gewalt",
+        "scam": "Betrug",
+        "impersonation": "Identitätsmissbrauch",
+        "dangerous_advice": "Gefährlicher Rat",
+        "abuse": "Missbrauch",
+        "ip_infringement": "Urheberrecht",
+        "spam": "Spam",
+        "other": "Sonstiges"
+      }
     }
   },
   "muscle": {

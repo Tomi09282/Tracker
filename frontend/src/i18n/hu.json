@@ -149,6 +149,41 @@
       "owner": "Beküldő",
       "media": "Média",
       "actions": "Művelet"
+    },
+    "marketplace": {
+      "title": "Piactéri bejelentések",
+      "emptyTitle": "Nincs elintézendő bejelentés",
+      "emptyBody": "Ha valaki bejelent egy bejegyzést vagy profilt, itt fog megjelenni.",
+      "openLive": "Élő oldal megnyitása",
+      "snapshot": "A szöveg a bejelentés pillanatában",
+      "snapshotTruncated": "A szöveg hosszabb volt; a másolat le van vágva.",
+      "reporters": "{{count}} különböző bejelentő",
+      "decide": "Döntés",
+      "upholdAndRemove": "Helybenhagyás és eltávolítás",
+      "reject": "Elutasítás",
+      "cancel": "Mégse",
+      "removalReason": "Eltávolítás indoka",
+      "removalReasonHint": "Ez az indok az audit-naplóba kerül. A szerző nem látja.",
+      "resolutionNote": "Belső megjegyzés",
+      "reasonRequired": "Eltávolításhoz indok kell.",
+      "status": {
+        "open": "Nyitott",
+        "triaged": "Vizsgált",
+        "upheld": "Helybenhagyott",
+        "rejected": "Elutasított"
+      },
+      "reason": {
+        "illegal": "Jogellenes",
+        "sexual": "Szexuális tartalom",
+        "violence": "Erőszak",
+        "scam": "Átverés",
+        "impersonation": "Megszemélyesítés",
+        "dangerous_advice": "Veszélyes tanács",
+        "abuse": "Bántalmazás",
+        "ip_infringement": "Szerzői jog",
+        "spam": "Kéretlen tartalom",
+        "other": "Egyéb"
+      }
     }
   },
   "muscle": {

@@ -149,6 +149,41 @@
       "owner": "Submitted by",
       "media": "Media",
       "actions": "Action"
+    },
+    "marketplace": {
+      "title": "Marketplace reports",
+      "emptyTitle": "Nothing to decide",
+      "emptyBody": "When somebody reports a post or a profile, it appears here.",
+      "openLive": "Open the live page",
+      "snapshot": "The text as it was when reported",
+      "snapshotTruncated": "The text was longer; the copy is truncated.",
+      "reporters": "{{count}} different reporters",
+      "decide": "Decide",
+      "upholdAndRemove": "Uphold and remove",
+      "reject": "Reject",
+      "cancel": "Cancel",
+      "removalReason": "Reason for removal",
+      "removalReasonHint": "This goes into the audit log. The author does not see it.",
+      "resolutionNote": "Internal note",
+      "reasonRequired": "A removal needs a reason.",
+      "status": {
+        "open": "Open",
+        "triaged": "Triaged",
+        "upheld": "Upheld",
+        "rejected": "Rejected"
+      },
+      "reason": {
+        "illegal": "Illegal",
+        "sexual": "Sexual content",
+        "violence": "Violence",
+        "scam": "Scam",
+        "impersonation": "Impersonation",
+        "dangerous_advice": "Dangerous advice",
+        "abuse": "Abuse",
+        "ip_infringement": "Copyright",
+        "spam": "Spam",
+        "other": "Other"
+      }
     }
   },
   "muscle": {

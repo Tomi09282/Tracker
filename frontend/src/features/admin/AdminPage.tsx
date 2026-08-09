@@ -11,6 +11,7 @@ import { CountUp } from '../../ui/feedback/CountUp';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useSession } from '../auth/useSession';
+import { MarketplaceQueue } from './MarketplaceQueue';
 
 interface Stats {
   users: { total: number; coaches: number; admins: number; disabled: number; new_7d: number };
@@ -238,6 +239,8 @@ export function AdminPage() {
           </div>
         )}
       </section>
+
+      <MarketplaceQueue />
 
       {stats.data ? (
         <p className={cn('text-caption mt-6 text-text-3')}>
