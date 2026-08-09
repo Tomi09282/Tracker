@@ -14,8 +14,16 @@
 //      the one class of mistake that turns an ownership bug into a database one.
 //
 // Run: node scripts/check-routes.mjs   (wired into `npm run smoke`'s siblings and the release gate)
+//
+// ═══ THE PARSER LIVES IN scripts/lib/parse-routes.mjs ══════════════════════════════════════════
+//
+// It used to live here, as a regex, and `check-admin-audit` was about to grow a second copy. It
+// moved instead — and moving it revealed that the regex had never been able to see four routes,
+// the ones that build their handler with a factory rather than writing it inline. This gate has
+// been printing a route count that was four short since those routes were written.
 import fs from 'node:fs';
 import path from 'node:path';
+import { parseRoutes } from './lib/parse-routes.mjs';
 
 const ROOT = 'src';
 
@@ -51,35 +59,24 @@ const PUBLIC = new Map([
   ['GET /public/taxonomy', 'the cities, kinds and specialties the filter UI renders from — the same list the filters offer, and secret from nobody'],
 ]);
 
-const files = [];
-(function walk(dir) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const p = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(p);
-    else if (entry.name.endsWith('.js')) files.push(p);
-  }
-})(ROOT);
-
-const routes = [];
-for (const file of files) {
-  const src = fs.readFileSync(file, 'utf8');
-  // The middleware chain is everything between the path and the handler. `asyncRoute` is the
-  // handler wrapper every route in this codebase uses, which makes it a reliable terminator.
-  const re = /router\.(get|post|patch|put|delete)\(\s*\n?\s*'([^']+)'\s*,([\s\S]*?)asyncRoute/g;
-  let m;
-  while ((m = re.exec(src))) {
-    const [, method, route, chain] = m;
-    routes.push({
-      file: path.relative(ROOT, file).replace(/\\/g, '/'),
-      key: `${method.toUpperCase()} ${route}`,
-      method: method.toUpperCase(),
-      route,
-      chain,
-    });
-  }
-}
+const { files, routes, suspects } = parseRoutes(ROOT);
 
 const problems = [];
+
+/*
+ * A registration the parser could not read is a HARD FAILURE, never a skip.
+ *
+ * This is the trap the whole gate is built to avoid, turned on the gate itself: a route nothing can
+ * see passes every check by not existing to it, and the report comes out green. "I could not read
+ * this" must not be spelled the same way as "this is fine".
+ */
+for (const s of suspects) {
+  problems.push(
+    `${s.file}:${s.line} — a route registration this gate CANNOT PARSE: ${s.why}.\n` +
+      '      An unparseable route is an unchecked route. Write it in the house shape, or teach\n' +
+      '      scripts/lib/parse-routes.mjs to read it — do not leave it invisible.',
+  );
+}
 
 for (const r of routes) {
   const authed = /require(Auth|Admin|Role)/.test(r.chain);

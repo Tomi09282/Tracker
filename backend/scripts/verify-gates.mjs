@@ -75,6 +75,7 @@ const TOUCHED = [
   'src/public/compose.js',
   'src/public/body.js',
   'src/public/routes.js',
+  'src/admin/routes.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -156,6 +157,67 @@ await mutate({
   expect: 'req.user',
 });
 
+console.log('\n── check-admin-audit: the log that has to be there when somebody asks ──────────');
+
+// The gate follows a route into the transaction it delegates to, so the audit row it looks for is
+// usually not in the file the route lives in. This case plants the defect where it is EASIEST to
+// make by accident — inline, in the handler, in the middle of a writeTx — and the gate must still
+// name the route rather than the file.
+await mutate({
+  label: 'an admin write whose audit row is gone is caught',
+  file: 'src/admin/routes.js',
+  from: "        sql: `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)",
+  to: "        sql: `INSERT INTO moderation_notes (actor_id, action, target_type, target_id, detail, request_id, ip)",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'reaches no INSERT INTO audit_log',
+});
+
+// `requireRole('admin')` still passes here — that is the whole point. The token says admin; the
+// question is whether anything asked the DATABASE, and a gate that trusts the middleware cannot
+// tell the difference between a re-check and a comment claiming one.
+await mutate({
+  label: 'an admin route that authorises from the JWT alone is caught',
+  file: 'src/admin/routes.js',
+  from: '    if (!(await assertAdmin(req, res))) return;\n\n    // One round trip per metric',
+  to: '    // One round trip per metric',
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'authorises from the JWT alone',
+});
+
+// Two writers sharing one action string. The rule had to be narrowed once already — `/disable` and
+// `/enable` reach both of their strings through ONE transaction, and that is one writer, not two —
+// so this case exists to show the narrowed rule still fires on the thing it is for.
+await mutate({
+  label: 'two different writers sharing one audit action string are caught',
+  file: 'src/admin/routes.js',
+  from: "          approving ? 'exercise.moderation.approve' : 'exercise.moderation.reject',",
+  to: "          approving ? 'user.disable' : 'exercise.moderation.reject',",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: "'user.disable' is written from 2 different places",
+});
+
+console.log('\n── and a route no gate can see ────────────────────────────────────────────────');
+
+/*
+ * THE TRAP THAT WAS REAL, not hypothetical.
+ *
+ * Four routes in this codebase built their handler with a factory instead of writing it inline, and
+ * the old route regex could not parse them. `check-routes` printed "161 routes — all authenticated"
+ * for a codebase with 165, and said nothing at all about the other four. They happened to comply.
+ *
+ * The parser now reads them, and anything it still cannot read is a hard failure. This proves that
+ * second half: an unreadable registration must come out RED, because "I could not see this" and
+ * "this is fine" must never be spelled the same way.
+ */
+await mutate({
+  label: 'a route the parser cannot read fails the build instead of being skipped',
+  file: 'src/admin/routes.js',
+  from: "router.get(\n  '/admin/stats',",
+  to: 'router.get(\n  `/admin/stats`,',
+  gate: 'scripts/check-routes.mjs',
+  expect: 'CANNOT PARSE',
+});
+
 console.log('\n── and nothing was left behind ────────────────────────────────────────────────');
 
 const afterAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
@@ -167,10 +229,14 @@ check(
 );
 
 // And the real suite still passes, which is the other half of "nothing was left behind".
-const clean = ['scripts/check-worker-tx.mjs', 'scripts/check-body-writes.mjs', 'scripts/check-routes.mjs']
-  .map((g) => [g, runGate(g).rejected]);
+const clean = [
+  'scripts/check-worker-tx.mjs',
+  'scripts/check-body-writes.mjs',
+  'scripts/check-routes.mjs',
+  'scripts/check-admin-audit.mjs',
+].map((g) => [g, runGate(g).rejected]);
 check(
-  'and all three gates are green again',
+  'and all four gates are green again',
   clean.every(([, rejected]) => !rejected),
   clean.filter(([, r]) => r).map(([g]) => g).join(', '),
 );

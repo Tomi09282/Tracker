@@ -23,11 +23,12 @@
     "verify:021": "node scripts/verify-021.mjs",
     "verify:022": "node scripts/verify-022.mjs",
     "verify:markdown": "node scripts/verify-markdown.mjs",
-    "check:all": "npm run check:routes && npm run check:worker-tx && npm run check:body-writes && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates",
+    "check:all": "npm run check:routes && npm run check:admin-audit && npm run check:worker-tx && npm run check:body-writes && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates",
     "verify:023": "node scripts/verify-023.mjs",
     "check:body-writes": "node scripts/check-body-writes.mjs",
     "verify:gates": "node scripts/verify-gates.mjs",
-    "verify:last-admin": "node scripts/verify-last-admin.mjs"
+    "verify:last-admin": "node scripts/verify-last-admin.mjs",
+    "check:admin-audit": "node scripts/check-admin-audit.mjs"
   },
   "author": "",
   "license": "ISC",
