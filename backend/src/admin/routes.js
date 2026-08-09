@@ -170,30 +170,131 @@ router.post(
   requireRole('admin'),
   adminLimiter,
   asyncRoute(async (req, res) => {
-    if (!(await assertAdmin(req, res))) return;
-    const id = z.coerce.number().int().positive().parse(req.params.id);
-    const { role } = RoleSchema.parse(req.body);
+    const id = z.coerce.number().int().positive().safeParse(req.params.id);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    const body = RoleSchema.safeParse(req.body);
+    if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
-    const target = await db.get('SELECT id, role FROM users WHERE id = ?', [id]);
-    if (!target) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
-    // An admin demoting themselves can lock the last admin out of the system.
-    if (id === req.user.id) return sendError(res, 409, ERR.CONFLICT, 'cannot change your own role');
+    // EVERY guard now lives inside the transaction, including the actor's own role. The pre-checks
+    // this replaced could not hold the one that mattered: two admins demoting each other at the
+    // same instant both passed, and the product was left with no admin and no way to mint one.
+    const result = await db.setUserRole({
+      actorId: req.user.id,
+      targetId: id.data,
+      role: body.data.role,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
 
-    // The session_version bump rides in the SAME transaction as the role change. Without it the
-    // old access token keeps its old role for up to fifteen minutes, and the instant-revocation
-    // promise of the sv claim is simply untrue.
-    await db.writeTx([
-      { sql: 'UPDATE users SET role = ?, session_version = session_version + 1 WHERE id = ?', params: [role, id] },
-      {
-        sql: `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
-              VALUES (?, 'user.role.change', 'user', ?, ?, ?, ?)`,
-        params: [req.user.id, id, JSON.stringify({ from: target.role, to: role }), res.locals.requestId, req.ip ?? null],
-      },
-    ]);
-    invalidateSvCache(id);
+    if (result.outcome !== 'applied') return sendDisableOutcome(res, result);
+    invalidateSvCache(id.data);
 
-    req.log.info({ targetId: id, from: target.role, to: role }, 'role changed');
-    res.json({ ok: true });
+    req.log.info({ targetId: id.data, to: body.data.role }, 'role changed');
+    res.json({ ok: true, account: { id: result.id, role: result.role }, replayed: result.replayed });
+  }),
+);
+
+/* ── disabling an account ───────────────────────────────────────────────────────────────────── */
+
+const DISABLE_OUTCOMES = {
+  missing: 404,
+  not_an_admin: 403,
+  cannot_disable_self: 409,
+  cannot_change_own_role: 409,
+  needs_reason: 409,
+};
+
+const sendDisableOutcome = (res, result) => {
+  const status = DISABLE_OUTCOMES[result.outcome];
+  if (!status) return sendError(res, 500, ERR.INTERNAL, 'internal error');
+  if (status === 404) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+  if (status === 403) return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+  const { outcome, ...facts } = result;
+  return res.status(409).json({
+    error: 'conflict',
+    code: ERR.CONFLICT,
+    reason: outcome,
+    ...facts,
+    requestId: res.locals.requestId,
+  });
+};
+
+const DisableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
+const EnableBody = z.object({}).strict();
+
+/**
+ * Stop an account.
+ *
+ * ═══ EIGHT FILES READ `disabled_at` AND NOTHING COULD SET IT ═══════════════════════════════════
+ *
+ * Login, every authenticated request, publishing, restoring a withdrawn post, removing content and
+ * resolving a report all check it. Until this route existed, a coach posting things that should not
+ * be on the internet could have each post taken down one at a time — and keep posting.
+ *
+ * The revocation is already instant and was already correct: `getSessionVersion` answers -1 for a
+ * disabled account, which can never match a token's `sv`, so every live session dies on the next
+ * request. `invalidateSvCache` drops the thirty-second read cache so "next request" means the next
+ * one rather than the one after half a minute.
+ *
+ * A reason is REQUIRED. Stopping somebody's account is the heaviest thing this product can do to a
+ * person, and an audit row that says only "disabled" is a record of the act without the judgement.
+ */
+router.post(
+  '/admin/users/:id/disable',
+  requireAuth,
+  requireRole('admin'),
+  adminLimiter,
+  asyncRoute(async (req, res) => {
+    const id = z.coerce.number().int().positive().safeParse(req.params.id);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    const body = DisableBody.safeParse(req.body);
+    if (!body.success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.setAccountDisabled({
+      actorId: req.user.id,
+      targetId: id.data,
+      disabled: true,
+      reason: body.data.reason,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendDisableOutcome(res, result);
+    invalidateSvCache(id.data);
+    req.log.warn({ targetId: id.data }, 'account disabled');
+    res.json({ account: { id: result.id, disabledAt: result.disabledAt }, replayed: result.replayed });
+  }),
+);
+
+/**
+ * Let an account back in.
+ *
+ * No reason required, deliberately, and the asymmetry is the point: the heavy act is stopping
+ * somebody, and requiring paperwork to undo a mistake makes the mistake likelier to stand.
+ */
+router.post(
+  '/admin/users/:id/enable',
+  requireAuth,
+  requireRole('admin'),
+  adminLimiter,
+  asyncRoute(async (req, res) => {
+    const id = z.coerce.number().int().positive().safeParse(req.params.id);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (!EnableBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.setAccountDisabled({
+      actorId: req.user.id,
+      targetId: id.data,
+      disabled: false,
+      reason: null,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendDisableOutcome(res, result);
+    invalidateSvCache(id.data);
+    req.log.info({ targetId: id.data }, 'account enabled');
+    res.json({ account: { id: result.id, disabledAt: result.disabledAt }, replayed: result.replayed });
   }),
 );
 

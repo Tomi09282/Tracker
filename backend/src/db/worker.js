@@ -2877,3 +2877,197 @@ export function removeSubjectTx({
     return rethrow(err, current);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * DISABLING AN ACCOUNT — the switch eight predicates were already waiting for.
+ *
+ * `disabled_at` gates login, every authenticated request, publishing, restoring a withdrawn post,
+ * removing content and resolving a report. Eight files read it. NOTHING could set it: a coach
+ * posting things that should not be on the internet could have each post taken down one at a time,
+ * and could keep posting.
+ *
+ * The enforcement was already complete and correct — `getSessionVersion` answers -1 for a disabled
+ * account, which can never match a token's `sv`, so every live session dies on the next request.
+ * Only the switch was missing.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Disable or re-enable an account.
+ *
+ * ═══ EVERY GUARD IS READ INSIDE THE WRITE LOCK ═════════════════════════════════════════════════
+ *
+ * Including the ACTOR's own role. A pre-check on that cannot hold: an admin demoted or disabled a
+ * moment ago would still be acting on a token that says otherwise, and the operations here decide
+ * who may do everything else.
+ */
+export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed) => {
+      current = 'SELECT the account back';
+      const row = stmt(
+        `SELECT id, email, role, disabled_at AS disabledAt, session_version AS sessionVersion
+           FROM users WHERE id = ?`,
+      ).get(targetId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // The ACTOR's role is re-read from the database, not taken from the token. A role revoked
+    // thirty seconds ago must not still be able to disable somebody.
+    current = 'SELECT the actor';
+    const actor = stmt(
+      "SELECT 1 AS ok FROM users WHERE id = ? AND role = 'admin' AND disabled_at IS NULL",
+    ).get(actorId);
+    if (!actor) return { outcome: 'not_an_admin' };
+
+    if (actorId === targetId) return { outcome: 'cannot_disable_self' };
+
+    current = 'SELECT the target';
+    const target = stmt('SELECT id, role, disabled_at AS disabledAt FROM users WHERE id = ?').get(targetId);
+    if (!target) return { outcome: 'missing' };
+
+    // Already in the requested state is a replay, and the ORIGINAL timestamp is kept — a second
+    // disable must not rewrite when the account was actually stopped.
+    if (disabled === (target.disabledAt !== null)) return view(true);
+
+    if (disabled && (!reason || reason.trim().length === 0)) return { outcome: 'needs_reason' };
+
+    // No last-admin count here either, for the same reason and with the same evidence — see the
+    // note in setUserRoleTx. An admin cannot disable themselves, and a disabled account is refused
+    // by the actor check on its next call, so the product cannot be emptied of admins from here.
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the account';
+    // The session_version bump rides in the SAME statement. Disabling already forces `sv` to -1 on
+    // every read, so the bump is belt and braces for the enable direction: an account coming back
+    // must not resume with tokens minted before it was stopped.
+    stmt(
+      `UPDATE users
+          SET disabled_at = ${disabled ? 'unixepoch()' : 'NULL'},
+              -- updated_at is left alone: a users_updated_at trigger maintains it, and writing
+              -- it here would be a second author of the same value.
+              session_version = session_version + 1
+        WHERE id = ?`,
+    ).run(targetId);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, ?, 'user', ?, ?, ?, ?)`,
+    ).run(
+      actorId,
+      disabled ? 'user.disable' : 'user.enable',
+      targetId,
+      JSON.stringify({ role: target.role, reason: reason ?? null }),
+      requestId,
+      ip,
+    );
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Change an account's role, without the product ever reaching zero admins.
+ *
+ * ═══ THE RACE THIS EXISTS FOR ══════════════════════════════════════════════════════════════════
+ *
+ * The route this replaces guarded one thing: you cannot change your OWN role. That stops the
+ * obvious mistake and misses the one that matters. Two admins, A and B. A demotes B; B demotes A;
+ * at the same moment. Each passes the self-check, because each is demoting the other. Both writes
+ * land. The product is left with NO admin, and nothing in it can ever mint one again — every route
+ * that could is behind `requireRole('admin')`.
+ *
+ * That is not a state anybody recovers from through the API, which is what makes it worth a
+ * transaction rather than a bigger pre-check. Under one write lock the second caller reads the
+ * first one's effect and is refused.
+ *
+ * The count that was going to enforce this is gone. It could not fire — see the note in the body —
+ * and what actually holds the invariant is the actor's role being re-read from the database inside
+ * the write lock, which was measured doing exactly that.
+ */
+export function setUserRoleTx({ actorId, targetId, role, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed) => {
+      current = 'SELECT the account back';
+      const row = stmt(
+        'SELECT id, email, role, disabled_at AS disabledAt, session_version AS sessionVersion FROM users WHERE id = ?',
+      ).get(targetId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // The actor's role is re-read from the DATABASE. `requireRole` reads the JWT, which can be
+    // fifteen minutes stale, and this operation decides who may do everything else.
+    current = 'SELECT the actor';
+    const actor = stmt(
+      "SELECT 1 AS ok FROM users WHERE id = ? AND role = 'admin' AND disabled_at IS NULL",
+    ).get(actorId);
+    if (!actor) return { outcome: 'not_an_admin' };
+
+    if (actorId === targetId) return { outcome: 'cannot_change_own_role' };
+
+    current = 'SELECT the target';
+    const target = stmt('SELECT id, role FROM users WHERE id = ?').get(targetId);
+    if (!target) return { outcome: 'missing' };
+    if (target.role === role) return view(true);
+
+    // ═══ THERE IS NO LAST-ADMIN COUNT HERE, AND ITS ABSENCE IS THE POINT ═══════════════════════
+    //
+    // The first version of this transaction carried one: count the enabled admins other than the
+    // target, refuse at zero. It was written to stop two admins demoting each other at the same
+    // instant and leaving the product with none — a state nothing recovers from, because every
+    // route that could mint an admin is behind requireRole('admin').
+    //
+    // Exercised, it never fired. Two concurrent demotions were issued straight at the transaction,
+    // and the loser came back `not_an_admin`: the first write had already demoted it, and the actor
+    // check above re-reads the role from the DATABASE. The count could not fire in that case, and
+    // it cannot fire in any other — the actor is always an enabled admin and can never be the
+    // target, so the number of other admins is at least one by construction.
+    //
+    // Two real things hold the invariant, and both were seen to hold it:
+    //   * an admin cannot change their own role
+    //   * a demoted account loses the power on its very next call, because the role is re-read
+    //     inside the write lock rather than taken from a token
+    //
+    // The count was deleted rather than kept as belt and braces. A guard that cannot fire still
+    // reads like a safety net, and the next person to relax one of the two real checks will believe
+    // something is behind them.
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the role';
+    // The session_version bump rides in the SAME statement: without it the old access token keeps
+    // its old role for up to fifteen minutes, and the instant-revocation promise of `sv` is untrue.
+    stmt('UPDATE users SET role = ?, session_version = session_version + 1 WHERE id = ?').run(role, targetId);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'user.role.change', 'user', ?, ?, ?, ?)`,
+    ).run(actorId, targetId, JSON.stringify({ from: target.role, to: role }), requestId, ip);
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

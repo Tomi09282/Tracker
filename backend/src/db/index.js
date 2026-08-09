@@ -76,6 +76,15 @@ export const deletePostCover = (args) => pool.run(args, { name: 'deletePostCover
 export const fileReport = (args) => pool.run(args, { name: 'fileReportTx' });
 export const resolveReport = (args) => pool.run(args, { name: 'resolveReportTx' });
 export const removeSubject = (args) => pool.run(args, { name: 'removeSubjectTx' });
+
+// Disabling an account. The last-admin guard is read under the write lock rather than pre-checked:
+// two admins disabling each other at the same instant would otherwise leave the product with none,
+// and enabling an account requires an admin — a state nothing could recover from.
+export const setAccountDisabled = (args) => pool.run(args, { name: 'setAccountDisabledTx' });
+// A role change is a NAMED transaction rather than a writeTx pair, because its guard has to be read
+// under the write lock: two admins demoting each other concurrently both pass a pre-check and leave
+// the product with no admin, which nothing can recover from.
+export const setUserRole = (args) => pool.run(args, { name: 'setUserRoleTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);
