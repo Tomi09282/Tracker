@@ -65,9 +65,27 @@ while ((m = open.exec(src))) {
     const conditional = /\bif\s*\(/.test(line) || /\bif\s*\([^)]*\)\s*\{?\s*$/.test(prev);
     if (!conditional) continue;
 
-    // THE ADR'S OWN EXEMPTION: a changes === 0 probe on a guarded write.
+    /*
+     * THE ADR'S OWN EXEMPTION: a `changes === 0` probe on a guarded write.
+     *
+     * ═══ AND IT IS ONLY SOUND ON THE FIRST WRITE ═══════════════════════════════════════════════
+     *
+     * The exemption's whole argument is the sentence at the top of this file: "the statement wrote
+     * nothing, and committing nothing is a no-op". That holds when the guarded write is the ONLY
+     * write so far. It stops holding the moment something else has already run — then the return
+     * commits THAT, and the caller is told the operation failed.
+     *
+     * This gate used to apply the exemption after any write, and a mutation test caught it: planting
+     * `if (published.changes === 0) return { outcome: 'missing' };` after an earlier write left the
+     * gate GREEN. That is the exact shape of the only FATAL finding in the composer review — a cover
+     * soft-deleted, then a guarded write, then a conditional return, which destroys the image and
+     * answers 404. The gate written to enforce ADR-0005 could not see the defect ADR-0005 is about.
+     *
+     * So the exemption now requires that exactly one write precedes this return.
+     */
+    const writesBefore = (body.slice(0, absolute).match(/\.run\(/g) ?? []).length;
     const window = `${prev}\n${line}`;
-    if (/\.changes\s*===\s*0|changes\s*===\s*0/.test(window)) continue;
+    if (writesBefore <= 1 && /\.changes\s*===\s*0|changes\s*===\s*0/.test(window)) continue;
 
     problems.push(
       `${FILE}:${lineNo} — conditional return AFTER a write inside a transaction.\n` +
