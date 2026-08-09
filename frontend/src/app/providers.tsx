@@ -4,6 +4,7 @@ import { ApiError } from '../lib/api';
 import { ThemeProvider } from '../ui/theme/ThemeProvider';
 import { ElementStyleProvider } from '../ui/feedback/ElementStyleProvider';
 import { LoadingAnnouncer } from '../ui/feedback/LoadingAnnouncer';
+import { ToastHost } from '../ui/feedback/ToastHost';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +33,11 @@ export function Providers({ children }: { children: ReactNode }) {
           {/* Mounted above every route, public and authenticated alike — the marketplace screens
               sit OUTSIDE AppLayout, so anything hung off the app shell would have missed them. */}
           <LoadingAnnouncer />
-          {children}
+          {/* E15 shipped with five variants, an undo affordance and a polite live region, and the
+              only file that ever rendered one was the variant playground. Every mutation in the
+              product finished in silence — and a save that works and says nothing is
+              indistinguishable from a save that did nothing. */}
+          <ToastHost>{children}</ToastHost>
         </ElementStyleProvider>
       </ThemeProvider>
     </QueryClientProvider>

@@ -16,7 +16,9 @@
     "prevMonth": "Previous month",
     "nextMonth": "Next month",
     "add": "Add",
-    "delete": "Delete"
+    "delete": "Delete",
+    "undo": "Undo",
+    "undone": "Undone"
   },
   "auth": {
     "loginTitle": "Sign in to your account",
@@ -810,6 +812,17 @@
     "coverAlt": "Image description",
     "coverAltHint": "What does the image show? This is what someone who cannot see it will hear.",
     "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
-    "coverFailed": "The image could not be uploaded."
+    "coverFailed": "The image could not be uploaded.",
+    "toast": {
+      "draftCreated": "Draft created",
+      "saved": "Saved",
+      "published": "Published",
+      "withdrawn": "Taken down",
+      "restored": "Restored",
+      "coverAdded": "Cover uploaded",
+      "coverRemoved": "Cover removed"
+    },
+    "saved": "Saved",
+    "overLimit": "Longer than allowed."
   }
 }

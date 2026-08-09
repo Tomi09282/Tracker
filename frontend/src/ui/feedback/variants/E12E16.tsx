@@ -156,7 +156,7 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
         </motion.span>
 
         <span className="text-body-s flex-1 text-text-1">
-          {undone ? 'Undone' : toast.message}
+          {undone ? t('common.undone') : toast.message}
         </span>
 
         {toast.onUndo && !undone ? (
@@ -171,7 +171,7 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
             }}
             className="text-body-s min-h-[var(--target-min)] cursor-pointer px-2 text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           >
-            Undo
+            {t('common.undo')}
           </button>
         ) : null}
 

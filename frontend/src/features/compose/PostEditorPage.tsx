@@ -20,6 +20,13 @@ import {
   conflictOf,
   type ComposePost,
 } from './useCompose';
+import {
+  useSaveShortcut,
+  useUnsavedGuard,
+  useComposeFeedback,
+  counterTone,
+  COUNTER_CLASS,
+} from './useComposeFlow';
 
 /** One key per attempt, reused across retries — that is what makes a retry a retry. */
 const newIdempotencyKey = () =>
@@ -45,6 +52,10 @@ export function PostEditorPage() {
   // is a different attempt. Reusing one key across both is how a second image gets refused as a
   // replay of the first.
   const coverKeyRef = useRef(newIdempotencyKey());
+  const feedback = useComposeFeedback();
+  // `submit` is defined below the early returns, where a hook may not reach. The ref is refreshed
+  // on every render, so the shortcut always calls the current closure rather than the first one.
+  const submitRef = useRef<() => void>(() => {});
 
   const [kind, setKind] = useState('');
   const [title, setTitle] = useState('');
@@ -56,6 +67,9 @@ export function PostEditorPage() {
 
   const post: ComposePost | undefined = existing.data?.post;
   const cover = existing.data?.cover ?? null;
+  // The same fact as `readOnly` below, read where a hook is still allowed to see it: hooks cannot
+  // sit under the early returns, and a removed post has nothing to guard against losing.
+  const readOnlyEarly = !!post && post.removedAt !== null;
 
   useEffect(() => {
     if (post) {
@@ -84,6 +98,14 @@ export function PostEditorPage() {
     () => taxonomy.data?.kinds.find((k) => k.key === kind),
     [taxonomy.data, kind],
   );
+
+  // What is on screen versus what the server last confirmed. Autosave was cut deliberately, so
+  // this comparison is the only thing between a closed tab and lost writing.
+  const dirty = post
+    ? title !== post.title || body !== post.bodySrc
+    : title.trim().length > 0 || body.trim().length > 0;
+  useUnsavedGuard(dirty && !readOnlyEarly);
+  useSaveShortcut(() => submitRef.current(), !readOnlyEarly);
 
   const conflict = conflictOf(create.error) ?? conflictOf(save.error) ?? conflictOf(lifecycle.error);
   const bodyError = (create.error ?? save.error) as { body?: { reason?: string } } | null;
@@ -125,10 +147,17 @@ export function PostEditorPage() {
           price_minor: null,
           price_currency: null,
         },
-        { onSuccess: (r) => navigate(`/compose/posts/${r.post.id}`) },
+        {
+          onSuccess: (r) => {
+            feedback.ok('compose.toast.draftCreated');
+            navigate(`/compose/posts/${r.post.id}`);
+          },
+          onError: (e) => feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') })),
+        },
       );
     } else if (post) {
-      save.mutate({
+      save.mutate(
+        {
         expected_row_version: post.rowVersion,
         title,
         body_src: body,
@@ -138,9 +167,16 @@ export function PostEditorPage() {
         capacity: post.capacity,
         price_minor: post.priceMinor,
         price_currency: post.priceCurrency,
-      });
+        },
+        {
+          onSuccess: () => feedback.ok('compose.toast.saved'),
+          onError: (e) => feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') })),
+        },
+      );
     }
   };
+
+  submitRef.current = submit;
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-4 py-4">
@@ -184,6 +220,7 @@ export function PostEditorPage() {
         disabled={readOnly}
         onChange={(e) => setTitle(e.target.value)}
         hint={limits ? t('compose.charsLeft', { n: Math.max(0, limits.titleMax - title.length) }) : undefined}
+        error={limits && title.length > limits.titleMax ? t('compose.overLimit') : undefined}
       />
 
       <label className="flex flex-col gap-1">
@@ -194,7 +231,9 @@ export function PostEditorPage() {
           disabled={readOnly}
           onChange={(e) => setBody(e.target.value)}
         />
-        <span className="text-caption text-text-3">
+        {/* Colour arrives before reading does, and only near the end — a counter that is loud from
+            the first character is a counter people stop seeing. */}
+        <span className={`text-caption ${limits ? COUNTER_CLASS[counterTone(body.length, limits.bodyMax)] : 'text-text-3'}`}>
           {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bodyMax - body.length) }) : ''}
         </span>
       </label>
@@ -206,8 +245,15 @@ export function PostEditorPage() {
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <Pressable variant="primary" busy={create.isPending || save.isPending} disabled={readOnly} onClick={submit}>
-          {isNew ? t('compose.createDraft') : t('compose.save')}
+        <Pressable
+          variant="primary"
+          busy={create.isPending || save.isPending}
+          // Nothing to save is a real state and the button should look like it. Ctrl+S does nothing
+          // here either, so the keyboard and the button agree.
+          disabled={readOnly || (!isNew && !dirty)}
+          onClick={submit}
+        >
+          {isNew ? t('compose.createDraft') : dirty ? t('compose.save') : t('compose.saved')}
         </Pressable>
         <Pressable variant="secondary" onClick={() => setShowPreview((v) => !v)}>
           <Eye className="size-4" aria-hidden />
@@ -298,7 +344,11 @@ export function PostEditorPage() {
               </p>
               {/* There is NO replace: the server refuses a second cover, so changing one is delete
                   then upload. The screen says so rather than offering a button that answers 409. */}
-              <Pressable variant="secondary" busy={deleteCover.isPending} onClick={() => deleteCover.mutate()}>
+              <Pressable
+                variant="secondary"
+                busy={deleteCover.isPending}
+                onClick={() => deleteCover.mutate(undefined, { onSuccess: () => feedback.ok('compose.toast.coverRemoved') })}
+              >
                 <Trash2 className="size-4" aria-hidden />
                 {t('compose.removeCover')}
               </Pressable>
@@ -325,7 +375,10 @@ export function PostEditorPage() {
                     const file = e.target.files?.[0];
                     if (!file) return;
                     coverKeyRef.current = newIdempotencyKey();
-                    uploadCover.mutate({ file, alt, key: coverKeyRef.current });
+                    uploadCover.mutate(
+                      { file, alt, key: coverKeyRef.current },
+                      { onSuccess: () => feedback.ok('compose.toast.coverAdded') },
+                    );
                   }}
                 />
               </label>
@@ -346,18 +399,53 @@ export function PostEditorPage() {
       {post && !readOnly ? (
         <section className="flex flex-wrap gap-2 border-t border-line pt-4">
           {post.publishedAt === null && post.deletedAt === null ? (
-            <Pressable variant="primary" busy={lifecycle.isPending} onClick={() => lifecycle.mutate('publish')}>
+            <Pressable
+              variant="primary"
+              busy={lifecycle.isPending}
+              onClick={() =>
+                lifecycle.mutate('publish', {
+                  onSuccess: () => feedback.ok('compose.toast.published'),
+                  onError: (e) =>
+                    feedback.failed(
+                      t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
+                    ),
+                })
+              }
+            >
               <Globe className="size-4" aria-hidden />
               {t('compose.publish')}
             </Pressable>
           ) : null}
+          {/* THE UNDO IS THE POINT. Taking something down is the action people hesitate over, and a
+              one-tap way back is what makes hesitating unnecessary — the restore returns the post to
+              its ORIGINAL feed position and spends no quota, so the undo costs nothing at all. */}
           {post.deletedAt === null ? (
-            <Pressable variant="secondary" busy={lifecycle.isPending} onClick={() => lifecycle.mutate('withdraw')}>
+            <Pressable
+              variant="secondary"
+              busy={lifecycle.isPending}
+              onClick={() =>
+                lifecycle.mutate('withdraw', {
+                  onSuccess: () => feedback.ok('compose.toast.withdrawn', () => lifecycle.mutate('restore')),
+                })
+              }
+            >
               <EyeOff className="size-4" aria-hidden />
               {t('compose.withdraw')}
             </Pressable>
           ) : (
-            <Pressable variant="secondary" busy={lifecycle.isPending} onClick={() => lifecycle.mutate('restore')}>
+            <Pressable
+              variant="secondary"
+              busy={lifecycle.isPending}
+              onClick={() =>
+                lifecycle.mutate('restore', {
+                  onSuccess: () => feedback.ok('compose.toast.restored'),
+                  onError: (e) =>
+                    feedback.failed(
+                      t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
+                    ),
+                })
+              }
+            >
               <RotateCcw className="size-4" aria-hidden />
               {t('compose.restore')}
             </Pressable>

@@ -16,7 +16,9 @@
     "prevMonth": "Előző hónap",
     "nextMonth": "Következő hónap",
     "delete": "Törlés",
-    "add": "Hozzáadás"
+    "add": "Hozzáadás",
+    "undo": "Visszavonás",
+    "undone": "Visszavonva"
   },
   "auth": {
     "loginTitle": "Jelentkezz be a fiókodba",
@@ -810,6 +812,17 @@
     "coverAlt": "Képleírás",
     "coverAltHint": "Mit ábrázol a kép? Aki nem látja, ezt fogja hallani.",
     "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
-    "coverFailed": "A kép feltöltése nem sikerült."
+    "coverFailed": "A kép feltöltése nem sikerült.",
+    "toast": {
+      "draftCreated": "Piszkozat létrehozva",
+      "saved": "Mentve",
+      "published": "Közzétéve",
+      "withdrawn": "Levéve",
+      "restored": "Visszaállítva",
+      "coverAdded": "Borítókép feltöltve",
+      "coverRemoved": "Borítókép eltávolítva"
+    },
+    "saved": "Mentve",
+    "overLimit": "Hosszabb a megengedettnél."
   }
 }

@@ -16,7 +16,9 @@
     "prevMonth": "Voriger Monat",
     "nextMonth": "Nächster Monat",
     "add": "Hinzufügen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "undo": "Rückgängig",
+    "undone": "Rückgängig gemacht"
   },
   "auth": {
     "loginTitle": "Bei deinem Konto anmelden",
@@ -810,6 +812,17 @@
     "coverAlt": "Bildbeschreibung",
     "coverAltHint": "Was zeigt das Bild? Das hört jemand, der es nicht sehen kann.",
     "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
-    "coverFailed": "Das Bild konnte nicht hochgeladen werden."
+    "coverFailed": "Das Bild konnte nicht hochgeladen werden.",
+    "toast": {
+      "draftCreated": "Entwurf erstellt",
+      "saved": "Gespeichert",
+      "published": "Veröffentlicht",
+      "withdrawn": "Zurückgezogen",
+      "restored": "Wiederhergestellt",
+      "coverAdded": "Titelbild hochgeladen",
+      "coverRemoved": "Titelbild entfernt"
+    },
+    "saved": "Gespeichert",
+    "overLimit": "Länger als erlaubt."
   }
 }
