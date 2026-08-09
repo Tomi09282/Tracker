@@ -4703,6 +4703,101 @@ if (seeded) {
   }
 }
 
+// --- THE COMPOSER: THE COACH'S SIDE OF THE PUBLIC SURFACE -------------------------------------
+//
+// The mirror image of the block above. Those routes must answer with no session at all; these must
+// answer to nobody BUT an authenticated coach, and they sit on the other side of csrfProtection.
+if (seeded) {
+  const composerJar = new Jar();
+  const memberJar = new Jar();
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: composerJar });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: EMAIL, password: PASSWORD }, jar: memberJar });
+
+  {
+    const anon = await call('/api/v1/compose/context', { csrf: false });
+    const member = await call('/api/v1/compose/context', { jar: memberJar });
+    check(
+      'the composer answers nobody: 401 with no session, 403 to a signed-in non-coach',
+      anon.res.status === 401 && member.res.status === 403,
+      `${anon.res.status} / ${member.res.status}`,
+    );
+  }
+
+  const ctx = await call('/api/v1/compose/context', { jar: composerJar });
+  check(
+    'the context is ONE answer carrying profile, standing, quotas and limits',
+    ctx.res.status === 200 && ctx.json?.standing && ctx.json?.quotas && ctx.json?.limits,
+    `status ${ctx.res.status}`,
+  );
+  check(
+    'the limits are served, so the editor cannot keep a second copy of them',
+    ctx.json?.limits?.titleMax === 140 && ctx.json?.limits?.bodyMax === 20000,
+    JSON.stringify(ctx.json?.limits),
+  );
+  {
+    const strict = await call('/api/v1/compose/context?surprise=1', { jar: composerJar });
+    check('and its query schema is strict', strict.res.status === 400, `status ${strict.res.status}`);
+  }
+
+  // --- GUIDELINES: the gate that had no way to be satisfied ------------------------------------
+  //
+  // guidelines_versions, guidelines_acceptances and public_policy shipped in 021 and nothing in
+  // src/ had ever touched them. Three triggers refuse a publication by an account with no
+  // acceptance of the ACTIVE version, so until this route existed the publish gate denied every
+  // coach in the product and there was no request that could clear it.
+  const active = ctx.json?.standing?.activeGuidelinesVersion;
+  check('the context names the guidelines version now in force', typeof active === 'string', String(active));
+
+  {
+    const stale = await call('/api/v1/compose/guidelines/accept', { method: 'POST', jar: composerJar, body: { version: '9.9' } });
+    check(
+      'consent to a version that is not in force is 409 and names the one that is',
+      stale.res.status === 409 && stale.json?.reason === 'stale_version' && stale.json?.activeVersion === active,
+      `${stale.res.status} ${stale.json?.reason}`,
+    );
+  }
+  {
+    const extra = await call('/api/v1/compose/guidelines/accept', { method: 'POST', jar: composerJar, body: { version: active, sneak: 1 } });
+    check('an unknown body key is refused', extra.res.status === 400, `status ${extra.res.status}`);
+  }
+
+  // The FIRST acceptance, asserted as an insert rather than assumed. A suite that only ever ran
+  // against an already-consenting account would prove the replay and never the write.
+  check('this coach has not consented yet', ctx.json?.standing?.guidelinesAcceptedAt === null, String(ctx.json?.standing?.guidelinesAcceptedAt));
+  const first = await call('/api/v1/compose/guidelines/accept', { method: 'POST', jar: composerJar, body: { version: active } });
+  check('accepting the active version records it', first.res.status === 200 && typeof first.json?.acceptedAt === 'number', `status ${first.res.status}`);
+
+  const replay = await call('/api/v1/compose/guidelines/accept', { method: 'POST', jar: composerJar, body: { version: active } });
+  check(
+    'REPLAY: a second acceptance returns the ORIGINAL timestamp — the row is evidence, not a click',
+    replay.res.status === 200 && replay.json?.acceptedAt === first.json?.acceptedAt,
+    `${first.json?.acceptedAt} then ${replay.json?.acceptedAt}`,
+  );
+  {
+    const after = await call('/api/v1/compose/context', { jar: composerJar });
+    check(
+      'and the context reports it, so the composer can stop asking',
+      after.json?.standing?.guidelinesAcceptedAt === first.json?.acceptedAt,
+      String(after.json?.standing?.guidelinesAcceptedAt),
+    );
+  }
+
+  // --- CSRF: this router is BELOW the middleware, and that is the difference from public/ -------
+  {
+    const cross = await call('/api/v1/compose/guidelines/accept', {
+      method: 'POST', jar: composerJar, body: { version: active }, headers: { 'sec-fetch-site': 'cross-site' },
+    });
+    const bare = await call('/api/v1/compose/guidelines/accept', {
+      method: 'POST', jar: composerJar, body: { version: active }, csrf: false,
+    });
+    check(
+      'a cross-site write and a write with no X-CSRF header are both refused',
+      cross.res.status === 403 && bare.res.status === 403,
+      `${cross.res.status} / ${bare.res.status}`,
+    );
+  }
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

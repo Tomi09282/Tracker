@@ -26,6 +26,7 @@ import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
 import publicRoutes from './src/public/routes.js';
+import composeRoutes from './src/public/compose.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -193,6 +194,12 @@ app.use('/api/v1', progressUploadRoutes);
 app.use('/api/v1', publicRoutes);
 
 app.use(csrfProtection);
+// The coach's side of that same marketplace, and it sits on the OTHER side of this line on
+// purpose. `publicRoutes` above is anonymous GETs with nothing to protect; every route here is an
+// authenticated write by a named coach, so it takes all three CSRF layers like the rest of the
+// product. Two files, one feature, opposite ends of the stack — which is the whole reason the
+// composer is not a few more handlers inside `public/routes.js`.
+app.use('/api/v1', composeRoutes);
 app.use(AUTH_PATH, authRoutes);
 app.use('/api/v1', themeRoutes);
 app.use('/api/v1', exerciseRoutes);
