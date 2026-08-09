@@ -1,7 +1,7 @@
 ---
 type: table
 table: post_media
-summary: 13 columns, 0 rows
+summary: 15 columns, 0 rows
 rows: 0
 tags: [data-model, generated]
 ---
@@ -27,6 +27,8 @@ tags: [data-model, generated]
 | `sort_order` | INTEGER | NOT NULL, default 0 |
 | `created_at` | INTEGER | NOT NULL, default unixepoch() |
 | `deleted_at` | INTEGER |  |
+| `write_uid` | TEXT |  |
+| `content_sha256` | TEXT |  |
 
 ## Foreign keys
 
@@ -36,6 +38,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `post_media_write_uid_uidx` (unique) (partial)
 - `post_media_created_idx`
 - `post_media_mime_fk_idx`
 - `post_media_role_fk_idx`
@@ -47,6 +50,8 @@ tags: [data-model, generated]
 ## Triggers
 
 - `trg_post_media_daily_cap_ins`
+- `trg_post_media_identity_frozen_upd`
+- `trg_post_media_keys_distinct_ins`
 - `trg_post_media_mime_active_ins`
 - `trg_post_media_per_post_cap_ins`
 
@@ -59,5 +64,7 @@ tags: [data-model, generated]
 - `typeof(bytes`
 - `alt IS NULL OR (length(alt`
 - `typeof(sort_order`
+- `write_uid IS NULL OR (length(write_uid`
+- `content_sha256 IS NULL OR (length(content_sha256`
 
 Back to [[ERD]].

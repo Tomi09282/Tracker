@@ -63,3 +63,41 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-6]] · Owner req 9, 10
 
 ## Related
 [[TODO Master]] · [[TODO Phase-6]] · [[TODO Phase-8]]
+
+## F-C — The coach-side composer (the Phase 6 write surface)
+
+Spec: [[Composer Spec]] — a 13-agent adversarial pass, 60 defects (1 fatal, 18 severe). The public
+marketplace has shipped read-only since Phase 6: a coach cannot create a profile or publish a post,
+and the two posts that exist were inserted by a script through the DB facade.
+
+**OWNER DECISIONS 2026-08-09**, taken against the defect-clustering evidence:
+
+- **Media: cover image only.** Upload, delete, author-side view. The gallery, image reordering and
+  every media UPDATE are cut, and replacing a cover is DELETE then POST — two operations that are
+  each already atomic. The media surface carried ~40% of all defect weight and the only FATAL
+  finding; `post_media` has zero UPDATE triggers and an unfrozen `post_id`, so every UPDATE not
+  written is an IDOR that cannot exist.
+- **Scheduled publishing: CUT.** Measured — `PUBLIC_POST` contains no `unixepoch()` comparison, so
+  a future `published_at` is publicly readable the moment it is written, and the daily quota window
+  has no upper bound, so posts scheduled ahead would eat the whole allowance every day until then.
+- **Handle rename, autosave and the handle-availability endpoint: KEPT**, against the spec's
+  recommendation. They ship WITH their defects fixed rather than avoided — that is the cost the
+  decision accepts, and it is written here so the bill is visible rather than discovered later.
+- **Client food log stays private** (T4.5.1) — unrelated to the composer, decided in the same pass.
+
+### Blocker, verified before anything else was planned
+`guidelines_versions`, `guidelines_acceptances` and `public_policy` exist ONLY in migration 021.
+Nothing in `src/` reads or writes them — grepped, not assumed. There is no way for anyone to accept
+the community guidelines, so the publish gate would deny every coach in the product. The consent
+routes are therefore T7.C.2, not an afterthought.
+
+- [x] **T7.C.1** `022_composer.sql` — owner-scoped `write_uid` idempotency on `coach_posts` and `post_media`, `content_sha256` for intent comparison on replay, `row_version` for optimistic concurrency (`unixepoch()` is one-second granular, so a timestamp guard silently no-ops inside its own second), and the restore-standing trigger — `done` · schema v22. Every claim the migration rests on was checked against the LIVE schema first — 16 of 17 held and the seventeenth was the checker counting all triggers where it meant UPDATE triggers, so the spec was right and my probe was sloppy. `verify:022` is 32 assertions and asserts the ACCEPTED cases with the same weight as the refusals, because the trigger 022 replaces was refused for being too eager: a paragraph reflow changes body_src and can leave body_doc byte-identical, and a doc_version bump moves the doc alone, so 021's exclusive-or aborted ordinary edits and would have frozen the whole published corpus. Mutation-tested: deleting the identity-freeze trigger produces exactly 4 FAILs, restoring it returns 32/32
+- [ ] **T7.C.2** Guidelines consent: read the active version, accept it — `pending` · **the blocker above.** Append-only, versioned, and it gates publication
+- [ ] **T7.C.3** Coach profile: create, edit, publish, unpublish — `pending`
+- [ ] **T7.C.4** Handle rename + availability check — `pending` · KEPT by owner decision, so IDOR-1 (one account locking ~1 440–5 760 handles/day into a one-year global cooldown while retaining exclusive reclaim), REPLAY-10 and RACE-5 (a stale tab reverting a rename from a headline edit, burning BOTH handles for a year) must be genuinely fixed. Availability collapses taken / reserved / in-cooldown to ONE outcome so it cannot enumerate unpublished profiles or leak another account's rename timestamp (IDOR-2)
+- [ ] **T7.C.5** Posts: create draft, edit, publish, withdraw, restore, list, read-as-author — `pending` · `row_version` for lost updates; the body XOR trigger replaced, because as specified a `doc_version` bump makes every existing post permanently uneditable including title-only edits, with no request that succeeds and no escape through DELETE+INSERT
+- [ ] **T7.C.6** Autosave — `pending` · KEPT by owner decision, so RACE-7 must be fixed: an in-flight create plus a blur-triggered second create must not let the replay answer discard the coach's newest keystrokes behind a URL change that looks like success
+- [ ] **T7.C.7** Cover media: upload, delete, author-side view — `pending` · plus the `resolveStoredPath` and serve-route repairs, which are needed the first time any `post_media` row exists regardless
+- [ ] **T7.C.8** Server-side preview through the reader's own `DocRenderer` — `pending` · one renderer, so a coach cannot discover that the preview and the published page disagree
+- [ ] **T7.C.9** Frontend composer screens — `pending`
+- [ ] **T7.C.10** Probes + smoke: every gate SEEN TO FIRE by breaking what it guards — `pending`

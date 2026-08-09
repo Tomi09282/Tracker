@@ -1,7 +1,7 @@
 ---
 type: table
 table: coach_profiles
-summary: 16 columns, 1 rows
+summary: 17 columns, 1 rows
 rows: 1
 tags: [data-model, generated]
 ---
@@ -30,6 +30,7 @@ tags: [data-model, generated]
 | `removal_reason` | TEXT |  |
 | `created_at` | INTEGER | NOT NULL, default unixepoch() |
 | `updated_at` | INTEGER | NOT NULL, default unixepoch() |
+| `listed_at` | INTEGER |  |
 
 ## Foreign keys
 
@@ -40,6 +41,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `coach_profiles_listed_idx` (partial)
 - `coach_profiles_city_fk_idx` (partial)
 - `coach_profiles_removed_by_fk_idx` (partial)
 - `coach_profiles_verified_by_fk_idx` (partial)
@@ -50,6 +52,7 @@ tags: [data-model, generated]
 
 ## Triggers
 
+- `trg_profile_bio_doc_needs_a_source_upd`
 - `trg_profile_handle_available_ins`
 - `trg_profile_handle_available_upd`
 - `trg_profile_handle_retire_del`

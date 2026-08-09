@@ -51,7 +51,7 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-3]]
 
 ## Follow-ups this phase deliberately did NOT take
 
-- [ ] **T4.5.1** Coach visibility into a client's FOOD LOG — `pending` · not built, and not an
+- [~] **T4.5.1** Coach visibility into a client's FOOD LOG — `resolved-by-owner` · **OWNER DECISION 2026-08-09: it stays on the client's own screen. No third flag, no coach read, nothing built.** The question was put with three options — leave it, a revocable per-link share on the `progress_shares` pattern, or a summary-only view showing macro adherence without the itemised diary — and the answer was to leave it. So the note below is no longer a description of an unfinished item; it is the reasoning the decision agreed with. Not built, and not an
   oversight. `nutrition_log_items` is single-table on the client's own id, exactly as measurements
   were before a consent flag existed. A coach read needs the same design `progress_shares` got:
   explicit, revocable, per-link, defaulting to nobody. A food diary is close enough to health data

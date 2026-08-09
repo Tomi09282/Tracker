@@ -244,12 +244,28 @@ check(
   bodyCols.join(', '),
 );
 
-// THE THREE MUST MOVE TOGETHER. A body edited without re-rendering is markdown displayed as a
-// stale tree — the drift this project keeps finding, applied to the one field a stranger reads.
+// THE DOC MAY NOT MOVE ON ITS OWN. A rendered tree that changed with nothing behind it is the one
+// field a stranger reads, drifting away from the text its author wrote.
+//
+// ═══ THIS ASSERTION USED TO SAY THE OPPOSITE, AND MIGRATION 022 CHANGED IT ══════════════════════
+//
+// 021 wrote the rule as an exclusive-or: refuse the update unless body_src and body_doc BOTH moved.
+// That was too eager in both directions and 022 replaced it. Reflowing a paragraph changes the
+// source and can leave the parsed document byte-identical, so an ordinary edit was aborted; and
+// re-parsing under a new grammar moves the doc while the source stands still, so the day
+// doc_version was bumped the entire published corpus would have become permanently unwritable —
+// including a title-only edit, with no request that succeeds.
+//
+// The direction kept here is the one that protects the reader. The four cases that must now be
+// ACCEPTED are asserted in verify-022, which is where the full matrix lives — an assertion that
+// only ever proves a refusal cannot tell a correct rule from one that refuses everything.
+//
+// Widening `check:all` is what surfaced this: verify-021 was not in the aggregate gate, so 022
+// could contradict it silently. Five suites were outside that gate.
 refused(
-  'the source cannot be edited without its rendered form',
-  () => run(`UPDATE coach_posts SET body_src = 'changed' WHERE id = ?`, p1),
-  'body_columns_must_move_together',
+  'the rendered doc cannot move while the source and the grammar stand still',
+  () => run(`UPDATE coach_posts SET body_doc = '[{"k":"p"}]' WHERE id = ?`, p1),
+  'doc_moved_without_source',
 );
 
 // AND THE PUBLIC ID IS NOT THE ROW ID. An enumerable id plus a public read is a directory of

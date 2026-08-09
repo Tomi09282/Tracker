@@ -1,7 +1,7 @@
 ---
 type: table
 table: coach_posts
-summary: 22 columns, 2 rows
+summary: 24 columns, 2 rows
 rows: 2
 tags: [data-model, generated]
 ---
@@ -36,6 +36,8 @@ tags: [data-model, generated]
 | `removal_reason` | TEXT |  |
 | `created_at` | INTEGER | NOT NULL, default unixepoch() |
 | `updated_at` | INTEGER | NOT NULL, default unixepoch() |
+| `write_uid` | TEXT |  |
+| `row_version` | INTEGER | NOT NULL, default 1 |
 
 ## Foreign keys
 
@@ -47,6 +49,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `coach_posts_write_uid_uidx` (unique) (partial)
 - `coach_posts_removed_by_fk_idx` (partial)
 - `coach_posts_currency_fk_idx` (partial)
 - `coach_posts_city_fk_idx` (partial)
@@ -66,7 +69,7 @@ tags: [data-model, generated]
 - `trg_coach_posts_fts_del`
 - `trg_coach_posts_fts_ins`
 - `trg_coach_posts_fts_upd`
-- `trg_post_body_moves_as_one_upd`
+- `trg_post_doc_needs_a_source_upd`
 - `trg_post_excerpt_is_derived_upd`
 - `trg_post_frozen_while_removed_upd`
 - `trg_post_identity_frozen_upd`
@@ -81,6 +84,7 @@ tags: [data-model, generated]
 - `trg_post_removal_pair_upd`
 - `trg_post_removal_reasoned_upd`
 - `trg_post_removed_by_admin_upd`
+- `trg_post_restore_standing_upd`
 
 ## Constraints
 
