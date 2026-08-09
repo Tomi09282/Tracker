@@ -140,6 +140,11 @@ function useComposeInvalidate() {
     qc.invalidateQueries({ queryKey: ['compose-context'] });
     qc.invalidateQueries({ queryKey: ['compose-profile'] });
     qc.invalidateQueries({ queryKey: ['compose-posts'] });
+    // SINGULAR, and its absence was a real bug: the list is `compose-posts` and one post is
+    // `compose-post`, so invalidating only the plural left the editor showing stale data after
+    // every write to the post it was open on. Found by uploading a cover through the screen — the
+    // request answered 201 and nothing appeared, which reads to the user as "it did not work".
+    qc.invalidateQueries({ queryKey: ['compose-post'] });
     // The public reads change too — a publish is the point of this whole surface.
     qc.invalidateQueries({ queryKey: ['public-feed'] });
     qc.invalidateQueries({ queryKey: ['public-coach'] });
@@ -200,7 +205,7 @@ export function useComposePosts(state: PostState) {
 export function useComposePost(publicId: string | undefined) {
   return useQuery({
     queryKey: ['compose-post', publicId],
-    queryFn: () => apiWithRefresh<{ post: ComposePost }>(`/compose/posts/${publicId}`),
+    queryFn: () => apiWithRefresh<{ post: ComposePost; cover: PostCover | null }>(`/compose/posts/${publicId}`),
     enabled: !!publicId,
   });
 }
@@ -247,6 +252,55 @@ export function usePostLifecycle(publicId: string) {
         method: 'POST',
         body: {},
       }),
+    onSuccess: invalidate,
+  });
+}
+
+
+export interface PostCover {
+  id: number;
+  storageKey: string;
+  thumbKey: string;
+  mime: string;
+  width: number;
+  height: number;
+  bytes: number;
+  alt: string | null;
+  createdAt: number;
+}
+
+/**
+ * Upload the cover for one post.
+ *
+ * FormData goes through `apiWithRefresh` untouched — the helper detects it and neither stringifies
+ * it nor sets a Content-Type, because the browser writes the multipart boundary itself. Building a
+ * second uploader here with a bare `fetch` would be a second place for the CSRF header, the
+ * credentials mode and the 401-refresh to be got wrong.
+ *
+ * There is no REPLACE. The server refuses a second cover with 409 `cover_exists`, so changing one
+ * is delete-then-upload, and the screen does exactly that rather than pretending otherwise.
+ */
+export function useUploadCover(publicId: string) {
+  const invalidate = useComposeInvalidate();
+  return useMutation({
+    mutationFn: ({ file, alt, key }: { file: File; alt: string; key: string }) => {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('idempotency_key', key);
+      if (alt.trim().length > 0) form.append('alt', alt);
+      return apiWithRefresh<{ cover: PostCover; replayed: boolean }>(
+        `/compose/posts/${publicId}/cover`,
+        { method: 'POST', body: form },
+      );
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteCover(publicId: string) {
+  const invalidate = useComposeInvalidate();
+  return useMutation({
+    mutationFn: () => apiWithRefresh<{ removed: true }>(`/compose/posts/${publicId}/cover`, { method: 'DELETE' }),
     onSuccess: invalidate,
   });
 }

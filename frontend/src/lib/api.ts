@@ -61,14 +61,30 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
   const headers = new Headers(options.headers);
 
   if (!SAFE_METHODS.has(method)) headers.set('X-CSRF', '1');
-  if (options.body !== undefined) headers.set('Content-Type', 'application/json');
+
+  // FormData GOES THROUGH UNTOUCHED, and both halves of that matter.
+  //
+  // Stringifying it produces the literal "[object FormData]" — a request that looks perfectly
+  // healthy and uploads nothing. That exact bug has already been paid for once in this project's
+  // smoke harness, which is why the multipart path is handled here rather than in a second helper
+  // beside the upload screen.
+  //
+  // And the Content-Type must NOT be set: the browser writes it itself, with the multipart
+  // boundary. Setting it by hand produces a header with no boundary and a body no parser can read.
+  const isMultipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (options.body !== undefined && !isMultipart) headers.set('Content-Type', 'application/json');
 
   const res = await fetch(`/api/v1${path}`, {
     ...options,
     method,
     headers,
     credentials: 'include',
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body:
+      options.body === undefined
+        ? undefined
+        : isMultipart
+          ? (options.body as FormData)
+          : JSON.stringify(options.body),
   });
 
   if (res.status === 204) return undefined as T;

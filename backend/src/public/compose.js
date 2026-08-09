@@ -23,7 +23,7 @@ import { requireAuth, requireCoach } from '../auth/middleware.js';
 import { MarkdownError } from './markdown.js';
 import { buildBio, buildBody, BIO_BODY, POST_BODY, COMPOSE_JSON_LIMIT } from './body.js';
 import { displayText } from './text.js';
-import { removePublicImage } from '../lib/media.js';
+import { removePublicImage, resolveStoredPath } from '../lib/media.js';
 import { HANDLE_RE, CITY_KEY_RE, SPECIALTY_KEY_RE, KIND_KEY_RE, CURRENCY_RE, PUBLIC_ID_RE, ianaTz } from './shapes.js';
 import { AUTHOR_POST_ANY, AUTHOR_POST_COLUMNS, POST_STATE_FILTERS } from './visibility.js';
 import { encodeCursor, decodeCursor } from '../lib/cursor.js';
@@ -761,7 +761,20 @@ router.get(
       [parsed.data.publicId, req.user.id],
     );
     if (!post) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
-    res.json({ post: withPostDoc(post) });
+
+    // The cover, as its author sees it — including one on a post that is still a draft, which no
+    // public read will serve. The editor needs to show what is attached before deciding whether to
+    // replace it, and replacing means deleting first.
+    const [cover] = await db.all(
+      `SELECT m.id, m.storage_key AS storageKey, m.thumb_key AS thumbKey, m.mime,
+              m.width, m.height, m.bytes, m.alt, m.created_at AS createdAt
+         FROM post_media m
+         JOIN coach_posts p ON p.id = m.post_id
+        WHERE p.public_id = ? AND p.author_user_id = ? AND m.role_key = 'cover' AND m.deleted_at IS NULL`,
+      [parsed.data.publicId, req.user.id],
+    );
+
+    res.json({ post: withPostDoc(post), cover: cover ?? null });
   }),
 );
 
@@ -970,6 +983,48 @@ router.delete(
     if (result.outcome !== 'applied') return sendPostOutcome(res, result);
     await removePublicImage(result.storageKey, result.thumbKey);
     res.json({ removed: true, replayed: result.replayed });
+  }),
+);
+
+
+/**
+ * Serve the author their own cover.
+ *
+ * A DRAFT's cover cannot come from `/public/media/:key` — that route gates on `PUBLIC_POST`, which
+ * requires a published post, and rightly so. But the coach has to see what they attached before
+ * deciding whether to replace it, so the same file is served here behind OWNERSHIP instead of
+ * behind publication.
+ *
+ * Two routes, one file, two different questions: "may the world see this" and "is this yours".
+ */
+router.get(
+  '/compose/posts/:publicId/cover',
+  requireAuth,
+  requireCoach,
+  composeReadLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = publicIdParam.safeParse(req.params);
+    if (!parsed.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const [row] = await db.all(
+      `SELECT m.storage_key AS storageKey
+         FROM post_media m
+         JOIN coach_posts p ON p.id = m.post_id
+        WHERE p.public_id = ? AND p.author_user_id = ?
+          AND m.role_key = 'cover' AND m.deleted_at IS NULL`,
+      [parsed.data.publicId, req.user.id],
+    );
+    if (!row) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const full = resolveStoredPath(row.storageKey, 'public');
+    if (!full) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    // PRIVATE, unlike the public serve route, because this answer depends on who is asking. A
+    // shared cache holding it would hand one coach's draft to the next reader.
+    res.setHeader('Cache-Control', 'private, max-age=60');
+    res.sendFile(full, (err) => {
+      if (err && !res.headersSent) sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    });
   }),
 );
 

@@ -766,6 +766,15 @@
       "too_many_lines": "Zu viele Zeilen.",
       "too_many_nodes": "Der Text ist zu komplex.",
       "too_many_bytes": "Der Text ist zu groß."
-    }
+    },
+    "cover": "Titelbild",
+    "chooseCover": "Bild auswählen",
+    "uploading": "Wird hochgeladen…",
+    "removeCover": "Bild entfernen",
+    "coverReplaceNote": "Zum Ändern: erst dieses entfernen, dann ein neues hochladen.",
+    "coverAlt": "Bildbeschreibung",
+    "coverAltHint": "Was zeigt das Bild? Das hört jemand, der es nicht sehen kann.",
+    "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
+    "coverFailed": "Das Bild konnte nicht hochgeladen werden."
   }
 }

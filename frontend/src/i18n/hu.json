@@ -766,6 +766,15 @@
       "too_many_lines": "Túl sok sor van a szövegben.",
       "too_many_nodes": "A szöveg túl összetett.",
       "too_many_bytes": "A szöveg túl nagy."
-    }
+    },
+    "cover": "Borítókép",
+    "chooseCover": "Kép választása",
+    "uploading": "Feltöltés…",
+    "removeCover": "Kép eltávolítása",
+    "coverReplaceNote": "Csere: előbb távolítsd el, aztán tölts fel újat.",
+    "coverAlt": "Képleírás",
+    "coverAltHint": "Mit ábrázol a kép? Aki nem látja, ezt fogja hallani.",
+    "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
+    "coverFailed": "A kép feltöltése nem sikerült."
   }
 }

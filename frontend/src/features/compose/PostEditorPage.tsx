@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Eye, EyeOff, Globe, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Globe, ImagePlus, RotateCcw, Trash2 } from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
@@ -15,6 +15,8 @@ import {
   useSavePost,
   usePostLifecycle,
   usePreview,
+  useUploadCover,
+  useDeleteCover,
   conflictOf,
   type ComposePost,
 } from './useCompose';
@@ -36,6 +38,13 @@ export function PostEditorPage() {
   const save = useSavePost(isNew ? '' : (publicId as string));
   const lifecycle = usePostLifecycle(isNew ? '' : (publicId as string));
   const preview = usePreview();
+  const uploadCover = useUploadCover(isNew ? '' : (publicId as string));
+  const deleteCover = useDeleteCover(isNew ? '' : (publicId as string));
+  const [alt, setAlt] = useState('');
+  // One key per FILE CHOICE: a retry of the same upload is a retry, and choosing a different file
+  // is a different attempt. Reusing one key across both is how a second image gets refused as a
+  // replay of the first.
+  const coverKeyRef = useRef(newIdempotencyKey());
 
   const [kind, setKind] = useState('');
   const [title, setTitle] = useState('');
@@ -46,6 +55,7 @@ export function PostEditorPage() {
   const keyRef = useRef(newIdempotencyKey());
 
   const post: ComposePost | undefined = existing.data?.post;
+  const cover = existing.data?.cover ?? null;
 
   useEffect(() => {
     if (post) {
@@ -264,6 +274,71 @@ export function PostEditorPage() {
           ) : (
             <p className="text-caption text-text-3">{t('compose.previewEmpty')}</p>
           )}
+        </section>
+      ) : null}
+
+
+      {/* ── the cover ─────────────────────────────────────────────────────────────────────── */}
+      {post && !readOnly ? (
+        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
+          <h2 className="text-label text-text-2">{t('compose.cover')}</h2>
+
+          {cover ? (
+            <>
+              {/* Served by the AUTHOR route, not the public one. On a draft this is the only place
+                  the image can be seen at all — the public serve route refuses a cover whose post
+                  is not published, which is the property that route exists for. */}
+              <img
+                src={'/api/v1/compose/posts/' + post.id + '/cover'}
+                alt={cover.alt ?? ''}
+                className="max-h-48 w-full rounded-card object-cover"
+              />
+              <p className="text-caption text-text-3">
+                {t('compose.coverMeta', { w: cover.width, h: cover.height, kb: Math.round(cover.bytes / 1024) })}
+              </p>
+              {/* There is NO replace: the server refuses a second cover, so changing one is delete
+                  then upload. The screen says so rather than offering a button that answers 409. */}
+              <Pressable variant="secondary" busy={deleteCover.isPending} onClick={() => deleteCover.mutate()}>
+                <Trash2 className="size-4" aria-hidden />
+                {t('compose.removeCover')}
+              </Pressable>
+              <p className="text-caption text-text-3">{t('compose.coverReplaceNote')}</p>
+            </>
+          ) : (
+            <>
+              <Field
+                label={t('compose.coverAlt')}
+                value={alt}
+                maxLength={200}
+                onChange={(e) => setAlt(e.target.value)}
+                hint={t('compose.coverAltHint')}
+              />
+              <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center gap-2 rounded-button border border-line px-4 text-text-1">
+                <ImagePlus className="size-4" aria-hidden />
+                {uploadCover.isPending ? t('compose.uploading') : t('compose.chooseCover')}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="sr-only"
+                  disabled={uploadCover.isPending}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    coverKeyRef.current = newIdempotencyKey();
+                    uploadCover.mutate({ file, alt, key: coverKeyRef.current });
+                  }}
+                />
+              </label>
+            </>
+          )}
+
+          {uploadCover.error || deleteCover.error ? (
+            <p className="text-body-s text-danger" role="alert">
+              {t(`compose.reason.${conflictOf(uploadCover.error ?? deleteCover.error)?.reason ?? 'generic'}`, {
+                defaultValue: t('compose.coverFailed'),
+              })}
+            </p>
+          ) : null}
         </section>
       ) : null}
 

@@ -766,6 +766,15 @@
       "too_many_lines": "Too many lines.",
       "too_many_nodes": "The text is too complex.",
       "too_many_bytes": "The text is too large."
-    }
+    },
+    "cover": "Cover image",
+    "chooseCover": "Choose an image",
+    "uploading": "Uploading…",
+    "removeCover": "Remove image",
+    "coverReplaceNote": "To change it: remove this one first, then upload another.",
+    "coverAlt": "Image description",
+    "coverAltHint": "What does the image show? This is what someone who cannot see it will hear.",
+    "coverMeta": "{{w}}×{{h}} · {{kb}} kB",
+    "coverFailed": "The image could not be uploaded."
   }
 }
