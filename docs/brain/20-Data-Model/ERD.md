@@ -161,12 +161,12 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 16 |
+| [[audit_log]] | 9 | 29 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
 | [[coach_follows]] | 3 | 0 |
-| [[coach_posts]] | 24 | 3 |
+| [[coach_posts]] | 24 | 7 |
 | [[coach_profile_specialties]] | 2 | 0 |
 | [[coach_profiles]] | 18 | 1 |
 | [[coach_specialties]] | 4 | 14 |
@@ -176,7 +176,7 @@ erDiagram
 | [[coin_reasons]] | 6 | 4 |
 | [[coin_store_items]] | 10 | 2 |
 | [[coin_wallets]] | 4 | 14 |
-| [[content_reports]] | 15 | 0 |
+| [[content_reports]] | 15 | 1 |
 | [[conversations]] | 9 | 1 |
 | [[element_style_config]] | 4 | 27 |
 | [[equipment]] | 4 | 16 |
@@ -207,7 +207,7 @@ erDiagram
 | [[onboarding_limitations]] | 6 | 3 |
 | [[onboarding_profiles]] | 18 | 3 |
 | [[post_kinds]] | 6 | 3 |
-| [[post_media]] | 15 | 0 |
+| [[post_media]] | 15 | 3 |
 | [[post_media_mimes]] | 2 | 3 |
 | [[post_media_roles]] | 1 | 2 |
 | [[progress_access_log]] | 8 | 0 |
@@ -218,7 +218,7 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 116 |
+| [[refresh_tokens]] | 9 | 125 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |

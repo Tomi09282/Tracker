@@ -28,6 +28,7 @@ import coinRoutes from './src/coins/routes.js';
 import publicRoutes from './src/public/routes.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
 import composeUploadRoutes from './src/public/compose-media.js';
+import moderationRoutes from './src/public/moderation.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -216,6 +217,10 @@ app.use(csrfProtection);
 // product. Two files, one feature, opposite ends of the stack — which is the whole reason the
 // composer is not a few more handlers inside `public/routes.js`.
 app.use('/api/v1', composeRoutes);
+// Reporting and the queue that acts on it. Below csrfProtection like every other write, and split
+// by audience rather than by file size: reporting is requireAuth with no role gate, because the
+// person who finds something is rarely a coach.
+app.use('/api/v1', moderationRoutes);
 app.use(AUTH_PATH, authRoutes);
 app.use('/api/v1', themeRoutes);
 app.use('/api/v1', exerciseRoutes);

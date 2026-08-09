@@ -2580,3 +2580,300 @@ export function deletePostCoverTx({ userId, publicId, requestId, ip = null }) {
     return rethrow(err, current);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * MODERATION — the path that was missing.
+ *
+ * The composer opened a public writing surface. Before this, `content_reports` existed in migration
+ * 021 and NOTHING in src/ referenced it, and no route anywhere wrote `removed_at`: a coach could
+ * publish to the open internet and nobody could take it down or even report it.
+ *
+ * Every rule below is already enforced by a trigger — the resolver's admin role is re-read from the
+ * database at write time, a removal without a reason is refused, the resolution triple moves
+ * together, and the reported snapshot MUST be cleared when a case closes. These transactions exist
+ * so the refusal is a sentence rather than nine snake_case words, and so the whole act is atomic.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * File a report.
+ *
+ * `subject_author_user_id` is copied from the SERVER's own row inside the INSERT ... SELECT, never
+ * sent by the client — which is what makes "you cannot report yourself" a one-column test the
+ * database can enforce rather than a join the route has to remember.
+ *
+ * The body snapshot is taken HERE, at report time, so a moderator judges what the reporter actually
+ * saw rather than what the author has since edited it into.
+ */
+export function fileReportTx({
+  reporterId, publicId, handle, reasonKey, note, requestId,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // The subject must be something the reporter could actually SEE. Reporting a draft would
+    // confirm that a draft exists under a guessed id, which no public read discloses.
+    current = 'SELECT the subject';
+    const subject = publicId
+      ? stmt(
+          `SELECT p.id AS postId, NULL AS profileId, p.author_user_id AS authorId,
+                  substr(p.body_src, 1, 4000) AS snapshot,
+                  CASE WHEN length(p.body_src) > 4000 THEN 1 ELSE 0 END AS truncated
+             FROM coach_posts p
+             JOIN coach_profiles c ON c.user_id = p.author_user_id
+            WHERE p.public_id = ?
+              AND p.published_at IS NOT NULL AND p.deleted_at IS NULL AND p.removed_at IS NULL
+              AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+        ).get(publicId)
+      : stmt(
+          `SELECT NULL AS postId, c.user_id AS profileId, c.user_id AS authorId,
+                  substr(c.bio_src, 1, 4000) AS snapshot,
+                  CASE WHEN length(c.bio_src) > 4000 THEN 1 ELSE 0 END AS truncated
+             FROM coach_profiles c
+            WHERE c.handle = ? AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+        ).get(handle);
+    if (!subject) return { outcome: 'missing' };
+    if (subject.authorId === reporterId) return { outcome: 'self_report' };
+
+    current = 'SELECT the reason';
+    const reason = stmt(
+      'SELECT key FROM report_reasons WHERE key = ? AND reportable = 1 AND active = 1',
+    ).get(reasonKey);
+    // `legal_order` and `admin_discretion` are marked non-reportable: they are removal reasons an
+    // admin uses, not something a member of the public can claim.
+    if (!reason) return { outcome: 'reason_unavailable' };
+
+    // A DUPLICATE from the same reporter is answered as a replay rather than as a second row. The
+    // queue measures how many DIFFERENT people objected; letting one person file five times would
+    // make severity a function of persistence.
+    current = 'SELECT an existing open report by this reporter';
+    const prior = stmt(
+      `SELECT r.id FROM content_reports r
+        JOIN report_statuses s ON s.key = r.status_key AND s.is_terminal = 0
+       WHERE r.reporter_user_id = ?
+         AND ((? IS NOT NULL AND r.subject_post_id = ?) OR (? IS NOT NULL AND r.subject_profile_id = ?))`,
+    ).get(reporterId, subject.postId, subject.postId, subject.profileId, subject.profileId);
+    if (prior) return { outcome: 'applied', replayed: true, reportId: prior.id };
+
+    current = 'SELECT the reporter quota';
+    const quota = stmt(
+      `SELECT (SELECT COUNT(*) FROM content_reports x
+                WHERE x.reporter_user_id = ? AND x.created_at > unixepoch() - 86400) AS used,
+              (SELECT value FROM public_policy WHERE key = 'report_daily_max') AS max`,
+    ).get(reporterId);
+    if (quota.used >= quota.max) return { outcome: 'quota_reached', used: quota.used, max: quota.max };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'INSERT the report';
+    const created = stmt(
+      `INSERT INTO content_reports
+         (subject_post_id, subject_profile_id, subject_author_user_id, reporter_user_id,
+          reason_key, note, body_snapshot, snapshot_truncated, request_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      subject.postId, subject.profileId, subject.authorId, reporterId,
+      reasonKey, note, subject.snapshot, subject.truncated, requestId,
+    );
+    if (created.changes === 0) return { outcome: 'missing' };
+
+    return { outcome: 'applied', replayed: false, reportId: Number(created.lastInsertRowid) };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Resolve a report, and take the subject down in the SAME transaction when it is upheld.
+ *
+ * ═══ ONE ACT, ONE TRANSACTION ══════════════════════════════════════════════════════════════════
+ *
+ * "Uphold this and remove it" is a single decision. Split across two calls it has a window in which
+ * the report reads as handled and the content is still on the open internet — and the window is
+ * exactly the moment somebody is looking.
+ *
+ * Removing a PROFILE takes that coach's entire back catalogue off the marketplace on the next read,
+ * because `PUBLIC_POST` requires a live profile. There is no sweep to run and none to forget.
+ */
+export function resolveReportTx({
+  reportId, adminId, statusKey, note, removeSubject, removalReason, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the report';
+    const report = stmt(
+      `SELECT r.id, r.subject_post_id AS postId, r.subject_profile_id AS profileId,
+              r.status_key AS statusKey, s.is_terminal AS isTerminal
+         FROM content_reports r
+         JOIN report_statuses s ON s.key = r.status_key
+        WHERE r.id = ?`,
+    ).get(reportId);
+    if (!report) return { outcome: 'missing' };
+    if (report.isTerminal === 1) return { outcome: 'already_resolved', statusKey: report.statusKey };
+
+    current = 'SELECT the target status';
+    const status = stmt('SELECT key, is_terminal AS isTerminal FROM report_statuses WHERE key = ?').get(statusKey);
+    if (!status) return { outcome: 'status_unknown', key: statusKey };
+
+    // The DB re-reads the admin role at write time anyway; checking here turns `resolver_not_admin`
+    // into an answer somebody can read.
+    current = 'SELECT the resolver';
+    const admin = stmt(
+      "SELECT 1 AS ok FROM users WHERE id = ? AND role = 'admin' AND disabled_at IS NULL",
+    ).get(adminId);
+    if (!admin) return { outcome: 'not_an_admin' };
+
+    // A removal with no reason is refused by a trigger. Catch it here so the moderator is told what
+    // is missing rather than shown nine snake_case words.
+    if (removeSubject && (!removalReason || removalReason.trim().length === 0)) {
+      return { outcome: 'removal_needs_reason' };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    if (removeSubject) {
+      current = 'UPDATE the subject to removed';
+      // The triple moves together: a trigger refuses `removed_at` without `removed_by`, another
+      // refuses it without a reason, and a third re-reads the remover's role from the database.
+      if (report.postId !== null) {
+        stmt(
+          `UPDATE coach_posts
+              SET removed_at = unixepoch(), removed_by = ?, removal_reason = ?,
+                  row_version = row_version + 1, updated_at = unixepoch()
+            WHERE id = ? AND removed_at IS NULL`,
+        ).run(adminId, removalReason, report.postId);
+      } else {
+        stmt(
+          `UPDATE coach_profiles
+              SET removed_at = unixepoch(), removed_by = ?, removal_reason = ?,
+                  updated_at = unixepoch()
+            WHERE user_id = ? AND removed_at IS NULL`,
+        ).run(adminId, removalReason, report.profileId);
+      }
+    }
+
+    current = 'UPDATE the report';
+    // `body_snapshot` is CLEARED on a terminal status, and a trigger refuses the write otherwise.
+    // The copy of somebody's reported content exists to be judged, not to be kept.
+    stmt(
+      `UPDATE content_reports
+          SET status_key = ?,
+              resolved_at = CASE WHEN ? = 1 THEN unixepoch() ELSE NULL END,
+              resolved_by = CASE WHEN ? = 1 THEN ? ELSE NULL END,
+              resolution_note = ?,
+              body_snapshot = CASE WHEN ? = 1 THEN NULL ELSE body_snapshot END
+        WHERE id = ?`,
+    ).run(statusKey, status.isTerminal, status.isTerminal, adminId, note, status.isTerminal, reportId);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.moderation.resolve', ?, ?, ?, ?, ?)`,
+    ).run(
+      adminId,
+      report.postId !== null ? 'coach_post' : 'coach_profile',
+      report.postId !== null ? report.postId : report.profileId,
+      JSON.stringify({ reportId, statusKey, removed: !!removeSubject, removalReason: removalReason ?? null }),
+      requestId,
+      ip,
+    );
+
+    current = 'SELECT the report back';
+    const view = stmt(
+      `SELECT id, status_key AS statusKey, resolved_at AS resolvedAt, resolved_by AS resolvedBy,
+              body_snapshot AS snapshot
+         FROM content_reports WHERE id = ?`,
+    ).get(reportId);
+    return { outcome: 'applied', removed: !!removeSubject, ...view };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Take something down with no report behind it.
+ *
+ * A court order does not arrive as a user report, and neither does an admin noticing something at
+ * three in the morning. `report_reasons` carries two keys marked NOT reportable for exactly this —
+ * `legal_order` and `admin_discretion` — so the vocabulary already distinguishes "somebody
+ * complained" from "we decided", and the audit row records which.
+ */
+export function removeSubjectTx({
+  adminId, publicId, handle, removalReason, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the resolver';
+    const admin = stmt(
+      "SELECT 1 AS ok FROM users WHERE id = ? AND role = 'admin' AND disabled_at IS NULL",
+    ).get(adminId);
+    if (!admin) return { outcome: 'not_an_admin' };
+
+    if (!removalReason || removalReason.trim().length === 0) return { outcome: 'removal_needs_reason' };
+
+    current = 'SELECT the subject';
+    const subject = publicId
+      ? stmt('SELECT id, removed_at AS removedAt FROM coach_posts WHERE public_id = ?').get(publicId)
+      : stmt('SELECT user_id AS id, removed_at AS removedAt FROM coach_profiles WHERE handle = ?').get(handle);
+    if (!subject) return { outcome: 'missing' };
+    // Already down is not an error, and a second takedown must not overwrite who did the first one.
+    if (subject.removedAt !== null) return { outcome: 'applied', replayed: true, id: subject.id };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the subject to removed';
+    if (publicId) {
+      stmt(
+        `UPDATE coach_posts
+            SET removed_at = unixepoch(), removed_by = ?, removal_reason = ?,
+                row_version = row_version + 1, updated_at = unixepoch()
+          WHERE id = ? AND removed_at IS NULL`,
+      ).run(adminId, removalReason, subject.id);
+    } else {
+      stmt(
+        `UPDATE coach_profiles
+            SET removed_at = unixepoch(), removed_by = ?, removal_reason = ?, updated_at = unixepoch()
+          WHERE user_id = ? AND removed_at IS NULL`,
+      ).run(adminId, removalReason, subject.id);
+    }
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.moderation.remove', ?, ?, ?, ?, ?)`,
+    ).run(
+      adminId,
+      publicId ? 'coach_post' : 'coach_profile',
+      subject.id,
+      JSON.stringify({ publicId: publicId ?? null, handle: handle ?? null, removalReason }),
+      requestId,
+      ip,
+    );
+
+    return { outcome: 'applied', replayed: false, id: subject.id };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

@@ -1,8 +1,8 @@
 ---
 type: table
 table: post_media
-summary: 15 columns, 0 rows
-rows: 0
+summary: 15 columns, 3 rows
+rows: 3
 tags: [data-model, generated]
 ---
 

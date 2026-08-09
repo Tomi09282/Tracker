@@ -172,6 +172,9 @@ const routers = [
   ['/api/v1', '../src/progress/routes.js'],
   ['/api/v1', '../src/coins/routes.js'],
   ['/api/v1', '../src/public/routes.js'],
+  ['/api/v1', '../src/public/compose.js'],
+  ['/api/v1', '../src/public/compose-media.js'],
+  ['/api/v1', '../src/public/moderation.js'],
 ];
 
 // Cross-check against server.js so adding a router without adding it here is caught here,

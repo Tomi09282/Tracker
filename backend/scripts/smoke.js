@@ -5305,6 +5305,138 @@ if (seeded) {
     );
   }
 
+
+  // --- MODERATION: report, queue, takedown -----------------------------------------------------
+  //
+  // This is the half that was missing when the composer shipped. content_reports existed in
+  // migration 021 and NOTHING in src/ referenced it; no route anywhere wrote removed_at. A coach
+  // could publish to the open internet and there was no way to report it and no way to take it
+  // down. The assertions that matter are the ones about EFFECT, not about status codes.
+  {
+    const readerJar = new Jar();
+    const adminJar2 = new Jar();
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: EMAIL, password: PASSWORD }, jar: readerJar });
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.admin.email, password: seeded.admin.password }, jar: adminJar2 });
+
+    const modKinds = (await call('/api/v1/public/taxonomy', { csrf: false })).json.kinds;
+    const modKind = modKinds.find((k) => k.requiresEventAt === 0) ?? modKinds[0];
+    const target = await call('/api/v1/compose/posts', {
+      method: 'POST', jar: builderJar,
+      body: {
+        idempotency_key: 'smoke-mod-post', kind_key: modKind.key, title: 'Reportable post',
+        body_src: 'The text a reporter will have seen.', city_key: null, event_at: null,
+        event_tz: null, capacity: null, price_minor: null, price_currency: null,
+      },
+    });
+    const tpid = target.json?.post?.id;
+    await call(`/api/v1/compose/posts/${tpid}/publish`, { method: 'POST', jar: builderJar, body: {} });
+
+    {
+      const live = await call(`/api/v1/public/posts/${tpid}`, { csrf: false });
+      check('the post is on the open internet before any of this', live.res.status === 200, `status ${live.res.status}`);
+    }
+
+    // WHO MAY REPORT, AND ABOUT WHAT.
+    {
+      // TWO refusals, from two layers, and they are worth separating. With no X-CSRF header the
+      // CSRF middleware answers 403 before authentication is even consulted; WITH the header and no
+      // session, requireAuth answers 401. Asserting only one of them would leave the other untested
+      // and would break the moment the mount order changed.
+      const noCsrf = await call('/api/v1/reports', { method: 'POST', csrf: false, body: { post_id: tpid, handle: null, reason_key: 'spam', note: null } });
+      const noSession = await call('/api/v1/reports', { method: 'POST', body: { post_id: tpid, handle: null, reason_key: 'spam', note: null } });
+      const mine = await call('/api/v1/reports', { method: 'POST', jar: builderJar, body: { post_id: tpid, handle: null, reason_key: 'spam', note: null } });
+      // legal_order is marked NOT reportable — it is a removal reason an admin records, not
+      // something a member of the public can claim.
+      const adminOnly = await call('/api/v1/reports', { method: 'POST', jar: readerJar, body: { post_id: tpid, handle: null, reason_key: 'legal_order', note: null } });
+      const ghost = await call('/api/v1/reports', { method: 'POST', jar: readerJar, body: { post_id: 'notarealid12', handle: null, reason_key: 'spam', note: null } });
+      check(
+        'reporting is refused with no CSRF header (403) and with no session (401), refuses your own post and an admin-only reason, and 404s an unknown subject',
+        noCsrf.res.status === 403 && noSession.res.status === 401 && mine.json?.reason === 'self_report'
+          && adminOnly.json?.reason === 'reason_unavailable' && ghost.res.status === 404,
+        `${noCsrf.res.status} / ${noSession.res.status} / ${mine.json?.reason} / ${adminOnly.json?.reason} / ${ghost.res.status}`,
+      );
+    }
+
+    const filed = await call('/api/v1/reports', { method: 'POST', jar: readerJar, body: { post_id: tpid, handle: null, reason_key: 'dangerous_advice', note: 'Unsafe.' } });
+    const again = await call('/api/v1/reports', { method: 'POST', jar: readerJar, body: { post_id: tpid, handle: null, reason_key: 'spam', note: null } });
+    check(
+      'a report is filed, and the same reporter filing again REPLAYS — severity is people, not persistence',
+      filed.res.status === 201 && again.res.status === 200 && again.json?.reportId === filed.json?.reportId,
+      `${filed.res.status} / ${again.res.status}`,
+    );
+
+    // THE QUEUE.
+    {
+      const asReader = await call('/api/v1/admin/marketplace/reports', { jar: readerJar });
+      const queue = await call('/api/v1/admin/marketplace/reports', { jar: adminJar2 });
+      const row = queue.json?.reports?.find((r) => r.id === filed.json.reportId);
+      check(
+        'the queue is admin-only, carries the snapshot of what was seen, and names NO reporter',
+        asReader.res.status === 403 && queue.res.status === 200
+          && typeof row?.snapshot === 'string' && row.snapshot.includes('reporter will have seen')
+          && !JSON.stringify(row).includes('reporter_user_id'),
+        `${asReader.res.status} / ${queue.res.status}`,
+      );
+    }
+
+    // RESOLUTION, AND THE EFFECT.
+    {
+      const noReason = await call(`/api/v1/admin/marketplace/reports/${filed.json.reportId}/resolve`, {
+        method: 'POST', jar: adminJar2, body: { status: 'upheld', note: null, remove: true, removal_reason: null },
+      });
+      check('upholding with a removal and no written reason is refused', noReason.res.status === 400, `status ${noReason.res.status}`);
+
+      const done = await call(`/api/v1/admin/marketplace/reports/${filed.json.reportId}/resolve`, {
+        method: 'POST', jar: adminJar2,
+        body: { status: 'upheld', note: 'Unsafe advice.', remove: true, removal_reason: 'Injury-risk exercise description.' },
+      });
+      check(
+        'the report is upheld and the post removed in ONE act, with the snapshot destroyed',
+        done.res.status === 200 && done.json?.report?.removed === true && done.json?.report?.snapshot === null
+          && typeof done.json?.report?.resolvedAt === 'number',
+        `status ${done.res.status}`,
+      );
+
+      const gone = await call(`/api/v1/public/posts/${tpid}`, { csrf: false });
+      const feed = await call('/api/v1/public/posts', { csrf: false });
+      check(
+        'and it is gone from the open internet AND the feed, with no sweep having run',
+        gone.res.status === 404 && !feed.json?.posts?.some((p) => p.id === tpid),
+        `status ${gone.res.status}`,
+      );
+
+      const author = await call(`/api/v1/compose/posts/${tpid}`, { jar: builderJar });
+      check(
+        'the AUTHOR still sees it marked removed so an appeal is possible, without the moderator note',
+        author.res.status === 200 && author.json?.post?.removedAt !== null
+          && !JSON.stringify(author.json).includes('Injury-risk'),
+        `status ${author.res.status}`,
+      );
+
+      const twice = await call(`/api/v1/admin/marketplace/reports/${filed.json.reportId}/resolve`, {
+        method: 'POST', jar: adminJar2, body: { status: 'rejected', note: null, remove: false, removal_reason: null },
+      });
+      check('a resolved report cannot be resolved again', twice.res.status === 409 && twice.json?.reason === 'already_resolved', `${twice.res.status}`);
+    }
+
+    // A TAKEDOWN WITH NO REPORT BEHIND IT, and the property that makes profile removal worth having.
+    {
+      const bare = await call('/api/v1/admin/marketplace/remove', { method: 'POST', jar: adminJar2, body: { post_id: null, handle: 'smoke-builder', removal_reason: null } });
+      const done = await call('/api/v1/admin/marketplace/remove', { method: 'POST', jar: adminJar2, body: { post_id: null, handle: 'smoke-builder', removal_reason: 'Court order.' } });
+      const profile = await call('/api/v1/public/coaches/smoke-builder', { csrf: false });
+      const feed = await call('/api/v1/public/posts', { csrf: false });
+      check(
+        'an admin takedown needs a reason, and removing a PROFILE takes the whole catalogue with it',
+        bare.res.status === 400 && done.res.status === 200 && profile.res.status === 404
+          && !feed.json?.posts?.some((p) => p.coachHandle === 'smoke-builder'),
+        `${bare.res.status} / ${done.res.status} / ${profile.res.status}`,
+      );
+
+      const replay = await call('/api/v1/admin/marketplace/remove', { method: 'POST', jar: adminJar2, body: { post_id: null, handle: 'smoke-builder', removal_reason: 'Second time.' } });
+      check('and a second takedown replays rather than overwriting who did the first', replay.res.status === 200 && replay.json?.replayed === true, `status ${replay.res.status}`);
+    }
+  }
+
   // --- CSRF: this router is BELOW the middleware, and that is the difference from public/ -------
   {
     const cross = await call('/api/v1/compose/guidelines/accept', {

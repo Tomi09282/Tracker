@@ -1,11 +1,11 @@
 ---
 type: api-index
 title: API surface
-count: 141
+count: 163
 tags: [api, moc, generated]
 ---
 
-# API surface — 141 endpoints
+# API surface — 163 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -18,6 +18,9 @@ protection the code does not have.
 |---|---|---|
 | GET | `/api/v1/admin/coins/audit` | `requireAuth` |
 | GET | `/api/v1/admin/coins/ledger` | `requireAuth` |
+| POST | `/api/v1/admin/marketplace/remove` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/reports` | `requireAuth` |
+| POST | `/api/v1/admin/marketplace/reports/:id/resolve` | `requireAuth` |
 | GET | `/api/v1/admin/moderation` | `requireAuth` |
 | POST | `/api/v1/admin/moderation/:id` | `requireAuth` |
 | GET | `/api/v1/admin/stats` | `requireAuth` |
@@ -49,6 +52,24 @@ protection the code does not have.
 | GET | `/api/v1/coins/store` | `requireAuth` |
 | POST | `/api/v1/coins/store/:id/purchase` | `requireAuth` |
 | GET | `/api/v1/coins/wallet` | `requireAuth` |
+| GET | `/api/v1/compose/context` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/guidelines/accept` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/compose/posts` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/posts` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/compose/posts/:publicId` | `requireAuth`, `requireCoach` |
+| PUT | `/api/v1/compose/posts/:publicId` | `requireAuth`, `requireCoach` |
+| DELETE | `/api/v1/compose/posts/:publicId/cover` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/compose/posts/:publicId/cover` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/posts/:publicId/cover` | `requireAuth`, `requireCoach`, `multipartCsrf`, `multerMiddleware` |
+| POST | `/api/v1/compose/posts/:publicId/publish` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/posts/:publicId/restore` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/posts/:publicId/withdraw` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/preview` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
+| PUT | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/profile/publish` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/profile/unpublish` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/conversations` | `requireAuth` |
 | POST | `/api/v1/conversations` | `requireAuth` |
 | POST | `/api/v1/conversations/:id/attachments` | `requireAuth`, `multipartCsrf`, `multerMiddleware` |
@@ -143,6 +164,7 @@ protection the code does not have.
 | GET | `/api/v1/public/search` | — |
 | GET | `/api/v1/public/taxonomy` | — |
 | GET | `/api/v1/records` | `requireAuth` |
+| POST | `/api/v1/reports` | `requireAuth` |
 | POST | `/api/v1/sets/:id/check` | `requireAuth` |
 | POST | `/api/v1/sets/:id/void` | `requireAuth` |
 | GET | `/api/v1/sources` | — |

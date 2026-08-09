@@ -1,8 +1,8 @@
 ---
 type: table
 table: coach_posts
-summary: 24 columns, 3 rows
-rows: 3
+summary: 24 columns, 7 rows
+rows: 7
 tags: [data-model, generated]
 ---
 

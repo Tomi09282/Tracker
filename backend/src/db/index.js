@@ -69,6 +69,13 @@ export const restorePost = (args) => pool.run(args, { name: 'restorePostTx' });
 // followed by a guarded write followed by a conditional return COMMITS the delete and answers 404.
 export const attachPostCover = (args) => pool.run(args, { name: 'attachPostCoverTx' });
 export const deletePostCover = (args) => pool.run(args, { name: 'deletePostCoverTx' });
+
+// Moderation. resolveReport takes the subject down in the SAME transaction when a report is
+// upheld: split in two, there is a window where the report reads as handled and the content is
+// still public, and that window is exactly when somebody is looking.
+export const fileReport = (args) => pool.run(args, { name: 'fileReportTx' });
+export const resolveReport = (args) => pool.run(args, { name: 'resolveReportTx' });
+export const removeSubject = (args) => pool.run(args, { name: 'removeSubjectTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);
