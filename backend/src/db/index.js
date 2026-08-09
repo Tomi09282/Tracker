@@ -56,6 +56,14 @@ export const createCoachProfile = (args) => pool.run(args, { name: 'createCoachP
 export const updateCoachProfile = (args) => pool.run(args, { name: 'updateCoachProfileTx' });
 export const publishCoachProfile = (args) => pool.run(args, { name: 'publishCoachProfileTx' });
 export const unpublishCoachProfile = (args) => pool.run(args, { name: 'unpublishCoachProfileTx' });
+
+// Posts. publishPost and restorePost both re-check standing INSIDE their guarded UPDATE, so the
+// facade carries no policy of its own — it is a name and a thread hop.
+export const createPost = (args) => pool.run(args, { name: 'createPostTx' });
+export const updatePost = (args) => pool.run(args, { name: 'updatePostTx' });
+export const publishPost = (args) => pool.run(args, { name: 'publishPostTx' });
+export const withdrawPost = (args) => pool.run(args, { name: 'withdrawPostTx' });
+export const restorePost = (args) => pool.run(args, { name: 'restorePostTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);

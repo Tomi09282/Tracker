@@ -147,3 +147,47 @@ export const PROFILE_SORTS = {
   recommended: 'CASE WHEN c.verified_at IS NULL THEN 1 ELSE 0 END, c.listed_at DESC, c.user_id DESC',
   recent: 'c.listed_at DESC, c.user_id DESC',
 };
+
+/**
+ * The AUTHOR'S view of their own posts, which is not the public one.
+ *
+ * ═══ THIS MUST NOT COMPOSE PUBLIC_POST ═════════════════════════════════════════════════════════
+ *
+ * PUBLIC_POST requires published_at IS NOT NULL. Reusing it here would return zero drafts, and an
+ * empty draft list looks exactly like a coach who has not written anything — a bug that reports
+ * itself as an empty state rather than as an error.
+ *
+ * Ownership is the whole predicate. Not-yours and never-existed are one answer, so this filter is
+ * the only thing between a post and a stranger.
+ */
+export const AUTHOR_POST_ANY = '(p.author_user_id = ?)';
+
+/**
+ * Everything the author may see, including the two things no public read returns: body_src, the
+ * markdown they typed, and row_version, which their next edit has to send back.
+ *
+ * removal_reason is deliberately NOT here. A moderator's note is written for the moderation queue,
+ * and handing it back verbatim turns an internal record into a message nobody chose to send.
+ */
+export const AUTHOR_POST_COLUMNS = `
+  p.public_id AS id, p.kind_key AS kind, p.title, p.body_src AS bodySrc, p.body_doc AS doc,
+  p.body_excerpt AS excerpt, p.doc_version AS docVersion, p.city_key AS city,
+  p.event_at AS eventAt, p.event_tz AS eventTz, p.capacity,
+  p.price_minor AS priceMinor, p.price_currency AS priceCurrency,
+  p.published_at AS publishedAt, p.deleted_at AS deletedAt, p.removed_at AS removedAt,
+  p.row_version AS rowVersion, p.created_at AS createdAt, p.updated_at AS updatedAt`;
+
+/**
+ * The manage-screen state filter, as a CLOSED MAP to fixed fragments.
+ *
+ * A state name from a query string never reaches SQL.  is a state the author can select
+ * because it is a state their post can be IN — hiding it would mean a takedown looks like the post
+ * evaporated.
+ */
+export const POST_STATE_FILTERS = {
+  all: '1 = 1',
+  draft: '(p.published_at IS NULL AND p.deleted_at IS NULL AND p.removed_at IS NULL)',
+  live: '(p.published_at IS NOT NULL AND p.deleted_at IS NULL AND p.removed_at IS NULL)',
+  withdrawn: '(p.deleted_at IS NOT NULL AND p.removed_at IS NULL)',
+  removed: '(p.removed_at IS NOT NULL)',
+};

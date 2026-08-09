@@ -21,9 +21,11 @@ import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
 import { MarkdownError } from './markdown.js';
-import { buildBio, BIO_BODY, POST_BODY, COMPOSE_JSON_LIMIT } from './body.js';
+import { buildBio, buildBody, BIO_BODY, POST_BODY, COMPOSE_JSON_LIMIT } from './body.js';
 import { displayText } from './text.js';
-import { HANDLE_RE, CITY_KEY_RE, SPECIALTY_KEY_RE } from './shapes.js';
+import { HANDLE_RE, CITY_KEY_RE, SPECIALTY_KEY_RE, KIND_KEY_RE, CURRENCY_RE, PUBLIC_ID_RE, ianaTz } from './shapes.js';
+import { AUTHOR_POST_ANY, AUTHOR_POST_COLUMNS, POST_STATE_FILTERS } from './visibility.js';
+import { encodeCursor, decodeCursor } from '../lib/cursor.js';
 
 const router = Router();
 
@@ -265,6 +267,18 @@ router.post(
   }),
 );
 
+
+/**
+ * A cursor arrives opaque and is used as an integer keyset internally — the same shape the public
+ * feed uses, and deliberately the same helper. A manage list that handed back raw row ids would be
+ * the leak the public side has already been fixed for.
+ */
+const cursorId = (raw) => {
+  if (raw === undefined) return null;
+  const parts = decodeCursor(raw);
+  const n = Array.isArray(parts) ? parts[0] : null;
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
 
 /* ── the coach's own profile ─────────────────────────────────────────────────────────────────── */
 
@@ -533,6 +547,346 @@ router.post(
     // The count is the point of the answer: PUBLIC_POST requires a live profile, so unpublishing
     // takes the whole back catalogue dark on the next read, with no sweep anywhere to watch.
     res.json({ profile: result, replayed: result.replayed, postsWentDark: result.postsWentDark });
+  }),
+);
+
+
+/* ── posts ───────────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The post outcome map. Same shape as the profile one, extended with the states only a post has.
+ *
+ * `quota_reached` is a 409, NOT a 429. It is a business rule, and every 429 in this product comes
+ * from express-rate-limit — conflating them would make a daily allowance look like throttling and
+ * send the client into a retry loop against a wall that only opens tomorrow.
+ */
+const POST_OUTCOMES = {
+  missing: { status: 404 },
+  not_a_coach: { status: 403 },
+  account_disabled: { status: 403 },
+  session_stale: { status: 401 },
+  profile_required: { status: 409 },
+  profile_not_published: { status: 409 },
+  needs_guidelines: { status: 409 },
+  too_new: { status: 409 },
+  quota_reached: { status: 409 },
+  kind_unknown: { status: 409 },
+  kind_shape: { status: 409 },
+  city_unknown: { status: 409 },
+  currency_unknown: { status: 409 },
+  key_reused: { status: 409 },
+  stale: { status: 409 },
+  withdrawn: { status: 409 },
+};
+
+const sendPostOutcome = (res, result) => {
+  const map = POST_OUTCOMES[result.outcome];
+  if (!map) return sendError(res, 500, ERR.INTERNAL, 'internal error');
+  if (map.status === 404) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+  if (map.status === 403) return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+  if (map.status === 401) return sendError(res, 401, ERR.UNAUTHORIZED, 'unauthorized');
+  const { outcome, ...facts } = result;
+  return res.status(409).json({
+    error: 'conflict',
+    code: ERR.CONFLICT,
+    reason: outcome,
+    ...facts,
+    requestId: res.locals.requestId,
+  });
+};
+
+/** The doc is stored as a JSON string and leaves as a tree, parsed HERE so a bad row is a 500. */
+const withPostDoc = (post) => (post ? { ...post, doc: post.doc ? JSON.parse(post.doc) : null } : post);
+
+// The colon is EXCLUDED so the server-side `post:${userId}:` prefix cannot be forged from inside a
+// client-supplied key.
+const clientKey = z.string().regex(/^[A-Za-z0-9_-]{8,64}$/);
+
+const publicIdParam = z.object({ publicId: z.string().regex(PUBLIC_ID_RE) }).strict();
+
+const manageQuery = z
+  .object({
+    state: z.enum(['all', 'draft', 'live', 'withdrawn', 'removed']).optional(),
+    cursor: z.string().max(512).optional(),
+    limit: z.coerce.number().int().min(1).max(24).optional(),
+  })
+  .strict();
+
+/*
+ * The per-kind rules are NOT restated in these schemas. `post_kinds` is a TABLE, and the shape
+ * rules are read from the stored row inside the transaction — so adding a kind stays an INSERT
+ * rather than a deploy, and the form and the trigger cannot come to disagree.
+ *
+ * Absent and therefore rejected by `.strict()`: published_at, deleted_at, removed_at, public_id,
+ * author_user_id, write_uid, row_version, created_at. Every one of them is server-minted.
+ */
+const postFields = {
+  title: displayText(3, COMPOSE_LIMITS.titleMax),
+  body_src: z.string().min(1).max(POST_BODY.maxChars * 8),
+  city_key: z.string().regex(CITY_KEY_RE).nullable(),
+  // The bounds are the year 2000 and the year 2100: a timestamp outside them is a unit error, not
+  // an event.
+  event_at: z.number().int().min(946_684_800).max(4_102_444_800).nullable(),
+  event_tz: ianaTz(z.string().max(64)).nullable(),
+  capacity: z.number().int().min(1).max(100_000).nullable(),
+  price_minor: z.number().int().min(0).max(100_000_000).nullable(),
+  price_currency: z.string().regex(CURRENCY_RE).nullable(),
+};
+
+const postCreateBody = z
+  .object({ idempotency_key: clientKey, kind_key: z.string().regex(KIND_KEY_RE), ...postFields })
+  .strict()
+  // A price with no currency is a number nobody can read, and a currency with no price is nothing.
+  .refine((v) => (v.price_minor === null) === (v.price_currency === null), 'price needs a currency')
+  // An event time with no zone is ambiguous to anybody reading from another country, and this is a
+  // public surface.
+  .refine((v) => v.event_at === null || v.event_tz !== null, 'an event time needs a time zone');
+
+const postUpdateBody = z
+  .object({
+    expected_row_version: z.number().int().min(1).max(Number.MAX_SAFE_INTEGER),
+    ...postFields,
+  })
+  .strict()
+  // `kind_key` is ABSENT and frozen. That makes trg_post_kind_shape_upd's missing `active = 1`
+  // clause unreachable from this surface rather than something to argue about.
+  .refine((v) => (v.price_minor === null) === (v.price_currency === null), 'price needs a currency')
+  .refine((v) => v.event_at === null || v.event_tz !== null, 'an event time needs a time zone');
+
+/**
+ * The coach's own posts, in every state including the ones no public read returns.
+ *
+ * MUST NOT compose `PUBLIC_POST`. That predicate requires `published_at IS NOT NULL`, so reusing it
+ * would return zero drafts — and an empty draft list is indistinguishable from a coach who has not
+ * written anything. The bug would report itself as an empty state.
+ */
+router.get(
+  '/compose/posts',
+  requireAuth,
+  requireCoach,
+  composeReadLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = manageQuery.safeParse(req.query);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+    const { state = 'all', limit = 12 } = parsed.data;
+    const cursor = cursorId(parsed.data.cursor);
+
+    const rows = await db.all(
+      `SELECT ${AUTHOR_POST_COLUMNS}, p.id AS _cursor
+         FROM coach_posts p
+        WHERE ${AUTHOR_POST_ANY}
+          AND (? IS NULL OR p.id < ?)
+          AND ${POST_STATE_FILTERS[state]}
+        ORDER BY p.created_at DESC, p.id DESC
+        LIMIT ?`,
+      [req.user.id, cursor, cursor, limit],
+    );
+
+    res.json({
+      posts: rows.map((r) => {
+        const { _cursor, ...rest } = r;
+        return withPostDoc(rest);
+      }),
+      nextCursor: rows.length === limit ? encodeCursor([rows.at(-1)._cursor]) : null,
+    });
+  }),
+);
+
+router.post(
+  '/compose/posts',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = postCreateBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    let body;
+    try {
+      body = buildBody(parsed.data.body_src, POST_BODY);
+    } catch (err) {
+      return sendBodyError(res, err);
+    }
+
+    const result = await db.createPost({
+      userId: req.user.id,
+      kindKey: parsed.data.kind_key,
+      title: parsed.data.title,
+      body,
+      city: parsed.data.city_key,
+      eventAt: parsed.data.event_at,
+      eventTz: parsed.data.event_tz,
+      capacity: parsed.data.capacity,
+      priceMinor: parsed.data.price_minor,
+      priceCurrency: parsed.data.price_currency,
+      idempotencyKey: parsed.data.idempotency_key,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    res.status(result.replayed ? 200 : 201).json({ post: withPostDoc(result), replayed: result.replayed });
+  }),
+);
+
+/**
+ * One post, as its author sees it.
+ *
+ * A malformed id answers 404 rather than 400. A 400 on a bad shape plus a 404 on an unknown one is
+ * together an oracle for what a valid id looks like, and the shape is the only thing standing
+ * between an attacker and enumeration.
+ *
+ * A REMOVED post IS returned, with `removedAt` set, so an appeal is possible. `removal_reason` is
+ * not: a moderator's note is written for the queue, and handing it back verbatim turns an internal
+ * record into a message nobody chose to send.
+ */
+router.get(
+  '/compose/posts/:publicId',
+  requireAuth,
+  requireCoach,
+  composeReadLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = publicIdParam.safeParse(req.params);
+    if (!parsed.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const [post] = await db.all(
+      `SELECT ${AUTHOR_POST_COLUMNS} FROM coach_posts p
+        WHERE p.public_id = ? AND ${AUTHOR_POST_ANY}`,
+      [parsed.data.publicId, req.user.id],
+    );
+    if (!post) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    res.json({ post: withPostDoc(post) });
+  }),
+);
+
+router.put(
+  '/compose/posts/:publicId',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const id = publicIdParam.safeParse(req.params);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    const parsed = postUpdateBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    let body;
+    try {
+      body = buildBody(parsed.data.body_src, POST_BODY);
+    } catch (err) {
+      return sendBodyError(res, err);
+    }
+
+    const result = await db.updatePost({
+      userId: req.user.id,
+      publicId: id.data.publicId,
+      expectedRowVersion: parsed.data.expected_row_version,
+      title: parsed.data.title,
+      body,
+      city: parsed.data.city_key,
+      eventAt: parsed.data.event_at,
+      eventTz: parsed.data.event_tz,
+      capacity: parsed.data.capacity,
+      priceMinor: parsed.data.price_minor,
+      priceCurrency: parsed.data.price_currency,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    // A stale save carries the CURRENT row, which the client can show beside the draft the coach
+    // still has in front of them. A bare 409 would leave them with two texts and no way to tell
+    // which one the server holds.
+    if (result.outcome === 'stale') {
+      return res.status(409).json({
+        error: 'conflict',
+        code: ERR.CONFLICT,
+        reason: 'stale',
+        post: withPostDoc(result.post),
+        requestId: res.locals.requestId,
+      });
+    }
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    res.json({ post: withPostDoc(result) });
+  }),
+);
+
+router.post(
+  '/compose/posts/:publicId/publish',
+  requireAuth,
+  requireCoach,
+  publishIpLimiter,
+  publishAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const id = publicIdParam.safeParse(req.params);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (!emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.publishPost({
+      userId: req.user.id,
+      publicId: id.data.publicId,
+      tokenSv: req.user.sv ?? null,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    res.json({ post: withPostDoc(result), replayed: result.replayed });
+  }),
+);
+
+/**
+ * Withdraw and restore. There is NO unpublish for a post.
+ *
+ * `published_at` is write-once, so a restored post returns at its ORIGINAL feed position and spends
+ * no quota. That is the anti-bump property doing its job: withdrawing and restoring cannot be used
+ * to climb the feed, and the coach loses nothing by taking something down for a day.
+ */
+router.post(
+  '/compose/posts/:publicId/withdraw',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const id = publicIdParam.safeParse(req.params);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (!emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.withdrawPost({
+      userId: req.user.id,
+      publicId: id.data.publicId,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    res.json({ post: withPostDoc(result), replayed: result.replayed });
+  }),
+);
+
+router.post(
+  '/compose/posts/:publicId/restore',
+  requireAuth,
+  requireCoach,
+  publishIpLimiter,
+  publishAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const id = publicIdParam.safeParse(req.params);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (!emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.restorePost({
+      userId: req.user.id,
+      publicId: id.data.publicId,
+      tokenSv: req.user.sv ?? null,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    res.json({ post: withPostDoc(result), replayed: result.replayed });
   }),
 );
 

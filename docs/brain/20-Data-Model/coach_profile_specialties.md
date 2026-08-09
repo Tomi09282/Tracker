@@ -1,8 +1,8 @@
 ---
 type: table
 table: coach_profile_specialties
-summary: 2 columns, 1 rows
-rows: 1
+summary: 2 columns, 0 rows
+rows: 0
 tags: [data-model, generated]
 ---
 

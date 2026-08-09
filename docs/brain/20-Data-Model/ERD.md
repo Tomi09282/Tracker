@@ -161,13 +161,13 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 2 |
+| [[audit_log]] | 9 | 16 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
 | [[coach_follows]] | 3 | 0 |
-| [[coach_posts]] | 24 | 2 |
-| [[coach_profile_specialties]] | 2 | 1 |
+| [[coach_posts]] | 24 | 3 |
+| [[coach_profile_specialties]] | 2 | 0 |
 | [[coach_profiles]] | 18 | 1 |
 | [[coach_specialties]] | 4 | 14 |
 | [[coin_entitlements]] | 8 | 1 |
@@ -218,7 +218,7 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 110 |
+| [[refresh_tokens]] | 9 | 116 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |

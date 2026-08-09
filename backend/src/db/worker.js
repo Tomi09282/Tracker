@@ -6,6 +6,7 @@
 // across threads.
 import { readFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import Database from 'better-sqlite3-multiple-ciphers';
 import { deriveDbKeyHex } from '../lib/dbkey.js';
 
@@ -1883,6 +1884,523 @@ export function unpublishCoachProfileTx({ userId, requestId, ip = null }) {
     ).run(userId, userId, JSON.stringify({ postsWentDark: live }), requestId, ip);
 
     return view(false, live);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE COMPOSER — posts.
+ *
+ * Five transactions. The recurring shape: look the OBJECT up first and answer 404 before anything
+ * is said about the caller, then branch the standing gate into sentences a coach can act on, then
+ * one guarded write whose WHERE repeats every predicate so the database is the thing enforcing it.
+ *
+ * The pre-checks are NOT the security boundary — the WHERE clauses are. The pre-checks exist so a
+ * refusal arrives as `needs_guidelines` rather than as the trigger's nine snake_case words, which
+ * http.js withholds from clients on purpose.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/** Read a post the way its author sees it: markdown source and row_version included. */
+const AUTHOR_POST_SELECT = `
+  SELECT public_id AS id, kind_key AS kind, title, body_src AS bodySrc, body_doc AS doc,
+         body_excerpt AS excerpt, doc_version AS docVersion, city_key AS city,
+         event_at AS eventAt, event_tz AS eventTz, capacity,
+         price_minor AS priceMinor, price_currency AS priceCurrency,
+         published_at AS publishedAt, deleted_at AS deletedAt, removed_at AS removedAt,
+         row_version AS rowVersion, created_at AS createdAt, updated_at AS updatedAt
+    FROM coach_posts WHERE id = ?`;
+
+/**
+ * The standing every publish and every restore is measured against, as one row of flags.
+ *
+ * Repeated as EXISTS terms inside each guarded UPDATE as well. That is not redundancy: the flags
+ * produce the sentence, the WHERE produces the guarantee, and the two are read under the same write
+ * lock so they cannot disagree.
+ */
+const STANDING_SELECT = `
+  SELECT u.disabled_at IS NULL       AS enabled,
+         u.role IN ('coach','admin') AS roleOk,
+         u.session_version           AS sessionVersion,
+         u.created_at <= unixepoch()
+           - (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS oldEnough,
+         u.created_at
+           + (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS eligibleAt,
+         EXISTS (SELECT 1 FROM guidelines_acceptances a
+                   JOIN guidelines_versions v ON v.version = a.version AND v.active = 1
+                  WHERE a.user_id = u.id) AS guidelinesOk,
+         (SELECT v.version  FROM guidelines_versions v WHERE v.active = 1) AS activeVersion,
+         (SELECT v.i18n_key FROM guidelines_versions v WHERE v.active = 1) AS activeI18nKey,
+         EXISTS (SELECT 1 FROM coach_profiles c
+                  WHERE c.user_id = u.id AND c.removed_at IS NULL) AS hasProfile,
+         EXISTS (SELECT 1 FROM coach_profiles c
+                  WHERE c.user_id = u.id AND c.removed_at IS NULL
+                    AND c.published_at IS NOT NULL) AS profileLive
+    FROM users u WHERE u.id = ?`;
+
+/** Branch standing into ONE named reason, in a fixed order, or null when it is clear. */
+function standingRefusal(s, tokenSv) {
+  if (!s) return { outcome: 'missing' };
+  if (!s.roleOk) return { outcome: 'not_a_coach' };
+  if (!s.enabled) return { outcome: 'account_disabled' };
+  if (tokenSv !== null && tokenSv !== undefined && s.sessionVersion !== tokenSv) {
+    return { outcome: 'session_stale' };
+  }
+  if (!s.hasProfile) return { outcome: 'profile_required' };
+  if (!s.profileLive) return { outcome: 'profile_not_published' };
+  if (!s.guidelinesOk) {
+    return { outcome: 'needs_guidelines', activeVersion: s.activeVersion, activeI18nKey: s.activeI18nKey };
+  }
+  if (!s.oldEnough) return { outcome: 'too_new', eligibleAt: s.eligibleAt };
+  return null;
+}
+
+/**
+ * Create a draft.
+ *
+ * `published_at` is ABSENT from the column list, so neither the publish-standing twin nor the
+ * quota twin can fire: a draft is free, and writing one costs nothing a coach has to save up for.
+ */
+export function createPostTx({
+  userId, kindKey, title, body, city, eventAt, eventTz, capacity,
+  priceMinor, priceCurrency, idempotencyKey, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (postId, replayed) => {
+      current = 'SELECT the post back';
+      return { outcome: 'applied', replayed, ...stmt(AUTHOR_POST_SELECT).get(postId) };
+    };
+
+    // The colon is excluded from the client key's own regex, so this prefix cannot be forged by
+    // sending a key that already contains one.
+    const writeUid = `post:${userId}:${idempotencyKey}`;
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // (1) REPLAY, owner-scoped in the WHERE itself rather than by trusting the prefix convention.
+    current = 'SELECT the prior attempt';
+    const prior = stmt(
+      'SELECT id, title, body_src AS bodySrc FROM coach_posts WHERE author_user_id = ? AND write_uid = ?',
+    ).get(userId, writeUid);
+    // A key reused for DIFFERENT content is a client bug, and answering with the old post would
+    // hide it. Answering with a second post would be the effect the key exists to prevent.
+    if (prior && (prior.title !== title || prior.bodySrc !== body.src)) {
+      return { outcome: 'key_reused' };
+    }
+    if (prior) return view(prior.id, true);
+
+    current = 'SELECT the profile';
+    const profile = stmt(
+      'SELECT user_id FROM coach_profiles WHERE user_id = ? AND removed_at IS NULL',
+    ).get(userId);
+    if (!profile) return { outcome: 'profile_required' };
+
+    // (2) THE KIND'S OWN RULES, read from the stored row. Never a z.enum and never a second copy:
+    //     adding a kind stays an INSERT, and the shape rules live where the kind lives.
+    current = 'SELECT the kind';
+    const kind = stmt(
+      `SELECT requires_event_at AS requiresEventAt, allows_capacity AS allowsCapacity,
+              allows_price AS allowsPrice
+         FROM post_kinds WHERE key = ? AND active = 1`,
+    ).get(kindKey);
+    if (!kind) return { outcome: 'kind_unknown', key: kindKey };
+    if (kind.requiresEventAt === 1 && eventAt === null) {
+      return { outcome: 'kind_shape', field: 'event_at', reason_detail: 'required' };
+    }
+    if (kind.allowsCapacity === 0 && capacity !== null) {
+      return { outcome: 'kind_shape', field: 'capacity', reason_detail: 'not_allowed' };
+    }
+    if (kind.allowsPrice === 0 && priceMinor !== null) {
+      return { outcome: 'kind_shape', field: 'price_minor', reason_detail: 'not_allowed' };
+    }
+
+    // (3) Reference membership. Neither table has an active-flag trigger, so an unknown or retired
+    //     key would otherwise arrive as an opaque foreign-key failure.
+    current = 'SELECT the reference rows';
+    const refs = stmt(
+      `SELECT (? IS NULL OR EXISTS (SELECT 1 FROM public_cities WHERE key = ? AND active = 1)) AS cityOk,
+              (? IS NULL OR EXISTS (SELECT 1 FROM public_currencies WHERE code = ? AND active = 1)) AS currencyOk`,
+    ).get(city, city, priceCurrency, priceCurrency);
+    if (!refs.cityOk) return { outcome: 'city_unknown', key: city };
+    if (!refs.currencyOk) return { outcome: 'currency_unknown', key: priceCurrency };
+
+    // (4) Mint the public id under the write lock. A UNIQUE collision after the INSERT would be an
+    //     opaque 400; drawing here means the only failure is exhaustion, which is an error.
+    current = 'SELECT the public_id probe';
+    let publicId = null;
+    for (let i = 0; i < 5 && publicId === null; i += 1) {
+      const candidate = randomBytes(9).toString('base64url');
+      if (!stmt('SELECT 1 FROM coach_posts WHERE public_id = ?').get(candidate)) publicId = candidate;
+    }
+    if (publicId === null) throw new Error('createPostTx: public_id space exhausted after five draws');
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'INSERT the post';
+    // An INSERT has no WHERE, so the SELECT is the guard: author_user_id is projected out of the
+    // row the SERVER matched, never bound from the request, and the role is re-read here.
+    const created = stmt(
+      `INSERT INTO coach_posts (public_id, author_user_id, kind_key, title,
+                                body_src, body_doc, body_excerpt, doc_version,
+                                city_key, event_at, event_tz, capacity,
+                                price_minor, price_currency, write_uid)
+       SELECT ?, c.user_id, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+         FROM coach_profiles c
+         JOIN users u ON u.id = c.user_id AND u.disabled_at IS NULL AND u.role IN ('coach','admin')
+        WHERE c.user_id = ? AND c.removed_at IS NULL`,
+    ).run(
+      publicId, kindKey, title, body.src, body.doc, body.excerpt, body.version,
+      city, eventAt, eventTz, capacity, priceMinor, priceCurrency, writeUid, userId,
+    );
+    if (created.changes === 0) return { outcome: 'profile_required' };
+
+    current = 'SELECT the new row id';
+    const postId = stmt('SELECT id FROM coach_posts WHERE public_id = ?').get(publicId).id;
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.post.create', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, postId, JSON.stringify({ publicId, kindKey }), requestId, ip);
+
+    return view(postId, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Edit a post. ONE statement, no branch, all four body columns always in the SET list.
+ *
+ * That is only safe because 023 replaced 021's exclusive-or trigger. Under the original rule a
+ * source-only edit — reflowing a paragraph, changing a bullet marker — aborted, and after a grammar
+ * bump every edit would have aborted.
+ *
+ * `kind_key` is ABSENT and frozen, which makes `trg_post_kind_shape_upd`'s missing `active = 1`
+ * clause unreachable from this surface rather than something to argue about.
+ */
+export function updatePostTx({
+  userId, publicId, expectedRowVersion, title, body, city, eventAt, eventTz,
+  capacity, priceMinor, priceCurrency, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (postId, replayed) => {
+      current = 'SELECT the post back';
+      return { outcome: 'applied', replayed, ...stmt(AUTHOR_POST_SELECT).get(postId) };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // THE OBJECT FIRST, and one answer for not-yours, never-existed and removed. A moderated post
+    // answering differently from a stranger's post is an oracle for what was taken down.
+    current = 'SELECT the post';
+    const post = stmt(
+      `SELECT id, kind_key AS kindKey, row_version AS rowVersion
+         FROM coach_posts
+        WHERE public_id = ? AND author_user_id = ? AND removed_at IS NULL`,
+    ).get(publicId, userId);
+    if (!post) return { outcome: 'missing' };
+
+    if (post.rowVersion !== expectedRowVersion) {
+      current = 'SELECT the current row for the conflict answer';
+      return { outcome: 'stale', post: stmt(AUTHOR_POST_SELECT).get(post.id) };
+    }
+
+    // The kind is frozen, so its rules are checked against the STORED kind and the new values.
+    current = 'SELECT the kind';
+    const kind = stmt(
+      `SELECT requires_event_at AS requiresEventAt, allows_capacity AS allowsCapacity,
+              allows_price AS allowsPrice
+         FROM post_kinds WHERE key = ?`,
+    ).get(post.kindKey);
+    if (kind) {
+      if (kind.requiresEventAt === 1 && eventAt === null) {
+        return { outcome: 'kind_shape', field: 'event_at', reason_detail: 'required' };
+      }
+      if (kind.allowsCapacity === 0 && capacity !== null) {
+        return { outcome: 'kind_shape', field: 'capacity', reason_detail: 'not_allowed' };
+      }
+      if (kind.allowsPrice === 0 && priceMinor !== null) {
+        return { outcome: 'kind_shape', field: 'price_minor', reason_detail: 'not_allowed' };
+      }
+    }
+
+    current = 'SELECT the reference rows';
+    const refs = stmt(
+      `SELECT (? IS NULL OR EXISTS (SELECT 1 FROM public_cities WHERE key = ? AND active = 1)) AS cityOk,
+              (? IS NULL OR EXISTS (SELECT 1 FROM public_currencies WHERE code = ? AND active = 1)) AS currencyOk`,
+    ).get(city, city, priceCurrency, priceCurrency);
+    if (!refs.cityOk) return { outcome: 'city_unknown', key: city };
+    if (!refs.currencyOk) return { outcome: 'currency_unknown', key: priceCurrency };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the post';
+    // `removed_at IS NULL` is load-bearing here even though it was checked above:
+    // trg_post_frozen_while_removed_upd has NO value comparison and fires on the mere presence of
+    // these column names in the SET list, so without it a moderated post aborts as a generic 400
+    // instead of the 404 this surface answers everywhere else.
+    const updated = stmt(
+      `UPDATE coach_posts
+          SET title = ?, body_src = ?, body_doc = ?, body_excerpt = ?, doc_version = ?,
+              city_key = ?, event_at = ?, event_tz = ?, capacity = ?,
+              price_minor = ?, price_currency = ?,
+              row_version = row_version + 1, updated_at = unixepoch()
+        WHERE id = ? AND author_user_id = ?
+          AND deleted_at IS NULL AND removed_at IS NULL
+          AND row_version = ?`,
+    ).run(
+      title, body.src, body.doc, body.excerpt, body.version,
+      city, eventAt, eventTz, capacity, priceMinor, priceCurrency,
+      post.id, userId, expectedRowVersion,
+    );
+    // The row was proved to exist and to carry this row_version under the same lock, so zero rows
+    // means it was withdrawn between the two statements — a state, not a contradiction.
+    if (updated.changes === 0) return { outcome: 'stale', post: stmt(AUTHOR_POST_SELECT).get(post.id) };
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.post.update', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, post.id, JSON.stringify({ publicId }), requestId, ip);
+
+    return view(post.id, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Publish a post.
+ *
+ * The object is looked up FIRST, before a word is said about the caller's standing. A post that is
+ * not yours must answer 404 without revealing whether your guidelines are current — otherwise the
+ * error text distinguishes "somebody else's post" from "no such post".
+ */
+export function publishPostTx({ userId, publicId, tokenSv = null, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (postId, replayed) => {
+      current = 'SELECT the post back';
+      return { outcome: 'applied', replayed, ...stmt(AUTHOR_POST_SELECT).get(postId) };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the post';
+    const post = stmt(
+      `SELECT id, published_at AS publishedAt, deleted_at AS deletedAt
+         FROM coach_posts
+        WHERE public_id = ? AND author_user_id = ? AND removed_at IS NULL`,
+    ).get(publicId, userId);
+    if (!post) return { outcome: 'missing' };
+    if (post.publishedAt !== null) return view(post.id, true);
+    // A withdrawn post is restored, not published: published_at is write-once and a restore returns
+    // it to its original feed position for free.
+    if (post.deletedAt !== null) return { outcome: 'withdrawn' };
+
+    current = 'SELECT publish standing';
+    const refusal = standingRefusal(stmt(STANDING_SELECT).get(userId), tokenSv);
+    if (refusal) return refusal;
+
+    // The quota is counted exactly as trg_post_publish_quota_upd counts it — INCLUDING posts since
+    // withdrawn or removed. A screen that counted only live ones would promise a slot the database
+    // then refuses.
+    current = 'SELECT the publish quota';
+    const q = stmt(
+      `SELECT (SELECT COUNT(*) FROM coach_posts q
+                WHERE q.author_user_id = ? AND q.published_at IS NOT NULL
+                  AND q.published_at > unixepoch() - 86400) AS used,
+              (SELECT MIN(q.published_at) FROM coach_posts q
+                WHERE q.author_user_id = ? AND q.published_at IS NOT NULL
+                  AND q.published_at > unixepoch() - 86400) AS oldest,
+              (SELECT value FROM public_policy WHERE key = 'post_publish_daily_max') AS max`,
+    ).get(userId, userId);
+    if (q.used >= q.max) {
+      // 409 rather than 429 at the route: this is a business rule, and every 429 in this product
+      // comes from the rate limiter. Conflating them would make a quota look like throttling.
+      return { outcome: 'quota_reached', used: q.used, max: q.max, nextSlotAt: q.oldest + 86400 };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the post to published';
+    // Every predicate above is repeated here as a term. The pre-checks produce the sentence; THIS
+    // produces the guarantee, and the two run under one write lock so they cannot disagree.
+    const published = stmt(
+      `UPDATE coach_posts
+          SET published_at = unixepoch(), row_version = row_version + 1, updated_at = unixepoch()
+        WHERE id = ? AND author_user_id = ?
+          AND published_at IS NULL AND deleted_at IS NULL AND removed_at IS NULL
+          AND EXISTS (SELECT 1 FROM users u
+                       WHERE u.id = coach_posts.author_user_id
+                         AND u.disabled_at IS NULL AND u.role IN ('coach','admin')
+                         AND u.created_at <= unixepoch()
+                             - (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish'))
+          AND EXISTS (SELECT 1 FROM coach_profiles p
+                       WHERE p.user_id = coach_posts.author_user_id
+                         AND p.published_at IS NOT NULL AND p.removed_at IS NULL)
+          AND EXISTS (SELECT 1 FROM guidelines_acceptances a
+                        JOIN guidelines_versions v ON v.version = a.version AND v.active = 1
+                       WHERE a.user_id = coach_posts.author_user_id)
+          AND (SELECT COUNT(*) FROM coach_posts q
+                WHERE q.author_user_id = coach_posts.author_user_id
+                  AND q.published_at IS NOT NULL
+                  AND q.published_at > unixepoch() - 86400)
+              < (SELECT value FROM public_policy WHERE key = 'post_publish_daily_max')`,
+    ).run(post.id, userId);
+    if (published.changes === 0) throw new Error('publishPostTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.post.publish', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, post.id, JSON.stringify({ publicId }), requestId, ip);
+
+    return view(post.id, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Withdraw a post — the author taking their own content back.
+ *
+ * NO `removed_at` term, deliberately. `deleted_at` is absent from
+ * `trg_post_frozen_while_removed_upd`'s column list precisely so an author can always take down
+ * their own post, even one a moderator has already removed. The two states stay distinct in the
+ * row, which is what lets an appeal tell "I changed my mind" from "we took this down".
+ */
+export function withdrawPostTx({ userId, publicId, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (postId, replayed) => {
+      current = 'SELECT the post back';
+      return { outcome: 'applied', replayed, ...stmt(AUTHOR_POST_SELECT).get(postId) };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the post';
+    const post = stmt(
+      'SELECT id, deleted_at AS deletedAt FROM coach_posts WHERE public_id = ? AND author_user_id = ?',
+    ).get(publicId, userId);
+    if (!post) return { outcome: 'missing' };
+    // A replay must answer with the ORIGINAL deleted_at, not a fresh one. Moving that timestamp on
+    // a double-click would rewrite when the author says they took it down.
+    if (post.deletedAt !== null) return view(post.id, true);
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the post to withdrawn';
+    const withdrawn = stmt(
+      `UPDATE coach_posts
+          SET deleted_at = unixepoch(), row_version = row_version + 1, updated_at = unixepoch()
+        WHERE id = ? AND author_user_id = ? AND deleted_at IS NULL`,
+    ).run(post.id, userId);
+    if (withdrawn.changes === 0) throw new Error('withdrawPostTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.post.withdraw', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, post.id, JSON.stringify({ publicId }), requestId, ip);
+
+    return view(post.id, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Restore a withdrawn post.
+ *
+ * A restore IS a publication event even though `published_at` never moves, which is exactly why no
+ * 021 trigger watched it and why 022 added one. The standing gate is repeated here as EXISTS terms
+ * so the database enforces what the branch above only explains.
+ *
+ * Account age and quota are deliberately NOT re-checked: the post was published once, its
+ * `published_at` does not move, and charging a quota slot to un-hide something that was already
+ * public would make withdrawal a punishment. The post returns to its ORIGINAL feed position, which
+ * is the anti-bump property working.
+ */
+export function restorePostTx({ userId, publicId, tokenSv = null, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (postId, replayed) => {
+      current = 'SELECT the post back';
+      return { outcome: 'applied', replayed, ...stmt(AUTHOR_POST_SELECT).get(postId) };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the post';
+    const post = stmt(
+      `SELECT id, deleted_at AS deletedAt, published_at AS publishedAt
+         FROM coach_posts
+        WHERE public_id = ? AND author_user_id = ? AND removed_at IS NULL`,
+    ).get(publicId, userId);
+    if (!post) return { outcome: 'missing' };
+    if (post.deletedAt === null) return view(post.id, true);
+
+    // A never-published draft coming out of the bin is not a publication event, so it carries no
+    // standing gate. Gating it would make a coach's own drafts depend on their public standing.
+    if (post.publishedAt !== null) {
+      current = 'SELECT restore standing';
+      const refusal = standingRefusal(stmt(STANDING_SELECT).get(userId), tokenSv);
+      if (refusal) return refusal;
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the post to restored';
+    const restored = stmt(
+      `UPDATE coach_posts
+          SET deleted_at = NULL, row_version = row_version + 1, updated_at = unixepoch()
+        WHERE id = ? AND author_user_id = ?
+          AND deleted_at IS NOT NULL AND removed_at IS NULL`,
+    ).run(post.id, userId);
+    if (restored.changes === 0) throw new Error('restorePostTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.post.restore', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, post.id, JSON.stringify({ publicId }), requestId, ip);
+
+    return view(post.id, false);
   });
 
   try {

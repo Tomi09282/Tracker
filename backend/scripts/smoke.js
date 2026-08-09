@@ -4976,6 +4976,173 @@ if (seeded) {
       `${down.res.status} / ${again.res.status}`);
   }
 
+
+  // --- POSTS: draft, edit, publish, withdraw, restore ------------------------------------------
+  //
+  // The loop this whole phase exists to close: a coach writes something and a stranger reads it.
+  {
+    const kinds = (await call('/api/v1/public/taxonomy', { csrf: false })).json.kinds;
+    const plain = kinds.find((k) => k.requiresEventAt === 0 && k.allowsPrice === 1) ?? kinds[0];
+    const eventKind = kinds.find((k) => k.requiresEventAt === 1);
+    const draft = {
+      idempotency_key: 'smoke-post-key-1',
+      kind_key: plain.key,
+      title: 'Smoke programme',
+      body_src: 'Heti **négy** edzés.\n\n- Hétfő\n- Szerda',
+      city_key: null, event_at: null, event_tz: null, capacity: null,
+      price_minor: 45000, price_currency: 'HUF',
+    };
+
+    const created = await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: draft });
+    check('a coach creates a draft', created.res.status === 201, `status ${created.res.status}`);
+    const pid = created.json?.post?.id;
+    check(
+      'addressed by a 12-character opaque public id, never the rowid',
+      typeof pid === 'string' && pid.length === 12 && !/^\d+$/.test(pid), String(pid),
+    );
+    check(
+      'a draft is not published and spends no quota — published_at is absent from the INSERT',
+      created.json?.post?.publishedAt === null,
+    );
+    check(
+      'and the four body columns arrive together',
+      !!created.json?.post?.bodySrc && !!created.json?.post?.doc
+        && !!created.json?.post?.excerpt && created.json?.post?.docVersion === 1,
+    );
+
+    {
+      const replay = await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: draft });
+      const reused = await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: { ...draft, title: 'Something else' } });
+      check(
+        'REPLAY: the same key returns the same post; the same key with different content is 409',
+        replay.res.status === 200 && replay.json?.post?.id === pid
+          && reused.res.status === 409 && reused.json?.reason === 'key_reused',
+        `${replay.res.status} / ${reused.res.status} ${reused.json?.reason}`,
+      );
+    }
+    {
+      // The per-kind rules are read from post_kinds, not restated in a z.enum, so adding a kind
+      // stays an INSERT and the form cannot come to disagree with the trigger.
+      const unknown = await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: { ...draft, idempotency_key: 'smoke-k2', kind_key: 'no_such_kind' } });
+      const misshaped = eventKind
+        ? await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: { ...draft, idempotency_key: 'smoke-k3', kind_key: eventKind.key } })
+        : { res: { status: 409 }, json: { reason: 'kind_shape', field: 'event_at' } };
+      check(
+        'an unknown kind and a mis-shaped one are both 409, each naming what is wrong',
+        unknown.res.status === 409 && unknown.json?.reason === 'kind_unknown'
+          && misshaped.res.status === 409 && misshaped.json?.reason === 'kind_shape' && misshaped.json?.field === 'event_at',
+        `${unknown.json?.reason} / ${misshaped.json?.reason}:${misshaped.json?.field}`,
+      );
+    }
+    {
+      const forged = [];
+      for (const field of ['published_at', 'public_id', 'author_user_id', 'row_version', 'write_uid', 'deleted_at', 'removed_at']) {
+        const r = await call('/api/v1/compose/posts', { method: 'POST', jar: builderJar, body: { ...draft, idempotency_key: `smoke-f-${field}`, [field]: 1 } });
+        if (r.res.status !== 400) forged.push(`${field}=${r.res.status}`);
+      }
+      check('FORGE: every server-minted column is rejected by name', forged.length === 0, forged.join(' '));
+    }
+
+    // THE TRAP: reusing PUBLIC_POST here would return zero drafts, and an empty draft list looks
+    // exactly like a coach who has not written anything.
+    {
+      const drafts = await call('/api/v1/compose/posts?state=draft', { jar: builderJar });
+      check(
+        'the manage list shows DRAFTS — it must not compose the public predicate',
+        drafts.res.status === 200 && drafts.json?.posts?.some((p) => p.id === pid),
+        `${drafts.res.status}, ${drafts.json?.posts?.length} posts`,
+      );
+    }
+    {
+      const theirs = await call(`/api/v1/compose/posts/${pid}`, { jar: composerJar });
+      const malformed = await call('/api/v1/compose/posts/not-a-valid-id', { jar: builderJar });
+      check(
+        "another coach's post and a malformed id are both 404 — a 400 on the shape would be an oracle",
+        theirs.res.status === 404 && malformed.res.status === 404,
+        `${theirs.res.status} / ${malformed.res.status}`,
+      );
+    }
+
+    // OPTIMISTIC CONCURRENCY. unixepoch() is one-second granular, so a timestamp guard would do
+    // nothing in exactly the case it exists for — two edits inside the same second.
+    const rv = created.json.post.rowVersion;
+    const body = { title: 'Smoke programme, edited', body_src: draft.body_src, city_key: null, event_at: null, event_tz: null, capacity: null, price_minor: 45000, price_currency: 'HUF' };
+    {
+      const ok = await call(`/api/v1/compose/posts/${pid}`, { method: 'PUT', jar: builderJar, body: { expected_row_version: rv, ...body } });
+      const stale = await call(`/api/v1/compose/posts/${pid}`, { method: 'PUT', jar: builderJar, body: { expected_row_version: rv, ...body } });
+      check(
+        'an edit lands, row_version advances, and the stale retry is a 409 CARRYING the current row',
+        ok.res.status === 200 && ok.json?.post?.rowVersion === rv + 1
+          && stale.res.status === 409 && stale.json?.reason === 'stale' && stale.json?.post?.rowVersion === rv + 1,
+        `${rv} -> ${ok.json?.post?.rowVersion}, stale ${stale.res.status}`,
+      );
+    }
+    {
+      // The edit 021's exclusive-or trigger aborted: a source change that leaves the parsed
+      // document byte-identical. Reflowing a paragraph is not an exotic case.
+      const cur = (await call(`/api/v1/compose/posts/${pid}`, { jar: builderJar })).json.post;
+      const reflow = await call(`/api/v1/compose/posts/${pid}`, {
+        method: 'PUT', jar: builderJar,
+        body: { expected_row_version: cur.rowVersion, ...body, body_src: `${draft.body_src}\n` },
+      });
+      check('a source-only edit is accepted — the ordinary edit 021 refused', reflow.res.status === 200, `status ${reflow.res.status}`);
+    }
+
+    // PUBLISH, WITHDRAW, RESTORE — and the anti-bump property.
+    {
+      // The profile block above ends with the profile DOWN, which is the right state to test from:
+      // a post cannot be public while its author page is not. PUBLIC_POST requires both.
+      const blocked = await call(`/api/v1/compose/posts/${pid}/publish`, { method: 'POST', jar: builderJar, body: {} });
+      check(
+        'a post cannot publish while its author profile is unpublished',
+        blocked.res.status === 409 && blocked.json?.reason === 'profile_not_published',
+        `${blocked.res.status} ${blocked.json?.reason}`,
+      );
+      await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+
+      const pub = await call(`/api/v1/compose/posts/${pid}/publish`, { method: 'POST', jar: builderJar, body: {} });
+      check('the post publishes', pub.res.status === 200, `status ${pub.res.status} ${pub.json?.reason ?? ''}`);
+      const publishedAt = pub.json?.post?.publishedAt;
+
+      const again = await call(`/api/v1/compose/posts/${pid}/publish`, { method: 'POST', jar: builderJar, body: {} });
+      check('a second publish replays with the ORIGINAL timestamp', again.json?.replayed === true && again.json?.post?.publishedAt === publishedAt, `${publishedAt} then ${again.json?.post?.publishedAt}`);
+
+      const gone = await call(`/api/v1/compose/posts/${pid}/withdraw`, { method: 'POST', jar: builderJar, body: {} });
+      const goneAgain = await call(`/api/v1/compose/posts/${pid}/withdraw`, { method: 'POST', jar: builderJar, body: {} });
+      check(
+        'withdraw takes it down, and a replay keeps the ORIGINAL deleted_at rather than moving it',
+        gone.res.status === 200 && gone.json?.post?.deletedAt !== null
+          && goneAgain.json?.replayed === true && goneAgain.json?.post?.deletedAt === gone.json?.post?.deletedAt,
+        `${gone.json?.post?.deletedAt} then ${goneAgain.json?.post?.deletedAt}`,
+      );
+
+      const back = await call(`/api/v1/compose/posts/${pid}/restore`, { method: 'POST', jar: builderJar, body: {} });
+      check(
+        'restore returns it at its ORIGINAL feed position — published_at is write-once, so there is no bump to buy',
+        back.res.status === 200 && back.json?.post?.deletedAt === null
+          && typeof publishedAt === 'number' && back.json?.post?.publishedAt === publishedAt,
+        `${publishedAt} then ${back.json?.post?.publishedAt}`,
+      );
+    }
+
+    // THE LOOP CLOSED: written through the API, read by nobody in particular.
+    {
+      const anon = await call(`/api/v1/public/posts/${pid}`, { csrf: false });
+      check(
+        'the post a coach wrote is readable with NO session at all',
+        anon.res.status === 200 && anon.json?.post?.id === pid,
+        `status ${anon.res.status}`,
+      );
+      check(
+        'and that public read does NOT carry the markdown source — the author sees it, the world does not',
+        // The post must EXIST for its absence to mean anything: the previous version passed on a
+        // 404, where every key is absent.
+        anon.json?.post?.id === pid && !('bodySrc' in anon.json.post),
+        Object.keys(anon.json?.post ?? {}).join(','),
+      );
+    }
+  }
+
   // --- CSRF: this router is BELOW the middleware, and that is the difference from public/ -------
   {
     const cross = await call('/api/v1/compose/guidelines/accept', {
