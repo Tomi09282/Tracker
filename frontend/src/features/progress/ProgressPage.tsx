@@ -4,6 +4,7 @@ import { LineChart, Camera, Trash2, Eye, ShieldCheck } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { TrendChart } from '../../ui/feedback/TrendChart';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
   useMeasurements,
   useMetrics,
@@ -160,7 +161,7 @@ function BodyTab() {
       {measurements.isLoading ? (
         <div className="flex flex-col gap-3">
           {[0, 1].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-card bg-surface-2" />
+            <Skeleton key={i} className="h-32 rounded-card" />
           ))}
         </div>
       ) : byMetric.size === 0 ? (
@@ -273,7 +274,7 @@ function PhotosTab() {
       {photos.isLoading ? (
         <div className="grid grid-cols-3 gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="aspect-square animate-pulse rounded-card bg-surface-2" />
+            <Skeleton key={i} className="aspect-square rounded-card" />
           ))}
         </div>
       ) : (photos.data?.photos ?? []).length === 0 ? (

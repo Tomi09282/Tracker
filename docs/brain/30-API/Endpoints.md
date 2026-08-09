@@ -1,15 +1,15 @@
 ---
 type: api-index
 title: API surface
-count: 140
+count: 141
 tags: [api, moc, generated]
 ---
 
-# API surface — 140 endpoints
+# API surface — 141 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.
@@ -137,6 +137,7 @@ protection the code does not have.
 | POST | `/api/v1/progress-shares/:id` | `requireAuth` |
 | GET | `/api/v1/public/coaches` | — |
 | GET | `/api/v1/public/coaches/:handle` | — |
+| GET | `/api/v1/public/media/:key` | — |
 | GET | `/api/v1/public/posts` | — |
 | GET | `/api/v1/public/posts/:publicId` | — |
 | GET | `/api/v1/public/search` | — |

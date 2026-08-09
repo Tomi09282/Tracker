@@ -16,7 +16,7 @@ export function Skeleton({ className }: { className?: string }) {
       className={cn(
         'rounded-field bg-[var(--skeleton-base)]',
         'bg-[linear-gradient(90deg,var(--skeleton-base)_25%,var(--skeleton-sheen)_50%,var(--skeleton-base)_75%)]',
-        'bg-[length:200%_100%] animate-[skeleton-sweep_1.2s_linear_infinite]',
+        'bg-[length:200%_100%] animate-[skeleton-sweep_var(--duration-ambient)_linear_infinite]',
         className,
       )}
     />

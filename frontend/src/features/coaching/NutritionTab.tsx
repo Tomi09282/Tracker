@@ -5,6 +5,7 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { apiWithRefresh } from '../../lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
   useNutritionPlans,
   useNutritionPlan,
@@ -46,7 +47,7 @@ export function NutritionTab({ linkId }: { linkId: number }) {
     return (
       <div className="flex flex-col gap-2">
         {[0, 1].map((i) => (
-          <div key={i} className="h-16 animate-pulse rounded-card bg-surface-2" />
+          <Skeleton key={i} className="h-16 rounded-card" />
         ))}
       </div>
     );
@@ -160,7 +161,7 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
   });
 
   if (tree.isLoading || !tree.data) {
-    return <div className="mt-2 h-24 animate-pulse rounded-card bg-surface-2" />;
+    return <Skeleton className="mt-2 h-24 rounded-card" />;
   }
 
   const { plan, days, meals, items } = tree.data;

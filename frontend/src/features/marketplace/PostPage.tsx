@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Calendar, Users, BadgeCheck, FileQuestion } from 'lu
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { DocRenderer } from './DocRenderer';
 import { usePost, formatPrice } from './usePublic';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * One post, addressed by its opaque public id.
@@ -28,8 +29,8 @@ export function PostPage() {
   if (isLoading) {
     return (
       <div className="col-mobile screen-x flex flex-col gap-4 py-4">
-        <div className="h-8 w-2/3 animate-pulse rounded-card bg-surface-2" />
-        <div className="h-40 animate-pulse rounded-card bg-surface-2" />
+        <Skeleton className="h-8 w-2/3 rounded-card" />
+        <Skeleton className="h-40 rounded-card" />
       </div>
     );
   }

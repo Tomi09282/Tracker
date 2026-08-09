@@ -153,6 +153,14 @@
  * its final state. This is the safety net; components also branch on the preference so they can
  * skip transform-based motion entirely.
  */
+/*
+ * Tailwind ships animate-pulse at 2s, which no token declares. The utility is the right one for a
+ * breathing emphasis, so it is kept and re-pointed at the token instead of being banned — a rule
+ * enforced by deleting the convenient thing gets worked around, and the next screen would simply
+ * write the 2s inline where no audit greps for it.
+ */
+.animate-pulse { animation-duration: var(--duration-ambient); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

@@ -16,6 +16,7 @@ import {
   toCoins,
 } from './useCoins';
 import type { StoreItem } from './useCoins';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * The coin screen: balance, store, achievements, statement.
@@ -43,7 +44,7 @@ export function CoinsPage() {
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-title-2">{t('coins.title')}</h1>
         {wallet.isLoading ? (
-          <span className="h-6 w-16 animate-pulse rounded-chip bg-surface-2" />
+          <Skeleton className="h-6 w-16 rounded-chip" />
         ) : (
           <CoinBalance balanceMinor={wallet.data?.balanceMinor ?? 0} className="text-title-3" />
         )}
@@ -100,7 +101,7 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
     return (
       <div className="flex flex-col gap-2">
         {[0, 1].map((i) => (
-          <div key={i} className="h-20 animate-pulse rounded-card bg-surface-2" />
+          <Skeleton key={i} className="h-20 rounded-card" />
         ))}
       </div>
     );
@@ -181,7 +182,7 @@ function AchievementsTab() {
     return (
       <div className="flex flex-col gap-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-14 animate-pulse rounded-card bg-surface-2" />
+          <Skeleton key={i} className="h-14 rounded-card" />
         ))}
       </div>
     );
@@ -255,7 +256,7 @@ function StatementTab() {
     return (
       <div className="flex flex-col gap-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-12 animate-pulse rounded-card bg-surface-2" />
+          <Skeleton key={i} className="h-12 rounded-card" />
         ))}
       </div>
     );

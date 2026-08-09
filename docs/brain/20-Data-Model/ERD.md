@@ -9,7 +9,7 @@ tags: [data-model, erd, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
 
 81 tables, plus 4 FTS5 shadow tables (`coach_posts_fts`, `exercise_translations_fts`, `food_translations_fts`, `foods_fts`).
 
@@ -166,9 +166,9 @@ erDiagram
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
 | [[coach_follows]] | 3 | 0 |
-| [[coach_posts]] | 22 | 0 |
-| [[coach_profile_specialties]] | 2 | 0 |
-| [[coach_profiles]] | 16 | 0 |
+| [[coach_posts]] | 22 | 2 |
+| [[coach_profile_specialties]] | 2 | 1 |
+| [[coach_profiles]] | 16 | 1 |
 | [[coach_specialties]] | 4 | 14 |
 | [[coin_entitlements]] | 8 | 1 |
 | [[coin_ledger]] | 11 | 2 |
@@ -187,7 +187,7 @@ erDiagram
 | [[exercises]] | 16 | 1652 |
 | [[food_translations]] | 8 | 285 |
 | [[foods]] | 17 | 95 |
-| [[guidelines_acceptances]] | 4 | 0 |
+| [[guidelines_acceptances]] | 4 | 1 |
 | [[guidelines_versions]] | 4 | 1 |
 | [[invite_codes]] | 11 | 6 |
 | [[invite_redemptions]] | 6 | 3 |

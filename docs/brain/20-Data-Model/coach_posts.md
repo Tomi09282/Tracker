@@ -1,8 +1,8 @@
 ---
 type: table
 table: coach_posts
-summary: 22 columns, 0 rows
-rows: 0
+summary: 22 columns, 2 rows
+rows: 2
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-07.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
 
 | Column | Type | Notes |
 |---|---|---|

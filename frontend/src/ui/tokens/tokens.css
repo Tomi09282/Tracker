@@ -93,6 +93,13 @@
   --duration-fast: 150ms;     /* hover */
   --duration-base: 250ms;     /* most transitions */
   --duration-slow: 400ms;     /* sheets, large surfaces */
+
+  /* The LOOP duration, which the four above are not. Those are state-change durations: something
+     was one way, now it is another, and the number is how long the eye is given to follow it. A
+     skeleton shimmer never arrives anywhere — it repeats until data lands — and running it at
+     250ms is a strobe. Naming it here is what stops each screen from inventing its own: nine of
+     them had already reached for Tailwind's animate-pulse at 2s, which no token declares. */
+  --duration-ambient: 1200ms; /* skeleton shimmer, breathing emphasis — loops, not transitions */
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-linear: linear;      /* progress only */
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { ChevronRight } from 'lucide-react';
 import { MacroBars } from './MacroBars';
 import { useNutritionDay } from './useNutrition';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * Today's nutrition, on Home (T4.1.7).
@@ -28,7 +29,7 @@ export function NutritionCard({ date }: { date: string }) {
   const day = useNutritionDay(date);
 
   if (day.isLoading) {
-    return <div className="mt-4 h-28 animate-pulse rounded-card bg-surface-2" />;
+    return <Skeleton className="mt-4 h-28 rounded-card" />;
   }
 
   // Narrowed by the guard rather than by a non-null assertion: `data` really can be undefined

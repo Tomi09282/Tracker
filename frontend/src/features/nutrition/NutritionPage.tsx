@@ -6,6 +6,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { MacroBars } from './MacroBars';
 import { useFoodSearch, useNutritionDay, useLogFood, useDeleteLogItem } from './useNutrition';
 import type { FoodRow, LogItem } from './useNutrition';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * The client's food day.
@@ -79,7 +80,7 @@ export function NutritionPage() {
           {day.data?.targets?.day_name ?? t('nutrition.totals')}
         </h2>
         {day.isLoading ? (
-          <div className="h-24 animate-pulse rounded-card bg-surface-3" />
+          <Skeleton className="h-24 rounded-card" />
         ) : (
           <>
             <MacroBars totals={day.data?.totals ?? EMPTY} targets={day.data?.targets ?? null} />
@@ -171,7 +172,7 @@ export function NutritionPage() {
         {day.isLoading ? (
           <div className="flex flex-col gap-2">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-12 animate-pulse rounded-card bg-surface-2" />
+              <Skeleton key={i} className="h-12 rounded-card" />
             ))}
           </div>
         ) : groups.length === 0 ? (

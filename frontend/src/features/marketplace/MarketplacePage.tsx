@@ -6,6 +6,7 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useFeed, useSearch, useTaxonomy, formatPrice } from './usePublic';
 import type { PublicPost } from './usePublic';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * The public marketplace: a feed, filters, and a search.
@@ -106,7 +107,7 @@ export function MarketplacePage() {
       {loading ? (
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-card bg-surface-2" />
+            <Skeleton key={i} className="h-28 rounded-card" />
           ))}
         </div>
       ) : posts.length === 0 ? (

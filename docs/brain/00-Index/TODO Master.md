@@ -123,6 +123,7 @@ tasks above. Every one was **measured in the running app**, not guessed:
 | F-06 | Bottom-nav icons 20px instead of 24px | T0.14 |
 | F-07 | Desktop dock 64px above the bottom instead of 16px | T0.14 |
 | F-08 | Motion durations/easing diverged from the Bible | T0.9 |
+| F-24 | `animate-pulse` ran at an undeclared 2s in nine files since Phase 4, and the canonical `Skeleton` spelled its own 1.2s inline — invisible to five audits because a skeleton is only on screen while data is in flight | T6.6.2 |
 | F-09 | Cards used border AND shadow together | T0.11 |
 | F-10 | Card padding 24px instead of 16–20px | T0.10 |
 | F-11 | No 10-step accent ramp, no derived hover/pressed states | T0.7 |

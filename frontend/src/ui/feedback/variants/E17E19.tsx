@@ -125,7 +125,7 @@ export function SkeletonBlock({ className, index = 0 }: { className?: string; in
         // A — a light sweep travels across, which reads as "arriving".
         variant === 'A' &&
           motionSafe &&
-          'bg-[linear-gradient(90deg,var(--skeleton-base)_25%,var(--skeleton-sheen)_50%,var(--skeleton-base)_75%)] bg-[length:200%_100%] animate-[skeleton-sweep_1.2s_linear_infinite]',
+          'bg-[linear-gradient(90deg,var(--skeleton-base)_25%,var(--skeleton-sheen)_50%,var(--skeleton-base)_75%)] bg-[length:200%_100%] animate-[skeleton-sweep_var(--duration-ambient)_linear_infinite]',
         // B — a slow breath instead. Quieter on a screen full of placeholders, where a dozen
         // sweeps at once turns into noise.
         variant === 'B' && motionSafe && 'animate-[skeleton-pulse_1.6s_ease-in-out_infinite]',

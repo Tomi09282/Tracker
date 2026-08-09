@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, BadgeCheck, UserX } from 'lucide-react';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { DocRenderer } from './DocRenderer';
 import { useCoach } from './usePublic';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * A public coach profile, addressed by HANDLE.
@@ -32,8 +33,8 @@ export function CoachProfilePage() {
   if (isLoading) {
     return (
       <div className="col-mobile screen-x flex flex-col gap-4 py-4">
-        <div className="h-8 w-1/2 animate-pulse rounded-card bg-surface-2" />
-        <div className="h-24 animate-pulse rounded-card bg-surface-2" />
+        <Skeleton className="h-8 w-1/2 rounded-card" />
+        <Skeleton className="h-24 rounded-card" />
       </div>
     );
   }
