@@ -1,7 +1,7 @@
 ---
 type: table
 table: coach_profiles
-summary: 17 columns, 1 rows
+summary: 18 columns, 1 rows
 rows: 1
 tags: [data-model, generated]
 ---
@@ -31,6 +31,7 @@ tags: [data-model, generated]
 | `created_at` | INTEGER | NOT NULL, default unixepoch() |
 | `updated_at` | INTEGER | NOT NULL, default unixepoch() |
 | `listed_at` | INTEGER |  |
+| `handle_renamed_at` | INTEGER |  |
 
 ## Foreign keys
 
@@ -55,6 +56,8 @@ tags: [data-model, generated]
 - `trg_profile_bio_doc_needs_a_source_upd`
 - `trg_profile_handle_available_ins`
 - `trg_profile_handle_available_upd`
+- `trg_profile_handle_rename_cooldown_upd`
+- `trg_profile_handle_rename_stamp_upd`
 - `trg_profile_handle_retire_del`
 - `trg_profile_handle_retire_upd`
 - `trg_profile_publish_standing_ins`

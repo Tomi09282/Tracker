@@ -1,11 +1,11 @@
 ---
 type: data-model
 title: Data model
-schema_version: 22
+schema_version: 23
 tags: [data-model, erd, generated]
 ---
 
-# Data model — schema version 22
+# Data model — schema version 23
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -168,7 +168,7 @@ erDiagram
 | [[coach_follows]] | 3 | 0 |
 | [[coach_posts]] | 24 | 2 |
 | [[coach_profile_specialties]] | 2 | 1 |
-| [[coach_profiles]] | 17 | 1 |
+| [[coach_profiles]] | 18 | 1 |
 | [[coach_specialties]] | 4 | 14 |
 | [[coin_entitlements]] | 8 | 1 |
 | [[coin_ledger]] | 11 | 2 |
@@ -215,15 +215,15 @@ erDiagram
 | [[progress_shares]] | 8 | 0 |
 | [[public_cities]] | 5 | 10 |
 | [[public_currencies]] | 3 | 4 |
-| [[public_policy]] | 3 | 7 |
+| [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 107 |
+| [[refresh_tokens]] | 9 | 110 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |
 | [[retired_handles]] | 3 | 0 |
-| [[schema_migrations]] | 2 | 21 |
+| [[schema_migrations]] | 2 | 22 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[theme_packs]] | 6 | 7 |

@@ -1,8 +1,8 @@
 ---
 type: table
 table: public_policy
-summary: 3 columns, 7 rows
-rows: 7
+summary: 3 columns, 8 rows
+rows: 8
 tags: [data-model, generated]
 ---
 
