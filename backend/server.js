@@ -26,7 +26,7 @@ import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
 import publicRoutes from './src/public/routes.js';
-import composeRoutes from './src/public/compose.js';
+import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -139,6 +139,15 @@ if (corsOrigins.length > 0) {
 
 app.use(requestContext(logger));
 // Global body cap. Individual routes tighten this further; auth and upload routes especially.
+// The composer needs a bigger body than the rest of the product, and ONLY the composer does.
+// A legal 20 000-character post of accented or CJK text exceeds 64 KB once UTF-8 and JSON
+// escaping are paid for, and that request would be a 413 raised by the PARSER — before zod, before
+// the route, with an error the composer cannot explain because nothing it sent was out of bounds.
+//
+// Mounted above the global parser: express.json skips a body that is already parsed, so the 64 KB
+// cap stays in force everywhere else. body.js asserts at module load that this number can actually
+// admit the body bound it promises, rather than describing the relationship in a comment.
+app.use('/api/v1/compose', express.json({ limit: COMPOSE_JSON_LIMIT }));
 app.use(express.json({ limit: '64kb' }));
 app.use(cookieParser());
 

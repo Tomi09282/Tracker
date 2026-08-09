@@ -20,7 +20,10 @@ import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
-import { LIMITS } from './markdown.js';
+import { MarkdownError } from './markdown.js';
+import { buildBio, BIO_BODY, POST_BODY, COMPOSE_JSON_LIMIT } from './body.js';
+import { displayText } from './text.js';
+import { HANDLE_RE, CITY_KEY_RE, SPECIALTY_KEY_RE } from './shapes.js';
 
 const router = Router();
 
@@ -38,13 +41,18 @@ const router = Router();
  * editor's counter, because a counter that disagrees with the validator is a form that says "12
  * characters left" and then refuses to save.
  */
+export { COMPOSE_JSON_LIMIT };
+
 export const COMPOSE_LIMITS = {
   titleMax: 140,
   headlineMax: 120,
   displayNameMax: 120,
   displayNameMin: 2,
-  bodyMax: LIMITS.chars,
-  bioMax: LIMITS.chars,
+  bodyMax: POST_BODY.maxChars,
+  // NOT the same number as bodyMax. coach_profiles.bio_src is CHECKd at 16 384 while a post body is
+  // bounded at 20 000, so a bio the editor said was fine would have died on a raw constraint. The
+  // counter and the validator now read the same constant.
+  bioMax: BIO_BODY.maxChars,
   specialtyMax: 6,
 };
 
@@ -65,6 +73,11 @@ const limiter = (limit, keyGenerator) =>
 const composeReadLimiter = limiter(600);
 const composeWriteIpLimiter = limiter(120);
 const composeWriteAccountLimiter = limiter(60, (req) => `compose:${req.user?.id ?? req.ip}`);
+// Publishing is limited far ABOVE the database's own daily quota on purpose. The quota is the
+// bound that survives a restart and a second cluster worker; a limiter set to the same ceiling
+// would let a handful of retries of one publish exhaust the budget for every other one.
+const publishIpLimiter = limiter(20);
+const publishAccountLimiter = limiter(60, (req) => `pub:${req.user?.id ?? req.ip}`);
 
 /* ── GET /compose/context ───────────────────────────────────────────────────────────────────── */
 
@@ -249,6 +262,277 @@ router.post(
     );
 
     res.json({ version: saved.version, acceptedAt: saved.acceptedAt });
+  }),
+);
+
+
+/* ── the coach's own profile ─────────────────────────────────────────────────────────────────── */
+
+/**
+ * Translate a worker outcome into an HTTP answer.
+ *
+ * ONE mapping for all five profile routes. Written out at each of them, the routes would
+ * eventually disagree about whether a missing profile is a 404 or a 409, and the reason a coach
+ * cannot publish would be phrased two ways on two screens.
+ *
+ * The shape of a refusal a caller can ACT ON is a 409 with a snake_case `reason`, which the client
+ * maps to a translated sentence. No trigger message ever reaches a person: every RAISE string in
+ * 021 is snake_case precisely so `http.js` can withhold all of them, and each one a coach can
+ * actually hit is pre-checked in the transaction so it arrives as this instead.
+ */
+const PROFILE_OUTCOMES = {
+  missing: { status: 404, code: ERR.NOT_FOUND },
+  not_a_coach: { status: 403, code: ERR.FORBIDDEN },
+  account_disabled: { status: 403, code: ERR.FORBIDDEN },
+  session_stale: { status: 401, code: ERR.UNAUTHORIZED },
+  profile_exists: { status: 409, code: ERR.CONFLICT },
+  handle_unavailable: { status: 409, code: ERR.CONFLICT },
+  city_unknown: { status: 409, code: ERR.CONFLICT },
+  specialty_unknown: { status: 409, code: ERR.CONFLICT },
+  needs_guidelines: { status: 409, code: ERR.CONFLICT },
+  too_new: { status: 409, code: ERR.CONFLICT },
+};
+
+const sendOutcome = (res, result) => {
+  const map = PROFILE_OUTCOMES[result.outcome];
+  if (!map) return sendError(res, 500, ERR.INTERNAL, 'internal error');
+  if (map.status === 404) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+  if (map.status === 403) return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+  if (map.status === 401) return sendError(res, 401, ERR.UNAUTHORIZED, 'unauthorized');
+  // A 409 carries the facts the coach needs to fix it — which version to accept, when they become
+  // eligible, which key was not recognised. `outcome` is the reason; everything else is context.
+  const { outcome, ...facts } = result;
+  return res.status(map.status).json({
+    error: 'conflict',
+    code: map.code,
+    reason: outcome,
+    ...facts,
+    requestId: res.locals.requestId,
+  });
+};
+
+/**
+ * Turn a markdown failure into something the composer can render.
+ *
+ * `MarkdownError` carries a snake_case reason and it is the ONE error class the body pipeline
+ * throws, so a 400 from here always names what was wrong with the text rather than saying
+ * "validation_error" about a field the coach can see is fine.
+ */
+const sendBodyError = (res, err) => {
+  if (!(err instanceof MarkdownError)) throw err;
+  return res.status(400).json({
+    error: 'invalid body',
+    code: ERR.VALIDATION,
+    // MarkdownError carries its reason on .code, not .reason. Reading the wrong field made every
+    // body failure arrive as a generic invalid_body — losing precisely the information the class
+    // exists to carry, and silently, because the status was right.
+    reason: err.code ?? 'invalid_body',
+    requestId: res.locals.requestId,
+  });
+};
+
+const specialtyList = z.array(z.string().regex(SPECIALTY_KEY_RE)).max(COMPOSE_LIMITS.specialtyMax);
+
+const profileCreateBody = z
+  .object({
+    handle: z.string().regex(HANDLE_RE),
+    display_name: displayText(COMPOSE_LIMITS.displayNameMin, COMPOSE_LIMITS.displayNameMax),
+    headline: displayText(2, COMPOSE_LIMITS.headlineMax).nullable(),
+    bio_src: z.string().max(BIO_BODY.maxChars * 8).nullable(),
+    city_key: z.string().regex(CITY_KEY_RE).nullable(),
+    specialties: specialtyList,
+  })
+  .strict()
+  // `.strict()` comes FIRST because check-routes matches /^\}\)\s*\.strict\(\)/ on the text right
+  // after the closing brace — `.refine().strict()` is invisible to it and fails the build.
+  //
+  // Duplicates are refused here rather than at the primary key: ['strength','strength'] would
+  // otherwise reach PRIMARY KEY (user_id, specialty_key) as an opaque 400.
+  .refine((v) => new Set(v.specialties).size === v.specialties.length, 'duplicate specialty');
+
+/*
+ * WHAT IS ABSENT FROM THESE SCHEMAS IS THE CONTROL.
+ *
+ * `verified_at`, `verified_by`, `published_at`, `listed_at`, `removed_at`, `removed_by`,
+ * `removal_reason`, `user_id` and `created_at` never appear, so `.strict()` REJECTS each of them as
+ * an unknown key rather than ignoring it. A forged body asking to be verified gets a 400 naming
+ * the field, and the badge stays what the schema says it is: something only an admin can grant.
+ */
+const profileUpdateBody = z
+  .object({
+    display_name: displayText(COMPOSE_LIMITS.displayNameMin, COMPOSE_LIMITS.displayNameMax),
+    headline: displayText(2, COMPOSE_LIMITS.headlineMax).nullable(),
+    bio_src: z.string().max(BIO_BODY.maxChars * 8).nullable(),
+    city_key: z.string().regex(CITY_KEY_RE).nullable(),
+    specialties: specialtyList,
+  })
+  .strict()
+  // The handle is ABSENT. Renaming is its own route with its own cooldown, because it is the only
+  // profile field whose change takes something away from other people.
+  .refine((v) => new Set(v.specialties).size === v.specialties.length, 'duplicate specialty');
+
+const emptyBody = z.object({}).strict();
+
+/**
+ * The coach's own profile, including the markdown source no public read returns.
+ *
+ * A REMOVED profile is returned, with `removedAt` set. It is the coach's own row, and hiding it
+ * produces a support ticket rather than security — they need to see that it was taken down, which
+ * is exactly the distinction `removed_at` exists to keep separate from `deleted_at`.
+ */
+router.get(
+  '/compose/profile',
+  requireAuth,
+  requireCoach,
+  composeReadLimiter,
+  asyncRoute(async (req, res) => {
+    if (!emptyQuery.safeParse(req.query).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const [profile] = await db.all(
+      `SELECT c.handle, c.display_name AS displayName, c.headline, c.bio_src AS bioSrc,
+              c.bio_doc AS bioDoc, c.doc_version AS docVersion, c.city_key AS city,
+              c.published_at AS publishedAt, c.listed_at AS listedAt, c.removed_at AS removedAt,
+              c.handle_renamed_at AS handleRenamedAt,
+              CASE WHEN c.verified_at IS NULL THEN 0 ELSE 1 END AS verified
+         FROM coach_profiles c WHERE c.user_id = ?`,
+      [req.user.id],
+    );
+
+    // No profile is a STATE, not a miss — the composer renders a create form from it.
+    if (!profile) return res.json({ profile: null, specialties: [] });
+
+    const specialties = await db.all(
+      'SELECT specialty_key AS key FROM coach_profile_specialties WHERE user_id = ? ORDER BY specialty_key',
+      [req.user.id],
+    );
+    res.json({
+      profile: { ...profile, doc: profile.bioDoc ? JSON.parse(profile.bioDoc) : null },
+      specialties: specialties.map((s) => s.key),
+    });
+  }),
+);
+
+router.post(
+  '/compose/profile',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = profileCreateBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    let bio;
+    try {
+      // ONE parse, on the main thread, before the worker is called. The worker receives opaque
+      // values and never parses — a second producer would be a second answer to "what is the doc
+      // for this source", and CPU work on the SQL thread besides.
+      bio = buildBio(parsed.data.bio_src);
+    } catch (err) {
+      return sendBodyError(res, err);
+    }
+
+    const result = await db.createCoachProfile({
+      userId: req.user.id,
+      handle: parsed.data.handle,
+      displayName: parsed.data.display_name,
+      headline: parsed.data.headline,
+      bio,
+      city: parsed.data.city_key,
+      specialties: parsed.data.specialties,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendOutcome(res, result);
+    res.status(result.replayed ? 200 : 201).json({ profile: result, replayed: result.replayed });
+  }),
+);
+
+router.put(
+  '/compose/profile',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = profileUpdateBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    let bio;
+    try {
+      bio = buildBio(parsed.data.bio_src);
+    } catch (err) {
+      return sendBodyError(res, err);
+    }
+
+    const result = await db.updateCoachProfile({
+      userId: req.user.id,
+      displayName: parsed.data.display_name,
+      headline: parsed.data.headline,
+      bio,
+      city: parsed.data.city_key,
+      specialties: parsed.data.specialties,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendOutcome(res, result);
+    res.json({ profile: result });
+  }),
+);
+
+/**
+ * Publish and unpublish are SEPARATE routes, not one endpoint taking a boolean.
+ *
+ * They are not symmetric: publish carries a standing gate and unpublish carries none, publish
+ * writes `listed_at` and unpublish leaves it alone, and only unpublish reports how many posts it
+ * took dark. A shared handler would be correct for exactly one of the two and would have to branch
+ * on the flag for everything that matters.
+ */
+router.post(
+  '/compose/profile/publish',
+  requireAuth,
+  requireCoach,
+  publishIpLimiter,
+  publishAccountLimiter,
+  asyncRoute(async (req, res) => {
+    if (!emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.publishCoachProfile({
+      userId: req.user.id,
+      // The token's session version, re-checked against the database inside the transaction.
+      // requireAuth caches it for 30 seconds, which is nothing for a read and everything for the
+      // one write that puts a name on the open internet.
+      tokenSv: req.user.sv ?? null,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendOutcome(res, result);
+    res.json({ profile: result, replayed: result.replayed });
+  }),
+);
+
+router.post(
+  '/compose/profile/unpublish',
+  requireAuth,
+  requireCoach,
+  publishIpLimiter,
+  publishAccountLimiter,
+  asyncRoute(async (req, res) => {
+    if (!emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.unpublishCoachProfile({
+      userId: req.user.id,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendOutcome(res, result);
+    // The count is the point of the answer: PUBLIC_POST requires a live profile, so unpublishing
+    // takes the whole back catalogue dark on the next read, with no sweep anywhere to watch.
+    res.json({ profile: result, replayed: result.replayed, postsWentDark: result.postsWentDark });
   }),
 );
 

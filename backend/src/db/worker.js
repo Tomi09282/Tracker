@@ -1502,3 +1502,392 @@ export function adminAdjustCoinsTx({
     return rethrow(err, current);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE COMPOSER — the coach's own profile.
+ *
+ * Four named transactions rather than one setProfile() with flags, because the four differ in ways
+ * a shared helper would have to branch on anyway: publish carries a standing gate and unpublish
+ * deliberately does not, listed_at is written only on the publish path and never cleared, and
+ * create must leave published_at out of the column list entirely so the publish trigger cannot
+ * fire on an INSERT.
+ *
+ * ADR-0005 governs all four: conn.transaction() COMMITS ON RETURN, so every check that can produce
+ * an error result runs above the marker comment, and the only conditional return below it is a
+ * changes === 0 probe on the FIRST write.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/** The placeholders a specialty list is checked with, padded so the SQL text never varies. */
+const SPECIALTY_SLOTS = 6;
+
+/**
+ * Create the coach's public profile.
+ *
+ * published_at, listed_at, verified_at, verified_by, removed_at, removed_by and removal_reason are
+ * ABSENT from the INSERT's column list, and that absence is the control: the publish-standing and
+ * verified-pair INSERT triggers cannot fire on a row that never sets the columns they watch, so a
+ * profile cannot be born published or born verified.
+ */
+export function createCoachProfileTx({
+  userId, handle, displayName, headline, bio, city, specialties, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // (0) ONE response builder, declared first so its return sits textually above every write, and
+    //     reading the STORED row rather than the arguments — a view rebuilt from JS variables is a
+    //     second account of what was written.
+    const view = (replayed) => {
+      current = 'SELECT the profile back';
+      const row = stmt(
+        `SELECT handle, display_name AS displayName, headline, bio_src AS bioSrc, bio_doc AS bioDoc,
+                doc_version AS docVersion, city_key AS city, published_at AS publishedAt,
+                listed_at AS listedAt, created_at AS createdAt
+           FROM coach_profiles WHERE user_id = ?`,
+      ).get(userId);
+      const keys = stmt(
+        'SELECT specialty_key AS key FROM coach_profile_specialties WHERE user_id = ? ORDER BY specialty_key',
+      ).all(userId).map((r) => r.key);
+      return { outcome: 'applied', replayed, ...row, specialties: keys };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    // (1) REPLAY. coach_profiles.user_id IS the primary key, so the natural key is the idempotency
+    //     key and no token is needed — a validated-and-discarded one would be a promise this API
+    //     does not keep.
+    current = 'SELECT any existing profile';
+    const existing = stmt('SELECT handle FROM coach_profiles WHERE user_id = ?').get(userId);
+    if (existing && existing.handle === handle) return view(true);
+    if (existing) return { outcome: 'profile_exists', handle: existing.handle };
+
+    // (2) THE HANDLE, as ONE outcome from three questions. Reserved, taken and cooling answer
+    //     identically on purpose: distinguishing them enumerates unpublished profiles and leaks
+    //     another account's rename timestamp.
+    current = 'SELECT handle availability';
+    const avail = stmt(
+      `SELECT EXISTS (SELECT 1 FROM reserved_handles WHERE handle = ?) AS reserved,
+              EXISTS (SELECT 1 FROM coach_profiles   WHERE handle = ?) AS taken,
+              EXISTS (SELECT 1 FROM retired_handles t
+                       WHERE t.handle = ?
+                         AND (t.prev_user_id IS NULL OR t.prev_user_id <> ?)
+                         AND t.released_at > unixepoch()
+                             - (SELECT value FROM public_policy WHERE key = 'handle_cooldown_s')) AS cooling`,
+    ).get(handle, handle, handle, userId);
+    if (avail.reserved || avail.taken || avail.cooling) return { outcome: 'handle_unavailable' };
+
+    // (3) Reference membership. public_cities has no active-flag trigger, so an unknown or retired
+    //     key would otherwise surface as an opaque foreign-key failure.
+    current = 'SELECT the city';
+    if (city !== null) {
+      const ok = stmt('SELECT 1 AS ok FROM public_cities WHERE key = ? AND active = 1').get(city);
+      if (!ok) return { outcome: 'city_unknown', key: city };
+    }
+
+    // (4) Specialties, through a FIXED six-placeholder list padded with NULL. The SQL text never
+    //     varies, so one prepared statement is cached forever and no IN clause is ever assembled
+    //     from request data.
+    current = 'SELECT the specialties';
+    if (specialties.length > 0) {
+      const padded = [...specialties, ...Array(SPECIALTY_SLOTS - specialties.length).fill(null)];
+      const found = stmt(
+        'SELECT key FROM coach_specialties WHERE active = 1 AND key IN (?, ?, ?, ?, ?, ?)',
+      ).all(...padded).map((r) => r.key);
+      const unknown = specialties.find((k) => !found.includes(k));
+      if (unknown) return { outcome: 'specialty_unknown', key: unknown };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'INSERT the profile';
+    // INSERT ... SELECT rather than VALUES: the role is re-read from the DATABASE at write time, so
+    // an account whose coach role was revoked thirty seconds ago cannot squat a handle on the
+    // strength of a token it still holds. VALUES admits no such predicate.
+    const created = stmt(
+      `INSERT INTO coach_profiles (user_id, handle, display_name, headline,
+                                   bio_src, bio_doc, doc_version, city_key)
+       SELECT u.id, ?, ?, ?, ?, ?, ?, ?
+         FROM users u
+        WHERE u.id = ? AND u.disabled_at IS NULL AND u.role IN ('coach','admin')`,
+    ).run(handle, displayName, headline, bio.src, bio.doc, bio.version, city, userId);
+    if (created.changes === 0) return { outcome: 'not_a_coach' };
+
+    current = 'INSERT the specialties';
+    for (const key of specialties) {
+      stmt('INSERT INTO coach_profile_specialties (user_id, specialty_key) VALUES (?, ?)').run(userId, key);
+    }
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.profile.create', 'coach_profile', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ handle, city, specialties }), requestId, ip);
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Edit the profile. Every field is required and NULL means cleared — a PUT, not a PATCH.
+ *
+ * That removes absent-versus-null merge semantics from the whole surface, which is where "I
+ * cleared my headline and it came back" lives. The handle is NOT here: renaming is its own route
+ * with its own cooldown, because it is the one field with consequences for other people.
+ */
+export function updateCoachProfileTx({
+  userId, displayName, headline, bio, city, specialties, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed) => {
+      current = 'SELECT the profile back';
+      const row = stmt(
+        `SELECT handle, display_name AS displayName, headline, bio_src AS bioSrc, bio_doc AS bioDoc,
+                doc_version AS docVersion, city_key AS city, published_at AS publishedAt,
+                listed_at AS listedAt, updated_at AS updatedAt
+           FROM coach_profiles WHERE user_id = ?`,
+      ).get(userId);
+      const keys = stmt(
+        'SELECT specialty_key AS key FROM coach_profile_specialties WHERE user_id = ? ORDER BY specialty_key',
+      ).all(userId).map((r) => r.key);
+      return { outcome: 'applied', replayed, ...row, specialties: keys };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+    //
+    // The city and specialty checks in particular MUST be here. They are natural to write after the
+    // DELETE that clears the old set, and a conditional return there would COMMIT a profile
+    // stripped of its specialties while answering with an error.
+
+    current = 'SELECT the profile';
+    const profile = stmt(
+      'SELECT user_id FROM coach_profiles WHERE user_id = ? AND removed_at IS NULL',
+    ).get(userId);
+    if (!profile) return { outcome: 'missing' };
+
+    current = 'SELECT the city';
+    if (city !== null) {
+      const ok = stmt('SELECT 1 AS ok FROM public_cities WHERE key = ? AND active = 1').get(city);
+      if (!ok) return { outcome: 'city_unknown', key: city };
+    }
+
+    current = 'SELECT the specialties';
+    if (specialties.length > 0) {
+      const padded = [...specialties, ...Array(SPECIALTY_SLOTS - specialties.length).fill(null)];
+      const found = stmt(
+        'SELECT key FROM coach_specialties WHERE active = 1 AND key IN (?, ?, ?, ?, ?, ?)',
+      ).all(...padded).map((r) => r.key);
+      const unknown = specialties.find((k) => !found.includes(k));
+      if (unknown) return { outcome: 'specialty_unknown', key: unknown };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the profile';
+    // All three bio columns move together or none do — two column CHECKs enforce the pairing, and
+    // buildBio is what guarantees the triple is coherent before it arrives here.
+    const updated = stmt(
+      `UPDATE coach_profiles
+          SET display_name = ?, headline = ?, bio_src = ?, bio_doc = ?, doc_version = ?,
+              city_key = ?, updated_at = unixepoch()
+        WHERE user_id = ? AND removed_at IS NULL`,
+    ).run(displayName, headline, bio.src, bio.doc, bio.version, city, userId);
+    if (updated.changes === 0) return { outcome: 'missing' };
+
+    current = 'DELETE the old specialties';
+    stmt('DELETE FROM coach_profile_specialties WHERE user_id = ?').run(userId);
+
+    current = 'INSERT the specialties';
+    for (const key of specialties) {
+      stmt('INSERT INTO coach_profile_specialties (user_id, specialty_key) VALUES (?, ?)').run(userId, key);
+    }
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.profile.update', 'coach_profile', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ city, specialties }), requestId, ip);
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Put the profile on the open internet.
+ *
+ * The standing gate is branched HERE, in a fixed order, so the coach gets a sentence they can act
+ * on. The triggers enforce the same rules and would answer publish_denied — every RAISE string in
+ * 021 is snake_case exactly so none of them is ever shown to a person.
+ *
+ * sessionVersion is compared against the token's claim because requireAuth caches it for 30
+ * seconds, and a publish is an irreversible push to the open internet. Thirty seconds is nothing
+ * for a profile read and everything for the one write a scraper cannot be asked to undo.
+ */
+export function publishCoachProfileTx({ userId, tokenSv = null, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed) => {
+      current = 'SELECT the profile back';
+      const row = stmt(
+        `SELECT handle, published_at AS publishedAt, listed_at AS listedAt
+           FROM coach_profiles WHERE user_id = ?`,
+      ).get(userId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the profile';
+    const profile = stmt(
+      'SELECT published_at FROM coach_profiles WHERE user_id = ? AND removed_at IS NULL',
+    ).get(userId);
+    if (!profile) return { outcome: 'missing' };
+    if (profile.published_at !== null) return view(true);
+
+    current = 'SELECT publish standing';
+    const s = stmt(
+      `SELECT
+         u.disabled_at IS NULL       AS enabled,
+         u.role IN ('coach','admin') AS roleOk,
+         u.session_version           AS sessionVersion,
+         u.created_at <= unixepoch()
+           - (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS oldEnough,
+         u.created_at
+           + (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS eligibleAt,
+         EXISTS (SELECT 1 FROM guidelines_acceptances a
+                   JOIN guidelines_versions v ON v.version = a.version AND v.active = 1
+                  WHERE a.user_id = u.id) AS guidelinesOk,
+         (SELECT v.version  FROM guidelines_versions v WHERE v.active = 1) AS activeVersion,
+         (SELECT v.i18n_key FROM guidelines_versions v WHERE v.active = 1) AS activeI18nKey
+       FROM users u WHERE u.id = ?`,
+    ).get(userId);
+
+    if (!s) return { outcome: 'missing' };
+    if (!s.roleOk) return { outcome: 'not_a_coach' };
+    if (!s.enabled) return { outcome: 'account_disabled' };
+    if (tokenSv !== null && s.sessionVersion !== tokenSv) return { outcome: 'session_stale' };
+    if (!s.guidelinesOk) {
+      return { outcome: 'needs_guidelines', activeVersion: s.activeVersion, activeI18nKey: s.activeI18nKey };
+    }
+    if (!s.oldEnough) return { outcome: 'too_new', eligibleAt: s.eligibleAt };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the profile to published';
+    // listed_at is write-once by COALESCE: the directory position a coach earns at their first
+    // publish survives every later unpublish, so taking yourself down for a week is not a way to
+    // buy the front page back.
+    const published = stmt(
+      `UPDATE coach_profiles
+          SET published_at = unixepoch(),
+              listed_at = COALESCE(listed_at, unixepoch()),
+              updated_at = unixepoch()
+        WHERE user_id = ? AND removed_at IS NULL AND published_at IS NULL`,
+    ).run(userId);
+    // Every predicate above was established under this same write lock, so zero rows is not a
+    // state — it is a contradiction. Returning a cheerful view(true) here would report "already
+    // published" with a null publishedAt, which is RACE-8 in the review that produced this file.
+    if (published.changes === 0) throw new Error('publishCoachProfileTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.profile.publish', 'coach_profile', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ published: true }), requestId, ip);
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Take the profile back down.
+ *
+ * NO STANDING GATE, deliberately. A coach who has lost standing — disabled, role revoked, or who
+ * simply has not accepted the guidelines now in force — must still be able to remove themselves
+ * from the open internet. Gating the exit on the same conditions as the entrance means the people
+ * most likely to want out are the ones who cannot leave.
+ *
+ * listed_at is untouched, so re-publishing later returns to the same directory position rather
+ * than to the top of it.
+ */
+export function unpublishCoachProfileTx({ userId, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed, wentDark) => {
+      current = 'SELECT the profile back';
+      const row = stmt(
+        `SELECT handle, published_at AS publishedAt, listed_at AS listedAt
+           FROM coach_profiles WHERE user_id = ?`,
+      ).get(userId);
+      return { outcome: 'applied', replayed, postsWentDark: wentDark, ...row };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the profile';
+    const profile = stmt(
+      'SELECT published_at FROM coach_profiles WHERE user_id = ? AND removed_at IS NULL',
+    ).get(userId);
+    if (!profile) return { outcome: 'missing' };
+    if (profile.published_at === null) return view(true, 0);
+
+    // How many live posts this is about to hide. PUBLIC_POST requires a live profile, so they go
+    // dark on the next read with no sweep and no fan-out — and a coach pressing this button
+    // deserves to be told it takes their whole catalogue with it.
+    current = 'COUNT the posts about to go dark';
+    const live = stmt(
+      `SELECT COUNT(*) AS n FROM coach_posts
+        WHERE author_user_id = ? AND published_at IS NOT NULL
+          AND deleted_at IS NULL AND removed_at IS NULL`,
+    ).get(userId).n;
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the profile to unpublished';
+    const hidden = stmt(
+      `UPDATE coach_profiles
+          SET published_at = NULL, updated_at = unixepoch()
+        WHERE user_id = ? AND removed_at IS NULL AND published_at IS NOT NULL`,
+    ).run(userId);
+    if (hidden.changes === 0) throw new Error('unpublishCoachProfileTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.profile.unpublish', 'coach_profile', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ postsWentDark: live }), requestId, ip);
+
+    return view(false, live);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

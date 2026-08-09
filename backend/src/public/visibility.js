@@ -58,6 +58,45 @@ export const PUBLIC_PROFILE = `(
 )`;
 
 /**
+ * Whether an account may put something on the open internet, as ONE statement.
+ *
+ * ═══ WHY THIS IS A PROJECTION AND NOT A PREDICATE ══════════════════════════════════════════════
+ *
+ * `PUBLIC_POST` above is a filter: a row either survives it or is not there, and a reader has no
+ * business knowing which clause hid it. Standing is the opposite problem. A coach who cannot
+ * publish has to be told WHY, because every reason is something they can act on — accept the new
+ * guidelines, wait until the account is old enough, publish the profile first. A boolean here
+ * would be a screen that says no and nothing else.
+ *
+ * So each clause comes back as its own flag and the caller branches in a fixed order. The triggers
+ * still enforce all of it; this exists so the refusal arrives as a sentence instead of as
+ * `publish_denied`, which is what `http.js` would otherwise hand back — every RAISE string in 021
+ * is snake_case precisely so none of them ever reaches a person.
+ *
+ * Binds ONE parameter, the caller's own id, three times. Alias-free: it selects `FROM users u`.
+ */
+export const PUBLISH_STANDING = `
+  SELECT
+    u.disabled_at IS NULL                                        AS enabled,
+    u.role IN ('coach','admin')                                  AS roleOk,
+    u.session_version                                            AS sessionVersion,
+    u.created_at <= unixepoch()
+      - (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS oldEnough,
+    u.created_at
+      + (SELECT value FROM public_policy WHERE key = 'min_account_age_s_to_publish') AS eligibleAt,
+    EXISTS (SELECT 1 FROM guidelines_acceptances a
+              JOIN guidelines_versions v ON v.version = a.version AND v.active = 1
+             WHERE a.user_id = u.id)                             AS guidelinesOk,
+    (SELECT v.version  FROM guidelines_versions v WHERE v.active = 1) AS activeVersion,
+    (SELECT v.i18n_key FROM guidelines_versions v WHERE v.active = 1) AS activeI18nKey,
+    EXISTS (SELECT 1 FROM coach_profiles c
+             WHERE c.user_id = u.id AND c.removed_at IS NULL)    AS hasProfile,
+    EXISTS (SELECT 1 FROM coach_profiles c
+             WHERE c.user_id = u.id AND c.removed_at IS NULL
+               AND c.published_at IS NOT NULL)                   AS profileLive
+  FROM users u WHERE u.id = ?`;
+
+/**
  * The columns a public read may project, written once.
  *
  * WHAT IS ABSENT IS THE CONTROL. No `user_id`, no email, no `id`. A post is addressed by its
@@ -95,7 +134,16 @@ export const POST_SORTS = {
   soonest: 'p.event_at ASC, p.id DESC',
 };
 
+/**
+ * Directory order, keyed on `listed_at` rather than `published_at`.
+ *
+ * `published_at` is cleared by unpublish and re-set by publish, so ordering by it made
+ * unpublish-then-publish a free jump to the top of the directory, repeatable as fast as the limiter
+ * allows — and it moved rows under everyone else's keyset cursor while it happened. `listed_at` is
+ * written once, at the first publish, and never cleared: the position a coach earns is the position
+ * they keep, and taking your own profile down for a week does not buy you the front page.
+ */
 export const PROFILE_SORTS = {
-  recommended: 'CASE WHEN c.verified_at IS NULL THEN 1 ELSE 0 END, c.published_at DESC, c.user_id DESC',
-  recent: 'c.published_at DESC, c.user_id DESC',
+  recommended: 'CASE WHEN c.verified_at IS NULL THEN 1 ELSE 0 END, c.listed_at DESC, c.user_id DESC',
+  recent: 'c.listed_at DESC, c.user_id DESC',
 };

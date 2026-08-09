@@ -103,6 +103,32 @@ async function seedPublicCorpus() {
   }
 }
 
+/**
+ * Backdate an account so the publish age gate can be passed.
+ *
+ * min_account_age_s_to_publish is 24 hours and the suite builds every account seconds before it
+ * uses one, so the happy path is unreachable without this. Written through the server own
+ * database file for the same reason as seedPrescription: there is no route that ages an account,
+ * and there should not be.
+ *
+ * The gate itself is asserted BEFORE this is called. Ageing the account first would have quietly
+ * deleted the assertion that the gate exists at all.
+ */
+async function ageAccount(email) {
+  try {
+    const { default: Database } = await import('better-sqlite3-multiple-ciphers');
+    const { deriveDbKeyHex } = await import('../src/lib/dbkey.js');
+    const conn = new Database(process.env.DB_PATH);
+    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+    conn.prepare('UPDATE users SET created_at = unixepoch() - 999999 WHERE email = ?').run(email);
+    conn.close();
+    return true;
+  } catch (err) {
+    console.error(`  ageAccount: ${err.message}`);
+    return false;
+  }
+}
+
 async function seedPrescription({ planId, dayId, exerciseId }) {
   try {
     const { default: Database } = await import('better-sqlite3-multiple-ciphers');
@@ -4780,6 +4806,174 @@ if (seeded) {
       after.json?.standing?.guidelinesAcceptedAt === first.json?.acceptedAt,
       String(after.json?.standing?.guidelinesAcceptedAt),
     );
+  }
+
+
+  // --- THE PROFILE: create, edit, publish, unpublish ------------------------------------------
+  //
+  // coach2 has no profile in a fresh database, which is what makes the CREATE path testable at
+  // all — the composer coach above already has one.
+  const builderJar = new Jar();
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: builderJar });
+
+  {
+    const empty = await call('/api/v1/compose/profile', { jar: builderJar });
+    check(
+      'a coach with no profile reads a STATE, not a 404 — the composer renders a create form from it',
+      empty.res.status === 200 && empty.json?.profile === null,
+      `status ${empty.res.status}`,
+    );
+  }
+
+  // FORGE: what is absent from the schema is the control. .strict() rejects each of these by name
+  // rather than ignoring it, so a body asking to be verified gets a 400 and the badge stays a
+  // thing only an admin can grant.
+  {
+    const forged = [];
+    for (const field of ['verified_at', 'verified_by', 'published_at', 'listed_at', 'removed_at', 'user_id']) {
+      const r = await call('/api/v1/compose/profile', {
+        method: 'POST', jar: builderJar,
+        body: { handle: 'smoke-builder', display_name: 'Smoke Builder', headline: null, bio_src: null, city_key: null, specialties: [], [field]: 1 },
+      });
+      if (r.res.status !== 400) forged.push(`${field}=${r.res.status}`);
+    }
+    check('FORGE: every admin-owned column is rejected by name, not ignored', forged.length === 0, forged.join(' '));
+  }
+
+  const created = await call('/api/v1/compose/profile', {
+    method: 'POST', jar: builderJar,
+    body: { handle: 'smoke-builder', display_name: 'Smoke Builder', headline: 'Probe headline',
+            bio_src: 'A **bio** with [a link](https://example.com/x).', city_key: null, specialties: [] },
+  });
+  check('a coach creates their profile', created.res.status === 201, `status ${created.res.status}`);
+  check(
+    'the three bio columns arrive together — source, parsed doc and version',
+    !!created.json?.profile?.bioSrc && !!created.json?.profile?.bioDoc && created.json?.profile?.docVersion === 1,
+    `docVersion=${created.json?.profile?.docVersion}`,
+  );
+  check(
+    'and it is NOT published by existing — published_at is absent from the INSERT entirely',
+    created.json?.profile?.publishedAt === null && created.json?.profile?.listedAt === null,
+    `published=${created.json?.profile?.publishedAt}`,
+  );
+
+  {
+    const replay = await call('/api/v1/compose/profile', {
+      method: 'POST', jar: builderJar,
+      body: { handle: 'smoke-builder', display_name: 'Smoke Builder', headline: null, bio_src: null, city_key: null, specialties: [] },
+    });
+    check('REPLAY: creating the same handle again returns the existing row, not a second one',
+      replay.res.status === 200 && replay.json?.replayed === true, `status ${replay.res.status}`);
+
+    const other = await call('/api/v1/compose/profile', {
+      method: 'POST', jar: builderJar,
+      body: { handle: 'different-handle', display_name: 'Smoke Builder', headline: null, bio_src: null, city_key: null, specialties: [] },
+    });
+    check('but a DIFFERENT handle is a conflict — one profile per account',
+      other.res.status === 409 && other.json?.reason === 'profile_exists', `${other.res.status} ${other.json?.reason}`);
+  }
+
+  {
+    // Reserved, taken and cooling are ONE answer. Distinguishing them enumerates unpublished
+    // profiles and leaks another account's rename timestamp.
+    const taken = await call('/api/v1/compose/profile', {
+      method: 'POST', jar: composerJar,
+      body: { handle: 'smoke-builder', display_name: 'Somebody Else', headline: null, bio_src: null, city_key: null, specialties: [] },
+    });
+    check('a handle somebody else holds is refused with ONE undifferentiated reason',
+      taken.res.status === 409 && ['handle_unavailable', 'profile_exists'].includes(taken.json?.reason),
+      `${taken.res.status} ${taken.json?.reason}`);
+  }
+
+  // THE BODY RULE: all three bio columns move together or none do. Two column CHECKs enforce the
+  // pairing; buildBio is what makes the triple coherent before it ever reaches them.
+  {
+    const cleared = await call('/api/v1/compose/profile', {
+      method: 'PUT', jar: builderJar,
+      body: { display_name: 'Smoke Builder', headline: null, bio_src: null, city_key: null, specialties: [] },
+    });
+    check(
+      'clearing a bio moves all three columns to null together',
+      cleared.res.status === 200 && cleared.json?.profile?.bioSrc === null
+        && cleared.json?.profile?.bioDoc === null && cleared.json?.profile?.docVersion === null,
+      `status ${cleared.res.status}`,
+    );
+  }
+  {
+    const blank = await call('/api/v1/compose/profile', {
+      method: 'PUT', jar: builderJar,
+      body: { display_name: 'Smoke Builder', headline: null, bio_src: '\\', city_key: null, specialties: [] },
+    });
+    check(
+      'a bio that parses to no visible text is refused, and the reason says which',
+      blank.res.status === 400 && blank.json?.reason === 'no_visible_text',
+      `${blank.res.status} ${blank.json?.reason}`,
+    );
+  }
+  {
+    const bad = await call('/api/v1/compose/profile', {
+      method: 'PUT', jar: builderJar,
+      body: { display_name: 'Smoke Builder', headline: null, bio_src: null, city_key: 'no-such-city', specialties: [] },
+    });
+    check('an unknown city is a 409 naming the key, never an opaque foreign-key failure',
+      bad.res.status === 409 && bad.json?.reason === 'city_unknown', `${bad.res.status} ${bad.json?.reason}`);
+  }
+
+  // PUBLISH AND UNPUBLISH ARE NOT SYMMETRIC, which is why they are two routes.
+  {
+    // THE GATE, ASSERTED BEFORE IT IS SATISFIED. coach2 has not consented in a fresh database, and
+    // that is the state most coaches are in the first time they press publish. Skipping straight to
+    // the happy path would leave the whole guidelines chain untested from this end.
+    const denied = await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+    check(
+      'publish is refused until the guidelines are accepted, and says which version to accept',
+      denied.res.status === 409 && denied.json?.reason === 'needs_guidelines' && typeof denied.json?.activeVersion === 'string',
+      `${denied.res.status} ${denied.json?.reason} -> ${denied.json?.activeVersion}`,
+    );
+    await call('/api/v1/compose/guidelines/accept', { method: 'POST', jar: builderJar, body: { version: denied.json.activeVersion } });
+
+    // THE SECOND GATE, and it is the one a real coach hits next. An account minutes old cannot put
+    // a name on the open internet, and the refusal carries WHEN it becomes eligible rather than a
+    // bare no.
+    const tooNew = await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+    check(
+      'and refused again while the account is too new, with the moment it becomes eligible',
+      tooNew.res.status === 409 && tooNew.json?.reason === 'too_new' && typeof tooNew.json?.eligibleAt === 'number',
+      `${tooNew.res.status} ${tooNew.json?.reason} -> ${tooNew.json?.eligibleAt}`,
+    );
+    check('the account can be aged for the rest of this block', await ageAccount(seeded.coach2.email));
+  }
+  {
+    const pub = await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+    check('publish succeeds for a coach in standing', pub.res.status === 200, `status ${pub.res.status} ${JSON.stringify(pub.json).slice(0, 70)}`);
+
+    const again = await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+    check('a second publish REPLAYS with the original timestamp rather than moving it',
+      again.json?.replayed === true && again.json?.profile?.publishedAt === pub.json?.profile?.publishedAt,
+      `${pub.json?.profile?.publishedAt} then ${again.json?.profile?.publishedAt}`);
+
+    const listedAtFirstPublish = pub.json?.profile?.listedAt;
+    const down = await call('/api/v1/compose/profile/unpublish', { method: 'POST', jar: builderJar, body: {} });
+    check('unpublish reports how many live posts it took dark — PUBLIC_POST needs a live profile',
+      down.res.status === 200 && typeof down.json?.postsWentDark === 'number', `postsWentDark=${down.json?.postsWentDark}`);
+
+    const up = await call('/api/v1/compose/profile/publish', { method: 'POST', jar: builderJar, body: {} });
+    check(
+      'and re-publishing returns to the SAME directory position — listed_at is write-once',
+      // typeof first: the previous version compared two undefineds and reported PASS while publish
+      // was being refused entirely. Equality is not evidence when neither side exists.
+      typeof listedAtFirstPublish === 'number' && up.json?.profile?.listedAt === listedAtFirstPublish,
+      `${listedAtFirstPublish} then ${up.json?.profile?.listedAt}`,
+    );
+  }
+  {
+    // The exit is NOT gated on the same standing as the entrance. A coach who has lost standing is
+    // exactly the person most likely to need out.
+    const down = await call('/api/v1/compose/profile/unpublish', { method: 'POST', jar: builderJar, body: {} });
+    const again = await call('/api/v1/compose/profile/unpublish', { method: 'POST', jar: builderJar, body: {} });
+    check('unpublish is idempotent and carries no standing gate',
+      down.res.status === 200 && again.res.status === 200 && again.json?.replayed === true,
+      `${down.res.status} / ${again.res.status}`);
   }
 
   // --- CSRF: this router is BELOW the middleware, and that is the difference from public/ -------

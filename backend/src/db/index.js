@@ -48,6 +48,14 @@ export const copyDays = (args) => pool.run(args, { name: 'copyDaysTx' });
 export const purchaseStoreItem = (args) => pool.run(args, { name: 'purchaseStoreItemTx' });
 export const unlockAchievement = (args) => pool.run(args, { name: 'unlockAchievementTx' });
 export const adminAdjustCoins = (args) => pool.run(args, { name: 'adminAdjustCoinsTx' });
+
+// The composer. Four named transactions rather than one setProfile() with flags — publish carries
+// a standing gate that unpublish deliberately does not, and listed_at is written only on the
+// publish path, so a shared helper would be correct for exactly one of the two.
+export const createCoachProfile = (args) => pool.run(args, { name: 'createCoachProfileTx' });
+export const updateCoachProfile = (args) => pool.run(args, { name: 'updateCoachProfileTx' });
+export const publishCoachProfile = (args) => pool.run(args, { name: 'publishCoachProfileTx' });
+export const unpublishCoachProfile = (args) => pool.run(args, { name: 'unpublishCoachProfileTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);
