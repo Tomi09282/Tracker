@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { Search, MapPin, Calendar, BadgeCheck, Compass } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { useFeed, useSearch, useTaxonomy, formatPrice } from './usePublic';
+import { useFeed, useSearch, useTaxonomy, usePriceFormatter } from './usePublic';
 import type { PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
@@ -138,7 +138,8 @@ export function MarketplacePage() {
 
 function PostCard({ post, locale }: { post: PublicPost; locale: string }) {
   const { t } = useTranslation();
-  const price = formatPrice(post.priceMinor, post.priceCurrency, locale);
+  const formatPrice = usePriceFormatter();
+  const price = formatPrice(post.priceMinor, post.priceCurrency);
 
   return (
     <Link

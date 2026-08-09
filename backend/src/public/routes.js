@@ -29,11 +29,11 @@ import { Router } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
 import path from 'node:path';
-import { createReadStream } from 'node:fs';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { toFtsQuery } from '../lib/normalize.js';
 import { MEDIA_DIR } from '../lib/media.js';
+import { encodeCursor, decodeCursor } from '../lib/cursor.js';
 import {
   PUBLIC_POST,
   PUBLIC_PROFILE,
@@ -75,7 +75,8 @@ const feedQuery = z
     // A CLOSED MAP, never a column name from a query string.
     sort: z.enum(['recent', 'soonest']).optional(),
     // KEYSET, not offset: an offset over a table people insert into skips rows as it pages.
-    cursor: z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional(),
+    // OPAQUE, because the keyset value is an internal row id and this endpoint is anonymous.
+    cursor: z.string().max(512).optional(),
     limit: z.coerce.number().int().min(1).max(24).optional(),
   })
   .strict();
@@ -92,10 +93,37 @@ const directoryQuery = z
   .object({
     city: z.string().regex(/^[a-z][a-z0-9-]{1,30}$/).optional(),
     sort: z.enum(['recommended', 'recent']).optional(),
-    cursor: z.coerce.number().int().min(1).max(Number.MAX_SAFE_INTEGER).optional(),
+    cursor: z.string().max(512).optional(),
     limit: z.coerce.number().int().min(1).max(24).optional(),
   })
   .strict();
+
+/**
+ * A cursor arrives opaque and is used as an integer keyset internally.
+ *
+ * ═══ WHY IT IS ENCODED AT ALL ══════════════════════════════════════════════════════════════════
+ *
+ * It was not. The feed handed back `p.id` and the directory handed back `c.user_id`, and the
+ * comment above the feed's cursor claimed it "names no account" — true of the feed, false of the
+ * directory, in the same file. `PUBLIC_PROFILE_COLUMNS` omits `user_id` precisely so an anonymous
+ * reader cannot collect account ids, and the cursor put them back one page at a time.
+ *
+ * The post cursor is the milder half of the same mistake: `public_id` is a 12-character opaque
+ * handle exactly so the rowid is not an address, and verify-021 asserts that a post is "addressed
+ * by a 12-char opaque public_id, never its rowid" — while the endpoint returned the rowid.
+ *
+ * `src/lib/cursor.js` already existed, already did this, and was already used by the exercise
+ * routes. Nothing new was written here; the ninth instance of this project's second defect class
+ * is once again a convention that existed and was not reached for.
+ */
+const cursorId = (raw) => {
+  if (raw === undefined) return null;
+  const parts = decodeCursor(raw);
+  const n = Array.isArray(parts) ? parts[0] : null;
+  // A cursor that does not decode is not an error — it is a stale link or a truncated copy-paste,
+  // and starting from the top is the answer a reader can actually use.
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
 
 /**
  * The doc arrives from the database as a JSON string and leaves as a parsed tree.
@@ -131,7 +159,8 @@ router.get(
   asyncRoute(async (req, res) => {
     const parsed = feedQuery.safeParse(req.query);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
-    const { kind, city, sort = 'recent', cursor, limit = 12 } = parsed.data;
+    const { kind, city, sort = 'recent', limit = 12 } = parsed.data;
+    const cursor = cursorId(parsed.data.cursor);
 
     // The sort fragment comes from a CLOSED MAP keyed by an enum zod already validated. There is
     // no path by which a query string becomes SQL.
@@ -157,9 +186,9 @@ router.get(
     });
     res.json({
       posts,
-      // The cursor is the internal id and it is the ONE integer that crosses the boundary. It is
-      // opaque to a reader, orders nothing they can act on, and names no account.
-      nextCursor: rows.length === limit ? rows.at(-1)._cursor : null,
+      // Encoded, so the internal row id never crosses the boundary. The client echoes the value
+      // back and never reads it, which is what makes the change invisible to it.
+      nextCursor: rows.length === limit ? encodeCursor([rows.at(-1)._cursor]) : null,
     });
   }),
 );
@@ -206,7 +235,8 @@ router.get(
   asyncRoute(async (req, res) => {
     const parsed = directoryQuery.safeParse(req.query);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
-    const { city, sort = 'recommended', cursor, limit = 12 } = parsed.data;
+    const { city, sort = 'recommended', limit = 12 } = parsed.data;
+    const cursor = cursorId(parsed.data.cursor);
 
     const rows = await db.all(
       `SELECT ${PUBLIC_PROFILE_COLUMNS}, c.user_id AS _cursor
@@ -224,7 +254,8 @@ router.get(
         const { _cursor, ...rest } = r;
         return withDoc(rest);
       }),
-      nextCursor: rows.length === limit ? rows.at(-1)._cursor : null,
+      // This one carried users.id. See cursorId above.
+      nextCursor: rows.length === limit ? encodeCursor([rows.at(-1)._cursor]) : null,
     });
   }),
 );
@@ -355,7 +386,13 @@ router.get(
     // is the same bytes for everybody, so there is no `Vary` question and no way for one reader's
     // response to reach another. An immutable key means the cache never needs to revalidate.
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
-    createReadStream(path.join(MEDIA_DIR, key.data)).pipe(res);
+    // A stream with no 'error' listener throws an UNCAUGHT EXCEPTION when the file is missing,
+    // and it sits outside asyncRoute's promise chain, so the process restarts instead of the
+    // reader getting a 404. Nothing could create such a row before the composer; something can now.
+    // The handled form already ships in exercises/media.js — this is that, not a new idea.
+    res.sendFile(path.join(MEDIA_DIR, key.data), (err) => {
+      if (err && !res.headersSent) sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    });
   }),
 );
 
@@ -371,7 +408,7 @@ router.get(
   '/public/taxonomy',
   publicLimiter,
   asyncRoute(async (_req, res) => {
-    const [cities, kinds, specialties] = await Promise.all([
+    const [cities, kinds, specialties, currencies] = await Promise.all([
       db.all(`SELECT key, country_code AS country, name_native AS name FROM public_cities ORDER BY sort_order, key`),
       db.all(
         `SELECT key, requires_event_at AS requiresEventAt, allows_capacity AS allowsCapacity,
@@ -379,8 +416,9 @@ router.get(
            FROM post_kinds ORDER BY sort_order, key`,
       ),
       db.all(`SELECT key, i18n_key AS i18nKey FROM coach_specialties WHERE active = 1 ORDER BY sort_order, key`),
+      db.all(`SELECT code, minor_units AS minorUnits FROM public_currencies WHERE active = 1 ORDER BY code`),
     ]);
-    res.json({ cities, kinds, specialties });
+    res.json({ cities, kinds, specialties, currencies });
   }),
 );
 

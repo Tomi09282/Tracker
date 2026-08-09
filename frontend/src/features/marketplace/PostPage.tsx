@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, MapPin, Calendar, Users, BadgeCheck, FileQuestion } from 'lucide-react';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { DocRenderer } from './DocRenderer';
-import { usePost, formatPrice } from './usePublic';
+import { usePost, usePriceFormatter } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
@@ -25,6 +25,9 @@ export function PostPage() {
   const { t, i18n } = useTranslation();
   const { publicId } = useParams();
   const { data, isLoading, isError } = usePost(publicId);
+  // Above the early returns: the price is read further down, past two of them, and a hook called
+  // after a conditional return is called on some renders and not others.
+  const formatPrice = usePriceFormatter();
 
   if (isLoading) {
     return (
@@ -55,7 +58,7 @@ export function PostPage() {
   }
 
   const { post, media } = data;
-  const price = formatPrice(post.priceMinor, post.priceCurrency, i18n.language);
+  const price = formatPrice(post.priceMinor, post.priceCurrency);
   const cover = media.find((m) => m.role === 'cover') ?? media[0];
 
   return (

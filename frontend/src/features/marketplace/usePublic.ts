@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import type { BlockNode } from './DocRenderer';
 
 /**
@@ -54,6 +55,8 @@ export interface Taxonomy {
   cities: { key: string; country: string; name: string }[];
   kinds: { key: string; requiresEventAt: 0 | 1; allowsCapacity: 0 | 1; allowsPrice: 0 | 1 }[];
   specialties: { key: string; i18nKey: string }[];
+  /** How many decimal places a currency actually has. HUF is 0; EUR, GBP and USD are 2. */
+  currencies: { code: string; minorUnits: number }[];
 }
 
 export function useTaxonomy() {
@@ -135,12 +138,51 @@ export function useSearch(q: string, city?: string) {
 }
 
 /** Display only. The server stores integer minor units and no float ever crosses the boundary. */
-export const formatPrice = (minor: number | null, currency: string | null, locale: string) => {
+/**
+ * Render a price from its MINOR UNITS, which is not always hundredths.
+ *
+ * This divided by a hardcoded 100 and forced `maximumFractionDigits: 0`. Measured against the
+ * database, which is the only thing that actually knows: `public_currencies.minor_units` is 0 for
+ * HUF and 2 for EUR, GBP and USD. So every Hungarian price on the public marketplace was rendered
+ * at ONE HUNDREDTH of its value, and the forced zero digits turned EUR 0.01 into "0 EUR".
+ *
+ * `minorUnits` comes from `GET /public/taxonomy`. Passing it in rather than keeping a table here is
+ * the point: a second copy of the currency list is a second thing to update when one is added, and
+ * this file has just finished paying for exactly that mistake.
+ */
+export const formatPrice = (
+  minor: number | null,
+  currency: string | null,
+  locale: string,
+  minorUnits: number | undefined,
+) => {
   if (minor == null || !currency) return null;
+  // Undefined means the taxonomy has not loaded. Guessing a scale is how the original bug read to
+  // everyone who looked at it, so this renders nothing until it knows.
+  if (minorUnits === undefined) return null;
+  const value = minor / 10 ** minorUnits;
   try {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 })
-      .format(minor / 100);
+    return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
   } catch {
-    return `${Math.round(minor / 100)} ${currency}`;
+    return `${value} ${currency}`;
   }
 };
+
+/**
+ * The price formatter, bound to the currency table and the reader's locale.
+ *
+ * A hook rather than two call sites each doing their own `currencies.find(...)`: that lookup is
+ * the thing that was wrong, and writing it twice is how it goes wrong again in one place and not
+ * the other. Callers ask for a formatter and pass it a number.
+ */
+export function usePriceFormatter() {
+  const { i18n } = useTranslation();
+  const { data } = useTaxonomy();
+  return (minor: number | null, currency: string | null) =>
+    formatPrice(
+      minor,
+      currency,
+      i18n.language,
+      data?.currencies.find((c) => c.code === currency)?.minorUnits,
+    );
+}

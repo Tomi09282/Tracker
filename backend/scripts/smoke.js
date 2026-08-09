@@ -25,6 +25,84 @@ let failed = 0;
  * own database file, so the schema's coherence triggers still police it — an invalid insert is
  * refused and reported, rather than silently leaving the probe testing nothing.
  */
+/**
+ * Publish one coach profile and two posts, so the public assertions run against something.
+ *
+ * ═══ WHY THIS EXISTS, AND WHAT IT SAYS ABOUT THE ASSERTIONS THAT CAME BEFORE IT ════════════════
+ *
+ * Every anonymous marketplace check ran against an EMPTY corpus. The suite boots a fresh database
+ * and there are no write routes for the marketplace yet, so nothing had ever published anything —
+ * `/public/posts` answered `{"posts":[],"nextCursor":null}` and each check passed on it.
+ *
+ * Including the one that mattered most. "A signed-in visitor gets BYTE-IDENTICAL bytes to an
+ * anonymous one" reported `anon 30b, auth 30b`: thirty bytes is that empty envelope, so the
+ * flagship property of the public surface was being proved by comparing two empty lists. A clean
+ * result is a statement about coverage before it is a statement about the subject.
+ *
+ * Same shape as seedPrescription above and for the same reason — the row has to exist and there is
+ * no route that makes one — and it goes through the server's own database file so 021's publish
+ * gates and coherence triggers still police it. The body goes through the REAL parser: a
+ * hand-built tree would let the assertions pass over a document the product cannot produce.
+ */
+async function seedPublicCorpus() {
+  try {
+    const { default: Database } = await import('better-sqlite3-multiple-ciphers');
+    const { deriveDbKeyHex } = await import('../src/lib/dbkey.js');
+    const { parseBody } = await import('../src/public/markdown.js');
+    const conn = new Database(process.env.DB_PATH);
+    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+    conn.pragma('foreign_keys = ON');
+
+    const uid = conn
+      .prepare(
+        `INSERT INTO users (email, password_hash, role, created_at)
+         VALUES ('public-corpus@smoke.local', 'x', 'coach', unixepoch() - 999999)`,
+      )
+      .run().lastInsertRowid;
+
+    // Consent first: trg_profile_publish_standing_ins refuses a published profile without it.
+    conn
+      .prepare(
+        `INSERT INTO guidelines_acceptances (user_id, version)
+         SELECT ?, version FROM guidelines_versions WHERE active = 1`,
+      )
+      .run(uid);
+    conn
+      .prepare(
+        `INSERT INTO coach_profiles (user_id, handle, display_name, headline, bio_src, bio_doc,
+                                     doc_version, published_at, listed_at)
+         VALUES (?, 'smoke-coach', 'Smoke Coach', 'Probe profile', 'A **bio**.', ?, ?, unixepoch(), unixepoch())`,
+      )
+      .run(uid, ...(() => { const b = parseBody('A **bio**.'); return [b.json, b.version]; })());
+
+    // ASK THE TABLE WHICH KIND FITS THIS ROW, rather than taking the first one and hoping. The
+    // first draft used LIMIT 1 and hit `kind_shape_invalid`: kinds differ in whether they require
+    // an event time and whether they allow a price, and the trigger enforces the combination.
+    const kind = conn
+      .prepare(`SELECT key FROM post_kinds WHERE active = 1 AND allows_price = 1 AND requires_event_at = 0 LIMIT 1`)
+      .get()?.key;
+    if (!kind) throw new Error('no post kind allows a price without an event time');
+    for (const [publicId, title, src] of [
+      ['smokePost001', 'First smoke post', 'The **first** post.\n\n- one\n- two'],
+      ['smokePost002', 'Second smoke post', 'The *second* post, with [a link](https://example.com/x).'],
+    ]) {
+      const { json, excerpt, version } = parseBody(src);
+      conn
+        .prepare(
+          `INSERT INTO coach_posts (public_id, author_user_id, kind_key, title, body_src, body_doc,
+                                    body_excerpt, doc_version, price_minor, price_currency, published_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 45000, 'HUF', unixepoch())`,
+        )
+        .run(publicId, uid, kind, title, src, json, excerpt, version);
+    }
+    conn.close();
+    return true;
+  } catch (err) {
+    console.error(`  seedPublicCorpus: ${err.message}`);
+    return false;
+  }
+}
+
 async function seedPrescription({ planId, dayId, exerciseId }) {
   try {
     const { default: Database } = await import('better-sqlite3-multiple-ciphers');
@@ -4423,6 +4501,10 @@ if (seeded) {
 {
   const noJar = { csrf: false };
 
+  // Without this every check below runs against an empty feed and reports PASS. See the header on
+  // seedPublicCorpus for what that was actually proving.
+  check('the public corpus is seeded — these checks have something to be about', await seedPublicCorpus());
+
   for (const [label, path] of [
     ['the feed', '/api/v1/public/posts'],
     ['the coach directory', '/api/v1/public/coaches'],
@@ -4479,6 +4561,73 @@ if (seeded) {
       'nor in the directory — a public profile names a handle, never an account',
       !/"(email|userId|user_id)"/.test(leaked) && !/@/.test(leaked),
       leaked.slice(0, 120),
+    );
+  }
+  {
+    // AND THE CURSOR IS NOT A BACK DOOR TO THE SAME FACT.
+    //
+    // The two assertions above search for the KEY NAMES. The directory shipped `c.user_id` as the
+    // VALUE of `nextCursor`, so an account id crossed the boundary one page at a time while both
+    // checks stayed green — the leak was not hidden, it was simply under a different name. The feed
+    // did the same with the internal post rowid, which `public_id` exists to keep unaddressable.
+    const dir = await call('/api/v1/public/coaches?limit=1', noJar);
+    const feed = await call('/api/v1/public/posts?limit=1', noJar);
+    check(
+      'a cursor is opaque, never a raw row id — the value the key-name checks above cannot see',
+      typeof dir.json?.nextCursor === 'string' &&
+        !/^\d+$/.test(dir.json.nextCursor) &&
+        typeof feed.json?.nextCursor === 'string' &&
+        !/^\d+$/.test(feed.json.nextCursor),
+      `${JSON.stringify(dir.json?.nextCursor)} / ${JSON.stringify(feed.json?.nextCursor)}`,
+    );
+
+    // An opaque cursor that decodes wrong returns page one forever and looks perfectly healthy, so
+    // the encoding is only worth anything if paging is measured through it.
+    const page2 = await call(
+      `/api/v1/public/posts?limit=1&cursor=${encodeURIComponent(feed.json?.nextCursor ?? '')}`,
+      noJar,
+    );
+    check(
+      'and it still pages — page two is a different post, not page one again',
+      page2.res.status === 200 &&
+        page2.json?.posts?.[0]?.id &&
+        page2.json.posts[0].id !== feed.json?.posts?.[0]?.id,
+      `${feed.json?.posts?.[0]?.id} then ${page2.json?.posts?.[0]?.id}`,
+    );
+
+    const junk = await call('/api/v1/public/posts?limit=1&cursor=not-a-cursor', noJar);
+    check(
+      'a malformed cursor starts from the beginning rather than erroring — it is client input',
+      junk.res.status === 200 && junk.json?.posts?.[0]?.id === feed.json?.posts?.[0]?.id,
+      `status ${junk.res.status}`,
+    );
+  }
+  {
+    // THE SCALE OF MONEY IS THE DATABASE'S TO STATE.
+    //
+    // The client divided by a hardcoded 100. HUF has no minor unit, so every Hungarian price on the
+    // open internet rendered at one hundredth of its value. The API now says how many places each
+    // currency has, and this asserts the one that made the bug visible.
+    const { res, json } = await call('/api/v1/public/taxonomy', noJar);
+    const huf = json?.currencies?.find((c) => c.code === 'HUF');
+    check(
+      'the taxonomy states minor units per currency, and HUF has none',
+      res.status === 200 && Array.isArray(json?.currencies) && huf?.minorUnits === 0,
+      JSON.stringify(json?.currencies),
+    );
+  }
+  {
+    // A WELL-FORMED KEY WITH NO FILE IS A 404, NOT A RESTART.
+    //
+    // The serve route piped a read stream with no 'error' listener, outside asyncRoute's promise
+    // chain: a missing file was an uncaughtException. Nothing could create such a row before the
+    // composer. The second call is the real assertion — it proves the process is still alive.
+    const missing = await call(`/api/v1/public/media/pub_${'a'.repeat(32)}.webp`, noJar);
+    const alive = await call('/healthz', noJar);
+    check(
+      'a media key with no file behind it is 404 and the process survives it',
+      missing.res.status === 404 && alive.res.status === 200,
+      `${missing.res.status} then healthz ${alive.res.status}`,
     );
   }
 
