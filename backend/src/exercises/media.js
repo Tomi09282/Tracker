@@ -5,7 +5,7 @@ import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
-import { requireAuth } from '../auth/middleware.js';
+import { requireAuth, multipartCsrf } from '../auth/middleware.js';
 import { VISIBLE, visibleParams } from './visibility.js';
 import {
   QUARANTINE_DIR,
@@ -61,19 +61,6 @@ const upload = multer({
  * cross-origin, and the Fetch-Metadata check — so this narrows the content-type rule for this
  * one route rather than dropping CSRF protection for it.
  */
-function multipartCsrf(req, res, next) {
-  const site = req.get('Sec-Fetch-Site');
-  if (site && site !== 'same-origin' && site !== 'none') {
-    return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-  }
-  if (req.get('X-CSRF') !== '1') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-  const ct = (req.get('Content-Type') ?? '').split(';')[0].trim();
-  if (ct !== 'multipart/form-data') {
-    return sendError(res, 415, ERR.UNSUPPORTED_MEDIA_TYPE, 'unsupported media type');
-  }
-  next();
-}
-
 router.post(
   '/exercises/:id/media',
   requireAuth,

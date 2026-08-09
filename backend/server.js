@@ -27,6 +27,7 @@ import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/prog
 import coinRoutes from './src/coins/routes.js';
 import publicRoutes from './src/public/routes.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
+import composeUploadRoutes from './src/public/compose-media.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -200,6 +201,12 @@ app.use('/api/v1', progressUploadRoutes);
 // link opened in a fresh browser, a person who has never signed up. There is NO WRITE in this
 // router, which is what makes the placement safe rather than an exception: CSRF protects
 // state-changing requests, and there is no state to change.
+// The cover UPLOAD joins media, chat attachments and progress photos above the global CSRF
+// middleware, for the same reason and with the same compensation: a multipart body cannot carry
+// a JSON content type, so it runs multipartCsrf instead. Only the upload moves; the cover DELETE
+// has no body at all and stays below with the rest of the composer.
+app.use('/api/v1', composeUploadRoutes);
+
 app.use('/api/v1', publicRoutes);
 
 app.use(csrfProtection);

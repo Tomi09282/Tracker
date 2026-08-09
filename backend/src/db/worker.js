@@ -2409,3 +2409,174 @@ export function restorePostTx({ userId, publicId, tokenSv = null, requestId, ip 
     return rethrow(err, current);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE COMPOSER — the cover image.
+ *
+ * ONE cover per post, and there is no replace. The adversarial review put 40% of the whole
+ * corpus's defect weight in the media surface, including its only FATAL finding: a soft-delete
+ * followed by a guarded write followed by `return {outcome:'missing'}` destroys the coach's image
+ * and answers 404, because the transaction COMMITS ON RETURN.
+ *
+ * Replacing a cover is therefore DELETE then POST — two operations that are each already atomic,
+ * with no window between them that matters, and no UPDATE of post_media anywhere in the product.
+ * Every UPDATE not written is an IDOR that cannot exist.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+const COVER_SELECT = `
+  SELECT m.id, m.storage_key AS storageKey, m.thumb_key AS thumbKey, m.mime,
+         m.width, m.height, m.bytes, m.alt, m.created_at AS createdAt
+    FROM post_media m WHERE m.id = ?`;
+
+/**
+ * Attach the cover to a post.
+ *
+ * The file is ALREADY on disk when this runs — it was written by the ingest before the transaction
+ * opened, because re-encoding an 8 MiB photo inside a write lock would hold the database for the
+ * length of a sharp pass. The consequence is stated rather than hidden: if this transaction
+ * refuses, the route removes the files it just wrote.
+ */
+export function attachPostCoverTx({
+  userId, publicId, storageKey, thumbKey, mime, width, height, bytes,
+  sha256, alt, idempotencyKey, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (mediaId, replayed) => {
+      current = 'SELECT the cover back';
+      return { outcome: 'applied', replayed, ...stmt(COVER_SELECT).get(mediaId) };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the post';
+    const post = stmt(
+      `SELECT id FROM coach_posts
+        WHERE public_id = ? AND author_user_id = ?
+          AND deleted_at IS NULL AND removed_at IS NULL`,
+    ).get(publicId, userId);
+    if (!post) return { outcome: 'missing' };
+
+    // REPLAY, scoped to the post and comparing the BYTES. Two uploads under one key are a retry
+    // only if they carry the same image; answering the second with the first one's row whatever
+    // was sent would put the wrong picture on a published post and report success.
+    current = 'SELECT the prior attempt';
+    const prior = stmt(
+      'SELECT id, content_sha256 AS sha FROM post_media WHERE post_id = ? AND write_uid = ?',
+    ).get(post.id, idempotencyKey);
+    if (prior && prior.sha !== sha256) return { outcome: 'key_reused' };
+    if (prior) return view(prior.id, true);
+
+    current = 'SELECT the live cover';
+    const live = stmt(
+      "SELECT id FROM post_media WHERE post_id = ? AND role_key = 'cover' AND deleted_at IS NULL",
+    ).get(post.id);
+    // No replace. Delete the old one first — see the header.
+    if (live) return { outcome: 'cover_exists' };
+
+    // The daily cap counts rows CREATED, with no deleted_at filter, because that is how
+    // trg_post_media_daily_cap_ins counts. Subtracting deletions here would promise an upload the
+    // database then refuses, with a trigger message nobody may see.
+    current = 'SELECT the daily media count';
+    const cap = stmt(
+      `SELECT (SELECT COUNT(*) FROM post_media m JOIN coach_posts p ON p.id = m.post_id
+                WHERE p.author_user_id = ? AND m.created_at > unixepoch() - 86400) AS used,
+              (SELECT value FROM public_policy WHERE key = 'media_daily_max') AS max`,
+    ).get(userId);
+    if (cap.used >= cap.max) return { outcome: 'media_quota', used: cap.used, max: cap.max };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'INSERT the cover';
+    // `mime` is a server-side literal and `sort_order` a constant: the gallery was cut, so the only
+    // media a post can have is one cover at position zero. An INSERT has no WHERE, so the SELECT
+    // carries the ownership and liveness predicates.
+    const created = stmt(
+      `INSERT INTO post_media (post_id, role_key, storage_key, thumb_key, mime,
+                               width, height, bytes, alt, sort_order, content_sha256, write_uid)
+       SELECT p.id, 'cover', ?, ?, 'image/webp', ?, ?, ?, ?, 0, ?, ?
+         FROM coach_posts p
+        WHERE p.id = ? AND p.author_user_id = ?
+          AND p.deleted_at IS NULL AND p.removed_at IS NULL`,
+    ).run(storageKey, thumbKey, width, height, bytes, alt, sha256, idempotencyKey, post.id, userId);
+    if (created.changes === 0) return { outcome: 'missing' };
+
+    current = 'SELECT the new media id';
+    const mediaId = stmt('SELECT id FROM post_media WHERE storage_key = ?').get(storageKey).id;
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.media.attach', 'coach_post', ?, ?, ?, ?)`,
+    ).run(userId, post.id, JSON.stringify({ publicId, bytes }), requestId, ip);
+
+    return view(mediaId, false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Take the cover off a post.
+ *
+ * Soft-delete only. The files are removed by the ROUTE after this returns, and in that order: a
+ * row pointing at a missing file renders as a broken image, while a file with no row is invisible
+ * and gets swept. If the two must disagree for a moment, this is the harmless direction.
+ *
+ * Deliberately NOT written as `UPDATE ... RETURNING`: `.run()` discards the returned rows and
+ * `.all()` reports no `.changes`, so the shape that reads naturally is the one that cannot tell
+ * whether it changed anything.
+ */
+export function deletePostCoverTx({ userId, publicId, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the cover';
+    const cover = stmt(
+      `SELECT m.id, m.storage_key AS storageKey, m.thumb_key AS thumbKey, m.deleted_at AS deletedAt
+         FROM post_media m
+         JOIN coach_posts p ON p.id = m.post_id
+        WHERE p.public_id = ? AND p.author_user_id = ? AND m.role_key = 'cover'
+        ORDER BY m.id DESC`,
+    ).get(publicId, userId);
+    if (!cover) return { outcome: 'missing' };
+    // Already gone is not an error, and the files are named again so a retry can finish a delete
+    // that failed halfway through its file removal.
+    if (cover.deletedAt !== null) {
+      return { outcome: 'applied', replayed: true, storageKey: cover.storageKey, thumbKey: cover.thumbKey };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the cover to deleted';
+    const removed = stmt(
+      'UPDATE post_media SET deleted_at = unixepoch() WHERE id = ? AND deleted_at IS NULL',
+    ).run(cover.id);
+    // The row was proved present and live under this same write lock.
+    if (removed.changes === 0) throw new Error('deletePostCoverTx: guarded update matched nothing');
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.media.delete', 'coach_post',
+               (SELECT id FROM coach_posts WHERE public_id = ?), ?, ?, ?)`,
+    ).run(userId, publicId, JSON.stringify({ publicId }), requestId, ip);
+
+    return { outcome: 'applied', replayed: false, storageKey: cover.storageKey, thumbKey: cover.thumbKey };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

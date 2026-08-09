@@ -64,6 +64,11 @@ export const updatePost = (args) => pool.run(args, { name: 'updatePostTx' });
 export const publishPost = (args) => pool.run(args, { name: 'publishPostTx' });
 export const withdrawPost = (args) => pool.run(args, { name: 'withdrawPostTx' });
 export const restorePost = (args) => pool.run(args, { name: 'restorePostTx' });
+
+// The cover. There is no updateCover: replacing one is delete-then-post, because a soft-delete
+// followed by a guarded write followed by a conditional return COMMITS the delete and answers 404.
+export const attachPostCover = (args) => pool.run(args, { name: 'attachPostCoverTx' });
+export const deletePostCover = (args) => pool.run(args, { name: 'deletePostCoverTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);

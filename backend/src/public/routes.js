@@ -32,7 +32,7 @@ import path from 'node:path';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { toFtsQuery } from '../lib/normalize.js';
-import { MEDIA_DIR } from '../lib/media.js';
+import { resolveStoredPath } from '../lib/media.js';
 import { encodeCursor, decodeCursor } from '../lib/cursor.js';
 import {
   PUBLIC_POST,
@@ -390,7 +390,14 @@ router.get(
     // and it sits outside asyncRoute's promise chain, so the process restarts instead of the
     // reader getting a 404. Nothing could create such a row before the composer; something can now.
     // The handled form already ships in exercises/media.js — this is that, not a new idea.
-    res.sendFile(path.join(MEDIA_DIR, key.data), (err) => {
+    // The PUBLIC namespace, which is a different directory. 021 asked for this and nothing
+    // implemented it: a flat MEDIA_DIR holds exercise media, chat attachments and progress
+    // photos, and a public route joining onto it is safe only while two key regexes happen not
+    // to overlap. Disjoint namespaces make a progress photo unreachable from here rather than
+    // merely unmatched.
+    const full = resolveStoredPath(key.data, 'public');
+    if (!full) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    res.sendFile(full, (err) => {
       if (err && !res.headersSent) sendError(res, 404, ERR.NOT_FOUND, 'not found');
     });
   }),

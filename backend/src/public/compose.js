@@ -23,6 +23,7 @@ import { requireAuth, requireCoach } from '../auth/middleware.js';
 import { MarkdownError } from './markdown.js';
 import { buildBio, buildBody, BIO_BODY, POST_BODY, COMPOSE_JSON_LIMIT } from './body.js';
 import { displayText } from './text.js';
+import { removePublicImage } from '../lib/media.js';
 import { HANDLE_RE, CITY_KEY_RE, SPECIALTY_KEY_RE, KIND_KEY_RE, CURRENCY_RE, PUBLIC_ID_RE, ianaTz } from './shapes.js';
 import { AUTHOR_POST_ANY, AUTHOR_POST_COLUMNS, POST_STATE_FILTERS } from './visibility.js';
 import { encodeCursor, decodeCursor } from '../lib/cursor.js';
@@ -938,6 +939,37 @@ router.post(
     } catch (err) {
       return sendBodyError(res, err);
     }
+  }),
+);
+
+/**
+ * Remove the cover.
+ *
+ * The ROW is soft-deleted first and the files are removed after. If the process dies between the
+ * two, the result is a deleted row and two orphaned files — invisible to every read, and cheaper
+ * than the other order, which leaves a live row pointing at nothing and a broken image on a page
+ * anybody can see.
+ */
+router.delete(
+  '/compose/posts/:publicId/cover',
+  requireAuth,
+  requireCoach,
+  composeWriteIpLimiter,
+  composeWriteAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const id = publicIdParam.safeParse(req.params);
+    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const result = await db.deletePostCover({
+      userId: req.user.id,
+      publicId: id.data.publicId,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendPostOutcome(res, result);
+    await removePublicImage(result.storageKey, result.thumbKey);
+    res.json({ removed: true, replayed: result.replayed });
   }),
 );
 

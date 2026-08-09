@@ -5144,6 +5144,126 @@ if (seeded) {
   }
 
 
+
+  // --- THE COVER IMAGE -------------------------------------------------------------------------
+  //
+  // The adversarial review put 40% of the whole defect corpus in this surface, including its only
+  // FATAL finding, so the feature that shipped is one cover per post with NO replace: replacing is
+  // delete-then-post, and there is no UPDATE of post_media anywhere in the product.
+  {
+    const sharp = (await import('sharp')).default;
+    const { stat } = await import('node:fs/promises');
+    const nodePath = (await import('node:path')).default;
+
+    // The kind is looked up HERE rather than borrowed from the block above: a name that happens to
+    // still be in scope is a dependency nobody declared.
+    const coverKinds = (await call('/api/v1/public/taxonomy', { csrf: false })).json.kinds;
+    const coverKind = coverKinds.find((k) => k.requiresEventAt === 0) ?? coverKinds[0];
+
+    const jpeg = await sharp({ create: { width: 900, height: 600, channels: 3, background: { r: 40, g: 90, b: 160 } } })
+      .jpeg({ quality: 90 }).toBuffer();
+
+    const coverPost = await call('/api/v1/compose/posts', {
+      method: 'POST', jar: builderJar,
+      body: {
+        idempotency_key: 'smoke-cover-post', kind_key: coverKind.key, title: 'Cover smoke post',
+        body_src: 'A post with a picture.', city_key: null, event_at: null, event_tz: null,
+        capacity: null, price_minor: null, price_currency: null,
+      },
+    });
+    const cpid = coverPost.json?.post?.id;
+
+    const form = (buf, key, name = 'photo.jpg', type = 'image/jpeg') => {
+      const fd = new FormData();
+      fd.append('file', new Blob([buf], { type }), name);
+      fd.append('idempotency_key', key);
+      fd.append('alt', 'A blue rectangle');
+      return fd;
+    };
+
+    const up = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(jpeg, 'smoke-ck-1') });
+    const cover = up.json?.cover;
+    check(
+      'a cover uploads as TWO distinct keys of the exact public shape, with a server-chosen mime',
+      up.res.status === 201
+        && /^pub_[a-f0-9]{32}\.webp$/.test(cover?.storageKey ?? '')
+        && /^pub_[a-f0-9]{32}\.webp$/.test(cover?.thumbKey ?? '')
+        && cover.storageKey !== cover.thumbKey && cover.mime === 'image/webp',
+      `${up.res.status} ${cover?.storageKey}`,
+    );
+
+    // 021 asked for disjoint namespaces so a public route cannot reach a client's progress photo.
+    // The flat layout was safe only while two key regexes happened not to overlap.
+    {
+      const inPublic = await stat(nodePath.resolve('storage/media/public', cover.storageKey)).then(() => true).catch(() => false);
+      const inFlat = await stat(nodePath.resolve('storage/media', cover.storageKey)).then(() => true).catch(() => false);
+      check('and it lands in the PUBLIC subtree, not the flat media directory', inPublic && !inFlat, `public ${inPublic} / flat ${inFlat}`);
+    }
+
+    // THE ASSERTION THAT CAN ONLY BE MADE ONCE: before the post is published.
+    {
+      const draft = await call(`/api/v1/public/media/${cover.storageKey}`, { csrf: false });
+      check('a DRAFT post cover is not served to the open internet', draft.res.status === 404, `status ${draft.res.status}`);
+    }
+
+    await call(`/api/v1/compose/posts/${cpid}/publish`, { method: 'POST', jar: builderJar, body: {} });
+
+    {
+      const anon = await fetch(`${BASE}/api/v1/public/media/${cover.storageKey}`);
+      const thumb = await fetch(`${BASE}/api/v1/public/media/${cover.thumbKey}`);
+      const big = (await anon.arrayBuffer()).byteLength;
+      const small = (await thumb.arrayBuffer()).byteLength;
+      check(
+        'once published both variants serve with no session, and the card one is genuinely smaller',
+        anon.status === 200 && thumb.status === 200 && small < big,
+        `${small} < ${big}`,
+      );
+    }
+
+    {
+      const replay = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(jpeg, 'smoke-ck-1') });
+      const other = await sharp({ create: { width: 400, height: 400, channels: 3, background: { r: 200, g: 30, b: 30 } } }).jpeg().toBuffer();
+      const reused = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(other, 'smoke-ck-1') });
+      check(
+        'REPLAY compares the BYTES: the same image returns the original row, a different one is 409',
+        replay.res.status === 200 && replay.json?.cover?.storageKey === cover.storageKey
+          && reused.res.status === 409 && reused.json?.reason === 'key_reused',
+        `${replay.res.status} / ${reused.res.status} ${reused.json?.reason}`,
+      );
+
+      const second = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(other, 'smoke-ck-2') });
+      check('a second cover is refused — there is no replace, only delete then post',
+        second.res.status === 409 && second.json?.reason === 'cover_exists', `${second.res.status} ${second.json?.reason}`);
+    }
+
+    {
+      // SVG is a document format that can carry script, and it is absent from the allowlist. The
+      // sniff reads magic bytes, so renaming it and lying about the type changes nothing.
+      const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><scr' + 'ipt>alert(1)</scr' + 'ipt></svg>');
+      const bad = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(svg, 'smoke-svg-1', 'x.jpg', 'image/jpeg') });
+      const empty = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'POST', jar: builderJar, body: form(Buffer.alloc(0), 'smoke-empty-1') });
+      check(
+        'an SVG renamed and re-typed as a JPEG is refused on its magic bytes, and so is a zero-byte file',
+        bad.res.status === 400 && empty.res.status === 400,
+        `${bad.res.status} ${bad.json?.reason} / ${empty.res.status}`,
+      );
+    }
+
+    {
+      const del = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'DELETE', jar: builderJar });
+      const onDisk = await stat(nodePath.resolve('storage/media/public', cover.storageKey)).then(() => true).catch(() => false);
+      const gone = await call(`/api/v1/public/media/${cover.storageKey}`, { csrf: false });
+      const alive = await call('/healthz', { csrf: false });
+      check(
+        'delete removes the row AND both files, serving 404s, and the process survives it',
+        del.res.status === 200 && !onDisk && gone.res.status === 404 && alive.res.status === 200,
+        `${del.res.status} / onDisk ${onDisk} / ${gone.res.status}`,
+      );
+      const again = await call(`/api/v1/compose/posts/${cpid}/cover`, { method: 'DELETE', jar: builderJar });
+      check('and a second delete is a replay, not an error', again.res.status === 200 && again.json?.replayed === true, `status ${again.res.status}`);
+    }
+  }
+
   // --- PREVIEW: the same function as the save, which is the entire point ------------------------
   {
     const ok = await call('/api/v1/compose/preview', {

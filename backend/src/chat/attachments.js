@@ -23,7 +23,7 @@ import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
-import { requireAuth } from '../auth/middleware.js';
+import { requireAuth, multipartCsrf } from '../auth/middleware.js';
 import { MEDIA_DIR, QUARANTINE_DIR, resolveStoredPath } from '../lib/media.js';
 
 const router = Router();
@@ -55,15 +55,6 @@ const upload = multer({
   dest: QUARANTINE_DIR,
   limits: { fileSize: MAX_ATTACHMENT_BYTES, files: 1, fields: 4, parts: 8 },
 });
-
-function multipartCsrf(req, res, next) {
-  const site = req.get('Sec-Fetch-Site');
-  if (site && site !== 'same-origin' && site !== 'none') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-  if (req.get('X-CSRF') !== '1') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-  const ct = (req.get('Content-Type') ?? '').split(';')[0].trim();
-  if (ct !== 'multipart/form-data') return sendError(res, 415, ERR.UNSUPPORTED_MEDIA_TYPE, 'unsupported media type');
-  next();
-}
 
 /**
  * THE GATE THAT RUNS BEFORE ANY BYTE IS WRITTEN.

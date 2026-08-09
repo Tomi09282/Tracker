@@ -129,6 +129,30 @@ export const requireRole =
  */
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
+/**
+ * The CSRF rule NARROWED for multipart, not waived.
+ *
+ * `csrfProtection` below requires a JSON content type, which a multipart body cannot have — so
+ * every upload route is mounted above it and runs this instead: the same Sec-Fetch-Site check, the
+ * same X-CSRF header requirement, and the content-type requirement changed from JSON to multipart
+ * rather than dropped.
+ *
+ * ═══ IT LIVES HERE BECAUSE THERE WERE ALREADY THREE OF IT ══════════════════════════════════════
+ *
+ * Exercise media, chat attachments and progress photos each carried their own copy. Compared: the
+ * three agreed on behaviour and differed only in line breaks, so nothing had gone wrong yet — and
+ * the composer's cover upload was about to be the fourth. A rule with four copies is a rule that
+ * will be updated in three of them.
+ */
+export function multipartCsrf(req, res, next) {
+  const site = req.get('Sec-Fetch-Site');
+  if (site && site !== 'same-origin' && site !== 'none') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+  if (req.get('X-CSRF') !== '1') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+  const ct = (req.get('Content-Type') ?? '').split(';')[0].trim();
+  if (ct !== 'multipart/form-data') return sendError(res, 415, ERR.UNSUPPORTED_MEDIA_TYPE, 'unsupported media type');
+  next();
+}
+
 export function csrfProtection(req, res, next) {
   if (SAFE_METHODS.has(req.method)) return next();
 
