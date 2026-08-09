@@ -74,12 +74,25 @@ decorative boxes and told nothing about what was happening. Every refactored blo
 `aria-hidden="true"` — measured on a cold load with the API held back 700 ms, three skeletons on
 `/m` and two on the post page, all at `1.2s` with the shimmer gradient painted.
 
-**The announcement is still missing**, and this document nearly claimed otherwise. `role="status"`
-lives on `ScreenSkeleton`'s own wrapper; the inline loading branches render bare `<Skeleton>`
-groups with no wrapper, so `[role="status"], [aria-busy="true"]` measures **0** on all three
-marketplace routes. The boxes are no longer read out, and nothing is announced in their place.
-Recorded as open (**T6.7.1**) rather than folded into a green row — the first draft of this
-paragraph asserted both halves, and only one of them had been measured.
+**The announcement was missing, and this document nearly claimed otherwise before it was
+measured.** `role="status"` lived only on `ScreenSkeleton`'s wrapper; the 59 inline `<Skeleton>`
+uses across 26 files sat in bare divs, so `[role="status"], [aria-busy="true"]` measured **0** on
+all three marketplace routes while three skeletons were on screen. The boxes had stopped being read
+out and nothing was announced in their place.
+
+Fixed as **T6.7.1**, and the interesting part is the fix that was REJECTED. A `SkeletonGroup`
+wrapper applied at all 26 sites is the obvious answer and it is **the same shape as the defect** — a
+convention that has to be remembered at 26 call sites is one that gets forgotten at the 27th, which
+is precisely how nine screens came to hand-roll a skeleton that already existed as a component. So
+the announcement is ONE component mounted above every route, public and authenticated alike, keyed
+on queries that have no data yet. Background refetches are excluded deliberately: there is content
+on the page already, and interrupting a reader to announce a refresh they did not ask for is worse
+than saying nothing.
+
+**Seen to fire and seen to stop**, which is the rule-6 half that a single snapshot cannot give: a
+recorder attached to the region logged "" → "Betöltés" → "" across 1.1 s while two skeletons swept
+on the post page. A region that is merely present, and a region that never speaks, measure the same
+in one sample.
 
 ## And the probe was breaking rule 4 while it caught this
 

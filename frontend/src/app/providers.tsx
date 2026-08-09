@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ApiError } from '../lib/api';
 import { ThemeProvider } from '../ui/theme/ThemeProvider';
 import { ElementStyleProvider } from '../ui/feedback/ElementStyleProvider';
+import { LoadingAnnouncer } from '../ui/feedback/LoadingAnnouncer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,7 +28,12 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <ElementStyleProvider>{children}</ElementStyleProvider>
+        <ElementStyleProvider>
+          {/* Mounted above every route, public and authenticated alike — the marketplace screens
+              sit OUTSIDE AppLayout, so anything hung off the app shell would have missed them. */}
+          <LoadingAnnouncer />
+          {children}
+        </ElementStyleProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
