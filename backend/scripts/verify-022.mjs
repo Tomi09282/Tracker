@@ -363,6 +363,117 @@ accepted(
   );
 }
 
+/* ── 9. THE SHORT-TEXT CONTROL 021 PROMISED AND NOBODY WROTE ─────────────────────────────────── */
+
+const { sanitizeDisplayText } = await import('../src/public/text.js');
+const { HANDLE_RE } = await import('../src/public/shapes.js');
+
+// EVERY INVISIBLE CHARACTER IN THIS SECTION IS AN ESCAPE, never the character itself.
+//
+// The first draft of this block pasted literals. One of them — a non-breaking space — arrived as
+// an ordinary space, so the assertion written to show that the COLUMN cannot catch a blank name
+// reported the opposite, and it reported it convincingly. A file about invisible characters is the
+// last place to keep any.
+const NBSP = '\u00A0';
+const ZWJ = '\u200D';
+const IDEOGRAPHIC_SPACE = '\u3000';
+const RLO = '\u202E';
+const PDF = '\u202C';
+const ACUTE = '\u0301';
+
+// THE PROPERTY, stated once: after sanitising, the length JavaScript measures is the length SQLite
+// measures. Everything else in text.js exists to make that true.
+//
+// It is not true of raw input, because SQLite's trim() strips ASCII SPACE AND NOTHING ELSE —
+// measured against the real database, not assumed: NBSP, U+3000, TAB and NEWLINE all survive it
+// with the length unchanged. So a bound of length(trim(x)) BETWEEN 2 AND 120 is satisfied by two
+// non-breaking spaces, and a name JavaScript trims to two characters can fail a CHECK that measured
+// it differently, arriving at the composer as an opaque 400 about a length the coach can see is fine.
+for (const [raw, label] of [
+  ['Kovács Péter', 'ordinary accented text'],
+  [ZWJ.repeat(60), 'sixty zero-width joiners'],
+  [NBSP + NBSP, 'two non-breaking spaces'],
+  [RLO + 'gnitekram' + PDF, 'a right-to-left override'],
+  ['a' + ACUTE.repeat(4) + 'b', 'a combining-mark run'],
+  ['  spaced' + IDEOGRAPHIC_SPACE + 'out  ', 'mixed unicode whitespace'],
+  ['\u0007x', 'a control character'],
+]) {
+  const clean = sanitizeDisplayText(raw);
+  const trimmed = db.prepare('SELECT length(trim(?)) AS n').get(clean).n;
+  check(
+    'after sanitising, JS and SQLite agree on the length — ' + label,
+    clean.length === trimmed,
+    'js ' + clean.length + ' vs sqlite ' + trimmed + ' for ' + JSON.stringify(clean),
+  );
+}
+
+check(
+  'a display name of joiners alone sanitises to nothing, so the 2-character floor rejects it',
+  sanitizeDisplayText(ZWJ.repeat(60)) === '' && sanitizeDisplayText(NBSP + NBSP) === '',
+);
+
+const insName = (handle, name, email) =>
+  db
+    .prepare('INSERT INTO coach_profiles (user_id, handle, display_name) VALUES (?, ?, ?)')
+    .run(mkUser(email), handle, name);
+
+refused(
+  'the column catches a blank name made of ASCII spaces',
+  () => insName('blank-name', '  ', 'blank@v022.local'),
+  'display_name',
+);
+
+/*
+ * AND HERE IS WHY THE CODE CONTROL HAS TO EXIST AT ALL.
+ *
+ * The same blank name written with NON-BREAKING spaces is ACCEPTED by the column, because SQLite's
+ * trim() leaves them alone: length(trim(x)) sees two characters and the CHECK agrees. The row is
+ * legal, the directory renders an entry with no name, and no schema control anywhere refuses it.
+ *
+ * 021 said exactly this — the strip is "a CODE control, stated as one... and not pretended to be a
+ * schema control here" — and then the code was never written. This assertion is the demonstration
+ * that the column really cannot do the job, so the next person to find sanitizeDisplayText
+ * inconvenient can see what deleting it gives back.
+ */
+accepted(
+  'but the SAME name in non-breaking spaces satisfies that CHECK — the schema cannot catch this',
+  () => insName('nbsp-name', NBSP + NBSP, 'nbsp@v022.local'),
+);
+check(
+  'which is what sanitizeDisplayText refuses before it ever reaches the column',
+  sanitizeDisplayText(NBSP + NBSP).length === 0,
+);
+
+/*
+ * HANDLE_RE and the column CHECK are ONE RULE WRITTEN TWICE — once as a JavaScript regex, once as
+ * four SQLite GLOB clauses. Two representations that must agree is this project's number-one defect
+ * class, and the only honest way to hold them together is to ask both about the same strings rather
+ * than to read them side by side and nod.
+ */
+{
+  const alphabet = ['a', 'z', '0', '9', '-', 'A', '_', '.', ' ', 'é', ZWJ];
+  const candidates = new Set(['', 'a', 'ab', 'abc', 'a-c', '-ab', 'ab-', 'a'.repeat(32), 'a'.repeat(33)]);
+  for (const a of alphabet) {
+    for (const b of alphabet) {
+      for (const c of alphabet) candidates.add(a + b + c);
+    }
+  }
+  const sql = db.prepare(
+    "SELECT (? NOT GLOB '*[^a-z0-9-]*' AND ? GLOB '[a-z0-9]*' AND substr(?, -1, 1) GLOB '[a-z0-9]' AND length(?) BETWEEN 3 AND 32) AS ok",
+  );
+  const disagreements = [];
+  for (const h of candidates) {
+    const byRegex = HANDLE_RE.test(h);
+    const byColumn = sql.get(h, h, h, h).ok === 1;
+    if (byRegex !== byColumn) disagreements.push(JSON.stringify(h) + ': regex ' + byRegex + ' vs column ' + byColumn);
+  }
+  check(
+    'HANDLE_RE and the four-clause column CHECK agree on all ' + candidates.size + ' candidates',
+    disagreements.length === 0,
+    disagreements.slice(0, 3).join(' | '),
+  );
+}
+
 /* ── done ────────────────────────────────────────────────────────────────────────────────────── */
 
 db.close();
