@@ -5143,6 +5143,48 @@ if (seeded) {
     }
   }
 
+
+  // --- PREVIEW: the same function as the save, which is the entire point ------------------------
+  {
+    const ok = await call('/api/v1/compose/preview', {
+      method: 'POST', jar: builderJar,
+      body: { surface: 'post', body_src: '## Heading\n\nText with **bold** and [a link](https://example.com/x).' },
+    });
+    check(
+      'preview returns the parsed doc, the derived excerpt and the grammar version',
+      ok.res.status === 200 && Array.isArray(ok.json?.doc) && ok.json.doc[0]?.k === 'h'
+        && typeof ok.json?.excerpt === 'string' && ok.json?.version === 1,
+      `status ${ok.res.status}`,
+    );
+
+    // The preview runs the REAL parser, so a payload is neutralised here exactly as it is on the
+    // published page. A client-side renderer for the preview would be a second grammar that agrees
+    // until the day it does not, and that day is a coach publishing something they never saw.
+    const payload = await call('/api/v1/compose/preview', {
+      method: 'POST', jar: builderJar,
+      body: { surface: 'post', body_src: '<scr' + 'ipt>alert(1)</scr' + 'ipt> and [x](javascript:alert(1))' },
+    });
+    const asText = JSON.stringify(payload.json?.doc ?? []);
+    check(
+      'a script tag previews as TEXT and a javascript: URL never becomes a link node',
+      payload.res.status === 200 && asText.includes('alert(1)') && !asText.includes('"k":"link"'),
+      asText.slice(0, 80),
+    );
+
+    // The two surfaces carry DIFFERENT bounds, and the preview must enforce the one that will be
+    // saved: bio_src is capped well below a post body, so previewing at the post bound would show
+    // an author text the save is about to refuse. Paragraphs of 200 chars, so the per-line bound
+    // is never what refuses it.
+    const para = Array.from({ length: 45 }, () => 'a'.repeat(200)).join('\n\n');
+    const asBio = await call('/api/v1/compose/preview', { method: 'POST', jar: builderJar, body: { surface: 'bio', body_src: para } });
+    const asPost = await call('/api/v1/compose/preview', { method: 'POST', jar: builderJar, body: { surface: 'post', body_src: para } });
+    check(
+      'and the SAME text is too long for a bio while fitting a post — two surfaces, two bounds',
+      asBio.res.status === 400 && asBio.json?.reason === 'too_long' && asPost.res.status === 200,
+      `bio ${asBio.res.status} ${asBio.json?.reason} / post ${asPost.res.status}`,
+    );
+  }
+
   // --- CSRF: this router is BELOW the middleware, and that is the difference from public/ -------
   {
     const cross = await call('/api/v1/compose/guidelines/accept', {

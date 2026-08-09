@@ -74,6 +74,10 @@ const limiter = (limit, keyGenerator) =>
 // account limit stops one person with a phone, a laptop and a VPN.
 const composeReadLimiter = limiter(600);
 const composeWriteIpLimiter = limiter(120);
+// Preview is a keystroke-driven read that writes nothing, so it is limited generously — but it
+// still runs the parser, which is the only CPU work on this surface, so it is limited at all.
+const composePreviewIpLimiter = limiter(300);
+const composePreviewAccountLimiter = limiter(200, (req) => `prev:${req.user?.id ?? req.ip}`);
 const composeWriteAccountLimiter = limiter(60, (req) => `compose:${req.user?.id ?? req.ip}`);
 // Publishing is limited far ABOVE the database's own daily quota on purpose. The quota is the
 // bound that survives a restart and a second cluster worker; a limiter set to the same ceiling
@@ -887,6 +891,53 @@ router.post(
 
     if (result.outcome !== 'applied') return sendPostOutcome(res, result);
     res.json({ post: withPostDoc(result), replayed: result.replayed });
+  }),
+);
+
+
+/* ── preview ─────────────────────────────────────────────────────────────────────────────────── */
+
+const previewBody = z
+  .object({
+    surface: z.enum(['post', 'bio']),
+    body_src: z.string().min(1).max(POST_BODY.maxChars * 8),
+  })
+  .strict();
+
+/**
+ * Render what the published page will show, WITHOUT writing anything.
+ *
+ * ═══ THE POINT IS THAT IT IS THE SAME FUNCTION ═════════════════════════════════════════════════
+ *
+ * It calls the same buildBody the write path calls, so a preview and a published post are the
+ * same function of the same input. The alternative — a client-side markdown renderer for the
+ * preview and the server parser for the save — is two grammars that agree until the day they do
+ * not, and the day they do not is a coach publishing something they never saw.
+ *
+ * The two surfaces differ only in their bound: a bio is capped well below a post because the
+ * bio_src column is, and previewing at 20 000 characters what can only be saved at 8 000 would
+ * show the author text the save is about to refuse.
+ *
+ * Writes nothing and reads nothing. There is no id, no ownership question and therefore no 404.
+ */
+router.post(
+  '/compose/preview',
+  requireAuth,
+  requireCoach,
+  composePreviewIpLimiter,
+  composePreviewAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = previewBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    try {
+      const built = buildBody(parsed.data.body_src, parsed.data.surface === 'bio' ? BIO_BODY : POST_BODY);
+      // The DOC as a tree, because that is what DocRenderer consumes — the same renderer the public
+      // page uses, so the preview cannot render something the published page will not.
+      res.json({ doc: JSON.parse(built.doc), excerpt: built.excerpt, version: built.version, chars: built.src.length });
+    } catch (err) {
+      return sendBodyError(res, err);
+    }
   }),
 );
 
