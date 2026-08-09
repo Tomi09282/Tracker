@@ -161,7 +161,7 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 29 |
+| [[audit_log]] | 9 | 48 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
@@ -176,7 +176,7 @@ erDiagram
 | [[coin_reasons]] | 6 | 4 |
 | [[coin_store_items]] | 10 | 2 |
 | [[coin_wallets]] | 4 | 14 |
-| [[content_reports]] | 15 | 1 |
+| [[content_reports]] | 15 | 0 |
 | [[conversations]] | 9 | 1 |
 | [[element_style_config]] | 4 | 27 |
 | [[equipment]] | 4 | 16 |
@@ -218,7 +218,7 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 125 |
+| [[refresh_tokens]] | 9 | 130 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |

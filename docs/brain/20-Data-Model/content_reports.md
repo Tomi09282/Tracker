@@ -1,8 +1,8 @@
 ---
 type: table
 table: content_reports
-summary: 15 columns, 1 rows
-rows: 1
+summary: 15 columns, 0 rows
+rows: 0
 tags: [data-model, generated]
 ---
 
