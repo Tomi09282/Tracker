@@ -15,6 +15,21 @@ export class ApiError extends Error {
   readonly code: string;
   /** Correlates with the server log — worth surfacing in a support flow, never in a toast. */
   readonly requestId: string;
+  /**
+   * The WHOLE envelope, kept rather than discarded.
+   *
+   * This class used to project three fields and throw the rest away, which was fine while every
+   * error was a generic failure. It stopped being fine the moment a route started answering with
+   * facts the user can act on: the composer's 409s carry `reason` plus which guidelines version to
+   * accept, when the account becomes eligible, how many publish slots are left and, on a stale
+   * save, the current row itself.
+   *
+   * All of that was being deleted here, one layer below any screen that could have used it, and the
+   * symptom would have been a carefully-designed refusal rendering as "request failed".
+   *
+   * Read it through a narrow accessor rather than reaching in — see `conflictOf` in the composer.
+   */
+  readonly body: Readonly<Record<string, unknown>>;
 
   constructor(status: number, body: Partial<ApiErrorBody>) {
     super(body.error ?? 'request failed');
@@ -22,6 +37,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = body.code ?? 'unknown';
     this.requestId = body.requestId ?? '';
+    this.body = body as Record<string, unknown>;
   }
 }
 

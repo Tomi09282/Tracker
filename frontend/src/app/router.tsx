@@ -50,6 +50,15 @@ const ProgressPage = lazy(() =>
 const CoinsPage = lazy(() =>
   import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
 );
+const ComposePage = lazy(() =>
+  import('../features/compose/ComposePage').then((m) => ({ default: m.ComposePage })),
+);
+const ProfileEditorPage = lazy(() =>
+  import('../features/compose/ProfileEditorPage').then((m) => ({ default: m.ProfileEditorPage })),
+);
+const PostEditorPage = lazy(() =>
+  import('../features/compose/PostEditorPage').then((m) => ({ default: m.PostEditorPage })),
+);
 const MarketplacePage = lazy(() =>
   import('../features/marketplace/MarketplacePage').then((m) => ({ default: m.MarketplacePage })),
 );
@@ -101,6 +110,9 @@ export const router = createBrowserRouter([
       { path: 'nutrition', element: suspended(<NutritionPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
       { path: 'coins', element: suspended(<CoinsPage />) },
+      { path: 'compose', element: suspended(<ComposePage />) },
+      { path: 'compose/profile', element: suspended(<ProfileEditorPage />) },
+      { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },
