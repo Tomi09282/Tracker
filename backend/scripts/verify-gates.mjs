@@ -76,6 +76,7 @@ const TOUCHED = [
   'src/public/body.js',
   'src/public/routes.js',
   'src/admin/routes.js',
+  'src/db/migrations/024_rename_eligibility.sql',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -194,6 +195,28 @@ await mutate({
   to: "          approving ? 'user.disable' : 'exercise.moderation.reject',",
   gate: 'scripts/check-admin-audit.mjs',
   expect: "'user.disable' is written from 2 different places",
+});
+
+console.log('\n── verify-024: the view the rename cooldown was moved into ─────────────────────');
+
+/*
+ * 024 moved a rule. Moving a rule is the change most likely to relax it silently, because the
+ * assertions that survive a relaxation are the ones about things SUCCEEDING — and those are most of
+ * them. This plants the exact failure the migration risks: a `too_soon` that is always 0.
+ *
+ * Both readers go quiet together, which is the design working: the trigger stops aborting AND the
+ * route stops refusing, so nothing anywhere holds the cooldown. If verify-024 stayed green here,
+ * its central assertion would be measuring nothing.
+ */
+await mutate({
+  label: 'a rename-eligibility view that always says "not too soon" is caught',
+  file: 'src/db/migrations/024_rename_eligibility.sql',
+  from: `    WHEN p.handle_renamed_at
+         > unixepoch() - (SELECT value FROM public_policy WHERE key = 'handle_rename_cooldown_s')
+      THEN 1`,
+  to: `    WHEN 0 THEN 1`,
+  gate: 'scripts/verify-024.mjs',
+  expect: 'FAIL  a SECOND rename inside the window',
 });
 
 console.log('\n── and a route no gate can see ────────────────────────────────────────────────');

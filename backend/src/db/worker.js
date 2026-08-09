@@ -1522,6 +1522,48 @@ export function adminAdjustCoinsTx({
 const SPECIALTY_SLOTS = 6;
 
 /**
+ * IS THIS HANDLE FREE FOR THIS ACCOUNT — asked once, in one place.
+ *
+ * Three questions collapsed into ONE answer on purpose. Reserved, taken and cooling are told apart
+ * by nothing the caller can see, because distinguishing them enumerates unpublished profiles and
+ * leaks another account's rename timestamp: "unavailable, but not reserved and not taken" is a
+ * sentence that means "somebody renamed away from this recently, and here is roughly when".
+ *
+ * It lives here as a constant because it now has THREE readers — create, rename, and the
+ * availability probe the composer calls on every keystroke. Written out three times it would agree
+ * on the day it was copied, and the copy that drifted would be the one that says YES.
+ *
+ * Bind order: handle, handle, handle, userId.
+ */
+const HANDLE_AVAILABILITY_SQL = `
+  SELECT EXISTS (SELECT 1 FROM reserved_handles WHERE handle = ?) AS reserved,
+         EXISTS (SELECT 1 FROM coach_profiles   WHERE handle = ?) AS taken,
+         EXISTS (SELECT 1 FROM retired_handles t
+                  WHERE t.handle = ?
+                    AND (t.prev_user_id IS NULL OR t.prev_user_id <> ?)
+                    AND t.released_at > unixepoch()
+                        - (SELECT value FROM public_policy WHERE key = 'handle_cooldown_s')) AS cooling`;
+
+/** True when the handle cannot be claimed by this account, for any of the three reasons. */
+const handleUnavailable = (handle, userId) => {
+  const a = stmt(HANDLE_AVAILABILITY_SQL).get(handle, handle, handle, userId);
+  return Boolean(a.reserved || a.taken || a.cooling);
+};
+
+/**
+ * The availability probe the composer's handle field calls as the coach types.
+ *
+ * Answers ONE boolean and nothing else. Not a reason, not a timestamp, not a suggestion — every
+ * additional field is a bit of information about somebody else's account, and this endpoint is
+ * reachable by any authenticated coach as fast as the limiter allows.
+ *
+ * A read, so no transaction: there is nothing here to commit.
+ */
+export function handleAvailabilityQuery({ userId, handle }) {
+  return { available: !handleUnavailable(handle, userId) };
+}
+
+/**
  * Create the coach's public profile.
  *
  * published_at, listed_at, verified_at, verified_by, removed_at, removed_by and removal_reason are
@@ -1567,16 +1609,7 @@ export function createCoachProfileTx({
     //     identically on purpose: distinguishing them enumerates unpublished profiles and leaks
     //     another account's rename timestamp.
     current = 'SELECT handle availability';
-    const avail = stmt(
-      `SELECT EXISTS (SELECT 1 FROM reserved_handles WHERE handle = ?) AS reserved,
-              EXISTS (SELECT 1 FROM coach_profiles   WHERE handle = ?) AS taken,
-              EXISTS (SELECT 1 FROM retired_handles t
-                       WHERE t.handle = ?
-                         AND (t.prev_user_id IS NULL OR t.prev_user_id <> ?)
-                         AND t.released_at > unixepoch()
-                             - (SELECT value FROM public_policy WHERE key = 'handle_cooldown_s')) AS cooling`,
-    ).get(handle, handle, handle, userId);
-    if (avail.reserved || avail.taken || avail.cooling) return { outcome: 'handle_unavailable' };
+    if (handleUnavailable(handle, userId)) return { outcome: 'handle_unavailable' };
 
     // (3) Reference membership. public_cities has no active-flag trigger, so an unknown or retired
     //     key would otherwise surface as an opaque foreign-key failure.
@@ -1717,6 +1750,113 @@ export function updateCoachProfileTx({
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
        VALUES (?, 'marketplace.profile.update', 'coach_profile', ?, ?, ?, ?)`,
     ).run(userId, userId, JSON.stringify({ city, specialties }), requestId, ip);
+
+    return view(false);
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Rename the handle.
+ *
+ * ═══ THE OWNER KEPT THIS AGAINST THE REVIEW'S ADVICE, SO IT IS FIXED RATHER THAN AVOIDED ═══════
+ *
+ * Three defects were named. Each is closed by something structural, not by care:
+ *
+ * IDOR-1 — one account locking thousands of handles a day into a year-long global cooldown while
+ *   keeping an exclusive claim on all of them. Closed in the SCHEMA by 023: retirement now keys on
+ *   `listed_at`, so an unpublished profile releases its handle immediately and the cheap bulk move
+ *   is gone. To lock a handle you must publish under it first, which costs an accepted guidelines
+ *   version, an old enough account and a quota slot. The 30-day rename cooldown caps the rest.
+ *
+ * RACE-5 / REPLAY-10 — a stale tab reverting a rename and burning BOTH handles. Closed twice over.
+ *   First, structurally: the handle is ABSENT from the profile PUT, so an ordinary headline edit
+ *   cannot carry a handle at all. Second, here: the caller must send the handle it BELIEVES it
+ *   currently has. A tab whose belief is out of date is refused with the true current handle, so a
+ *   revert is impossible rather than merely unlikely — and a replay of the same rename returns the
+ *   original result without writing anything, so it costs no cooldown and leaves no second audit
+ *   row.
+ *
+ * ═══ AND THERE IS NO `changes === 0` PROBE ON THE UPDATE ═══════════════════════════════════════
+ *
+ * The obvious shape is `UPDATE ... WHERE handle = ?` followed by a probe. It would be dead code.
+ * This is an IMMEDIATE transaction, so the write lock is held from the first statement; the row was
+ * read INSIDE it, and nothing else can have moved between the read and the write. The probe could
+ * not fire under any input.
+ *
+ * This project deleted a "last admin" count for exactly that reason a week ago. A guard that cannot
+ * fire still reads like a safety net, and the next person to relax the check above it will believe
+ * something is behind them. The `AND handle = ?` stays in the WHERE clause — it costs nothing and
+ * states the intent — but nothing branches on its result.
+ */
+export function renameCoachHandleTx({ userId, from, to, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const view = (replayed) => {
+      current = 'SELECT the profile back';
+      const row = stmt(
+        `SELECT handle, listed_at AS listedAt, handle_renamed_at AS handleRenamedAt,
+                published_at AS publishedAt
+           FROM coach_profiles WHERE user_id = ?`,
+      ).get(userId);
+      return { outcome: 'applied', replayed, ...row };
+    };
+
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the profile and its rename eligibility';
+    // Read from the VIEW 024 created, which is also what the cooldown TRIGGER reads. One predicate,
+    // two readers: when it is wrong it is wrong in both places, rather than the route saying yes
+    // and the trigger aborting on a coach who was told to go ahead.
+    const p = stmt(
+      `SELECT e.handle, e.listed_at AS listedAt, e.too_soon AS tooSoon, e.eligible_at AS eligibleAt,
+              c.removed_at AS removedAt
+         FROM coach_handle_rename_eligibility e
+         JOIN coach_profiles c ON c.user_id = e.user_id
+        WHERE e.user_id = ?`,
+    ).get(userId);
+    if (!p || p.removedAt !== null) return { outcome: 'missing' };
+
+    // REPLAY. Renaming to the handle you already hold is a no-op, not a rename: no write, no
+    // cooldown burned, no second audit row. This sits above the staleness check on purpose — the
+    // second delivery of a successful request must succeed, and by then `from` is out of date.
+    if (p.handle === to) return view(true);
+
+    // STALE. The caller told us which handle it thinks it is renaming FROM. If that is not the
+    // handle on the row, this request was composed against a world that has since changed, and
+    // applying it would revert somebody's rename and burn both names for a year.
+    if (p.handle !== from) return { outcome: 'stale', handle: p.handle };
+
+    // COOLDOWN, asked before availability so a coach who cannot rename at all learns nothing about
+    // the handle they were reaching for.
+    if (p.tooSoon === 1) return { outcome: 'rename_too_soon', eligibleAt: p.eligibleAt };
+
+    current = 'SELECT handle availability';
+    if (handleUnavailable(to, userId)) return { outcome: 'handle_unavailable' };
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UPDATE the handle';
+    // The retirement of the OLD handle and the stamping of `handle_renamed_at` are both TRIGGERS.
+    // Neither is written here, and that is deliberate: a route that forgot the stamp would silently
+    // disable the cooldown, and the route is the thing most likely to be rewritten.
+    stmt(
+      `UPDATE coach_profiles SET handle = ?, updated_at = unixepoch()
+        WHERE user_id = ? AND handle = ? AND removed_at IS NULL`,
+    ).run(to, userId, from);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'marketplace.handle.rename', 'coach_profile', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ from, to, listed: p.listedAt !== null }), requestId, ip);
 
     return view(false);
   });

@@ -85,6 +85,11 @@ const composeWriteAccountLimiter = limiter(60, (req) => `compose:${req.user?.id 
 // would let a handful of retries of one publish exhaust the budget for every other one.
 const publishIpLimiter = limiter(20);
 const publishAccountLimiter = limiter(60, (req) => `pub:${req.user?.id ?? req.ip}`);
+// The handle probe is a read, but it is also an oracle — so it is limited like a write, and per
+// ACCOUNT as well as per IP. What matters about an oracle is how many questions you can ask it.
+// 200/15min is generous for a debounced field and useless for enumeration.
+const handleProbeIpLimiter = limiter(400);
+const handleProbeAccountLimiter = limiter(200, (req) => `hnd:${req.user?.id ?? req.ip}`);
 
 /* ── GET /compose/context ───────────────────────────────────────────────────────────────────── */
 
@@ -310,6 +315,12 @@ const PROFILE_OUTCOMES = {
   specialty_unknown: { status: 409, code: ERR.CONFLICT },
   needs_guidelines: { status: 409, code: ERR.CONFLICT },
   too_new: { status: 409, code: ERR.CONFLICT },
+  // A rename composed against a world that has since changed. The 409 carries the TRUE current
+  // handle, so the client can show what actually happened instead of retrying into the same wall.
+  stale: { status: 409, code: ERR.CONFLICT },
+  // Carries `eligibleAt`. A refusal a person cannot plan around is a refusal they retry blindly
+  // until the rate limiter answers instead of the rule.
+  rename_too_soon: { status: 409, code: ERR.CONFLICT },
 };
 
 const sendOutcome = (res, result) => {
@@ -498,6 +509,98 @@ router.put(
 
     if (result.outcome !== 'applied') return sendOutcome(res, result);
     res.json({ profile: result });
+  }),
+);
+
+/* ── the handle ──────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The rename body carries BOTH handles, and `from` is the whole defence against a stale tab.
+ *
+ * A client that sends only `to` is asking the server to rename from whatever is there now — which
+ * is precisely what a tab that has been open since before somebody else's rename would be doing.
+ * Applying it reverts that rename and burns both names for a year, and the tab shows a success.
+ */
+// `from === to` is NOT refused here. It is the replay case, and the transaction answers it above
+// its first write: renaming to the handle you already hold returns the original result, writes
+// nothing, burns no cooldown and leaves no second audit row. A 400 would break the one delivery a
+// retrying client is most likely to make.
+const handleRenameBody = z
+  .object({
+    from: z.string().regex(HANDLE_RE),
+    to: z.string().regex(HANDLE_RE),
+  })
+  .strict();
+
+const handleProbeQuery = z.object({ handle: z.string().regex(HANDLE_RE) }).strict();
+
+/**
+ * Is this handle free — one boolean, and deliberately nothing else.
+ *
+ * ═══ THIS ENDPOINT IS AN ENUMERATION ORACLE AND IS BUILT AS ONE ════════════════════════════════
+ *
+ * Any authenticated coach can ask it about any string. So the answer is collapsed to a single bit
+ * by the shared predicate in the worker: reserved, taken and in-cooldown are indistinguishable.
+ * "Unavailable, but not reserved and not taken" would mean "somebody renamed away from this
+ * recently", which is a fact about another account's timeline; and a distinguishable "taken"
+ * enumerates profiles that were never published and have no public page.
+ *
+ * The bit itself is not secret — attempting the rename reveals it anyway, and a composer that
+ * cannot tell a coach their handle is taken until they submit is a worse product for no gain.
+ * What is bounded instead is the RATE, per account as well as per IP, because the value of an
+ * oracle is in how many questions you can ask it.
+ */
+router.get(
+  '/compose/handle',
+  requireAuth,
+  requireCoach,
+  handleProbeIpLimiter,
+  handleProbeAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = handleProbeQuery.safeParse(req.query);
+    // A malformed handle is not "unavailable" — it is a client bug, and answering `false` would
+    // send the coach hunting for a different name over a validation error.
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    const { available } = await db.handleAvailability({
+      userId: req.user.id,
+      handle: parsed.data.handle,
+    });
+    res.json({ available });
+  }),
+);
+
+/**
+ * Rename.
+ *
+ * Its own route rather than a field on the profile PUT, because it is the only profile change that
+ * takes something from other people: the old handle is retired for everybody else, and the coach
+ * spends a cooldown they then cannot spend again for thirty days.
+ *
+ * The rate limiters are the PUBLISH tier, not the compose tier. A rename is closer to publishing
+ * than to editing — it is the write that moves a public URL — and the compose tier's 60-per-15-min
+ * is sized for typing, not for an operation with a month-long consequence.
+ */
+router.post(
+  '/compose/profile/handle',
+  requireAuth,
+  requireCoach,
+  publishIpLimiter,
+  publishAccountLimiter,
+  asyncRoute(async (req, res) => {
+    const parsed = handleRenameBody.safeParse(req.body);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+
+    const result = await db.renameCoachHandle({
+      userId: req.user.id,
+      from: parsed.data.from,
+      to: parsed.data.to,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    if (result.outcome !== 'applied') return sendOutcome(res, result);
+    res.json({ profile: result, replayed: result.replayed });
   }),
 );
 

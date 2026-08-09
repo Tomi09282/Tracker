@@ -56,6 +56,13 @@ export const createCoachProfile = (args) => pool.run(args, { name: 'createCoachP
 export const updateCoachProfile = (args) => pool.run(args, { name: 'updateCoachProfileTx' });
 export const publishCoachProfile = (args) => pool.run(args, { name: 'publishCoachProfileTx' });
 export const unpublishCoachProfile = (args) => pool.run(args, { name: 'unpublishCoachProfileTx' });
+// Renaming is its own transaction, and not part of the profile PUT, because it is the one profile
+// field with consequences for other people: it retires the old handle for everybody else and it
+// spends a 30-day cooldown. See renameCoachHandleTx for the three defects this shape closes.
+export const renameCoachHandle = (args) => pool.run(args, { name: 'renameCoachHandleTx' });
+// A read, not a transaction — and it answers ONE boolean, because every extra field is information
+// about somebody else's account.
+export const handleAvailability = (args) => pool.run(args, { name: 'handleAvailabilityQuery' });
 
 // Posts. publishPost and restorePost both re-check standing INSIDE their guarded UPDATE, so the
 // facade carries no policy of its own — it is a name and a thread hop.
