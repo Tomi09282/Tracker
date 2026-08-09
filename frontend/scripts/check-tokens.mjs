@@ -42,6 +42,20 @@ const RULES = [
     msg: 'raw duration — use duration-[var(--duration-*)]',
   },
   {
+    id: 'raw-duration-in-animate',
+    // `animate-[skeleton-sweep_1.2s_linear_infinite]` — a duration hidden inside an arbitrary
+    // ANIMATION utility, which `raw-duration` above never looked at. This is the shape that hid a
+    // 2s from five consecutive Bible audits: a skeleton is only on screen while data is in flight,
+    // so a probe that waits for the screen to settle can never see one. A static rule does not
+    // care whether the element was ever rendered.
+    //
+    // It also caught the reverse of the same defect — `animate-[hold-fill_550ms_...]` sitting
+    // beside `const HOLD_MS = 550`, two literals that had to agree with a comment claiming they
+    // did. Underscores are Tailwind's space separator inside arbitrary values.
+    re: /\banimate-\[[^\]]*?[_[]\d+(?:\.\d+)?m?s[_\]]/g,
+    msg: 'raw duration inside animate-[…] — pass a token: animate-[name_var(--duration-*)_…]',
+  },
+  {
     id: 'raw-radius',
     re: /\brounded-\[\s*\d+(?:px|rem)\s*\]/g,
     msg: 'raw radius — use rounded-card / rounded-button / rounded-chip / rounded-field',
@@ -119,9 +133,28 @@ const declared = new Set([...tokenSource.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m
 // Tailwind declares its own; `env()` and inherited CSS vars are not ours to verify.
 const IGNORED_PREFIXES = ['--tw-', '--radix-', '--safe-'];
 
+const indexCss = await fs.readFile(path.join(SRC, 'index.css'), 'utf8');
+
 /** Utility classes this project defines by hand, so a reference to one is not a typo. */
-const localUtilities = new Set(
-  [...(await fs.readFile(path.join(SRC, 'index.css'), 'utf8')).matchAll(/^\s*\.([a-z0-9-]+)\s*\{/gim)].map(
+const localUtilities = new Set([...indexCss.matchAll(/^\s*\.([a-z0-9-]+)\s*\{/gim)].map((m) => m[1]));
+
+/*
+ * Tailwind's built-in animation utilities carry durations this project never declared:
+ * animate-pulse is 2s, animate-spin/bounce/ping are 1s. Nine feature files reached for
+ * animate-pulse across three phases and every Bible audit reported "0 rogue durations", because
+ * all of them measured SETTLED screens and a skeleton is only up while data is in flight.
+ *
+ * Banning them outright was rejected: a rule enforced by deleting the convenient thing gets routed
+ * around, and the next screen writes the duration inline where nothing greps for it. So a built-in
+ * may be USED exactly when index.css has re-pointed it at a token.
+ *
+ * The set is READ from index.css rather than typed here. An audit that carries its own copy of what
+ * it audits will eventually disagree with it — this file learned that when its token list was typed
+ * from memory, omitted --duration-instant, and reported a violation that did not exist.
+ */
+const BUILTIN_ANIMATIONS = ['pulse', 'spin', 'bounce', 'ping'];
+const pinnedAnimations = new Set(
+  [...indexCss.matchAll(/\.animate-([a-z]+)\s*\{[^}]*animation-duration:\s*var\(\s*--duration-[a-z-]+\s*\)/g)].map(
     (m) => m[1],
   ),
 );
@@ -138,9 +171,30 @@ for await (const file of walk(SRC)) {
 
   const lines = text.split('\n');
 
+  /*
+   * Custom properties this FILE provides itself, via a style object.
+   *
+   * `var(--x)` is normally required to name a design token, and that rule caught two silent
+   * layout bugs. But a value that comes from JavaScript is not a token and has no business in
+   * tokens.css — `SetRow` drives its hold-fill animation from `const HOLD_MS`, and it must go
+   * through a custom property because the animation lives on an `::after` pseudo-element, which
+   * an inline style cannot reach.
+   *
+   * So the test is not a naming convention anybody has to remember: a var is locally provided if
+   * this same file assigns it. Nothing to learn, nothing to spell right, and a typo still fails —
+   * `--hold-fill-ms` used in the class and `--hold-fil-ms` set in the style object do not match.
+   */
+  const locallyProvided = new Set([...text.matchAll(/['"](--[a-z0-9-]+)['"]\s*:/gi)].map((m) => m[1]));
+
   lines.forEach((line, i) => {
     // A line may opt out with an explicit, reviewed justification.
     if (line.includes('token-lint-disable')) return;
+
+    // A line that is ONLY a comment is prose, not shipped style. It was flagging itself: the
+    // comment recording the `animate-[hold-fill_550ms_…]` defect quotes the defect, and a gate
+    // that punishes the note explaining a fix is a gate people stop writing notes for. A trailing
+    // comment on a line of real code is still checked, because that line still renders.
+    if (/^\s*(?:\/\/|\/\*|\*)/.test(line)) return;
 
     for (const rule of RULES) {
       if (rule.uiExempt && path.resolve(file).startsWith(UI_DIR)) continue;
@@ -169,7 +223,7 @@ for await (const file of walk(SRC)) {
     // A gate that cries wolf is a gate someone switches off.
     for (const m of line.matchAll(/var\(\s*(--[a-z0-9-]+)\s*[,)]/gi)) {
       const name = m[1];
-      if (declared.has(name) || IGNORED_PREFIXES.some((p) => name.startsWith(p))) continue;
+      if (declared.has(name) || locallyProvided.has(name) || IGNORED_PREFIXES.some((p) => name.startsWith(p))) continue;
       violations.push({
         file: path.relative(process.cwd(), file),
         line: i + 1,
@@ -177,6 +231,22 @@ for await (const file of walk(SRC)) {
         found: `var(${name})`,
         msg: `${name} is not declared in ui/tokens/tokens.css — it resolves to nothing at runtime, which is a silent layout bug, not an error.`,
       });
+    }
+
+    // A built-in animation utility is only allowed once index.css has pinned its duration to a
+    // token. Restricted to .ts/.tsx on purpose: CSS files DECLARE these classes and prose in a
+    // comment names them, and a gate that flags its own definition is a gate someone switches off.
+    if (path.extname(file) === '.ts' || path.extname(file) === '.tsx') {
+      for (const m of line.matchAll(/(?<![.\w-])animate-([a-z]+)\b/g)) {
+        if (!BUILTIN_ANIMATIONS.includes(m[1]) || pinnedAnimations.has(m[1])) continue;
+        violations.push({
+          file: path.relative(process.cwd(), file),
+          line: i + 1,
+          rule: 'unpinned-builtin-animation',
+          found: m[0],
+          msg: `Tailwind's animate-${m[1]} carries a duration no token declares. Pin it in index.css: .animate-${m[1]} { animation-duration: var(--duration-ambient); }`,
+        });
+      }
     }
 
     // A `size-icon-*` style utility must be a class this project actually defines. Tailwind

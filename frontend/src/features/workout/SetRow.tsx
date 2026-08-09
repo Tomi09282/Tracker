@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Trophy, Undo2 } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -297,12 +297,18 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         aria-pressed={done}
         busy={busy}
         disabled={done || voided || disabled}
+        // The fill is driven FROM `HOLD_MS`, not from a second copy of it. It used to read
+        // `animate-[hold-fill_550ms_...]` while the timer read `const HOLD_MS = 550` — two literals
+        // that had to agree, with a comment in index.css asserting they did. Changing the timer
+        // alone would have left the bar completing early, which teaches the lifter to let go before
+        // the set is recorded: the exact failure that comment exists to warn about.
+        style={{ '--hold-fill-ms': `${HOLD_MS}ms` } as CSSProperties}
         className={cn(
           'relative size-14 overflow-hidden',
           // The hold's own feedback: the button fills over HOLD_MS so the lifter can see the
           // gesture being accepted. Under reduced motion it simply darkens — the information is
           // "this is registering", and that does not require the sweep.
-          holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-[var(--accent)]/30 after:animate-[hold-fill_550ms_linear_forwards]',
+          holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-[var(--accent)]/30 after:animate-[hold-fill_var(--hold-fill-ms)_linear_forwards]',
           holding && !motionSafe && 'bg-[var(--accent)]/20',
         )}
         {...holdProps}

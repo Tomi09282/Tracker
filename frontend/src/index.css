@@ -154,12 +154,22 @@
  * skip transform-based motion entirely.
  */
 /*
- * Tailwind ships animate-pulse at 2s, which no token declares. The utility is the right one for a
- * breathing emphasis, so it is kept and re-pointed at the token instead of being banned — a rule
- * enforced by deleting the convenient thing gets worked around, and the next screen would simply
- * write the 2s inline where no audit greps for it.
+ * Tailwind ships animate-pulse at 2s and animate-spin at 1s, and no token declares either. The
+ * utilities are the right ones for a breathing emphasis and a spinner, so they are kept and
+ * re-pointed at the token rather than banned — a rule enforced by deleting the convenient thing
+ * gets worked around, and the next screen would simply write the duration inline where no audit
+ * greps for it.
+ *
+ * Both land on the same value because both are the same KIND of motion: a loop that repeats until
+ * something else ends it. `--duration-ambient` is the name for that, and inventing a second token
+ * so a spinner can be 200ms quicker would be a distinction nobody can see and everybody has to
+ * maintain.
+ *
+ * `check-tokens` enforces the pair: a built-in animation utility may only be used if it is
+ * re-pointed HERE, and the gate reads this file rather than carrying its own list.
  */
 .animate-pulse { animation-duration: var(--duration-ambient); }
+.animate-spin  { animation-duration: var(--duration-ambient); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
