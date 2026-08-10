@@ -407,10 +407,29 @@ const themeJar = new Jar();
 await call('/api/v1/auth/login', { method: 'POST', body: { email: EMAIL, password: PASSWORD }, jar: themeJar });
 
 {
+  /*
+   * ═══ THIS ASSERTION USED TO CARRY ITS OWN COPY OF THE NUMBER IT WAS AUDITING ══════════════════
+   *
+   * It read `Array.from({ length: 26 }, ...)` against a table with 27 rows, under a label that said
+   * "all 26 seeded". So it was green while E27 — added by migration 012, present in catalog.ts,
+   * present in the fallback map — was checked by nobody. It could not have caught the drift it was
+   * standing next to, because it WAS the drift.
+   *
+   * An audit must not carry its own copy of what it audits. The roster now comes from the response,
+   * and what is asserted is the property that actually matters: every element the server ships has
+   * a variant the schema will accept. The count is REPORTED so a silent shrink is visible, and
+   * compared against the frontend catalogue by the parity check below — which was always doing it
+   * the right way round.
+   */
   const { res, json } = await call('/api/v1/ui/element-styles');
   const styles = json?.styles ?? {};
-  const complete = Array.from({ length: 26 }, (_, i) => `E${i + 1}`).every((k) => 'ABCDE'.includes(styles[k]));
-  check('element styles: all 26 seeded with a valid variant', res.status === 200 && complete, `${Object.keys(styles).length} rows`);
+  const ids = Object.keys(styles);
+  const complete = ids.length > 0 && ids.every((k) => 'ABCDE'.includes(styles[k]));
+  check(
+    'element styles: every element the server ships has a valid variant',
+    res.status === 200 && complete,
+    `${ids.length} rows${ids.length ? '' : ' — an empty roster would pass an .every() check, so the count is asserted too'}`,
+  );
 }
 {
   // Catalog parity. The frontend offers a variant list per element; the database CHECKs what it
@@ -826,6 +845,63 @@ if (seeded) {
   {
     const { json } = await call(`/api/v1/exercises/${queued.id}`, { jar: themeJar });
     check('approved exercise is now visible to everyone', json?.exercise?.id === queued.id, `status ${json?.exercise ? 'visible' : 'hidden'}`);
+  }
+
+  /* ── the element style write, whose SUCCESS branch had never run ──────────────────────────────
+   *
+   * The only assertion this endpoint had was a non-admin getting a 403. Everything the route does
+   * when it WORKS — the write, the 404 on an unknown element, the change reaching every reader —
+   * was unexercised, and an untried success path is one untested branch from never having worked.
+   *
+   * It is walked on E27 deliberately. E27 shipped in migration 012 and was in the database, the
+   * catalogue and the fallback map, while the route's id regex stopped at E26 — so until this
+   * commit **nobody could set it**, and no test could have noticed.
+   */
+  {
+    const before = await call('/api/v1/ui/element-styles');
+    const original = before.json?.styles?.E27 ?? 'A';
+    const target = original === 'B' ? 'C' : 'B';
+
+    const { res } = await call('/api/v1/ui/element-styles/E27', {
+      method: 'PUT',
+      jar: adminJar,
+      body: { variant: target },
+    });
+    check('admin sets E27 — the element the id regex used to make unreachable', res.status === 200, `status ${res.status}`);
+
+    const after = await call('/api/v1/ui/element-styles');
+    check(
+      'and the change is visible on the PUBLIC read every client boots from',
+      after.json?.styles?.E27 === target,
+      `${after.json?.styles?.E27}`,
+    );
+
+    // Existence is the database's question now, not the regex's. A well-formed id with no row is a
+    // 404 — the same answer E27 itself used to get from a 400.
+    const missing = await call('/api/v1/ui/element-styles/E900', {
+      method: 'PUT',
+      jar: adminJar,
+      body: { variant: 'A' },
+    });
+    check('an element that does not exist -> 404, not a validation error', missing.res.status === 404, `status ${missing.res.status}`);
+
+    const shaped = await call('/api/v1/ui/element-styles/nonsense', {
+      method: 'PUT',
+      jar: adminJar,
+      body: { variant: 'A' },
+    });
+    check('an id that is not shaped like one -> 400', shaped.res.status === 400, `status ${shaped.res.status}`);
+
+    const bad = await call('/api/v1/ui/element-styles/E27', {
+      method: 'PUT',
+      jar: adminJar,
+      body: { variant: 'Z' },
+    });
+    check('a variant outside A–E -> 400', bad.res.status === 400, `status ${bad.res.status}`);
+
+    await call('/api/v1/ui/element-styles/E27', { method: 'PUT', jar: adminJar, body: { variant: original } });
+    const restored = await call('/api/v1/ui/element-styles');
+    check('and the smoke run put E27 back', restored.json?.styles?.E27 === original, `${restored.json?.styles?.E27}`);
   }
   {
     const { res } = await call(`/api/v1/admin/users/${seeded.coach2 ? 1 : 1}/role`, {

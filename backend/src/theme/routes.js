@@ -170,7 +170,24 @@ router.get(
   }),
 );
 
-const ElementIdSchema = z.string().regex(/^E([1-9]|1[0-9]|2[0-6])$/);
+/**
+ * ═══ THE ROSTER HAD FOUR READERS AND TWO OF THEM SAID 26 ═══════════════════════════════════════
+ *
+ * This used to be `/^E([1-9]|1[0-9]|2[0-6])$/` — an enumeration of which elements exist, written
+ * out in a regex. Migration 012 added E27. The database has 27 rows, `catalog.ts` has 27 entries,
+ * the fallback map has 27, and this line capped at 26, so **E27 could not be set by anybody**. The
+ * smoke suite agreed with the wrong copy: `Array.from({ length: 26 })` against a 27-row table,
+ * under an assertion labelled "all 26 seeded".
+ *
+ * That is the project's most common defect in its purest form — two things that must agree, and the
+ * copy that drifted is the one that says NO.
+ *
+ * So this no longer answers "which elements exist". It answers "is this shaped like an element id",
+ * which is the only question a REGEX can keep true. Existence is the database's question, and the
+ * route below already asks it: a row that is not there is a 404, whether the id is E27 or E900.
+ * One definition, in the table, with every other reader downstream of it.
+ */
+const ElementIdSchema = z.string().regex(/^E[1-9][0-9]{0,2}$/);
 const VariantSchema = z.object({ variant: z.enum(['A', 'B', 'C', 'D', 'E']) }).strict();
 
 router.put(
