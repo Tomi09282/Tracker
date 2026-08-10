@@ -836,7 +836,12 @@
     "handleChange": "Change",
     "handleChangeTitle": "Change your public name",
     "handleChangeConfirm": "Change name",
-    "handleCooldownWarning": "You are letting {{handle}} go, and nobody else can take it for {{retireDays}} days. You will be able to change it again in {{days}} days."
+    "handleCooldownWarning": "You are letting {{handle}} go, and nobody else can take it for {{retireDays}} days. You will be able to change it again in {{days}} days.",
+    "autosave": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "failed": "Autosave failed — your text is here, try again."
+    }
   },
   "studio": {
     "eyebrow": "Appearance",

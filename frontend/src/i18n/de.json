@@ -836,7 +836,12 @@
     "handleChange": "Ändern",
     "handleChangeTitle": "Öffentlichen Namen ändern",
     "handleChangeConfirm": "Namen ändern",
-    "handleCooldownWarning": "Du gibst {{handle}} damit frei, und {{retireDays}} Tage lang kann ihn niemand sonst übernehmen. Eine erneute Änderung ist in {{days}} Tagen möglich."
+    "handleCooldownWarning": "Du gibst {{handle}} damit frei, und {{retireDays}} Tage lang kann ihn niemand sonst übernehmen. Eine erneute Änderung ist in {{days}} Tagen möglich.",
+    "autosave": {
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert",
+      "failed": "Automatisches Speichern fehlgeschlagen — dein Text ist da, versuch es erneut."
+    }
   },
   "studio": {
     "eyebrow": "Erscheinungsbild",

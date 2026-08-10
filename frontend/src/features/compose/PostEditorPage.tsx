@@ -27,6 +27,7 @@ import {
   counterTone,
   COUNTER_CLASS,
 } from './useComposeFlow';
+import { useAutosave } from './useAutosave';
 
 /** One key per attempt, reused across retries — that is what makes a retry a retry. */
 const newIdempotencyKey = () =>
@@ -55,7 +56,10 @@ export function PostEditorPage() {
   const feedback = useComposeFeedback();
   // `submit` is defined below the early returns, where a hook may not reach. The ref is refreshed
   // on every render, so the shortcut always calls the current closure rather than the first one.
-  const submitRef = useRef<() => void>(() => {});
+  // It RETURNS A PROMISE, and that is what lets autosave share it. A callback-style save cannot be
+  // awaited, so the hook could not know when a flight ended — and knowing that is the whole of the
+  // single-flight rule.
+  const submitRef = useRef<() => Promise<void>>(async () => {});
 
   const [kind, setKind] = useState('');
   const [title, setTitle] = useState('');
@@ -65,19 +69,62 @@ export function PostEditorPage() {
   // in state and regenerating on any render is how a retry quietly becomes a second post.
   const keyRef = useRef(newIdempotencyKey());
 
+  /**
+   * Everything a save would send, as one string.
+   *
+   * The hook compares this against what the last successful save carried, so "dirty" is a fact
+   * about the payload rather than about which fields somebody has focused. A field added to the
+   * save and not to this serialisation would autosave once and then never again, which is the
+   * quietest possible way to lose work — so both live in this file, next to each other.
+   */
+  const serialiseDraft = () => JSON.stringify([kind, title, body]);
+
   const post: ComposePost | undefined = existing.data?.post;
   const cover = existing.data?.cover ?? null;
   // The same fact as `readOnly` below, read where a hook is still allowed to see it: hooks cannot
   // sit under the early returns, and a removed post has nothing to guard against losing.
   const readOnlyEarly = !!post && post.removedAt !== null;
 
+  /**
+   * ═══ THE EDITOR IS SEEDED ONCE, NOT ON EVERY REFETCH ═════════════════════════════════════════
+   *
+   * This used to run whenever `post` changed identity — which is every refetch, and every autosave
+   * causes one. So the server's copy was written over the editor's, continuously, while somebody
+   * was typing into it. With a manual save that was rare enough to look like a glitch; with
+   * autosave it is the last step of RACE-7: create replays, the URL changes, the post arrives, and
+   * this effect erases everything typed since the request left.
+   *
+   * Seeded once per post, tracked by id. A change made in ANOTHER tab therefore does not appear
+   * here — correctly: `expected_row_version` refuses the save and says so, which is a conversation
+   * with the coach rather than a silent overwrite of their draft.
+   */
+  const seededFor = useRef<string | null>(null);
   useEffect(() => {
-    if (post) {
-      setKind(post.kind);
-      setTitle(post.title);
-      setBody(post.bodySrc);
-    }
+    if (!post || seededFor.current === post.id) return;
+    seededFor.current = post.id;
+    setKind(post.kind);
+    setTitle(post.title);
+    setBody(post.bodySrc);
   }, [post]);
+
+  /*
+   * Autosave runs `submit`, the SAME path the save button uses — one save, two triggers.
+   *
+   * A second implementation here would have to make its own decision about create-versus-update,
+   * about which idempotency key to send, and about row versions, and it would get one of them wrong
+   * on a Tuesday. The hook owns the timing and the single-flight rule; `submit` owns what a save is.
+   *
+   * Declared HERE, below everything it reads. It first sat above `title` and `readOnlyEarly` and
+   * referenced both — which TypeScript catches, and which is the ordinary cost of adding a hook to
+   * a component by pasting it near the other hooks.
+   */
+  const autosave = useAutosave({
+    // A title is the floor. Autosaving an empty draft creates a post nobody asked for, and the
+    // create endpoint would refuse it anyway — repeatedly, on a timer.
+    enabled: !readOnlyEarly && !existing.isPending && title.trim().length > 0,
+    serialise: serialiseDraft,
+    save: () => submitRef.current(),
+  });
 
   useEffect(() => {
     if (isNew && kind === '' && taxonomy.data?.kinds.length) setKind(taxonomy.data.kinds[0].key);
@@ -99,8 +146,16 @@ export function PostEditorPage() {
     [taxonomy.data, kind],
   );
 
-  // What is on screen versus what the server last confirmed. Autosave was cut deliberately, so
-  // this comparison is the only thing between a closed tab and lost writing.
+  /*
+   * What is on screen versus what the server last confirmed.
+   *
+   * Still computed against the SERVER's copy rather than reading `autosave.hasUnsaved`, and the
+   * difference matters at exactly one moment: autosave is disabled until there is a title, so a
+   * draft with a body and no title reports `hasUnsaved: false` while holding real writing. The
+   * guard has to fire for that, which is the case somebody actually loses work in.
+   *
+   * (The comment here used to say autosave had been cut, which it no longer has.)
+   */
   const dirty = post
     ? title !== post.title || body !== post.bodySrc
     : title.trim().length > 0 || body.trim().length > 0;
@@ -132,10 +187,22 @@ export function PostEditorPage() {
 
   const readOnly = !!post && post.removedAt !== null;
 
-  const submit = () => {
+  const submit = async () => {
     if (isNew) {
-      create.mutate(
-        {
+      /*
+       * ═══ THE SNAPSHOT IS TAKEN BEFORE THE REQUEST LEAVES ═══════════════════════════════════
+       *
+       * `sent` is what this create actually carries. Handing it to `autosave.adopt` on success is
+       * what makes the follow-up correct: the hook then knows the server holds EXACTLY this, so if
+       * the coach typed while the request was in flight it sees a difference and issues an UPDATE.
+       *
+       * Reading the snapshot from the response instead would be the bug — a replayed create answers
+       * with the ORIGINAL post, and adopting that would tell the hook the newest keystrokes were
+       * already saved.
+       */
+      const sent = serialiseDraft();
+      try {
+        const r = await create.mutateAsync({
           idempotency_key: keyRef.current,
           kind_key: kind,
           title,
@@ -146,18 +213,22 @@ export function PostEditorPage() {
           capacity: null,
           price_minor: null,
           price_currency: null,
-        },
-        {
-          onSuccess: (r) => {
-            feedback.ok('compose.toast.draftCreated');
-            navigate(`/compose/posts/${r.post.id}`);
-          },
-          onError: (e) => feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') })),
-        },
-      );
+        });
+        autosave.adopt(sent);
+        // The post is about to arrive from the server. Marking it seeded keeps the effect above
+        // from writing the created body over an editor that has moved on.
+        seededFor.current = r.post.id;
+        feedback.ok('compose.toast.draftCreated');
+        // `replace`, so Back does not return to a /new route whose draft now exists.
+        navigate(`/compose/posts/${r.post.id}`, { replace: true });
+      } catch (e) {
+        feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }));
+        throw e;
+      }
     } else if (post) {
-      save.mutate(
-        {
+      const sent = serialiseDraft();
+      try {
+        await save.mutateAsync({
         expected_row_version: post.rowVersion,
         title,
         body_src: body,
@@ -167,12 +238,13 @@ export function PostEditorPage() {
         capacity: post.capacity,
         price_minor: post.priceMinor,
         price_currency: post.priceCurrency,
-        },
-        {
-          onSuccess: () => feedback.ok('compose.toast.saved'),
-          onError: (e) => feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') })),
-        },
-      );
+        });
+        autosave.adopt(sent);
+        feedback.ok('compose.toast.saved');
+      } catch (e) {
+        feedback.failed(t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }));
+        throw e;
+      }
     }
   };
 
@@ -259,6 +331,32 @@ export function PostEditorPage() {
           <Eye className="size-4" aria-hidden />
           {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
         </Pressable>
+
+        {/*
+          The autosave state, said out loud.
+
+          `aria-live="polite"` on a region that only ever holds four short words — unlike the studio,
+          where the same attribute would have read eighty. It matters here because the whole promise
+          of autosave is that somebody can stop paying attention, and a promise nobody can hear is
+          one only sighted users get.
+
+          `failed` is deliberately loud and does not go away on its own. Everything else fades to
+          nothing when there is nothing to say.
+        */}
+        <p
+          className={`text-caption ml-auto self-center ${
+            autosave.state === 'failed' ? 'text-danger' : 'text-text-3'
+          }`}
+          aria-live="polite"
+        >
+          {autosave.state === 'saving'
+            ? t('compose.autosave.saving')
+            : autosave.state === 'failed'
+              ? t('compose.autosave.failed')
+              : autosave.state === 'saved' && !autosave.hasUnsaved
+                ? t('compose.autosave.saved')
+                : ''}
+        </p>
       </div>
 
       {/* ── the refusals, each carrying what to do about it ─────────────────────────────────── */}

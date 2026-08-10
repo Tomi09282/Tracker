@@ -836,7 +836,12 @@
     "handleChange": "Módosítás",
     "handleChangeTitle": "Nyilvános név módosítása",
     "handleChangeConfirm": "Név módosítása",
-    "handleCooldownWarning": "A(z) {{handle}} nevet ezzel elengeded, és {{retireDays}} napig senki más nem veheti fel. Új módosításra {{days}} nap múlva lesz újra lehetőséged."
+    "handleCooldownWarning": "A(z) {{handle}} nevet ezzel elengeded, és {{retireDays}} napig senki más nem veheti fel. Új módosításra {{days}} nap múlva lesz újra lehetőséged.",
+    "autosave": {
+      "saving": "Mentés…",
+      "saved": "Mentve",
+      "failed": "A mentés nem sikerült — a szöveged megvan, próbáld újra."
+    }
   },
   "studio": {
     "eyebrow": "Megjelenés",
