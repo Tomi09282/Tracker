@@ -47,7 +47,17 @@
     "admin": "Admin",
     "coach": "Coach",
     "plans": "Plans",
-    "primary": "Primary navigation"
+    "primary": "Primary navigation",
+    "nutrition": "Nutrition",
+    "progress": "Progress",
+    "workout": "Workout",
+    "notifications": "Notifications",
+    "coins": "Coins",
+    "marketplace": "Marketplace",
+    "compose": "Publishing",
+    "composeProfile": "Public profile",
+    "styleStudio": "Style studio",
+    "playground": "Playground"
   },
   "home": {
     "greeting": "Hi there!",

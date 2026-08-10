@@ -47,7 +47,17 @@
     "admin": "Admin",
     "coach": "Trainer",
     "plans": "Pläne",
-    "primary": "Hauptnavigation"
+    "primary": "Hauptnavigation",
+    "nutrition": "Ernährung",
+    "progress": "Fortschritt",
+    "workout": "Training",
+    "notifications": "Benachrichtigungen",
+    "coins": "Münzen",
+    "marketplace": "Marktplatz",
+    "compose": "Veröffentlichen",
+    "composeProfile": "Öffentliches Profil",
+    "styleStudio": "Stil-Studio",
+    "playground": "Playground"
   },
   "home": {
     "greeting": "Hallo!",

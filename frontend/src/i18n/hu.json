@@ -47,7 +47,17 @@
     "admin": "Admin",
     "coach": "Edző",
     "plans": "Tervek",
-    "primary": "Fő navigáció"
+    "primary": "Fő navigáció",
+    "nutrition": "Táplálkozás",
+    "progress": "Haladás",
+    "workout": "Edzés",
+    "notifications": "Értesítések",
+    "coins": "Érmék",
+    "marketplace": "Piactér",
+    "compose": "Publikálás",
+    "composeProfile": "Nyilvános profil",
+    "styleStudio": "Stílus stúdió",
+    "playground": "Playground"
   },
   "home": {
     "greeting": "Szia!",

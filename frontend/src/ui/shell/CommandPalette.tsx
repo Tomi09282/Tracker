@@ -12,6 +12,19 @@ interface Command {
   icon?: LucideIcon;
   run: () => void;
   keywords?: string;
+  /**
+   * The route, kept for SEARCH as well as navigation.
+   *
+   * Measured: typing "nutrition" into a Hungarian UI returned nothing. The label was
+   * "Táplálkozás" and the keywords carried "food meal etel taplalkozas" — every word except the
+   * English name of the screen. The comment above them claimed they carried both languages; they
+   * carried the other one.
+   *
+   * Including the path fixes it for every entry at once and in every language, because a route is
+   * already the English name of the thing. Optional, so a caller-supplied command that runs
+   * something other than a navigation still works.
+   */
+  to?: string;
 }
 
 /**
@@ -33,15 +46,54 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
   const [cursor, setCursor] = useState(0);
   const input = useRef<HTMLInputElement>(null);
 
+  /*
+   * ═══ IT KNEW FIVE OF THE PRODUCT'S EIGHTEEN SCREENS ══════════════════════════════════════════
+   *
+   * Home, library, settings, playground and admin. A palette people reach for and half the time do
+   * not find what they wanted is a palette they stop reaching for — and the five it knew were not
+   * the five anybody navigates to most.
+   *
+   * `keywords` carry BOTH languages on the entries where the Hungarian and English words share no
+   * letters, because somebody running the app in Hungarian still types "nutrition" half the time.
+   * The label itself is translated, so the search matches whichever the person actually uses.
+   */
   const items = useMemo<Command[]>(() => {
+    // `to` is stored as well as used, so navigation and search can never disagree about where a
+    // command goes — one field, two readers.
+    const go = (id: string, label: string, to: string, keywords?: string): Command => ({
+      id,
+      label,
+      to,
+      run: () => void navigate(to),
+      keywords,
+    });
+
     const base: Command[] = [
-      { id: 'home', label: t('nav.home'), run: () => void navigate('/') },
-      { id: 'library', label: t('nav.library'), run: () => void navigate('/library'), keywords: 'exercise gyakorlat' },
-      { id: 'settings', label: t('nav.settings'), run: () => void navigate('/settings'), keywords: 'theme téma' },
-      { id: 'playground', label: 'Playground', run: () => void navigate('/playground'), keywords: 'qa feedback' },
+      go('home', t('nav.home'), '/', 'kezdolap today ma'),
+      go('library', t('nav.library'), '/library', 'exercise gyakorlat'),
+      go('nutrition', t('nav.nutrition'), '/nutrition', 'food meal etel taplalkozas'),
+      go('progress', t('nav.progress'), '/progress', 'measurement meres suly weight'),
+      go('workout', t('nav.workout'), '/workout', 'player edzes session'),
+      go('notifications', t('nav.notifications'), '/notifications', 'ertesites'),
+      go('coins', t('nav.coins'), '/coins', 'erme wallet store bolt'),
+      go('marketplace', t('nav.marketplace'), '/m', 'piacter coaches edzok discover'),
+      go('settings', t('nav.settings'), '/settings', 'theme tema beallitasok'),
     ];
+
+    if (user?.role === 'coach' || user?.role === 'admin') {
+      base.push(
+        go('coach', t('nav.coach'), '/coach', 'clients kliensek dashboard'),
+        go('plans', t('nav.plans'), '/coach/plans', 'tervek programs'),
+        go('compose', t('nav.compose'), '/compose', 'posts bejegyzes publish'),
+        go('composeProfile', t('nav.composeProfile'), '/compose/profile', 'public profile nyilvanos profil handle'),
+      );
+    }
     if (user?.role === 'admin') {
-      base.push({ id: 'admin', label: t('nav.admin'), run: () => void navigate('/admin') });
+      base.push(
+        go('admin', t('nav.admin'), '/admin', 'stats moderation'),
+        go('styleStudio', t('nav.styleStudio'), '/admin/styles', 'variants elements stilus'),
+        go('playground', t('nav.playground'), '/playground', 'qa feedback matrix'),
+      );
     }
     return [...base, ...(commands ?? [])];
   }, [commands, navigate, t, user]);
@@ -49,14 +101,18 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return items;
-    return items.filter((c) => `${c.label} ${c.keywords ?? ''}`.toLowerCase().includes(q));
+    return items.filter((c) => `${c.label} ${c.keywords ?? ''} ${c.to ?? ''}`.toLowerCase().includes(q));
   }, [items, query]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen((v) => !v);
+        setOpen((v) => {
+          // Captured on the way IN, while the element that had focus still has it.
+          if (!v) returnFocusTo.current = document.activeElement as HTMLElement | null;
+          return !v;
+        });
         setQuery('');
         setCursor(0);
       }
@@ -66,8 +122,21 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
+  /*
+   * Focus goes back where it came from.
+   *
+   * Opening moved it into the search box; closing used to drop it on `<body>`. For a keyboard user
+   * that costs their place on the page every time they open the palette and change their mind —
+   * which, on a surface designed to be opened constantly, is constantly.
+   */
+  const returnFocusTo = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    if (open) input.current?.focus();
+    if (open) {
+      input.current?.focus();
+    } else {
+      returnFocusTo.current?.focus?.();
+      returnFocusTo.current = null;
+    }
   }, [open]);
 
   if (!open) return null;

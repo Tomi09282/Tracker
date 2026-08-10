@@ -82,9 +82,31 @@
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-  /* The screen's horizontal gutter: 16px mobile, 24px from the tablet breakpoint up. */
-  .screen-x { padding-inline: --spacing(4); }
-  @media (width >= 48rem) { .screen-x { padding-inline: --spacing(6); } }
+  /*
+   * The screen's horizontal gutter: 16px mobile, 24px from the tablet breakpoint up.
+   *
+   * ═══ AND THE LANDSCAPE NOTCH, WHICH THIS HAD NEVER ACCOUNTED FOR ═══════════════════════════
+   *
+   * `viewport-fit=cover` is set in index.html, which is what makes `env(safe-area-inset-*)` report
+   * anything at all — and every use of it in this codebase was VERTICAL. Turn a notched phone
+   * sideways and the inset moves to the left or right edge, where a flat 16px gutter puts the first
+   * character of every line underneath the cutout.
+   *
+   * A fitness app is used sideways. A phone propped against a rack, or a tablet on a stand, is not
+   * an edge case here — it is how somebody reads their next set.
+   *
+   * `max()` rather than addition: the inset REPLACES the gutter when it is larger, so the safe edge
+   * never gets 16px of padding stacked on top of a 44px cutout. On every device with no inset the
+   * value is unchanged, which is why this costs nothing everywhere else.
+   */
+  .screen-x {
+    padding-inline: max(--spacing(4), env(safe-area-inset-left)) max(--spacing(4), env(safe-area-inset-right));
+  }
+  @media (width >= 48rem) {
+    .screen-x {
+      padding-inline: max(--spacing(6), env(safe-area-inset-left)) max(--spacing(6), env(safe-area-inset-right));
+    }
+  }
 
   /* Mobile-shaped flows (player, chat, today) stay in a centred column on wide screens;
      dashboards and grids use the wide column instead. */
