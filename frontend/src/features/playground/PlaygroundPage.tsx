@@ -22,6 +22,23 @@ import { BottomNav } from '../../ui/nav/BottomNav';
 
 /** Elements with a live implementation. The rest are catalogued but not yet built. */
 // All twenty Phase-1 elements. E21–E26 belong to later phases and are listed, not faked.
+/**
+ * Which elements this page can DEMONSTRATE — one entry per `case` in the switch below.
+ *
+ * It is a hand-written copy of that switch, and `scripts/check-element-roster.mjs` holds the two to
+ * each other, because nothing else can: the switch cannot be enumerated at runtime without calling
+ * a component that opens with a dozen hooks.
+ *
+ * ═══ PREVIEWABLE IS NOT THE SAME AS LIVE, AND THIS LIST ONLY KNOWS THE FIRST ═════════════════
+ *
+ * Measured: E21, E22, E25 and E26 have real components calling `useElementVariant` on them, and no
+ * demo case here. The first attempt at a fix added them to this set, and the roster gate caught it
+ * immediately — a preview tile with no demo behind it is an empty box labelled "implemented".
+ *
+ * Two different questions were being answered by one list. Whether an element SHIPS lives in
+ * `catalog.ts` as `live`, beside its labels, where the gate holds it to the measured call sites.
+ * This set stays what it always was: which elements this page can DEMONSTRATE.
+ */
 const IMPLEMENTED = new Set([
   'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
   'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20',
@@ -238,8 +255,21 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
  */
 export function PlaygroundPage() {
   const motionSafe = useMotionSafe();
-  const implemented = CATALOG.filter((e) => IMPLEMENTED.has(e.id));
-  const pending = CATALOG.filter((e) => !IMPLEMENTED.has(e.id));
+  /*
+   * ═══ THREE GROUPS, BECAUSE THERE ARE THREE ANSWERS ════════════════════════════════════════════
+   *
+   * This page used to split the catalogue in two: has a demo here, or "catalogued, not yet built".
+   * Measured against the actual `useElementVariant` call sites, that put FOUR SHIPPED ELEMENTS —
+   * E21, E22, E25, E26 — under "not yet built". A screen whose whole job is showing what is live
+   * was wrong about four live things, in the reassuring direction.
+   *
+   * Shipping and being demonstrable here are separate facts. `entry.live` comes from the catalogue
+   * and check-element-roster holds it to the measured call sites; IMPLEMENTED is this file's own
+   * list of what the switch below can draw.
+   */
+  const previewable = CATALOG.filter((e) => IMPLEMENTED.has(e.id));
+  const liveNoDemo = CATALOG.filter((e) => e.live && !IMPLEMENTED.has(e.id));
+  const inert = CATALOG.filter((e) => !e.live && !IMPLEMENTED.has(e.id));
 
   return (
     <div className="col-wide screen-x py-6">
@@ -254,7 +284,7 @@ export function PlaygroundPage() {
         with it on, every state change below still happens, it just does not travel.
       </p>
 
-      {implemented.map((entry) => (
+      {previewable.map((entry) => (
         <section key={entry.id} className="mt-8">
           <div className="flex items-baseline gap-2">
             <h2 className="text-title-3 text-text-1">{entry.name}</h2>
@@ -294,15 +324,41 @@ export function PlaygroundPage() {
         ]}
       />
 
+      {liveNoDemo.length > 0 ? (
+        <section className="mt-10">
+          <h2 className="text-title-3 text-text-1">Shipping, with no demo on this page</h2>
+          <p className="text-body-s measure mt-1 text-text-2">
+            Real components read these variants, so changing them in the studio changes the product.
+            They just have no tile here yet — a gap in this page, not in the app. They were listed
+            under &ldquo;not yet built&rdquo; until the roster was measured against the actual call
+            sites.
+          </p>
+          <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {liveNoDemo.map((e) => (
+              <li
+                key={e.id}
+                className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
+              >
+                <span className="text-body-s text-text-2">
+                  <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
+                </span>
+                <span className="text-micro uppercase rounded-chip bg-ok-subtle px-1.5 text-ok">live</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="mt-10">
-        <h2 className="text-title-3 text-text-1">Catalogued, not yet built</h2>
+        <h2 className="text-title-3 text-text-1">Catalogued, and nothing reads them</h2>
         <p className="text-body-s measure mt-1 text-text-2">
-          These rows already exist in <code>element_style_config</code> and in the admin studio, so
-          nothing needs a migration when the component lands. Listing them honestly beats an empty
-          card that looks finished.
+          These rows exist in <code>element_style_config</code> and no component consults them, so an
+          admin can pick a variant, watch it save and see it audited while the product does not
+          change by a pixel. Saying so beats a card that looks finished — and the studio marks them
+          the same way.
         </p>
         <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {pending.map((e) => (
+          {inert.map((e) => (
             <li
               key={e.id}
               className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
