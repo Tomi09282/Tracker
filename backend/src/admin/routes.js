@@ -1,7 +1,8 @@
 // src/admin/routes.js — F8-lite: stats and the exercise moderation queue.
 import { Router } from 'express';
 import { z } from 'zod';
-import rateLimit from 'express-rate-limit';
+import argon2 from 'argon2';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
@@ -10,13 +11,31 @@ import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 
 const router = Router();
 
-const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 120,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'test',
-});
+const limiter = (limit, keyGenerator) =>
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: () => process.env.NODE_ENV === 'test',
+    ...(keyGenerator ? { keyGenerator } : {}),
+  });
+
+/**
+ * ═══ READS AND WRITES DO NOT SHARE A BUDGET ════════════════════════════════════════════════════
+ *
+ * They used to: one `adminLimiter` at 120 per 15 minutes per IP covered all eight routes here,
+ * reads included. Opening the dashboard costs three requests — stats, metrics, users — so a working
+ * admin session spends the write budget on looking at things, and the limiter that is supposed to
+ * bound damage is exhausted by the page that shows there is none.
+ *
+ * And it was IP-only. A per-IP limit stops one machine; it does not stop one principal with a
+ * laptop, a phone and a VPN, which is the shape of an actual compromised admin session.
+ */
+const adminReadIpLimiter = limiter(600);
+const adminReadLimiter = limiter(300, (req) => `adm-r:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
+const adminWriteIpLimiter = limiter(120);
+const adminWriteLimiter = limiter(60, (req) => `adm-w:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 
 /**
  * Re-read the caller's role from the DATABASE, inside the request.
@@ -30,6 +49,22 @@ async function assertAdmin(req, res) {
     req.user.id,
   ]);
   if (actor?.role !== 'admin') {
+    /*
+     * ═══ THIS IS THE ABUSE SIGNAL, AND IT WAS GOING NOWHERE ══════════════════════════════════
+     *
+     * Reaching this line means somebody presented a VALID token whose `admin` claim the database
+     * disagrees with: a role revoked, an account disabled, or a token minted before either. The
+     * audit log records what admins DID; it has never recorded what a non-admin TRIED, and a
+     * refusal that leaves no trace is a refusal nobody can count.
+     *
+     * It is a log line rather than an audit row on purpose. `audit_log` is append-only and a
+     * refused request is not an event in the product's history — but it is exactly the thing an
+     * operator greps for after a laptop goes missing.
+     */
+    req.log.warn(
+      { userId: req.user.id, route: req.originalUrl, dbRole: actor?.role ?? 'gone-or-disabled' },
+      'admin route refused: the token says admin and the database does not',
+    );
     sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
     return false;
   }
@@ -40,7 +75,8 @@ router.get(
   '/admin/stats',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminReadIpLimiter,
+  adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
 
@@ -73,7 +109,8 @@ router.get(
   '/admin/moderation',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminReadIpLimiter,
+  adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
     const lang = await resolveLang(req);
@@ -116,7 +153,8 @@ router.post(
   '/admin/moderation/:id',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminWriteIpLimiter,
+  adminWriteLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
     const id = z.coerce.number().int().positive().parse(req.params.id);
@@ -156,18 +194,68 @@ router.post(
   }),
 );
 
-const RoleSchema = z.object({ role: z.enum(['user', 'coach', 'admin']) }).strict();
+/**
+ * ═══ STEP-UP, ON THE ONE ACTION THAT HANDS OVER THE PRODUCT ════════════════════════════════════
+ *
+ * Enumerated first, because "step up on destructive operations" needs to know which those are:
+ *
+ *   exercise approve/reject   reversible — re-moderate; status is a column
+ *   account disable           reversible — /admin/users/:id/enable
+ *   role change               reversible — demote through this same route
+ *   coin adjust               reversible — adjust back; the ledger keeps both entries
+ *   marketplace takedown      reversible — removed_at is a column and restore exists
+ *   element style variant     reversible — set it back
+ *
+ * NO admin action in this product is irreversible. The only irreversible thing is a person erasing
+ * their own account, and that already asks for a password.
+ *
+ * So the question step-up answers here is not "can this be undone" but "what does this HAND OVER".
+ * Granting `admin` is the one move that gives somebody else the ability to do everything else,
+ * including everything on that list, forever — and it is precisely what a stolen admin session
+ * would do first, because a second admin it controls SURVIVES the original session being revoked.
+ *
+ * Demotion is not stepped up. Requiring a password to take power away, when it is not required to
+ * exercise it, gets the incentive backwards.
+ */
+const RoleSchema = z
+  .object({
+    role: z.enum(['user', 'coach', 'admin']),
+    // Only read when granting admin. Optional here so demotions and coach grants keep working with
+    // the body they already send.
+    password: z.string().min(1).max(200).optional(),
+  })
+  .strict();
 
 router.post(
   '/admin/users/:id/role',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminWriteIpLimiter,
+  adminWriteLimiter,
   asyncRoute(async (req, res) => {
     const id = z.coerce.number().int().positive().safeParse(req.params.id);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = RoleSchema.safeParse(req.body);
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
+
+    // The step-up, and ONLY on the grant. See the note on RoleSchema for why this one action and
+    // not the others: it is the move that hands over the ability to do everything else, and it is
+    // what a stolen session does first because the second admin outlives the first one's revocation.
+    if (body.data.role === 'admin') {
+      if (!body.data.password) {
+        return res.status(401).json({
+          error: 'granting admin requires your password',
+          code: ERR.UNAUTHORIZED,
+          reason: 'step_up_required',
+          requestId: res.locals.requestId,
+        });
+      }
+      const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+      if (!actor || !(await argon2.verify(actor.password_hash, body.data.password))) {
+        req.log.warn({ actorId: req.user.id, targetId: id.data }, 'admin grant refused: step-up failed');
+        return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+      }
+    }
 
     // EVERY guard now lives inside the transaction, including the actor's own role. The pre-checks
     // this replaced could not hold the one that mattered: two admins demoting each other at the
@@ -237,7 +325,8 @@ router.post(
   '/admin/users/:id/disable',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminWriteIpLimiter,
+  adminWriteLimiter,
   asyncRoute(async (req, res) => {
     const id = z.coerce.number().int().positive().safeParse(req.params.id);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
@@ -270,7 +359,8 @@ router.post(
   '/admin/users/:id/enable',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminWriteIpLimiter,
+  adminWriteLimiter,
   asyncRoute(async (req, res) => {
     const id = z.coerce.number().int().positive().safeParse(req.params.id);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
@@ -346,7 +436,8 @@ router.get(
   '/admin/users',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminReadIpLimiter,
+  adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
     const parsed = userQuery.safeParse(req.query);
@@ -447,7 +538,8 @@ router.get(
   '/admin/metrics',
   requireAuth,
   requireRole('admin'),
-  adminLimiter,
+  adminReadIpLimiter,
+  adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
     const parsed = metricsQuery.safeParse(req.query);

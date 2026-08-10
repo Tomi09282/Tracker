@@ -33,7 +33,8 @@
     "check:route-tx": "node scripts/check-route-tx.mjs",
     "verify:025": "node scripts/verify-025.mjs",
     "check:gdpr": "node scripts/check-gdpr.mjs",
-    "verify:gdpr": "node scripts/verify-gdpr.mjs"
+    "verify:gdpr": "node scripts/verify-gdpr.mjs",
+    "verify:stepup": "node scripts/verify-stepup.mjs"
   },
   "author": "",
   "license": "ISC",
