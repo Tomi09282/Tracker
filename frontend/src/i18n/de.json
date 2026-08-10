@@ -853,5 +853,23 @@
     "inertExplain": "Diese Einstellung wird derzeit von keiner Komponente gelesen. Sie würde gespeichert und auditiert, und am Produkt änderte sich kein Pixel — deshalb bleibt der Schalter deaktiviert, bis es einen Verbraucher gibt.",
     "loadFailed": "Stile konnten nicht geladen werden",
     "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu."
+  },
+  "adminMetrics": {
+    "title": "Kennzahlen",
+    "window": "letzte {{days}} Tage",
+    "loggedPeople": "Personen mit Eintrag",
+    "loggedPeopleSub": "heute: {{today}}",
+    "signups": "Registrierungen",
+    "activeCoaches": "Aktive Coaches",
+    "activeCoachesSub": "{{withRole}} mit Coach-Rolle",
+    "coinVelocity": "Münzbewegung",
+    "coinVelocitySub": "bewegte Einheiten, ohne Vorzeichen",
+    "completedWorkouts": "Abgeschlossene Workouts",
+    "cardHint": "Der Wert bezieht sich auf den gewählten Zeitraum.",
+    "clock": {
+      "local_date": "eigener Tag",
+      "utc": "UTC"
+    },
+    "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Tage Messwerte sind nötig."
   }
 }

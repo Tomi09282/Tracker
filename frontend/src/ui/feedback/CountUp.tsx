@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMotionSafe } from './useMotionSafe';
 
 /**
@@ -34,6 +35,7 @@ export function CountUp({
   from?: number;
   duration?: number;
 }) {
+  const { i18n } = useTranslation();
   const motionSafe = useMotionSafe();
   const [value, setValue] = useState(motionSafe ? from : to);
   const frame = useRef(0);
@@ -65,5 +67,15 @@ export function CountUp({
     };
   }, [to, from, duration, motionSafe]);
 
-  return <span className="tabular-nums">{value.toLocaleString()}</span>;
+  /*
+   * ═══ THE LOCALE COMES FROM i18next, NOT FROM THE BROWSER ═══════════════════════════════════
+   *
+   * `value.toLocaleString()` with no argument uses the BROWSER's locale. This app's language is
+   * chosen in-app and persisted, and defaults to Hungarian — so a Hungarian UI on an en-US browser
+   * rendered "1,652" where every other number on the screen reads "1 652". One digit group
+   * separator, on the largest text on the page, disagreeing with the language around it.
+   *
+   * Passing the language explicitly costs nothing and removes the disagreement entirely.
+   */
+  return <span className="tabular-nums">{value.toLocaleString(i18n.language)}</span>;
 }

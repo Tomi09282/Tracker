@@ -47,20 +47,31 @@ export function TrendChart({
   label,
   direction = 'neutral',
   className,
+  emptyKey = 'progress.notEnough',
 }: {
   series: TrendPoint[];
   unit: string;
   label: string;
   direction?: TrendDirection;
   className?: string;
+  /**
+   * Which sentence to show when there are fewer than three points.
+   *
+   * The default is the progress screen's, which is where this chart was born and where it says
+   * "three training days". That wording followed the component onto the admin dashboard's coin
+   * velocity chart, which told an admin to log three more workouts — measured on the screen, in
+   * Hungarian, with one ledger entry in the window.
+   *
+   * A shared component with a domain-specific empty state is a small lie per reuse. The default
+   * keeps every existing caller unchanged; new surfaces pass their own.
+   */
+  emptyKey?: string;
 }) {
   const { t } = useTranslation();
   const gradientId = useId();
 
   if (series.length < 3) {
-    return (
-      <p className="text-caption text-text-3">{t('progress.notEnough', { count: series.length })}</p>
-    );
+    return <p className="text-caption text-text-3">{t(emptyKey, { count: series.length })}</p>;
   }
 
   // The viewBox is fixed and the SVG scales; nothing here depends on measured pixels, so it renders

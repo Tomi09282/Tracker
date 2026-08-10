@@ -13,6 +13,7 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
+import { AdminMetrics } from './AdminMetrics';
 
 interface Stats {
   users: { total: number; coaches: number; admins: number; disabled: number; new_7d: number };
@@ -157,6 +158,8 @@ export function AdminPage() {
           />
         </div>
       ) : null}
+
+      <AdminMetrics enabled={user?.role === 'admin'} />
 
       <section className="mt-8">
         <div className="flex items-baseline gap-2">

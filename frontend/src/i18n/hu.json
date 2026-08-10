@@ -853,5 +853,23 @@
     "inertExplain": "Ezt a beállítást jelenleg egyetlen komponens sem olvassa. Elmenteni és auditálni lehetne, de a termék nem változna tőle egy képpontot sem — ezért a váltás le van tiltva, amíg nem kap fogyasztót.",
     "loadFailed": "Nem sikerült betölteni a stílusokat",
     "loadFailedBody": "A szerver nem válaszolt. Frissítsd az oldalt."
+  },
+  "adminMetrics": {
+    "title": "Mérőszámok",
+    "window": "utolsó {{days}} nap",
+    "loggedPeople": "Naplózó emberek",
+    "loggedPeopleSub": "ma: {{today}}",
+    "signups": "Regisztrációk",
+    "activeCoaches": "Aktív edzők",
+    "activeCoachesSub": "{{withRole}} edző szerepkörrel",
+    "coinVelocity": "Érme-mozgás",
+    "coinVelocitySub": "mozgatott egység, előjel nélkül",
+    "completedWorkouts": "Befejezett edzések",
+    "cardHint": "A szám a kiválasztott időablakra vonatkozik.",
+    "clock": {
+      "local_date": "saját nap",
+      "utc": "UTC"
+    },
+    "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három napnyi mérés kell hozzá."
   }
 }

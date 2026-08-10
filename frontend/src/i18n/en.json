@@ -853,5 +853,23 @@
     "inertExplain": "No component reads this setting today. It would save and it would be audited, and the product would not change by a pixel — so the switch stays disabled until something consumes it.",
     "loadFailed": "Could not load the styles",
     "loadFailedBody": "The server did not answer. Reload the page."
+  },
+  "adminMetrics": {
+    "title": "Metrics",
+    "window": "last {{days}} days",
+    "loggedPeople": "People who logged",
+    "loggedPeopleSub": "today: {{today}}",
+    "signups": "Signups",
+    "activeCoaches": "Active coaches",
+    "activeCoachesSub": "{{withRole}} hold the coach role",
+    "coinVelocity": "Coin movement",
+    "coinVelocitySub": "units moved, sign dropped",
+    "completedWorkouts": "Completed workouts",
+    "cardHint": "The figure covers the selected window.",
+    "clock": {
+      "local_date": "user's own day",
+      "utc": "UTC"
+    },
+    "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three days of measurements are needed."
   }
 }

@@ -291,4 +291,135 @@ router.post(
   }),
 );
 
+/* ── metrics ─────────────────────────────────────────────────────────────────────────────────── */
+
+const metricsQuery = z
+  .object({
+    // Bounded, and low. Every series below groups a date range across EVERY user, so the cost is
+    // linear in the window — an unbounded window is a one-request denial of service wearing the
+    // clothes of a chart control. 90 is a quarter, which is as far back as a trend line is read.
+    days: z.coerce.number().int().min(7).max(90).optional(),
+  })
+  .strict();
+
+/**
+ * The dashboard's time series.
+ *
+ * ═══ THIS DOES NOT RETURN DAU/MAU, BECAUSE THE PRODUCT CANNOT MEASURE IT ═══════════════════════
+ *
+ * There is no session table, no events table and no `users.last_seen_at` — checked against
+ * `pragma_table_info`, not assumed. Every candidate proxy means something different from "daily
+ * active users":
+ *
+ *   * `refresh_tokens` counts TOKENS. Rotation mints a new row on every refresh, so one tab open
+ *     all afternoon looks like a dozen people.
+ *   * `audit_log` records notable events, which ordinary use is not.
+ *
+ * Adding `last_seen_at` would mean a write on every authenticated request — a write amplifier on
+ * the hottest path in the product, to power one number on one screen.
+ *
+ * So this returns what the product actually records: PEOPLE WHO LOGGED SOMETHING. That is a real
+ * engagement number, and it is smaller than DAU by however many people opened the app and logged
+ * nothing. The field is called `loggedPeople` rather than `dau` so nobody has to read this comment
+ * to avoid the mistake.
+ *
+ * ═══ TWO CLOCKS, KEPT APART ════════════════════════════════════════════════════════════════════
+ *
+ * Activity buckets on `local_date` — the user's own day, the same column the streaks and calendar
+ * use, and 010 says in terms why `date(started_at,'unixepoch')` mis-buckets everyone outside UTC.
+ * Signups and coin movement bucket on UTC, because a registration and a ledger entry are events in
+ * server time. Each series carries its `clock`, and the client charts them separately: a UTC bar
+ * beside a local-date one on one axis claims a shared day boundary they do not have.
+ */
+router.get(
+  '/admin/metrics',
+  requireAuth,
+  requireRole('admin'),
+  adminLimiter,
+  asyncRoute(async (req, res) => {
+    if (!(await assertAdmin(req, res))) return;
+    const parsed = metricsQuery.safeParse(req.query);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+    const days = parsed.data.days ?? 30;
+    const since = `-${days} days`;
+
+    // One pool call per series, in parallel. They are independent reads, each answered from its own
+    // index, and there is no consistency requirement between them that a few milliseconds of skew
+    // could violate.
+    const [logged, signups, workouts, coins, coaches, totals] = await Promise.all([
+      // Somebody who logged a workout AND a meal on the same day is one person: UNION, not UNION
+      // ALL, and the DISTINCT is over the union rather than over each half.
+      db.all(
+        `SELECT d AS day, COUNT(DISTINCT uid) AS people FROM (
+           SELECT local_date AS d, client_user_id AS uid FROM workout_logs
+            WHERE local_date >= date('now', ?)
+           UNION
+           SELECT local_date AS d, client_user_id AS uid FROM nutrition_log_items
+            WHERE local_date >= date('now', ?)
+         )
+         GROUP BY d ORDER BY d`,
+        [since, since],
+      ),
+      db.all(
+        `SELECT date(created_at, 'unixepoch') AS day, COUNT(*) AS n
+           FROM users WHERE created_at >= unixepoch() - ? GROUP BY day ORDER BY day`,
+        [days * 86400],
+      ),
+      db.all(
+        `SELECT local_date AS day, COUNT(*) AS n
+           FROM workout_logs WHERE local_date >= date('now', ?) AND status = 'completed'
+          GROUP BY day ORDER BY day`,
+        [since],
+      ),
+      // Velocity is how much MOVED, so the sign is dropped: a 500 grant and a 500 spend are a
+      // thousand minor units of movement, not zero. Integer minor units throughout — nothing here
+      // divides, because HUF has minor_units = 0 and dividing by a hardcoded 100 is a defect this
+      // project already shipped once.
+      db.all(
+        `SELECT date(created_at, 'unixepoch') AS day,
+                SUM(ABS(amount_minor)) AS movedMinor,
+                COUNT(*) AS entries
+           FROM coin_ledger WHERE created_at >= unixepoch() - ? GROUP BY day ORDER BY day`,
+        [days * 86400],
+      ),
+      // An "active coach" is one somebody is actually linked to. Counting accounts that hold the
+      // coach role answers a different question, and it is the flattering one.
+      db.get(
+        `SELECT
+           (SELECT COUNT(*) FROM users WHERE role = 'coach' AND disabled_at IS NULL) AS withRole,
+           (SELECT COUNT(DISTINCT c.coach_id) FROM coach_clients c
+             JOIN users u ON u.id = c.coach_id
+            WHERE c.status = 'active' AND u.disabled_at IS NULL)                     AS withClients`,
+      ),
+      db.get(
+        `SELECT
+           (SELECT COUNT(DISTINCT uid) FROM (
+              SELECT client_user_id AS uid FROM workout_logs        WHERE local_date >= date('now','-30 days')
+              UNION
+              SELECT client_user_id AS uid FROM nutrition_log_items WHERE local_date >= date('now','-30 days')
+            )) AS loggedPeople30d,
+           (SELECT COUNT(DISTINCT uid) FROM (
+              SELECT client_user_id AS uid FROM workout_logs        WHERE local_date >= date('now','-1 days')
+              UNION
+              SELECT client_user_id AS uid FROM nutrition_log_items WHERE local_date >= date('now','-1 days')
+            )) AS loggedPeople1d`,
+      ),
+    ]);
+
+    res.json({
+      window: { days },
+      loggedPeople: {
+        clock: 'local_date',
+        daily: logged,
+        last30d: totals.loggedPeople30d,
+        last1d: totals.loggedPeople1d,
+      },
+      signups: { clock: 'utc', daily: signups },
+      completedWorkouts: { clock: 'local_date', daily: workouts },
+      coinVelocity: { clock: 'utc', daily: coins },
+      coaches,
+    });
+  }),
+);
+
 export default router;

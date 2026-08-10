@@ -297,6 +297,38 @@ await mutate({
   expect: 'FAIL  a SECOND rename inside the window',
 });
 
+console.log('\n── verify-025: the indexes the dashboard queries plan against ──────────────────');
+
+/*
+ * A dropped index is the quietest regression in the file. The endpoint keeps answering, the tests
+ * keep passing, and on fourteen dev rows nothing feels slow — it feels slow in production, months
+ * later, to somebody else.
+ *
+ * This case does not touch the migration's SQL. It runs the probe against a database where the
+ * index has genuinely been dropped, which is the state a bad merge or a hand-run DROP produces,
+ * and the probe has to notice the plan changed rather than reporting on the index's absence.
+ */
+{
+  const label = 'a dropped metrics index makes the query plan probe go red';
+  const { execFileSync } = await import('node:child_process');
+  const drop = (sql) =>
+    execFileSync(process.execPath, ['-e', `import('./src/db/index.js').then(async d => { await d.run(${JSON.stringify(sql)}); await d.closePool(); })`], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  try {
+    drop('DROP INDEX IF EXISTS workout_logs_date_idx');
+    const { rejected, output } = runGate('scripts/verify-025.mjs');
+    check(
+      label,
+      rejected && output.includes('FULL SCAN of workout_logs'),
+      rejected ? output.split('\n').find((l) => l.includes('FULL SCAN'))?.trim().slice(0, 88) ?? 'red, but not about the scan' : 'THE PROBE STAYED GREEN',
+    );
+  } finally {
+    drop('CREATE INDEX IF NOT EXISTS workout_logs_date_idx ON workout_logs (local_date, client_user_id)');
+  }
+}
+
 console.log('\n── and a route no gate can see ────────────────────────────────────────────────');
 
 /*
