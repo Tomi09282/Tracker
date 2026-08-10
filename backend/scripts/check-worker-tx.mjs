@@ -16,6 +16,7 @@
 // That is the codebase's dominant safe pattern and it must not be flagged.
 import fs from 'node:fs';
 import path from 'node:path';
+import { blankComments } from './lib/parse-routes.mjs';
 
 const FILE = 'src/db/worker.js';
 const raw = fs.readFileSync(FILE, 'utf8');
@@ -36,46 +37,10 @@ const raw = fs.readFileSync(FILE, 'utf8');
  *     satisfy the exemption test and wave the defect straight through. The gate would go quiet
  *     because of a sentence describing the opposite of what the code does.
  *
- * So comments are replaced with spaces first. Positions and line numbers are preserved exactly —
- * every offset below still points at the real file — but nothing inside a comment can be mistaken
- * for a statement.
+ * So comments are replaced with spaces first. The implementation is SHARED with the route parser —
+ * check-routes hit the identical problem the same afternoon, and two copies of "what is a comment"
+ * is this project's second-most-common defect wearing a different hat.
  */
-function blankComments(text) {
-  let out = '';
-  let i = 0;
-  while (i < text.length) {
-    const c = text[i];
-    if (c === '/' && text[i + 1] === '/') {
-      const nl = text.indexOf('\n', i);
-      const end = nl === -1 ? text.length : nl;
-      out += ' '.repeat(end - i);
-      i = end;
-      continue;
-    }
-    if (c === '/' && text[i + 1] === '*') {
-      const close = text.indexOf('*/', i + 2);
-      const end = close === -1 ? text.length : close + 2;
-      // Newlines are kept so every line number downstream is still the file's own.
-      out += text.slice(i, end).replace(/[^\n]/g, ' ');
-      i = end;
-      continue;
-    }
-    if (c === "'" || c === '"' || c === '`') {
-      let j = i + 1;
-      while (j < text.length && text[j] !== c) {
-        if (text[j] === '\\') j += 1;
-        j += 1;
-      }
-      out += text.slice(i, Math.min(j + 1, text.length));
-      i = j + 1;
-      continue;
-    }
-    out += c;
-    i += 1;
-  }
-  return out;
-}
-
 const src = blankComments(raw);
 const lines = src.split('\n');
 

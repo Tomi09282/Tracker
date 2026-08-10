@@ -1,15 +1,15 @@
 ---
 type: api-index
 title: API surface
-count: 165
+count: 167
 tags: [api, moc, generated]
 ---
 
-# API surface — 165 endpoints
+# API surface — 167 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.
@@ -56,6 +56,7 @@ protection the code does not have.
 | GET | `/api/v1/coins/wallet` | `requireAuth` |
 | GET | `/api/v1/compose/context` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/compose/guidelines/accept` | `requireAuth`, `requireCoach` |
+| GET | `/api/v1/compose/handle` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/compose/posts` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/compose/posts` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/compose/posts/:publicId` | `requireAuth`, `requireCoach` |
@@ -70,6 +71,7 @@ protection the code does not have.
 | GET | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
 | PUT | `/api/v1/compose/profile` | `requireAuth`, `requireCoach` |
+| POST | `/api/v1/compose/profile/handle` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/compose/profile/publish` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/compose/profile/unpublish` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/conversations` | `requireAuth` |

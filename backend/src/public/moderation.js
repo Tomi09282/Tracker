@@ -19,7 +19,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
@@ -43,7 +43,7 @@ const limiter = (limit, keyGenerator) =>
 // the quota survives a restart and a second worker process, and a limiter set to the same ceiling
 // would let a few retries of one report exhaust the day's allowance.
 const reportIpLimiter = limiter(60);
-const reportAccountLimiter = limiter(40, (req) => `rep:${req.user?.id ?? req.ip}`);
+const reportAccountLimiter = limiter(40, (req) => `rep:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 const adminReadLimiter = limiter(600);
 const adminWriteLimiter = limiter(120);
 

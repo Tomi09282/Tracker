@@ -23,7 +23,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { rm } from 'node:fs/promises';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
@@ -51,7 +51,7 @@ const limiter = (limit, keyGenerator) =>
   });
 
 const coverUploadIpLimiter = limiter(30);
-const coverUploadAccountLimiter = limiter(20, (req) => `cover:${req.user?.id ?? req.ip}`);
+const coverUploadAccountLimiter = limiter(20, (req) => `cover:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 
 const upload = multer({
   dest: QUARANTINE_DIR,

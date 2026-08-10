@@ -35,6 +35,62 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+/**
+ * Replace every comment with spaces, preserving length and line numbers exactly.
+ *
+ * ═══ EVERY GATE BUILT ON THIS WAS READING PROSE AS CODE ════════════════════════════════════════
+ *
+ * Twice in one afternoon, a comment broke a gate:
+ *
+ *   * `check-worker-tx` counts writes to decide whether ADR-0005's exemption applies. A comment
+ *     mentioning `.run(` inflated the count. Worse in the other direction: the exemption window is
+ *     the current line plus the one above — usually a comment — so a sentence reading "we do not
+ *     probe changes === 0 here" would have switched the gate off over a real defect.
+ *
+ *   * `check-routes` compares the position of a limiter against the position of `requireAuth`. A
+ *     comment ABOVE the role gate explaining why the limiter moved contained the word `writeLimiter`,
+ *     so the gate found the limiter "first" and reported the route it had just been fixed.
+ *
+ * A gate whose verdict depends on what somebody wrote ABOUT the code is not measuring the code. So
+ * comments are blanked before any consumer sees a chain or a handler. Strings are left intact — an
+ * SQL literal is data the gates genuinely need to read.
+ */
+export function blankComments(text) {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (c === '/' && text[i + 1] === '/') {
+      const nl = text.indexOf('\n', i);
+      const end = nl === -1 ? text.length : nl;
+      out += ' '.repeat(end - i);
+      i = end;
+      continue;
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      const close = text.indexOf('*/', i + 2);
+      const end = close === -1 ? text.length : close + 2;
+      // Newlines survive so every line number downstream still points at the real file.
+      out += text.slice(i, end).replace(/[^\n]/g, ' ');
+      i = end;
+      continue;
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== c) {
+        if (text[j] === '\\') j += 1;
+        j += 1;
+      }
+      out += text.slice(i, Math.min(j + 1, text.length));
+      i = j + 1;
+      continue;
+    }
+    out += c;
+    i += 1;
+  }
+  return out;
+}
+
 /** Every `.js` file under `dir`, recursively. */
 export function sourceFiles(dir) {
   const out = [];
@@ -213,10 +269,13 @@ export function parseRoutes(root = 'src') {
         key: `${method} ${route}`,
         method,
         route,
-        // The factory's own arguments are part of the chain for gate purposes only in the sense
-        // that they are NOT middleware — the chain is what sits between the path and the handler.
-        chain,
-        handler,
+        // COMMENT-FREE, always. Every consumer of these is asking a question about the code, and a
+        // gate whose verdict moves when somebody edits a comment is not measuring the code. The raw
+        // text is still available for anything that genuinely wants the prose.
+        chain: blankComments(chain),
+        handler: blankComments(handler),
+        rawChain: chain,
+        rawHandler: handler,
         via,
       });
     }

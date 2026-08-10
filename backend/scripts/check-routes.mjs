@@ -89,6 +89,35 @@ for (const r of routes) {
   if (r.method !== 'GET' && !/[Ll]imiter/.test(r.chain)) {
     problems.push(`${r.key} (${r.file}) is a write with no rate limiter`);
   }
+
+  /*
+   * ═══ THE CHEAP REJECTION COMES FIRST ═══════════════════════════════════════════════════════
+   *
+   * A limiter placed above `requireAuth` or `requireRole` charges its budget to callers who were
+   * never allowed through. Found on `PUT /ui/element-styles/:id`, whose limiter is 120 per IP and
+   * SHARED with `PUT /me/theme`: any signed-in non-admin could empty the bucket the admin needs —
+   * and their own theme writes with it — by firing rejected requests at it.
+   *
+   * There is nothing to protect by limiting first. Both middlewares read an already-verified token
+   * claim; neither touches the database, and both are cheaper than the limiter's own store lookup.
+   *
+   * The rule applies only where the gate EXISTS. `POST /login` has no requireAuth and its limiter is
+   * the whole brute-force defence, so it is untouched by this — which is why the check is a relative
+   * ordering rather than a position.
+   */
+  const limiterAt = r.chain.search(/[A-Za-z]*[Ll]imiter/);
+  if (limiterAt !== -1) {
+    for (const gate of ['requireAuth', 'requireRole', 'requireCoach', 'requireAdmin']) {
+      const at = r.chain.indexOf(gate);
+      if (at !== -1 && at > limiterAt) {
+        problems.push(
+          `${r.key} (${r.file}) runs its rate limiter BEFORE ${gate}.\n` +
+            '      Callers the gate would have rejected spend the budget anyway. Move the gate above\n' +
+            '      the limiter — it reads a token claim and is cheaper than the limiter it precedes.',
+        );
+      }
+    }
+  }
 }
 
 // Every allowlist entry must correspond to a route that exists. A stale exemption is how a

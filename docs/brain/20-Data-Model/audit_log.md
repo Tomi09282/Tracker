@@ -1,8 +1,8 @@
 ---
 type: table
 table: audit_log
-summary: 9 columns, 56 rows
-rows: 56
+summary: 9 columns, 116 rows
+rows: 116
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
 
 | Column | Type | Notes |
 |---|---|---|

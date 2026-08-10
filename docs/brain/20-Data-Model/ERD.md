@@ -1,15 +1,15 @@
 ---
 type: data-model
 title: Data model
-schema_version: 23
+schema_version: 24
 tags: [data-model, erd, generated]
 ---
 
-# Data model — schema version 23
+# Data model — schema version 24
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
 
 81 tables, plus 4 FTS5 shadow tables (`coach_posts_fts`, `exercise_translations_fts`, `food_translations_fts`, `foods_fts`).
 
@@ -161,7 +161,7 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 56 |
+| [[audit_log]] | 9 | 116 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
@@ -189,7 +189,7 @@ erDiagram
 | [[foods]] | 17 | 95 |
 | [[guidelines_acceptances]] | 4 | 1 |
 | [[guidelines_versions]] | 4 | 1 |
-| [[invite_codes]] | 11 | 6 |
+| [[invite_codes]] | 11 | 7 |
 | [[invite_redemptions]] | 6 | 3 |
 | [[languages]] | 6 | 25 |
 | [[meal_items]] | 15 | 0 |
@@ -218,12 +218,12 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 139 |
+| [[refresh_tokens]] | 9 | 146 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |
 | [[retired_handles]] | 3 | 0 |
-| [[schema_migrations]] | 2 | 22 |
+| [[schema_migrations]] | 2 | 23 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[theme_packs]] | 6 | 7 |
@@ -234,10 +234,10 @@ erDiagram
 | [[workout_log_exercises]] | 15 | 16 |
 | [[workout_log_sets]] | 31 | 54 |
 | [[workout_logs]] | 29 | 14 |
-| [[workout_plan_blocks]] | 10 | 13 |
+| [[workout_plan_blocks]] | 10 | 14 |
 | [[workout_plan_day_exceptions]] | 9 | 0 |
-| [[workout_plan_days]] | 11 | 14 |
-| [[workout_plan_exercises]] | 23 | 15 |
+| [[workout_plan_days]] | 11 | 15 |
+| [[workout_plan_exercises]] | 23 | 16 |
 | [[workout_plan_set_targets]] | 14 | 0 |
 | [[workout_plans]] | 20 | 11 |
 | [[workout_pr_events]] | 17 | 11 |

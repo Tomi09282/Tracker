@@ -1,8 +1,8 @@
 ---
 type: table
 table: workout_plan_blocks
-summary: 10 columns, 13 rows
-rows: 13
+summary: 10 columns, 14 rows
+rows: 14
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-09.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
 
 | Column | Type | Notes |
 |---|---|---|

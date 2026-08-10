@@ -16,7 +16,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
@@ -78,18 +78,18 @@ const composeWriteIpLimiter = limiter(120);
 // Preview is a keystroke-driven read that writes nothing, so it is limited generously — but it
 // still runs the parser, which is the only CPU work on this surface, so it is limited at all.
 const composePreviewIpLimiter = limiter(300);
-const composePreviewAccountLimiter = limiter(200, (req) => `prev:${req.user?.id ?? req.ip}`);
-const composeWriteAccountLimiter = limiter(60, (req) => `compose:${req.user?.id ?? req.ip}`);
+const composePreviewAccountLimiter = limiter(200, (req) => `prev:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
+const composeWriteAccountLimiter = limiter(60, (req) => `compose:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 // Publishing is limited far ABOVE the database's own daily quota on purpose. The quota is the
 // bound that survives a restart and a second cluster worker; a limiter set to the same ceiling
 // would let a handful of retries of one publish exhaust the budget for every other one.
 const publishIpLimiter = limiter(20);
-const publishAccountLimiter = limiter(60, (req) => `pub:${req.user?.id ?? req.ip}`);
+const publishAccountLimiter = limiter(60, (req) => `pub:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 // The handle probe is a read, but it is also an oracle — so it is limited like a write, and per
 // ACCOUNT as well as per IP. What matters about an oracle is how many questions you can ask it.
 // 200/15min is generous for a debounced field and useless for enumeration.
 const handleProbeIpLimiter = limiter(400);
-const handleProbeAccountLimiter = limiter(200, (req) => `hnd:${req.user?.id ?? req.ip}`);
+const handleProbeAccountLimiter = limiter(200, (req) => `hnd:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 
 /* ── GET /compose/context ───────────────────────────────────────────────────────────────────── */
 

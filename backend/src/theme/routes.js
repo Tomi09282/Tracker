@@ -193,8 +193,17 @@ const VariantSchema = z.object({ variant: z.enum(['A', 'B', 'C', 'D', 'E']) }).s
 router.put(
   '/ui/element-styles/:id',
   requireAuth,
-  writeLimiter,
+  // ═══ THE ROLE GATE COMES BEFORE THE LIMITER, AND IT USED TO COME AFTER ═════════════════════
+  //
+  // `writeLimiter` is 120 per 15 minutes PER IP and it is shared with `PUT /me/theme`. With the
+  // limiter first, every signed-in non-admin's rejected attempt spent from that budget — so any
+  // ordinary user could empty the bucket the admin needs, and their own theme writes with it, by
+  // firing 120 requests at an endpoint they were never allowed to call.
+  //
+  // `requireRole` reads a claim off the already-verified token: no database, no hashing, cheaper
+  // than the limiter's own store lookup. There is nothing to protect by putting the limiter first.
   requireRole('admin'),
+  writeLimiter,
   asyncRoute(async (req, res) => {
     const id = ElementIdSchema.parse(req.params.id);
     const { variant } = VariantSchema.parse(req.body);

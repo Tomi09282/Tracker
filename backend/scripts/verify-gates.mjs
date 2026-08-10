@@ -78,6 +78,7 @@ const TOUCHED = [
   'src/admin/routes.js',
   'src/db/migrations/024_rename_eligibility.sql',
   'src/coaching/routes.js',
+  'src/theme/routes.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -199,6 +200,24 @@ await mutate({
   to: 'const emptyBody = z.object({});',
   gate: 'scripts/check-routes.mjs',
   expect: 'not .strict()',
+});
+
+/*
+ * The ordering rule, and the reason it needed comments blanked to work at all.
+ *
+ * `PUT /ui/element-styles/:id` had its limiter above `requireRole('admin')`, so any signed-in
+ * non-admin could empty a 120-per-IP bucket shared with `PUT /me/theme`. Moving the gate up fixed
+ * it — and the gate then reported the route AGAIN, because the comment explaining the move contains
+ * the word `writeLimiter` and the check was searching raw text. Both the rule and the blanking are
+ * proved here.
+ */
+await mutate({
+  label: 'a limiter running before its role gate is caught',
+  file: 'src/theme/routes.js',
+  from: "  requireRole('admin'),\n  writeLimiter,",
+  to: '  writeLimiter,\n  requireRole(\'admin\'),',
+  gate: 'scripts/check-routes.mjs',
+  expect: 'runs its rate limiter BEFORE requireRole',
 });
 
 await mutate({
