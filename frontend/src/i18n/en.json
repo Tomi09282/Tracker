@@ -791,7 +791,9 @@
       "withdrawn": "This post is taken down. Restore it first.",
       "account_disabled": "The account is disabled.",
       "not_a_coach": "This needs a coach account.",
-      "session_stale": "The session is stale. Sign in again."
+      "session_stale": "The session is stale. Sign in again.",
+      "handle_changed": "Your profile name changed in the meantime — it is now {{handle}}. Reload before trying again.",
+      "rename_too_soon": "You changed this name recently. The next change is possible after {{date}}."
     },
     "markdown": {
       "generic": "That text cannot be processed.",
@@ -823,6 +825,16 @@
       "coverRemoved": "Cover removed"
     },
     "saved": "Saved",
-    "overLimit": "Longer than allowed."
+    "overLimit": "Longer than allowed.",
+    "handleChecking": "Checking…",
+    "handleFree": "Available",
+    "handleTaken": "That name is taken",
+    "handleMalformed": "Lowercase letters, numbers and hyphens only, 3–32 characters.",
+    "handleIsYours": "This is your current name.",
+    "handleUnknown": "Could not check just now — saving will tell you.",
+    "handleChange": "Change",
+    "handleChangeTitle": "Change your public name",
+    "handleChangeConfirm": "Change name",
+    "handleCooldownWarning": "You are letting {{handle}} go, and nobody else can take it for {{retireDays}} days. You will be able to change it again in {{days}} days."
   }
 }

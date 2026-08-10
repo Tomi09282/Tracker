@@ -50,6 +50,18 @@ export interface ComposeContext {
     mediaToday: number;
   };
   limits: ComposeLimits;
+  /**
+   * The source of the server's HANDLE_RE, shipped rather than restated.
+   *
+   * shapes.js owns the rule and a column CHECK agrees with it. A regex literal in a React component
+   * would be a fourth reader with nothing keeping it honest, and it would fail in the direction that
+   * tells a coach an invalid handle is fine.
+   */
+  handlePattern: string;
+  /** Read from the same policy row the eligibility view reads, so the warning matches the rule. */
+  handleRenameCooldownS: number;
+  /** How long a retired handle is held against everybody else. Quoted in the rename warning. */
+  handleCooldownS: number;
   now: number;
 }
 
@@ -165,6 +177,51 @@ export function useSaveProfile() {
   return useMutation({
     mutationFn: (body: ProfileDraft) =>
       apiWithRefresh<{ profile: unknown }>('/compose/profile', { method: 'PUT', body }),
+    onSuccess: invalidate,
+  });
+}
+
+/**
+ * Is this handle free — asked as the coach types, debounced by the caller.
+ *
+ * The server answers ONE boolean and nothing else, so there is nothing here to widen. `enabled`
+ * keeps a malformed or unchanged handle from ever reaching the network: the endpoint is an
+ * enumeration oracle with a per-account rate limit, and burning that limit on keystrokes the coach
+ * has not finished typing would spend it on nothing.
+ *
+ * `retry: false` because a 429 is an answer, not a hiccup — retrying into a rate limiter is how a
+ * debounced field turns into a lockout.
+ */
+export function useHandleAvailable(handle: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['handle-available', handle],
+    queryFn: () =>
+      apiWithRefresh<{ available: boolean }>(`/compose/handle?handle=${encodeURIComponent(handle)}`),
+    enabled,
+    retry: false,
+    // The answer can change under us — somebody else can claim it between the check and the
+    // rename — so this is a hint for the UI, never the authority. The rename itself is the
+    // authority, and it refuses with `handle_unavailable`.
+    staleTime: 30_000,
+  });
+}
+
+/**
+ * Rename.
+ *
+ * `from` is not decoration. Sending only `to` would ask the server to rename from whatever is
+ * there now, which is exactly what a tab left open since before somebody else's rename would do —
+ * and applying it reverts that rename and burns both names for a month while the tab shows success.
+ * So the current handle travels with the request and the server refuses if it disagrees.
+ */
+export function useRenameHandle() {
+  const invalidate = useComposeInvalidate();
+  return useMutation({
+    mutationFn: (body: { from: string; to: string }) =>
+      apiWithRefresh<{ profile: { handle: string }; replayed: boolean }>('/compose/profile/handle', {
+        method: 'POST',
+        body,
+      }),
     onSuccess: invalidate,
   });
 }

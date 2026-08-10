@@ -151,6 +151,9 @@ router.get(
            WHERE q.author_user_id = me.uid AND q.published_at IS NOT NULL
              AND q.published_at > unixepoch() - 86400)                     AS oldestPublishedAt,
 
+         (SELECT value FROM public_policy WHERE key = 'handle_rename_cooldown_s') AS handleRenameCooldownS,
+         (SELECT value FROM public_policy WHERE key = 'handle_cooldown_s')        AS handleCooldownS,
+
          (SELECT value FROM public_policy WHERE key = 'media_daily_max')   AS mediaDailyMax,
          -- NO deleted_at filter, deliberately: this must count the way trg_post_media_daily_cap_ins
          -- counts, and that trigger counts rows created, not rows surviving. A screen that
@@ -195,6 +198,26 @@ router.get(
         mediaToday: row.mediaToday,
       },
       limits: COMPOSE_LIMITS,
+      // ═══ THE HANDLE RULE IS SHIPPED, NOT RESTATED ═══════════════════════════════════════════
+      //
+      // The composer needs to tell a coach that `Peter_Kovacs` is not a handle without a round trip
+      // per keystroke. The obvious way is a regex in the React component — and shapes.js says in its
+      // own header that a second copy of HANDLE_RE is a second answer to what a handle is, and that
+      // this one has to agree with a four-clause column CHECK.
+      //
+      // So the source is serialised and sent. `.source` is the pattern without the delimiters, which
+      // is exactly what `new RegExp()` takes on the other side. One definition, in the file that owns
+      // it, and a client that cannot drift because it has nothing of its own to drift from.
+      handlePattern: HANDLE_RE.source,
+      // How long a LISTED profile must wait between renames — read from the same policy row the
+      // trigger and the eligibility view read, so the warning the coach sees is the rule they will
+      // actually meet.
+      handleRenameCooldownS: row.handleRenameCooldownS,
+      // How long a RETIRED handle is held against everybody else. The composer's warning quotes this
+      // number, and quoting it from the server is the difference between a warning and a guess: the
+      // first draft of that sentence said 'a year' in three translation files while the 30-day figure
+      // beside it came from the policy row. One of those two numbers could change without the other.
+      handleCooldownS: row.handleCooldownS,
       now: row.now,
     });
   }),
@@ -315,9 +338,11 @@ const PROFILE_OUTCOMES = {
   specialty_unknown: { status: 409, code: ERR.CONFLICT },
   needs_guidelines: { status: 409, code: ERR.CONFLICT },
   too_new: { status: 409, code: ERR.CONFLICT },
-  // A rename composed against a world that has since changed. The 409 carries the TRUE current
-  // handle, so the client can show what actually happened instead of retrying into the same wall.
-  stale: { status: 409, code: ERR.CONFLICT },
+  // A rename composed against a world that has since changed. NOT reused as `stale`, which on
+  // this surface already means "your post row_version is old" — one reason string with two meanings
+  // gets one translated sentence, and it would be wrong for whichever case it was not written for.
+  // The 409 carries the TRUE current handle, so the client can say what actually happened.
+  handle_changed: { status: 409, code: ERR.CONFLICT },
   // Carries `eligibleAt`. A refusal a person cannot plan around is a refusal they retry blindly
   // until the rate limiter answers instead of the rule.
   rename_too_soon: { status: 409, code: ERR.CONFLICT },

@@ -1832,7 +1832,7 @@ export function renameCoachHandleTx({ userId, from, to, requestId, ip = null }) 
     // STALE. The caller told us which handle it thinks it is renaming FROM. If that is not the
     // handle on the row, this request was composed against a world that has since changed, and
     // applying it would revert somebody's rename and burn both names for a year.
-    if (p.handle !== from) return { outcome: 'stale', handle: p.handle };
+    if (p.handle !== from) return { outcome: 'handle_changed', handle: p.handle };
 
     // COOLDOWN, asked before availability so a coach who cannot rename at all learns nothing about
     // the handle they were reaching for.

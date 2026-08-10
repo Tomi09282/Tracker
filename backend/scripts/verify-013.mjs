@@ -28,12 +28,52 @@ const refused = (name, fn) => {
   catch (e) { check(name, true, String(e.message).slice(0, 62)); }
 };
 
-const link = c.prepare("SELECT id, coach_id, client_id FROM coach_clients WHERE status='active' LIMIT 1").get();
-const other = c.prepare('SELECT id FROM users WHERE id NOT IN (?, ?) LIMIT 1').get(link.coach_id, link.client_id);
-const link2 = c.prepare("SELECT id, coach_id, client_id FROM coach_clients WHERE status='active' AND id <> ? LIMIT 1").get(link.id) ?? link;
-
+/*
+ * ═══ THE FIXTURES ARE BUILT, NOT BORROWED ══════════════════════════════════════════════════════
+ *
+ * This used to take the first two active links it found and insert a conversation for each. That
+ * worked until somebody used the product: opening one chat in the dev app left link 3 with a
+ * conversation, and the probe's second INSERT hit `UNIQUE constraint failed:
+ * conversations.coach_client_id` and CRASHED — halfway through, having reported nine passes about
+ * an unrelated part of the schema.
+ *
+ * A probe whose result depends on activity it has nothing to do with is a probe that goes red on a
+ * Tuesday for no reason, and the third time it does that somebody stops reading it. So it now
+ * requires links with NO conversation, and creates its own if the database has none spare. All of
+ * it inside the transaction that is always rolled back, so the live database is untouched either
+ * way.
+ */
 c.exec('BEGIN');
 try {
+  const freeLinks = () =>
+    c.prepare(
+      `SELECT id, coach_id, client_id FROM coach_clients
+        WHERE status = 'active'
+          AND id NOT IN (SELECT coach_client_id FROM conversations)
+        LIMIT 2`,
+    ).all();
+
+  // Make up the shortfall rather than depending on the database's mood. A coach and a client who
+  // are not already linked is all this needs, and the pair is only ever used to hang a rolled-back
+  // conversation off.
+  while (freeLinks().length < 2) {
+    const pair = c.prepare(
+      `SELECT (SELECT id FROM users WHERE role IN ('coach','admin') LIMIT 1) AS coach,
+              (SELECT id FROM users WHERE role = 'user' LIMIT 1)             AS client`,
+    ).get();
+    if (!pair?.coach || !pair?.client) {
+      console.log('FAIL  the dev database has no coach and no client to build a link from');
+      c.exec('ROLLBACK');
+      process.exit(1);
+    }
+    c.prepare(
+      "INSERT INTO coach_clients (coach_id, client_id, status, origin) VALUES (?, ?, 'active', 'manual')",
+    ).run(pair.coach, pair.client);
+  }
+
+  const [link, link2] = freeLinks();
+  const other = c.prepare('SELECT id FROM users WHERE id NOT IN (?, ?) LIMIT 1').get(link.coach_id, link.client_id);
+
   // A conversation whose denormalised pair does not match the link it names.
   refused('a conversation cannot claim a link it does not belong to', () =>
     c.prepare(`INSERT INTO conversations (coach_client_id, coach_id, client_id, coach_name_snapshot) VALUES (?, ?, ?, 'coach')`)

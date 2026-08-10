@@ -192,9 +192,21 @@ await fs.rm(`${tmp}-shm`, { force: true });
 console.log('');
 const pool = await import('../src/db/index.js');
 
+/*
+ * ORDER MATTERS, and getting it wrong left rows behind for one commit.
+ *
+ * Deleting the retired handles first looks right and is not: dropping a LISTED profile fires
+ * `trg_profile_handle_retire_del`, which INSERTS its handle straight back into the table this had
+ * just cleaned. The probe reported "the dev database is back the way this probe found it" while two
+ * fixture handles sat in `retired_handles` holding names against every real account.
+ *
+ * It reported that because the assertion counted USERS. A cleanup check that measures one table and
+ * claims something about the database is the same mistake as a screenshot standing in for a
+ * measurement — so the profiles go first, and the check below now counts everything this touches.
+ */
 const cleanup = async () => {
-  await pool.run("DELETE FROM retired_handles WHERE handle LIKE 'v024-%'");
   await pool.run("DELETE FROM coach_profiles WHERE handle LIKE 'v024-%'");
+  await pool.run("DELETE FROM retired_handles WHERE handle LIKE 'v024-%'");
   await pool.run("DELETE FROM users WHERE email LIKE '%@v024probe.local'");
 };
 
@@ -266,7 +278,7 @@ try {
   });
   check(
     'a rename composed against a stale view of the world is REFUSED, not applied',
-    stale.outcome === 'stale' && stale.handle === 'v024-asker',
+    stale.outcome === 'handle_changed' && stale.handle === 'v024-asker',
     `${stale.outcome} handle=${stale.handle}`,
   );
   check(
@@ -340,8 +352,18 @@ try {
   );
 } finally {
   await cleanup();
-  const left = await pool.get("SELECT COUNT(*) AS n FROM users WHERE email LIKE '%@v024probe.local'");
-  check('the dev database is back the way this probe found it', left.n === 0, `${left.n} left`);
+  // Every table this probe writes to, not just the one it is easiest to check. The first version
+  // counted users, passed, and left two fixture handles retired against the whole namespace.
+  const left = await pool.get(
+    `SELECT (SELECT COUNT(*) FROM users           WHERE email  LIKE '%@v024probe.local') AS users,
+            (SELECT COUNT(*) FROM coach_profiles  WHERE handle LIKE 'v024-%')            AS profiles,
+            (SELECT COUNT(*) FROM retired_handles WHERE handle LIKE 'v024-%')            AS retired`,
+  );
+  check(
+    'the dev database is back the way this probe found it — users, profiles AND retired handles',
+    left.users === 0 && left.profiles === 0 && left.retired === 0,
+    `users=${left.users} profiles=${left.profiles} retired=${left.retired}`,
+  );
   await pool.closePool();
 }
 

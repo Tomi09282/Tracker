@@ -791,7 +791,9 @@
       "withdrawn": "Dieser Beitrag ist zurückgezogen. Stelle ihn zuerst wieder her.",
       "account_disabled": "Das Konto ist deaktiviert.",
       "not_a_coach": "Dafür wird ein Coach-Konto benötigt.",
-      "session_stale": "Die Sitzung ist veraltet. Melde dich neu an."
+      "session_stale": "Die Sitzung ist veraltet. Melde dich neu an.",
+      "handle_changed": "Der Name deines Profils hat sich inzwischen geändert — er lautet jetzt {{handle}}. Lade neu, bevor du es erneut versuchst.",
+      "rename_too_soon": "Du hast diesen Namen kürzlich geändert. Die nächste Änderung ist nach dem {{date}} möglich."
     },
     "markdown": {
       "generic": "Dieser Text kann nicht verarbeitet werden.",
@@ -823,6 +825,16 @@
       "coverRemoved": "Titelbild entfernt"
     },
     "saved": "Gespeichert",
-    "overLimit": "Länger als erlaubt."
+    "overLimit": "Länger als erlaubt.",
+    "handleChecking": "Wird geprüft…",
+    "handleFree": "Verfügbar",
+    "handleTaken": "Dieser Name ist vergeben",
+    "handleMalformed": "Nur Kleinbuchstaben, Ziffern und Bindestriche, 3–32 Zeichen.",
+    "handleIsYours": "Das ist dein aktueller Name.",
+    "handleUnknown": "Konnte gerade nicht geprüft werden — das Speichern zeigt es.",
+    "handleChange": "Ändern",
+    "handleChangeTitle": "Öffentlichen Namen ändern",
+    "handleChangeConfirm": "Namen ändern",
+    "handleCooldownWarning": "Du gibst {{handle}} damit frei, und {{retireDays}} Tage lang kann ihn niemand sonst übernehmen. Eine erneute Änderung ist in {{days}} Tagen möglich."
   }
 }

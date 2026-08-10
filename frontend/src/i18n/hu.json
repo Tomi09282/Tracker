@@ -791,7 +791,9 @@
       "withdrawn": "Ez a bejegyzés le van véve. Előbb állítsd vissza.",
       "account_disabled": "A fiók le van tiltva.",
       "not_a_coach": "Ehhez edzői jogosultság kell.",
-      "session_stale": "A munkamenet elavult. Jelentkezz be újra."
+      "session_stale": "A munkamenet elavult. Jelentkezz be újra.",
+      "handle_changed": "A profilod neve időközben megváltozott — most {{handle}}. Frissítsd az oldalt, mielőtt újra megpróbálod.",
+      "rename_too_soon": "A nevet nemrég módosítottad. A következő módosítás {{date}} után lehetséges."
     },
     "markdown": {
       "generic": "A szöveg nem dolgozható fel.",
@@ -823,6 +825,16 @@
       "coverRemoved": "Borítókép eltávolítva"
     },
     "saved": "Mentve",
-    "overLimit": "Hosszabb a megengedettnél."
+    "overLimit": "Hosszabb a megengedettnél.",
+    "handleChecking": "Ellenőrzés…",
+    "handleFree": "Szabad",
+    "handleTaken": "Ez a név foglalt",
+    "handleMalformed": "Csak kisbetű, szám és kötőjel, 3–32 karakter.",
+    "handleIsYours": "Ez a jelenlegi neved.",
+    "handleUnknown": "Most nem sikerült ellenőrizni — a mentésnél kiderül.",
+    "handleChange": "Módosítás",
+    "handleChangeTitle": "Nyilvános név módosítása",
+    "handleChangeConfirm": "Név módosítása",
+    "handleCooldownWarning": "A(z) {{handle}} nevet ezzel elengeded, és {{retireDays}} napig senki más nem veheti fel. Új módosításra {{days}} nap múlva lesz újra lehetőséged."
   }
 }

@@ -7,24 +7,138 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { DocRenderer } from '../marketplace/DocRenderer';
 import { useTaxonomy } from '../marketplace/usePublic';
+import { HandleField } from './HandleField';
 import {
   useComposeContext,
   useComposeProfile,
   useCreateProfile,
   useSaveProfile,
+  useRenameHandle,
   usePreview,
   conflictOf,
 } from './useCompose';
+
+/**
+ * Renaming, behind a disclosure.
+ *
+ * ═══ IT IS FOLDED AWAY ON PURPOSE ══════════════════════════════════════════════════════════════
+ *
+ * A LISTED profile's rename retires the old handle for a year and spends a cooldown the coach then
+ * cannot spend again for thirty days. That does not belong as an always-open box beside a headline,
+ * where it is one absent-minded edit away from happening.
+ *
+ * ═══ AND `from` IS THE DEFENCE AGAINST THIS VERY SCREEN ════════════════════════════════════════
+ *
+ * `current` comes from the loaded profile, and it travels with the request. If this tab has been
+ * open since before a rename made elsewhere — a second tab, a phone — the server sees a `from` that
+ * no longer matches and refuses, naming the handle that is actually there. Without it, this form
+ * would happily revert that rename and burn both names for a month while showing a success.
+ */
+function HandleRename({ current, listed }: { current: string; listed: boolean }) {
+  const { t } = useTranslation();
+  const ctx = useComposeContext();
+  const rename = useRenameHandle();
+  const [open, setOpen] = useState(false);
+  const [next, setNext] = useState('');
+
+  const conflict = conflictOf(rename.error);
+  const cooldownDays = Math.round((ctx.data?.handleRenameCooldownS ?? 2592000) / 86400);
+  // Both numbers in the warning come from the server. The retirement window was hardcoded as "a
+  // year" in three translation files while the rename window beside it was read from policy — two
+  // numbers describing one rule, only one of which could be changed.
+  const retireDays = Math.round((ctx.data?.handleCooldownS ?? 31536000) / 86400);
+
+  if (!open) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-body-s text-text-2">{t('compose.handleFixed', { handle: current })}</p>
+        <Pressable
+          variant="ghost"
+          density="compact"
+          onClick={() => {
+            setNext(current);
+            setOpen(true);
+          }}
+        >
+          {t('compose.handleChange')}
+        </Pressable>
+      </div>
+    );
+  }
+
+  return (
+    <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
+      <h2 className="text-label text-text-2">{t('compose.handleChangeTitle')}</h2>
+
+      <HandleField
+        label={t('compose.handle')}
+        value={next}
+        onChange={setNext}
+        ownHandle={current}
+        hint={t('compose.handleHint')}
+        autoFocus
+      />
+
+      {/*
+        The warning appears only for a LISTED profile, because only a listed profile pays. An
+        unpublished one releases its handle immediately and has no cooldown — telling its owner
+        about a thirty-day wait would be a lie that discourages a free action.
+      */}
+      {listed ? (
+        <p className="text-caption rounded-card border border-warning bg-warning-subtle p-2 text-text-1">
+          {t('compose.handleCooldownWarning', { days: cooldownDays, retireDays, handle: current })}
+        </p>
+      ) : null}
+
+      {conflict ? (
+        <p className="text-body-s text-danger" role="alert">
+          {t(`compose.reason.${conflict.reason}`, {
+            defaultValue: t('compose.reason.generic'),
+            handle: (conflict as { handle?: string }).handle,
+            date:
+              typeof (conflict as { eligibleAt?: number }).eligibleAt === 'number'
+                ? new Date((conflict as { eligibleAt: number }).eligibleAt * 1000).toLocaleDateString()
+                : undefined,
+          })}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Pressable
+          variant="primary"
+          density="compact"
+          busy={rename.isPending}
+          disabled={next === current || next.length === 0}
+          onClick={() =>
+            rename.mutate(
+              { from: current, to: next },
+              {
+                onSuccess: () => {
+                  setOpen(false);
+                },
+              },
+            )
+          }
+        >
+          {t('compose.handleChangeConfirm')}
+        </Pressable>
+        <Pressable variant="ghost" density="compact" onClick={() => setOpen(false)}>
+          {t('common.cancel')}
+        </Pressable>
+      </div>
+    </section>
+  );
+}
 
 /**
  * Create or edit the public profile.
  *
  * ═══ THE HANDLE IS ASKED FOR ONCE ══════════════════════════════════════════════════════════════
  *
- * It appears on the create form and nowhere else. Renaming exists as its own operation with a
- * thirty-day cooldown, because the old handle is retired for a year the moment a LISTED profile
- * changes it — that cooldown is what stops one account cycling through and locking the namespace,
- * and it is not something to bury in an edit form beside a headline.
+ * It appears on the create form, and on the edit form only behind the disclosure above. Renaming is
+ * its own operation with its own cooldown, because a LISTED profile's rename retires the old handle
+ * against everybody else — that is what stops one account cycling through and locking the
+ * namespace, and it is not something to leave open beside a headline field.
  *
  * `PUT`, not `PATCH`: every field is sent every time and an empty box means cleared. There is no
  * absent-versus-null merge to get wrong, which is the bug where a cleared headline comes back.
@@ -113,16 +227,14 @@ export function ProfileEditorPage() {
       <h1 className="text-title-2">{isNew ? t('compose.createProfile') : t('compose.editProfile')}</h1>
 
       {isNew ? (
-        <Field
+        <HandleField
           label={t('compose.handle')}
           value={handle}
-          onChange={(e) => setHandle(e.target.value.toLowerCase())}
+          onChange={setHandle}
           hint={t('compose.handleHint')}
         />
       ) : (
-        <p className="text-body-s text-text-2">
-          {t('compose.handleFixed', { handle: profile?.handle })}
-        </p>
+        <HandleRename current={profile?.handle ?? ''} listed={profile?.listedAt !== null} />
       )}
 
       <Field
