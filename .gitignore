@@ -13,6 +13,12 @@ backend/logs/
 backend/storage/
 backend/seed/cache/
 
+# Backups. Encrypted, and still never committed: a repository is copied, cloned, mirrored and
+# pushed to places the database never goes, and "it is encrypted" is one leaked .env away from
+# being a full copy of every user's training history and measurements. The first backup this repo
+# ever took showed up as an untracked 6.8 MB file one `git add -A` away from the history.
+backend/backups/
+
 # tooling noise
 .DS_Store
 Thumbs.db
