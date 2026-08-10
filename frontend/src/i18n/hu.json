@@ -871,5 +871,25 @@
       "utc": "UTC"
     },
     "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három napnyi mérés kell hozzá."
+  },
+  "adminUsers": {
+    "title": "Fiókok",
+    "search": "Keresés e-mailben",
+    "noneTitle": "Nincs találat",
+    "noneBody": "Próbáld meg az e-mail cím egy részletével.",
+    "disabled": "letiltva",
+    "mustChange": "jelszócsere",
+    "moreMatches": "Több találat van, mint amennyi elfér egy oldalon — szűkíts a kereséssel.",
+    "col": {
+      "email": "E-mail",
+      "role": "Szerepkör",
+      "clients": "Kliensek",
+      "created": "Regisztrált"
+    },
+    "role": {
+      "user": "Felhasználó",
+      "coach": "Edző",
+      "admin": "Admin"
+    }
   }
 }

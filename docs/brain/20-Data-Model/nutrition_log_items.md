@@ -39,6 +39,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `nutrition_log_items_date_idx`
 - `nutrition_log_items_plan_day_idx` (partial)
 - `nutrition_log_items_food_idx` (partial)
 - `nutrition_log_items_day_idx`

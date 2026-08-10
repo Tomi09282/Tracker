@@ -1,11 +1,11 @@
 ---
 type: data-model
 title: Data model
-schema_version: 24
+schema_version: 25
 tags: [data-model, erd, generated]
 ---
 
-# Data model — schema version 24
+# Data model — schema version 25
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -161,7 +161,7 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 116 |
+| [[audit_log]] | 9 | 149 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 8 |
 | [[coach_clients]] | 11 | 3 |
@@ -218,12 +218,12 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 146 |
+| [[refresh_tokens]] | 9 | 152 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |
 | [[retired_handles]] | 3 | 0 |
-| [[schema_migrations]] | 2 | 23 |
+| [[schema_migrations]] | 2 | 24 |
 | [[taxonomy_translations]] | 7 | 252 |
 | [[teams]] | 7 | 0 |
 | [[theme_packs]] | 6 | 7 |

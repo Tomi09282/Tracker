@@ -14,6 +14,8 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
 import { AdminMetrics } from './AdminMetrics';
+import { DataTable } from '../../ui/data/DataTable';
+import { UserSearch } from './UserSearch';
 
 interface Stats {
   users: { total: number; coaches: number; admins: number; disabled: number; new_7d: number };
@@ -161,6 +163,8 @@ export function AdminPage() {
 
       <AdminMetrics enabled={user?.role === 'admin'} />
 
+      <UserSearch enabled={user?.role === 'admin'} />
+
       <section className="mt-8">
         <div className="flex items-baseline gap-2">
           <h2 className="text-title-3 text-text-1">{t('admin.moderation')}</h2>
@@ -178,79 +182,73 @@ export function AdminPage() {
             <EmptyState icon={Check} title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
           </div>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-card border border-[var(--surface-border)]">
-            <table className="w-full min-w-[640px] border-collapse text-left">
-              <thead className="sticky top-0 bg-surface-2">
-                <tr>
-                  {['name', 'owner', 'media', 'actions'].map((h) => (
-                    <th key={h} className="text-micro uppercase px-4 py-3 text-text-3">
-                      {t(`admin.col.${h}`)}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {queue.data!.queue.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-t border-[var(--surface-border)] bg-surface-1 transition-colors duration-[var(--duration-fast)] hover:bg-surface-2"
-                  >
-                    <td className="text-body px-4 py-3 text-text-1">{row.name}</td>
-                    <td className="text-body-s px-4 py-3 text-text-2">{row.owner_email ?? '—'}</td>
-                    <td className="text-body-s px-4 py-3 tabular-nums text-text-2">{row.media_count}</td>
-                    <td className="px-4 py-3">
-                      {rejecting === row.id ? (
-                        <div className="flex flex-wrap items-end gap-2">
-                          <Field
-                            label={t('admin.reason')}
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            className="w-56"
-                          />
-                          <Pressable
-                            variant="danger"
-                            density="compact"
-                            disabled={reason.trim().length === 0}
-                            busy={decide.isPending}
-                            onClick={() => decide.mutate({ id: row.id, decision: 'reject', reason })}
-                          >
-                            {t('admin.reject')}
-                          </Pressable>
-                          <Pressable density="compact" variant="ghost" onClick={() => setRejecting(null)}>
-                            {t('common.cancel')}
-                          </Pressable>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Pressable
-                            variant="primary"
-                            density="compact"
-                            busy={decide.isPending}
-                            icon={<Check size={20} strokeWidth={2} aria-hidden />}
-                            onClick={() => decide.mutate({ id: row.id, decision: 'approve' })}
-                          >
-                            {t('admin.approve')}
-                          </Pressable>
-                          {/* Destructive action: never in the primary position, and it cannot
-                              fire without a reason the author can act on. */}
-                          <Pressable
-                            variant="ghost"
-                            density="compact"
-                            icon={<X size={20} strokeWidth={2} aria-hidden />}
-                            onClick={() => {
-                              setRejecting(row.id);
-                              setReason('');
-                            }}
-                          >
-                            {t('admin.reject')}
-                          </Pressable>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-3">
+            <DataTable
+              caption={t('admin.moderation')}
+              rows={queue.data!.queue}
+              rowKey={(row) => row.id}
+              columns={[
+                { key: 'name', header: t('admin.col.name'), render: (row) => row.name },
+                {
+                  key: 'owner',
+                  header: t('admin.col.owner'),
+                  render: (row) => <span className="text-text-2">{row.owner_email ?? '—'}</span>,
+                },
+                { key: 'media', header: t('admin.col.media'), numeric: true, render: (row) => row.media_count },
+                {
+                  key: 'actions',
+                  header: t('admin.col.actions'),
+                  render: (row) =>
+                    rejecting === row.id ? (
+                      <div className="flex flex-wrap items-end gap-2">
+                        <Field
+                          label={t('admin.reason')}
+                          value={reason}
+                          onChange={(e) => setReason(e.target.value)}
+                          className="w-56"
+                        />
+                        <Pressable
+                          variant="danger"
+                          density="compact"
+                          disabled={reason.trim().length === 0}
+                          busy={decide.isPending}
+                          onClick={() => decide.mutate({ id: row.id, decision: 'reject', reason })}
+                        >
+                          {t('admin.reject')}
+                        </Pressable>
+                        <Pressable density="compact" variant="ghost" onClick={() => setRejecting(null)}>
+                          {t('common.cancel')}
+                        </Pressable>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Pressable
+                          variant="primary"
+                          density="compact"
+                          busy={decide.isPending}
+                          icon={<Check size={20} strokeWidth={2} aria-hidden />}
+                          onClick={() => decide.mutate({ id: row.id, decision: 'approve' })}
+                        >
+                          {t('admin.approve')}
+                        </Pressable>
+                        {/* Destructive action: never in the primary position, and it cannot fire
+                            without a reason the author can act on. */}
+                        <Pressable
+                          variant="ghost"
+                          density="compact"
+                          icon={<X size={20} strokeWidth={2} aria-hidden />}
+                          onClick={() => {
+                            setRejecting(row.id);
+                            setReason('');
+                          }}
+                        >
+                          {t('admin.reject')}
+                        </Pressable>
+                      </div>
+                    ),
+                },
+              ]}
+            />
           </div>
         )}
       </section>

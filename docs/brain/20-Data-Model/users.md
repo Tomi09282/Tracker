@@ -33,6 +33,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `users_created_idx`
 - `users_role_idx`
 - `users_email_unique` (unique)
 

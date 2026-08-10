@@ -53,6 +53,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `workout_logs_date_idx`
 - `workout_logs_occurrence_unique` (unique) (partial)
 - `workout_logs_one_live_unique` (unique) (partial)
 - `workout_logs_stale_idx` (partial)

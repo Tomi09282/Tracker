@@ -871,5 +871,25 @@
       "utc": "UTC"
     },
     "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Tage Messwerte sind nötig."
+  },
+  "adminUsers": {
+    "title": "Konten",
+    "search": "Nach E-Mail suchen",
+    "noneTitle": "Keine Treffer",
+    "noneBody": "Versuche es mit einem Teil der E-Mail-Adresse.",
+    "disabled": "deaktiviert",
+    "mustChange": "Passwortwechsel",
+    "moreMatches": "Es gibt mehr Treffer, als auf eine Seite passen — grenze die Suche ein.",
+    "col": {
+      "email": "E-Mail",
+      "role": "Rolle",
+      "clients": "Klienten",
+      "created": "Registriert"
+    },
+    "role": {
+      "user": "Nutzer",
+      "coach": "Coach",
+      "admin": "Admin"
+    }
   }
 }

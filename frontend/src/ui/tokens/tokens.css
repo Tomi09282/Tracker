@@ -123,7 +123,19 @@
   --col-mobile: 480px;      /* mobile-shaped flows stay in this column on desktop */
   --col-wide: 1120px;       /* admin / dashboards / grids */
 
-  /* Z-index ladder */
+  /* Dense tables (admin).
+     --table-max-h is not decoration: a sticky header sticks to its nearest SCROLLING ancestor, and
+     a wrapper with no height constraint never scrolls, so the header travels with the page. The
+     admin queue shipped with `sticky top-0` on its thead and it was measured moving 600px when the
+     page scrolled 600px — it had never stuck once. Capping the height is what makes the wrapper a
+     real scroll container and the sticky meaningful. */
+  --table-max-h: 60vh;
+  --table-row-h: 44px;      /* the a11y floor again: every row carries interactive controls */
+
+  /* Z-index ladder.
+     --z-sticky sits BELOW the nav: a table header that scrolled over the bottom navigation would
+     be a header covering the way out of the screen. */
+  --z-sticky: 20;
   --z-nav: 40;
   --z-sheet: 50;
   --z-toast: 60;

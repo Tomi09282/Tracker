@@ -34,6 +34,7 @@ tags: [data-model, generated]
 
 ## Indexes
 
+- `coin_ledger_created_idx`
 - `coin_ledger_actor_idx` (partial)
 - `coin_ledger_user_idx`
 - `coin_ledger_sum_idx`

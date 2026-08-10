@@ -6,6 +6,7 @@ import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
 import { resolveLang, languages } from '../lib/lang.js';
+import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 
 const router = Router();
 
@@ -288,6 +289,117 @@ router.post(
     invalidateSvCache(id.data);
     req.log.info({ targetId: id.data }, 'account enabled');
     res.json({ account: { id: result.id, disabledAt: result.disabledAt }, replayed: result.replayed });
+  }),
+);
+
+/* ── user search ─────────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * The columns an admin may sort by, as a MAP from a client key to SQL.
+ *
+ * The client never sends SQL and never sends a column name that reaches a query. It sends a key,
+ * and a key that is not in this object is a 400 — so there is no interpolation to get wrong and no
+ * "sanitise the sort parameter" step that somebody later relaxes.
+ *
+ * `email` sorts on the same expression its unique index is built on, so the sort is answered from
+ * the index rather than by a temp b-tree.
+ */
+const USER_SORTS = {
+  created: { sql: 'u.created_at', tiebreak: 'u.id' },
+  email: { sql: 'lower(trim(u.email))', tiebreak: 'u.id' },
+  role: { sql: 'u.role', tiebreak: 'u.id' },
+};
+
+const userQuery = z
+  .object({
+    // Bounded and regex-shaped. This is fed to a LIKE, so the bound is what stops a pathological
+    // pattern, and the character class is what stops a wildcard being smuggled in: `%` and `_` are
+    // LIKE metacharacters, and a search for `%` would match every account in the product.
+    q: z.string().trim().min(1).max(80).regex(/^[\w@.\-+ ]+$/u).optional(),
+    sort: z.enum(['created', 'email', 'role']).optional(),
+    dir: z.enum(['asc', 'desc']).optional(),
+    role: z.enum(['user', 'coach', 'admin']).optional(),
+    state: z.enum(['all', 'enabled', 'disabled']).optional(),
+    cursor: z.string().max(200).optional(),
+  })
+  .strict();
+
+/**
+ * Find an account.
+ *
+ * ═══ THE PROJECTION IS THE SMALLEST THING THAT ANSWERS THE QUESTION ════════════════════════════
+ *
+ * An admin looking up a user needs to identify them, see their standing, and act. They do not need
+ * the person's measurements, their food log, their photos or their conversations, and this endpoint
+ * cannot reach any of it. The columns below are the whole projection, and `password_hash`,
+ * `session_version` and `next_login_at` are deliberately absent — a support screen that leaks a
+ * hash is a support screen that has to be treated as a credential store.
+ *
+ * ═══ AND THE PAGINATION IS THE ONE THE CODEBASE ALREADY HAS ════════════════════════════════════
+ *
+ * `lib/cursor.js` encodes an opaque keyset tuple and caps the page at MAX_PAGE. It had zero admin
+ * callers: the three existing admin list routes use three different dialects — a raw integer
+ * cursor, a hardcoded LIMIT 50 with no cursor at all, and a limit with no cursor. A fourth would
+ * have been the eleventh time this project reimplemented something it already had.
+ */
+router.get(
+  '/admin/users',
+  requireAuth,
+  requireRole('admin'),
+  adminLimiter,
+  asyncRoute(async (req, res) => {
+    if (!(await assertAdmin(req, res))) return;
+    const parsed = userQuery.safeParse(req.query);
+    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
+    const { q, role, state = 'all' } = parsed.data;
+    const sortKey = parsed.data.sort ?? 'created';
+    const desc = (parsed.data.dir ?? 'desc') === 'desc';
+    const order = USER_SORTS[sortKey];
+
+    // The keyset cursor carries the SORTED value and the tiebreak id, so a page boundary cannot
+    // skip or repeat a row when two accounts share a timestamp — which every seeded batch does.
+    const after = parsed.data.cursor ? decodeCursor(parsed.data.cursor) : null;
+    const cursorOk = Array.isArray(after) && after.length === 2;
+
+    // Every fragment below is a FIXED string chosen by a key, never assembled from request text.
+    const cmp = desc ? '<' : '>';
+    const dir = desc ? 'DESC' : 'ASC';
+    const rows = await db.all(
+      `SELECT u.id, u.email, u.role, u.created_at AS createdAt, u.disabled_at AS disabledAt,
+              u.must_change_credentials AS mustChange,
+              EXISTS (SELECT 1 FROM coach_profiles c WHERE c.user_id = u.id) AS hasProfile,
+              (SELECT COUNT(*) FROM coach_clients k
+                WHERE k.coach_id = u.id AND k.status = 'active')            AS clientCount
+         FROM users u
+        WHERE (? IS NULL OR lower(trim(u.email)) LIKE '%' || lower(?) || '%')
+          AND (? IS NULL OR u.role = ?)
+          AND (? = 'all'
+            OR (? = 'enabled'  AND u.disabled_at IS NULL)
+            OR (? = 'disabled' AND u.disabled_at IS NOT NULL))
+          AND (? = 0 OR (${order.sql}, ${order.tiebreak}) ${cmp} (?, ?))
+        ORDER BY ${order.sql} ${dir}, ${order.tiebreak} ${dir}
+        LIMIT ?`,
+      [
+        q ?? null, q ?? '',
+        role ?? null, role ?? null,
+        state, state, state,
+        cursorOk ? 1 : 0, cursorOk ? after[0] : null, cursorOk ? after[1] : null,
+        MAX_PAGE + 1,
+      ],
+    );
+
+    const page = rows.slice(0, MAX_PAGE);
+    const last = page[page.length - 1];
+    res.json({
+      users: page,
+      // The cursor encodes the SORT VALUE, not the row id — a cursor built from the id would walk
+      // the wrong order the moment the sort key is anything but `created`.
+      nextCursor:
+        rows.length > MAX_PAGE && last
+          ? encodeCursor([sortKey === 'email' ? String(last.email).trim().toLowerCase() : sortKey === 'role' ? last.role : last.createdAt, last.id])
+          : null,
+      sort: { key: sortKey, direction: desc ? 'desc' : 'asc' },
+    });
   }),
 );
 

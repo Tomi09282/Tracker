@@ -871,5 +871,25 @@
       "utc": "UTC"
     },
     "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three days of measurements are needed."
+  },
+  "adminUsers": {
+    "title": "Accounts",
+    "search": "Search by email",
+    "noneTitle": "No matches",
+    "noneBody": "Try a fragment of the email address.",
+    "disabled": "disabled",
+    "mustChange": "password reset",
+    "moreMatches": "There are more matches than fit on a page — narrow the search.",
+    "col": {
+      "email": "Email",
+      "role": "Role",
+      "clients": "Clients",
+      "created": "Joined"
+    },
+    "role": {
+      "user": "User",
+      "coach": "Coach",
+      "admin": "Admin"
+    }
   }
 }

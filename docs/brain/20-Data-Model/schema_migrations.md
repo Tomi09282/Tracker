@@ -1,8 +1,8 @@
 ---
 type: table
 table: schema_migrations
-summary: 2 columns, 23 rows
-rows: 23
+summary: 2 columns, 24 rows
+rows: 24
 tags: [data-model, generated]
 ---
 
