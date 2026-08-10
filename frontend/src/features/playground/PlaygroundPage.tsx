@@ -20,8 +20,6 @@ import { Slider, SkeletonBlock, PullToRefresh } from '../../ui/feedback/variants
 import { Select, DatePicker } from '../../ui/feedback/variants/E8E9';
 import { BottomNav } from '../../ui/nav/BottomNav';
 
-/** Elements with a live implementation. The rest are catalogued but not yet built. */
-// All twenty Phase-1 elements. E21–E26 belong to later phases and are listed, not faked.
 /**
  * Which elements this page can DEMONSTRATE — one entry per `case` in the switch below.
  *
@@ -39,14 +37,22 @@ import { BottomNav } from '../../ui/nav/BottomNav';
  * `catalog.ts` as `live`, beside its labels, where the gate holds it to the measured call sites.
  * This set stays what it always was: which elements this page can DEMONSTRATE.
  */
-const IMPLEMENTED = new Set([
+export const PREVIEWABLE = new Set([
   'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
   'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20',
 ]);
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-function Demo({ id }: { id: string }) {
+/**
+ * One live, interactive instance of an element.
+ *
+ * EXPORTED, because the admin studio needs exactly this and building a second preview harness would
+ * be the eleventh time this project reimplemented something it already had. The studio renders it
+ * inside the same `VariantOverride` the matrix below uses, so what an admin clicks through before
+ * committing a change is the component every user will get, not a picture of it.
+ */
+export function Demo({ id }: { id: string }) {
   const [toggled, setToggled] = useState(false);
   const [checked, setChecked] = useState(false);
   const [seg, setSeg] = useState<'all' | 'mine'>('all');
@@ -267,9 +273,9 @@ export function PlaygroundPage() {
    * and check-element-roster holds it to the measured call sites; IMPLEMENTED is this file's own
    * list of what the switch below can draw.
    */
-  const previewable = CATALOG.filter((e) => IMPLEMENTED.has(e.id));
-  const liveNoDemo = CATALOG.filter((e) => e.live && !IMPLEMENTED.has(e.id));
-  const inert = CATALOG.filter((e) => !e.live && !IMPLEMENTED.has(e.id));
+  const previewable = CATALOG.filter((e) => PREVIEWABLE.has(e.id));
+  const liveNoDemo = CATALOG.filter((e) => e.live && !PREVIEWABLE.has(e.id));
+  const inert = CATALOG.filter((e) => !e.live && !PREVIEWABLE.has(e.id));
 
   return (
     <div className="col-wide screen-x py-6">

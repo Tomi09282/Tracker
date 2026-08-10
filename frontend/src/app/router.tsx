@@ -35,6 +35,9 @@ const PlanListPage = lazy(() =>
 const PlanEditorPage = lazy(() =>
   import('../features/plans/PlanEditorPage').then((m) => ({ default: m.PlanEditorPage })),
 );
+const StyleStudioPage = lazy(() =>
+  import('../features/admin/StyleStudioPage').then((m) => ({ default: m.StyleStudioPage })),
+);
 const AdminPage = lazy(() =>
   import('../features/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 );
@@ -116,6 +119,9 @@ export const router = createBrowserRouter([
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },
+      // Its own route rather than a tab on the admin page: the studio is a full-width workspace
+      // with its own list column, and folding it into a tab would force both into one layout.
+      { path: 'admin/styles', element: suspended(<StyleStudioPage />) },
       { path: 'coach', element: suspended(<CoachDashboard />) },
       { path: 'coach/clients/:id', element: suspended(<ClientDetailPage />) },
       { path: 'coach/plans', element: suspended(<PlanListPage />) },

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Users, Dumbbell, Image, ShieldCheck, Languages, Check, X } from 'lucide-react';
+import { Link } from 'react-router';
+import { Users, Dumbbell, Image, ShieldCheck, Languages, Check, X, Palette } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
@@ -109,7 +110,18 @@ export function AdminPage() {
   return (
     <div className="col-wide screen-x py-6">
       <p className="text-micro uppercase text-accent">{t('admin.eyebrow')}</p>
-      <h1 className="text-title-1 mt-1 text-text-1">{t('admin.title')}</h1>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-title-1 text-text-1">{t('admin.title')}</h1>
+        {/* A real anchor, not a button that navigates: the studio is a page, and a page you can
+            open in a new tab or middle-click is a page. */}
+        <Link
+          to="/admin/styles"
+          className="text-body-s flex min-h-[var(--target-min)] items-center gap-1.5 text-accent"
+        >
+          <Palette className="size-4" aria-hidden />
+          {t('admin.styleStudio')}
+        </Link>
+      </div>
 
       {stats.isPending ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

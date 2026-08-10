@@ -186,7 +186,8 @@
         "spam": "Spam",
         "other": "Sonstiges"
       }
-    }
+    },
+    "styleStudio": "Stil-Studio"
   },
   "muscle": {
     "chest": "Brust",
@@ -836,5 +837,21 @@
     "handleChangeTitle": "Öffentlichen Namen ändern",
     "handleChangeConfirm": "Namen ändern",
     "handleCooldownWarning": "Du gibst {{handle}} damit frei, und {{retireDays}} Tage lang kann ihn niemand sonst übernehmen. Eine erneute Änderung ist in {{days}} Tagen möglich."
+  },
+  "studio": {
+    "eyebrow": "Erscheinungsbild",
+    "title": "Element-Stil-Studio",
+    "intro": "Jedes Element mit seinen fünf Varianten, am echten Komponenten. Deine Auswahl gilt beim nächsten Laden für alle Nutzenden — ohne Codeänderung und ohne Redeploy.",
+    "elementList": "Elemente",
+    "active": "aktiv",
+    "isActive": "Derzeit aktiv",
+    "makeActive": "Aktivieren",
+    "saved": "{{id}} verwendet jetzt Variante {{variant}}",
+    "failed": "Die Änderung ging nicht durch. Lade neu, um den tatsächlichen Stand zu sehen.",
+    "noPreview": "Für dieses Element gibt es auf diesem Bildschirm noch keine Live-Vorschau. Die Variante ist trotzdem echt — Komponenten lesen sie.",
+    "inertShort": "inert",
+    "inertExplain": "Diese Einstellung wird derzeit von keiner Komponente gelesen. Sie würde gespeichert und auditiert, und am Produkt änderte sich kein Pixel — deshalb bleibt der Schalter deaktiviert, bis es einen Verbraucher gibt.",
+    "loadFailed": "Stile konnten nicht geladen werden",
+    "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu."
   }
 }

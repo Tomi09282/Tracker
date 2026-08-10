@@ -7,7 +7,7 @@
 //   1. `element_style_config`            — the rows the server serves         (the source of truth)
 //   2. `ui/feedback/catalog.ts`          — labels and variant names
 //   3. `ui/feedback/ElementStyleProvider`— the curated fallback map
-//   4. `features/playground` IMPLEMENTED — which have a live demo
+//   4. `features/playground` PREVIEWABLE — which have a live demo
 //   5. `useElementVariant('E..')` calls  — which actually CHANGE anything
 //
 // They have already drifted, twice, and both times silently:
@@ -45,8 +45,8 @@ const PLAYGROUND = 'src/features/playground/PlaygroundPage.tsx';
  * a row to delete. An entry here is a promise that the studio will label it as inert.
  */
 const DORMANT = new Map([
-  ['E23', 'Chart reveal — the charts render their own entrance; no component reads the variant yet'],
-  ['E24', 'Streak flame — the streak badge is static; the variant has no consumer'],
+  ['E23', 'Like / reaction — reactions were CUT from Phase 6, so nothing renders one to style'],
+  ['E24', 'Follow button — following exists in the schema and has no screen; the button is unbuilt'],
   ['E27', 'Interval stage — added by migration 012 for the interval player, which does not read it'],
 ]);
 
@@ -69,8 +69,8 @@ const fallback = ids(read(PROVIDER), /'(E\d+)'/g);
 const playgroundSrc = read(PLAYGROUND);
 const demos = ids(playgroundSrc, /case '(E\d+)':/g);
 
-// The IMPLEMENTED literal, read as its own set so it can be compared with the switch it describes.
-const implementedBlock = /const IMPLEMENTED = new Set\(\[([\s\S]*?)\]\)/.exec(playgroundSrc);
+// The PREVIEWABLE literal, read as its own set so it can be compared with the switch it describes.
+const implementedBlock = /const PREVIEWABLE = new Set\(\[([\s\S]*?)\]\)/.exec(playgroundSrc);
 const implemented = implementedBlock ? ids(implementedBlock[1], /'(E\d+)'/g) : new Set();
 
 const consumers = new Set();
@@ -112,20 +112,20 @@ const missingFrom = (a, b) => new Set([...a].filter((x) => !b.has(x)));
   }
 }
 
-/* 2 — IMPLEMENTED must be exactly the demos that exist. It is a hand-written copy of a switch. */
+/* 2 — PREVIEWABLE must be exactly the demos that exist. It is a hand-written copy of a switch. */
 {
   const claimed = missingFrom(implemented, demos);
   const unclaimed = missingFrom(demos, implemented);
-  if (!implementedBlock) problems.push(`${PLAYGROUND} no longer declares IMPLEMENTED — this check is blind`);
+  if (!implementedBlock) problems.push(`${PLAYGROUND} no longer declares PREVIEWABLE — this check is blind`);
   if (claimed.size) {
     problems.push(
-      `IMPLEMENTED claims ${list(claimed)} but the Demo switch has no case for them — the playground\n` +
+      `PREVIEWABLE claims ${list(claimed)} but the Demo switch has no case for them — the playground\n` +
         '      would render an empty preview tile and call it implemented.',
     );
   }
   if (unclaimed.size) {
     problems.push(
-      `the Demo switch handles ${list(unclaimed)} but IMPLEMENTED omits them — the playground files\n` +
+      `the Demo switch handles ${list(unclaimed)} but PREVIEWABLE omits them — the playground files\n` +
         '      a working preview under "not yet built".',
     );
   }
@@ -141,7 +141,7 @@ const missingFrom = (a, b) => new Set([...a].filter((x) => !b.has(x)));
  *
  * Note what is NOT checked here. "Live" and "previewable" are different properties, and the first
  * attempt at this gate conflated them — it demanded a demo tile for every shipped element, which
- * pushed E21/E22/E25/E26 into IMPLEMENTED without a switch case behind them and produced four empty
+ * pushed E21/E22/E25/E26 into PREVIEWABLE without a switch case behind them and produced four empty
  * boxes labelled implemented. Missing previews are reported below as a count, not as a failure.
  */
 {

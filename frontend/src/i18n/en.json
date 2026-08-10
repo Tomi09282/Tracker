@@ -186,7 +186,8 @@
         "spam": "Spam",
         "other": "Other"
       }
-    }
+    },
+    "styleStudio": "Style studio"
   },
   "muscle": {
     "chest": "Chest",
@@ -836,5 +837,21 @@
     "handleChangeTitle": "Change your public name",
     "handleChangeConfirm": "Change name",
     "handleCooldownWarning": "You are letting {{handle}} go, and nobody else can take it for {{retireDays}} days. You will be able to change it again in {{days}} days."
+  },
+  "studio": {
+    "eyebrow": "Appearance",
+    "title": "Element style studio",
+    "intro": "Every element against its five variants, with the real component. What you pick here applies to every user on their next load — no code change, no redeploy.",
+    "elementList": "Elements",
+    "active": "active",
+    "isActive": "Currently active",
+    "makeActive": "Make active",
+    "saved": "{{id}} now uses variant {{variant}}",
+    "failed": "The change did not go through. Reload to see where things actually stand.",
+    "noPreview": "No live preview for this element on this screen yet. The variant is still real — components read it.",
+    "inertShort": "inert",
+    "inertExplain": "No component reads this setting today. It would save and it would be audited, and the product would not change by a pixel — so the switch stays disabled until something consumes it.",
+    "loadFailed": "Could not load the styles",
+    "loadFailedBody": "The server did not answer. Reload the page."
   }
 }
