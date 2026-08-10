@@ -1,11 +1,11 @@
 ---
 type: api-index
 title: API surface
-count: 169
+count: 171
 tags: [api, moc, generated]
 ---
 
-# API surface — 169 endpoints
+# API surface — 171 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
@@ -99,6 +99,8 @@ protection the code does not have.
 | POST | `/api/v1/invite-codes/:id/revoke` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/join` | `requireAuth` |
 | GET | `/api/v1/languages` | — |
+| POST | `/api/v1/me/delete` | `requireAuth` |
+| GET | `/api/v1/me/export` | `requireAuth` |
 | GET | `/api/v1/me/theme` | `requireAuth` |
 | PUT | `/api/v1/me/theme` | `requireAuth` |
 | GET | `/api/v1/measurement-metrics` | `requireAuth` |

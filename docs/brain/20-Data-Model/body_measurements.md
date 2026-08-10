@@ -1,8 +1,8 @@
 ---
 type: table
 table: body_measurements
-summary: 8 columns, 8 rows
-rows: 8
+summary: 8 columns, 10 rows
+rows: 10
 tags: [data-model, generated]
 ---
 

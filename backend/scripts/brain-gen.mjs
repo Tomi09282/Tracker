@@ -160,6 +160,7 @@ const routers = [
   ['/api/v1', '../src/exercises/routes.js'],
   ['/api/v1', '../src/exercises/media.js'],
   ['/api/v1', '../src/admin/routes.js'],
+  ['/api/v1', '../src/privacy/routes.js'],
   ['/api/v1', '../src/coaching/routes.js'],
   ['/api/v1', '../src/onboarding/routes.js'],
   ['/api/v1', '../src/plans/routes.js'],

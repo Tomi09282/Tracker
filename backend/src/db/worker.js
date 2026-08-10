@@ -5,6 +5,7 @@
 // thread. Each worker owns exactly one encrypted connection; connections cannot be shared
 // across threads.
 import { readFileSync, mkdirSync } from 'node:fs';
+import { EXPORT_TABLES, UNLINK_BEFORE_DELETE } from './gdpr.js';
 import { dirname } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import Database from 'better-sqlite3-multiple-ciphers';
@@ -3408,6 +3409,123 @@ export function redeemInviteTx({ userId, digest, ip = null }) {
       : null;
 
     return { outcome, coachId: code?.coachId ?? null, link };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * GDPR — the two operations a person may perform on their own record.
+ *
+ * The table list lives in ./gdpr.js and is shared by both, because an export is a claim about which
+ * tables hold somebody's data and a deletion is a claim that the same list is complete. Two lists
+ * would drift, and the drift would be invisible: a table in neither is data the subject cannot see
+ * and that survives their erasure.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Everything the product holds about one person.
+ *
+ * ═══ IT IS ONE TRANSACTION, AND THAT IS NOT PEDANTRY ═══════════════════════════════════════════
+ *
+ * Each call into the pool is a different worker thread with its own read snapshot. An export
+ * assembled from thirty pool calls is thirty moments stitched together: a workout that appears in
+ * the log and not in its sets, because it was written between two of them. A DEFERRED transaction
+ * takes one read snapshot and every statement below sees the same database.
+ *
+ * Read-only, so nothing here can commit anything wrongly — the ADR's hazard does not apply.
+ */
+export function exportMyDataQuery({ userId }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    const out = {};
+    for (const [key, sql] of EXPORT_TABLES) {
+      current = key;
+      // Two placeholders in the coach-links statement, one everywhere else. Counting the `?`s is
+      // how the binding stays right without a per-table argument list to keep in step.
+      const arity = (sql.match(/\?/g) ?? []).length;
+      out[key] = stmt(sql).all(...Array(arity).fill(userId));
+    }
+    return out;
+  });
+
+  try {
+    return { exportedAt: Math.floor(Date.now() / 1000), data: tx.deferred() };
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Erase an account, at the person's own request.
+ *
+ * ═══ THE LAST-ADMIN GUARD HERE CAN ACTUALLY FIRE ═══════════════════════════════════════════════
+ *
+ * Two other transactions in this file had a last-admin count deleted for being unreachable: their
+ * actor is always an enabled admin and can never be the target, so the number of OTHER admins is at
+ * least one by construction.
+ *
+ * That argument does not hold here, because the actor IS the target. The sole admin deleting their
+ * own account leaves the product with none and no way to mint one — every route that could is
+ * behind requireRole('admin'). Described firing: log in as the only admin, call this, get
+ * `last_admin`. It is refused rather than warned about, and the way out is to promote somebody
+ * first, which is a decision a person should make deliberately.
+ *
+ * ═══ AND THE AUDIT ROW IS WRITTEN BEFORE THE DELETE, ON PURPOSE ════════════════════════════════
+ *
+ * 018 made `audit_log.actor_id` the one column an FK may set to NULL, so writing the row first and
+ * deleting the user second leaves a permanent, ANONYMOUS record that an account was erased. It
+ * carries the role and the account's age and nothing else — an erasure record that names the person
+ * is not an erasure.
+ */
+export function deleteMyAccountTx({ userId, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the account';
+    const me = stmt('SELECT id, role, created_at AS createdAt FROM users WHERE id = ?').get(userId);
+    if (!me) return { outcome: 'missing' };
+
+    current = 'COUNT the remaining admins';
+    if (me.role === 'admin') {
+      const others = stmt(
+        "SELECT COUNT(*) AS n FROM users WHERE role = 'admin' AND disabled_at IS NULL AND id <> ?",
+      ).get(userId).n;
+      if (others === 0) return { outcome: 'last_admin' };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'UNLINK what outlives them';
+    const unlinked = {};
+    for (const [label, sql] of UNLINK_BEFORE_DELETE) {
+      unlinked[label] = stmt(sql).run(userId).changes;
+    }
+
+    current = 'INSERT audit_log';
+    // Written FIRST so the FK can anonymise it when the user goes. Nothing identifying: the role
+    // and the account's age are facts about a deletion, not about a person.
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'account.erase', 'user', ?, ?, ?, ?)`,
+    ).run(userId, userId, JSON.stringify({ role: me.role, accountAgeDays: Math.floor((Math.floor(Date.now() / 1000) - me.createdAt) / 86400) }), requestId, ip);
+
+    current = 'DELETE the account';
+    // 39 foreign keys cascade from here and 16 set null, measured with pragma_foreign_key_list.
+    // Nothing is deleted by hand: a hand-written cascade is a list that goes stale the first time
+    // somebody adds a table, and it goes stale silently.
+    stmt('DELETE FROM users WHERE id = ?').run(userId);
+
+    return { outcome: 'erased', unlinked };
   });
 
   try {

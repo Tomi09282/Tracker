@@ -161,9 +161,9 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 149 |
+| [[audit_log]] | 9 | 190 |
 | [[body_area_muscle_map]] | 3 | 44 |
-| [[body_measurements]] | 8 | 8 |
+| [[body_measurements]] | 8 | 10 |
 | [[coach_clients]] | 11 | 3 |
 | [[coach_follows]] | 3 | 0 |
 | [[coach_posts]] | 24 | 7 |
@@ -175,7 +175,7 @@ erDiagram
 | [[coin_purchases]] | 9 | 1 |
 | [[coin_reasons]] | 6 | 4 |
 | [[coin_store_items]] | 10 | 2 |
-| [[coin_wallets]] | 4 | 14 |
+| [[coin_wallets]] | 4 | 19 |
 | [[content_reports]] | 15 | 0 |
 | [[conversations]] | 9 | 1 |
 | [[element_style_config]] | 4 | 27 |
@@ -218,7 +218,7 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 152 |
+| [[refresh_tokens]] | 9 | 154 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |
@@ -228,8 +228,8 @@ erDiagram
 | [[teams]] | 7 | 0 |
 | [[theme_packs]] | 6 | 7 |
 | [[user_achievements]] | 7 | 0 |
-| [[user_theme_prefs]] | 6 | 4 |
-| [[users]] | 12 | 14 |
+| [[user_theme_prefs]] | 6 | 6 |
+| [[users]] | 12 | 19 |
 | [[workout_calendar_feeds]] | 11 | 0 |
 | [[workout_log_exercises]] | 15 | 16 |
 | [[workout_log_sets]] | 31 | 54 |

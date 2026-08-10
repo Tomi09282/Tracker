@@ -14,6 +14,7 @@ import themeRoutes from './src/theme/routes.js';
 import exerciseRoutes from './src/exercises/routes.js';
 import mediaRoutes from './src/exercises/media.js';
 import adminRoutes from './src/admin/routes.js';
+import privacyRoutes from './src/privacy/routes.js';
 import coachingRoutes from './src/coaching/routes.js';
 import onboardingRoutes from './src/onboarding/routes.js';
 import planRoutes from './src/plans/routes.js';
@@ -222,7 +223,8 @@ app.use('/api/v1', composeRoutes);
 // person who finds something is rarely a coach.
 app.use('/api/v1', moderationRoutes);
 app.use(AUTH_PATH, authRoutes);
-app.use('/api/v1', themeRoutes);
+app.use('/api/v1', privacyRoutes);
+  app.use('/api/v1', themeRoutes);
 app.use('/api/v1', exerciseRoutes);
 app.use('/api/v1', adminRoutes);
 app.use('/api/v1', coachingRoutes);

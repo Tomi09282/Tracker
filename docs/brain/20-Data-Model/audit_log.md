@@ -1,8 +1,8 @@
 ---
 type: table
 table: audit_log
-summary: 9 columns, 149 rows
-rows: 149
+summary: 9 columns, 190 rows
+rows: 190
 tags: [data-model, generated]
 ---
 

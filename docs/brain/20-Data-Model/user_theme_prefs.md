@@ -1,8 +1,8 @@
 ---
 type: table
 table: user_theme_prefs
-summary: 6 columns, 4 rows
-rows: 4
+summary: 6 columns, 6 rows
+rows: 6
 tags: [data-model, generated]
 ---
 

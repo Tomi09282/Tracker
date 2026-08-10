@@ -79,6 +79,7 @@ const TOUCHED = [
   'src/db/migrations/024_rename_eligibility.sql',
   'src/coaching/routes.js',
   'src/theme/routes.js',
+  'src/db/gdpr.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -328,6 +329,35 @@ console.log('\n── verify-025: the indexes the dashboard queries plan against
     drop('CREATE INDEX IF NOT EXISTS workout_logs_date_idx ON workout_logs (local_date, client_user_id)');
   }
 }
+
+console.log('\n── check-gdpr: an export that quietly stops being complete ─────────────────────');
+
+/*
+ * The failure this gate exists for leaves no trace: a table gets added, nobody adds it to the
+ * export, nothing goes red, and the first person to notice is the one who asked for their record
+ * and got a file with a hole in it.
+ *
+ * Two directions are planted. Dropping a table from the export must be caught by the schema
+ * comparison; and an unlink step aimed at a NOT NULL column must be caught before it aborts an
+ * erasure at the very last statement, after the audit row is already written.
+ */
+await mutate({
+  label: 'a table dropped from the export is caught against the schema',
+  file: 'src/db/gdpr.js',
+  from: "  ['body_measurements', 'SELECT * FROM body_measurements WHERE client_user_id = ?'],\n",
+  to: '',
+  gate: 'scripts/check-gdpr.mjs',
+  expect: 'body_measurements has a foreign key into users and is neither exported nor exempt',
+});
+
+await mutate({
+  label: 'an unlink step aimed at a NOT NULL column is caught before it can abort an erasure',
+  file: 'src/db/gdpr.js',
+  from: "    \"UPDATE exercises SET owner_id = NULL WHERE owner_id = ? AND status = 'global'\",",
+  to: "    \"UPDATE exercises SET status = NULL WHERE owner_id = ? AND status = 'global'\",",
+  gate: 'scripts/check-gdpr.mjs',
+  expect: 'that column is NOT NULL',
+});
 
 console.log('\n── and a route no gate can see ────────────────────────────────────────────────');
 

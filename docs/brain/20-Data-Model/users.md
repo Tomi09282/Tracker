@@ -1,8 +1,8 @@
 ---
 type: table
 table: users
-summary: 12 columns, 14 rows
-rows: 14
+summary: 12 columns, 19 rows
+rows: 19
 tags: [data-model, generated]
 ---
 
