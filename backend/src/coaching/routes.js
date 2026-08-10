@@ -1,7 +1,7 @@
 // src/coaching/routes.js — coach↔client links, teams and the three join flows (F2).
 import { Router } from 'express';
 import { z } from 'zod';
-import { randomBytes, createHash, timingSafeEqual } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 import argon2 from 'argon2';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
@@ -50,12 +50,16 @@ function generateCode() {
 
 const hashCode = (code) => createHash('sha256').update(code.trim().toUpperCase()).digest('hex');
 
-/** Constant-time compare of two hex digests of equal length. */
-function sameHash(a, b) {
-  const ba = Buffer.from(a, 'hex');
-  const bb = Buffer.from(b, 'hex');
-  return ba.length === bb.length && timingSafeEqual(ba, bb);
-}
+/*
+ * `sameHash` used to live here — a constant-time compare of two hex digests, called on a row that
+ * had just been SELECTed `WHERE code_hash = ?`. Its own comment said it was belt and braces.
+ *
+ * It went with the redemption into `redeemInviteTx`, and it did not come back: a re-comparison of a
+ * value the database matched by equality can only ever agree, and the timing it was protecting is
+ * the index lookup's, not JavaScript's. Dead code that looks like a security control is worse than
+ * no code — the next person to touch this reads it as the defence and stops looking for the real
+ * one, which is that the code is hashed before it is ever used as a key.
+ */
 
 /* ── teams ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -276,67 +280,41 @@ router.post(
     const { code } = RedeemBody.parse(req.body);
     const digest = hashCode(code);
 
-    const row = await db.get(
-      'SELECT id, coach_id, team_id, kind, max_uses, uses, expires_at, revoked_at, code_hash FROM invite_codes WHERE code_hash = ?',
-      [digest],
-    );
+    // ═══ AN EXHAUSTED CODE USED TO LINK THE CLIENT ANYWAY ══════════════════════════════════════
+    //
+    // The old shape read the code, ran a series of checks, then `writeTx([consumeGuarded,
+    // insertLink])` and finally branched on `consumed.changes === 0` to answer 409 'this code has
+    // been used up'. writeTx commits every step before it returns.
+    //
+    // Measured on the dev database: the guarded UPDATE changed 0 rows, the route sent its 409 —
+    // and `coach_clients` held a row with `status = 'active'`. That is a coach reading somebody's
+    // logs, assigning them plans and opening a chat with them, off a code the product had just told
+    // that person did not work. The comment above the old transaction said two racing callers could
+    // not both win; the guard was real, and it protected exactly one of the two statements.
+    //
+    // Everything is one named transaction now: the outcome is decided before anything is written,
+    // the link is written ONLY on the accepted path, and the redemption record still lands for the
+    // refusals it exists to remember.
+    const r = await db.redeemInvite({
+      userId: req.user.id,
+      digest,
+      ip: req.ip ?? null,
+    });
 
-    const record = (outcome, codeId = null) =>
-      db.run(
-        'INSERT INTO invite_redemptions (code_id, user_id, outcome, ip) VALUES (?, ?, ?, ?)',
-        [codeId, req.user.id, outcome, req.ip ?? null],
-      );
-
-    // The lookup above is already an equality match on a hash, so this comparison is belt and
-    // braces — but it costs nothing and it keeps the constant-time habit where codes are handled.
-    if (!row || !sameHash(row.code_hash, digest)) {
-      await record('unknown');
+    // A code that does not exist, was revoked, or has expired all answer identically. Telling them
+    // apart would confirm which codes are real to somebody feeding the endpoint guesses.
+    if (r.outcome === 'unknown' || r.outcome === 'revoked' || r.outcome === 'expired') {
       return sendError(res, 404, ERR.NOT_FOUND, 'invalid code');
     }
-    if (row.revoked_at) {
-      await record('revoked', row.id);
-      return sendError(res, 404, ERR.NOT_FOUND, 'invalid code');
-    }
-    if (row.expires_at && row.expires_at <= Math.floor(Date.now() / 1000)) {
-      await record('expired', row.id);
-      return sendError(res, 404, ERR.NOT_FOUND, 'invalid code');
-    }
-    if (row.coach_id === req.user.id) {
+    if (r.outcome === 'own_team') {
       return sendError(res, 409, ERR.CONFLICT, 'you cannot join your own team');
     }
-
-    // The consume and the link are ONE transaction, and the use-count guard lives inside the
-    // UPDATE. Two clients redeeming the last seat of a code at the same moment cannot both win.
-    const [consumed, linked] = await db.writeTx([
-      {
-        sql: 'UPDATE invite_codes SET uses = uses + 1 WHERE id = ? AND uses < max_uses AND revoked_at IS NULL',
-        params: [row.id],
-      },
-      {
-        sql: `INSERT INTO coach_clients (coach_id, client_id, team_id, status, origin, accepted_at)
-              VALUES (?, ?, ?, 'active', 'team_code', unixepoch())
-              ON CONFLICT(coach_id, client_id) DO UPDATE SET
-                status = 'active',
-                team_id = excluded.team_id,
-                accepted_at = unixepoch(),
-                archived_at = NULL`,
-        params: [row.coach_id, req.user.id, row.team_id],
-      },
-    ]);
-
-    if (consumed.changes === 0) {
-      await record('exhausted', row.id);
+    if (r.outcome === 'exhausted') {
       return sendError(res, 409, ERR.CONFLICT, 'this code has been used up');
     }
 
-    await record('accepted', row.id);
-    await db.run(
-      'INSERT OR IGNORE INTO referrals (coach_id, referred_user_id, code_id) VALUES (?, ?, ?)',
-      [row.coach_id, req.user.id, row.id],
-    );
-
-    req.log.info({ coachId: row.coach_id, teamId: row.team_id }, 'join code redeemed');
-    res.json({ ok: true, linkId: linked.lastInsertRowid, teamId: row.team_id });
+    req.log.info({ coachId: r.coachId, teamId: r.link.teamId }, 'join code redeemed');
+    res.json({ ok: true, linkId: r.link.id, teamId: r.link.teamId });
   }),
 );
 

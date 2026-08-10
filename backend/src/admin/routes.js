@@ -121,41 +121,34 @@ router.post(
     const id = z.coerce.number().int().positive().parse(req.params.id);
     const body = DecisionSchema.parse(req.body);
 
-    const target = await db.get(
-      "SELECT id, owner_id, name FROM exercises WHERE id = ? AND status = 'pending_review' AND deleted_at IS NULL",
-      [id],
-    );
-    if (!target) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // ═══ THIS USED TO BE A writeTx PAIR, AND IT REFUSED AFTER IT HAD COMMITTED ═════════════════
+    //
+    // The old shape ran `writeTx([guardedUpdate, auditInsert])` and then checked
+    // `updated.changes === 0` to answer 409. writeTx commits every step before it returns, so the
+    // audit row was durable by then.
+    //
+    // THE EXPOSURE WAS CONCURRENCY, not a plain second click. The old SELECT above caught a
+    // sequential repeat and answered 404. But two moderators on the queue at the same instant — or
+    // one double-click whose requests overlap — both passed that SELECT, both ran the writeTx, and
+    // both committed an audit row. One decision, two log entries, the second recording an approval
+    // that was refused. The log is the one artefact everybody else is told to trust.
+    //
+    // Measured after the fix: two concurrent decisions come back `applied / missing` and write ONE
+    // audit row. `scripts/check-route-tx.mjs` is the gate that found this shape and keeps it out.
+    const result = await db.decideExercise({
+      adminId: req.user.id,
+      exerciseId: id,
+      approve: body.decision === 'approve',
+      reason: body.reason ?? null,
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
 
-    const approving = body.decision === 'approve';
-
-    // The decision and its audit row commit together. An approval that publishes content to
-    // every user, with no record of who approved it, is exactly what the append-only log exists
-    // to prevent — and the guard stays inside the UPDATE so a double-click cannot double-decide.
-    const [updated] = await db.writeTx([
-      {
-        sql: approving
-          ? `UPDATE exercises SET status = 'global', owner_id = owner_id, rejection_reason = NULL
-              WHERE id = ? AND status = 'pending_review'`
-          : `UPDATE exercises SET status = 'rejected', rejection_reason = ?
-              WHERE id = ? AND status = 'pending_review'`,
-        params: approving ? [id] : [body.reason, id],
-      },
-      {
-        sql: `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
-              VALUES (?, ?, 'exercise', ?, ?, ?, ?)`,
-        params: [
-          req.user.id,
-          approving ? 'exercise.moderation.approve' : 'exercise.moderation.reject',
-          id,
-          JSON.stringify({ name: target.name, ownerId: target.owner_id, reason: body.reason ?? null }),
-          res.locals.requestId,
-          req.ip ?? null,
-        ],
-      },
-    ]);
-
-    if (updated.changes === 0) return sendError(res, 409, ERR.CONFLICT, 'already decided');
+    // ONE refusal, and it covers both cases. A submission that was never there and one that another
+    // moderator decided a moment ago are the same thing from here: not in the queue. The old route
+    // had a 409 'already decided' beside this, and it was unreachable — the SELECT caught the
+    // sequential case, and under concurrency the loser's SELECT runs after the winner's commit.
+    if (result.outcome === 'missing') return sendError(res, 404, ERR.NOT_FOUND, 'not found');
 
     req.log.info({ exerciseId: id, decision: body.decision }, 'moderation decision');
     res.json({ ok: true });

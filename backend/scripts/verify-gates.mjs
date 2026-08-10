@@ -77,6 +77,7 @@ const TOUCHED = [
   'src/public/routes.js',
   'src/admin/routes.js',
   'src/db/migrations/024_rename_eligibility.sql',
+  'src/coaching/routes.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -98,6 +99,57 @@ await mutate({
   to: ".run(userId, userId, JSON.stringify({ city, specialties }), requestId, ip);\n\n    if (updated.changes === 0) return { outcome: 'missing' };\n    return view(false);",
   gate: 'scripts/check-worker-tx.mjs',
   expect: 'conditional return AFTER a write',
+});
+
+/*
+ * ═══ THE HOLE A COMMENT COULD OPEN ════════════════════════════════════════════════════════════
+ *
+ * The exemption test reads the current line AND THE LINE ABOVE, and the line above a probe is
+ * almost always a comment. Until comments were blanked, a comment mentioning `changes === 0` was
+ * enough to satisfy it — so a sentence describing the opposite of what the code does could switch
+ * the gate off over a genuine conditional return after a write.
+ *
+ * This plants exactly that: a return that is NOT a changes === 0 probe, under a comment that says
+ * it is. The gate must fire on the code and ignore the prose.
+ */
+await mutate({
+  label: 'a comment mentioning changes === 0 no longer buys a conditional return the exemption',
+  file: 'src/db/worker.js',
+  // `updateCoachProfileTx`'s guarded UPDATE, which is a legitimate one-write changes === 0 probe.
+  // Rewriting it as `!== 1` makes it no longer the exemption's shape, while the comment above CLAIMS
+  // it is — which is exactly the sentence that used to switch the gate off.
+  from: "    if (updated.changes === 0) return { outcome: 'missing' };",
+  to:
+    '    // the changes === 0 probe below is the ADR-0005 exemption, so this is fine\n' +
+    "    if (updated.changes !== 1) return { outcome: 'missing' };",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+console.log('\n── check-route-tx: the blind spot check-worker-tx cannot see ───────────────────');
+
+/*
+ * The defect this gate was built for, restored to the route it was found in.
+ *
+ * `db.writeTx([guarded, consequence])` followed by a branch on the guard's `changes` is the same
+ * mistake ADR-0005 is about, one layer up — and check-worker-tx cannot see it, because it only
+ * walks worker.js. Two real instances were live when this gate was written: an audit row committed
+ * for a moderation decision that was refused, and an exhausted invite code that linked the client
+ * to the coach anyway.
+ */
+await mutate({
+  label: 'a route that refuses after committing the rest of its writeTx is caught',
+  file: 'src/admin/routes.js',
+  from: '    const result = await db.decideExercise({',
+  to:
+    '    const [probe] = await db.writeTx([\n' +
+    "      { sql: 'UPDATE exercises SET status = ? WHERE id = ? AND status = ?', params: ['global', id, 'pending_review'] },\n" +
+    "      { sql: 'INSERT INTO audit_log (actor_id, action, target_type, target_id, request_id) VALUES (?, ?, ?, ?, ?)', params: [req.user.id, 'x.y', 'exercise', id, res.locals.requestId] },\n" +
+    '    ]);\n' +
+    "    if (probe.changes === 0) return sendError(res, 409, ERR.CONFLICT, 'already decided');\n" +
+    '    const result = await db.decideExercise({',
+  gate: 'scripts/check-route-tx.mjs',
+  expect: 'branches on `probe.changes === 0` after a 2-step db.writeTx',
 });
 
 console.log('\n── check-body-writes: the four columns that must agree ─────────────────────────');
@@ -160,15 +212,22 @@ await mutate({
 
 console.log('\n── check-admin-audit: the log that has to be there when somebody asks ──────────');
 
-// The gate follows a route into the transaction it delegates to, so the audit row it looks for is
-// usually not in the file the route lives in. This case plants the defect where it is EASIEST to
-// make by accident — inline, in the handler, in the middle of a writeTx — and the gate must still
-// name the route rather than the file.
+/*
+ * The gate follows a route into the transaction it delegates to, so the audit row it looks for is
+ * NOT in the file the route lives in — and this case now proves that, because the anchor moved.
+ *
+ * It used to plant the defect inline in admin/routes.js. Then the moderation decision became a
+ * named worker transaction (it was committing an audit row for decisions it refused), the inline
+ * INSERT went away, and this case reported "the anchor is gone from src/admin/routes.js — this case
+ * no longer tests anything" instead of passing over nothing. That message is the harness earning
+ * its keep: a mutation test whose anchor has rotted is a test that always passes.
+ */
 await mutate({
-  label: 'an admin write whose audit row is gone is caught',
-  file: 'src/admin/routes.js',
-  from: "        sql: `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)",
-  to: "        sql: `INSERT INTO moderation_notes (actor_id, action, target_type, target_id, detail, request_id, ip)",
+  label: 'an admin write whose audit row is gone is caught, through the delegation',
+  file: 'src/db/worker.js',
+  // Unique to decideExerciseTx: no other audit row in this file binds 'exercise' as target_type.
+  from: "      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, ?, 'exercise', ?, ?, ?, ?)`",
+  to: "      `INSERT INTO moderation_notes (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, ?, 'exercise', ?, ?, ?, ?)`",
   gate: 'scripts/check-admin-audit.mjs',
   expect: 'reaches no INSERT INTO audit_log',
 });
@@ -190,9 +249,9 @@ await mutate({
 // so this case exists to show the narrowed rule still fires on the thing it is for.
 await mutate({
   label: 'two different writers sharing one audit action string are caught',
-  file: 'src/admin/routes.js',
-  from: "          approving ? 'exercise.moderation.approve' : 'exercise.moderation.reject',",
-  to: "          approving ? 'user.disable' : 'exercise.moderation.reject',",
+  file: 'src/db/worker.js',
+  from: "      approve ? 'exercise.moderation.approve' : 'exercise.moderation.reject',",
+  to: "      approve ? 'user.disable' : 'exercise.moderation.reject',",
   gate: 'scripts/check-admin-audit.mjs',
   expect: "'user.disable' is written from 2 different places",
 });
@@ -257,9 +316,10 @@ const clean = [
   'scripts/check-body-writes.mjs',
   'scripts/check-routes.mjs',
   'scripts/check-admin-audit.mjs',
+  'scripts/check-route-tx.mjs',
 ].map((g) => [g, runGate(g).rejected]);
 check(
-  'and all four gates are green again',
+  'and all five gates are green again',
   clean.every(([, rejected]) => !rejected),
   clean.filter(([, r]) => r).map(([g]) => g).join(', '),
 );

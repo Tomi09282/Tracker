@@ -18,7 +18,65 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const FILE = 'src/db/worker.js';
-const src = fs.readFileSync(FILE, 'utf8');
+const raw = fs.readFileSync(FILE, 'utf8');
+
+/**
+ * ═══ COMMENTS ARE BLANKED BEFORE ANY OF THIS COUNTS ANYTHING ═══════════════════════════════════
+ *
+ * This gate counts writes and looks for `changes === 0` in a two-line window. Both were reading
+ * COMMENTS as code, and it fails in both directions:
+ *
+ *   * TOO STRICT — a comment above a transaction that mentions `.run(` inflates the write count and
+ *     revokes the ADR's own exemption from a probe that deserves it. That happened while fixing the
+ *     moderation transaction: a comment explaining this very gate was counted as a second write.
+ *
+ *   * TOO LOOSE, and this is the one that matters — the window that grants the exemption is the
+ *     current line plus THE LINE ABOVE, which is usually a comment. A comment reading "we do not
+ *     probe changes === 0 here" sitting above a genuine conditional return after a write would
+ *     satisfy the exemption test and wave the defect straight through. The gate would go quiet
+ *     because of a sentence describing the opposite of what the code does.
+ *
+ * So comments are replaced with spaces first. Positions and line numbers are preserved exactly —
+ * every offset below still points at the real file — but nothing inside a comment can be mistaken
+ * for a statement.
+ */
+function blankComments(text) {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    const c = text[i];
+    if (c === '/' && text[i + 1] === '/') {
+      const nl = text.indexOf('\n', i);
+      const end = nl === -1 ? text.length : nl;
+      out += ' '.repeat(end - i);
+      i = end;
+      continue;
+    }
+    if (c === '/' && text[i + 1] === '*') {
+      const close = text.indexOf('*/', i + 2);
+      const end = close === -1 ? text.length : close + 2;
+      // Newlines are kept so every line number downstream is still the file's own.
+      out += text.slice(i, end).replace(/[^\n]/g, ' ');
+      i = end;
+      continue;
+    }
+    if (c === "'" || c === '"' || c === '`') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== c) {
+        if (text[j] === '\\') j += 1;
+        j += 1;
+      }
+      out += text.slice(i, Math.min(j + 1, text.length));
+      i = j + 1;
+      continue;
+    }
+    out += c;
+    i += 1;
+  }
+  return out;
+}
+
+const src = blankComments(raw);
 const lines = src.split('\n');
 
 /** Walk from an opening brace to its match, so a nested block cannot end the body early. */

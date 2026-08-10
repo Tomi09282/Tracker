@@ -92,6 +92,20 @@ export const setAccountDisabled = (args) => pool.run(args, { name: 'setAccountDi
 // under the write lock: two admins demoting each other concurrently both pass a pre-check and leave
 // the product with no admin, which nothing can recover from.
 export const setUserRole = (args) => pool.run(args, { name: 'setUserRoleTx' });
+
+/*
+ * Two writes that used to be `writeTx` step arrays, and were refusing after they had committed.
+ *
+ * A moderation decision wrote its audit row even when the guarded UPDATE matched nothing, and an
+ * exhausted invite code linked the client to the coach before the route answered "used up". In both
+ * cases the guard was correctly inside the UPDATE and protected only that one statement.
+ *
+ * They are NAMED transactions now because that is the house rule for a business-critical write, and
+ * because it is the only shape where a guard can decide what happens next. `check-route-tx.mjs`
+ * keeps the old shape from coming back.
+ */
+export const decideExercise = (args) => pool.run(args, { name: 'decideExerciseTx' });
+export const redeemInvite = (args) => pool.run(args, { name: 'redeemInviteTx' });
 export const closePool = () => pool.destroy();
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);

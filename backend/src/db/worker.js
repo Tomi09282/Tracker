@@ -3211,3 +3211,208 @@ export function setUserRoleTx({ actorId, targetId, role, requestId, ip = null })
     return rethrow(err, current);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * TWO WRITES THAT WERE REFUSING AFTER THEY HAD ALREADY COMMITTED.
+ *
+ * Both routes below used to run `db.writeTx([guardedWrite, consequence])` and then branch on
+ * `changes === 0` to send a 409. `writeTx` commits every step before it returns, so the guard
+ * protected its own statement and NOTHING ELSE — the consequence was durable by the time the route
+ * decided to refuse.
+ *
+ * `check-worker-tx` could not see either one. It walks THIS file for a conditional return after a
+ * write inside a transaction body, and neither defect was in this file. They were four lines of
+ * route code that read like careful work: the guard really is inside the UPDATE, and the comment
+ * above one of them says in as many words that two racing callers cannot both win.
+ *
+ * Both were measured before being touched. `scripts/check-route-tx.mjs` is the gate that finds
+ * the shape, and it is what brought these two here.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Approve or reject a submitted exercise.
+ *
+ * MEASURED BEFORE: deciding the same exercise twice produced ONE status change and TWO audit rows —
+ * the second saying an admin approved it, committed alongside the 409 that told them it was already
+ * decided. An audit trail that records events which were refused is worse than no audit trail,
+ * because it is the thing everybody else is told to trust.
+ *
+ * The `changes === 0` probe here IS sound, and it is the ADR's own exemption: it sits on the FIRST
+ * write, the guard lives in the WHERE clause, and committing a statement that wrote nothing is a
+ * no-op. What makes it sound is that the audit INSERT is BELOW it and therefore never runs.
+ */
+export function decideExerciseTx({
+  adminId, exerciseId, approve, reason = null, requestId, ip = null,
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ──────────────
+
+    current = 'SELECT the submission';
+    const target = stmt(
+      `SELECT id, owner_id AS ownerId, name
+         FROM exercises
+        WHERE id = ? AND status = 'pending_review' AND deleted_at IS NULL`,
+    ).get(exerciseId);
+    if (!target) return { outcome: 'missing' };
+
+    // ── from here on, nothing may conditionally return except the changes === 0 probe ────────
+
+    current = 'UPDATE the submission';
+    // ONE `.run(`, deliberately. The obvious form is a ternary between two prepared statements, and
+    // check-worker-tx counts writes TEXTUALLY, so it read that as two writes. Choosing the statement
+    // and running it once is clearer anyway.
+    stmt(
+      approve
+        ? `UPDATE exercises SET status = 'global', rejection_reason = NULL
+            WHERE id = ? AND status = 'pending_review'`
+        : `UPDATE exercises SET status = 'rejected', rejection_reason = ?
+            WHERE id = ? AND status = 'pending_review'`,
+    ).run(...(approve ? [exerciseId] : [reason, exerciseId]));
+
+    // ═══ AND THERE IS NO `changes === 0` PROBE, FOR THE THIRD TIME THIS WEEK ═══════════════════
+    //
+    // The first draft had one, returning `already_decided` so the route could answer 409. It was
+    // written straight after the last-admin count was deleted for being unreachable, and it was
+    // unreachable in the same way.
+    //
+    // Exercised rather than assumed: two decisions fired together at this transaction came back
+    // `applied / missing`. The SELECT above and this UPDATE are inside ONE IMMEDIATE transaction,
+    // so the write lock is held from the first statement — the loser's SELECT runs after the
+    // winner has committed, sees a row that is no longer `pending_review`, and returns `missing`
+    // before reaching here. Nothing can make the UPDATE match zero rows.
+    //
+    // So an already-decided submission is a 404, which is also the honest answer: it is not in the
+    // moderation queue. The old route's 409 was dead too — its own SELECT caught the sequential
+    // case first, and the concurrent case never reached the branch either.
+
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, ?, 'exercise', ?, ?, ?, ?)`,
+    ).run(
+      adminId,
+      approve ? 'exercise.moderation.approve' : 'exercise.moderation.reject',
+      exerciseId,
+      JSON.stringify({ name: target.name, ownerId: target.ownerId, reason }),
+      requestId,
+      ip,
+    );
+
+    return { outcome: 'applied', id: target.id, name: target.name };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
+ * Redeem an invite code.
+ *
+ * MEASURED BEFORE: an EXHAUSTED code was refused with "this code has been used up" and the client
+ * was linked to the coach anyway — `status = 'active'`, which is a coach reading somebody's logs,
+ * assigning them plans and opening a chat with them. The person who redeemed it was told it did
+ * not work.
+ *
+ * ═══ THERE IS EXACTLY ONE RETURN, AND THAT IS THE WHOLE DESIGN ═════════════════════════════════
+ *
+ * The redemption RECORD has to be written on every path — a refused attempt is precisely what
+ * `invite_redemptions` exists to remember, so the writes here are not all conditional on success.
+ * That makes the usual shape ("check, refuse, write") unavailable: a conditional return after the
+ * record would be a return after a write, and the reader could not tell an intended commit from
+ * the accidental kind without reading every branch.
+ *
+ * So the outcome is COMPUTED first, the writes are chosen from it, and the function returns once at
+ * the bottom. The consequence — the link, the referral — is written only on the accepted path,
+ * which is the entire fix. Nothing branches on a result after a write.
+ *
+ * `own_team` deliberately writes no record: `invite_redemptions.outcome` is CHECKd against five
+ * values and that is not one of them, because a coach fumbling their own code is not an event
+ * anybody needs to audit.
+ */
+export function redeemInviteTx({ userId, digest, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── everything is decided before anything is written ──────────────────────────────────────
+
+    current = 'SELECT the code';
+    // The lookup IS the constant-time comparison: SQLite matches the digest through an index, and
+    // the route hashed the user's input before it got here. The old code re-compared the same two
+    // values in JS afterwards, described in its own comment as belt and braces — a re-comparison of
+    // a row selected BY equality can only ever agree.
+    const code = stmt(
+      `SELECT id, coach_id AS coachId, team_id AS teamId, max_uses AS maxUses, uses,
+              expires_at AS expiresAt, revoked_at AS revokedAt
+         FROM invite_codes WHERE code_hash = ?`,
+    ).get(digest);
+
+    const now = stmt('SELECT unixepoch() AS t').get().t;
+    let outcome = 'accepted';
+    if (!code) outcome = 'unknown';
+    else if (code.revokedAt) outcome = 'revoked';
+    else if (code.expiresAt && code.expiresAt <= now) outcome = 'expired';
+    else if (code.coachId === userId) outcome = 'own_team';
+
+    // ── the writes, chosen from the outcome, with no return between them ──────────────────────
+
+    if (outcome === 'accepted') {
+      current = 'UPDATE the use count';
+      // The guard is in the WHERE clause and it is the arbiter of the race: two clients redeeming
+      // the last seat at the same instant cannot both win. What is new is that losing it now
+      // prevents the link below, rather than merely changing the status code.
+      const consumed = stmt(
+        `UPDATE invite_codes SET uses = uses + 1
+          WHERE id = ? AND uses < max_uses AND revoked_at IS NULL`,
+      ).run(code.id);
+      if (consumed.changes === 0) outcome = 'exhausted';
+    }
+
+    if (outcome === 'accepted') {
+      current = 'INSERT the link';
+      stmt(
+        `INSERT INTO coach_clients (coach_id, client_id, team_id, status, origin, accepted_at)
+         VALUES (?, ?, ?, 'active', 'team_code', unixepoch())
+         ON CONFLICT(coach_id, client_id) DO UPDATE SET
+           status = 'active',
+           team_id = excluded.team_id,
+           accepted_at = unixepoch(),
+           archived_at = NULL`,
+      ).run(code.coachId, userId, code.teamId);
+
+      current = 'INSERT the referral';
+      stmt(
+        'INSERT OR IGNORE INTO referrals (coach_id, referred_user_id, code_id) VALUES (?, ?, ?)',
+      ).run(code.coachId, userId, code.id);
+    }
+
+    if (outcome !== 'own_team') {
+      current = 'INSERT the redemption record';
+      stmt(
+        'INSERT INTO invite_redemptions (code_id, user_id, outcome, ip) VALUES (?, ?, ?, ?)',
+      ).run(code?.id ?? null, userId, outcome, ip);
+    }
+
+    current = 'SELECT the link back';
+    const link = outcome === 'accepted'
+      ? stmt(
+          'SELECT id, team_id AS teamId FROM coach_clients WHERE coach_id = ? AND client_id = ?',
+        ).get(code.coachId, userId)
+      : null;
+
+    return { outcome, coachId: code?.coachId ?? null, link };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
