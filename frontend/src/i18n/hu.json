@@ -864,7 +864,7 @@
     "saved": "{{id}} mostantól {{variant}} változatot használ",
     "failed": "A módosítás nem ment át. Frissítsd az oldalt, és nézd meg, mi az aktuális állapot.",
     "noPreview": "Ehhez az elemhez még nincs élő előnézet ezen a képernyőn. A változat attól még valódi: a komponensek olvassák.",
-    "inertShort": "inert",
+    "inertShort": "nem használt",
     "inertExplain": "Ezt a beállítást jelenleg egyetlen komponens sem olvassa. Elmenteni és auditálni lehetne, de a termék nem változna tőle egy képpontot sem — ezért a váltás le van tiltva, amíg nem kap fogyasztót.",
     "loadFailed": "Nem sikerült betölteni a stílusokat",
     "loadFailedBody": "A szerver nem válaszolt. Frissítsd az oldalt."

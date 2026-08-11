@@ -864,7 +864,7 @@
     "saved": "{{id}} verwendet jetzt Variante {{variant}}",
     "failed": "Die Änderung ging nicht durch. Lade neu, um den tatsächlichen Stand zu sehen.",
     "noPreview": "Für dieses Element gibt es auf diesem Bildschirm noch keine Live-Vorschau. Die Variante ist trotzdem echt — Komponenten lesen sie.",
-    "inertShort": "inert",
+    "inertShort": "ungenutzt",
     "inertExplain": "Diese Einstellung wird derzeit von keiner Komponente gelesen. Sie würde gespeichert und auditiert, und am Produkt änderte sich kein Pixel — deshalb bleibt der Schalter deaktiviert, bis es einen Verbraucher gibt.",
     "loadFailed": "Stile konnten nicht geladen werden",
     "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu."

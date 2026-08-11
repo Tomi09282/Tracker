@@ -102,6 +102,75 @@ for (const [code, bundle] of Object.entries(bundles)) {
   }
 }
 
+/* ── ONE KEY that was pasted rather than translated ──────────────────────────────────────────────
+ *
+ * The whole-bundle check above catches a file somebody copied. It does not catch the far more
+ * common thing: a single key pasted into another bundle and never translated, which is what happens
+ * when somebody adds a feature at the end of a long day.
+ *
+ * ═══ IT COMPARES AGAINST HUNGARIAN, AND THAT IS THE WHOLE DESIGN ═══════════════════════════════
+ *
+ * Measured across the 764 keys before choosing the rule:
+ *
+ *     hu == en:  9 keys        hu == de:  9 keys        en == de: 26 keys
+ *
+ * English and German share vocabulary — Admin, Import, Playground, Coach — so an en/de comparison
+ * is 26 false positives and an allowlist nobody will maintain. Hungarian shares almost nothing with
+ * either, so a Hungarian string identical to another language is nearly always one that was never
+ * translated. Same nine keys against both, and they are exactly the legitimate ones.
+ *
+ * The first version of this required a key to be identical in ALL THREE, which is the conservative
+ * rule and also the useless one: a key pasted into just one bundle — the common case — slipped
+ * straight through. Proved by trying it.
+ *
+ * `studio.inertShort` was found this way: it read "inert" in Hungarian, which is not a word in
+ * Hungarian.
+ */
+{
+  const UNTRANSLATED_BY_DESIGN = new Map([
+    ['nav.admin', 'a borrowed word in all three'],
+    ['nav.playground', 'the QA page has no product name to translate'],
+    ['workout.kg', 'SI unit'],
+    ['workout.metres', 'SI unit'],
+    ['plans.blockKind.emom', 'a training acronym, said the same in every gym'],
+    ['plans.blockKind.amrap', 'the same'],
+    ['compose.coverMeta', 'pure format — dimensions and a size, no words'],
+    ['adminMetrics.clock.utc', 'a standard, not a word'],
+    ['adminUsers.role.admin', 'a borrowed word in all three'],
+  ]);
+
+  // The reference bundle is Hungarian — the product's own language, and the one that shares no
+  // vocabulary with the other two. See the note above for the measurement behind that choice.
+  const PIVOT = 'hu';
+  const others = Object.keys(bundles).filter((c) => c !== PIVOT);
+
+  if (bundles[PIVOT] && others.length) {
+    const flagged = new Set();
+    for (const other of others) {
+      for (const [key, value] of bundles[PIVOT]) {
+        if (bundles[other].get(key) !== value) continue;
+        if (UNTRANSLATED_BY_DESIGN.has(key) || flagged.has(key)) continue;
+        flagged.add(key);
+        problems.push(
+          `"${key}" is the same in ${PIVOT} and ${other}: ${JSON.stringify(value.slice(0, 48))}\n` +
+            '      Hungarian shares almost no vocabulary with either other language, so this is very\n' +
+            '      likely a string that was pasted rather than translated. Translate it, or add it to\n' +
+            '      UNTRANSLATED_BY_DESIGN with the reason it stays.',
+        );
+      }
+    }
+    // A stale exemption hides the next regression: the key gets translated, the entry stays, and it
+    // waves through whatever takes its place.
+    for (const [key, reason] of UNTRANSLATED_BY_DESIGN) {
+      if (!bundles[PIVOT].has(key)) {
+        problems.push(`UNTRANSLATED_BY_DESIGN names ${key}, which no longer exists — delete the entry`);
+      } else if (others.every((c) => bundles[c].get(key) !== bundles[PIVOT].get(key))) {
+        problems.push(`UNTRANSLATED_BY_DESIGN lists ${key} (${reason}), and it IS translated now — delete the entry`);
+      }
+    }
+  }
+}
+
 /* ── keys no code references ─────────────────────────────────────────────────────────────────────
  *
  * A dead key is not merely waste. It is a claim that a feature exists — the next person reads
