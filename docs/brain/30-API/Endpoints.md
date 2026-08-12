@@ -9,7 +9,7 @@ tags: [api, moc, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.

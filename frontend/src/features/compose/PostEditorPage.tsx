@@ -99,13 +99,6 @@ export function PostEditorPage() {
    * with the coach rather than a silent overwrite of their draft.
    */
   const seededFor = useRef<string | null>(null);
-  useEffect(() => {
-    if (!post || seededFor.current === post.id) return;
-    seededFor.current = post.id;
-    setKind(post.kind);
-    setTitle(post.title);
-    setBody(post.bodySrc);
-  }, [post]);
 
   /*
    * Autosave runs `submit`, the SAME path the save button uses — one save, two triggers.
@@ -125,6 +118,31 @@ export function PostEditorPage() {
     serialise: serialiseDraft,
     save: () => submitRef.current(),
   });
+
+  useEffect(() => {
+    if (!post || seededFor.current === post.id) return;
+    seededFor.current = post.id;
+    setKind(post.kind);
+    setTitle(post.title);
+    setBody(post.bodySrc);
+    /*
+     * ═══ AND THE AUTOSAVE SNAPSHOT IS SEEDED WITH IT ═══════════════════════════════════════════
+     *
+     * Without this, opening any existing post fired an unrequested PUT 1.5 seconds later.
+     * `savedSnapshot` starts as null, the editor fills with the server's text, and the hook
+     * correctly concludes that what is on screen differs from what it last saved — because it has
+     * never saved anything. So it saved, on a post nobody had touched.
+     *
+     * Built from `post` rather than from `serialiseDraft()`: the three setState calls above have
+     * not flushed yet, so reading component state here returns the PREVIOUS post's fields and the
+     * snapshot would describe the wrong document.
+     *
+     * The seed effect sits BELOW the hook for this one line. It read better above, next to the
+     * state it fills — and it cannot be there, because it needs the hook that is declared here.
+     */
+    autosave.adopt(JSON.stringify([post.kind, post.title, post.bodySrc]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post]);
 
   useEffect(() => {
     if (isNew && kind === '' && taxonomy.data?.kinds.length) setKind(taxonomy.data.kinds[0].key);

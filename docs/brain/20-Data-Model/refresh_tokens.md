@@ -1,8 +1,8 @@
 ---
 type: table
 table: refresh_tokens
-summary: 9 columns, 154 rows
-rows: 154
+summary: 9 columns, 138 rows
+rows: 138
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
 
 | Column | Type | Notes |
 |---|---|---|

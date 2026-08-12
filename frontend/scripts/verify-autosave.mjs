@@ -73,6 +73,9 @@ const check = (label, ok, detail = '') => {
  * rather than discovered later.
  */
 function makeAutosave({ serialise, save }) {
+  // save() takes NO argument, exactly as the hook calls it. The transcription used to pass the
+  // payload, so the probe was exercising a signature that does not ship — the drift this file
+  // warns about, in this file.
   let inFlight = false;
   let again = false;
   let savedSnapshot = null;
@@ -89,7 +92,7 @@ function makeAutosave({ serialise, save }) {
     inFlight = true;
     state = 'saving';
     try {
-      await save(sending);
+      await save();
       savedSnapshot = sending;
       state = serialise() === sending ? 'saved' : 'dirty';
     } catch {
@@ -117,8 +120,10 @@ function makeAutosave({ serialise, save }) {
   let pending = null;
   const auto = makeAutosave({
     serialise: () => content,
-    save: async (payload) => {
-      sent.push(payload);
+    // Records what the editor HOLDS at the moment the save runs — which is what the real submit()
+    // does, because it reads title and body out of component state rather than from an argument.
+    save: async () => {
+      sent.push(content);
       pending = gate();
       await pending;
     },
@@ -167,7 +172,7 @@ function makeAutosave({ serialise, save }) {
 
 {
   const sent = [];
-  const auto = makeAutosave({ serialise: () => 'unchanged', save: async (p) => { sent.push(p); } });
+  const auto = makeAutosave({ serialise: () => 'unchanged', save: async () => { sent.push('unchanged'); } });
   await auto.run();
   await auto.run();
   await auto.run();
@@ -179,7 +184,7 @@ function makeAutosave({ serialise, save }) {
 {
   const sent = [];
   let content = 'created body';
-  const auto = makeAutosave({ serialise: () => content, save: async (p) => { sent.push(p); } });
+  const auto = makeAutosave({ serialise: () => content, save: async () => { sent.push(content); } });
 
   // The route creates, then adopts the snapshot it actually SENT — not the server's response, which
   // on a replay is the original post and would tell the hook the newest text was already saved.
@@ -196,6 +201,51 @@ function makeAutosave({ serialise, save }) {
   );
 }
 
+/* ── opening a post nobody touched must not save it ──────────────────────────────────────────── */
+
+{
+  /*
+   * ═══ THE CASE THIS PROBE DID NOT HAVE, AND THE DEFECT IT LET THROUGH ═══════════════════════════
+   *
+   * `savedSnapshot` starts as null. The editor then fills with the server's text, so the hook sees
+   * a difference between what is on screen and what it last saved — because it has never saved
+   * anything — and 1.5 seconds later it PUTs a post nobody had touched.
+   *
+   * Found by the Phase 7 regression sweep, not by this file, which had eight assertions about the
+   * race and none about the moment before it. A probe is a statement about coverage first.
+   *
+   * The fix is one line in the editor: seed the snapshot from the loaded post at the same moment
+   * the fields are seeded. This asserts the SHAPE of that fix rather than the editor's own wiring —
+   * with a snapshot adopted, an untouched document saves nothing.
+   */
+  const sent = [];
+  const loaded = JSON.stringify(['kind', 'A title from the server', 'A body from the server']);
+  let content = loaded;
+  const auto = makeAutosave({ serialise: () => content, save: async () => { sent.push(content); } });
+
+  auto.adopt(loaded);
+  await auto.run();
+  check('opening an existing post and touching nothing sends NOTHING', sent.length === 0, `${sent.length} request(s)`);
+
+  content = JSON.stringify(['kind', 'A title from the server', 'A body the coach then edited']);
+  await auto.run();
+  check('and the first real edit still saves', sent.length === 1, `${sent.length} request(s)`);
+}
+
+{
+  // The same document WITHOUT the seed — the state the editor was in before the fix. This is the
+  // control: if it did not save here, the assertion above would prove nothing.
+  const sent = [];
+  const content = JSON.stringify(['kind', 'A title from the server', 'A body from the server']);
+  const auto = makeAutosave({ serialise: () => content, save: async () => { sent.push(content); } });
+  await auto.run();
+  check(
+    'CONTROL: with no seeded snapshot the same untouched document DOES save — which is the defect',
+    sent.length === 1,
+    `${sent.length} request(s)`,
+  );
+}
+
 /* ── a failure does not silently claim success ───────────────────────────────────────────────── */
 
 {
@@ -209,7 +259,7 @@ function makeAutosave({ serialise, save }) {
 
   content = 'will fail, retried';
   const sent = [];
-  const auto2 = makeAutosave({ serialise: () => content, save: async (p) => { sent.push(p); } });
+  const auto2 = makeAutosave({ serialise: () => content, save: async () => { sent.push(content); } });
   await auto2.run();
   check('and the content is still there to retry with', sent[0] === 'will fail, retried', JSON.stringify(sent));
 }

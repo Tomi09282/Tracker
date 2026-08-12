@@ -9,7 +9,7 @@ tags: [data-model, erd, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-10.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
 
 81 tables, plus 4 FTS5 shadow tables (`coach_posts_fts`, `exercise_translations_fts`, `food_translations_fts`, `foods_fts`).
 
@@ -161,7 +161,7 @@ erDiagram
 | Table | Columns | Rows |
 |---|---|---|
 | [[achievements]] | 6 | 7 |
-| [[audit_log]] | 9 | 190 |
+| [[audit_log]] | 9 | 234 |
 | [[body_area_muscle_map]] | 3 | 44 |
 | [[body_measurements]] | 8 | 10 |
 | [[coach_clients]] | 11 | 3 |
@@ -218,7 +218,7 @@ erDiagram
 | [[public_policy]] | 3 | 8 |
 | [[push_devices]] | 7 | 0 |
 | [[referrals]] | 6 | 3 |
-| [[refresh_tokens]] | 9 | 154 |
+| [[refresh_tokens]] | 9 | 138 |
 | [[report_reasons]] | 5 | 12 |
 | [[report_statuses]] | 3 | 5 |
 | [[reserved_handles]] | 1 | 53 |
