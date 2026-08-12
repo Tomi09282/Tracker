@@ -8,6 +8,7 @@ import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
 import { resolveLang, languages } from '../lib/lang.js';
 import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
+import { assertAdmin } from '../lib/assert-admin.js';
 
 const router = Router();
 
@@ -37,39 +38,6 @@ const adminReadLimiter = limiter(300, (req) => `adm-r:${req.user?.id ?? ipKeyGen
 const adminWriteIpLimiter = limiter(120);
 const adminWriteLimiter = limiter(60, (req) => `adm-w:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 
-/**
- * Re-read the caller's role from the DATABASE, inside the request.
- *
- * `requireRole` reads the JWT, which is a fast-path hint that can be up to 15 minutes stale.
- * For an operation that reshapes the product for everyone, or that publishes content, the token
- * is not good enough: a role revoked thirty seconds ago must not still work here.
- */
-async function assertAdmin(req, res) {
-  const actor = await db.get('SELECT role FROM users WHERE id = ? AND disabled_at IS NULL', [
-    req.user.id,
-  ]);
-  if (actor?.role !== 'admin') {
-    /*
-     * ═══ THIS IS THE ABUSE SIGNAL, AND IT WAS GOING NOWHERE ══════════════════════════════════
-     *
-     * Reaching this line means somebody presented a VALID token whose `admin` claim the database
-     * disagrees with: a role revoked, an account disabled, or a token minted before either. The
-     * audit log records what admins DID; it has never recorded what a non-admin TRIED, and a
-     * refusal that leaves no trace is a refusal nobody can count.
-     *
-     * It is a log line rather than an audit row on purpose. `audit_log` is append-only and a
-     * refused request is not an event in the product's history — but it is exactly the thing an
-     * operator greps for after a laptop goes missing.
-     */
-    req.log.warn(
-      { userId: req.user.id, route: req.originalUrl, dbRole: actor?.role ?? 'gone-or-disabled' },
-      'admin route refused: the token says admin and the database does not',
-    );
-    sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-    return false;
-  }
-  return true;
-}
 
 router.get(
   '/admin/stats',

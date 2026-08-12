@@ -134,7 +134,35 @@ function reachableFrom(handler) {
 
 /* ── the three rules ─────────────────────────────────────────────────────────────────────────── */
 
-const adminRoutes = routes.filter((r) => /requireRole\(\s*'admin'\s*\)/.test(r.chain));
+/**
+ * ═══ AN ALIAS MADE THREE ADMIN ROUTES INVISIBLE ════════════════════════════════════════════════
+ *
+ * This used to be `routes.filter((r) => /requireRole\('admin'\)/.test(r.chain))` — the literal
+ * string, in the chain. `src/public/moderation.js:30` writes
+ *
+ *     const requireAdmin = requireRole('admin');
+ *
+ * and uses `requireAdmin` on three routes. All three were outside every rule in this file: not
+ * checked for an audit row, not checked for a DB role re-check, not checked for a colliding action
+ * string. The gate reported "10 admin routes" over a codebase with thirteen.
+ *
+ * That is the same shape as the four routes the ROUTE PARSER could not see — a gate whose subject
+ * is a spelling rather than a meaning. So the aliases are resolved per file first: any identifier
+ * bound to `requireRole('admin')` counts as the thing it is.
+ */
+const ADMIN_MIDDLEWARE = new Set(['requireAdmin']);
+for (const file of new Set(routes.map((r) => r.file))) {
+  const src = fs.readFileSync(`${ROOT}/${file}`, 'utf8');
+  for (const m of src.matchAll(/(?:const|let)\s+(\w+)\s*=\s*requireRole\(\s*'admin'\s*\)/g)) {
+    ADMIN_MIDDLEWARE.add(m[1]);
+  }
+}
+
+const isAdminRoute = (chain) =>
+  /requireRole\(\s*'admin'\s*\)/.test(chain) ||
+  [...ADMIN_MIDDLEWARE].some((name) => new RegExp(`\\b${name}\\b`).test(chain));
+
+const adminRoutes = routes.filter((r) => isAdminRoute(r.chain));
 
 /**
  * action string -> the set of PLACES that write it.

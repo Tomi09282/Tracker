@@ -37,6 +37,7 @@ import { z } from 'zod';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { assertAdmin } from '../lib/assert-admin.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
 
 const router = Router();
@@ -351,24 +352,6 @@ router.get(
 
 /* ── the admin path ─────────────────────────────────────────────────────────────────────────── */
 
-/**
- * Re-read the caller's role from the DATABASE, inside the request.
- *
- * Copied in shape from admin/routes.js, and it is still only the FAST rejection here. It is a
- * separate pool call from the write, which is a TOCTOU against a concurrent demotion — tolerable
- * for approving an exercise, not tolerable for minting currency. The authority is the role and
- * session-version re-read INSIDE `adminAdjustCoinsTx`, under the same write lock as the movement.
- */
-async function assertAdmin(req, res) {
-  const actor = await db.get('SELECT role FROM users WHERE id = ? AND disabled_at IS NULL', [
-    req.user.id,
-  ]);
-  if (actor?.role !== 'admin') {
-    sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
-    return false;
-  }
-  return true;
-}
 
 /**
  * Move a wallet by hand.

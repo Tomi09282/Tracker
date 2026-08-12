@@ -22,6 +22,7 @@ import { z } from 'zod';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { assertAdmin } from '../lib/assert-admin.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
 import { displayText } from './text.js';
 import { PUBLIC_ID_RE, HANDLE_RE } from './shapes.js';
@@ -143,6 +144,11 @@ router.get(
   requireAdmin,
   adminReadLimiter,
   asyncRoute(async (req, res) => {
+    // A READ, and it still re-checks. The moderation queue carries what a reporter saw and which
+    // account it names; a role revoked thirty seconds ago must not still open it, and this one
+    // authorised from the JWT alone until check-admin-audit learned to see through the
+    // `requireAdmin` alias.
+    if (!(await assertAdmin(req, res))) return undefined;
     const parsed = queueQuery.safeParse(req.query);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { status = 'open', limit = 25 } = parsed.data;

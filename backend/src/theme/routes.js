@@ -4,6 +4,7 @@ import { z } from 'zod';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
+import { assertAdmin } from '../lib/assert-admin.js';
 import { checkAccent, AA_NORMAL } from '../lib/contrast.js';
 import rateLimit from 'express-rate-limit';
 
@@ -208,13 +209,7 @@ router.put(
     const id = ElementIdSchema.parse(req.params.id);
     const { variant } = VariantSchema.parse(req.body);
 
-    // Admin actions re-check the role against the database at execution time. The JWT claim is
-    // a fast-path hint; a role revoked thirty seconds ago must not still be able to reconfigure
-    // the app for every user in the system.
-    const actor = await db.get('SELECT role FROM users WHERE id = ? AND disabled_at IS NULL', [
-      req.user.id,
-    ]);
-    if (actor?.role !== 'admin') return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
+    if (!(await assertAdmin(req, res))) return undefined;
 
     const before = await db.get('SELECT variant FROM element_style_config WHERE element_id = ?', [id]);
     if (!before) return sendError(res, 404, ERR.NOT_FOUND, 'not found');

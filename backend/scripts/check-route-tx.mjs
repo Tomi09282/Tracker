@@ -31,10 +31,11 @@
 // A single-step `writeTx` is fine and is not flagged: there is nothing after the guard to commit.
 //
 // Run: node scripts/check-route-tx.mjs
+import fs from 'node:fs';
 import { parseRoutes } from './lib/parse-routes.mjs';
 
 const ROOT = 'src';
-const { routes, suspects } = parseRoutes(ROOT);
+const { routes, suspects, files } = parseRoutes(ROOT);
 const problems = [];
 
 for (const s of suspects) {
@@ -57,16 +58,36 @@ function matchBracket(src, openIdx, open, close) {
 let inspected = 0;
 
 for (const r of routes) {
-  // `const [updated] = await db.writeTx([` — the destructure is what makes the result inspectable,
-  // and inspecting the result is the whole tell. A route that ignores it has nothing to branch on.
-  const re = /const\s*\[\s*(\w+)[^\]]*\]\s*=\s*await\s+db\.writeTx\(\s*\[/g;
+  /*
+   * ═══ EVERY CALL SITE, NOT EVERY DESTRUCTURE ══════════════════════════════════════════════════
+   *
+   * The first version matched only `const [x] = await db.writeTx([` — the destructured form, on the
+   * reasoning that a route which ignores the result has nothing to branch on. That reasoning is
+   * sound and the regex was still wrong, because it made the gate's SUBJECT the shape rather than
+   * the call.
+   *
+   * Measured on HEAD: nine routes call `db.writeTx` and the gate inspected ZERO of them. It printed
+   * `0 inspected db.writeTx result(s)` and then `OK` — and that number went past me twice.
+   *
+   * A clean result is a statement about COVERAGE before it is a statement about the subject. This
+   * gate was written to catch a defect of exactly that shape, and it had the same one.
+   *
+   * So: find every call, capture however it is captured, and flag when the result is branched on.
+   */
+  const re = /(?:(?:const|let|var)\s*(?:\[\s*(\w+)[^\]]*\]|(\w+))\s*=\s*)?await\s+db\.writeTx\(\s*\[/g;
   let m;
   while ((m = re.exec(r.handler))) {
     inspected += 1;
-    const binding = m[1];
+    const binding = m[1] ?? m[2];
+    // Nothing captured the result, so nothing can branch on it. Counted as inspected — that is the
+    // difference between "checked and fine" and "never looked at".
+    if (!binding) continue;
 
-    // Does anything branch on this binding's changes?
-    const branch = new RegExp(`if\\s*\\(\\s*${binding}\\.changes\\s*===\\s*0`);
+    // Does anything branch on this binding's changes? Both the destructured (`x.changes`) and the
+    // whole-array (`x[0].changes`) forms, because both are ways of reading the guarded write.
+    const branch = new RegExp(
+      `if\\s*\\(\\s*${binding}(?:\\[\\d+\\])?\\.changes\\s*(?:===\\s*0|!==)`,
+    );
     if (!branch.test(r.handler)) continue;
 
     // How many steps are in the array? One is safe — nothing follows the guard.
@@ -82,6 +103,36 @@ for (const r of routes) {
         `      send arrives with the other ${steps - 1} statement(s) already durable.\n` +
         '      Move it to a NAMED worker transaction with the guard inside — the house rule for any\n' +
         '      business-critical write — or make the writeTx a single statement.',
+    );
+  }
+}
+
+/*
+ * ═══ THE GATE CHECKS ITS OWN COVERAGE ══════════════════════════════════════════════════════════
+ *
+ * Zero inspected sites in a codebase that plainly calls `db.writeTx` does not mean there is nothing
+ * wrong — it means nothing was looked at, and printing OK underneath that is the failure this whole
+ * file exists to prevent, committed by the file itself. It happened: nine call sites, zero
+ * inspected, OK.
+ *
+ * So the count is asserted against a plain grep of the source. The grep is deliberately crude and
+ * independent of the parser above: if the two disagree, the parser is the one that is wrong.
+ */
+{
+  const grepped = files.reduce(
+    (n, f) => n + (fs.readFileSync(f, 'utf8').match(/\bdb\.writeTx\s*\(/g) ?? []).length,
+    0,
+  );
+  if (grepped > 0 && inspected === 0) {
+    problems.push(
+      `${grepped} call(s) to db.writeTx exist in src/ and this gate inspected NONE of them.\n` +
+        '      An OK printed under a zero is a statement about coverage wearing the clothes of a\n' +
+        '      statement about the code. Fix the matcher — do not adjust this check.',
+    );
+  }
+  if (inspected < grepped) {
+    console.log(
+      `                (${grepped} db.writeTx call(s) in src/, ${inspected} reachable through a parsed route)`,
     );
   }
 }
