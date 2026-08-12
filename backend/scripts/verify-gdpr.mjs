@@ -59,6 +59,14 @@ await db.run(
 );
 await db.run("INSERT INTO user_theme_prefs (user_id, pack) VALUES (?, 'midnight')", [me.id]);
 
+// The high-water mark of the audit log before this run.
+//
+// SQLite reuses a rowid once its row is gone, so `target_id` alone matches rows from EVERY previous
+// run of this probe. That has now produced a false PASS once — over a deletion the rate limiter had
+// refused — and a false FAIL once, on a pre-fix row that still carried an IP. An id floor is the
+// only thing available here that is genuinely unique to this run.
+const auditFloor = (await db.all('SELECT COALESCE(MAX(id), 0) AS id FROM audit_log'))[0].id;
+
 const erasesBefore = (await db.all("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'account.erase' AND target_id = ?", [me.id]))[0].n;
 const exportsBefore = (await db.all("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'account.export' AND target_id = ?", [me.id]))[0].n;
 
@@ -168,6 +176,32 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
     'and the record names NOBODY — actor_id was set to NULL by the foreign key',
     audit.length > 0 && audit.every((a) => a.actor_id === null),
     audit.map((a) => `actor_id=${a.actor_id}`).join(', ') || 'no rows',
+  );
+
+  /*
+   * ═══ AND THE SURVIVING ROWS CARRY NO IDENTIFIER ════════════════════════════════════════════
+   *
+   * Found by the Phase 7 sweep, not by this file. Both rows survive the person — the foreign key
+   * anonymises `actor_id` and 018's trigger then freezes every other column FOREVER — and both were
+   * storing `req.ip`. An IP is an identifier; a permanent record of an erasure that keeps one is
+   * not an erasure.
+   *
+   * Asserted on the rows this run created, so a legacy row from before the fix cannot mask it.
+   */
+  const identifying = await db.all(
+    `SELECT action, ip, detail FROM audit_log
+      WHERE id > ? AND target_id = ? AND action IN ('account.erase', 'account.export')`,
+    [auditFloor, me.id],
+  );
+  check(
+    'neither surviving row keeps an IP address',
+    identifying.length > 0 && identifying.every((r) => r.ip === null),
+    identifying.map((r) => `${r.action}:${JSON.stringify(r.ip)}`).join(' ') || 'no rows',
+  );
+  check(
+    'and the erasure detail carries no email, handle or address',
+    identifying.every((r) => !/@|"email"|"handle"|\d+\.\d+\.\d+\.\d+/.test(String(r.detail ?? ''))),
+    identifying.map((r) => String(r.detail ?? 'null').slice(0, 44)).join(' | '),
   );
 
   const exportRow = await db.all(

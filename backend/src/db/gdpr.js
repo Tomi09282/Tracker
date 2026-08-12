@@ -87,28 +87,39 @@ export const EXPORT_TABLES = [
 ];
 
 /**
- * Content that OUTLIVES the person, and why each one does.
+ * Content that OUTLIVES the person.
  *
- * A deletion route built on a bare `DELETE FROM users` gets these wrong in opposite directions, and
- * both matter:
+ * ═══ THIS LIST IS EMPTY, AND IT HELD A STEP THAT DID NOTHING ═══════════════════════════════════
  *
- *   * `exercises.owner_id` is ON DELETE CASCADE. An exercise a coach submitted and an admin
- *     PROMOTED to the shared library still carries their id — approval does not clear it. So a
- *     coach who gets one approved and then deletes their account takes it out of the library for
- *     everybody, and every plan that referenced it keeps a row with a null exercise. Measured: all
- *     1652 seeded global exercises have no owner, so nothing is broken today — it breaks the first
- *     time a real submission is approved and its author leaves.
+ * It carried one entry: null `exercises.owner_id` for the person's `global` exercises before the
+ * delete, on the reasoning that `exercises.owner_id` is ON DELETE CASCADE (it is — checked with
+ * `pragma_foreign_key_list`) and that a coach with a PROMOTED exercise would otherwise take it out
+ * of the shared library on their way out.
  *
- *     Promotion to `global` is the moment the exercise stops being the coach's and becomes the
- *     product's. So erasure unlinks it rather than destroying it, which is also what erasure MEANS:
- *     the person is unlinked from the content, the content is not rewritten. Exactly what 018 does
- *     for the audit log.
+ * That defect is real and it was fixed in PHASE 1. Migration 011 installs
+ * `trg_user_delete_keeps_exercises`, a BEFORE DELETE trigger on `users` that nulls `owner_id` for
+ * every exercise they authored — before the cascade can fire, for every status, not just `global`.
+ * Its own header explains the chain it protects: the logs keep their `exercise_id`, so a client's
+ * progress graph and record book keep resolving after their coach leaves.
  *
- *   * Everything still `private` or `pending_review` is theirs and goes with them, by cascade.
+ * Measured, by deleting somebody with no unlink step at all:
+ *
+ *     unlink2-global    global    owner=null
+ *     unlink2-private   private   owner=null
+ *
+ * So the step was a second implementation of something the schema already did — this project's
+ * second-most-common defect, written here by somebody who had spent the day finding it elsewhere.
+ *
+ * The list stays, empty and named, because the NEXT thing that genuinely needs unlinking has an
+ * obvious home — and because `check-gdpr` now reads triggers as well as foreign keys, so a step
+ * that duplicates one is refused rather than merely unnecessary.
+ *
+ * ═══ AND WHAT 011 DECIDED ABOUT PRIVATE ROWS IS DELIBERATE ═════════════════════════════════════
+ *
+ * A departing person's `private` and `pending_review` exercises SURVIVE, ownerless. That reads like
+ * an erasure gap and 011 argues it out: `status` is left alone, so a private exercise stays private,
+ * and the visibility predicate needs `status = 'global'` or a matching owner — NULL matches nobody.
+ * The row is unreadable by every user in the product. Changing that is a Phase-1 decision to reopen
+ * with evidence, not something to quietly override from here.
  */
-export const UNLINK_BEFORE_DELETE = [
-  [
-    'exercises promoted to the shared library',
-    "UPDATE exercises SET owner_id = NULL WHERE owner_id = ? AND status = 'global'",
-  ],
-];
+export const UNLINK_BEFORE_DELETE = [];

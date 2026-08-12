@@ -70,7 +70,11 @@ router.get(
     await db.run(
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, request_id, ip)
        VALUES (?, 'account.export', 'user', ?, ?, ?)`,
-      [req.user.id, req.user.id, res.locals.requestId, req.ip ?? null],
+      // NO ip. This row survives the person: `actor_id` is anonymised by the foreign key when they
+      // erase, and 018's trigger freezes every other column forever. An export record that keeps
+      // the requester's address is a permanent identifier attached to somebody who has since asked
+      // to be forgotten. The fact and the moment are what this row is for.
+      [req.user.id, req.user.id, res.locals.requestId, null],
     );
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -135,7 +139,6 @@ router.post(
     const result = await db.deleteMyAccount({
       userId: req.user.id,
       requestId: res.locals.requestId,
-      ip: req.ip ?? null,
     });
 
     if (result.outcome !== 'erased') {

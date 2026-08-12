@@ -64,43 +64,101 @@ const require_ = (label, ok, detail) => {
   if (!ok) blocked += 1;
 };
 
-/* 1 — nothing is holding the database. */
+/*
+ * 1 — nothing is holding the database.
+ *
+ * ═══ THE FIRST VERSION OF THIS PASSED PRECISELY WHEN THE DANGER WAS PRESENT ══════════════════
+ *
+ * It asserted "the database opens for writing" and printed a note telling the operator to stop the
+ * server. Opening for writing SUCCEEDS while the server is running — SQLite is built for concurrent
+ * writers — so the check went green in exactly the state it was written to refuse, and the only
+ * thing standing between a running pool and an in-place rekey was a paragraph somebody might read.
+ *
+ * A precondition that cannot refuse is not a precondition. This one asks the SERVER, which is the
+ * only thing that actually knows.
+ */
 {
-  // A WAL sidecar with a live reader is the cheapest available signal; the definitive one is that
-  // the file opens for WRITING, which a running pool prevents on Windows and permits on POSIX. Both
-  // are checked, and the human instruction is printed either way.
-  let writable = false;
+  const port = process.env.PORT ?? 3000;
+  let alive = false;
+  let detail = '';
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/healthz`, {
+      signal: AbortSignal.timeout(1500),
+    });
+    alive = true;
+    detail = `answered ${res.status} on :${port}`;
+  } catch (e) {
+    detail = `nothing answering on :${port} (${String(e.name)})`;
+  }
+  require_('the server is STOPPED', !alive, detail);
+  if (alive) {
+    console.log('      → A rekey racing a worker is the failure this script exists to prevent, and');
+    console.log('        the pool holds DB_POOL_THREADS connections opened with the OLD key.');
+  }
+
+  // And the file is genuinely reachable with the current key. Kept because a database that will not
+  // open is a different failure, and finding that out AFTER stopping production is worse.
   let probe = null;
   try {
     probe = new Database(DB_PATH);
     probe.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
     probe.pragma('user_version');
-    writable = true;
+    require_('the database file opens for writing', true);
   } catch (e) {
-    require_('the database opens for writing', false, String(e.message).slice(0, 60));
+    require_('the database file opens for writing', false, String(e.message).slice(0, 60));
   } finally {
     probe?.close();
   }
-  if (writable) require_('the database opens for writing', true);
-  console.log('      → STOP THE SERVER FIRST. This cannot detect a pool that has the file open on');
-  console.log('        every platform, and a rekey racing a worker is the failure this script exists');
-  console.log('        to make unlikely.');
 }
 
-/* 2 — a backup exists, and it is recent. */
+/*
+ * 2 — a backup exists, is recent, AND OPENS.
+ *
+ * ═══ AN mtime IS NOT A BACKUP ══════════════════════════════════════════════════════════════════
+ *
+ * The first version checked a filename and a timestamp, so `: > backups/tracker-<now>.db` — a
+ * zero-byte file — satisfied the only guard standing before an irreversible in-place rekey. The
+ * note underneath told the operator to run the restore drill, which is a paragraph, not a check.
+ *
+ * The drill's own questions are asked here instead: does it open with the CURRENT key, does it
+ * carry rows, and does `integrity_check` pass. Cheap, and it is the difference between a backup and
+ * a file with a plausible name.
+ */
 {
   const backups = fs.existsSync(BACKUP_DIR)
     ? fs.readdirSync(BACKUP_DIR).filter((f) => /^tracker-.*\.db$/.test(f)).sort()
     : [];
   const newest = backups.at(-1);
-  const ageH = newest ? (Date.now() - fs.statSync(path.join(BACKUP_DIR, newest)).mtimeMs) / 3600000 : Infinity;
+  const full = newest ? path.join(BACKUP_DIR, newest) : null;
+  const ageH = full ? (Date.now() - fs.statSync(full).mtimeMs) / 3600000 : Infinity;
+
   require_(
     'a backup exists and is less than an hour old',
     ageH < 1,
     newest ? `${newest}, ${ageH.toFixed(1)}h old` : `none in ${BACKUP_DIR}`,
   );
-  console.log('      → and it must have PASSED `node scripts/restore-drill.mjs`. A backup nobody has');
-  console.log('        restored is a file, and this is the operation that turns the old key useless.');
+
+  if (full && ageH < 1) {
+    let ok = false;
+    let detail = '';
+    let b = null;
+    try {
+      b = new Database(full, { readonly: true });
+      b.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+      const users = b.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+      const integrity = b.pragma('integrity_check', { simple: true });
+      ok = users > 0 && integrity === 'ok';
+      detail = `${users} user(s), integrity_check ${integrity}`;
+    } catch (e) {
+      detail = String(e.message).slice(0, 60);
+    } finally {
+      b?.close();
+    }
+    require_('and that backup OPENS with the current key, has rows, and passes integrity_check', ok, detail);
+  }
+
+  console.log('      → run `node scripts/restore-drill.mjs` too: it asks the questions this cannot,');
+  console.log('        including whether the schema version is one this checkout can still migrate.');
 }
 
 /* 3 — the current key actually works, before anything is changed. */

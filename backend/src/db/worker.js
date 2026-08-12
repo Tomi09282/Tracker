@@ -3484,7 +3484,22 @@ export function exportMyDataQuery({ userId }) {
  * carries the role and the account's age and nothing else — an erasure record that names the person
  * is not an erasure.
  */
-export function deleteMyAccountTx({ userId, requestId, ip = null }) {
+/*
+ * ═══ NO `ip` PARAMETER, AND ITS ABSENCE IS THE CONTROL ═════════════════════════════════════════
+ *
+ * This took one and passed it to the audit row. Measured on the dev database:
+ *
+ *     account.erase   actor=null  ip="::1"  detail={"role":"user","accountAgeDays":0}
+ *
+ * `actor_id` is NULL because the foreign key anonymised it, exactly as 018 designed — and 018's
+ * trigger permits that ONE update and freezes every other column. So the IP address of the person
+ * who asked to be erased is permanent, on the row that records their erasure, and no code path in
+ * the product can ever remove it. An IP is an identifier; a record that keeps one is not an erasure.
+ *
+ * Removing the PARAMETER rather than passing null at the call site: a null argument is one edit away
+ * from being filled in again by somebody adding "just a bit more context to the audit row".
+ */
+export function deleteMyAccountTx({ userId, requestId }) {
   const conn = getDb();
   let current = null;
 
@@ -3517,7 +3532,7 @@ export function deleteMyAccountTx({ userId, requestId, ip = null }) {
     stmt(
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
        VALUES (?, 'account.erase', 'user', ?, ?, ?, ?)`,
-    ).run(userId, userId, JSON.stringify({ role: me.role, accountAgeDays: Math.floor((Math.floor(Date.now() / 1000) - me.createdAt) / 86400) }), requestId, ip);
+    ).run(userId, userId, JSON.stringify({ role: me.role, accountAgeDays: Math.floor((Math.floor(Date.now() / 1000) - me.createdAt) / 86400) }), requestId, null);
 
     current = 'DELETE the account';
     // 39 foreign keys cascade from here and 16 set null, measured with pragma_foreign_key_list.

@@ -350,13 +350,38 @@ await mutate({
   expect: 'body_measurements has a foreign key into users and is neither exported nor exempt',
 });
 
+/*
+ * The unlink list is EMPTY now, so these two cases PLANT a step rather than editing one.
+ *
+ * That is the better shape anyway: the previous version mutated the single entry that existed, and
+ * when that entry was deleted — because it turned out to duplicate a Phase-1 trigger — the case
+ * reported "the anchor is gone from src/db/gdpr.js" instead of silently passing. The harness said
+ * so; the case still had to be rewritten to test the rule rather than the entry.
+ */
 await mutate({
   label: 'an unlink step aimed at a NOT NULL column is caught before it can abort an erasure',
   file: 'src/db/gdpr.js',
-  from: "    \"UPDATE exercises SET owner_id = NULL WHERE owner_id = ? AND status = 'global'\",",
-  to: "    \"UPDATE exercises SET status = NULL WHERE owner_id = ? AND status = 'global'\",",
+  from: 'export const UNLINK_BEFORE_DELETE = [];',
+  to: "export const UNLINK_BEFORE_DELETE = [['probe', \"UPDATE exercises SET status = NULL WHERE owner_id = ?\"]];",
   gate: 'scripts/check-gdpr.mjs',
   expect: 'that column is NOT NULL',
+});
+
+/*
+ * And the rule that would have stopped a whole day's worth of wrong work.
+ *
+ * `exercises.owner_id` is ON DELETE CASCADE, so a step nulling it before the delete looks
+ * load-bearing — and migration 011 already installs a BEFORE DELETE trigger on `users` that does
+ * exactly that, for every status. The gate read the foreign key, saw CASCADE, and stayed green over
+ * a step that could not change anything.
+ */
+await mutate({
+  label: 'an unlink step the schema already performs via a trigger is caught',
+  file: 'src/db/gdpr.js',
+  from: 'export const UNLINK_BEFORE_DELETE = [];',
+  to: "export const UNLINK_BEFORE_DELETE = [['probe', \"UPDATE exercises SET owner_id = NULL WHERE owner_id = ? AND status = 'global'\"]];",
+  gate: 'scripts/check-gdpr.mjs',
+  expect: 'duplicates trg_user_delete_keeps_exercises',
 });
 
 console.log('\n── and a route no gate can see ────────────────────────────────────────────────');

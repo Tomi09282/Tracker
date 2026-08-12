@@ -145,7 +145,19 @@ for (const [label, sql] of UNLINK_BEFORE_DELETE) {
         '      The erasure would abort on the last thing it does, after the audit row is written.',
     );
   }
-  // The whole reason the step exists: without it the FK would destroy the row instead of freeing it.
+  /*
+   * ═══ THE FOREIGN KEY IS NOT THE ONLY THING THAT DECIDES ════════════════════════════════════
+   *
+   * This check read `pragma_foreign_key_list` and nothing else, so it saw `exercises.owner_id ON
+   * DELETE CASCADE`, concluded the step was load-bearing, and stayed green over a step that did
+   * nothing at all: migration 011 installs a BEFORE DELETE trigger on `users` that nulls the same
+   * column first, for every status.
+   *
+   * A gate that reads ONE source of truth about a behaviour the database decides in TWO places will
+   * be wrong exactly when it matters — here, waving through a second implementation of a Phase-1
+   * fix. Triggers are read now, and a step the schema already performs is a failure rather than a
+   * note, because an unnecessary step reads like a load-bearing one to everybody after.
+   */
   const fk = db
     .prepare(`SELECT * FROM pragma_foreign_key_list('${table}')`)
     .all()
@@ -154,6 +166,22 @@ for (const [label, sql] of UNLINK_BEFORE_DELETE) {
     problems.push(
       `the unlink step "${label}" is unnecessary: ${table}.${column} is ON DELETE ${fk.on_delete},\n` +
         '      so the database already frees it. An unnecessary step reads like a load-bearing one.',
+    );
+  }
+
+  const nulledByTrigger = db
+    .prepare(
+      `SELECT name, sql FROM sqlite_master
+        WHERE type = 'trigger' AND tbl_name = 'users' AND sql LIKE '%BEFORE DELETE%'`,
+    )
+    .all()
+    .find((t) => new RegExp(`UPDATE\\s+${table}\\s+SET\\s+${column}\\s*=\\s*NULL`, 'i').test(t.sql));
+  if (nulledByTrigger) {
+    problems.push(
+      `the unlink step "${label}" duplicates ${nulledByTrigger.name}, a BEFORE DELETE trigger on\n` +
+        `      users that already sets ${table}.${column} to NULL — before the cascade, for every row.\n` +
+        '      Delete the step. A second implementation of something the schema does is this\n' +
+        "      project's second-most-common defect, and it reads as load-bearing to everybody after.",
     );
   }
 }
