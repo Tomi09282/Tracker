@@ -62,6 +62,32 @@ export function ExerciseDetailPage() {
         {t('nav.library')}
       </Link>
 
+      {/*
+        ═══ THE OTHER END OF THE MODERATION LOOP ═══════════════════════════════════════════════
+        The admin route has always REFUSED a rejection with no reason — a zod `.refine` whose
+        message reads "a rejection must carry a reason", written so the coach would not have to
+        guess what to fix. The reason was then stored, returned by this very endpoint, and
+        rendered nowhere. The coach guessed anyway, for the whole of Phase 1.
+
+        Above the media, not below the steps: somebody opening a submission they are waiting on
+        should not have to scroll to find out it was turned down.
+      */}
+      {exercise.status === 'rejected' ? (
+        <div
+          role="status"
+          className="mt-3 rounded-card border border-danger bg-danger-subtle p-3"
+        >
+          <p className="text-body-s font-semibold text-text-1">{t('library.rejectedTitle')}</p>
+          {exercise.rejection_reason ? (
+            <p className="text-body-s mt-1 text-text-2">{exercise.rejection_reason}</p>
+          ) : null}
+        </div>
+      ) : exercise.status === 'pending_review' ? (
+        <div role="status" className="mt-3 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3">
+          <p className="text-body-s text-text-2">{t('library.pendingReview')}</p>
+        </div>
+      ) : null}
+
       {/* The aspect ratio is reserved whether or not media exists, so nothing shifts on load. */}
       <div className="mt-3 grid aspect-video w-full place-items-center overflow-hidden rounded-card border border-[var(--surface-border)] bg-surface-1">
         {media.length > 0 ? (

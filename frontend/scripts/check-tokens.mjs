@@ -141,6 +141,34 @@ const indexCss = await fs.readFile(path.join(SRC, 'index.css'), 'utf8');
 const localUtilities = new Set([...indexCss.matchAll(/^\s*\.([a-z0-9-]+)\s*\{/gim)].map((m) => m[1]));
 
 /*
+ * ═══ THE COLOR HALF OF THE SAME FAILURE ════════════════════════════════════════════════════════
+ *
+ * The `undefined-utility` rule below matches three literal shapes — `size-icon-*`, `col-*`,
+ * `screen-x` — which are the three defects that had already been found by hand. A rule cut to the
+ * exact outline of the bugs you already know about is a snapshot, not a gate, and this one was
+ * measurably too narrow: `text-on-accent` walked straight through it.
+ *
+ * That class is `--accent-fg`. Four of the five semantic pairs in `tokens.css` are named `on-*`
+ * (`on-success`, `on-warning`, `on-danger`, `on-info`) and the accent one is not, so `on-accent` is
+ * the natural guess and it resolves to nothing — accent-colored text on an accent-colored chip.
+ *
+ * ═══ WHY IT KEYS ON THE PROJECT'S OWN STEMS ════════════════════════════════════════════════════
+ *
+ * Checking every `text-*` against the token list would flag `text-sm`, `text-left`, `text-balance`
+ * and every Tailwind built-in — a gate nobody keeps. So the vocabulary is READ from `@theme inline`
+ * (never typed here — see the note on BUILTIN_ANIMATIONS), and only names whose FIRST segment is
+ * one this project owns are held to it. `on-accent` starts with `on`, which this project owns, so
+ * it must resolve; `sm` and `left` are Tailwind's and are left alone.
+ */
+const themeColors = new Set(
+  [...tokenSource.matchAll(/--color-([a-z0-9-]+)\s*:/g)].map((m) => m[1]),
+);
+const COLOR_PREFIXES = ['text', 'bg', 'border', 'fill', 'stroke', 'ring', 'outline', 'decoration', 'divide'];
+// The stems this project has claimed. `text` and `border` are stems AND prefixes, which is why
+// `text-text-1` and `border-border-token` are the shapes that work.
+const OWNED_STEMS = new Set([...themeColors].map((c) => c.split('-')[0]));
+
+/*
  * Tailwind's built-in animation utilities carry durations this project never declared:
  * animate-pulse is 2s, animate-spin/bounce/ping are 1s. Nine feature files reached for
  * animate-pulse across three phases and every Bible audit reported "0 rogue durations", because
@@ -188,15 +216,52 @@ for await (const file of walk(SRC)) {
    */
   const locallyProvided = new Set([...text.matchAll(/['"](--[a-z0-9-]+)['"]\s*:/gi)].map((m) => m[1]));
 
+  /*
+   * ═══ COMMENT STATE, TRACKED ACROSS LINES ═════════════════════════════════════════════════════
+   *
+   * This used to be one test per line: `/^\s*(?:\/\/|\/\*|\*)/`. It handles a `//` line and the
+   * OPENING line of a block, and it had never been run over the middle of a multi-line JSX comment
+   * — where the continuation lines are plain prose with no marker at all.
+   *
+   * So a `{/* … *\/}` block explaining WHY a rule exists tripped that very rule, three lines below
+   * its own opener. Measured: a note reading "a Pressable, not a raw <button>" was reported as a
+   * raw button, on the commit that removed the last raw button from the file.
+   *
+   * A trailing comment on a line of real code is still checked, because that line still renders —
+   * only the commented part of it is blanked.
+   */
+  let inBlock = false;
+
   lines.forEach((line, i) => {
-    // A line may opt out with an explicit, reviewed justification.
+    let code = line;
+
+    if (inBlock) {
+      const close = code.indexOf('*/');
+      if (close === -1) return; // wholly inside a comment
+      inBlock = false;
+      code = code.slice(close + 2);
+    }
+    // Openers, repeatedly: a line may close one block and open another.
+    for (;;) {
+      const open = code.indexOf('/*');
+      if (open === -1) break;
+      const close = code.indexOf('*/', open + 2);
+      if (close === -1) {
+        inBlock = true;
+        code = code.slice(0, open);
+        break;
+      }
+      code = code.slice(0, open) + ' '.repeat(close + 2 - open) + code.slice(close + 2);
+    }
+    // Line comments last, so `/* // */` has already gone.
+    const slashes = code.indexOf('//');
+    if (slashes !== -1) code = code.slice(0, slashes);
+
+    // A line may opt out with an explicit, reviewed justification. Read from the WHOLE line: the
+    // justification is written as a comment, which is precisely what has just been blanked.
     if (line.includes('token-lint-disable')) return;
 
-    // A line that is ONLY a comment is prose, not shipped style. It was flagging itself: the
-    // comment recording the `animate-[hold-fill_550ms_…]` defect quotes the defect, and a gate
-    // that punishes the note explaining a fix is a gate people stop writing notes for. A trailing
-    // comment on a line of real code is still checked, because that line still renders.
-    if (/^\s*(?:\/\/|\/\*|\*)/.test(line)) return;
+    if (code.trim() === '') return;
 
     for (const rule of RULES) {
       if (rule.uiExempt && path.resolve(file).startsWith(UI_DIR)) continue;
@@ -205,7 +270,7 @@ for await (const file of walk(SRC)) {
       if (fileExempt && (rule.id === 'raw-hex' || rule.id === 'raw-color-fn')) continue;
       rule.re.lastIndex = 0;
       let m;
-      while ((m = rule.re.exec(line)) !== null) {
+      while ((m = rule.re.exec(code)) !== null) {
         if (rule.check && !rule.check(m)) continue;
         violations.push({
           file: path.relative(process.cwd(), file),
@@ -267,7 +332,7 @@ for await (const file of walk(SRC)) {
      * that cannot express column spans. Tailwind's own grid-column utilities are named, so a typo
      * in `col-mobile` is still caught and `col-span-3` is not.
      */
-    for (const m of line.matchAll(/\b(size-icon-[a-z0-9-]+|col-[a-z]+|screen-x)\b/gi)) {
+    for (const m of code.matchAll(/\b(size-icon-[a-z0-9-]+|col-[a-z]+|screen-x)\b/gi)) {
       if (localUtilities.has(m[1])) continue;
       if (TAILWIND_COLUMN_UTILITIES.has(m[1].toLowerCase())) continue;
       violations.push({
@@ -276,6 +341,22 @@ for await (const file of walk(SRC)) {
         rule: 'undefined-utility',
         found: m[1],
         msg: `.${m[1]} is not defined in src/index.css and Tailwind cannot generate it — the class is inert.`,
+      });
+    }
+
+    // A color utility naming one of this project's own stems must resolve to a declared token.
+    for (const m of code.matchAll(/\b([a-z]+)-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\b/g)) {
+      const [, prefix, name] = m;
+      if (!COLOR_PREFIXES.includes(prefix)) continue;
+      if (!OWNED_STEMS.has(name.split('-')[0])) continue;
+      if (themeColors.has(name)) continue;
+      if (localUtilities.has(`${prefix}-${name}`)) continue;
+      violations.push({
+        file: path.relative(process.cwd(), file),
+        line: i + 1,
+        rule: 'undefined-color',
+        found: `${prefix}-${name}`,
+        msg: `--color-${name} is not declared in tokens.css, so .${prefix}-${name} resolves to nothing.`,
       });
     }
   });

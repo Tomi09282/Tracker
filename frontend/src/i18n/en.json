@@ -134,7 +134,9 @@
       "plyometrics": "Plyometrics"
     },
     "howTo": "How to",
-    "substitutions": "Substitutions"
+    "substitutions": "Substitutions",
+    "rejectedTitle": "This submission was rejected",
+    "pendingReview": "Submitted — waiting for review."
   },
   "admin": {
     "eyebrow": "Administration",
@@ -156,12 +158,6 @@
     "forbiddenTitle": "Not authorised",
     "forbiddenBody": "This page is available to administrators only.",
     "footer": "{{sessions}} active sessions · {{events}} audit events in the last 24 hours",
-    "col": {
-      "name": "Exercise",
-      "owner": "Submitted by",
-      "media": "Media",
-      "actions": "Action"
-    },
     "marketplace": {
       "title": "Marketplace reports",
       "emptyTitle": "Nothing to decide",
@@ -204,7 +200,16 @@
       "accounts": "Accounts",
       "moderation": "Moderation",
       "marketplace": "Marketplace"
-    }
+    },
+    "noMedia": "No media uploaded",
+    "mediaCount": "{{count}} media",
+    "mediaAlt": "{{name}} — submitted media",
+    "noInstructions": "No instructions were provided",
+    "reviewPickTitle": "Pick a submission",
+    "reviewPickBody": "Approving shares the exercise with the whole library, so open it and read it first.",
+    "reviewGoneTitle": "This submission has left the queue",
+    "reviewGoneBody": "Somebody decided it in the meantime. Refresh the list.",
+    "reasonHint": "The author reads this on their own exercise."
   },
   "muscle": {
     "chest": "Chest",

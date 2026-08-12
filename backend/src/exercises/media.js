@@ -143,7 +143,7 @@ router.get(
 
     // The DB decides, not the filesystem. A key that exists on disk but whose owning exercise
     // is private to somebody else must be as invisible as one that was never uploaded.
-    const row = await db.get(
+    let row = await db.get(
       // The SHARED predicate, not a copy of it. This query used to inline its own version, and it
       // is exactly the sort of duplicate that gets left behind: the prescription arm was added to
       // the library's copy and a client would still have been unable to load the picture of the
@@ -155,6 +155,43 @@ router.get(
           AND ${VISIBLE}`,
       [key, ...visibleParams(req.user.id)],
     );
+
+    /*
+     * ═══ THE MODERATOR'S ARM, AND WHY IT IS NOT PART OF `VISIBLE` ══════════════════════════════
+     *
+     * Measured before it was written: an admin opening the moderation queue got 404 on every image
+     * in it. `VISIBLE` has four arms — global, ownerless, owned by the caller, prescribed to the
+     * caller — and a coach's `pending_review` submission matches none of them. So the queue asked
+     * somebody to approve a movement into the shared library while serving them a broken image.
+     *
+     * The obvious fix is a fifth arm on `VISIBLE` for admins. That would be wrong: `VISIBLE` also
+     * governs the library and every private exercise in it, and an admin arm there is a button that
+     * reads any coach's private library. `privacy/routes.js` makes the same argument about exports.
+     *
+     * This arm is scoped to what moderation actually requires: a submission the author VOLUNTEERED
+     * for review, and only while it is still in the queue. A decision moves it to `global` (which
+     * arm one already covers) or `rejected` (which nothing covers), so the moderator's read expires
+     * the moment they no longer need it.
+     *
+     * It runs only after the normal predicate has missed, so nothing changes for anybody else, and
+     * the role comes from the DATABASE — a JWT still carrying `admin` after a demotion opens
+     * nothing.
+     */
+    if (!row && req.user.role === 'admin') {
+      const live = await db.get('SELECT role FROM users WHERE id = ?', [req.user.id]);
+      if (live?.role === 'admin') {
+        row = await db.get(
+          `SELECT m.storage_key, m.mime
+             FROM exercise_media m
+             JOIN exercises e ON e.id = m.exercise_id
+            WHERE m.storage_key = ? AND m.deleted_at IS NULL
+              AND e.status = 'pending_review' AND e.deleted_at IS NULL`,
+          [key],
+        );
+        if (row) req.log.info({ storageKey: key }, 'moderation media read');
+      }
+    }
+
     if (!row) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
 
     const full = resolveStoredPath(row.storage_key);

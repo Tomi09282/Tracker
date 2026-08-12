@@ -118,6 +118,20 @@ export interface ExerciseDetail {
     exercise_type: string | null;
     source: string;
     translated: 0 | 1;
+    /*
+     * ═══ THESE TWO WERE MISSING, AND THAT IS WHY NOBODY EVER SAW A REJECTION ═══════════════════
+     *
+     * The API has returned both since Phase 1. `admin/routes.js` makes the reason MANDATORY on a
+     * rejection — a zod `.refine` whose message says a rejection with no reason leaves the coach
+     * guessing what to fix — and the reason then went into a column that no screen in the product
+     * read, because this interface stopped one field short of it. The coach guessed anyway.
+     *
+     * A narrower type than the payload is not a smaller surface. It is a field nobody knows exists.
+     */
+    status: 'global' | 'private' | 'pending_review' | 'rejected' | 'custom';
+    rejection_reason: string | null;
+    submitted_at: number | null;
+    owner_id: number | null;
   };
   lang: string;
   availableLangs: { lang: string; origin: string }[];

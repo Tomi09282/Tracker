@@ -134,7 +134,9 @@
       "plyometrics": "Pliometria"
     },
     "howTo": "Végrehajtás",
-    "substitutions": "Helyettesítő gyakorlatok"
+    "substitutions": "Helyettesítő gyakorlatok",
+    "rejectedTitle": "Ezt a beküldést elutasították",
+    "pendingReview": "Beküldve — moderálásra vár."
   },
   "admin": {
     "eyebrow": "Adminisztráció",
@@ -156,12 +158,6 @@
     "forbiddenTitle": "Nincs jogosultságod",
     "forbiddenBody": "Ez az oldal csak adminisztrátoroknak érhető el.",
     "footer": "{{sessions}} aktív munkamenet · {{events}} naplóesemény az elmúlt 24 órában",
-    "col": {
-      "name": "Gyakorlat",
-      "owner": "Beküldő",
-      "media": "Média",
-      "actions": "Művelet"
-    },
     "marketplace": {
       "title": "Piactéri bejelentések",
       "emptyTitle": "Nincs elintézendő bejelentés",
@@ -204,7 +200,16 @@
       "accounts": "Fiókok",
       "moderation": "Moderáció",
       "marketplace": "Piactér"
-    }
+    },
+    "noMedia": "Nincs feltöltött média",
+    "mediaCount": "{{count}} média",
+    "mediaAlt": "{{name}} — beküldött média",
+    "noInstructions": "Nincs megadva végrehajtási leírás",
+    "reviewPickTitle": "Válassz egy beküldést",
+    "reviewPickBody": "A jóváhagyás megosztja a gyakorlatot a teljes könyvtárban, ezért előbb nyisd meg és nézd át.",
+    "reviewGoneTitle": "Ez a beküldés már nincs a sorban",
+    "reviewGoneBody": "Időközben valaki döntött róla. Frissítsd a listát.",
+    "reasonHint": "A beküldő elolvassa, a saját gyakorlatánál jelenik meg."
   },
   "muscle": {
     "chest": "Mell",

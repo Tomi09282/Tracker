@@ -1,21 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { Users, Dumbbell, Image, ShieldCheck, Languages, Check, X, Palette, Activity, Globe } from 'lucide-react';
+import { Users, Dumbbell, Image, ShieldCheck, Languages, Palette, Activity, Globe } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Field } from '../../ui/primitives/Field';
 import { CountUp } from '../../ui/feedback/CountUp';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
+import { ModerationQueue } from './ModerationQueue';
 import { AdminMetrics } from './AdminMetrics';
 import { AdminShell } from './AdminShell';
-import { DataTable } from '../../ui/data/DataTable';
 import { UserSearch } from './UserSearch';
 
 interface Stats {
@@ -26,15 +24,6 @@ interface Stats {
   translations: { rows: number; langs: number };
   sessions: { active: number };
   audit: { events_24h: number };
-}
-
-interface QueueItem {
-  id: number;
-  name: string;
-  owner_email: string | null;
-  submitted_at: number;
-  difficulty: string | null;
-  media_count: number;
 }
 
 function StatCard({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: string; value: number; sub?: string }) {
@@ -62,38 +51,15 @@ function StatCard({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: 
  */
 export function AdminPage() {
   const { t } = useTranslation();
-  const qc = useQueryClient();
   const { data: user } = useSession();
   // Which panel is open. Local state rather than a route: these are four views of one screen, and
   // a URL per view would mean four routes the palette and the router both have to know about.
   const [section, setSection] = useState('overview');
-  const [rejecting, setRejecting] = useState<number | null>(null);
-  const [reason, setReason] = useState('');
 
   const stats = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: () => apiWithRefresh<Stats>('/admin/stats'),
     enabled: user?.role === 'admin',
-  });
-
-  const queue = useQuery({
-    queryKey: ['admin', 'moderation'],
-    queryFn: () => apiWithRefresh<{ queue: QueueItem[] }>('/admin/moderation'),
-    enabled: user?.role === 'admin',
-  });
-
-  const decide = useMutation({
-    mutationFn: (v: { id: number; decision: 'approve' | 'reject'; reason?: string }) =>
-      apiWithRefresh(`/admin/moderation/${v.id}`, {
-        method: 'POST',
-        body: { decision: v.decision, ...(v.reason ? { reason: v.reason } : {}) },
-      }),
-    onSuccess: () => {
-      setRejecting(null);
-      setReason('');
-      void qc.invalidateQueries({ queryKey: ['admin'] });
-      void qc.invalidateQueries({ queryKey: ['exercises'] });
-    },
   });
 
   // The server enforces this too — this is only so a non-admin sees an explanation instead of
@@ -201,82 +167,9 @@ export function AdminPage() {
           ) : null}
         </div>
 
-        {queue.isPending ? (
-          <Skeleton className="mt-3 h-40 rounded-card" />
-        ) : (queue.data?.queue.length ?? 0) === 0 ? (
-          <div className="mt-3 rounded-card border border-[var(--surface-border)] bg-surface-1">
-            <EmptyState icon={Check} title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
-          </div>
-        ) : (
-          <div className="mt-3">
-            <DataTable
-              caption={t('admin.moderation')}
-              rows={queue.data!.queue}
-              rowKey={(row) => row.id}
-              columns={[
-                { key: 'name', header: t('admin.col.name'), render: (row) => row.name },
-                {
-                  key: 'owner',
-                  header: t('admin.col.owner'),
-                  render: (row) => <span className="text-text-2">{row.owner_email ?? '—'}</span>,
-                },
-                { key: 'media', header: t('admin.col.media'), numeric: true, render: (row) => row.media_count },
-                {
-                  key: 'actions',
-                  header: t('admin.col.actions'),
-                  render: (row) =>
-                    rejecting === row.id ? (
-                      <div className="flex flex-wrap items-end gap-2">
-                        <Field
-                          label={t('admin.reason')}
-                          value={reason}
-                          onChange={(e) => setReason(e.target.value)}
-                          className="w-56"
-                        />
-                        <Pressable
-                          variant="danger"
-                          density="compact"
-                          disabled={reason.trim().length === 0}
-                          busy={decide.isPending}
-                          onClick={() => decide.mutate({ id: row.id, decision: 'reject', reason })}
-                        >
-                          {t('admin.reject')}
-                        </Pressable>
-                        <Pressable density="compact" variant="ghost" onClick={() => setRejecting(null)}>
-                          {t('common.cancel')}
-                        </Pressable>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Pressable
-                          variant="primary"
-                          density="compact"
-                          busy={decide.isPending}
-                          icon={<Check size={20} strokeWidth={2} aria-hidden />}
-                          onClick={() => decide.mutate({ id: row.id, decision: 'approve' })}
-                        >
-                          {t('admin.approve')}
-                        </Pressable>
-                        {/* Destructive action: never in the primary position, and it cannot fire
-                            without a reason the author can act on. */}
-                        <Pressable
-                          variant="ghost"
-                          density="compact"
-                          icon={<X size={20} strokeWidth={2} aria-hidden />}
-                          onClick={() => {
-                            setRejecting(row.id);
-                            setReason('');
-                          }}
-                        >
-                          {t('admin.reject')}
-                        </Pressable>
-                      </div>
-                    ),
-                },
-              ]}
-            />
-          </div>
-        )}
+        {/* The queue AND the decision live here now. They used to be a table in this file whose
+            row carried Approve — see the header comment in ModerationQueue for why that moved. */}
+        <ModerationQueue />
       </section>
               </>
             ),

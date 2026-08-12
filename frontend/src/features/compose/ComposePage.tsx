@@ -121,7 +121,7 @@ export function ComposePage() {
           <p className="text-body-s mt-1 text-text-2">{t('compose.noProfileBody')}</p>
           <Link
             to="/compose/profile"
-            className="text-body-s mt-3 inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-on-accent"
+            className="text-body-s mt-3 inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-accent-fg"
           >
             {t('compose.createProfile')}
           </Link>
@@ -190,7 +190,7 @@ export function ComposePage() {
           <h2 className="text-title-3">{t('compose.posts')}</h2>
           <Link
             to="/compose/posts/new"
-            className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-on-accent"
+            className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-accent-fg"
           >
             <Plus className="size-4" aria-hidden />
             {t('compose.newPost')}

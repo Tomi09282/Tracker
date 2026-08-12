@@ -37,7 +37,9 @@
     "verify:stepup": "node scripts/verify-stepup.mjs",
     "backup": "node scripts/backup.mjs",
     "restore:drill": "node scripts/restore-drill.mjs",
-    "verify:rekey": "node scripts/verify-rekey.mjs"
+    "verify:rekey": "node scripts/verify-rekey.mjs",
+    "verify:moderation": "node scripts/verify-moderation.mjs",
+    "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation"
   },
   "author": "",
   "license": "ISC",

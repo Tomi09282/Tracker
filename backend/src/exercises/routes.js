@@ -10,6 +10,7 @@ import { encodeCursor, decodeCursor, clampLimit } from '../lib/cursor.js';
 import { taxonomyList, labelJoin } from '../lib/taxonomy.js';
 import { resolveLang, languages } from '../lib/lang.js';
 import { VISIBLE, visibleParams } from './visibility.js';
+import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from './detail.js';
 
 const router = Router();
 
@@ -267,57 +268,15 @@ router.get(
     const { fallback } = await languages();
 
     const exercise = await db.get(
-      `SELECT e.id, e.status, e.owner_id, e.source, e.source_uid, e.difficulty, e.exercise_type,
-              e.created_at, e.updated_at, e.submitted_at, e.rejection_reason,
-              COALESCE(t.name, tf.name, e.name)                 AS name,
-              COALESCE(t.description, tf.description, e.description)   AS description,
-              COALESCE(t.instructions, tf.instructions, e.instructions) AS instructions,
-              CASE WHEN t.lang IS NOT NULL THEN 1 ELSE 0 END    AS translated
-         FROM exercises e
-         LEFT JOIN exercise_translations t  ON t.exercise_id  = e.id AND t.lang  = ?
-         LEFT JOIN exercise_translations tf ON tf.exercise_id = e.id AND tf.lang = ?
-        WHERE e.id = ? AND ${VISIBLE}`,
+      `SELECT ${DETAIL_COLUMNS} ${DETAIL_JOINS} WHERE e.id = ? AND ${VISIBLE}`,
       [lang, fallback, id, ...visibleParams(userId)],
     );
     // 404, not 403 — see the note on VISIBLE.
     if (!exercise) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
 
-    // Every language this exercise exists in, so the UI can offer a switch rather than silently
-    // showing fallback text.
-    const availableLangs = await db.all(
-      'SELECT lang, origin FROM exercise_translations WHERE exercise_id = ? ORDER BY lang',
-      [id],
-    );
-
-    const [muscles, equipmentRows, media] = await Promise.all([
-      (() => {
-        const l = labelJoin('muscle_group', 'g', fallback, lang);
-        return db.all(
-          `SELECT g.slug, g.body_side, m.role, ${l.select}
-             FROM exercise_muscle_map m JOIN muscle_groups g ON g.id = m.muscle_group_id
-             ${l.join}
-            WHERE m.exercise_id = ?
-            ORDER BY m.role, g.sort_order`,
-          [...l.params, id],
-        );
-      })(),
-      (() => {
-        const l = labelJoin('equipment', 'q', fallback, lang);
-        return db.all(
-          `SELECT q.slug, ${l.select}
-             FROM exercise_equipment_map x JOIN equipment q ON q.id = x.equipment_id
-             ${l.join}
-            WHERE x.exercise_id = ? ORDER BY q.sort_order`,
-          [...l.params, id],
-        );
-      })(),
-      db.all(
-        `SELECT id, kind, storage_key, mime, width, height, position
-           FROM exercise_media WHERE exercise_id = ? AND deleted_at IS NULL
-          ORDER BY position, id`,
-        [id],
-      ),
-    ]);
+    // Languages, muscles, equipment and media — the same assembly the moderation screen runs, so a
+    // field added here cannot go missing from the screen where somebody approves it.
+    const { availableLangs, muscles, equipment: equipmentRows, media } = await exerciseBody(id, lang, fallback);
 
     // Substitutions: other visible exercises sharing this one's PRIMARY muscles. Ordered by how
     // many they share, so the closest swap comes first.
@@ -337,7 +296,7 @@ router.get(
     );
 
     res.json({
-      exercise: { ...exercise, instructions: exercise.instructions ? JSON.parse(exercise.instructions) : [] },
+      exercise: withInstructions(exercise),
       lang,
       availableLangs,
       muscles,

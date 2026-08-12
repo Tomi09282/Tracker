@@ -9,6 +9,7 @@ import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.
 import { resolveLang, languages } from '../lib/lang.js';
 import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 import { assertAdmin } from '../lib/assert-admin.js';
+import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from '../exercises/detail.js';
 
 const router = Router();
 
@@ -101,6 +102,52 @@ router.get(
       [lang, fallback],
     );
     res.json({ queue });
+  }),
+);
+
+/**
+ * ═══ THE SUBMISSION ITSELF, BECAUSE THE QUEUE ROW IS NOT ENOUGH TO DECIDE ON ═══════════════════
+ *
+ * The lite queue listed a name, an owner's email and a media count, and offered Approve. Approving
+ * puts a movement into the shared library that every user in the product can find and follow, and
+ * the only thing the moderator had read was its name.
+ *
+ * This returns exactly what the library's own detail route returns — same columns, same body
+ * assembly, from `exercises/detail.js` — so what the moderator reviews IS what everybody else will
+ * see, and a field added to one appears on the other.
+ *
+ * NO `VISIBLE` here, and no id from the caller beyond this one lookup: the WHERE is pinned to
+ * `pending_review`, so this route reaches submissions their author volunteered for review and
+ * nothing else. An admin cannot read a coach's private library through it — the same boundary the
+ * media route's moderation arm draws.
+ */
+router.get(
+  '/admin/moderation/:id',
+  requireAuth,
+  requireRole('admin'),
+  adminReadIpLimiter,
+  adminReadLimiter,
+  asyncRoute(async (req, res) => {
+    if (!(await assertAdmin(req, res))) return;
+    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const lang = await resolveLang(req);
+    const { fallback } = await languages();
+
+    const exercise = await db.get(
+      `SELECT ${DETAIL_COLUMNS}, u.email AS owner_email
+         ${DETAIL_JOINS}
+         LEFT JOIN users u ON u.id = e.owner_id
+        WHERE e.id = ? AND e.status = 'pending_review' AND e.deleted_at IS NULL`,
+      [lang, fallback, id],
+    );
+    // A submission somebody else decided a moment ago is not in the queue, and 404 is the honest
+    // answer for that as well as for an id that never existed — the same rule the decision route
+    // applies.
+    if (!exercise) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+
+    const { availableLangs, muscles, equipment, media } = await exerciseBody(id, lang, fallback);
+
+    res.json({ exercise: withInstructions(exercise), lang, availableLangs, muscles, equipment, media });
   }),
 );
 

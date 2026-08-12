@@ -134,7 +134,9 @@
       "plyometrics": "Plyometrie"
     },
     "howTo": "Ausführung",
-    "substitutions": "Alternativen"
+    "substitutions": "Alternativen",
+    "rejectedTitle": "Diese Einreichung wurde abgelehnt",
+    "pendingReview": "Eingereicht — wartet auf Prüfung."
   },
   "admin": {
     "eyebrow": "Verwaltung",
@@ -156,12 +158,6 @@
     "forbiddenTitle": "Nicht berechtigt",
     "forbiddenBody": "Diese Seite steht nur Administratoren offen.",
     "footer": "{{sessions}} aktive Sitzungen · {{events}} Audit-Ereignisse in den letzten 24 Stunden",
-    "col": {
-      "name": "Übung",
-      "owner": "Eingereicht von",
-      "media": "Medien",
-      "actions": "Aktion"
-    },
     "marketplace": {
       "title": "Marktplatz-Meldungen",
       "emptyTitle": "Nichts zu entscheiden",
@@ -204,7 +200,16 @@
       "accounts": "Konten",
       "moderation": "Moderation",
       "marketplace": "Marktplatz"
-    }
+    },
+    "noMedia": "Keine Medien hochgeladen",
+    "mediaCount": "{{count}} Medien",
+    "mediaAlt": "{{name}} — eingereichte Medien",
+    "noInstructions": "Keine Ausführungshinweise angegeben",
+    "reviewPickTitle": "Einreichung auswählen",
+    "reviewPickBody": "Eine Freigabe teilt die Übung mit der gesamten Bibliothek — erst öffnen und lesen.",
+    "reviewGoneTitle": "Diese Einreichung ist nicht mehr in der Warteschlange",
+    "reviewGoneBody": "Jemand hat inzwischen entschieden. Liste aktualisieren.",
+    "reasonHint": "Die verfassende Person liest dies an ihrer eigenen Übung."
   },
   "muscle": {
     "chest": "Brust",
