@@ -101,6 +101,8 @@ async function* walk(dir) {
   }
 }
 
+/** Tailwind generates these. A typo in the projects own col-* utilities is still caught. */
+const TAILWIND_COLUMN_UTILITIES = new Set(['col-span', 'col-start', 'col-end', 'col-auto']);
 const violations = [];
 
 /*
@@ -249,11 +251,25 @@ for await (const file of walk(SRC)) {
       }
     }
 
-    // A `size-icon-*` style utility must be a class this project actually defines. Tailwind
-    // silently ignores a class it cannot generate, so a typo here costs nothing at build time
-    // and everything at render time.
+    /*
+     * A `size-icon-*` style utility must be a class this project actually defines. Tailwind
+     * silently ignores a class it cannot generate, so a typo here costs nothing at build time
+     * and everything at render time.
+     *
+     * ═══ EXCEPT THAT `col-` IS ALSO TAILWIND'S OWN PREFIX ══════════════════════════════════════
+     *
+     * The rule was written to catch typos in this project's `col-mobile` and `col-wide`. Measured:
+     * it also flags `col-span-3`, `col-start-2` and `col-end-4` — real Tailwind grid utilities that
+     * ARE generated. So the twelve-column layout the admin panel was specced with could not be
+     * written at all without the build going red, and the only way to discover that was to try it.
+     *
+     * A gate that forbids the correct answer sends people to a worse one — here, a flex fallback
+     * that cannot express column spans. Tailwind's own grid-column utilities are named, so a typo
+     * in `col-mobile` is still caught and `col-span-3` is not.
+     */
     for (const m of line.matchAll(/\b(size-icon-[a-z0-9-]+|col-[a-z]+|screen-x)\b/gi)) {
       if (localUtilities.has(m[1])) continue;
+      if (TAILWIND_COLUMN_UTILITIES.has(m[1].toLowerCase())) continue;
       violations.push({
         file: path.relative(process.cwd(), file),
         line: i + 1,

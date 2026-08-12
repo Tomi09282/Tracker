@@ -197,7 +197,14 @@
         "other": "Egyéb"
       }
     },
-    "styleStudio": "Stílus stúdió"
+    "styleStudio": "Stílus stúdió",
+    "sections": "Szakaszok",
+    "section": {
+      "overview": "Áttekintés",
+      "accounts": "Fiókok",
+      "moderation": "Moderáció",
+      "marketplace": "Piactér"
+    }
   },
   "muscle": {
     "chest": "Mell",

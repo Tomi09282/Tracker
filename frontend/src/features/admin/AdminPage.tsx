@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { Users, Dumbbell, Image, ShieldCheck, Languages, Check, X, Palette } from 'lucide-react';
+import { Users, Dumbbell, Image, ShieldCheck, Languages, Check, X, Palette, Activity, Globe } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
@@ -14,6 +14,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
 import { AdminMetrics } from './AdminMetrics';
+import { AdminShell } from './AdminShell';
 import { DataTable } from '../../ui/data/DataTable';
 import { UserSearch } from './UserSearch';
 
@@ -63,6 +64,9 @@ export function AdminPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: user } = useSession();
+  // Which panel is open. Local state rather than a route: these are four views of one screen, and
+  // a URL per view would mean four routes the palette and the router both have to know about.
+  const [section, setSection] = useState('overview');
   const [rejecting, setRejecting] = useState<number | null>(null);
   const [reason, setReason] = useState('');
 
@@ -161,10 +165,32 @@ export function AdminPage() {
         </div>
       ) : null}
 
-      <AdminMetrics enabled={user?.role === 'admin'} />
+      {/*
+        Four sections behind a rail rather than four stacked on one page.
 
-      <UserSearch enabled={user?.role === 'admin'} />
-
+        Stacked, an admin arriving to answer "is this account disabled" scrolled past a metrics
+        grid, four charts and a moderation table to reach the search box — and every one of those
+        fetched on arrival. Behind a rail, the section that is not open does not render, so it does
+        not fetch either: `render` is a function for that reason, not a node.
+      */}
+      <AdminShell
+        sections={[
+          {
+            key: 'overview',
+            icon: Activity,
+            render: () => <AdminMetrics enabled={user?.role === 'admin'} />,
+          },
+          {
+            key: 'accounts',
+            icon: Users,
+            render: () => <UserSearch enabled={user?.role === 'admin'} />,
+          },
+          {
+            key: 'moderation',
+            icon: ShieldCheck,
+            badge: stats.data?.moderation.pending || undefined,
+            render: () => (
+              <>
       <section className="mt-8">
         <div className="flex items-baseline gap-2">
           <h2 className="text-title-3 text-text-1">{t('admin.moderation')}</h2>
@@ -252,8 +278,18 @@ export function AdminPage() {
           </div>
         )}
       </section>
-
-      <MarketplaceQueue />
+              </>
+            ),
+          },
+          {
+            key: 'marketplace',
+            icon: Globe,
+            render: () => <MarketplaceQueue />,
+          },
+        ]}
+        active={section}
+        onSelect={setSection}
+      />
 
       {stats.data ? (
         <p className={cn('text-caption mt-6 text-text-3')}>

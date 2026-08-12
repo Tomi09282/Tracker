@@ -197,7 +197,14 @@
         "other": "Other"
       }
     },
-    "styleStudio": "Style studio"
+    "styleStudio": "Style studio",
+    "sections": "Sections",
+    "section": {
+      "overview": "Overview",
+      "accounts": "Accounts",
+      "moderation": "Moderation",
+      "marketplace": "Marketplace"
+    }
   },
   "muscle": {
     "chest": "Chest",

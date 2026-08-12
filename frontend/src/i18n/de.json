@@ -197,7 +197,14 @@
         "other": "Sonstiges"
       }
     },
-    "styleStudio": "Stil-Studio"
+    "styleStudio": "Stil-Studio",
+    "sections": "Bereiche",
+    "section": {
+      "overview": "Überblick",
+      "accounts": "Konten",
+      "moderation": "Moderation",
+      "marketplace": "Marktplatz"
+    }
   },
   "muscle": {
     "chest": "Brust",

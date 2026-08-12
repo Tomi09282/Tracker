@@ -132,6 +132,12 @@
   --table-max-h: 60vh;
   --table-row-h: 44px;      /* the a11y floor again: every row carries interactive controls */
 
+  /* The admin sidebar. A GRID COLUMN inside the 1120px content column, not a second fixed element:
+     BottomNav is already `fixed inset-x-0 bottom-0`, and a second fixed rail would have to know
+     about it, about the safe-area inset and about the toast layer. Three z-index decisions to get
+     wrong instead of none. */
+  --admin-sidebar-w: 15rem;
+
   /* Z-index ladder.
      --z-sticky sits BELOW the nav: a table header that scrolled over the bottom navigation would
      be a header covering the way out of the screen. */
