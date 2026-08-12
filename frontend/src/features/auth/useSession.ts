@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, apiWithRefresh, ApiError } from '../../lib/api';
+import { clearOutbox } from '../../lib/outbox';
 
 export interface SessionUser {
   id: number;
@@ -58,6 +59,20 @@ export function useLogout() {
     mutationFn: () => api('/auth/logout', { method: 'POST' }),
     // Clear everything, not just the session: cached lists may hold data this user could see
     // and the next one may not.
-    onSuccess: () => qc.clear(),
+    //
+    // The OUTBOX goes too, and for a stronger reason than the query cache. That cache lives in
+    // memory and dies with the tab; the outbox is in localStorage, which is per-origin and
+    // outlives the session by design. Left behind, it is one person's training data sitting in
+    // the next person's browser on a shared phone — and it would be REPLAYED under their cookies
+    // the moment the network returned. The server refuses those (every write is ownership-scoped)
+    // but the payload should never have been there to send.
+    onSuccess: () => {
+      clearOutbox();
+      qc.clear();
+    },
+    // Also on failure: a logout the server did not confirm still means this person is walking
+    // away from the device, and a queue that survives "logout didn't quite work" is the exact
+    // case worth defending.
+    onError: () => clearOutbox(),
   });
 }

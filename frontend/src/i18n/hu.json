@@ -244,7 +244,8 @@
     "filterHint": "Koppints egy izomra a szűréshez"
   },
   "offline": {
-    "title": "Nincs internetkapcsolat"
+    "title": "Nincs internetkapcsolat",
+    "queued": "{{count}} művelet vár feltöltésre"
   },
   "palette": {
     "title": "Parancsok",

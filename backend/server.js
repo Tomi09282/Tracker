@@ -106,6 +106,12 @@ app.use(
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
+        // Both of these already resolve to 'self' by falling back to default-src, and both are
+        // written out anyway: the PWA depends on them, and a future tightening of default-src
+        // would otherwise kill the service worker silently — no console error the user sees, just
+        // an app that quietly stops starting offline.
+        workerSrc: ["'self'"],
+        manifestSrc: ["'self'"],
       },
     },
     hsts: env.NODE_ENV === 'production' ? { maxAge: 31536000, includeSubDomains: true } : false,

@@ -38,6 +38,14 @@
         }
       })();
     </script>
+
+    <!-- The mark, which nothing linked to before this: `public/favicon.svg` has shipped since
+         Phase 1 and no <link> referenced it, so every browser fell back to requesting
+         /favicon.ico, getting the SPA's index.html, and drawing its default page glyph. -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- iOS ignores the manifest's icons entirely and reads this one. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
   </head>
   <body>
     <div id="root"></div>

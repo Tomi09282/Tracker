@@ -244,7 +244,8 @@
     "filterHint": "Tippe auf einen Muskel zum Filtern"
   },
   "offline": {
-    "title": "Keine Internetverbindung"
+    "title": "Keine Internetverbindung",
+    "queued": "{{count}} Aktion wartet auf Upload"
   },
   "palette": {
     "title": "Befehle",

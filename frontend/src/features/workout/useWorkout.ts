@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiWithRefresh, ApiError } from '../../lib/api';
+import { enqueue, isNetworkFailure } from '../../lib/outbox';
+import { useSession } from '../auth/useSession';
 
 export interface LogSet {
   id: number;
@@ -102,8 +104,10 @@ export function useCheckSet() {
     return uid;
   }, []);
 
+  const { data: user } = useSession();
+
   const mutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       setId,
       ...values
     }: {
@@ -114,11 +118,30 @@ export function useCheckSet() {
       seconds?: number | null;
       rpe?: number | null;
       rest_taken_seconds?: number | null;
-    }) =>
-      apiWithRefresh<CheckOutcome>(`/sets/${setId}/check`, {
-        method: 'POST',
-        body: { write_uid: uidFor(setId), ...values },
-      }),
+    }): Promise<CheckOutcome & { queued?: true }> => {
+      const path = `/sets/${setId}/check`;
+      const body = { write_uid: uidFor(setId), ...values };
+
+      try {
+        return await apiWithRefresh<CheckOutcome>(path, { method: 'POST', body });
+      } catch (err) {
+        /*
+         * ═══ THE GYM WITH NO SIGNAL ══════════════════════════════════════════════════════════
+         *
+         * Only a NETWORK failure queues. A 409, a 422, a 403 are the server having an opinion,
+         * and swallowing those into a queue would tell the user their set was recorded when the
+         * server had just explained why it was not.
+         *
+         * `body` goes into the queue exactly as it is, `write_uid` and all. That key was minted
+         * once for this set and is now stored beside the payload, so replaying it in an hour is
+         * still the SAME request rather than a second one — which is the entire reason replay is
+         * safe here and not safe in general. See lib/outbox.ts.
+         */
+        if (!user || !isNetworkFailure(err)) throw err;
+        enqueue(user.id, path, body);
+        return { applied: true, replayed: false, records: [], queued: true };
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
   });
 

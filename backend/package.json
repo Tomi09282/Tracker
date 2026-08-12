@@ -39,7 +39,8 @@
     "restore:drill": "node scripts/restore-drill.mjs",
     "verify:rekey": "node scripts/verify-rekey.mjs",
     "verify:moderation": "node scripts/verify-moderation.mjs",
-    "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation"
+    "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation",
+    "icons": "node scripts/build-icons.mjs"
   },
   "author": "",
   "license": "ISC",
