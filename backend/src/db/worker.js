@@ -3319,6 +3319,128 @@ export function decideExerciseTx({
 }
 
 /**
+ * ═══ THE SEAT CAP, WRITTEN ONCE ════════════════════════════════════════════════════════════════
+ *
+ * Called by BOTH paths that create a coach-client link — `redeemInviteTx` and
+ * `pregenerateClientTx` — because a cap enforced on one of two paths is a cap with a hole, and the
+ * bulk pregeneration is the path where a coach could add fifty in a single request.
+ *
+ * ═══ IT ASKS "MAY THIS LINK BE ADDED", NEVER "IS THIS COACH OVER THE CAP" ══════════════════════
+ *
+ * The distinction is the whole design. A coach's tier can drop WITHOUT their consent — a card
+ * expires, a payment fails, the processor moves them to `canceled` — and a rule phrased as "a
+ * coach on Starter may not HAVE more than ten clients" turns a bank's fraud heuristic into
+ * dissolved coaching relationships. Enforcing at the moment a link is ADDED means a downgrade
+ * freezes growth and touches nothing that already exists.
+ *
+ * Three rules, each of which had to be decided rather than defaulted:
+ *
+ *   1. A link that is ALREADY active consumes no new seat. Re-redeeming a live link is a no-op for
+ *      the count, and charging it a seat would refuse an idempotent repeat.
+ *   2. `canceled` resolves to FREE, not to the tier the row still names. The row keeps `pro` after
+ *      cancellation so the history is legible; the entitlement does not survive it.
+ *   3. `past_due` KEEPS the tier. That is a dunning window, not a decision — see 026's comment.
+ *
+ * `client_cap IS NULL` is unlimited, and it is the only spelling of unlimited in the schema.
+ */
+function hasSeat(coachId, clientId) {
+  const alreadyActive = stmt(
+    `SELECT 1 FROM coach_clients WHERE coach_id = ? AND client_id = ? AND status = 'active'`,
+  ).get(coachId, clientId);
+  if (alreadyActive) return true;
+
+  const tier = stmt(
+    `SELECT t.client_cap AS cap
+       FROM subscription_tiers t
+      WHERE t.key = COALESCE(
+        (SELECT s.tier_key FROM coach_subscriptions s
+          WHERE s.coach_id = ? AND s.status IN ('trialing', 'active', 'past_due')),
+        'free')`,
+  ).get(coachId);
+
+  // A missing tier row is a broken install, not a case to have a policy about: 026 inserts `free`
+  // and a foreign key guards every other reference. Failing OPEN here would silently hand every
+  // coach an unlimited plan the first time somebody deleted a row; failing closed would refuse
+  // every client in the product. Neither is a thing to do quietly.
+  if (!tier) throw new Error(`seat cap: no subscription tier resolves for coach ${coachId}`);
+
+  if (tier.cap === null) return true;
+
+  const used = stmt(
+    `SELECT COUNT(*) AS n FROM coach_clients WHERE coach_id = ? AND status = 'active'`,
+  ).get(coachId).n;
+  return used < tier.cap;
+}
+
+/**
+ * Pre-generate ONE client account and link it to the coach.
+ *
+ * ═══ THIS WAS A writeTx WITH THE USER CREATED OUTSIDE IT ═══════════════════════════════════════
+ *
+ * The route inserted the `users` row on its own, then ran a `writeTx` holding the link and the
+ * audit row. That shape had no failure mode while nothing could refuse the link — and the seat cap
+ * is exactly something that can. A refused link would have left an account behind that belongs to
+ * nobody: an email address consumed, a password hash on disk, a row the coach cannot see and the
+ * client was never told about. The next attempt for that address would then be told it is taken.
+ *
+ * So the user, the link and the audit row are one named transaction, and the cap is decided before
+ * the first write — ADR-0005's law, which is what makes "refused" mean nothing happened at all.
+ *
+ * The argon2 hash arrives as an argument rather than being computed here. It costs ~50 ms of CPU by
+ * design, and doing that inside a held write lock would stall every other writer in the process for
+ * the duration, fifty times over on a full batch.
+ *
+ * The email check moved INSIDE too. Outside, two requests for the same address could both pass it
+ * and the second would fail on the unique index — a 500 where the route already knows how to say
+ * "skipped".
+ */
+export function pregenerateClientTx({ coachId, email, passwordHash, teamId = null, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── everything that can refuse, before anything is written ────────────────────────────────
+
+    current = 'SELECT the email';
+    const taken = stmt('SELECT id FROM users WHERE lower(trim(email)) = ?').get(email);
+    // Never silently attach an account that already belongs to somebody: that would hand a coach a
+    // live account they did not create, password unknown to them but access granted.
+    if (taken) return { outcome: 'email_taken' };
+
+    current = 'CHECK the seat';
+    // `clientId` is null — the account does not exist yet, so it cannot already hold a seat.
+    if (!hasSeat(coachId, null)) return { outcome: 'seat_limit' };
+
+    // ── from here on nothing may conditionally return ─────────────────────────────────────────
+
+    current = 'INSERT the user';
+    const user = stmt(
+      'INSERT INTO users (email, password_hash, must_change_credentials, created_by) VALUES (?, ?, 1, ?)',
+    ).run(email, passwordHash, coachId);
+
+    current = 'INSERT the link';
+    stmt(
+      `INSERT INTO coach_clients (coach_id, client_id, team_id, status, origin, accepted_at)
+       VALUES (?, ?, ?, 'active', 'pregenerated', unixepoch())`,
+    ).run(coachId, user.lastInsertRowid, teamId);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'client.pregenerate', 'user', ?, ?, ?, ?)`,
+    ).run(coachId, user.lastInsertRowid, JSON.stringify({ email, teamId }), requestId, ip);
+
+    return { outcome: 'created', userId: Number(user.lastInsertRowid) };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
+
+/**
  * Redeem an invite code.
  *
  * MEASURED BEFORE: an EXHAUSTED code was refused with "this code has been used up" and the client
@@ -3366,6 +3488,7 @@ export function redeemInviteTx({ userId, digest, ip = null }) {
     else if (code.revokedAt) outcome = 'revoked';
     else if (code.expiresAt && code.expiresAt <= now) outcome = 'expired';
     else if (code.coachId === userId) outcome = 'own_team';
+    else if (!hasSeat(code.coachId, userId)) outcome = 'seat_limit';
 
     // ── the writes, chosen from the outcome, with no return between them ──────────────────────
 

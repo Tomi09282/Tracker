@@ -23,7 +23,7 @@
     "verify:021": "node scripts/verify-021.mjs",
     "verify:022": "node scripts/verify-022.mjs",
     "verify:markdown": "node scripts/verify-markdown.mjs",
-    "check:all": "npm run check:modules && npm run check:routes && npm run check:admin-audit && npm run check:worker-tx && npm run check:route-tx && npm run check:body-writes && npm run check:gdpr && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:024 && npm run verify:025 && npm run verify:rekey && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates",
+    "check:all": "npm run check:modules && npm run check:routes && npm run check:admin-audit && npm run check:worker-tx && npm run check:route-tx && npm run check:body-writes && npm run check:gdpr && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:024 && npm run verify:025 && npm run verify:rekey && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates && npm run verify:seats",
     "verify:023": "node scripts/verify-023.mjs",
     "check:body-writes": "node scripts/check-body-writes.mjs",
     "verify:gates": "node scripts/verify-gates.mjs",
@@ -42,7 +42,8 @@
     "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation",
     "icons": "node scripts/build-icons.mjs",
     "security:checklist": "node scripts/security-checklist.mjs",
-    "check:modules": "node scripts/check-modules-load.mjs"
+    "check:modules": "node scripts/check-modules-load.mjs",
+    "verify:seats": "node scripts/verify-seats.mjs"
   },
   "author": "",
   "license": "ISC",

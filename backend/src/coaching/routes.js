@@ -312,6 +312,21 @@ router.post(
     if (r.outcome === 'exhausted') {
       return sendError(res, 409, ERR.CONFLICT, 'this code has been used up');
     }
+    /*
+     * ═══ THE ONE REFUSAL THAT IS NOT ABOUT THE PERSON HOLDING THE CODE ═══════════════════════
+     *
+     * Their code is valid. The coach has no seat left. Every other refusal above is deliberately
+     * vague — telling a stranger which codes are real is an enumeration oracle — but this one has
+     * nobody to protect: it reveals nothing about the code, and leaving it as "invalid code" would
+     * send somebody to their coach reporting a broken link that is not broken.
+     *
+     * The redemption row is written with `outcome = 'seat_limit'`, so the coach's own view can
+     * eventually show that somebody tried and bounced off the plan limit. That is the single most
+     * useful thing to tell a coach who is about to upgrade.
+     */
+    if (r.outcome === 'seat_limit') {
+      return sendError(res, 409, ERR.CONFLICT, 'this coach has no free client seat');
+    }
 
     req.log.info({ coachId: r.coachId, teamId: r.link.teamId }, 'join code redeemed');
     res.json({ ok: true, linkId: r.link.id, teamId: r.link.teamId });
@@ -346,50 +361,70 @@ router.post(
     const created = [];
     const skipped = [];
 
-    for (const email of body.emails) {
-      const existing = await db.get('SELECT id FROM users WHERE lower(trim(email)) = ?', [email]);
-      if (existing) {
-        // Never silently attach an account that already belongs to somebody: that would hand a
-        // coach a live account they did not create, password unknown to them but access granted.
-        skipped.push(email);
-        continue;
-      }
+    /*
+     * ═══ THE BATCH STOPS AT THE SEAT LIMIT, IT DOES NOT SKIP PAST IT ═════════════════════════
+     *
+     * `skipped` already means "this address belongs to somebody else, try another" — a per-address
+     * fact the coach can act on. Running out of seats is not that: every remaining address fails
+     * for the same reason, and folding them into `skipped` would report fifty addresses as
+     * individually unusable when the truth is one plan limit.
+     *
+     * The accounts created before the limit was hit are real and are returned. Discarding work that
+     * succeeded in order to report a clean failure would throw away passwords that exist nowhere
+     * else — they are shown once and stored only as a hash.
+     */
+    let seatLimited = false;
 
+    for (const email of body.emails) {
       // A temporary password the coach reads out once. `must_change_credentials` is what makes
       // this safe: until the client sets their own, the coach knows the password, so the account
       // is not yet theirs — and requireAuth refuses everything except the change endpoint.
+      //
+      // Hashed HERE rather than in the worker: argon2 at these parameters costs ~50 ms of CPU by
+      // design, and spending that inside a held write lock would stall every other writer in the
+      // process, fifty times over on a full batch.
       const temp = generateCode().replace(/-/g, '').slice(0, 12);
       const hash = await argon2.hash(temp, ARGON2_OPTS);
 
-      const user = await db.run(
-        'INSERT INTO users (email, password_hash, must_change_credentials, created_by) VALUES (?, ?, 1, ?)',
-        [email, hash, req.user.id],
-      );
+      /*
+       * ONE named transaction for the account, the link and the audit row.
+       *
+       * This used to be a bare INSERT for the user followed by a `writeTx` for the rest — a shape
+       * with no failure mode until the seat cap gave it one. A refused link would have left an
+       * account behind that belongs to nobody: the address consumed, a password hash on disk, a
+       * row the coach cannot see and the client was never told about. The next attempt for that
+       * address would then be told it is taken.
+       *
+       * The email check moved inside for the same reason: outside, two requests for one address
+       * could both pass it and the second would hit the unique index as a 500, where the route
+       * already knows how to say "skipped".
+       */
+      const r = await db.pregenerateClient({
+        coachId: req.user.id,
+        email,
+        passwordHash: hash,
+        teamId: body.team_id ?? null,
+        requestId: res.locals.requestId,
+        ip: req.ip ?? null,
+      });
 
-      await db.writeTx([
-        {
-          sql: `INSERT INTO coach_clients (coach_id, client_id, team_id, status, origin, accepted_at)
-                VALUES (?, ?, ?, 'active', 'pregenerated', unixepoch())`,
-          params: [req.user.id, user.lastInsertRowid, body.team_id ?? null],
-        },
-        {
-          sql: `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
-                VALUES (?, 'client.pregenerate', 'user', ?, ?, ?, ?)`,
-          params: [
-            req.user.id,
-            user.lastInsertRowid,
-            JSON.stringify({ email, teamId: body.team_id ?? null }),
-            res.locals.requestId,
-            req.ip ?? null,
-          ],
-        },
-      ]);
+      if (r.outcome === 'email_taken') {
+        skipped.push(email);
+        continue;
+      }
+      if (r.outcome === 'seat_limit') {
+        seatLimited = true;
+        break;
+      }
 
       // The temporary password is returned exactly once and stored nowhere in plaintext.
-      created.push({ email, temporaryPassword: temp, userId: user.lastInsertRowid });
+      created.push({ email, temporaryPassword: temp, userId: r.userId });
     }
 
-    res.status(201).json({ created, skipped });
+    // `seatLimited` is reported, not inferred. A client counting `created.length` against what it
+    // sent would have to guess whether the shortfall was seats or taken addresses, and those need
+    // different actions from the coach: upgrade, or pick another address.
+    res.status(201).json({ created, skipped, seatLimited });
   }),
 );
 

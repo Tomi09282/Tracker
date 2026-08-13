@@ -41,4 +41,30 @@ for (const u of USERS) {
   console.log(`${u.email.padEnd(24)} ${u.role.padEnd(6)} ${PASSWORD}`);
 }
 
+/*
+ * ═══ THE SEEDED COACHES GET AN UNLIMITED PLAN ══════════════════════════════════════════════════
+ *
+ * Found by the seat cap landing: `smoke` links a fresh athlete to the SHARED seeded coach in
+ * several sections, and the free tier's cap of 3 refused the second one. Eight assertions went red
+ * with codes that named nothing useful — a 404 from `workouts/start` and a 400 from the chat — all
+ * of them downstream of one link that was never created.
+ *
+ * The guard is correct and stays. What was wrong is asking a development fixture to live inside a
+ * COMMERCIAL limit: a dev environment where the demo coach can hold three clients is a dev
+ * environment nobody can use, and the alternative — raising the free cap so the tests pass — would
+ * be letting a test suite set the product's pricing.
+ *
+ * `verify:seats` is where the cap is proven, with its own fixtures and its own tiers, so nothing is
+ * lost by exempting the seed.
+ */
+for (const u of USERS.filter((x) => x.role === 'coach' || x.role === 'admin')) {
+  await db.run(
+    `INSERT INTO coach_subscriptions (coach_id, tier_key, status, provider, updated_at)
+     SELECT id, 'unlimited', 'active', 'seed', unixepoch() FROM users WHERE lower(trim(email)) = ?
+     ON CONFLICT(coach_id) DO UPDATE SET tier_key = 'unlimited', status = 'active', updated_at = unixepoch()`,
+    [u.email],
+  );
+}
+console.log('\nseeded coaches are on the unlimited tier — see the note above; the cap is proven in verify:seats');
+
 await db.closePool();

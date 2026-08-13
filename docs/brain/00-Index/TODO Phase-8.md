@@ -24,7 +24,7 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-7]]
 ## Payment processor (decision D-2A)
 - [x] **T8.2.1** Choose the processor — `done` · **Stripe (Connect + Billing)**, recorded as [[60-Decisions/0014-payment-processor|ADR-0014]]. Decided by ONE question, not by fee tables: money going OUT to coaches makes this a platform, and a Merchant-of-Record (Paddle/Lemon Squeezy) cannot pay third parties — a capability wall, not a preference. Mangopay rejected on DX, Adyen on stage, Barion on cross-border reach. Costs accepted deliberately: coach KYC becomes a product surface, and EU VAT/OSS on subscription revenue stays ours (the burden the MoR route would have removed)
 - [ ] **T8.2.2** Coach subscription billing — `pending`
-- [ ] **T8.2.3** Per-coach client seat cap enforcement wired to the subscription tier — `pending` · interface reserved in Phase 2
+- [x] **T8.2.3** Per-coach client seat cap enforcement wired to the subscription tier — `done` · enforced at "add a client", NEVER at "have clients" — a tier can drop without consent (failed card), so a billing event must not dissolve a relationship. Both link paths guarded (`redeemInviteTx` and the rewritten `pregenerateClientTx`); `verify:seats` 20/20, each guard mutation-proven. **The FREE tier cap of 3 is still my placeholder, not a decision** — see the note in 026
 - [ ] **T8.2.4** Coin real-money top-up — `pending` · D-1A lift
 - [ ] **T8.2.5** Marketplace payout to coaches — `pending` · D-1A lift
 - [ ] **T8.2.6** Inbound webhook hardening — raw-body constant-time signature verify, timestamp + event-id replay defense, verify-then-parse — `pending`
