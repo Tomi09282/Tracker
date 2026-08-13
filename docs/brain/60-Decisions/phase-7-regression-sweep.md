@@ -64,11 +64,11 @@ exercising a signature that does not ship — rule 4 biting in the file that war
 
 | Severity | Where | What |
 |---|---|---|
-| severe | `worker.js` erasure | the erasure audit row stores the erased person's IP, and nothing can remove it |
-| severe | `rekey.mjs:67` | the "stop the server first" precondition passes precisely when the danger is present |
-| severe | `rekey.mjs:90` | the backup precondition checks an mtime — a zero-byte file passes |
+| ~~severe~~ **FIXED** | `worker.js` erasure | the erasure audit row stores the erased person's IP, and nothing can remove it |
+| ~~severe~~ **FIXED** | `rekey.mjs:67` | the "stop the server first" precondition passes precisely when the danger is present |
+| ~~severe~~ **FIXED** | `rekey.mjs:90` | the backup precondition checks an mtime — a zero-byte file passes |
 | severe | `gdpr.js:61` | the export ships plan headers and no plan content; `check-gdpr` structurally cannot see the omission |
-| severe | `deleteMyAccountTx` | erasure leaves the subject's `private` and `pending_review` exercises behind |
+| ~~severe~~ **FIXED** | `deleteMyAccountTx` | erasure leaves the subject's `private` and `pending_review` exercises behind |
 | severe | `check-safe-area:107` | the edge rule cannot cross a quote, so the bottom sheet is never examined |
 | moderate ×12 | gates and projections | vacuous assertions, unreachable exemptions, an admin id in the export |
 | minor ×10 | comments and shapes | docblocks asserting things their own bodies do not do |

@@ -97,6 +97,12 @@ router.get(
          LEFT JOIN exercise_translations tf ON tf.exercise_id = e.id AND tf.lang = ?
          LEFT JOIN users u ON u.id = e.owner_id
         WHERE e.status = 'pending_review' AND e.deleted_at IS NULL
+          -- An ORPHANED submission is not a submission awaiting a decision. Migration 011's delete
+          -- trigger nulls owner_id for everything the person authored, so a coach who erases
+          -- their account while something is under review leaves a row here with no author to
+          -- approve for, nobody to send a rejection reason to, and an owner column reading NULL.
+          -- Approving it would publish content on behalf of somebody who asked to be forgotten.
+          AND e.owner_id IS NOT NULL
         ORDER BY e.submitted_at ASC
         LIMIT 50`,
       [lang, fallback],
@@ -137,7 +143,11 @@ router.get(
       `SELECT ${DETAIL_COLUMNS}, u.email AS owner_email
          ${DETAIL_JOINS}
          LEFT JOIN users u ON u.id = e.owner_id
-        WHERE e.id = ? AND e.status = 'pending_review' AND e.deleted_at IS NULL`,
+        WHERE e.id = ? AND e.status = 'pending_review' AND e.deleted_at IS NULL
+          -- Same predicate as the list, for the same reason. Written twice deliberately rather than
+          -- shared: these are the only two places it appears, and a two-line helper for one WHERE
+          -- clause hides the rule from whoever reads either query.
+          AND e.owner_id IS NOT NULL`,
       [lang, fallback, id],
     );
     // A submission somebody else decided a moment ago is not in the queue, and 404 is the honest

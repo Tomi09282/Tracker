@@ -3255,7 +3255,12 @@ export function decideExerciseTx({
     const target = stmt(
       `SELECT id, owner_id AS ownerId, name
          FROM exercises
-        WHERE id = ? AND status = 'pending_review' AND deleted_at IS NULL`,
+        WHERE id = ? AND status = 'pending_review' AND deleted_at IS NULL
+          -- The queue hides orphaned submissions; this refuses to DECIDE one, which is the half
+          -- that matters. Hiding a row from a list does not stop a POST at its id, and the id of a
+          -- submission that was in the queue yesterday is not a secret. An author who erased their
+          -- account cannot be published on behalf of, and cannot be sent a rejection reason.
+          AND owner_id IS NOT NULL`,
     ).get(exerciseId);
     if (!target) return { outcome: 'missing' };
 

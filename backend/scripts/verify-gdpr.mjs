@@ -59,6 +59,20 @@ await db.run(
 );
 await db.run("INSERT INTO user_theme_prefs (user_id, pack) VALUES (?, 'midnight')", [me.id]);
 
+// A private exercise and one still under review, so the erasure can be asked the question that
+// matters: does asking to be forgotten make your library READABLE?
+for (const [name, status] of [
+  [`gdpr-private-${me.id}`, 'private'],
+  [`gdpr-pending-${me.id}`, 'pending_review'],
+]) {
+  await db.run('INSERT INTO exercises (name, normalized_name, owner_id, status) VALUES (?, ?, ?, ?)', [
+    name,
+    name,
+    me.id,
+    status,
+  ]);
+}
+
 // The high-water mark of the audit log before this run.
 //
 // SQLite reuses a rowid once its row is gone, so `target_id` alone matches rows from EVERY previous
@@ -213,6 +227,72 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
     exportRow.length === exportsBefore + 1 && exportRow.every((r) => r.actor_id === null),
     `${exportRow.length} row(s), was ${exportsBefore}`,
   );
+
+  /*
+   * ═══ ERASURE MUST NOT PUBLISH WHAT THE PERSON KEPT PRIVATE ═════════════════════════════════
+   *
+   * The defect this replaces was a chain of three reasonable parts: migration 011's delete trigger
+   * orphans every exercise the person authored (so a client's history keeps resolving), `VISIBLE`
+   * admitted `owner_id IS NULL` (for the 1653-row public dataset), and therefore a `private` row
+   * became world-readable at the exact moment its author asked to be forgotten.
+   *
+   * Measured then:  BEFORE  a stranger sees global.  AFTER  global, pending_review, private.
+   *
+   * Asked here through the SHARED predicate rather than a copy of it, so the assertion follows the
+   * definition if it ever moves again.
+   */
+  /*
+   * ═══ AND IT ONLY MEANS ANYTHING IF THE ERASURE HAPPENED ════════════════════════════════════
+   *
+   * The first version of these two assertions did not check that. Written minutes after a commit
+   * message about assertions that pass by measuring nothing, and then run against a rate-limited
+   * deletion:
+   *
+   *     FAIL  the erasure answers 200  (RATE LIMITED (429) …)
+   *     PASS  the erased account's private library did NOT become world-readable  (nothing visible)
+   *
+   * Of course nothing was visible. The account was still there, so its private rows were private
+   * for the ordinary reason and the assertion would have passed with the defect fully present.
+   *
+   * A visibility claim about an ERASED account is only a claim once the account is erased.
+   */
+  const reallyGone = (await db.all('SELECT COUNT(*) AS n FROM users WHERE id = ?', [me.id]))[0].n === 0;
+
+  if (!reallyGone) {
+    check(
+      "the erased account's private library did NOT become world-readable",
+      false,
+      'NOT TESTED — the account was never erased (see the failure above), so this proves nothing either way',
+    );
+  } else {
+    // Through the SHARED predicate, not a copy of it, so the assertion follows the definition if it
+    // ever moves again.
+    const { VISIBLE, visibleParams } = await import('../src/exercises/visibility.js');
+    const strangerSees = await db.all(
+      `SELECT e.normalized_name AS n, e.status FROM exercises e
+        WHERE e.normalized_name IN (?, ?) AND ${VISIBLE}`,
+      [`gdpr-private-${me.id}`, `gdpr-pending-${me.id}`, ...visibleParams(1)],
+    );
+    check(
+      "the erased account's private library did NOT become world-readable",
+      strangerSees.length === 0,
+      strangerSees.map((r) => `${r.n}(${r.status})`).join(', ') || 'nothing visible, and the account IS gone',
+    );
+
+    // And the rows still EXIST, because that is what the trigger is for — a client's history keeps
+    // resolving after their coach leaves. Invisible is the fix; deleted would have been a different
+    // defect.
+    const stillThere = await db.all('SELECT COUNT(*) AS n FROM exercises WHERE normalized_name IN (?, ?)', [
+      `gdpr-private-${me.id}`,
+      `gdpr-pending-${me.id}`,
+    ]);
+    check('while the rows survive, orphaned, for history to resolve against', stillThere[0].n === 2, `${stillThere[0].n} row(s)`);
+  }
+
+  await db.run('DELETE FROM exercises WHERE normalized_name IN (?, ?)', [
+    `gdpr-private-${me.id}`,
+    `gdpr-pending-${me.id}`,
+  ]);
 
   const after = await call('/auth/me');
   check('and the session is dead', after.status === 401, `status ${after.status}`);
