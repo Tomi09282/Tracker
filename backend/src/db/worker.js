@@ -3677,3 +3677,32 @@ export function deleteMyAccountTx({ userId, requestId }) {
     return rethrow(err, current);
   }
 }
+
+/**
+ * Claim a processor event, exactly once.
+ *
+ * The INSERT is the claim. A `SELECT` first would let two concurrent deliveries of the same event
+ * both see nothing and both proceed — and a retry arriving while the first is still in flight is
+ * the documented behaviour of every webhook sender, not an edge case.
+ *
+ * Returns `{ fresh: false }` for a duplicate rather than throwing, because a replay is a normal
+ * outcome and not an error: the caller answers 200 to stop the sender retrying something that
+ * already happened.
+ */
+export function claimProcessorEventTx({ eventId, eventType, eventAt, requestId = null, provider = 'stripe' }) {
+  const conn = getDb();
+  let current = 'INSERT the event claim';
+  const tx = conn.transaction(() => {
+    // `OR IGNORE` against the unique index, then read `changes`. One statement, no race.
+    const r = stmt(
+      `INSERT OR IGNORE INTO processor_events (provider, event_id, event_type, event_at, request_id)
+       VALUES (?, ?, ?, ?, ?)`,
+    ).run(provider, eventId, eventType, eventAt, requestId);
+    return { fresh: r.changes === 1 };
+  });
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

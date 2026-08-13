@@ -41,6 +41,22 @@ const PUBLIC = new Map([
   ['GET /ui/element-styles', 'one global admin setting the login screen itself is styled by'],
   ['GET /calendar/:token.ics', 'a calendar client is not a browser and carries no cookie; the TOKEN authenticates and the LINK authorises, checked in the fetch predicate'],
 
+  /*
+   * The ONE unauthenticated WRITE in the product, and the only entry on this list that is not a
+   * GET. It earns that on a different basis from the rest.
+   *
+   * There is no session to require: the caller is Stripe, which holds no account here and never
+   * will. What it does hold is a secret shared only with this server, and every request carries an
+   * HMAC-SHA256 over the raw body and a timestamp under that secret. `requireAuth` proves a cookie
+   * belongs to a user; the signature proves the whole body came from the one party that could have
+   * produced it — a stronger claim, checked in constant time, before a single byte is parsed.
+   *
+   * Replay is closed twice over: a five-minute timestamp tolerance bounds how long a captured
+   * request is useful, and `processor_events` has a unique index on the event id so a replay
+   * INSIDE that window is a no-op. Every failure answers an identical bare 400.
+   */
+  ['POST /payments/webhook', 'authenticated by an HMAC signature over the raw body, not by a session — Stripe has no account. Verified before parse, replay-bounded by timestamp AND event id'],
+
   // ── THE PUBLIC MARKETPLACE (021) ────────────────────────────────────────────────────────────
   //
   // Eight deliberate public reads, and the allowlist is doing exactly its job here: this is the

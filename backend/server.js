@@ -27,6 +27,7 @@ import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
 import publicRoutes from './src/public/routes.js';
+import paymentWebhookRoutes from './src/payments/webhook.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
 import composeUploadRoutes from './src/public/compose-media.js';
 import moderationRoutes from './src/public/moderation.js';
@@ -156,6 +157,22 @@ app.use(requestContext(logger));
 // Mounted above the global parser: express.json skips a body that is already parsed, so the 64 KB
 // cap stays in force everywhere else. body.js asserts at module load that this number can actually
 // admit the body bound it promises, rather than describing the relationship in a comment.
+/*
+ * ═══ THE PAYMENT WEBHOOK IS MOUNTED ABOVE EVERY PARSER, AND THAT IS THE POINT ══════════════════
+ *
+ * Its signature covers the RAW BYTES. `express.json` parses and the route would then have to
+ * re-serialise to check the HMAC — and a re-serialised body differs from the original in key
+ * order, whitespace and unicode escaping, so the signature would match nothing and every real
+ * event would be refused. This is the one route in the product that wants a Buffer, and it brings
+ * its own `express.raw` scoped to itself.
+ *
+ * It is ALSO above `csrfProtection`, which is further down. Stripe sends no `X-CSRF`, no
+ * `Sec-Fetch-Site`, no cookie and no session, and no configuration would make it. CSRF defends a
+ * browser that attaches the user's credentials automatically; there is no browser here. The
+ * signature is the authentication, and it is stronger than the three layers it stands in for.
+ */
+app.use('/api/v1', paymentWebhookRoutes);
+
 app.use('/api/v1/compose', express.json({ limit: COMPOSE_JSON_LIMIT }));
 app.use(express.json({ limit: '64kb' }));
 app.use(cookieParser());

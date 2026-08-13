@@ -40,6 +40,25 @@ const EnvSchema = z
     // Exact-origin allowlist. Empty in dev, where Vite proxies /api and everything is
     // same-origin; a wildcard with credentials is never acceptable.
     CORS_ALLOWED_ORIGINS: z.string().default(''),
+
+    /*
+     * The webhook signing secret. OPTIONAL, deliberately: the product runs perfectly well with no
+     * payment processor configured — that is most of its history — and requiring this at boot
+     * would make every developer machine and every test run need a Stripe account.
+     *
+     * What must NOT happen is the route quietly accepting anything when it is absent, so
+     * `verifyWebhook` returns `no_secret_configured` and the endpoint refuses. Optional to BOOT,
+     * mandatory to ACCEPT.
+     *
+     * `whsec_` is the prefix Stripe uses; checking it turns the commonest configuration mistake —
+     * pasting the API key into this variable — into a boot failure instead of a signature that
+     * never verifies and a webhook queue that silently backs up for a week.
+     */
+    STRIPE_WEBHOOK_SECRET: z
+      .string()
+      .min(16)
+      .regex(/^whsec_/, 'STRIPE_WEBHOOK_SECRET must start with whsec_ — this is the SIGNING secret, not an API key')
+      .optional(),
   })
   .superRefine((e, ctx) => {
     // The rotation keyring is a Map keyed by kid and only engages when BOTH prev vars are set.

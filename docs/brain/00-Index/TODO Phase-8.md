@@ -27,7 +27,7 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-7]]
 - [x] **T8.2.3** Per-coach client seat cap enforcement wired to the subscription tier — `done` · enforced at "add a client", NEVER at "have clients" — a tier can drop without consent (failed card), so a billing event must not dissolve a relationship. Both link paths guarded (`redeemInviteTx` and the rewritten `pregenerateClientTx`); `verify:seats` 20/20, each guard mutation-proven. **The FREE tier cap of 3 is still my placeholder, not a decision** — see the note in 026
 - [ ] **T8.2.4** Coin real-money top-up — `pending` · D-1A lift
 - [ ] **T8.2.5** Marketplace payout to coaches — `pending` · D-1A lift
-- [ ] **T8.2.6** Inbound webhook hardening — raw-body constant-time signature verify, timestamp + event-id replay defense, verify-then-parse — `pending`
+- [x] **T8.2.6** Inbound webhook hardening — `done` · raw-body constant-time HMAC verify, replay bounded on timestamp AND event id, verify-then-parse enforced by structure (JSON.parse appears once, below the check, nothing between). Mounted above BOTH express.json (the signature covers raw bytes) and csrfProtection (Stripe sends no cookie — the signature IS the authentication, and it is stronger). Every failure answers an identical bare 400. `verify:webhook` 24/24, three mutations proven
 - [ ] **T8.2.7** Full 5-pass adversarial checklist on every payment endpoint — `pending`
 
 ## Parked — do NOT build
