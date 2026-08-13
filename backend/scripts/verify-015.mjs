@@ -38,11 +38,41 @@ const one = async (sql, params = []) => (await all(sql, params))[0];
 
 // ── fixtures ───────────────────────────────────────────────────────────────────────────────────
 const stamp = Date.now();
+
+/*
+ * ═══ A REAL argon2id HASH, NOT 'x' ═════════════════════════════════════════════════════════════
+ *
+ * These accounts never log in — this probe talks to the database, not to HTTP — so a placeholder
+ * looked free. It was not: `security-checklist` asks whether EVERY stored hash is argon2id, and a
+ * literal 'x' answers no. Two of these fixtures had survived a crashed run (see the cleanup note
+ * below) and turned a real security assertion into a false alarm about the product.
+ *
+ * A fixture that cannot pass the product's own rules is a fixture that will one day be reported as
+ * the product failing them. It is a constant rather than a fresh hash per user because hashing at
+ * these parameters costs ~50ms and this probe makes three of them; the VALUE is irrelevant, the
+ * SHAPE is the point.
+ */
+const FIXTURE_HASH =
+  '$argon2id$v=19$m=19456,p=1,t=2$c2VjdXJpdHktY2hlY2tsaXN0LWZpeHR1cmU$JmZgHMlPNVE0kbF3WvjcOKmfaJTFcOyvRakVRVOZfXo';
+
 const mkUser = async (label, role) => {
   const email = `v015-${label}-${stamp}@example.com`;
-  await run(`INSERT INTO users (email, password_hash, role) VALUES (?, 'x', ?)`, [email, role]);
+  await run(`INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)`, [email, FIXTURE_HASH, role]);
   return (await one(`SELECT id FROM users WHERE email = ?`, [email])).id;
 };
+
+/*
+ * ═══ SWEEP FIRST, BECAUSE THE CLEANUP AT THE BOTTOM ONLY RUNS WHEN NOTHING GOES WRONG ══════════
+ *
+ * This script deletes its fixtures on the last line. A run that throws — a real regression, which
+ * is the entire point of the probe — never reaches it, so a FAILING run leaves accounts behind and
+ * a passing one does not. Exactly backwards.
+ *
+ * Two of these were found months later by `security-checklist`, still sitting in the dev database.
+ * Sweeping at STARTUP is self-healing in a way a `finally` is not: it also collects anything left
+ * by a run that was killed, lost its terminal, or crashed the process outright.
+ */
+await run(`DELETE FROM users WHERE email LIKE 'v015-%@example.com'`);
 
 const coach = await mkUser('coach', 'coach');
 const client = await mkUser('client', 'user');

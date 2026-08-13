@@ -40,7 +40,8 @@
     "verify:rekey": "node scripts/verify-rekey.mjs",
     "verify:moderation": "node scripts/verify-moderation.mjs",
     "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs",
+    "security:checklist": "node scripts/security-checklist.mjs"
   },
   "author": "",
   "license": "ISC",
