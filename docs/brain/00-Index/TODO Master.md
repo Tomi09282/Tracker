@@ -152,7 +152,7 @@ vulnerabilities.
 ## Locked decisions (baked-in defaults — do not re-litigate)
 
 - [x] **D-1A** Coins earn-only first — `done`
-- [x] **D-2A** Coaches pay subscription; payment processor LATER, stubs only — `done`
+- [x] **D-2A** Coaches pay subscription; payment processor LATER, stubs only — `done` · **resolved 2026-08-14: Stripe (Connect + Billing)** — [[60-Decisions/0014-payment-processor|ADR-0014]]
 - [x] **D-3C** Exercise seed = hybrid wger + free-exercise-db, dedupe + attribution page — `done` · **must be re-fetched; the 1648-row seed and 2042 cached images were deleted**
 - [x] **D-4A** Food DB USDA-first; OpenFoodFacts later — `done`
 - [x] **D-5A** Chat v1 = polling — `done`

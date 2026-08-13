@@ -22,7 +22,7 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-7]]
 - [ ] **T8.1.4** Conflict resolution between synced and manually logged data — `pending`
 
 ## Payment processor (decision D-2A)
-- [ ] **T8.2.1** Choose the processor (Stripe or other) — `pending` · decision deliberately deferred to this point
+- [x] **T8.2.1** Choose the processor — `done` · **Stripe (Connect + Billing)**, recorded as [[60-Decisions/0014-payment-processor|ADR-0014]]. Decided by ONE question, not by fee tables: money going OUT to coaches makes this a platform, and a Merchant-of-Record (Paddle/Lemon Squeezy) cannot pay third parties — a capability wall, not a preference. Mangopay rejected on DX, Adyen on stage, Barion on cross-border reach. Costs accepted deliberately: coach KYC becomes a product surface, and EU VAT/OSS on subscription revenue stays ours (the burden the MoR route would have removed)
 - [ ] **T8.2.2** Coach subscription billing — `pending`
 - [ ] **T8.2.3** Per-coach client seat cap enforcement wired to the subscription tier — `pending` · interface reserved in Phase 2
 - [ ] **T8.2.4** Coin real-money top-up — `pending` · D-1A lift
