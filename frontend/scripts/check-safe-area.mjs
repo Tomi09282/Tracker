@@ -104,7 +104,31 @@ for (const file of files) {
     ['top-0', 'safe-area-inset-top', 'pt-'],
     ['bottom-0', 'safe-area-inset-bottom', 'pb-'],
   ]) {
-    if (!new RegExp(`fixed[^'"\`]*\\b${edge}\\b|\\b${edge}\\b[^'"\`]*fixed`).test(code)) continue;
+    /*
+     * ═══ THE WINDOW MAY CROSS A QUOTE, AND IT HAD TO LEARN TO ══════════════════════════════════
+     *
+     * This was `fixed[^'"`]*\bEDGE\b` — the two tokens had to sit in ONE string literal with no
+     * quote between them. Real className code does not oblige:
+     *
+     *     cn('fixed inset-x-0', open ? 'bottom-0' : '-bottom-full')
+     *
+     * `ui/feedback/variants/E14E20.tsx` — the bottom SHEET, the one element in the product whose
+     * whole job is to sit on the bottom edge of a phone — was never examined by this rule. Measured
+     * by running the strict and loose forms side by side over every .tsx:
+     *
+     *     bottom-0   MISSED BY THE REGEX  ui/feedback/variants/E14E20.tsx   accounts: yes
+     *
+     * It happens to pad itself, so there was no live defect. That is the worse case, not the better
+     * one: the file was compliant, the gate was green, and the gate was green for the wrong reason.
+     * Remove the padding and nothing would have said so.
+     *
+     * A bounded window rather than "both tokens anywhere in the file", because file-scope would pair
+     * an unrelated `fixed` with an unrelated `bottom-0` two hundred lines apart. 400 characters is
+     * comfortably more than any className expression here and far less than a component.
+     */
+    const WINDOW = 400;
+    if (!new RegExp(`fixed[\\s\\S]{0,${WINDOW}}?\\b${edge}\\b|\\b${edge}\\b[\\s\\S]{0,${WINDOW}}?fixed`).test(code))
+      continue;
     const key = `${rel}:${edge.replace('-0', '')}`;
     if (EXEMPT.has(key)) continue;
     // Either the element pads itself, or it uses a token that already carries the inset.

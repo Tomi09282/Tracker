@@ -60,6 +60,44 @@ export const EXPORT_TABLES = [
   // client who only ever received plans would otherwise get an empty section.
   ['plans', 'SELECT * FROM workout_plans WHERE author_user_id = ? OR client_user_id = ?'],
   ['nutrition_plans', 'SELECT * FROM nutrition_plans WHERE author_user_id = ? OR client_user_id = ?'],
+
+  /*
+   * ═══ AND WHAT IS ACTUALLY IN THOSE PLANS ═════════════════════════════════════════════════════
+   *
+   * The two lines above ship plan HEADERS — a name, a date, a status. For a while that was the
+   * whole of it, so a coach who exercised their right of access received eleven plan names with
+   * nothing inside them. Measured on a real account before this was added:
+   *
+   *     EXPORTED      workout_plans                11 rows
+   *     NOT EXPORTED  workout_plan_days            15
+   *                   workout_plan_blocks          14
+   *                   workout_plan_exercises       16
+   *                   nutrition_plan_days           1
+   *
+   * Forty-six rows of the person's actual training programme, absent from the file that is supposed
+   * to BE their data. An export that lists the covers of the books is not an export.
+   *
+   * Each is scoped through its parent plan rather than by a user column, because these tables have
+   * none — a plan day belongs to a plan, and the plan belongs to the person. Same both-sides rule
+   * as the headers: authored or assigned.
+   */
+  ['plan_days', `SELECT d.* FROM workout_plan_days d JOIN workout_plans p ON p.id = d.plan_id
+                  WHERE p.author_user_id = ? OR p.client_user_id = ?`],
+  ['plan_blocks', `SELECT b.* FROM workout_plan_blocks b JOIN workout_plans p ON p.id = b.plan_id
+                    WHERE p.author_user_id = ? OR p.client_user_id = ?`],
+  ['plan_exercises', `SELECT x.* FROM workout_plan_exercises x JOIN workout_plans p ON p.id = x.plan_id
+                       WHERE p.author_user_id = ? OR p.client_user_id = ?`],
+  // Straight off `plan_id` like its siblings — the first draft joined through
+  // `workout_plan_exercises` on a `plan_exercise_id` column that does not exist (it is
+  // `exercise_row_id`, and the table carries `plan_id` directly anyway). `check-gdpr` refused it
+  // before it could ship, which is the whole reason that gate PREPARES every statement rather than
+  // eyeballing the list: six of these were broken the same way when it was written.
+  ['plan_set_targets', `SELECT s.* FROM workout_plan_set_targets s JOIN workout_plans p ON p.id = s.plan_id
+                         WHERE p.author_user_id = ? OR p.client_user_id = ?`],
+  ['plan_day_exceptions', `SELECT e.* FROM workout_plan_day_exceptions e JOIN workout_plans p ON p.id = e.plan_id
+                            WHERE p.author_user_id = ? OR p.client_user_id = ?`],
+  ['nutrition_plan_days', `SELECT d.* FROM nutrition_plan_days d JOIN nutrition_plans p ON p.id = d.plan_id
+                            WHERE p.author_user_id = ? OR p.client_user_id = ?`],
   // The person's OWN messages. Not the whole conversation: the other half is somebody else's
   // personal data, and an export is not a way to obtain it.
   ['messages_sent', 'SELECT id, conversation_id, body, created_at, deleted_at FROM messages WHERE sender_id = ?'],

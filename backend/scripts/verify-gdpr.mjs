@@ -84,6 +84,40 @@ const auditFloor = (await db.all('SELECT COALESCE(MAX(id), 0) AS id FROM audit_l
 const erasesBefore = (await db.all("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'account.erase' AND target_id = ?", [me.id]))[0].n;
 const exportsBefore = (await db.all("SELECT COUNT(*) AS n FROM audit_log WHERE action = 'account.export' AND target_id = ?", [me.id]))[0].n;
 
+/**
+ * ═══ ONE BLOCKED PRECONDITION IS ONE RESULT, NOT EIGHT FAILURES ══════════════════════════════
+ *
+ * The probe used to record the 429 as a failure and carry on, so a rate-limited run printed EIGHT
+ * red lines — the account is still there, the health data is still there, the audit row did not
+ * appear — every one a true observation about an erasure that never ran, and every one reading like
+ * a defect in the product.
+ *
+ * The limiter is the product working. Eight red lines for it trains whoever runs this to skim red,
+ * which is the state in which a real regression goes unnoticed.
+ *
+ * Exits 2, distinct from 1, so a caller can tell "could not test" from "tested and it failed".
+ */
+async function stopRateLimited() {
+  console.log(
+    `\nSTOP  /me/delete answered 429, so nothing past this point could be tested.\n` +
+      `      It allows 20/hour per IP and this probe spends 3 of them per run.\n` +
+      `      This is the limiter doing its job, not a defect.\n\n` +
+      `      Wait for the window, or start the server with NODE_ENV=test where the limiters skip.\n\n` +
+      `gdpr walk: ${pass} passed, ${fail} failed, the rest NOT TESTED`,
+  );
+  await db.run('DELETE FROM exercises WHERE normalized_name IN (?, ?)', [
+    `gdpr-private-${me.id}`,
+    `gdpr-pending-${me.id}`,
+  ]);
+  // Exiting the instant `closePool()` resolves races Piscina's worker teardown and trips a libuv
+  // assertion on Windows — `!(handle->flags & UV_HANDLE_CLOSING)`, observed once here, which then
+  // reports the WRONG exit code on top of a noisy crash. One tick of the event loop lets the
+  // handles finish closing.
+  await db.closePool();
+  await new Promise((r) => setTimeout(r, 50));
+  process.exit(2);
+}
+
 await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASSWORD } });
 
 /* ── export ──────────────────────────────────────────────────────────────────────────────────── */
@@ -98,8 +132,27 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
   );
   check('and is never cached', (r.headers.get('cache-control') ?? '').includes('no-store'), r.headers.get('cache-control') ?? '');
 
+  /*
+   * ═══ COUNTED AGAINST THE DECLARATION, NOT AGAINST A NUMBER ═══════════════════════════════════
+   *
+   * This read `keys.length === 30`. The label says "every DECLARED section" and the comparison was
+   * to a literal, so the two could only agree until somebody declared a thirty-first — which
+   * happened the day the export was found to ship plan headers with no plan content. Six sections
+   * were added; this assertion would have gone red for the fix, or worse, been "corrected" to 36
+   * without anybody asking whether 36 was right either.
+   *
+   * The list is the definition. Reading it here means the assertion is about COVERAGE — every
+   * declared section actually arrived — instead of about a number somebody typed once.
+   */
+  const { EXPORT_TABLES } = await import('../src/db/gdpr.js');
+  const declared = EXPORT_TABLES.map(([name]) => name);
   const keys = Object.keys(r.json?.data ?? {});
-  check('it carries every declared section', keys.length === 30, `${keys.length} sections`);
+  const missing = declared.filter((d) => !keys.includes(d));
+  check(
+    'it carries every declared section',
+    missing.length === 0 && keys.length === declared.length,
+    missing.length ? `missing: ${missing.join(', ')}` : `${keys.length} of ${declared.length} declared`,
+  );
   check(
     'the health data is actually in it',
     (r.json?.data?.body_measurements ?? []).length === 1,
@@ -124,6 +177,15 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
 
 {
   const bad = await call('/me/delete', { method: 'POST', json: { password: 'wrong-password', confirm: 'DELETE' } });
+
+  /*
+   * The limiter check belongs on the FIRST request to `/me/delete`, not on the erasure three
+   * requests later. All three spend from the same 20/hour budget, so when it is gone this refusal
+   * comes back 429 too — and reporting "a wrong password cannot erase an account (status 429)" as a
+   * failure is a red line about a guard that was never reached.
+   */
+  if (bad.status === 429) await stopRateLimited();
+
   check('a wrong password cannot erase an account', bad.status === 401, `status ${bad.status}`);
 
   const noConfirm = await call('/me/delete', { method: 'POST', json: { password: PASSWORD } });
@@ -147,11 +209,7 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
    * saves somebody twenty minutes.
    */
   if (r.status === 429) {
-    check(
-      'the erasure answers 200',
-      false,
-      'RATE LIMITED (429) — /me/delete allows 20/hour per IP and this probe spends 3. Wait, or run the server with NODE_ENV=test, where the limiters skip.',
-    );
+    await stopRateLimited();
   } else {
     check('the erasure answers 200', r.status === 200 && r.json?.erased === true, `status ${r.status}`);
   }
