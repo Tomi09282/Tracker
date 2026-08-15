@@ -39,13 +39,14 @@
     "restore:drill": "node scripts/restore-drill.mjs",
     "verify:rekey": "node scripts/verify-rekey.mjs",
     "verify:moderation": "node scripts/verify-moderation.mjs",
-    "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation && npm run verify:webhook && npm run verify:subscription",
+    "verify:live": "npm run verify:gdpr && npm run verify:stepup && npm run verify:moderation && npm run verify:webhook && npm run verify:subscription && npm run verify:payments",
     "icons": "node scripts/build-icons.mjs",
     "security:checklist": "node scripts/security-checklist.mjs",
     "check:modules": "node scripts/check-modules-load.mjs",
     "verify:seats": "node scripts/verify-seats.mjs",
     "verify:webhook": "node scripts/verify-webhook.mjs",
-    "verify:subscription": "node scripts/verify-subscription.mjs"
+    "verify:subscription": "node scripts/verify-subscription.mjs",
+    "verify:payments": "node scripts/verify-payments-adversarial.mjs"
   },
   "author": "",
   "license": "ISC",

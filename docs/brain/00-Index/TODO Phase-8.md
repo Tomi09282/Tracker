@@ -28,7 +28,7 @@ Parent: [[TODO Master]] · Previous: [[TODO Phase-7]]
 - [ ] **T8.2.4** Coin real-money top-up — `pending` · D-1A lift
 - [ ] **T8.2.5** Marketplace payout to coaches — `pending` · D-1A lift
 - [x] **T8.2.6** Inbound webhook hardening — `done` · raw-body constant-time HMAC verify, replay bounded on timestamp AND event id, verify-then-parse enforced by structure (JSON.parse appears once, below the check, nothing between). Mounted above BOTH express.json (the signature covers raw bytes) and csrfProtection (Stripe sends no cookie — the signature IS the authentication, and it is stronger). Every failure answers an identical bare 400. `verify:webhook` 24/24, three mutations proven
-- [ ] **T8.2.7** Full 5-pass adversarial checklist on every payment endpoint — `pending`
+- [x] **T8.2.7** Full 5-pass adversarial checklist on every payment endpoint — `done for the endpoint that exists` · forge / replay / race / IDOR / extremes against `POST /payments/webhook`, 31/31. The probe STATES its coverage (1 endpoint) rather than implying all — the Checkout Session route is not built. RACE and IDOR were previously unmeasured: two concurrent deliveries apply exactly once, and a metadata hint naming somebody else cannot move an existing subscription
 
 ## Parked — do NOT build
 - [ ] **T8.3.1** White-label coach branding — `blocked` · explicitly parked by the owner
