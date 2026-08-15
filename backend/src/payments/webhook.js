@@ -25,6 +25,7 @@ import * as db from '../db/index.js';
 import { asyncRoute } from '../lib/http.js';
 import { env } from '../lib/env.js';
 import { verifyWebhook } from './signature.js';
+import { intentFrom } from './handlers.js';
 
 const router = Router();
 
@@ -123,12 +124,61 @@ router.post(
     }
 
     /*
-     * Handling comes next (T8.2.2). Answering 200 for an event nothing acts on yet is deliberate
-     * and is NOT the same as dropping it: the row in `processor_events` records that it arrived,
-     * with its type and its time, so the first handler can be written against events that really
-     * came rather than against the documentation's examples.
+     * ═══ THE CLAIM IS ALREADY MADE, SO HANDLING MUST NOT THROW ═══════════════════════════════
+     *
+     * `processor_events` now holds this id, and a replay would be refused by it. That is correct —
+     * the event WAS received — but it means a handler that throws leaves an event marked as seen
+     * and never applied, with the sender told 200 and no retry coming.
+     *
+     * So every outcome below is a RESULT, not an exception, and the ones that mean "nothing was
+     * applied" are logged at a level somebody will see.
      */
-    req.log.info({ eventId: id, type }, 'payment webhook accepted');
+    const intent = intentFrom(event);
+
+    if (intent === null) {
+      // Most of what a processor sends is invoices, charges and payment methods. Recording and
+      // ignoring is the correct handling, and `info` rather than `warn` keeps the real problems
+      // visible.
+      req.log.info({ eventId: id, type }, 'payment webhook accepted — no action for this type');
+      return res.json({ received: true });
+    }
+
+    if (intent.kind === 'unsupported') {
+      req.log.error({ eventId: id, type, reason: intent.reason }, 'payment webhook: shape this product does not handle');
+      return res.json({ received: true });
+    }
+
+    const result = await db.applySubscriptionEvent({
+      subscriptionId: intent.subscriptionId,
+      customerId: intent.customerId,
+      priceId: intent.priceId,
+      status: intent.status,
+      currentPeriodEnd: intent.currentPeriodEnd,
+      coachIdHint: intent.coachIdHint,
+      eventAt: verdict.timestamp,
+    });
+
+    if (result.outcome === 'unattributed') {
+      // Somebody may have paid and received nothing. This is the loudest line in the file.
+      req.log.error(
+        { eventId: id, type, subscriptionId: intent.subscriptionId, customerId: intent.customerId },
+        'payment webhook: NO COACH resolves for this subscription — the event was recorded and NOT applied',
+      );
+    } else if (result.outcome === 'unknown_price') {
+      req.log.error(
+        { eventId: id, priceId: result.priceId },
+        'payment webhook: no tier maps to this price — add provider_price_id to subscription_tiers',
+      );
+    } else if (result.outcome === 'stale') {
+      // Expected and harmless: webhooks arrive out of order by design. `info`, not `warn`.
+      req.log.info({ eventId: id, type, coachId: result.coachId }, 'payment webhook: older than the state held, discarded');
+    } else {
+      req.log.info(
+        { eventId: id, type, coachId: result.coachId, tier: result.tierKey, status: result.status },
+        'subscription updated',
+      );
+    }
+
     res.json({ received: true });
   }),
 );

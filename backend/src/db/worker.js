@@ -3706,3 +3706,111 @@ export function claimProcessorEventTx({ eventId, eventType, eventAt, requestId =
     return rethrow(err, current);
   }
 }
+
+/**
+ * Apply a verified subscription event.
+ *
+ * ═══ THE OUT-OF-ORDER GUARD IS THE WHOLE DIFFICULTY ════════════════════════════════════════════
+ *
+ * Webhooks arrive out of order by documented design — a retry of Monday's `canceled` can land
+ * after Tuesday's `active`, and applying it would cancel a paying customer. So `provider_event_at`
+ * is compared INSIDE the UPDATE: an event no newer than the row we hold changes nothing, and
+ * `changes === 0` is how the caller learns it was stale rather than lost.
+ *
+ * ═══ AND EQUAL TIMESTAMPS APPLY, WHICH IS A CORRECTION ═════════════════════════════════════════
+ *
+ * This first refused them, reasoning that two events sharing a second are indistinguishable and the
+ * safe reading of "I cannot tell which came first" is to keep what is stored. `verify:subscription`
+ * refuted it within a minute: a `pro → unpaid` transition sent in the same second as the event
+ * before it was silently dropped, and the coach kept a plan they had stopped paying for.
+ *
+ * The reasoning was wrong because this guard is not the defence against replay. A stale event
+ * cannot get here at all — `verifyWebhook` refuses anything outside a five-minute window, and
+ * `processor_events` refuses a repeat of one inside it. What this guard defends against is
+ * LEGITIMATE out-of-order delivery, where the timestamps genuinely differ and Monday's cancellation
+ * arrives after Tuesday's renewal. Those it still catches.
+ *
+ * Same-second events are genuinely concurrent, and Stripe's clock has no finer resolution to offer.
+ * Refusing them loses real updates to defend against an attack two other layers have already
+ * closed; letting the later arrival win costs nothing that was not already ambiguous.
+ *
+ * ═══ FINDING THE COACH ═════════════════════════════════════════════════════════════════════════
+ *
+ * Three ways, in the order they are trustworthy: a subscription we have seen, a customer we have
+ * seen, and — only for the first event of a new subscription — the coach id the Checkout Session
+ * put in metadata. The hint is verified against `users` before it is used, because it round-trips
+ * through a third party.
+ *
+ * An event that resolves to nobody is NOT applied and NOT swallowed: `unattributed` goes back to
+ * the route, which logs it at error level. Silently dropping it would mean a coach who paid gets
+ * nothing and no line anywhere says why.
+ */
+export function applySubscriptionEventTx({
+  subscriptionId, customerId, priceId, status, currentPeriodEnd = null, coachIdHint = null,
+  eventAt, provider = 'stripe',
+}) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── everything that can refuse runs before the first write ────────────────────────────────
+
+    current = 'RESOLVE the tier';
+    // A price this product does not sell is a configuration mistake, not a plan. Applying it would
+    // have to invent a tier; refusing names the price so somebody can add the row.
+    const tier = priceId
+      ? stmt('SELECT key FROM subscription_tiers WHERE provider_price_id = ?').get(priceId)
+      : null;
+    if (priceId && !tier) return { outcome: 'unknown_price', priceId };
+
+    current = 'RESOLVE the coach';
+    let row =
+      stmt('SELECT coach_id AS id, provider_event_at AS at FROM coach_subscriptions WHERE provider = ? AND provider_subscription_id = ?')
+        .get(provider, subscriptionId) ??
+      stmt('SELECT coach_id AS id, provider_event_at AS at FROM coach_subscriptions WHERE provider = ? AND provider_customer_id = ?')
+        .get(provider, customerId) ??
+      null;
+
+    let coachId = row?.id ?? null;
+    if (coachId === null && coachIdHint !== null) {
+      // Verified against the table, never trusted from the payload.
+      const hinted = stmt("SELECT id FROM users WHERE id = ? AND role IN ('coach', 'admin')").get(coachIdHint);
+      if (hinted) coachId = hinted.id;
+    }
+    if (coachId === null) return { outcome: 'unattributed', subscriptionId, customerId };
+
+    // A cancellation for a price we no longer sell must still land — otherwise a retired plan
+    // becomes uncancellable. The tier only changes when the event names a price we know.
+    const tierKey = tier?.key ?? null;
+
+    // ── from here on nothing may conditionally return ─────────────────────────────────────────
+
+    current = 'UPSERT the subscription';
+    const r = stmt(
+      `INSERT INTO coach_subscriptions
+         (coach_id, tier_key, status, provider, provider_customer_id, provider_subscription_id,
+          current_period_end, provider_event_at, updated_at)
+       VALUES (?, COALESCE(?, 'free'), ?, ?, ?, ?, ?, ?, unixepoch())
+       ON CONFLICT(coach_id) DO UPDATE SET
+         tier_key                 = COALESCE(excluded.tier_key, coach_subscriptions.tier_key),
+         status                   = excluded.status,
+         provider_customer_id     = excluded.provider_customer_id,
+         provider_subscription_id = excluded.provider_subscription_id,
+         current_period_end       = excluded.current_period_end,
+         provider_event_at        = excluded.provider_event_at,
+         updated_at               = unixepoch()
+       WHERE coach_subscriptions.provider_event_at IS NULL
+          OR coach_subscriptions.provider_event_at <= excluded.provider_event_at`,
+    ).run(coachId, tierKey, status, provider, customerId, subscriptionId, currentPeriodEnd, eventAt);
+
+    return r.changes === 1
+      ? { outcome: 'applied', coachId, tierKey: tierKey ?? 'unchanged', status }
+      : { outcome: 'stale', coachId };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}

@@ -108,6 +108,7 @@ export const decideExercise = (args) => pool.run(args, { name: 'decideExerciseTx
 export const redeemInvite = (args) => pool.run(args, { name: 'redeemInviteTx' });
 export const pregenerateClient = (args) => pool.run(args, { name: 'pregenerateClientTx' });
 export const claimProcessorEvent = (args) => pool.run(args, { name: 'claimProcessorEventTx' });
+export const applySubscriptionEvent = (args) => pool.run(args, { name: 'applySubscriptionEventTx' });
 // GDPR. The export is a READ and still goes through the pool as a named call, because it must run
 // in ONE worker transaction: assembled from thirty pool calls it would be thirty read snapshots
 // stitched together, and a legal artefact cannot be internally inconsistent.
