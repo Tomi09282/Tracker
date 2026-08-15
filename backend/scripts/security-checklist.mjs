@@ -87,7 +87,11 @@ console.log('\n═══ AUTH AND SESSION ════════════�
   );
   check(
     'every auth cookie states SameSite explicitly',
-    cookies.every((c) => /SameSite=/i.test(c)),
+    // `length > 0` like its sibling above. An empty cookie list satisfies `every` — and the
+    // assertion that WOULD have caught an empty list is the one two lines up, which fails
+    // separately and does not stop this one printing PASS. That exact pair shipped in this file
+    // once already: the argon2 parse failed loudly while the cost check passed over nothing.
+    cookies.length > 0 && cookies.every((c) => /SameSite=/i.test(c)),
     cookies.map((c) => (c.match(/SameSite=(\w+)/i) ?? [])[1] ?? 'NONE STATED').join(', '),
   );
 
@@ -164,10 +168,14 @@ const db = await import('../src/db/index.js');
     return { m: +kv.m, t: +kv.t, p: +kv.p };
   });
 
-  check('every stored hash is argon2id', params.every(Boolean), `${rows.length} hash(es) inspected`);
+  // Both guarded on `rows.length`, for the reason the note above describes: an empty result set
+  // satisfies `every` and defeats `!some`, so with no users at all this section would print three
+  // green lines about nothing.
+  check('every stored hash is argon2id', rows.length > 0 && params.every(Boolean), `${rows.length} hash(es) inspected`);
   check(
     'and none is bcrypt or anything else',
-    !rows.some((r) => /^\$2[aby]\$|^\$6\$|^[a-f0-9]{32}$/.test(r.password_hash)),
+    rows.length > 0 && !rows.some((r) => /^\$2[aby]\$|^\$6\$|^[a-f0-9]{32}$/.test(r.password_hash)),
+    `${rows.length} inspected`,
   );
   const weak = params.filter((x) => !x || x.m < 19456 || x.t < 2 || x.p < 1);
   check(

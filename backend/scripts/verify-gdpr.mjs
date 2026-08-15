@@ -272,7 +272,9 @@ await call('/auth/login', { method: 'POST', json: { email: EMAIL, password: PASS
   );
   check(
     'and the erasure detail carries no email, handle or address',
-    identifying.every((r) => !/@|"email"|"handle"|\d+\.\d+\.\d+\.\d+/.test(String(r.detail ?? ''))),
+    // Guarded like its sibling directly above. Without it, an erasure that never ran leaves
+    // `identifying` empty and this prints PASS about no rows at all.
+    identifying.length > 0 && identifying.every((r) => !/@|"email"|"handle"|\d+\.\d+\.\d+\.\d+/.test(String(r.detail ?? ''))),
     identifying.map((r) => String(r.detail ?? 'null').slice(0, 44)).join(' | '),
   );
 
