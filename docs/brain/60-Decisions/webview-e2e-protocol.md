@@ -1,4 +1,5 @@
 ---
+type: decision
 phase: 7
 task: T7.5.3
 date: 2026-08-13

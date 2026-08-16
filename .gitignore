@@ -25,3 +25,14 @@ Thumbs.db
 *.local
 coverage/
 .vite/
+
+# graphify — the three OUTPUTS are committed; the working state is not.
+#
+# `.graphify_python` holds an absolute interpreter path from whichever machine built the graph,
+# and the cache/manifest are per-machine incremental state. Committing them would put one
+# developer's filesystem into everybody else's checkout and make `--update` reason about files
+# that are not there.
+graphify-out/*
+!graphify-out/graph.json
+!graphify-out/graph.html
+!graphify-out/GRAPH_REPORT.md

@@ -1,3 +1,10 @@
+---
+type: decision
+phase: 7
+task: T7.5.4
+date: 2026-08-12
+---
+
 # Phase 7 regression sweep (T7.5.4)
 
 **Run:** 48 agents — five attack lenses over the 17-commit diff, then one independent skeptic per
