@@ -92,7 +92,11 @@ export function DataTable<Row>({
                   scope="col"
                   // On the TH. On the button it is ignored — and ignored quietly.
                   aria-sort={c.sortable ? (active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none') : undefined}
-                  className={cn('text-micro uppercase px-4 py-3 text-text-3', c.numeric && 'text-right')}
+                  // `text-2`: the ink ramp declares step 2 for LABELS and step 3 for chrome, and a
+                  // column header is the label for everything under it. At 11px, step 3 measures
+                  // 3.8:1 — below the app's own AA_NORMAL, on the row that tells you what you are
+                  // reading.
+                  className={cn('text-micro uppercase px-4 py-3 text-text-2', c.numeric && 'text-right')}
                 >
                   {c.sortable && onSort ? (
                     <Pressable
@@ -102,14 +106,20 @@ export function DataTable<Row>({
                       onClick={() => onSort(c.key)}
                     >
                       {c.header}
+                      {/* `size-icon-s` (16px), not `size-3.5` (14px): the system declares exactly
+                          three icon sizes and 14 is not one of them.
+                          And the idle indicator dims via the INK RAMP rather than `opacity-50` —
+                          stacked on the ghost control's own text-2 that multiplied out to 0.31
+                          alpha, i.e. the affordance telling you the column is sortable was the
+                          least legible thing in the table. */}
                       {active ? (
                         sort.direction === 'asc' ? (
-                          <ArrowUp className="size-3.5" aria-hidden />
+                          <ArrowUp className="size-icon-s" aria-hidden />
                         ) : (
-                          <ArrowDown className="size-3.5" aria-hidden />
+                          <ArrowDown className="size-icon-s" aria-hidden />
                         )
                       ) : (
-                        <ChevronsUpDown className="size-3.5 opacity-50" aria-hidden />
+                        <ChevronsUpDown className="size-icon-s text-text-3" aria-hidden />
                       )}
                     </Pressable>
                   ) : (

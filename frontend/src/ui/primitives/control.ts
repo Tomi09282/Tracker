@@ -18,7 +18,16 @@ export const control = cva(
     'font-body whitespace-nowrap',
 
     // THE FLOOR. Both axes, on every variant, with no way to opt out from a call site.
-    'min-h-[var(--target-min)] min-w-[var(--target-min)]',
+    //
+    // The height reads `--control-h` rather than `--target-min` because control height is one of
+    // the four things a theme pack is allowed to change (size / radius / shadow / border), and
+    // Solar declares 48px with the comment "Solar = soft: larger radii, deeper shadow, taller
+    // controls" — a claim the app did not make anywhere, because nothing consumed the token.
+    // Every pack declares `--control-h` at >= 44px (four of five as `var(--target-min)` itself),
+    // so the a11y floor is unchanged: this can only ever make a control taller.
+    // The WIDTH stays on `--target-min`: it is the floor for a square icon control, not a
+    // stylistic dimension, and a taller pack has no reason to widen every chip.
+    'min-h-[var(--control-h)] min-w-[var(--target-min)]',
 
     // Press feedback. `duration-instant` (100ms) because a press must answer immediately;
     // anything slower reads as lag rather than acknowledgement.
@@ -48,9 +57,24 @@ export const control = cva(
       variant: {
         // Exactly one primary action per screen — the Bible's rule, and the reason this is the
         // only variant with a filled accent background.
-        primary: 'bg-accent text-accent-fg hover:bg-accent-hover active:bg-accent-pressed',
-        secondary:
-          'border border-[var(--surface-border)] bg-surface-1 text-text-1 hover:bg-surface-2',
+        //
+        // `--shadow-glow` is Neon's declared structural identity ("pill + glow, no drop shadow")
+        // and it reached no product screen: the token is `none` in the other four packs, so
+        // carrying it here is the entire visible difference between Neon and Midnight-with-a-
+        // cyan-accent, and it costs literally nothing anywhere else. It is not a card shadow —
+        // the primary button has no border, so "border OR shadow, never both" is not in play.
+        primary:
+          'bg-accent text-accent-fg shadow-[var(--shadow-glow)] hover:bg-accent-hover active:bg-accent-pressed',
+        // The border WIDTH comes from the pack: Mono declares 2px under "sharp + flat: no radius,
+        // heavier border" and every call site wrote Tailwind's `border` (= 1px), so the heaviest
+        // pack shipped the same hairline as the calmest one.
+        // Hover strengthens the edge as well as the fill — a surface-2 hover on a surface-1
+        // control is a 1.1:1 change, which is not an answer to a pointer.
+        secondary: [
+          'border-[length:var(--border-width)] border-[var(--surface-border)]',
+          'bg-surface-1 text-text-1',
+          'hover:border-[var(--surface-border-strong)] hover:bg-surface-2',
+        ].join(' '),
         ghost: 'text-text-2 hover:bg-accent-subtle hover:text-text-1',
         // Destructive is never styled as primary and never sits in the primary position.
         danger: 'bg-danger text-on-danger hover:opacity-90',
@@ -58,7 +82,9 @@ export const control = cva(
       shape: {
         button: 'rounded-button px-4',
         // Square controls: the floor already guarantees 44×44, so no width class is needed.
-        icon: 'rounded-chip px-0',
+        // Square, and it has to say so: --control-h is 48px in Solar while --target-min is 44, so a
+        // min-width pinned to the floor would render every icon-only chip 44x48.
+        icon: 'rounded-chip px-0 min-w-[var(--control-h)]',
         chip: 'rounded-chip px-4',
         field: 'w-full justify-start rounded-field px-3 text-left font-normal',
       },

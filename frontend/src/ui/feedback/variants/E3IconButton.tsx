@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../../lib/cn';
 import { Pressable, type PressableProps } from '../../primitives/Pressable';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe, SPRING } from '../useMotionSafe';
+import { useMotionSafe, SPRING, EASE_STANDARD } from '../useMotionSafe';
 
 export interface IconButtonProps extends Omit<PressableProps, 'shape' | 'children' | 'icon'> {
   /** Required — an icon-only control with no accessible name is unusable. */
@@ -94,7 +94,7 @@ export function IconButton({
           )}
           initial={{ scale: variant === 'B' ? 0 : 1, opacity: 0.7 }}
           animate={motionSafe ? { scale: variant === 'B' ? 1 : 1.9, opacity: 0 } : { opacity: 0 }}
-          transition={{ duration: motionSafe ? 0.5 : 0, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: motionSafe ? 0.5 : 0, ease: EASE_STANDARD }}
         />
       ))}
       <span className="relative inline-flex">{body}</span>

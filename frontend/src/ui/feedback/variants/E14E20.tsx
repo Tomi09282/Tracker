@@ -152,14 +152,16 @@ export function SwipeItem({
         <span className="text-body-s inline-flex items-center gap-2 text-success">
           <Check size={20} strokeWidth={2.5} aria-hidden />
         </span>
-        <span className="text-body-s inline-flex items-center gap-2 text-[var(--danger)]">
+        <span className="text-body-s inline-flex items-center gap-2 text-danger">
           <X size={20} strokeWidth={2.5} aria-hidden />
         </span>
       </div>
 
       <div
         className={cn(
-          'relative border border-[var(--surface-border)] bg-surface-1 p-3',
+          // Card padding comes from --card-pad, which had zero consumers while `p-3` beat `p-4`
+          // 121:62 across the product — the one density decision a theme pack cannot reach.
+          'relative border border-[var(--surface-border)] bg-surface-1 p-[var(--card-pad)]',
           offset > THRESHOLD && variant === 'B' && 'bg-[var(--success-subtle)]',
         )}
         style={{

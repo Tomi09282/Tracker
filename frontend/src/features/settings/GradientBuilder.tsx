@@ -122,7 +122,7 @@ export function GradientBuilder({
         ))}
       </ul>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Pressable
           density="compact"
           disabled={value.stops.length >= MAX_STOPS}

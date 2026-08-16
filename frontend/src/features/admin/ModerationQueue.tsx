@@ -87,18 +87,18 @@ export function ModerationQueue() {
 
   const rows = queue.data?.queue ?? [];
 
-  if (queue.isPending) return <Skeleton className="mt-3 h-64 rounded-card" />;
+  if (queue.isPending) return <Skeleton className="mt-4 h-64 rounded-card" />;
 
   if (rows.length === 0) {
     return (
-      <div className="mt-3 rounded-card border border-[var(--surface-border)] bg-surface-1">
+      <div className="mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1">
         <EmptyState icon={Check} title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
       </div>
     );
   }
 
   return (
-    <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
       {/* ── the queue ───────────────────────────────────────────────────────────────────────── */}
       <ul className="flex flex-col gap-2" aria-label={t('admin.moderation')}>
         {rows.map((row) => {
@@ -129,11 +129,11 @@ export function ModerationQueue() {
                 )}
               >
                 <span className="text-body block truncate text-text-1">{row.name}</span>
-                <span className="text-caption mt-1 block truncate text-text-3">{row.owner_email ?? '—'}</span>
-                <span className="text-micro mt-1 flex items-center gap-2 text-text-3">
+                <span className="text-caption block truncate text-text-3">{row.owner_email ?? '—'}</span>
+                <span className="text-micro flex items-center gap-2 text-text-3">
                   {row.media_count === 0 ? (
                     <>
-                      <ImageOff size={14} strokeWidth={2} aria-hidden />
+                      <ImageOff className="size-icon-s" strokeWidth={2} aria-hidden />
                       {t('admin.noMedia')}
                     </>
                   ) : (
@@ -211,7 +211,7 @@ function ReviewBody({
           these as a COUNT, and the route behind them answered 404 for admins — measured, then
           fixed in `exercises/media.js`. */}
       {media.length > 0 ? (
-        <ul className="mt-3 flex flex-wrap gap-2">
+        <ul className="mt-4 flex flex-wrap gap-2">
           {media.map((m) => (
             <li key={m.id}>
               <img
@@ -225,8 +225,8 @@ function ReviewBody({
           ))}
         </ul>
       ) : (
-        <p className="text-caption mt-3 flex items-center gap-2 text-text-3">
-          <ImageOff size={16} strokeWidth={2} aria-hidden />
+        <p className="text-caption mt-4 flex items-center gap-2 text-text-3">
+          <ImageOff className="size-icon-s" strokeWidth={2} aria-hidden />
           {t('admin.noMedia')}
         </p>
       )}
@@ -251,7 +251,7 @@ function ReviewBody({
       {muscles.length > 0 ? (
         <section className="mt-4">
           <h4 className="text-micro uppercase text-text-3">{t('library.muscle')}</h4>
-          <ul className="mt-2 flex flex-wrap gap-1.5">
+          <ul className="mt-2 flex flex-wrap gap-2">
             {muscles.map((m) => (
               <li
                 key={m.slug}
@@ -270,7 +270,7 @@ function ReviewBody({
       {equipment.length > 0 ? (
         <section className="mt-4">
           <h4 className="text-micro uppercase text-text-3">{t('library.equipment')}</h4>
-          <ul className="mt-2 flex flex-wrap gap-1.5">
+          <ul className="mt-2 flex flex-wrap gap-2">
             {equipment.map((q) => (
               <li key={q.slug} className="text-caption rounded-chip bg-surface-2 px-2 py-0.5 text-text-2">
                 {q.label}
@@ -281,7 +281,7 @@ function ReviewBody({
       ) : null}
 
       {/* ── the decision ──────────────────────────────────────────────────────────────────── */}
-      <footer className="mt-6 border-t border-[var(--surface-border)] pt-4">
+      <footer className="mt-8 border-t border-[var(--surface-border)] pt-4">
         {rejecting ? (
           <div className="flex flex-wrap items-end gap-2">
             <Field
@@ -312,7 +312,7 @@ function ReviewBody({
               variant="primary"
               density="compact"
               busy={busy}
-              icon={<Check size={20} strokeWidth={2} aria-hidden />}
+              icon={<Check className="size-icon-m" strokeWidth={2} aria-hidden />}
               onClick={() => onDecide('approve')}
             >
               {t('admin.approve')}
@@ -322,7 +322,7 @@ function ReviewBody({
             <Pressable
               variant="ghost"
               density="compact"
-              icon={<X size={20} strokeWidth={2} aria-hidden />}
+              icon={<X className="size-icon-m" strokeWidth={2} aria-hidden />}
               onClick={onStartReject}
             >
               {t('admin.reject')}

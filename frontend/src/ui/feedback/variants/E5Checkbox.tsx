@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '../../../lib/cn';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe, SPRING } from '../useMotionSafe';
+import { useMotionSafe, SPRING, EASE_STANDARD } from '../useMotionSafe';
 
 export interface CheckboxProps {
   checked: boolean | 'indeterminate';
@@ -68,7 +68,7 @@ export function Checkbox({ checked, onChange, label, disabled }: CheckboxProps) 
             className="absolute inset-0 rounded-field border-2 border-accent"
             initial={{ scale: 1, opacity: 0.8 }}
             animate={{ scale: 1.8, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.45, ease: EASE_STANDARD }}
           />
         ) : null}
 
@@ -105,7 +105,7 @@ export function Checkbox({ checked, onChange, label, disabled }: CheckboxProps) 
                 motionSafe
                   ? variant === 'B'
                     ? SPRING.tight
-                    : { duration: 0.2, ease: [0.16, 1, 0.3, 1] }
+                    : { duration: 0.2, ease: EASE_STANDARD }
                   : { duration: 0 }
               }
             />

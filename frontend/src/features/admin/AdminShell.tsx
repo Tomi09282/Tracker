@@ -50,7 +50,7 @@ export function AdminShell({
   const current = sections.find((s) => s.key === active) ?? sections[0];
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-12">
+    <div className="mt-8 grid gap-6 lg:grid-cols-12">
       {/*
         A tablist, not a nav. These switch a panel in place; they do not navigate, and calling it
         navigation would promise a screen-reader user a page change that never happens.
@@ -59,7 +59,7 @@ export function AdminShell({
         role="tablist"
         aria-orientation="vertical"
         aria-label={t('admin.sections')}
-        className="flex gap-1 overflow-x-auto lg:col-span-3 lg:max-w-[var(--admin-sidebar-w)] lg:flex-col lg:overflow-visible"
+        className="flex gap-2 overflow-x-auto lg:col-span-3 lg:max-w-[var(--admin-sidebar-w)] lg:flex-col lg:overflow-visible"
       >
         {sections.map((s) => {
           const Icon = s.icon;
@@ -76,7 +76,7 @@ export function AdminShell({
               className={cn('shrink-0 justify-start gap-2 lg:w-full', selected && 'font-medium')}
               onClick={() => onSelect(s.key)}
             >
-              <Icon className="size-4 shrink-0" aria-hidden />
+              <Icon className="size-icon-s shrink-0" aria-hidden />
               <span className="truncate">{t(`admin.section.${s.key}`)}</span>
               {/*
                 A count, and only when there IS one. A grey zero beside "Moderation" reads as a

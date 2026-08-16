@@ -34,13 +34,12 @@
   }
 
   /* Numbers never jitter width while counting (Bible: banned pattern). Timers, weights, reps,
-     balances and counters all inherit this from the elements that carry data. */
-  .tnum,
-  time,
-  output,
-  [data-numeric] {
-    font-variant-numeric: tabular-nums;
-  }
+     balances and counters all inherit this from the elements that carry data.
+     The selector used to also list `time`, `output` and `[data-numeric]`. The product contains
+     zero of all three, and the real mechanism is Tailwind's `tabular-nums` at 61 call sites — a
+     rule that claims coverage the app does not have is worse than no rule, because the next
+     person reads it as "handled". `.tnum` stays for the non-Tailwind contexts that do use it. */
+  .tnum { font-variant-numeric: tabular-nums; }
 
   /* Focus is never removed — only redrawn on the token ring. */
   :focus-visible {

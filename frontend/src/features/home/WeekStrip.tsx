@@ -63,7 +63,7 @@ export function WeekStrip({ today }: { today: string }) {
   return (
     <section aria-labelledby="week-heading" className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <h2 id="week-heading" className="text-label uppercase tracking-wide text-text-2">
+        <h2 id="week-heading" className="text-micro uppercase text-text-2">
           {rangeLabel.format(new Date(`${weekStart}T00:00:00Z`))} –{' '}
           {rangeLabel.format(new Date(`${addDays(weekStart, 6)}T00:00:00Z`))}
         </h2>
@@ -103,7 +103,7 @@ export function WeekStrip({ today }: { today: string }) {
                   className={cn(
                     'flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-card border p-1',
                     isToday ? 'border-[var(--accent)] bg-accent-subtle' : 'border-[var(--surface-border)]',
-                    trained && !isToday && 'bg-success/10',
+                    trained && !isToday && 'bg-success-subtle',
                   )}
                 >
                   <span className="text-micro uppercase text-text-3">{dayLabel.format(new Date(`${date}T00:00:00Z`))}</span>

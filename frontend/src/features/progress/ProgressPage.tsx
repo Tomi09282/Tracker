@@ -40,8 +40,8 @@ export function ProgressPage() {
   const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
-      <h1 className="text-title-2">{t('progress.title')}</h1>
+    <div className="col-mobile screen-x flex flex-col gap-6 py-6">
+      <h1 className="text-title-1">{t('progress.title')}</h1>
 
       {/* A TAB IS A FILTER, NOT A NEW SCREEN — the Phase 2 lesson, applied. One route, one URL,
           and no per-tab endpoint to keep in step with the others. */}
@@ -104,8 +104,8 @@ function BodyTab() {
 
   return (
     <>
-      <section className="rounded-card border border-line bg-surface-2 p-4">
-        <h2 className="text-label mb-3 text-text-2">{t('progress.record')}</h2>
+      <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+        <h2 className="text-title-3 mb-2 text-text-1">{t('progress.record')}</h2>
         <div className="flex flex-wrap items-end gap-2">
           {/* FULL WIDTH, NOT flex-1. Measured at 360: sharing a wrapped row with the value, the
               date and the save button squeezed the select to 37 px — under the 44 px floor in one
@@ -116,7 +116,7 @@ function BodyTab() {
             <select
               value={metric}
               onChange={(e) => setMetric(e.target.value)}
-              className="text-body min-h-[var(--target-min)] w-full rounded-card border border-line bg-surface-3 px-2 text-text-1"
+              className="text-body min-h-[var(--target-min)] w-full rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-text-1"
             >
               {(metrics.data?.metrics ?? []).map((m) => (
                 <option key={m.key} value={m.key}>
@@ -133,7 +133,7 @@ function BodyTab() {
               inputMode="decimal"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className="text-body min-h-[var(--target-min)] w-24 rounded-card border border-line bg-surface-3 px-2 text-right tabular-nums text-text-1"
+              className="text-body min-h-[var(--target-min)] w-24 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-right tabular-nums text-text-1"
             />
           </label>
           <label className="flex flex-col">
@@ -142,7 +142,7 @@ function BodyTab() {
               type="date"
               value={on}
               onChange={(e) => setOn(e.target.value)}
-              className="text-body-s min-h-[var(--target-min)] rounded-card border border-line bg-surface-3 px-2 text-text-1"
+              className="text-body-s min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-text-1"
             />
           </label>
           <Pressable variant="primary" busy={record.isPending} onClick={submit}>
@@ -159,7 +159,7 @@ function BodyTab() {
       </section>
 
       {measurements.isLoading ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {[0, 1].map((i) => (
             <Skeleton key={i} className="h-32 rounded-card" />
           ))}
@@ -171,7 +171,7 @@ function BodyTab() {
           {[...byMetric.entries()].map(([key, series]) => {
             const meta = (metrics.data?.metrics ?? []).find((m) => m.key === key);
             return (
-              <section key={key} className="rounded-card border border-line bg-surface-2 p-4">
+              <section key={key} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
                 <TrendChart
                   series={series}
                   unit={meta?.unit ?? ''}
@@ -187,7 +187,7 @@ function BodyTab() {
 
       {(measurements.data?.measurements ?? []).length > 0 ? (
         <section>
-          <h2 className="text-label mb-2 text-text-2">{t('progress.entries')}</h2>
+          <h2 className="text-title-3 mb-2 text-text-1">{t('progress.entries')}</h2>
           <ul className="flex flex-col gap-1">
             {(measurements.data?.measurements ?? [])
               .slice()
@@ -196,10 +196,10 @@ function BodyTab() {
               .map((m) => (
                 <li
                   key={m.id}
-                  className="flex items-center gap-2 rounded-card border border-line bg-surface-2 px-3"
+                  className="flex items-center gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 px-3"
                 >
                   <span className="min-w-0 flex-1 py-2">
-                    <span className="text-body block truncate text-text-1">
+                    <span className="text-body-strong block truncate text-text-1">
                       {t(`progress.metricName.${m.metric_key}`)}
                     </span>
                     <span className="text-caption tabular-nums text-text-3">
@@ -234,8 +234,8 @@ function PhotosTab() {
 
   return (
     <>
-      <section className="rounded-card border border-line bg-surface-2 p-4">
-        <h2 className="text-label mb-1 text-text-2">{t('progress.addPhoto')}</h2>
+      <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+        <h2 className="text-title-3 mb-1 text-text-1">{t('progress.addPhoto')}</h2>
         {/* SAID BEFORE THE UPLOAD, not after. Someone about to photograph their body deserves to
             know who can see it before they choose the file, and the answer is nobody by default. */}
         <p className="text-caption mb-3 text-text-3">{t('progress.photoPrivacyNote')}</p>
@@ -246,10 +246,10 @@ function PhotosTab() {
               type="date"
               value={on}
               onChange={(e) => setOn(e.target.value)}
-              className="text-body-s min-h-[var(--target-min)] rounded-card border border-line bg-surface-3 px-2 text-text-1"
+              className="text-body-s min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-text-1"
             />
           </label>
-          <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center rounded-card border border-line bg-surface-3 px-3 text-text-1">
+          <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center rounded-button border border-[var(--surface-border)] bg-surface-2 px-3 text-text-1">
             {t('progress.chooseFile')}
             <input
               type="file"
@@ -290,7 +290,7 @@ function PhotosTab() {
                 loading="lazy"
                 className="aspect-square w-full rounded-card object-cover"
               />
-              <span className="text-micro absolute bottom-1 left-1 rounded-chip bg-surface-1/80 px-1.5 text-text-2">
+              <span className="text-micro absolute bottom-1 left-1 rounded-chip bg-surface-1 px-1.5 text-text-2">
                 {p.taken_on}
               </span>
               <Pressable
@@ -324,8 +324,8 @@ function SharingTab() {
 
   return (
     <>
-      <section className="rounded-card border border-line bg-surface-2 p-4">
-        <h2 className="text-label mb-1 flex items-center gap-2 text-text-2">
+      <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+        <h2 className="text-title-3 mb-1 flex items-center gap-2 text-text-1">
           <ShieldCheck className="size-4" aria-hidden />
           {t('progress.whoCanSee')}
         </h2>
@@ -334,15 +334,15 @@ function SharingTab() {
         {(shares.data?.shares ?? []).length === 0 ? (
           <p className="text-caption text-text-3">{t('progress.noShares')}</p>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2">
             {(shares.data?.shares ?? []).map((s) => (
-              <li key={s.id} className="rounded-card bg-surface-3 p-3">
+              <li key={s.id} className="rounded-card bg-surface-2 p-3">
                 <div className="text-body-s mb-2 flex items-center justify-between gap-2 text-text-1">
                   <span className="truncate">{s.coach_email}</span>
                   {/* An archived link is shown as ENDED rather than hidden, because "I revoked it"
                       and "they left" are different facts and the client is entitled to both. */}
                   {s.link_status !== 'active' ? (
-                    <span className="text-micro uppercase rounded-chip bg-surface-2 px-1.5 text-text-3">
+                    <span className="text-micro uppercase rounded-chip border border-[var(--surface-border)] px-1.5 text-text-3">
                       {t('progress.linkEnded')}
                     </span>
                   ) : null}
@@ -378,7 +378,7 @@ function SharingTab() {
       </section>
 
       <section>
-        <h2 className="text-label mb-2 flex items-center gap-2 text-text-2">
+        <h2 className="text-title-3 mb-2 flex items-center gap-2 text-text-1">
           <Eye className="size-4" aria-hidden />
           {t('progress.whoLooked')}
         </h2>
@@ -387,9 +387,9 @@ function SharingTab() {
         ) : (
           <ul className="flex flex-col gap-1">
             {(log.data?.entries ?? []).slice(0, 50).map((e) => (
-              <li key={e.id} className="rounded-card border border-line bg-surface-2 px-3 py-2">
-                <span className="text-body-s block truncate text-text-1">{e.viewer}</span>
-                <span className="text-caption text-text-3">
+              <li key={e.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1 px-3 py-2">
+                <span className="text-body-strong block truncate text-text-1">{e.viewer}</span>
+                <span className="text-caption tabular-nums text-text-3">
                   {t(`progress.looked.${e.kind}`, { defaultValue: e.kind })} ·{' '}
                   {new Date(e.at * 1000).toLocaleString()}
                 </span>

@@ -4,7 +4,7 @@ import { Copy, Check } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { Pressable } from '../../primitives/Pressable';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe, SPRING } from '../useMotionSafe';
+import { useMotionSafe, SPRING, EASE_STANDARD } from '../useMotionSafe';
 
 const PARTICLES = [
   { x: -18, y: -14 },
@@ -86,7 +86,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
           className="absolute inset-y-0 left-0 bg-success"
           initial={false}
           animate={{ width: copied ? '100%' : '0%' }}
-          transition={motionSafe ? { duration: 0.2, ease: [0.16, 1, 0.3, 1] } : { duration: 0 }}
+          transition={motionSafe ? { duration: 0.2, ease: EASE_STANDARD } : { duration: 0 }}
         />
         <span className={cn('relative', copied && 'text-on-success')}>{icon}</span>
         {announcement}
@@ -106,7 +106,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
                 className="pointer-events-none absolute left-1/2 top-1/2 size-1 rounded-chip bg-success"
                 initial={{ x: 0, y: 0, opacity: 1 }}
                 animate={{ x: p.x, y: p.y, opacity: 0 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.45, ease: EASE_STANDARD }}
               />
             ))
           : null}

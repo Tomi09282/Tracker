@@ -28,7 +28,7 @@ export function ExerciseDetailPage() {
         <Skeleton className="aspect-video w-full rounded-card" />
         <Skeleton className="mt-4 h-7 w-2/3" />
         <Skeleton className="mt-2 h-4 w-1/3" />
-        <Skeleton className="mt-6 h-24 w-full rounded-card" />
+        <Skeleton className="mt-8 h-24 w-full rounded-card" />
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function ExerciseDetailPage() {
     <div className="col-mobile screen-x py-6">
       <Link
         to="/library"
-        className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body-s text-text-2 hover:text-text-1"
+        className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body-s text-text-2 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:text-text-1"
       >
         <ArrowLeft size={20} strokeWidth={2} aria-hidden />
         {t('nav.library')}
@@ -75,7 +75,7 @@ export function ExerciseDetailPage() {
       {exercise.status === 'rejected' ? (
         <div
           role="status"
-          className="mt-3 rounded-card border border-danger bg-danger-subtle p-3"
+          className="mt-4 rounded-card border border-danger-border bg-danger-subtle p-4"
         >
           <p className="text-body-s font-semibold text-text-1">{t('library.rejectedTitle')}</p>
           {exercise.rejection_reason ? (
@@ -83,13 +83,13 @@ export function ExerciseDetailPage() {
           ) : null}
         </div>
       ) : exercise.status === 'pending_review' ? (
-        <div role="status" className="mt-3 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3">
+        <div role="status" className="mt-4 rounded-card border border-info-border bg-info-subtle p-4">
           <p className="text-body-s text-text-2">{t('library.pendingReview')}</p>
         </div>
       ) : null}
 
       {/* The aspect ratio is reserved whether or not media exists, so nothing shifts on load. */}
-      <div className="mt-3 grid aspect-video w-full place-items-center overflow-hidden rounded-card border border-[var(--surface-border)] bg-surface-1">
+      <div className="mt-4 grid aspect-video w-full place-items-center overflow-hidden rounded-card border border-[var(--surface-border)] bg-surface-1">
         {media.length > 0 ? (
           <img
             src={`/api/v1/media/${media[0].storage_key}`}
@@ -126,7 +126,7 @@ export function ExerciseDetailPage() {
       </div>
 
       {primary.length > 0 || secondary.length > 0 ? (
-        <section className="mt-6">
+        <section className="mt-8">
           <p className="text-micro uppercase text-accent">{t('library.muscle')}</p>
           <MuscleMap highlights={highlights} className="mt-2" />
           <div className="mt-4 flex flex-wrap gap-2">
@@ -147,7 +147,7 @@ export function ExerciseDetailPage() {
       ) : null}
 
       {equipment.length > 0 ? (
-        <section className="mt-6">
+        <section className="mt-8">
           <p className="text-micro uppercase text-accent">{t('library.equipment')}</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {equipment.map((q) => (
@@ -160,15 +160,15 @@ export function ExerciseDetailPage() {
       ) : null}
 
       {exercise.description ? (
-        <section className="mt-6">
+        <section className="mt-8">
           <p className="text-body measure text-text-2">{exercise.description}</p>
         </section>
       ) : null}
 
       {exercise.instructions.length > 0 ? (
-        <section className="mt-6">
+        <section className="mt-8">
           <h2 className="text-title-3 text-text-1">{t('library.howTo')}</h2>
-          <ol className="mt-3 flex flex-col gap-3">
+          <ol className="mt-2 flex flex-col gap-4">
             {exercise.instructions.map((step, i) => (
               <li key={i} className="flex gap-3">
                 <span
@@ -185,16 +185,16 @@ export function ExerciseDetailPage() {
       ) : null}
 
       {substitutions.length > 0 ? (
-        <section className="mt-6">
+        <section className="mt-8">
           <h2 className="text-title-3 text-text-1">{t('library.substitutions')}</h2>
-          <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1">
+          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1">
             {substitutions.map((s) => (
               <Link
                 key={s.id}
                 to={`/library/${s.id}`}
                 className={cn(
                   'flex min-h-[var(--target-min)] w-44 shrink-0 flex-col justify-center rounded-card',
-                  'border border-[var(--surface-border)] bg-surface-1 p-3',
+                  'border border-[var(--surface-border)] bg-surface-1 p-4',
                   'transition-colors duration-[var(--duration-fast)] hover:bg-surface-2',
                   'outline-none focus-visible:outline-2 focus-visible:outline-offset-2',
                   'focus-visible:outline-[var(--focus-ring)]',

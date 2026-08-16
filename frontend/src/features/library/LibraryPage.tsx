@@ -113,9 +113,9 @@ export function LibraryPage() {
 
   return (
     <div className="col-mobile screen-x py-6">
-      <h1 className="text-title-2 text-text-1">{t('nav.library')}</h1>
+      <h1 className="text-title-1 text-text-1">{t('nav.library')}</h1>
 
-      <div className="mt-4">
+      <div className="mt-8">
         <FeedbackField
           label={t('library.search')}
           placeholder={t('library.searchPlaceholder')}
@@ -147,7 +147,7 @@ export function LibraryPage() {
         to show what an exercise targets; here the same component is a filter control.
       */}
       <details className="mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1">
-        <summary className="text-body-s flex min-h-[var(--target-min)] cursor-pointer list-none items-center px-4 text-text-2">
+        <summary className="text-body-s flex min-h-[var(--target-min)] cursor-pointer list-none items-center px-4 text-text-2 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:text-text-1">
           {t('muscleMap.filterHint')}
         </summary>
         <div className="px-4 pb-4">
@@ -159,7 +159,7 @@ export function LibraryPage() {
       </details>
 
       {taxonomies.data ? (
-        <div className="mt-4 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-4">
           <FilterRow
             label={t('library.muscle')}
             options={taxonomies.data.muscles}
@@ -177,7 +177,7 @@ export function LibraryPage() {
         </div>
       ) : null}
 
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-8 flex items-center justify-between gap-2">
         <p className="text-body-s text-text-2">
           {query.isPending ? t('common.loading') : t('library.count', { count: rows.length })}
         </p>
@@ -199,7 +199,7 @@ export function LibraryPage() {
         // Skeleton rows match the real row geometry, so the swap does not shift the layout.
         <ul className="mt-2 flex flex-col gap-2">
           {Array.from({ length: 6 }, (_, i) => (
-            <li key={i} className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+            <li key={i} className="flex h-[72px] items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 px-3 py-1">
               <Skeleton className="size-16 shrink-0 rounded-field" />
               <div className="flex-1">
                 <Skeleton className="h-4 w-2/3" />
@@ -292,7 +292,7 @@ export function LibraryPage() {
       {query.isFetchingNextPage ? (
         <ul className="mt-2 flex flex-col gap-2">
           {Array.from({ length: 3 }, (_, i) => (
-            <li key={i} className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+            <li key={i} className="flex h-[72px] items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 px-3 py-1">
               <Skeleton className="size-16 shrink-0 rounded-field" />
               <div className="flex-1">
                 <Skeleton className="h-4 w-2/3" />

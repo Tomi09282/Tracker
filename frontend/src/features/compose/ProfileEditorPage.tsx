@@ -67,8 +67,8 @@ function HandleRename({ current, listed }: { current: string; listed: boolean })
   }
 
   return (
-    <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
-      <h2 className="text-label text-text-2">{t('compose.handleChangeTitle')}</h2>
+    <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+      <h2 className="text-title-3 text-text-1">{t('compose.handleChangeTitle')}</h2>
 
       <HandleField
         label={t('compose.handle')}
@@ -85,7 +85,7 @@ function HandleRename({ current, listed }: { current: string; listed: boolean })
         about a thirty-day wait would be a lie that discourages a free action.
       */}
       {listed ? (
-        <p className="text-caption rounded-card border border-warning bg-warning-subtle p-2 text-text-1">
+        <p className="text-caption rounded-card border border-warning-border bg-warning-subtle p-3 text-text-1">
           {t('compose.handleCooldownWarning', { days: cooldownDays, retireDays, handle: current })}
         </p>
       ) : null}
@@ -187,7 +187,7 @@ export function ProfileEditorPage() {
 
   if (loaded.isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
         <Skeleton className="h-8 w-1/2 rounded-card" />
         <Skeleton className="h-40 rounded-card" />
       </div>
@@ -218,13 +218,13 @@ export function ProfileEditorPage() {
     );
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+    <div className="col-mobile screen-x flex flex-col gap-4 py-6">
       <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
-        <ArrowLeft className="size-4" aria-hidden />
+        <ArrowLeft className="size-icon-s" aria-hidden />
         {t('compose.backToDesk')}
       </Link>
 
-      <h1 className="text-title-2">{isNew ? t('compose.createProfile') : t('compose.editProfile')}</h1>
+      <h1 className="text-title-1">{isNew ? t('compose.createProfile') : t('compose.editProfile')}</h1>
 
       {isNew ? (
         <HandleField
@@ -253,9 +253,9 @@ export function ProfileEditorPage() {
       />
 
       <label className="flex flex-col gap-1">
-        <span className="text-label text-text-2">{t('compose.city')}</span>
+        <span className="text-body-s text-text-2">{t('compose.city')}</span>
         <select
-          className="text-body min-h-[var(--target-min)] rounded-field border border-line bg-surface-2 px-3 text-text-1"
+          className="text-body min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] px-3"
           value={city}
           onChange={(e) => setCity(e.target.value)}
         >
@@ -269,10 +269,10 @@ export function ProfileEditorPage() {
       </label>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-label text-text-2">
+        <legend className="text-body-s text-text-2">
           {t('compose.specialties', { n: specialties.length, max: limits?.specialtyMax ?? 6 })}
         </legend>
-        <ul className="flex flex-wrap gap-1">
+        <ul className="flex flex-wrap gap-2">
           {taxonomy.data?.specialties.map((s) => (
             <li key={s.key}>
               <Pressable
@@ -289,9 +289,9 @@ export function ProfileEditorPage() {
       </fieldset>
 
       <label className="flex flex-col gap-1">
-        <span className="text-label text-text-2">{t('compose.bio')}</span>
+        <span className="text-body-s text-text-2">{t('compose.bio')}</span>
         <textarea
-          className="text-body min-h-40 rounded-field border border-line bg-surface-2 p-3 text-text-1"
+          className="text-body min-h-40 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] p-3"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
         />
@@ -305,7 +305,7 @@ export function ProfileEditorPage() {
           {isNew ? t('compose.createProfile') : t('compose.save')}
         </Pressable>
         <Pressable variant="secondary" onClick={() => setShowPreview((v) => !v)}>
-          <Eye className="size-4" aria-hidden />
+          <Eye className="size-icon-s" aria-hidden />
           {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
         </Pressable>
       </div>
@@ -317,7 +317,7 @@ export function ProfileEditorPage() {
       ) : null}
 
       {conflict ? (
-        <p className="text-body-s rounded-card border border-warning bg-warning-subtle p-3 text-text-1" role="alert">
+        <p className="text-body-s rounded-card border border-warning-border bg-warning-subtle p-4 text-text-1" role="alert">
           {t(`compose.reason.${conflict.reason}`, {
             defaultValue: t('compose.reason.generic'),
             key: conflict.key,
@@ -326,8 +326,8 @@ export function ProfileEditorPage() {
       ) : null}
 
       {showPreview ? (
-        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label text-text-2">{t('compose.preview')}</h2>
+        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 text-text-1">{t('compose.preview')}</h2>
           {preview.data ? (
             <DocRenderer doc={preview.data.doc} />
           ) : (

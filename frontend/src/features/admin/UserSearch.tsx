@@ -71,9 +71,9 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
       </div>
 
       {users.isPending ? (
-        <Skeleton className="mt-3 h-64 rounded-card" />
+        <Skeleton className="mt-4 h-64 rounded-card" />
       ) : (
-        <div className="mt-3">
+        <div className="mt-4">
           <DataTable
             caption={t('adminUsers.title')}
             rows={users.data?.users ?? []}
@@ -97,7 +97,7 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
                         chip beside the identity rather than a column somebody has to scroll to. */}
                     {u.disabledAt !== null ? (
                       <span className="text-micro uppercase rounded-chip bg-danger-subtle px-1.5 text-danger">
-                        <ShieldOff className="mr-1 inline size-3" aria-hidden />
+                        <ShieldOff className="mr-1 inline size-icon-s" aria-hidden />
                         {t('adminUsers.disabled')}
                       </span>
                     ) : null}
@@ -115,7 +115,7 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
                 sortable: true,
                 render: (u) => (
                   <span className="inline-flex items-center gap-1">
-                    {u.role === 'admin' ? <UserCog className="size-3.5 text-accent" aria-hidden /> : null}
+                    {u.role === 'admin' ? <UserCog className="size-icon-s text-accent" aria-hidden /> : null}
                     {t(`adminUsers.role.${u.role}`)}
                   </span>
                 ),

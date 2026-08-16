@@ -242,9 +242,9 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
       className={cn(
         'relative grid h-14 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 rounded-card px-2',
         'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-        done ? 'bg-success/10' : 'bg-surface-1',
+        done ? 'bg-success-subtle' : 'bg-surface-1',
         voided && 'bg-surface-1 opacity-55 line-through decoration-text-3',
-        flashing && 'bg-warning/25 ring-2 ring-[var(--warning)]',
+        flashing && 'bg-warning-subtle ring-2 ring-[var(--warning)]',
         // Only variant C claims horizontal gestures, and only while the row is still pending.
         variant === 'C' && !done && !voided && 'touch-pan-y select-none',
         // The handover is announced by a ring, not by a jump: nothing moves under the thumb.
@@ -308,8 +308,8 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
           // The hold's own feedback: the button fills over HOLD_MS so the lifter can see the
           // gesture being accepted. Under reduced motion it simply darkens — the information is
           // "this is registering", and that does not require the sweep.
-          holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-[var(--accent)]/30 after:animate-[hold-fill_var(--hold-fill-ms)_linear_forwards]',
-          holding && !motionSafe && 'bg-[var(--accent)]/20',
+          holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-accent-subtle after:animate-[hold-fill_var(--hold-fill-ms)_linear_forwards]',
+          holding && !motionSafe && 'bg-accent-subtle',
         )}
         {...holdProps}
       >
@@ -356,7 +356,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
           retry. */}
       {failed ? (
         <div className="absolute inset-y-1 right-1 flex items-center gap-1" role="alert">
-          <span className="text-caption rounded-chip bg-danger/15 px-2 py-0.5 text-danger">
+          <span className="text-caption rounded-chip bg-danger-subtle px-2 py-0.5 text-danger">
             {t(`workout.checkFailed.${failed}`)}
           </span>
           {/* A conflict is not retryable — the stored values differ, so re-sending the same request

@@ -62,8 +62,8 @@ export function AccentPicker({
         </Pressable>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
+      <div className="mt-4 flex flex-wrap items-end gap-4">
+        <div className="flex flex-col gap-2">
           <label htmlFor={inputId} className="text-body-s text-text-2">
             {t('settings.accentCustom')}
           </label>

@@ -37,7 +37,7 @@ export function ComposePage() {
 
   if (ctx.isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
         <Skeleton className="h-8 w-1/2 rounded-card" />
         <Skeleton className="h-24 rounded-card" />
         <Skeleton className="h-40 rounded-card" />
@@ -67,7 +67,7 @@ export function ComposePage() {
   })();
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+    <div className="col-mobile screen-x flex flex-col gap-8 py-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-title-1">{t('compose.title')}</h1>
         <p className="text-body-s text-text-2">{t('compose.subtitle')}</p>
@@ -77,14 +77,14 @@ export function ComposePage() {
       {profileRemoved ? (
         // A moderator's removal is NOT the same as having no profile, and inviting the coach to
         // "create one" after a takedown would send them at a handle they can no longer claim.
-        <section className="rounded-card border border-danger bg-danger-subtle p-3">
-          <h2 className="text-label text-text-1">{t('compose.removedTitle')}</h2>
+        <section className="rounded-card border border-danger-border bg-danger-subtle p-4">
+          <h2 className="text-title-3 text-text-1">{t('compose.removedTitle')}</h2>
           <p className="text-body-s mt-1 text-text-2">{t('compose.removedBody')}</p>
         </section>
       ) : blocker === 'guidelines' ? (
-        <section className="rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label flex items-center gap-2 text-text-1">
-            <ShieldCheck className="size-4 shrink-0 text-accent" aria-hidden />
+        <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 flex items-center gap-2 text-text-1">
+            <ShieldCheck className="size-icon-s shrink-0 text-accent" aria-hidden />
             {t('compose.guidelinesTitle')}
           </h2>
           <p className="text-body-s mt-1 text-text-2">
@@ -100,9 +100,9 @@ export function ComposePage() {
           </Pressable>
         </section>
       ) : blocker === 'age' ? (
-        <section className="rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label flex items-center gap-2 text-text-1">
-            <Clock className="size-4 shrink-0 text-text-3" aria-hidden />
+        <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 flex items-center gap-2 text-text-1">
+            <Clock className="size-icon-s shrink-0 text-text-3" aria-hidden />
             {t('compose.tooNewTitle')}
           </h2>
           {/* WHEN, not "later". A limit a person can plan around is a limit; one they cannot is a wall. */}
@@ -113,15 +113,15 @@ export function ComposePage() {
           </p>
         </section>
       ) : blocker === 'profile' ? (
-        <section className="rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label flex items-center gap-2 text-text-1">
-            <UserPlus className="size-4 shrink-0 text-accent" aria-hidden />
+        <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 flex items-center gap-2 text-text-1">
+            <UserPlus className="size-icon-s shrink-0 text-accent" aria-hidden />
             {t('compose.noProfileTitle')}
           </h2>
           <p className="text-body-s mt-1 text-text-2">{t('compose.noProfileBody')}</p>
           <Link
             to="/compose/profile"
-            className="text-body-s mt-3 inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-accent-fg"
+            className="text-body-s mt-4 inline-flex min-h-[var(--target-min)] items-center gap-2 rounded-button bg-accent px-4 text-accent-fg transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] active:scale-[0.97] hover:bg-accent-hover active:bg-accent-pressed"
           >
             {t('compose.createProfile')}
           </Link>
@@ -130,7 +130,7 @@ export function ComposePage() {
 
       {/* ── the profile card ────────────────────────────────────────────────────────────────── */}
       {profile ? (
-        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
+        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-body truncate text-text-1">{profile.displayName}</h2>
@@ -138,13 +138,13 @@ export function ComposePage() {
             </div>
             <span
               className={`text-caption flex shrink-0 items-center gap-1 rounded-chip px-2 py-1 ${
-                profile.publishedAt !== null ? 'bg-success-subtle text-text-1' : 'bg-surface-3 text-text-2'
+                profile.publishedAt !== null ? 'bg-success-subtle text-success' : 'bg-surface-2 text-text-2'
               }`}
             >
               {profile.publishedAt !== null ? (
-                <Globe className="size-3" aria-hidden />
+                <Globe className="size-icon-s" aria-hidden />
               ) : (
-                <EyeOff className="size-3" aria-hidden />
+                <EyeOff className="size-icon-s" aria-hidden />
               )}
               {profile.publishedAt !== null ? t('compose.live') : t('compose.hidden')}
             </span>
@@ -153,7 +153,7 @@ export function ComposePage() {
           <div className="flex flex-wrap gap-2">
             <Link
               to="/compose/profile"
-              className="text-body-s inline-flex min-h-[var(--target-min)] items-center rounded-button border border-line px-4 text-text-1"
+              className="text-body-s inline-flex min-h-[var(--target-min)] items-center rounded-button border border-[var(--surface-border)] bg-surface-1 px-4 text-text-1 transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] active:scale-[0.97] hover:bg-surface-2"
             >
               {t('compose.editProfile')}
             </Link>
@@ -185,14 +185,14 @@ export function ComposePage() {
       ) : null}
 
       {/* ── posts ──────────────────────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-title-3">{t('compose.posts')}</h2>
           <Link
             to="/compose/posts/new"
-            className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-1 rounded-button bg-accent px-4 text-accent-fg"
+            className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-2 rounded-button bg-accent px-4 text-accent-fg transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] active:scale-[0.97] hover:bg-accent-hover active:bg-accent-pressed"
           >
-            <Plus className="size-4" aria-hidden />
+            <Plus className="size-icon-s" aria-hidden />
             {t('compose.newPost')}
           </Link>
         </div>
@@ -201,7 +201,7 @@ export function ComposePage() {
           {t('compose.slots', { left: slotsLeft, max: quotas.postPublishDailyMax })}
         </p>
 
-        <ul className="flex flex-wrap gap-1">
+        <ul className="flex flex-wrap gap-2">
           {(['all', 'draft', 'live', 'withdrawn', 'removed'] as const).map((s) => (
             <li key={s}>
               <Pressable
@@ -228,7 +228,7 @@ export function ComposePage() {
               <li key={p.id}>
                 <Link
                   to={`/compose/posts/${p.id}`}
-                  className="flex flex-col gap-1 rounded-card border border-line bg-surface-2 p-3"
+                  className="flex flex-col gap-1 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-surface-2"
                 >
                   <span className="text-caption flex items-center gap-2 text-text-3">
                     <span>{t(`marketplace.kind.${p.kind}`, { defaultValue: p.kind })}</span>

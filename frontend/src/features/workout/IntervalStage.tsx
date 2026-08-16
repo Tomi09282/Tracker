@@ -144,13 +144,13 @@ export function IntervalStage(props: IntervalStageProps) {
 
       {/* `aria-live="off"` deliberately: a countdown that announces every second is unusable with
           a screen reader. One announcement per PHASE goes out through the status line below. */}
-      <p className="text-timer text-center tabular-nums" aria-live="off">
+      <p className="text-timer text-center font-display tabular-nums" aria-live="off">
         {mmss(remaining)}
       </p>
 
-      <div className="h-1.5 w-full rounded-full bg-surface-3">
+      <div className="h-1.5 w-full rounded-chip bg-surface-3">
         <div
-          className="h-full rounded-full"
+          className="h-full rounded-chip"
           style={{
             width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`,
             backgroundColor: colour,

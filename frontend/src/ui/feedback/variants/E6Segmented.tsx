@@ -2,7 +2,7 @@ import { useId } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '../../../lib/cn';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe, SPRING } from '../useMotionSafe';
+import { useMotionSafe, SPRING, EASE_STANDARD } from '../useMotionSafe';
 
 export interface SegmentedOption<T extends string> {
   value: T;
@@ -86,7 +86,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
               <motion.span
                 className="relative inline-flex"
                 animate={motionSafe && variant === 'D' && active ? { rotate: [0, 120, 0] } : undefined}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.4, ease: EASE_STANDARD }}
               >
                 {opt.icon}
               </motion.span>

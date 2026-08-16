@@ -43,7 +43,10 @@ export function InteractiveCard({
       aria-pressed={variant === 'E' ? selected : undefined}
       className={cn(
         'relative block w-full min-h-[var(--target-min)] cursor-pointer overflow-hidden rounded-card',
-        'border bg-surface-1 p-4 text-left outline-none',
+        // `p-[var(--card-pad)]`, not `p-4`. Same 16px today — but --card-pad carries the written
+        // decision (Bible allows 16–20, the old build used 24) and had zero consumers, so card
+        // density was being re-decided at every call site instead of read from one place.
+        'border bg-surface-1 p-[var(--card-pad)] text-left outline-none',
         'transition-[transform,background-color,border-color,box-shadow]',
         'duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
@@ -105,10 +108,35 @@ const TOAST_ICON: Record<ToastKind, typeof Check> = {
   info: Info,
 };
 
-const TOAST_TONE: Record<ToastKind, string> = {
-  success: 'text-success',
-  error: 'text-[var(--danger)]',
-  info: 'text-info',
+/**
+ * TONE, not just a glyph colour.
+ *
+ * All three kinds used to render the identical `--toast-bg` box behind the identical hairline, so
+ * an error and a success were the same object with a different 20px icon — on the app's ONLY
+ * mutation feedback channel. `--info-subtle` and `--info-border` had zero uses in the product and
+ * `--danger-subtle` almost none, while the eight `-subtle`/`-border` tokens exist for exactly this.
+ *
+ * The SURFACE stays `--toast-bg`, deliberately: a toast floats over arbitrary content, and a 12%
+ * wash over an unknown background is a toast whose own message cannot be read. The tone is carried
+ * by the border and by the icon chip — which is the pattern the offline banner and the copy button
+ * already use, rather than a third way of saying "this went wrong".
+ */
+const TOAST_TONE: Record<ToastKind, { border: string; chip: string; icon: string }> = {
+  success: {
+    border: 'border-[var(--success-border)]',
+    chip: 'bg-[var(--success-subtle)]',
+    icon: 'text-success',
+  },
+  error: {
+    border: 'border-[var(--danger-border)]',
+    chip: 'bg-[var(--danger-subtle)]',
+    icon: 'text-danger',
+  },
+  info: {
+    border: 'border-[var(--info-border)]',
+    chip: 'bg-[var(--info-subtle)]',
+    icon: 'text-info',
+  },
 };
 
 export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number) => void }) {
@@ -118,6 +146,7 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
   const [undone, setUndone] = useState(false);
   const [paused, setPaused] = useState(false);
   const Icon = TOAST_ICON[toast.kind];
+  const tone = TOAST_TONE[toast.kind];
 
   useEffect(() => {
     if (paused) return;
@@ -137,11 +166,19 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
       transition={motionSafe ? SPRING.base : { duration: 0 }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
-      className="relative w-full overflow-hidden rounded-card border border-[var(--surface-border)] bg-[var(--toast-bg)] p-3 shadow-[var(--shadow-overlay)]"
+      className={cn(
+        'relative w-full overflow-hidden rounded-card border bg-[var(--toast-bg)] p-3',
+        'shadow-[var(--shadow-overlay)]',
+        tone.border,
+      )}
     >
       <div className="flex items-center gap-3">
         <motion.span
-          className={cn('inline-flex shrink-0', TOAST_TONE[toast.kind])}
+          className={cn(
+            'inline-flex size-8 shrink-0 items-center justify-center rounded-chip',
+            tone.chip,
+            tone.icon,
+          )}
           // C — the icon itself carries the kind: a drawn check, a shaken warning, a popped info.
           animate={
             motionSafe && variant === 'C'
@@ -155,7 +192,11 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
           <Icon size={20} strokeWidth={2.5} aria-hidden />
         </motion.span>
 
-        <span className="text-body-s flex-1 text-text-1">
+        {/* `text-body`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
+            secondary lines. This is the sentence the user has four seconds to read, and it is the
+            only place the app reports what a mutation did. The Undo beside it stays at 13 — that
+            one is a control label. */}
+        <span className="text-body flex-1 text-text-1">
           {undone ? t('common.undone') : toast.message}
         </span>
 

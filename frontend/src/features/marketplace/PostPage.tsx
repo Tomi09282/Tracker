@@ -124,7 +124,7 @@ export function PostPage() {
       <DocRenderer doc={post.doc} />
 
       {price ? (
-        <section className="rounded-card border border-line bg-surface-2 p-4">
+        <section className="rounded-card border border-[var(--surface-border)] bg-surface-2 p-4">
           <p className="text-title-3 tabular-nums text-text-1">{price}</p>
           {/* SAID PLAINLY. There is no purchase path in this phase, and a price beside a button
               that does nothing is worse than a price beside a sentence that tells the truth. */}

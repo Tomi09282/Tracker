@@ -348,7 +348,7 @@ export function PlaygroundPage() {
                 <span className="text-body-s text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
                 </span>
-                <span className="text-micro uppercase rounded-chip bg-ok-subtle px-1.5 text-ok">live</span>
+                <span className="text-micro uppercase rounded-chip bg-success-subtle px-1.5 text-success">live</span>
               </li>
             ))}
           </ul>

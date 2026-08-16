@@ -71,7 +71,10 @@ export function TrendChart({
   const gradientId = useId();
 
   if (series.length < 3) {
-    return <p className="text-caption text-text-3">{t(emptyKey, { count: series.length })}</p>;
+    // `text-2`, not `text-3`. This is a SENTENCE the reader has to act on ("three training days
+    // are needed"), not chrome — and the ink ramp's third step is declared for placeholders, idle
+    // nav and timestamps. It also measures 3.8:1, below the app's own AA_NORMAL.
+    return <p className="text-caption text-text-2">{t(emptyKey, { count: series.length })}</p>;
   }
 
   // The viewBox is fixed and the SVG scales; nothing here depends on measured pixels, so it renders
@@ -99,12 +102,18 @@ export function TrendChart({
     <figure className={className}>
       <figcaption className="text-caption flex items-baseline justify-between gap-2 text-text-2">
         <span>{label}</span>
-        <span className="tabular-nums text-text-1">
+        {/* THE ANSWER, at the size of an answer. This span used to inherit the figcaption's 12px,
+            so the current reading — the one number the chart exists to deliver — rendered SMALLER
+            than the two date labels under the axis. `text-title-3` is the scale's step for "the
+            value inside a stat block"; `items-baseline` on the row keeps it sitting on the same
+            line as its label. */}
+        <span className="text-title-3 tabular-nums text-text-1">
           {round(last.value)} {unit}
           {/* The change over the WHOLE window, not since the previous point. A single-session dip
-              is noise; where they started versus where they are is the question being asked. */}
+              is noise; where they started versus where they are is the question being asked.
+              Held at caption size so it annotates the value rather than competing with it. */}
           {delta !== 0 ? (
-            <span className={good ? 'ml-1 text-success' : 'ml-1 text-text-3'}>
+            <span className={good ? 'text-caption ml-1 text-success' : 'text-caption ml-1 text-text-2'}>
               {delta > 0 ? '+' : ''}
               {round(delta)}
             </span>

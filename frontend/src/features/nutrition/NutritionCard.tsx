@@ -38,9 +38,9 @@ export function NutritionCard({ date }: { date: string }) {
   if (!data || (data.items.length === 0 && data.targets == null)) return null;
 
   return (
-    <section className="mt-4 rounded-card border border-line bg-surface-2 p-4" aria-labelledby="nutrition-heading">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 id="nutrition-heading" className="text-label text-text-2">
+    <section className="mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4" aria-labelledby="nutrition-heading">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h2 id="nutrition-heading" className="text-title-3 text-text-1">
           {t('nutrition.card.title')}
         </h2>
         <Link

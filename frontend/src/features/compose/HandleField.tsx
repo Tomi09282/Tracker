@@ -85,7 +85,7 @@ export function HandleField({
   const TONE = {
     malformed: 'text-danger',
     taken: 'text-danger',
-    free: 'text-ok',
+    free: 'text-success',
     own: 'text-text-3',
     checking: 'text-text-3',
     unknown: 'text-text-3',
@@ -115,19 +115,19 @@ export function HandleField({
       <p className={`text-caption flex min-h-5 items-center gap-1 ${status ? TONE[status] : 'text-text-3'}`} aria-live="polite">
         {status === 'checking' ? (
           <>
-            <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" aria-hidden />
+            <Loader2 className="size-icon-s animate-spin motion-reduce:animate-none" aria-hidden />
             {t('compose.handleChecking')}
           </>
         ) : null}
         {status === 'free' ? (
           <>
-            <Check className="size-3.5" aria-hidden />
+            <Check className="size-icon-s" aria-hidden />
             {t('compose.handleFree')}
           </>
         ) : null}
         {status === 'taken' ? (
           <>
-            <X className="size-3.5" aria-hidden />
+            <X className="size-icon-s" aria-hidden />
             {t('compose.handleTaken')}
           </>
         ) : null}

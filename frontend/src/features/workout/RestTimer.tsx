@@ -97,7 +97,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           onClick={onSkip}
           className="shadow-[var(--shadow-overlay)] backdrop-blur"
         >
-          <span className="text-title-3 tabular-nums" aria-live="off">
+          <span className="text-title-3 font-display tabular-nums" aria-live="off">
             {clock}
           </span>
           <X className="size-icon-s" aria-hidden />
@@ -120,9 +120,13 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
         'bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom)+0.75rem)]',
       )}
     >
-      <div className="col-mobile flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-2/95 p-3 shadow-lg backdrop-blur">
+      {/* It FLOATS, so it separates by shadow — never by shadow AND a border (F-09). The surface is
+          the overlay step for the same reason, and the shadow is the pack's own overlay token
+          rather than a stock `shadow-lg`, which is a light-mode shadow at 10% black and invisible
+          on these surfaces. */}
+      <div className="col-mobile flex items-center gap-3 rounded-card border-[length:var(--border-width)] border-[var(--overlay-border)] bg-surface-3/95 p-3 shadow-[var(--shadow-overlay)] backdrop-blur">
         <svg viewBox="0 0 52 52" className="size-14 shrink-0 -rotate-90" aria-hidden>
-          <circle cx="26" cy="26" r={RADIUS} fill="none" stroke="var(--surface-3)" strokeWidth="4" />
+          <circle cx="26" cy="26" r={RADIUS} fill="none" stroke="var(--surface-2)" strokeWidth="4" />
           <circle
             cx="26"
             cy="26"
@@ -140,7 +144,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
         <div className="min-w-0 flex-1">
           {/* `aria-live="off"` on purpose: a countdown that announces every second is unusable with
               a screen reader. The single announcement that matters is "rest over", below. */}
-          <p className="text-title-2 tabular-nums" aria-live="off">
+          <p className="text-title-2 font-display tabular-nums" aria-live="off">
             {clock}
           </p>
           {nextUp ? (

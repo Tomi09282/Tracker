@@ -79,7 +79,7 @@ export function MarketplaceQueue() {
     <section className="mt-8">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-title-3 text-text-1">{t('admin.marketplace.title')}</h2>
-        <ul className="flex flex-wrap gap-1">
+        <ul className="flex flex-wrap gap-2">
           {(['open', 'triaged', 'upheld', 'rejected'] as const).map((s) => (
             <li key={s}>
               <Pressable
@@ -96,17 +96,17 @@ export function MarketplaceQueue() {
       </div>
 
       {queue.isPending ? (
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col gap-2">
           {[0, 1].map((i) => (
             <Skeleton key={i} className="h-28 rounded-card" />
           ))}
         </div>
       ) : queue.data && queue.data.reports.length > 0 ? (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-4 flex flex-col gap-2">
           {queue.data.reports.map((r) => (
-            <li key={r.id} className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
+            <li key={r.id} className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-caption rounded-chip bg-surface-3 px-2 py-1 text-text-1">
+                <span className="text-caption rounded-chip bg-surface-2 px-2 py-1 text-text-1">
                   {t(`admin.marketplace.reason.${r.reason}`, { defaultValue: r.reason })}
                 </span>
                 {/* How many DIFFERENT people, not how many reports. One person filing five times is
@@ -130,7 +130,7 @@ export function MarketplaceQueue() {
                   rel="noreferrer"
                   className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent"
                 >
-                  <ExternalLink className="size-4" aria-hidden />
+                  <ExternalLink className="size-icon-s" aria-hidden />
                   {t('admin.marketplace.openLive')}
                 </a>
               ) : null}
@@ -140,7 +140,7 @@ export function MarketplaceQueue() {
               {/* The text AS REPORTED. The live page may say something else by now, and that is the
                   point of keeping a copy until the case closes. */}
               {r.snapshot ? (
-                <div className="rounded-field bg-surface-3 p-2">
+                <div className="rounded-field bg-surface-2 p-3">
                   <p className="text-caption text-text-3">{t('admin.marketplace.snapshot')}</p>
                   <p className="text-body-s whitespace-pre-wrap text-text-1">{r.snapshot}</p>
                   {r.snapshotTruncated === 1 ? (
@@ -150,7 +150,7 @@ export function MarketplaceQueue() {
               ) : null}
 
               {openId === r.id ? (
-                <div className="flex flex-col gap-2 border-t border-line pt-2">
+                <div className="flex flex-col gap-4 border-t border-[var(--surface-border)] pt-4">
                   <Field
                     label={t('admin.marketplace.removalReason')}
                     value={reason}
@@ -202,7 +202,7 @@ export function MarketplaceQueue() {
           ))}
         </ul>
       ) : (
-        <div className="mt-3">
+        <div className="mt-4">
           <EmptyState
             icon={ShieldAlert}
             title={t('admin.marketplace.emptyTitle')}

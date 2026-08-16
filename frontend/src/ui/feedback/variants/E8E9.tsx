@@ -257,7 +257,8 @@ export function DatePicker({
         </div>
       ) : null}
 
-      <div className="mt-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+      {/* The canonical card, reading its padding from --card-pad rather than re-deciding it. */}
+      <div className="mt-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-[var(--card-pad)]">
         <div className="flex items-center justify-between gap-2">
           <Pressable
             shape="icon"

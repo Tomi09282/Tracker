@@ -31,11 +31,11 @@ function StatCard({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: 
     <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent">
-          <Icon size={20} strokeWidth={2} aria-hidden />
+          <Icon className="size-icon-m" strokeWidth={2} aria-hidden />
         </span>
         <span className="text-micro uppercase text-text-3">{label}</span>
       </div>
-      <p className="text-display mt-3 text-text-1">
+      <p className="text-display font-display mt-4 text-text-1">
         <CountUp to={value} />
       </p>
       {sub ? <p className="text-caption mt-1 text-text-3">{sub}</p> : null}
@@ -89,21 +89,21 @@ export function AdminPage() {
             open in a new tab or middle-click is a page. */}
         <Link
           to="/admin/styles"
-          className="text-body-s flex min-h-[var(--target-min)] items-center gap-1.5 text-accent"
+          className="text-body-s flex min-h-[var(--target-min)] items-center gap-2 text-accent"
         >
-          <Palette className="size-4" aria-hidden />
+          <Palette className="size-icon-s" aria-hidden />
           {t('admin.styleStudio')}
         </Link>
       </div>
 
       {stats.isPending ? (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Skeleton key={i} className="h-32 rounded-card" />
           ))}
         </div>
       ) : stats.data ? (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Users}
             label={t('admin.users')}
@@ -185,7 +185,7 @@ export function AdminPage() {
       />
 
       {stats.data ? (
-        <p className={cn('text-caption mt-6 text-text-3')}>
+        <p className={cn('text-caption mt-8 text-text-3')}>
           {t('admin.footer', {
             sessions: stats.data.sessions.active,
             events: stats.data.audit.events_24h,

@@ -61,7 +61,7 @@ function OnboardingPanel({ linkId }: { linkId: number }) {
   const avoid = p.limitations.filter((l: ClientOnboarding['limitations'][number]) => l.severity !== 'past');
 
   return (
-    <section className="flex flex-col gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+    <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col">
           <h2 className="text-title-3 font-display">{t('coaching.profileTitle')}</h2>
@@ -90,8 +90,8 @@ function OnboardingPanel({ linkId }: { linkId: number }) {
       {avoid.length ? (
         // Limitations are surfaced unconditionally, never behind the toggle. This is the one
         // answer where a coach not seeing it can hurt someone.
-        <div className="flex flex-col gap-2 rounded-card bg-danger-subtle p-3">
-          <p className="text-label uppercase tracking-wide text-danger">{t('coaching.limitations')}</p>
+        <div className="flex flex-col gap-2 rounded-card border border-danger-border bg-danger-subtle p-3">
+          <p className="text-micro uppercase text-danger">{t('coaching.limitations')}</p>
           {avoid.map((l: ClientOnboarding['limitations'][number]) => (
             <p key={l.body_area} className="text-body-s">
               <span className="font-medium">{t(`onboarding.area.${l.body_area}`)}</span>
@@ -104,7 +104,7 @@ function OnboardingPanel({ linkId }: { linkId: number }) {
       ) : null}
 
       {open ? (
-        <div className="flex flex-col border-t border-[var(--surface-border)] pt-3">
+        <div className="flex flex-col border-t border-[var(--surface-border)] pt-4">
           <Row label={t('onboarding.experience')} value={p.experience ? t(`onboarding.exp.${p.experience}`) : '—'} />
           <Row
             label={t('onboarding.sessionMinutes')}
@@ -168,7 +168,7 @@ export function ClientDetailPage() {
   const c = data.client;
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-5 py-6">
+    <div className="col-mobile screen-x flex flex-col gap-8 py-6">
       <Link to="/coach" className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body-s text-text-2">
         <ArrowLeft className="size-icon-s" aria-hidden />
         {t('coaching.title')}
@@ -183,7 +183,7 @@ export function ClientDetailPage() {
       </header>
 
       {c.must_change_credentials ? (
-        <div className="flex items-start gap-3 rounded-card bg-warning-subtle p-4">
+        <div className="flex items-start gap-3 rounded-card border border-warning-border bg-warning-subtle p-4">
           <TriangleAlert className="size-icon-m shrink-0 text-warning" aria-hidden />
           <p className="text-body-s">{t('coaching.handoverBody')}</p>
         </div>
@@ -197,7 +197,7 @@ export function ClientDetailPage() {
       <div
         role="tablist"
         aria-label={t('coaching.tabs')}
-        className="flex gap-1 overflow-x-auto"
+        className="flex gap-2 overflow-x-auto"
         onKeyDown={(e) => {
           const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
           if (!dir) return;

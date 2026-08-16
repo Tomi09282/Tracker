@@ -121,7 +121,7 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
           return (
             <li
               key={item.id}
-              className="flex items-center gap-3 rounded-card border border-line bg-surface-2 p-4"
+              className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-2 p-4"
             >
               <span className="min-w-0 flex-1">
                 <span className="text-body block truncate text-text-1">{item.title}</span>
@@ -204,7 +204,7 @@ function AchievementsTab() {
             <li
               key={a.key}
               className={`flex items-center gap-3 rounded-card border p-3 ${
-                done ? 'border-accent-subtle bg-surface-2' : 'border-line bg-surface-2'
+                done ? 'border-accent-subtle bg-surface-2' : 'border-[var(--surface-border)] bg-surface-2'
               }`}
             >
               <Trophy
@@ -272,7 +272,7 @@ function StatementTab() {
       {entries.map((e) => (
         <li
           key={e.id}
-          className="flex items-center gap-3 rounded-card border border-line bg-surface-2 px-3 py-2"
+          className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-2 px-3 py-2"
         >
           <span className="min-w-0 flex-1">
             <span className="text-body-s block truncate text-text-1">{e.reasonLabel}</span>

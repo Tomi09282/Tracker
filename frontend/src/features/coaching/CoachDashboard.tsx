@@ -30,11 +30,11 @@ function Stat({ icon: Icon, label, value }: { icon: LucideIcon; label: string; v
     <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent">
-          <Icon size={20} strokeWidth={2} aria-hidden />
+          <Icon className="size-icon-m" strokeWidth={2} aria-hidden />
         </span>
         <span className="text-micro uppercase text-text-3">{label}</span>
       </div>
-      <p className="text-display mt-3 text-text-1">
+      <p className="text-display font-display mt-4 text-text-1">
         <CountUp to={value} />
       </p>
     </div>
@@ -116,11 +116,11 @@ export function CoachDashboard() {
       </div>
 
       {clients.isPending ? (
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {[0, 1, 2].map((i) => <Skeleton key={i} className="h-32 rounded-card" />)}
         </div>
       ) : (
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <Stat icon={Users} label={t('coaching.clients')} value={rows.length} />
           <Stat icon={Ticket} label={t('coaching.teams')} value={teams.data?.teams.length ?? 0} />
           <Stat icon={KeyRound} label={t('coaching.activeCodes')} value={liveCodes.length} />
@@ -130,8 +130,8 @@ export function CoachDashboard() {
       {/* The one alert that is real today: accounts the coach created whose password the coach
           still knows. Until the client changes it, that account is not yet theirs. */}
       {awaitingHandover.length > 0 ? (
-        <div className="mt-4 flex items-start gap-3 rounded-card border border-[var(--warning-border)] bg-[var(--warning-subtle)] p-4">
-          <TriangleAlert size={20} strokeWidth={2} aria-hidden className="mt-0.5 shrink-0 text-warning" />
+        <div className="mt-8 flex items-start gap-3 rounded-card border border-[var(--warning-border)] bg-[var(--warning-subtle)] p-4">
+          <TriangleAlert strokeWidth={2} aria-hidden className="size-icon-m mt-0.5 shrink-0 text-warning" />
           <div>
             <p className="text-body text-text-1">{t('coaching.handoverTitle', { count: awaitingHandover.length })}</p>
             <p className="text-body-s measure mt-1 text-text-2">{t('coaching.handoverBody')}</p>
@@ -144,11 +144,11 @@ export function CoachDashboard() {
         <h2 className="text-title-3 text-text-1">{t('coaching.joinCodes')}</h2>
         <p className="text-body-s measure mt-1 text-text-2">{t('coaching.joinCodesBody')}</p>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Pressable
             variant="primary"
             busy={createCode.isPending}
-            icon={<KeyRound size={20} strokeWidth={2} aria-hidden />}
+            icon={<KeyRound className="size-icon-m" strokeWidth={2} aria-hidden />}
             onClick={async () => {
               const result = await createCode.mutateAsync({ kind: 'multi', max_uses: 20 });
               setMintedCode(result.code);
@@ -159,7 +159,7 @@ export function CoachDashboard() {
         </div>
 
         {liveCodes.length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-2">
+          <ul className="mt-4 flex flex-col gap-2">
             {liveCodes.map((c) => (
               <li
                 key={c.id}
@@ -188,7 +188,7 @@ export function CoachDashboard() {
       <section className="mt-8">
         <h2 className="text-title-3 text-text-1">{t('coaching.teams')}</h2>
         <form
-          className="mt-3 flex flex-wrap items-end gap-2"
+          className="mt-4 flex flex-wrap items-end gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             if (!teamName.trim()) return;
@@ -214,7 +214,7 @@ export function CoachDashboard() {
         <p className="text-body-s measure mt-1 text-text-2">{t('coaching.pregenBody')}</p>
 
         <form
-          className="mt-3 flex flex-wrap items-end gap-2"
+          className="mt-4 flex flex-wrap items-end gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             const emails = pregenEmails.split(/[\s,;]+/).map((s) => s.trim()).filter(Boolean);
@@ -233,7 +233,7 @@ export function CoachDashboard() {
           <Pressable
             type="submit"
             busy={pregenerate.isPending}
-            icon={<UserPlus size={20} strokeWidth={2} aria-hidden />}
+            icon={<UserPlus className="size-icon-m" strokeWidth={2} aria-hidden />}
           >
             {t('coaching.pregenCreate')}
           </Pressable>
@@ -242,7 +242,7 @@ export function CoachDashboard() {
         {/* Temporary passwords are shown exactly once. They are not stored in plaintext, so if
             this list is dismissed the coach must create the account again. */}
         {pregenerate.data && pregenerate.data.created.length > 0 ? (
-          <div className="mt-3 rounded-card border border-[var(--warning-border)] bg-[var(--warning-subtle)] p-4">
+          <div className="mt-4 rounded-card border border-[var(--warning-border)] bg-[var(--warning-subtle)] p-4">
             <p className="text-body-s text-text-1">{t('coaching.tempOnce')}</p>
             <ul className="mt-2 flex flex-col gap-2">
               {pregenerate.data.created.map((c) => (
@@ -262,9 +262,9 @@ export function CoachDashboard() {
         <h2 className="text-title-3 text-text-1">{t('coaching.roster')}</h2>
 
         {clients.isPending ? (
-          <Skeleton className="mt-3 h-40 rounded-card" />
+          <Skeleton className="mt-4 h-40 rounded-card" />
         ) : rows.length === 0 ? (
-          <div className="mt-3 rounded-card border border-[var(--surface-border)] bg-surface-1">
+          <div className="mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1">
             <EmptyState icon={Users} title={t('coaching.emptyTitle')} body={t('coaching.emptyBody')} />
           </div>
         ) : (
@@ -321,7 +321,7 @@ export function CoachDashboard() {
                         aria-label={t('coaching.archive')}
                         onClick={() => setConfirmArchive(c)}
                       >
-                        <Archive size={20} strokeWidth={2} aria-hidden />
+                        <Archive className="size-icon-m" strokeWidth={2} aria-hidden />
                       </Pressable>
                     </div>
                   </li>
@@ -334,7 +334,7 @@ export function CoachDashboard() {
 
       <Sheet open={mintedCode !== null} onClose={() => setMintedCode(null)} title={t('coaching.codeReady')}>
         <p className="text-body-s measure text-text-2">{t('coaching.codeOnce')}</p>
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3">
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3">
           <span className="text-title-3 tabular-nums text-text-1">{mintedCode}</span>
           <CopyButton value={mintedCode ?? ''} label={t('common.save')} />
         </div>

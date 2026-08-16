@@ -162,7 +162,7 @@ export function WorkoutPlayer() {
       // The whole screen, minus the nav. `h-[...]` rather than `min-h-` on purpose: this container
       // must NOT grow, or the page scrolls and the law above is broken.
       className={cn(
-        'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-3 py-4',
+        'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-group py-4',
         // Exactly what the layout reserves below it, from the same token — measured, not guessed.
         // Subtracting only `--nav-h` left the page 16 px taller than the viewport, which broke the
         // law this whole layout exists to keep.
@@ -259,8 +259,8 @@ export function WorkoutPlayer() {
       </header>
 
       {/* ── THE ONLY THING THAT SCROLLS ─────────────────────────────────────────────────────── */}
-      <ul className="min-h-0 overflow-y-auto overscroll-contain" aria-label={t('workout.sets')}>
-        <li className="grid h-8 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 px-2 text-caption text-text-3">
+      <ul className="min-h-0 space-y-1 overflow-y-auto overscroll-contain" aria-label={t('workout.sets')}>
+        <li className="grid h-8 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 px-2 text-micro uppercase text-text-3">
           <span className="text-center">#</span>
           <span>{t('workout.previous')}</span>
           <span className="text-center">{t('workout.kg')}</span>

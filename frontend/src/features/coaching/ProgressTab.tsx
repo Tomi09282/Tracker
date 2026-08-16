@@ -43,7 +43,7 @@ function ExerciseProgress({ linkId, exerciseId, name }: { linkId: number; exerci
   // information they can act on.
   if (!chosen) {
     return (
-      <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+      <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
         <p className="text-body-s text-text-1">{name}</p>
         <p className="text-caption mt-1 text-text-3">{t('progress.notEnough', { count: points.length })}</p>
       </div>
@@ -56,7 +56,7 @@ function ExerciseProgress({ linkId, exerciseId, name }: { linkId: number; exerci
       measure={chosen.key}
       unit={chosen.unit}
       label={name}
-      className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-3"
+      className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
     />
   );
 }
@@ -83,7 +83,7 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
   if (workouts.isPending || records.isPending) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <Skeleton className="h-20 w-full rounded-card" />
         <Skeleton className="h-20 w-full rounded-card" />
       </div>
@@ -104,14 +104,14 @@ export function ProgressTab({ linkId }: { linkId: number }) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* THE CHARTS COME FIRST, and only for movements the client has actually beaten a record on.
           That is the honest selection: an exercise with a record has, by definition, been done
           more than once, so there is something to plot. Charting whatever happens to be most
           recent would produce a line through one point. */}
       {chartable.length ? (
         <section aria-labelledby="progress-heading">
-          <h3 id="progress-heading" className="text-label uppercase tracking-wide text-text-2">
+          <h3 id="progress-heading" className="text-micro uppercase text-text-2">
             {t('progress.heading')}
           </h3>
           <div className="mt-2 flex flex-col gap-4">
@@ -124,14 +124,14 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
       {prs.length ? (
         <section aria-labelledby="records-heading">
-          <h3 id="records-heading" className="text-label uppercase tracking-wide text-text-2">
+          <h3 id="records-heading" className="text-micro uppercase text-text-2">
             {t('coaching.records')}
           </h3>
           <ul className="mt-2 flex flex-col gap-2">
             {prs.slice(0, 8).map((r) => (
               <li
                 key={r.id}
-                className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3"
+                className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
               >
                 <Trophy className="size-icon-m shrink-0 text-warning" aria-hidden />
                 <div className="min-w-0 flex-1">
@@ -155,12 +155,12 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
       {logs.length ? (
         <section aria-labelledby="sessions-heading">
-          <h3 id="sessions-heading" className="text-label uppercase tracking-wide text-text-2">
+          <h3 id="sessions-heading" className="text-micro uppercase text-text-2">
             {t('coaching.sessions')}
           </h3>
           <ul className="mt-2 flex flex-col gap-2">
             {logs.map((l) => (
-              <li key={l.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+              <li key={l.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-body truncate font-medium">
                     {l.day_name_snapshot ?? l.title ?? t('workout.freestyle')}

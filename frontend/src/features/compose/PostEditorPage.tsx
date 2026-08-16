@@ -185,7 +185,7 @@ export function PostEditorPage() {
 
   if (!isNew && existing.isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
         <Skeleton className="h-8 w-2/3 rounded-card" />
         <Skeleton className="h-40 rounded-card" />
       </div>
@@ -193,10 +193,10 @@ export function PostEditorPage() {
   }
   if (!isNew && (existing.isError || !post)) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
         <EmptyState icon={Trash2} title={t('compose.postGoneTitle')} body={t('compose.postGoneBody')} heading="h1" />
         <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
-          <ArrowLeft className="size-4" aria-hidden />
+          <ArrowLeft className="size-icon-s" aria-hidden />
           {t('compose.backToDesk')}
         </Link>
       </div>
@@ -269,25 +269,25 @@ export function PostEditorPage() {
   submitRef.current = submit;
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+    <div className="col-mobile screen-x flex flex-col gap-4 py-6">
       <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
-        <ArrowLeft className="size-4" aria-hidden />
+        <ArrowLeft className="size-icon-s" aria-hidden />
         {t('compose.backToDesk')}
       </Link>
 
-      <h1 className="text-title-2">{isNew ? t('compose.newPost') : t('compose.editPost')}</h1>
+      <h1 className="text-title-1">{isNew ? t('compose.newPost') : t('compose.editPost')}</h1>
 
       {readOnly ? (
-        <p className="text-body-s rounded-card border border-danger bg-danger-subtle p-3 text-text-1" role="status">
+        <p className="text-body-s rounded-card border border-danger-border bg-danger-subtle p-4 text-text-1" role="status">
           {t('compose.postRemoved')}
         </p>
       ) : null}
 
       {isNew ? (
         <label className="flex flex-col gap-1">
-          <span className="text-label text-text-2">{t('compose.kind')}</span>
+          <span className="text-body-s text-text-2">{t('compose.kind')}</span>
           <select
-            className="text-body min-h-[var(--target-min)] rounded-field border border-line bg-surface-2 px-3 text-text-1"
+            className="text-body min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] px-3"
             value={kind}
             onChange={(e) => setKind(e.target.value)}
           >
@@ -314,9 +314,9 @@ export function PostEditorPage() {
       />
 
       <label className="flex flex-col gap-1">
-        <span className="text-label text-text-2">{t('compose.body')}</span>
+        <span className="text-body-s text-text-2">{t('compose.body')}</span>
         <textarea
-          className="text-body min-h-64 rounded-field border border-line bg-surface-2 p-3 text-text-1"
+          className="text-body min-h-64 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] p-3"
           value={body}
           disabled={readOnly}
           onChange={(e) => setBody(e.target.value)}
@@ -346,7 +346,7 @@ export function PostEditorPage() {
           {isNew ? t('compose.createDraft') : dirty ? t('compose.save') : t('compose.saved')}
         </Pressable>
         <Pressable variant="secondary" onClick={() => setShowPreview((v) => !v)}>
-          <Eye className="size-4" aria-hidden />
+          <Eye className="size-icon-s" aria-hidden />
           {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
         </Pressable>
 
@@ -385,7 +385,7 @@ export function PostEditorPage() {
       ) : null}
 
       {conflict ? (
-        <div className="rounded-card border border-warning bg-warning-subtle p-3" role="alert">
+        <div className="rounded-card border border-warning-border bg-warning-subtle p-4" role="alert">
           <p className="text-body-s text-text-1">
             {t(`compose.reason.${conflict.reason}`, {
               defaultValue: t('compose.reason.generic'),
@@ -402,7 +402,7 @@ export function PostEditorPage() {
           {conflict.reason === 'stale' && conflict.post ? (
             <div className="mt-2 flex flex-col gap-2">
               <p className="text-caption text-text-2">{t('compose.staleServerCopy')}</p>
-              <p className="text-body-s rounded-field bg-surface-2 p-2 text-text-1">{conflict.post.title}</p>
+              <p className="text-body-s rounded-field bg-[var(--field-bg)] p-3 text-text-1">{conflict.post.title}</p>
               <Pressable
                 variant="secondary"
                 density="compact"
@@ -421,8 +421,8 @@ export function PostEditorPage() {
 
       {/* ── preview ────────────────────────────────────────────────────────────────────────── */}
       {showPreview ? (
-        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label text-text-2">{t('compose.preview')}</h2>
+        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 text-text-1">{t('compose.preview')}</h2>
           {preview.isPending ? (
             <Skeleton className="h-24 rounded-card" />
           ) : preview.data ? (
@@ -442,8 +442,8 @@ export function PostEditorPage() {
 
       {/* ── the cover ─────────────────────────────────────────────────────────────────────── */}
       {post && !readOnly ? (
-        <section className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-3">
-          <h2 className="text-label text-text-2">{t('compose.cover')}</h2>
+        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+          <h2 className="text-title-3 text-text-1">{t('compose.cover')}</h2>
 
           {cover ? (
             <>
@@ -465,7 +465,7 @@ export function PostEditorPage() {
                 busy={deleteCover.isPending}
                 onClick={() => deleteCover.mutate(undefined, { onSuccess: () => feedback.ok('compose.toast.coverRemoved') })}
               >
-                <Trash2 className="size-4" aria-hidden />
+                <Trash2 className="size-icon-s" aria-hidden />
                 {t('compose.removeCover')}
               </Pressable>
               <p className="text-caption text-text-3">{t('compose.coverReplaceNote')}</p>
@@ -479,8 +479,8 @@ export function PostEditorPage() {
                 onChange={(e) => setAlt(e.target.value)}
                 hint={t('compose.coverAltHint')}
               />
-              <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center gap-2 rounded-button border border-line px-4 text-text-1">
-                <ImagePlus className="size-4" aria-hidden />
+              <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center gap-2 rounded-button border border-[var(--surface-border)] bg-surface-1 px-4 text-text-1 transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] active:scale-[0.97] hover:bg-surface-2">
+                <ImagePlus className="size-icon-s" aria-hidden />
                 {uploadCover.isPending ? t('compose.uploading') : t('compose.chooseCover')}
                 <input
                   type="file"
@@ -513,7 +513,7 @@ export function PostEditorPage() {
 
       {/* ── lifecycle ──────────────────────────────────────────────────────────────────────── */}
       {post && !readOnly ? (
-        <section className="flex flex-wrap gap-2 border-t border-line pt-4">
+        <section className="flex flex-wrap gap-2 border-t border-[var(--surface-border)] pt-4">
           {post.publishedAt === null && post.deletedAt === null ? (
             <Pressable
               variant="primary"
@@ -528,7 +528,7 @@ export function PostEditorPage() {
                 })
               }
             >
-              <Globe className="size-4" aria-hidden />
+              <Globe className="size-icon-s" aria-hidden />
               {t('compose.publish')}
             </Pressable>
           ) : null}
@@ -545,7 +545,7 @@ export function PostEditorPage() {
                 })
               }
             >
-              <EyeOff className="size-4" aria-hidden />
+              <EyeOff className="size-icon-s" aria-hidden />
               {t('compose.withdraw')}
             </Pressable>
           ) : (
@@ -562,7 +562,7 @@ export function PostEditorPage() {
                 })
               }
             >
-              <RotateCcw className="size-4" aria-hidden />
+              <RotateCcw className="size-icon-s" aria-hidden />
               {t('compose.restore')}
             </Pressable>
           )}

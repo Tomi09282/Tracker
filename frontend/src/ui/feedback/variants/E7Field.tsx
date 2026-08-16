@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { Field, type FieldProps } from '../../primitives/Field';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe } from '../useMotionSafe';
+import { useMotionSafe, EASE_STANDARD } from '../useMotionSafe';
 
 export interface FeedbackFieldProps extends FieldProps {
   /** Marks the field as satisfied — variant C slides a tick in when true. */
@@ -39,7 +39,7 @@ export const FeedbackField = forwardRef<HTMLInputElement, FeedbackFieldProps>(fu
         className="inline-flex text-success"
         initial={motionSafe ? { x: 8, opacity: 0 } : false}
         animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: motionSafe ? 0.2 : 0, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: motionSafe ? 0.2 : 0, ease: EASE_STANDARD }}
       >
         <Check size={20} strokeWidth={2.5} />
       </motion.span>
@@ -69,7 +69,7 @@ export const FeedbackField = forwardRef<HTMLInputElement, FeedbackFieldProps>(fu
     <motion.div
       key={shakeKey}
       animate={motionSafe && error ? { x: [0, -8, 8, -6, 0] } : undefined}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.35, ease: EASE_STANDARD }}
     >
       {field}
     </motion.div>

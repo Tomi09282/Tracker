@@ -56,7 +56,7 @@ export function MarketplacePage() {
           onChange={(e) => setQ(e.target.value)}
           placeholder={t('marketplace.searchPlaceholder')}
           aria-label={t('marketplace.searchPlaceholder')}
-          className="text-body min-h-[var(--target-min)] w-full rounded-card border border-line bg-surface-2 pl-9 pr-3 text-text-1"
+          className="text-body min-h-[var(--target-min)] w-full rounded-card border border-[var(--surface-border)] bg-surface-2 pl-9 pr-3 text-text-1"
         />
       </div>
 
@@ -144,7 +144,7 @@ function PostCard({ post, locale }: { post: PublicPost; locale: string }) {
   return (
     <Link
       to={`/m/p/${post.id}`}
-      className="flex flex-col gap-2 rounded-card border border-line bg-surface-2 p-4"
+      className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-2 p-4"
     >
       <span className="text-caption flex items-center gap-2 text-text-3">
         <span className="rounded-chip bg-surface-3 px-1.5">

@@ -54,7 +54,7 @@ export function NutritionTab({ linkId }: { linkId: number }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {mine.length === 0 ? (
         <EmptyState
           icon={Apple}
@@ -109,7 +109,7 @@ export function NutritionTab({ linkId }: { linkId: number }) {
               })
             }
           >
-            <Plus className="size-4" aria-hidden />
+            <Plus className="size-icon-s" aria-hidden />
             {t('coaching.nutrition.create')}
           </Pressable>
         </>
@@ -169,11 +169,11 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
   const dayMeals = day ? meals.filter((m) => m.day_id === day.id) : [];
 
   return (
-    <div className="mt-2 rounded-card border border-line bg-surface-2 p-3">
+    <div className="mt-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
       {/* THE CYCLE IS THE SCHEDULE RULE'S INPUT, so the day picker is exactly cycle_days wide. A
           day outside it is refused by a trigger, and a picker that could produce one would be
           offering a control that cannot succeed. */}
-      <div className="mb-3 flex flex-wrap gap-1">
+      <div className="mb-4 flex flex-wrap gap-2">
         {Array.from({ length: plan.cycle_days }, (_, i) => {
           const exists = days.some((d) => d.day_index === i);
           return (
@@ -195,7 +195,7 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
           busy={addDay.isPending}
           onClick={() => addDay.mutate({ day_index: dayIndex })}
         >
-          <Plus className="size-4" aria-hidden />
+          <Plus className="size-icon-s" aria-hidden />
           {t('coaching.nutrition.addDay')}
         </Pressable>
       ) : (
@@ -206,14 +206,14 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
             // own macro arithmetic, because a second sum is a second answer.
             const kcal = mine.reduce((a, b) => a + b.kcal, 0);
             return (
-              <section key={m.id} className="mb-3">
-                <h4 className="text-caption mb-1 flex justify-between uppercase text-text-3">
+              <section key={m.id} className="mb-4">
+                <h4 className="text-micro mb-2 flex justify-between uppercase text-text-3">
                   <span>{m.name}</span>
                   <span className="tabular-nums">{Math.round(kcal)} kcal</span>
                 </h4>
                 <ul className="flex flex-col gap-1">
                   {mine.map((i) => (
-                    <li key={i.id} className="flex items-center gap-2 rounded-card bg-surface-3 px-3">
+                    <li key={i.id} className="flex items-center gap-2 rounded-card bg-surface-2 px-3">
                       <span className="min-w-0 flex-1 py-2">
                         <span className="text-body-s block truncate text-text-1">{i.name}</span>
                         <span className="text-caption tabular-nums text-text-3">
@@ -226,7 +226,7 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
                         onClick={() => delItem.mutate(i.id)}
                         aria-label={t('common.delete')}
                       >
-                        <Trash2 className="size-4" aria-hidden />
+                        <Trash2 className="size-icon-s" aria-hidden />
                       </Pressable>
                     </li>
                   ))}
@@ -248,14 +248,14 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
               addMeal.mutate({ day_id: day.id, name: t('coaching.nutrition.mealDefault') })
             }
           >
-            <Plus className="size-4" aria-hidden />
+            <Plus className="size-icon-s" aria-hidden />
             {t('coaching.nutrition.addMeal')}
           </Pressable>
         </>
       )}
 
       {plan.status === 'draft' ? (
-        <div className="mt-3 border-t border-line pt-3">
+        <div className="mt-4 border-t border-[var(--surface-border)] pt-4">
           {/* A DRAFT IS INVISIBLE TO THE CLIENT, and the coach is told so rather than left to
               wonder why nothing appeared on the client's phone. */}
           <p className="text-caption mb-2 text-text-3">{t('coaching.nutrition.draftNote')}</p>
@@ -284,7 +284,7 @@ function FoodPicker({
   const search = useFoodSearch(q, lang);
 
   return (
-    <div className="mt-1">
+    <div className="mt-2">
       <input
         value={q}
         onChange={(e) => {
@@ -293,10 +293,10 @@ function FoodPicker({
         }}
         placeholder={t('nutrition.searchPlaceholder')}
         aria-label={t('nutrition.searchPlaceholder')}
-        className="text-body-s min-h-[var(--target-min)] w-full rounded-card border border-line bg-surface-3 px-3 text-text-1"
+        className="text-body-s min-h-[var(--target-min)] w-full rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-3 text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
       />
       {q && !picked ? (
-        <ul className="mt-1 flex flex-col gap-0.5">
+        <ul className="mt-2 flex flex-col gap-1">
           {(search.data?.foods ?? []).slice(0, 5).map((f) => (
             <li key={f.id}>
               <Pressable
@@ -315,14 +315,14 @@ function FoodPicker({
         </ul>
       ) : null}
       {picked ? (
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-2 flex items-center gap-2">
           <span className="text-body-s min-w-0 flex-1 truncate text-text-1">{picked.name}</span>
           <input
             inputMode="decimal"
             value={grams}
             onChange={(e) => setGrams(e.target.value)}
             aria-label={t('nutrition.grams')}
-            className="text-body-s min-h-[var(--target-min)] w-16 rounded-card border border-line bg-surface-3 px-2 text-right tabular-nums text-text-1"
+            className="text-body-s min-h-[var(--target-min)] w-16 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-right tabular-nums text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           />
           <Pressable
             variant="primary"

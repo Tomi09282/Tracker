@@ -4,7 +4,7 @@ import { Check } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { Pressable, type PressableProps } from '../../primitives/Pressable';
 import { useElementVariant } from '../ElementStyleProvider';
-import { useMotionSafe, SPRING } from '../useMotionSafe';
+import { useMotionSafe, SPRING, EASE_STANDARD } from '../useMotionSafe';
 
 export interface FeedbackButtonProps extends Omit<PressableProps, 'onClick' | 'busy'> {
   /**
@@ -84,7 +84,7 @@ export function FeedbackButton({ onAction, onClick, children, className, ...rest
             className="absolute inset-y-0 left-0 bg-accent-pressed"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={motionSafe ? { duration: 0.25, ease: [0.16, 1, 0.3, 1] } : { duration: 0 }}
+            transition={motionSafe ? { duration: 0.25, ease: EASE_STANDARD } : { duration: 0 }}
           />
         ) : null}
         {done ? (

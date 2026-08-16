@@ -59,6 +59,15 @@
   --text-body--line-height: 1.375rem;    /* 22px */
   --text-body--font-weight: 400;
 
+  /* The primary line of a list row — the single most repeated text role in the product, and the
+     only one the scale had no step for. `text-body font-medium` was hand-written at 13 call sites
+     across 10 files; a role patched at the call site is a role the next screen re-decides. Same
+     size and line-height as --text-body on purpose: this is a WEIGHT step, not a size step, so a
+     row title and the secondary line under it stay on one baseline rhythm. */
+  --text-body-strong: 0.9375rem;              /* 15px */
+  --text-body-strong--line-height: 1.375rem;  /* 22px */
+  --text-body-strong--font-weight: 500;
+
   --text-body-s: 0.8125rem;              /* 13px */
   --text-body-s--line-height: 1.125rem;  /* 18px */
   --text-body-s--font-weight: 400;
@@ -75,6 +84,20 @@
   /* Spacing: Tailwind's --spacing IS the 4px grid of record (p-1=4 … p-12=48). Declaring a
      parallel scale would give the app two sources of truth, so we do not. */
   --spacing: 0.25rem;
+
+  /* Three NAMED steps OF that grid — not a second scale. Each is a plain multiple of --spacing
+     (2 / 4 / 8) and is named for a RELATIONSHIP rather than a size, which is the part the grid
+     could never carry: a grid says which values are legal, it does not say which one means
+     "these two things belong together".
+     Measured before they existed: 87% of every gap in the product was <= 12px and eight gaps in
+     the whole app were >= 20px, so proximity carried no information at all — 16 vs 12 vs 8 at
+     arm's length on a phone is one distance. Spacing is also the only axis with no gate
+     (off-grid-spacing inspects arbitrary values only), which is the structural reason it drifted.
+     WHY 32 for a section: it is the first step at 2x --card-pad, and below a 2:1 ratio a boundary
+     does not read as a boundary without a rule or a divider. */
+  --spacing-tight: 0.5rem;   /* 8px  = --spacing(2) — inside one group: icon↔text, chip↔chip, label↔value */
+  --spacing-group: 1rem;     /* 16px = --spacing(4) — between peers in one list; equals --card-pad on purpose */
+  --spacing-section: 2rem;   /* 32px = --spacing(8) — between two things that are not each other's business */
 
   /* Radius scale. Themes pick from it structurally; components never name a raw step. */
   --radius-0: 0px;
@@ -165,6 +188,13 @@
   --surface-2: #181C22;
   --surface-3: #20252D;
   --surface-border: rgb(255 255 255 / 0.07);
+  /* The hairline, one step stronger. It exists because an interactive surface has to be able to
+     state itself on hover, and its only other options were a raw value or the accent — and the
+     accent on every hoverable row spends the signature color on "the pointer is here", which is
+     the one thing it must not mean. Same alpha-of-ink construction as the hairline, so it works
+     on every surface in every pack; ~2x the base in each, which is the step where an edge is
+     read as *this* card rather than as a heavier line. */
+  --surface-border-strong: rgb(255 255 255 / 0.14);
 
   --ink: 242 245 247;                    /* #F2F5F7 */
   --accent: #6E8CFB;
@@ -185,6 +215,9 @@
   --border-width: 1px;
   --control-h: var(--target-min);
   --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
+     F-09: border OR shadow, never both. */
+  --overlay-border: transparent;
   --shadow-glow: none;
 }
 
@@ -194,6 +227,7 @@
   --surface-2: #201B14;
   --surface-3: #292219;
   --surface-border: rgb(255 255 255 / 0.07);
+  --surface-border-strong: rgb(255 255 255 / 0.14);
 
   --ink: 247 243 236;
   --accent: #FB9E3A;
@@ -213,6 +247,9 @@
   --border-width: 1px;
   --control-h: 48px;
   --shadow-overlay: 0 16px 40px rgb(0 0 0 / 0.45);
+  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
+     F-09: border OR shadow, never both. */
+  --overlay-border: transparent;
   --shadow-glow: none;
 }
 
@@ -222,6 +259,7 @@
   --surface-2: #161E18;
   --surface-3: #1D2720;
   --surface-border: rgb(255 255 255 / 0.07);
+  --surface-border-strong: rgb(255 255 255 / 0.14);
 
   --ink: 237 245 239;
   --accent: #3FCF8E;
@@ -240,6 +278,9 @@
   --border-width: 1px;
   --control-h: var(--target-min);
   --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
+     F-09: border OR shadow, never both. */
+  --overlay-border: transparent;
   --shadow-glow: none;
 }
 
@@ -250,6 +291,7 @@
   --surface-2: #11141B;
   --surface-3: #171B25;
   --surface-border: rgb(255 255 255 / 0.09);
+  --surface-border-strong: rgb(255 255 255 / 0.16);
 
   --ink: 240 244 255;
   --accent: #00E0FF;
@@ -269,6 +311,9 @@
   --border-width: 1px;
   --control-h: var(--target-min);
   --shadow-overlay: 0 0 32px color-mix(in srgb, var(--accent) 22%, transparent);
+  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
+     F-09: border OR shadow, never both. */
+  --overlay-border: transparent;
   --shadow-glow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
@@ -277,7 +322,10 @@
   --surface-1: #101010;
   --surface-2: #171717;
   --surface-3: #1F1F1F;
+  /* Mono's border is the heaviest in the set — that is the pack's declared identity, so its
+     strong step has to stay above everyone else's or the identity flattens on hover. */
   --surface-border: rgb(255 255 255 / 0.12);
+  --surface-border-strong: rgb(255 255 255 / 0.22);
 
   --ink: 245 245 245;
   --accent: #FAFAFA;
@@ -298,6 +346,9 @@
   --border-width: 2px;
   --control-h: var(--target-min);
   --shadow-overlay: none;
+  /* Mono declares no shadow, so a floating element separates by EDGE instead. F-09 asks for
+     one separator per pack, never both — this is that one. */
+  --overlay-border: var(--surface-border);
   --shadow-glow: none;
 }
 
@@ -307,10 +358,22 @@
  * custom accent, written straight onto the element by the theme engine) put in scope.
  */
 :root {
-  /* Text: one ink, three opacities (Bible: 92 / 62 / 42 %). */
+  /* Text: one ink, three opacities.
+   *
+   * The Bible cites 92 / 62 / 42. The bottom two were measured against this app's own accessibility
+   * constant and failed it: --text-3 at 0.42 is 3.80:1 on surface-0 and 3.67:1 on surface-3, while
+   * `ui/theme/contrast.ts` declares AA_NORMAL = 4.5 and enforces it on the accent. It is not chrome
+   * that fails — text-3 is the MOST used of the three (175 sites) and carries real data: measurement
+   * dates and values, gram and kcal figures, exercise type and difficulty, all at 11–12px, which is
+   * squarely "normal text".
+   *
+   * 92 / 70 / 52 measures 8.59:1 and 5.21:1 (surface-1) / 4.86:1 (surface-3) — clear on every surface
+   * in every pack. BOTH steps move: raising only text-3 would close the gap to text-2 and collapse
+   * two tiers into one, and three distinguishable tiers is the whole reason this is a ramp.
+   */
   --text-1: rgb(var(--ink) / 0.92);
-  --text-2: rgb(var(--ink) / 0.62);
-  --text-3: rgb(var(--ink) / 0.42);
+  --text-2: rgb(var(--ink) / 0.70);
+  --text-3: rgb(var(--ink) / 0.52);
 
   /* Accent ramp 50–950, interpolated in OKLab so a custom accent gets the same perceptual
      spacing as the built-in packs. --accent is step 500. */
@@ -329,7 +392,20 @@
   /* Interaction states derive from the ramp — never hand-picked per component. */
   --accent-hover: var(--accent-400);
   --accent-pressed: var(--accent-600);
-  --accent-subtle: color-mix(in srgb, var(--accent) 12%, transparent);
+
+  /* The "this one is selected / active / mine" wash. 12% measured 1.15:1 over surface-0 while
+     carrying the active nav tab, "today" in the week strip, the selected moderation row, the
+     command-palette cursor and the user's own chat bubble — at 1.08:1 against the other speaker's
+     bubble, the two people in a conversation were the same box. 20% is 1.30:1: still a wash rather
+     than a fill, and it survives an OLED phone at arm's length in a gym, which is the room this
+     app is used in. */
+  --accent-subtle: color-mix(in srgb, var(--accent) 20%, transparent);
+
+  /* The middle step the accent was missing. success / warning / danger / info each ship a 30%
+     `-border`; the accent jumped from a 12% wash straight to the filled color, so a selected card
+     had to choose between invisible and shouting. Same 30% as every other family, for the same
+     reason: an edge that states the state without spending the fill. */
+  --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);
 
   /* Every semantic color carries all four forms the Bible requires. */
   --success-subtle: color-mix(in srgb, var(--success) 12%, transparent);
@@ -376,8 +452,14 @@
   --nav-fg-idle: var(--text-3);
 
   --toast-bg: var(--surface-3);
+
+  /* The skeleton sweep. The sheen was borrowed from --surface-3, which put the two stops of a
+     moving gradient 1.07–1.11:1 apart in every pack — a 1200ms sweep across two colors nobody can
+     tell apart is a loading state that reports nothing. Deriving it from the base plus a little ink
+     (~1.35:1) makes it a step that cannot be flattened again by a future surface re-tune, which is
+     exactly how it got flat the first time. */
   --skeleton-base: var(--surface-2);
-  --skeleton-sheen: var(--surface-3);
+  --skeleton-sheen: color-mix(in srgb, var(--surface-3), rgb(var(--ink)) 8%);
 }
 
 /* ── Tailwind mapping ─────────────────────────────────────────────────────────────────── */
@@ -399,6 +481,7 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-subtle: var(--accent-subtle);
+  --color-accent-border: var(--accent-border);
 
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);

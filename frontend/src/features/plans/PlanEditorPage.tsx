@@ -56,7 +56,7 @@ export function PlanEditorPage() {
 
   if (isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-3 py-6">
+      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-24 w-full rounded-card" />
       </div>
@@ -88,7 +88,7 @@ export function PlanEditorPage() {
   };
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-5 py-6">
+    <div className="col-mobile screen-x flex flex-col gap-8 py-6">
       <Link to="/coach/plans" className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body-s text-text-2">
         <ArrowLeft className="size-icon-s" aria-hidden />
         {t('plans.title')}
@@ -138,7 +138,7 @@ export function PlanEditorPage() {
         </Pressable>
 
         {cloning ? (
-          <div className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3">
+          <div className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
             <p className="text-caption text-text-2">{t('plans.cloneHint')}</p>
             <ul className="flex flex-col gap-1">
               {(clients.data?.clients ?? []).map((c) => (
@@ -179,7 +179,7 @@ export function PlanEditorPage() {
         ) : null}
       </header>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-4">
         {days.length === 0 ? (
           <EmptyState icon={Layers} title={t('plans.noDaysTitle')} body={t('plans.noDaysBody')} />
         ) : null}
@@ -189,7 +189,7 @@ export function PlanEditorPage() {
           const open = openDay === day.id;
           return (
             <div key={day.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1">
-              <div className="flex items-center gap-2 p-3">
+              <div className="flex items-center gap-2 p-4">
                 <Pressable
                   variant="ghost"
                   shape="field"
@@ -217,7 +217,7 @@ export function PlanEditorPage() {
               </div>
 
               {open ? (
-                <div className="flex flex-col gap-3 border-t border-[var(--surface-border)] p-3">
+                <div className="flex flex-col gap-4 border-t border-[var(--surface-border)] p-4">
                   {dayBlocks.map((block, bi) => (
                     <div key={block.id} className="rounded-card bg-surface-2 p-2">
                       <div className="flex items-center gap-2">
@@ -295,8 +295,8 @@ export function PlanEditorPage() {
                                       className={cn(
                                         'text-caption ml-auto shrink-0 rounded-chip px-2 py-0.5',
                                         r.conflicts.some((c) => c.severity === 'avoid' && c.relation === 'loads')
-                                          ? 'bg-danger/15 text-danger'
-                                          : 'bg-warning/15 text-warning',
+                                          ? 'bg-danger-subtle text-danger'
+                                          : 'bg-warning-subtle text-warning',
                                       )}
                                       title={r.conflicts
                                         .map((c) => t(`onboarding.area.${c.body_area}`))
@@ -363,7 +363,7 @@ export function PlanEditorPage() {
         {/* Copy the whole cycle forward. Framed as "duplicate this week" because that is what a
             coach is doing — and the consequence is stated on the button, not discovered after. */}
         {days.length > 0 ? (
-          <div className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+          <div className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
             <Pressable
               variant="secondary"
               density="compact"

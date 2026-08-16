@@ -64,14 +64,14 @@ export function StyleStudioPage() {
       <h1 className="text-title-1 mt-1 text-text-1">{t('studio.title')}</h1>
       <p className="text-body measure mt-2 text-text-2">{t('studio.intro')}</p>
 
-      <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+      <div className="mt-8 flex flex-col gap-6 lg:flex-row">
         {/* The element list. A radiogroup, not a set of buttons: it is a single choice with one
             selected member, and screen readers should hear it that way. */}
         <nav
           className="lg:w-64 lg:shrink-0"
           aria-label={t('studio.elementList')}
         >
-          <ul role="radiogroup" aria-label={t('studio.elementList')} className="flex flex-col gap-1">
+          <ul role="radiogroup" aria-label={t('studio.elementList')} className="flex flex-col gap-2">
             {CATALOG.map((e) => (
               <li key={e.id}>
                 <Pressable
@@ -91,7 +91,7 @@ export function StyleStudioPage() {
                       {styles.data?.styles[e.id] ?? '·'}
                     </span>
                   ) : (
-                    <EyeOff className="size-3.5 text-text-3" aria-label={t('studio.inertShort')} />
+                    <EyeOff className="size-icon-s text-text-3" aria-label={t('studio.inertShort')} />
                   )}
                 </Pressable>
               </li>
@@ -120,19 +120,19 @@ export function StyleStudioPage() {
           </div>
 
           {!entry.live ? (
-            <p className="text-body-s measure mt-2 rounded-card border border-line bg-surface-2 p-3 text-text-2">
+            <p className="text-body-s measure mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4 text-text-2">
               {t('studio.inertExplain')}
             </p>
           ) : null}
 
           {styles.isPending ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {VARIANTS.map((v) => (
                 <Skeleton key={v} className="h-40 rounded-card" />
               ))}
             </div>
           ) : (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {VARIANTS.map((v) => {
                 const isActive = v === active;
                 return (
@@ -140,7 +140,7 @@ export function StyleStudioPage() {
                     key={v}
                     className={cn(
                       'rounded-card border bg-surface-1 p-4',
-                      isActive ? 'border-accent' : 'border-line',
+                      isActive ? 'border-accent' : 'border-[var(--surface-border)]',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -156,7 +156,7 @@ export function StyleStudioPage() {
 
                     {/* The SAME override the playground uses, around the SAME component. What is
                         clicked here is what ships — not a rendering of what would ship. */}
-                    <div className="mt-3 flex min-h-24 items-center justify-center">
+                    <div className="mt-4 flex min-h-24 items-center justify-center">
                       {previewable ? (
                         <VariantOverride styles={{ [entry.id]: v }}>
                           <Demo id={entry.id} />
@@ -171,14 +171,14 @@ export function StyleStudioPage() {
                     <Pressable
                       variant={isActive ? 'secondary' : 'primary'}
                       density="compact"
-                      className="mt-3 w-full"
+                      className="mt-4 w-full"
                       disabled={!entry.live || isActive || setVariant.isPending}
                       onClick={() => choose(v)}
                     >
                       {setVariant.isPending && setVariant.variables?.variant === v ? (
-                        <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
+                        <Loader2 className="size-icon-s animate-spin motion-reduce:animate-none" aria-hidden />
                       ) : isActive ? (
-                        <Check className="size-4" aria-hidden />
+                        <Check className="size-icon-s" aria-hidden />
                       ) : null}
                       {isActive ? t('studio.isActive') : t('studio.makeActive')}
                     </Pressable>

@@ -193,6 +193,14 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
                 className={cn(
                   'flex min-h-[var(--target-min)] w-full cursor-pointer items-center justify-between gap-2',
                   'rounded-field px-3 text-left text-body outline-none',
+                  // The cursor moves with the arrow keys, so the row it lands on has to CHANGE
+                  // rather than simply be different — instant, because this is the one surface a
+                  // power user notices 200ms on.
+                  'transition-colors duration-[var(--duration-instant)] ease-[var(--ease-standard)]',
+                  // `outline-none` alone removed focus instead of redrawing it: it sits in the
+                  // utilities layer and beats the `:focus-visible` backstop in index.css, so a
+                  // Tab into the list landed on a row with no indicator at all.
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
                   i === cursor ? 'bg-accent-subtle text-text-1' : 'text-text-2',
                 )}
               >
@@ -204,7 +212,9 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
             </li>
           ))}
           {filtered.length === 0 ? (
-            <li className="text-body-s px-3 py-3 text-text-3">{t('palette.empty')}</li>
+            // A sentence the reader has to act on, so it sits on the label step of the ink ramp,
+            // not the chrome step.
+            <li className="text-body-s px-3 py-3 text-text-2">{t('palette.empty')}</li>
           ) : null}
         </ul>
       </div>

@@ -204,7 +204,7 @@ export function OnboardingPage() {
     // desktop. `check-tokens` now rejects any reference that resolves to nothing.
     <div className="col-mobile screen-x flex flex-col gap-6 py-6">
       <header className="flex flex-col gap-3">
-        <p className="text-label uppercase tracking-wide text-text-2">
+        <p className="text-micro uppercase text-text-2">
           {t('onboarding.stepOf', { current: current + 1, total: STEPS.length })}
         </p>
         <h1 className="text-title-1 font-display">{t(`onboarding.step.${step}.title`)}</h1>
@@ -245,7 +245,7 @@ export function OnboardingPage() {
         {step === 'schedule' ? (
           <>
             <div role="radiogroup" aria-label={t('onboarding.experience')} className="flex flex-col gap-2">
-              <p className="text-label text-text-2">{t('onboarding.experience')}</p>
+              <p className="text-title-3 text-text-1">{t('onboarding.experience')}</p>
               {options.experience.map((e) => (
                 <Choice
                   key={e}
@@ -282,7 +282,7 @@ export function OnboardingPage() {
         {step === 'equipment' ? (
           <>
             <div role="radiogroup" aria-label={t('onboarding.location')} className="flex flex-col gap-2">
-              <p className="text-label text-text-2">{t('onboarding.location')}</p>
+              <p className="text-title-3 text-text-1">{t('onboarding.location')}</p>
               {options.locations.map((l) => (
                 <Choice
                   key={l}
@@ -293,7 +293,7 @@ export function OnboardingPage() {
               ))}
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-label text-text-2">{t('onboarding.equipment')}</p>
+              <p className="text-title-3 text-text-1">{t('onboarding.equipment')}</p>
               <p className="text-body-s text-text-2">{t('onboarding.equipmentHint')}</p>
               <div className="flex flex-wrap gap-2">
                 {options.equipment.map((eq) => (
@@ -368,7 +368,7 @@ export function OnboardingPage() {
               onChange={(e) => set({ birth_year: e.target.value ? Number(e.target.value) : null })}
             />
             <div className="flex flex-col gap-2">
-              <p className="text-label text-text-2">{t('onboarding.sex')}</p>
+              <p className="text-title-3 text-text-1">{t('onboarding.sex')}</p>
               <p className="text-body-s text-text-2">{t('onboarding.sexHint')}</p>
               <div className="flex flex-wrap gap-2">
                 {options.sex.map((s) => (

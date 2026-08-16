@@ -31,7 +31,10 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   const errorId = `${inputId}-error`;
 
   return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
+    // `gap-tight` (8px) rather than the old 1.5 step (6px): the label, the input and the hint or
+    // error are one group, and `--spacing-tight` is the name for that relationship. 6px was also
+    // the one distance in this component that was not on the 4px grid.
+    <div className={cn('flex flex-col gap-tight', className)}>
       <label htmlFor={inputId} className="text-body-s text-text-2">
         {label}
       </label>
@@ -44,11 +47,16 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
           aria-describedby={cn(hint && hintId, error && errorId) || undefined}
           className={cn(
             'w-full rounded-field bg-[var(--field-bg)] px-3',
-            // The floor, again — an input is a control like any other.
-            'min-h-[var(--target-min)]',
+            // The floor, again — an input is a control like any other, and it reads the same
+            // pack-owned height as `control.ts` so a field and the button beside it cannot end up
+            // different heights in a pack that declares taller controls.
+            'min-h-[var(--control-h)]',
             'text-body text-text-1 placeholder:text-text-3',
-            'border transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-            error ? 'border-[var(--danger)]' : 'border-[var(--surface-border)]',
+            // Border WIDTH from the pack (Mono's 2px), border COLOR from the field's own token —
+            // `--field-border` existed and nothing read it, so a field could never diverge from a
+            // card even though the alias was there to let it.
+            'border-[length:var(--border-width)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
+            error ? 'border-[var(--danger)]' : 'border-[var(--field-border)]',
             'outline-none focus-visible:border-accent focus-visible:outline-2',
             'focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
             'disabled:pointer-events-none disabled:opacity-45',

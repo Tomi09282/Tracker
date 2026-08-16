@@ -22,9 +22,9 @@ import { usePlans, useCreatePlan, useClonePlan, type PlanSummary } from '../plan
  */
 
 const STATUS_TONE: Record<PlanSummary['status'], string> = {
-  active: 'bg-success/15 text-success',
+  active: 'bg-success-subtle text-success',
   draft: 'bg-surface-3 text-text-2',
-  paused: 'bg-warning/15 text-warning',
+  paused: 'bg-warning-subtle text-warning',
   ended: 'bg-surface-3 text-text-3',
 };
 
@@ -86,7 +86,7 @@ export function PlanTab({ linkId }: { linkId: number }) {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <Skeleton className="h-24 w-full rounded-card" />
         <Skeleton className="h-24 w-full rounded-card" />
       </div>
@@ -96,7 +96,7 @@ export function PlanTab({ linkId }: { linkId: number }) {
   return (
     <div className="flex flex-col gap-4">
       {mine.length ? (
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-4">
           {mine.map((p) => (
             <PlanCard key={p.id} plan={p} />
           ))}
@@ -134,7 +134,7 @@ export function PlanTab({ linkId }: { linkId: number }) {
       {/* The template list is revealed rather than shown in a dialog: on a phone a dialog over this
           tab hides the plans the coach is comparing against. */}
       {cloning ? (
-        <ul className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3">
+        <ul className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
           {templates.map((tpl) => (
             <li key={tpl.id}>
               <Pressable

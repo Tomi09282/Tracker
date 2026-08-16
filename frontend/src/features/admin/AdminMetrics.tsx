@@ -56,12 +56,12 @@ function StatCard({
     <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent">
-          <Icon size={20} strokeWidth={2} aria-hidden />
+          <Icon className="size-icon-m" strokeWidth={2} aria-hidden />
         </span>
         <span className="text-micro uppercase text-text-3">{label}</span>
       </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <p className="text-display text-text-1">
+      <div className="mt-4 flex items-baseline gap-2">
+        <p className="text-display font-display text-text-1">
           <CountUp to={value} />
         </p>
         {/*
@@ -72,7 +72,7 @@ function StatCard({
         {delta !== undefined ? (
           <span
             className={`text-micro tabular-nums rounded-chip px-1.5 ${
-              delta > 0 ? 'bg-ok-subtle text-ok' : delta < 0 ? 'bg-danger-subtle text-danger' : 'bg-surface-2 text-text-3'
+              delta > 0 ? 'bg-success-subtle text-success' : delta < 0 ? 'bg-danger-subtle text-danger' : 'bg-surface-2 text-text-3'
             }`}
           >
             {delta > 0 ? '+' : ''}
@@ -101,7 +101,7 @@ export function AdminMetrics({ enabled }: { enabled: boolean }) {
     return (
       <section className="mt-8">
         <h2 className="text-title-3 text-text-1">{t('adminMetrics.title')}</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Skeleton key={i} className="h-32 rounded-card" />
           ))}
@@ -132,7 +132,7 @@ export function AdminMetrics({ enabled }: { enabled: boolean }) {
         <span className="text-caption text-text-3">{t('adminMetrics.window', { days: m.window.days })}</span>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={Activity}
           label={t('adminMetrics.loggedPeople')}
@@ -154,7 +154,7 @@ export function AdminMetrics({ enabled }: { enabled: boolean }) {
         />
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+      <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {/*
           A DIV, not a figure — and it was a figure for one render.
 

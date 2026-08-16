@@ -44,7 +44,7 @@ export function PlanListPage() {
     <li>
       <Link
         to={`/coach/plans/${plan.id}`}
-        className="flex min-h-[var(--target-min)] items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-3"
+        className="flex min-h-[var(--target-min)] items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-surface-2"
       >
         <ClipboardList className="size-icon-m shrink-0 text-text-2" aria-hidden />
         <div className="min-w-0 flex-1">
@@ -66,7 +66,7 @@ export function PlanListPage() {
   );
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-6 py-6">
+    <div className="col-mobile screen-x flex flex-col gap-8 py-6">
       <header>
         <p className="text-micro uppercase text-accent">{t('plans.eyebrow')}</p>
         <h1 className="text-title-1 font-display">{t('plans.title')}</h1>
@@ -105,7 +105,7 @@ export function PlanListPage() {
         <>
           {templates.length ? (
             <section aria-labelledby="tpl-heading">
-              <h2 id="tpl-heading" className={cn('text-label uppercase tracking-wide text-text-2')}>
+              <h2 id="tpl-heading" className={cn('text-micro uppercase text-text-2')}>
                 {t('plans.templates')}
               </h2>
               <ul className="mt-2 flex flex-col gap-2">
@@ -118,7 +118,7 @@ export function PlanListPage() {
 
           {clients.length ? (
             <section aria-labelledby="cli-heading">
-              <h2 id="cli-heading" className="text-label uppercase tracking-wide text-text-2">
+              <h2 id="cli-heading" className="text-micro uppercase text-text-2">
                 {t('plans.clientPlans')}
               </h2>
               <ul className="mt-2 flex flex-col gap-2">

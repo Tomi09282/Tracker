@@ -60,23 +60,23 @@ export function NutritionPage() {
   };
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-5 py-4">
+    <div className="col-mobile screen-x flex flex-col gap-section py-6">
       <header className="flex items-center justify-between gap-3">
-        <h1 className="text-title-2">{t('nutrition.title')}</h1>
+        <h1 className="text-title-1">{t('nutrition.title')}</h1>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           // The floor applies to a date input as much as to a button; it is tapped one-handed.
-          className="text-body-s min-h-[var(--target-min)] rounded-card border border-line bg-surface-2 px-3 text-text-1"
+          className="text-body-s min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-3 text-text-1"
           aria-label={t('nutrition.date')}
         />
       </header>
 
       {/* TOTALS FIRST. It is the question the screen exists to answer, and putting the search box
           above it would make the primary content something you scroll to. */}
-      <section className="rounded-card border border-line bg-surface-2 p-4">
-        <h2 className="text-label mb-3 text-text-2">
+      <section className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+        <h2 className="text-title-3 mb-2 text-text-1">
           {day.data?.targets?.day_name ?? t('nutrition.totals')}
         </h2>
         {day.isLoading ? (
@@ -87,7 +87,7 @@ export function NutritionPage() {
             {day.data && !day.data.targets ? (
               // Said rather than left blank. A missing target is a fact about the plan's schedule,
               // and an unexplained absence reads as a bug.
-              <p className="text-caption mt-3 text-text-3">{t('nutrition.noTargetToday')}</p>
+              <p className="text-caption mt-2 text-text-3">{t('nutrition.noTargetToday')}</p>
             ) : null}
           </>
         )}
@@ -95,7 +95,7 @@ export function NutritionPage() {
 
       {/* ADD */}
       <section>
-        <h2 className="text-label mb-2 text-text-2">{t('nutrition.add')}</h2>
+        <h2 className="text-title-3 mb-2 text-text-1">{t('nutrition.add')}</h2>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-3" aria-hidden />
           <input
@@ -105,7 +105,7 @@ export function NutritionPage() {
               setPicked(null);
             }}
             placeholder={t('nutrition.searchPlaceholder')}
-            className="text-body min-h-[var(--target-min)] w-full rounded-card border border-line bg-surface-2 pl-9 pr-3 text-text-1"
+            className="text-body min-h-[var(--target-min)] w-full rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] pl-9 pr-3 text-text-1"
             aria-label={t('nutrition.searchPlaceholder')}
           />
         </div>
@@ -123,7 +123,7 @@ export function NutritionPage() {
                   }}
                 >
                   <span className="min-w-0 flex-1 truncate">
-                    <span className="text-body block truncate text-text-1">{f.name}</span>
+                    <span className="text-body-strong block truncate text-text-1">{f.name}</span>
                     <span className="text-caption text-text-3">
                       {round(f.kcal_per_100g)} kcal · {round(f.protein_g_per_100g)}g P /100g
                       {f.brand ? ` · ${f.brand}` : ''}
@@ -140,9 +140,9 @@ export function NutritionPage() {
         ) : null}
 
         {picked ? (
-          <div className="mt-2 flex items-end gap-2 rounded-card border border-line bg-surface-2 p-3">
+          <div className="mt-2 flex items-end gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
             <span className="min-w-0 flex-1">
-              <span className="text-body block truncate text-text-1">{picked.name}</span>
+              <span className="text-body-strong block truncate text-text-1">{picked.name}</span>
               {/* The consequence of the grams, recomputed as they type — from the food's own
                   per-100g figures, which is the same arithmetic the server will do. It is shown
                   so the number is not a surprise after saving, NOT sent. */}
@@ -156,7 +156,7 @@ export function NutritionPage() {
                 inputMode="decimal"
                 value={grams}
                 onChange={(e) => setGrams(e.target.value)}
-                className="text-body min-h-[var(--target-min)] w-20 rounded-card border border-line bg-surface-3 px-2 text-right tabular-nums text-text-1"
+                className="text-body min-h-[var(--target-min)] w-20 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-right tabular-nums text-text-1"
               />
             </label>
             <Pressable variant="primary" busy={log.isPending} onClick={submit}>
@@ -168,7 +168,7 @@ export function NutritionPage() {
 
       {/* THE DAY */}
       <section>
-        <h2 className="text-label mb-2 text-text-2">{t('nutrition.logged')}</h2>
+        <h2 className="text-title-3 mb-2 text-text-1">{t('nutrition.logged')}</h2>
         {day.isLoading ? (
           <div className="flex flex-col gap-2">
             {[0, 1, 2].map((i) => (
@@ -179,16 +179,16 @@ export function NutritionPage() {
           <EmptyState icon={Apple} title={t('nutrition.emptyTitle')} body={t('nutrition.emptyBody')} />
         ) : (
           groups.map(([label, items]) => (
-            <div key={label} className="mb-3">
-              <h3 className="text-caption mb-1 uppercase text-text-3">{label}</h3>
+            <div key={label} className="mb-4">
+              <h3 className="text-micro mb-1 uppercase text-text-2">{label}</h3>
               <ul className="flex flex-col gap-1">
                 {items.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-center gap-2 rounded-card border border-line bg-surface-2 px-3"
+                    className="flex items-center gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 px-3"
                   >
                     <span className="min-w-0 flex-1 py-2">
-                      <span className="text-body block truncate text-text-1">{item.name}</span>
+                      <span className="text-body-strong block truncate text-text-1">{item.name}</span>
                       <span className="text-caption text-text-3 tabular-nums">
                         {round(item.grams)}g · {round(item.kcal)} kcal · {round(item.protein_g)}g P
                       </span>

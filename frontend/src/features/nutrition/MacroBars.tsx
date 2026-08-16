@@ -45,7 +45,7 @@ export function MacroBars({
   ];
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col gap-group">
       {rows.map((r) => {
         const over = r.target != null && r.value > r.target;
         // Clamped for the DRAWING only. The label below is never clamped.
@@ -70,7 +70,7 @@ export function MacroBars({
 
             {r.target != null ? (
               <div
-                className="mt-1 h-1.5 overflow-hidden rounded-chip bg-surface-3"
+                className="mt-1 h-1.5 overflow-hidden rounded-chip bg-surface-2"
                 role="progressbar"
                 aria-valuenow={Math.round(r.value)}
                 aria-valuemin={0}

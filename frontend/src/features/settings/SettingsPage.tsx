@@ -9,7 +9,7 @@ import { useSession, useLogout } from '../auth/useSession';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-6 first:mt-0">
+    <section className="mt-8 first:mt-0">
       <h2 className="text-micro uppercase text-text-3">{title}</h2>
       <div className="mt-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
         {children}
@@ -29,14 +29,14 @@ export function SettingsPage() {
 
   return (
     <div className="col-mobile screen-x py-6">
-      <h1 className="text-title-2 text-text-1">{t('settings.title')}</h1>
+      <h1 className="text-title-1 text-text-1">{t('settings.title')}</h1>
 
       <Section title={t('settings.account')}>
         <p className="text-body text-text-1">{user?.email}</p>
         <p className="text-body-s mt-1 text-text-3">{user?.role}</p>
         <Pressable
           variant="ghost"
-          className="mt-3"
+          className="mt-4"
           busy={logout.isPending}
           icon={<LogOut size={20} strokeWidth={2} aria-hidden />}
           onClick={() => logout.mutate()}
@@ -63,7 +63,7 @@ export function SettingsPage() {
         <Section title={t('nav.admin')}>
           <Link
             to="/admin"
-            className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body text-accent"
+            className="inline-flex min-h-[var(--target-min)] items-center gap-2 text-body text-accent transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:text-accent-hover"
           >
             <ShieldCheck className="size-icon-s" aria-hidden />
             {t('settings.openAdmin')}

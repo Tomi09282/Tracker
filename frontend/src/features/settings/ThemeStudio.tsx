@@ -41,7 +41,7 @@ export function ThemeStudio() {
         <div className="bg-surface-1 p-4">
           <p className="text-body text-text-1">{t('settings.previewBody')}</p>
           <p className="text-body-s mt-1 text-text-2">{t('settings.previewSecondary')}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Pressable variant="primary" density="compact">
               {t('common.save')}
             </Pressable>
@@ -50,7 +50,7 @@ export function ThemeStudio() {
         </div>
       </div>
 
-      <h3 className="text-micro uppercase mt-6 text-text-3">{t('settings.themePacks')}</h3>
+      <h3 className="text-micro uppercase mt-8 text-text-3">{t('settings.themePacks')}</h3>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {THEME_PACKS.map((pack) => {
           const active = theme.pack === pack;
@@ -77,7 +77,7 @@ export function ThemeStudio() {
         })}
       </div>
 
-      <h3 className="text-micro uppercase mt-6 text-text-3">{t('settings.accent')}</h3>
+      <h3 className="text-micro uppercase mt-8 text-text-3">{t('settings.accent')}</h3>
       <div className="mt-2">
         <AccentPicker
           value={theme.accent}
@@ -86,7 +86,7 @@ export function ThemeStudio() {
         />
       </div>
 
-      <h3 className="text-micro uppercase mt-6 text-text-3">{t('settings.gradient.title')}</h3>
+      <h3 className="text-micro uppercase mt-8 text-text-3">{t('settings.gradient.title')}</h3>
       <div className="mt-2">
         <GradientBuilder
           value={theme.gradient ?? DEFAULT_GRADIENT}
@@ -96,7 +96,7 @@ export function ThemeStudio() {
           }}
           onClear={() => commit({ gradient: null })}
         />
-        <div className="mt-3">
+        <div className="mt-4">
           <Pressable
             variant="primary"
             density="compact"

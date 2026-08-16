@@ -101,7 +101,7 @@ export function CoachProfilePage() {
       <DocRenderer doc={coach.doc} />
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-label text-text-2">{t('marketplace.theirPosts')}</h2>
+        <h2 className="text-title-3 text-text-1">{t('marketplace.theirPosts')}</h2>
         {posts.length === 0 ? (
           <p className="text-caption text-text-3">{t('marketplace.noPostsYet')}</p>
         ) : (
@@ -110,7 +110,7 @@ export function CoachProfilePage() {
               <li key={p.id}>
                 <Link
                   to={`/m/p/${p.id}`}
-                  className="flex flex-col gap-1 rounded-card border border-line bg-surface-2 p-3"
+                  className="flex flex-col gap-1 rounded-card border border-[var(--surface-border)] bg-surface-2 p-3"
                 >
                   <span className="text-caption text-text-3">
                     {t(`marketplace.kind.${p.kind}`, { defaultValue: p.kind })}

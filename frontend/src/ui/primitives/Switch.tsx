@@ -52,9 +52,14 @@ export function Switch({
       onClick={() => onChange(!checked)}
       className={cn(
         // The hit area, not the graphic. `grid place-items-center` keeps the track centred in it.
-        'grid size-11 shrink-0 place-items-center rounded-field',
+        // Sized from `--control-h` for the same reason `control.ts` is: it is the pack's control
+        // height, every pack declares it at >= 44px, and a switch sitting in a row of 48px controls
+        // at 44px is the kind of one-off that made the previous build's twelve different heights.
+        'grid size-[var(--control-h)] shrink-0 place-items-center rounded-field',
         'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-        'disabled:cursor-not-allowed disabled:opacity-40',
+        // 45, the same disabled opacity `control.ts` uses. 40 was drift: two primitives that mean
+        // the same thing are the start of twelve components that mean twelve things.
+        'disabled:cursor-not-allowed disabled:opacity-45',
         className,
       )}
     >

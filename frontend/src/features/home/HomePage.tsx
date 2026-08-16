@@ -42,23 +42,23 @@ export function HomePage() {
   };
 
   return (
-    <div className="col-mobile screen-x py-6">
+    <div className="col-mobile screen-x flex flex-col gap-8 py-6">
       <header>
         <div className="flex items-start justify-between gap-2">
-        <h1 className="text-title-2 text-text-1">{t('home.greeting')}</h1>
-        <p className="text-caption mt-1 text-text-3 first-letter:uppercase">{dateLabel}</p>
-        {user ? <p className="text-body-s mt-1 text-text-3">{user.email}</p> : null}
-                <NotificationBell className="-mr-2 shrink-0" />
-</div>
+          <h1 className="text-title-1 shrink-0 text-text-1">{t('home.greeting')}</h1>
+          <p className="text-caption mt-1 min-w-0 truncate text-text-3 first-letter:uppercase">{dateLabel}</p>
+          {user ? <p className="text-body-s mt-1 min-w-0 truncate text-text-3">{user.email}</p> : null}
+          <NotificationBell className="-mr-2 shrink-0" />
+        </div>
       </header>
 
       {today.data?.date ? (
-        <div className="mt-6">
+        <div>
           <WeekStrip today={today.data.date} />
         </div>
       ) : null}
 
-      <section className="mt-6" aria-labelledby="today-heading">
+      <section aria-labelledby="today-heading">
         <p className="text-micro uppercase text-accent">{t('home.todayTitle')}</p>
         <h2 id="today-heading" className="sr-only">
           {t('home.todayTitle')}
@@ -99,7 +99,7 @@ export function HomePage() {
             />
           </div>
         ) : (
-          <ul className="mt-2 flex flex-col gap-3">
+          <ul className="mt-2 flex flex-col gap-4">
             {days.map((day) => {
               const trained = day.log_id != null;
               return (
@@ -107,7 +107,7 @@ export function HomePage() {
                   key={`${day.plan_id}-${day.day_id}-${day.slot}`}
                   className={cn(
                     'flex items-center gap-3 rounded-card border border-[var(--surface-border)] p-4',
-                    trained ? 'bg-success/10' : 'bg-surface-1',
+                    trained ? 'bg-success-subtle' : 'bg-surface-1',
                   )}
                 >
                   {/* A rest day is information, not an absence. Hiding it looks like a bug and

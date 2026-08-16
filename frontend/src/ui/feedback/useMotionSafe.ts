@@ -28,6 +28,19 @@ export function useMotionSafe(): boolean {
   return safe;
 }
 
+/**
+ * `--ease-standard`, in the shape Motion wants.
+ *
+ * The token is `cubic-bezier(0.16, 1, 0.3, 1)` and `check-tokens` refuses that string outside
+ * `tokens.css` — but Motion takes a bezier as four numbers, which the gate cannot see and which had
+ * therefore been retyped as a literal `[0.16, 1, 0.3, 1]` in nine places across six variant files.
+ * Nine copies of one decision is how a curve drifts: the tenth is where somebody rounds it.
+ *
+ * It lives beside `SPRING` because that is where this project already keeps the motion config that
+ * has to reach JS. A CSS var read at module scope would resolve before the theme is applied.
+ */
+export const EASE_STANDARD: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 /** Spring presets from the Bible: stiffness 300–400, damping 17–28, scaled to element size. */
 export const SPRING = {
   /** Small controls: buttons, chips, icons. Snappy. */
