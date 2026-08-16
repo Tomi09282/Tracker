@@ -41,8 +41,12 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
       <ul className="mx-auto flex max-w-md items-stretch justify-around lg:max-w-none lg:gap-1">
         {visible.map((tab) => {
           const Icon = tab.icon;
+          // `min-w-0` because `flex-1` alone does not make a flex item shrinkable: the default
+          // `min-width: auto` floors it at its content width. Measured at 360px — the five links
+          // came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport, unreadable
+          // and only half tappable. With the floor removed the five cells are equal.
           return (
-            <li key={tab.to} className="flex-1 lg:flex-none">
+            <li key={tab.to} className="min-w-0 flex-1 lg:flex-none">
               <NavLink
                 to={tab.to}
                 end={tab.end}
@@ -51,7 +55,11 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     // The bar is 64px tall; the link fills it, so the whole cell is tappable
                     // rather than just the icon.
                     'flex h-[var(--nav-h)] min-w-[var(--target-min)] flex-col items-center',
-                    'justify-center gap-1 px-3 lg:flex-row lg:gap-2 lg:px-4',
+                    // No horizontal padding on the narrowest phones: the cells are equal width and the whole
+                    // cell is the tap target, so the padding bought nothing and cost 8px of label. With
+                    // it gone the two longest Hungarian labels (71px and 65px) fit a 72px cell; the
+                    // truncate below is the safety net for a longer translation, not the normal case.
+                    'justify-center gap-1 px-0 sm:px-3 lg:flex-row lg:gap-2 lg:px-4',
                     'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
                     isActive ? 'text-[var(--nav-fg-active)]' : 'text-[var(--nav-fg-idle)]',
                   )
@@ -96,7 +104,7 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                         </span>
                       ) : null}
                     </span>
-                    <span className="text-micro">{tab.label}</span>
+                    <span className="text-micro max-w-full truncate">{tab.label}</span>
                   </>
                 )}
               </NavLink>
