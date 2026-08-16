@@ -123,6 +123,17 @@
      250ms is a strobe. Naming it here is what stops each screen from inventing its own: nine of
      them had already reached for Tailwind's animate-pulse at 2s, which no token declares. */
   --duration-ambient: 1200ms; /* skeleton shimmer, breathing emphasis — loops, not transitions */
+
+  /* The toast's DWELL, which is a third kind again: not a state change and not a loop, but how
+     long a notification stays on screen before it takes itself away. It sits outside the 500ms
+     UI ceiling for the same reason --duration-ambient does — that ceiling governs how long the
+     eye is asked to follow a change, and this is how long a sentence is left up to be read.
+     It is a token because two literals had to agree and neither could see the other: the
+     auto-dismiss `setTimeout(…, 4000)` in E12E16 and the `toast-timer 4s` that draws the
+     remaining time as a hairline. A drained bar over a toast that is still there, or a toast
+     that vanishes under a half-full bar, is the timer lying about itself. */
+  --duration-toast: 4000ms;
+
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-linear: linear;      /* progress only */
 
@@ -187,17 +198,27 @@
   --surface-1: #12151A;
   --surface-2: #181C22;
   --surface-3: #20252D;
-  --surface-border: rgb(255 255 255 / 0.07);
+  /* The hairline, at the ~12% the card rule asks for. It ran at 0.07 and measured as an absence:
+     on a dark surface an alpha-white edge at 7% is under half a shade off the card it is meant to
+     bound, so the card separated by its fill alone — and the fill is one 4% step off the page.
+     This is the app's ONLY card separator (F-09: border OR shadow, never both), so it is not a
+     detail, it is the whole boundary. */
+  --surface-border: rgb(255 255 255 / 0.12);
   /* The hairline, one step stronger. It exists because an interactive surface has to be able to
      state itself on hover, and its only other options were a raw value or the accent — and the
      accent on every hoverable row spends the signature color on "the pointer is here", which is
      the one thing it must not mean. Same alpha-of-ink construction as the hairline, so it works
      on every surface in every pack; ~2x the base in each, which is the step where an edge is
-     read as *this* card rather than as a heavier line. */
-  --surface-border-strong: rgb(255 255 255 / 0.14);
+     read as *this* card rather than as a heavier line. It moves WITH the base: leaving it at
+     0.14 against a 0.12 hairline would have made hover a two-hundredths change nobody sees. */
+  --surface-border-strong: rgb(255 255 255 / 0.22);
 
   --ink: 242 245 247;                    /* #F2F5F7 */
-  --accent: #6E8CFB;
+  /* Desaturated one step off the source hue (HSL S 95 → 76, hue and lightness untouched). A
+     fully saturated accent buzzes on an OLED panel in a dark room, which is the only room this
+     app runs in — and this one is a large filled surface on every primary button. Legibility
+     went UP, not down: accent-as-text on surface-0 measures 6.78:1 where it was 6.31:1. */
+  --accent: #7C94ED;
   --accent-fg: #0B0D10;                  /* recomputed against WCAG by the theme engine */
 
   --success: #34D399;  --on-success: #04150E;
@@ -214,7 +235,23 @@
   --radius-chip: var(--radius-full);
   --border-width: 1px;
   --control-h: var(--target-min);
-  --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  /* THREE layers, not one. A single `0 8px 24px` is a stamp, not a shadow: it gives one distance
+     cue, so the sheet, the floating rest timer and the command palette all read as sitting at the
+     same height above the page. The stack is the standard one — a tight CONTACT shadow that says
+     the element is touching something, a MID spread that gives it its height, and a wide AMBIENT
+     wash that says the room has light in it. Blur roughly 2 / 12–24 / 32–48 at increasing offset.
+     Alphas drop as blur grows, so the three sum to about the weight the single layer had. */
+  --shadow-overlay:
+    0 1px 2px rgb(0 0 0 / 0.32),
+    0 8px 24px rgb(0 0 0 / 0.30),
+    0 20px 44px rgb(0 0 0 / 0.24);
+  /* The topmost thing on screen — the one element that is above every other floating element,
+     not merely above the page. Same three layers, pushed one step further out, so "on top of the
+     sheet" is a distance the eye can measure rather than a z-index only the code knows about. */
+  --shadow-overlay-strong:
+    0 1px 2px rgb(0 0 0 / 0.40),
+    0 12px 32px rgb(0 0 0 / 0.38),
+    0 32px 64px rgb(0 0 0 / 0.30);
   /* This pack separates a floating element by its shadow, so the edge stays out of the way.
      F-09: border OR shadow, never both. */
   --overlay-border: transparent;
@@ -226,11 +263,11 @@
   --surface-1: #191510;
   --surface-2: #201B14;
   --surface-3: #292219;
-  --surface-border: rgb(255 255 255 / 0.07);
-  --surface-border-strong: rgb(255 255 255 / 0.14);
+  --surface-border: rgb(255 255 255 / 0.12);
+  --surface-border-strong: rgb(255 255 255 / 0.22);
 
   --ink: 247 243 236;
-  --accent: #FB9E3A;
+  --accent: #E89D4D;                     /* HSL S 96 → 77; hue and lightness held */
   --accent-fg: #12100B;
 
   --success: #34D399;  --on-success: #04150E;
@@ -246,7 +283,17 @@
   --radius-chip: var(--radius-full);
   --border-width: 1px;
   --control-h: 48px;
-  --shadow-overlay: 0 16px 40px rgb(0 0 0 / 0.45);
+  /* Same three-layer construction as Midnight, thrown further: this pack's declared identity is
+     "soft — larger radii, deeper shadow", and a deeper shadow means a longer mid and ambient, not
+     a darker stamp. */
+  --shadow-overlay:
+    0 1px 2px rgb(0 0 0 / 0.36),
+    0 16px 40px rgb(0 0 0 / 0.38),
+    0 36px 72px rgb(0 0 0 / 0.30);
+  --shadow-overlay-strong:
+    0 1px 2px rgb(0 0 0 / 0.44),
+    0 22px 52px rgb(0 0 0 / 0.46),
+    0 48px 88px rgb(0 0 0 / 0.36);
   /* This pack separates a floating element by its shadow, so the edge stays out of the way.
      F-09: border OR shadow, never both. */
   --overlay-border: transparent;
@@ -258,11 +305,11 @@
   --surface-1: #101711;
   --surface-2: #161E18;
   --surface-3: #1D2720;
-  --surface-border: rgb(255 255 255 / 0.07);
-  --surface-border-strong: rgb(255 255 255 / 0.14);
+  --surface-border: rgb(255 255 255 / 0.12);
+  --surface-border-strong: rgb(255 255 255 / 0.22);
 
   --ink: 237 245 239;
-  --accent: #3FCF8E;
+  --accent: #4DC18D;                     /* HSL S 60 → 48; hue and lightness held */
   --accent-fg: #04150E;
 
   --success: #34D399;  --on-success: #04150E;
@@ -277,7 +324,16 @@
   --radius-chip: var(--radius-full);
   --border-width: 1px;
   --control-h: var(--target-min);
-  --shadow-overlay: 0 8px 24px rgb(0 0 0 / 0.35);
+  /* Forest shares Midnight's structural identity, so it shares its elevation stack too —
+     contact / mid / ambient. Two packs declared as "calm, medium" must not drift apart here. */
+  --shadow-overlay:
+    0 1px 2px rgb(0 0 0 / 0.32),
+    0 8px 24px rgb(0 0 0 / 0.30),
+    0 20px 44px rgb(0 0 0 / 0.24);
+  --shadow-overlay-strong:
+    0 1px 2px rgb(0 0 0 / 0.40),
+    0 12px 32px rgb(0 0 0 / 0.38),
+    0 32px 64px rgb(0 0 0 / 0.30);
   /* This pack separates a floating element by its shadow, so the edge stays out of the way.
      F-09: border OR shadow, never both. */
   --overlay-border: transparent;
@@ -290,11 +346,16 @@
   --surface-1: #0B0D12;
   --surface-2: #11141B;
   --surface-3: #171B25;
-  --surface-border: rgb(255 255 255 / 0.09);
-  --surface-border-strong: rgb(255 255 255 / 0.16);
+  /* One step above the base packs, as before: this pack's surfaces are the darkest in the set,
+     so its edges need slightly more ink to read at the same weight. */
+  --surface-border: rgb(255 255 255 / 0.14);
+  --surface-border-strong: rgb(255 255 255 / 0.24);
 
   --ink: 240 244 255;
-  --accent: #00E0FF;
+  /* The worst offender in the set at S=100 — a fully saturated cyan on a near-black page is the
+     exact "buzzes and reads as cheap" the dark-mode rule names. HSL S 100 → 80; still cyan, still
+     the pack's glow, no longer vibrating. */
+  --accent: #19CDE6;
   --accent-fg: #04141A;
 
   --success: #34D399;  --on-success: #04150E;
@@ -310,7 +371,18 @@
   --radius-chip: var(--radius-full);
   --border-width: 1px;
   --control-h: var(--target-min);
-  --shadow-overlay: 0 0 32px color-mix(in srgb, var(--accent) 22%, transparent);
+  /* Three layers here too, but all at ZERO offset: this pack's declared identity is "pill + glow,
+     no drop shadow", and a glow that gains a y-offset is a drop shadow. What the three layers buy
+     is the same thing they buy elsewhere — a tight rim that anchors the edge, a mid halo that
+     gives height, a wide ambient that lights the surface under it. */
+  --shadow-overlay:
+    0 0 2px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 0 12px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 0 32px color-mix(in srgb, var(--accent) 14%, transparent);
+  --shadow-overlay-strong:
+    0 0 3px color-mix(in srgb, var(--accent) 36%, transparent),
+    0 0 20px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 0 48px color-mix(in srgb, var(--accent) 20%, transparent);
   /* This pack separates a floating element by its shadow, so the edge stays out of the way.
      F-09: border OR shadow, never both. */
   --overlay-border: transparent;
@@ -323,11 +395,16 @@
   --surface-2: #171717;
   --surface-3: #1F1F1F;
   /* Mono's border is the heaviest in the set — that is the pack's declared identity, so its
-     strong step has to stay above everyone else's or the identity flattens on hover. */
-  --surface-border: rgb(255 255 255 / 0.12);
-  --surface-border-strong: rgb(255 255 255 / 0.22);
+     strong step has to stay above everyone else's or the identity flattens on hover. Both steps
+     moved up when the other four packs came up to ~12%: the ORDER is what carries the identity,
+     not the absolute number. */
+  --surface-border: rgb(255 255 255 / 0.16);
+  --surface-border-strong: rgb(255 255 255 / 0.28);
 
   --ink: 245 245 245;
+  /* Untouched at S=0. There is no saturation to take out of an achromatic accent — the
+     desaturation step the other four packs took does not apply, and faking one by darkening it
+     would be a different change with a different reason. */
   --accent: #FAFAFA;
   --accent-fg: #0A0A0A;
 
@@ -346,6 +423,10 @@
   --border-width: 2px;
   --control-h: var(--target-min);
   --shadow-overlay: none;
+  /* And the strong step is `none` too. Mono's identity is "sharp + flat: no shadow at all", so
+     the elevation stack the other four packs gained deliberately stops at this pack's door —
+     here the topmost element separates by its edge, one step stronger. */
+  --shadow-overlay-strong: none;
   /* Mono declares no shadow, so a floating element separates by EDGE instead. F-09 asks for
      one separator per pack, never both — this is that one. */
   --overlay-border: var(--surface-border);
@@ -407,6 +488,19 @@
      reason: an edge that states the state without spending the fill. */
   --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);
 
+  /* The foreground for text sitting ON that wash — and it is NOT the accent.
+   *
+   * `text-accent` on `bg-accent-subtle` measures 4.82 / 4.42 / 4.08 / 3.67 over surface-0/1/2/3 in
+   * the default pack: three of the four surfaces fail the 4.5 this app declares in
+   * `ui/theme/contrast.ts`, and the badges that use it are 11px `text-micro`. The reason is
+   * structural, not a bad pick — the wash IS the accent at 20%, so accent-on-accent-wash can never
+   * open much of a gap, in any pack, at any hue.
+   *
+   * The ink does: 11.70 / 10.78 / 10.00 / 9.03, and never below 7.10 in the worst pack/surface
+   * pair in the set. Named `on-accent-subtle` to match the four `on-*` foregrounds already here,
+   * so the next person guessing a name guesses this one. */
+  --on-accent-subtle: var(--text-1);
+
   /* Every semantic color carries all four forms the Bible requires. */
   --success-subtle: color-mix(in srgb, var(--success) 12%, transparent);
   --success-border: color-mix(in srgb, var(--success) 30%, transparent);
@@ -419,10 +513,30 @@
 
   --focus-ring: var(--accent);
 
+  /* The scrim behind a modal surface, and the one step stronger a full-height sheet uses.
+   *
+   * It was `bg-black/50` at four call sites and `bg-black/65` at a fifth — and `black` is not in
+   * the gate's palette list, so five raw values sat outside the token layer while the gate printed
+   * "no raw values outside the token layer". Two names, because the two weights are a real
+   * distinction (a dialog you can still see the page behind vs. a sheet that owns the screen) and
+   * because five call sites free-handing an alpha is how they became two weights by accident. */
+  --scrim: rgb(0 0 0 / 0.50);
+  --scrim-strong: rgb(0 0 0 / 0.65);
+
+  /* 3% grain, tiled. A two-stop gradient across a 400px surface asks a display for ~200 steps of
+     one hue and a 6-bit panel — which is most phones — has 64, so it renders the transition as
+     visible bands. Noise breaks the band edges into dither, which is the whole trick; the rule
+     asks for 2–3% and this is the top of that, because below ~2% it does nothing on the panels
+     that need it. Inline SVG rather than a PNG so it costs no request and the CSP needs no
+     image origin. */
+  --noise-overlay: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+
   /* Brand gradient. Bible: 2–3 stops, 135°, ONE gradient surface per screen, same hue family,
      never behind body text — and explicitly never the blue→purple "AI-generic" combination
-     that sank the previous build (F-04). This stays inside the accent's own hue. */
-  --gradient-brand: linear-gradient(135deg, var(--accent-400) 0%, var(--accent-700) 100%);
+     that sank the previous build (F-04). This stays inside the accent's own hue.
+     The grain is the FIRST layer, i.e. on top: it has to sit over the gradient it is dithering.
+     Every consumer already reads this one token, so no call site changes. */
+  --gradient-brand: var(--noise-overlay), linear-gradient(135deg, var(--accent-400) 0%, var(--accent-700) 100%);
 }
 
 /* ── Layer 3 — component tokens ───────────────────────────────────────────────────────── */
@@ -442,6 +556,19 @@
   --card-border: var(--surface-border);
   --card-radius: var(--radius-card);
   --card-pad: --spacing(4);            /* 16px — Bible allows 16–20, the old build used 24 */
+
+  /* The radius a surface nested INSIDE a card must use: outer radius − the padding between them.
+   *
+   * Concentric corners are not a preference — two curves separated by a constant gap are what the
+   * eye reads as "inside"; two equal radii read as two cards that happen to overlap, which is the
+   * "something is wrong here" the rule names. Nothing in the codebase computed it, so a nested
+   * card carried the SAME 16px as its parent over 16px of padding, where the correct answer is 0.
+   *
+   * Derived, not tabulated, so it stays right in all five packs and through a pack swap:
+   * Midnight/Forest 16−16 = 0 · Solar 24−16 = 8 · Neon 20−16 = 4 · Mono clamps to 0.
+   * The clamp is what makes Mono legal — 2−16 is negative, and a negative radius is invalid,
+   * which would silently take the declaration out and hand the element the browser default. */
+  --radius-inset: max(0px, calc(var(--radius-card) - var(--card-pad)));
 
   --sheet-bg: var(--surface-3);
   --sheet-radius: var(--radius-sheet);
@@ -482,6 +609,13 @@
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-border: var(--accent-border);
+  --color-on-accent-subtle: var(--on-accent-subtle);
+
+  /* `bg-scrim` / `bg-scrim-strong`. Mapped rather than left as `bg-[var(--scrim)]` so the gate's
+     own stem check owns the name: `scrim` is now a stem this project claims, and a `bg-scrim-x`
+     that resolves to nothing becomes a build failure instead of a transparent overlay. */
+  --color-scrim: var(--scrim);
+  --color-scrim-strong: var(--scrim-strong);
 
   --color-success: var(--success);
   --color-success-subtle: var(--success-subtle);
@@ -508,6 +642,9 @@
   --radius-card: var(--radius-card);
   --radius-sheet: var(--radius-sheet);
   --radius-chip: var(--radius-chip);
+  /* `rounded-inset`, on the same footing as the five above. Its real declaration is the derived
+     one in Layer 3, which is unlayered and therefore beats this `@layer theme` copy. */
+  --radius-inset: var(--radius-inset);
 
   /* --ease-standard is deliberately NOT re-declared here: it is theme-independent, lives in
      Layer 1, and an inline self-reference with no Layer-2 backing resolves to nothing. */

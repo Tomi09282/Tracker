@@ -340,10 +340,34 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
       ) : null}
 
       {records.length ? (
-        // Announced, not just shown. A lifter looking at the bar rather than the phone still hears
-        // that they beat something.
-        <span role="status" className="sr-only">
-          {t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) })}
+        // Announced AND, for the length of the flash, SHOWN. This was `sr-only` unconditionally:
+        // the gold flash and the trophy told a sighted lifter that *something* happened, and the
+        // one string that says WHAT was beaten was audible only to a screen reader. The peak of
+        // the whole product was invisible to the people looking at it.
+        //
+        // It overlays the index and previous columns rather than taking a line of its own — the set
+        // list must not reflow when a set is recorded, or every row below moves under the thumb —
+        // and `pointer-events-none` keeps it clear of the undo pill on the other side of the row.
+        // Past the flash window it returns to `sr-only`: the flash is the moment, the trophy on the
+        // check button is the permanent fact.
+        <span
+          role="status"
+          className={
+            flashing
+              ? cn(
+                  // max-w-32, not 40: the grid is [2.5rem_5rem_1fr_1fr_3.5rem] with gap-2 px-2, so at 375px
+                  // each 1fr is ~60px and a 160px pill starting at 4px reached ~30px into the weight
+                  // column — covering the number just entered, for the whole 1400ms flash.
+                  'text-caption pointer-events-none absolute inset-y-1 left-1 flex max-w-32',
+                  'items-center gap-tight rounded-chip bg-warning-subtle px-2 text-warning',
+                )
+              : 'sr-only'
+          }
+        >
+          <Trophy className="size-icon-s shrink-0" aria-hidden />
+          <span className="truncate">
+            {t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) })}
+          </span>
         </span>
       ) : null}
 

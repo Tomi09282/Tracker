@@ -115,9 +115,14 @@ export function AccentPicker({
         role={valid && !passes ? 'alert' : undefined}
       >
         {valid && !passes ? <AlertTriangle size={16} strokeWidth={2} aria-hidden /> : null}
-        {valid
-          ? t('settings.contrastRatio', { ratio: ratio.toFixed(2) })
-          : t('settings.contrastInvalid')}
+        {/* PASS AND FAIL ARE DIFFERENT SENTENCES. One key served both, so a failing colour rendered
+            "Kontraszt: 2,10:1 — megfelel a 4,5:1 minimumnak." in red, beside a warning triangle,
+            with Save disabled — the number said no and the sentence said yes. */}
+        {!valid
+          ? t('settings.contrastInvalid')
+          : passes
+            ? t('settings.contrastRatioPass', { ratio: ratio.toFixed(2) })
+            : t('settings.contrastRatioFail', { ratio: ratio.toFixed(2) })}
       </p>
     </div>
   );

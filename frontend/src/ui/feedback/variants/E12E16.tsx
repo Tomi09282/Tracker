@@ -226,14 +226,31 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
         </button>
       </div>
 
-      {/* B — a hairline shows the remaining time, and pauses on hover so a toast cannot vanish
-          from under a cursor that is reading it. */}
-      {variant === 'B' ? (
+      {/* The hairline shows the remaining time, and pauses on hover so a toast cannot vanish
+          from under a cursor that is reading it.
+          It used to be the B variant's decoration. It is not decoration: the toast is also the
+          undo window, the dismiss timer above runs at the same 4s in every variant, and an undo
+          offer with no visible countdown is an offer the user cannot judge. The other four
+          variants shipped that window blind, so the countdown is now unconditional — the
+          variants differ in how the toast ENTERS and how the icon behaves, not in whether the
+          user can see how long they have. */}
+      {/*
+        ═══ NOT RENDERED AT ALL UNDER REDUCED MOTION ══════════════════════════════════════════
+        `animation: 'none'` leaves the bar at its start state — full width, static, forever — so a
+        countdown reads as permanently 100%: the one thing it must never say. DESIGN §7 #41 is
+        explicit that reduced motion COLLAPSES a duration and does not remove the state change,
+        and a frozen progress bar removes it while looking like it did not.
+
+        This defect reached one style variant before; making the bar unconditional would have
+        taken it to all five. A countdown nobody can see is better than one that lies, and the
+        toast still dismisses on the same timer either way.
+      */}
+      {motionSafe ? (
         <span
           aria-hidden
           className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-accent"
           style={{
-            animation: motionSafe ? 'toast-timer 4s linear forwards' : 'none',
+            animation: 'toast-timer 4s linear forwards',
             animationPlayState: paused ? 'paused' : 'running',
           }}
         />

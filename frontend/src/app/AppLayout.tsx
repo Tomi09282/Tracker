@@ -17,15 +17,28 @@ export function AppLayout() {
   const { t } = useTranslation();
   const { data: user } = useSession();
 
+  const staff = user?.role === 'coach' || user?.role === 'admin';
+
+  const library: NavTab = { to: '/library', icon: Dumbbell, label: t('nav.library') };
+  const settings: NavTab = { to: '/settings', icon: Settings, label: t('nav.settings') };
+
+  // SERIAL POSITION: the middle of a sequence is where an item goes to be forgotten.
+  //
+  // Recall across an ordered list is U-shaped — the first and the last slot are the two people
+  // remember. On the three-tab nav the middle slot held Library, which is the daily loop, while
+  // Settings closed the row: the least-used destination in the product holding the position with
+  // the second-strongest recall. Swapped, so the sequence opens on Home and closes on Library.
+  //
+  // The five-item coach nav is NOT reordered. There the two role tabs already own the closing
+  // slots, and moving Settings would push Library into the middle instead of out of it.
   const tabs: NavTab[] = [
     { to: '/', icon: Home, label: t('nav.home'), end: true },
-    { to: '/library', icon: Dumbbell, label: t('nav.library') },
-    { to: '/settings', icon: Settings, label: t('nav.settings') },
+    ...(staff ? [library, settings] : [settings, library]),
   ];
 
   // The nav is a convenience, not a permission: the admin tab only appears for admins, but the
   // route and every endpoint behind it enforce the role on the server regardless.
-  if (user?.role === 'coach' || user?.role === 'admin') {
+  if (staff) {
     tabs.push({ to: '/coach', icon: Users, label: t('nav.coach') });
     tabs.push({ to: '/coach/plans', icon: ClipboardList, label: t('nav.plans') });
   }

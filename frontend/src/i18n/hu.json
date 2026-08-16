@@ -27,8 +27,8 @@
     "emailPlaceholder": "te@pelda.hu",
     "password": "Jelszó",
     "passwordPlaceholder": "A jelszavad",
-    "login": "Bejelentkezés",
-    "register": "Regisztráció",
+    "login": "Belépek",
+    "register": "Létrehozom a fiókom",
     "noAccount": "Még nincs fiókod?",
     "hasAccount": "Van már fiókod?",
     "logout": "Kijelentkezés",
@@ -38,7 +38,9 @@
       "emailTaken": "Ezzel az e-mail címmel már van fiók.",
       "rateLimited": "Túl sok próbálkozás. Várj egy kicsit, aztán próbáld újra.",
       "generic": "Nem sikerült a művelet. Próbáld újra."
-    }
+    },
+    "switchToRegister": "Regisztráció",
+    "switchToLogin": "Belépés"
   },
   "nav": {
     "home": "Kezdőlap",
@@ -83,7 +85,8 @@
     "accent": "Kiemelőszín",
     "accentDefault": "Alapértelmezett",
     "accentCustom": "Egyedi szín",
-    "contrastRatio": "Kontraszt: {{ratio}}:1 — megfelel a 4,5:1 minimumnak.",
+    "contrastRatioPass": "Kontraszt: {{ratio}}:1 — megfelel a 4,5:1 minimumnak.",
+    "contrastRatioFail": "Kontraszt: {{ratio}}:1 — nem éri el a 4,5:1 minimumot. Válassz kontrasztosabb színt.",
     "contrastInvalid": "Adj meg egy érvényes hexadecimális színt (#RRGGBB).",
     "previewTitle": "Élő előnézet",
     "previewBody": "Ez nem makett — a teljes app átszíneződik, amint választasz.",

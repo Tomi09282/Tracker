@@ -132,7 +132,10 @@ export function Select({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={label}
-                    className="min-h-[var(--target-min)] w-full bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
+                    // The option buttons below redraw their ring; this input removed it and
+                    // replaced it with nothing. `outline-none` in the utilities layer beats the
+                    // `:focus-visible` backstop in index.css, so the ring is restated here.
+                    className="min-h-[var(--target-min)] w-full bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
                   />
                 </li>
               ) : null}

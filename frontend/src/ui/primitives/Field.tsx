@@ -1,4 +1,5 @@
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { cn } from '../../lib/cn';
 
 export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {
@@ -75,9 +76,18 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
         </p>
       ) : null}
 
-      {/* Errors sit directly below the field they belong to, never collected at the top. */}
+      {/* Errors sit directly below the field they belong to, never collected at the top.
+          Colour + ICON + message, all three at once: roughly 12% of users have a colour-vision
+          deficiency, and for them a red border and red text is an unstyled sentence. `gap-tight`
+          is the named 8px step for icon-to-text inside one group — the same relationship the
+          wrapper above uses. */}
       {error ? (
-        <p id={errorId} role="alert" className="text-caption text-[var(--danger)]">
+        <p
+          id={errorId}
+          role="alert"
+          className="text-caption flex items-center gap-tight text-[var(--danger)]"
+        >
+          <AlertCircle size={16} strokeWidth={2} aria-hidden className="shrink-0" />
           {error}
         </p>
       ) : null}

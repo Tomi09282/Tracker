@@ -59,7 +59,10 @@ export function HomePage() {
       ) : null}
 
       <section aria-labelledby="today-heading">
-        <p className="text-micro uppercase text-accent">{t('home.todayTitle')}</p>
+        {/* An eyebrow is a label, not an action. The accent means "act here" in exactly one place
+            per screen, and spending it on a section heading is what made three filled buttons and
+            a decorative icon on this screen all read as equally urgent. */}
+        <p className="text-micro uppercase text-text-3">{t('home.todayTitle')}</p>
         <h2 id="today-heading" className="sr-only">
           {t('home.todayTitle')}
         </h2>
@@ -117,7 +120,7 @@ export function HomePage() {
                   ) : trained ? (
                     <CheckCircle2 className="size-icon-l shrink-0 text-success" aria-hidden />
                   ) : (
-                    <Dumbbell className="size-icon-l shrink-0 text-accent" aria-hidden />
+                    <Dumbbell className="size-icon-l shrink-0 text-text-2" aria-hidden />
                   )}
 
                   <div className="min-w-0 flex-1">
@@ -144,7 +147,11 @@ export function HomePage() {
                     <span className="text-caption shrink-0 text-success">{t('home.done')}</span>
                   ) : (
                     <Pressable
-                      variant="primary"
+                      // SECONDARY, and the whole list stays secondary. One filled accent per
+                      // screen: with a session running that is Resume above, and with none it is
+                      // the empty state's own action. A schedule of three untrained days emitted
+                      // three filled primaries, which is the same as emitting none.
+                      variant="secondary"
                       busy={start.isPending}
                       // A session already running would be RESUMED rather than replaced by the
                       // server, so offering "start" here would be a lie about what the tap does.

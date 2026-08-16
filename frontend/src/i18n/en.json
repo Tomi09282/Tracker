@@ -27,8 +27,8 @@
     "emailPlaceholder": "you@example.com",
     "password": "Password",
     "passwordPlaceholder": "Your password",
-    "login": "Sign in",
-    "register": "Sign up",
+    "login": "Sign me in",
+    "register": "Create my account",
     "noAccount": "No account yet?",
     "hasAccount": "Already have an account?",
     "logout": "Sign out",
@@ -38,7 +38,9 @@
       "emailTaken": "An account with this email already exists.",
       "rateLimited": "Too many attempts. Wait a moment, then try again.",
       "generic": "That didn't work. Please try again."
-    }
+    },
+    "switchToRegister": "Register",
+    "switchToLogin": "Sign in"
   },
   "nav": {
     "home": "Home",
@@ -83,7 +85,8 @@
     "accent": "Accent color",
     "accentDefault": "Default",
     "accentCustom": "Custom color",
-    "contrastRatio": "Contrast: {{ratio}}:1 — clears the 4.5:1 minimum.",
+    "contrastRatioPass": "Contrast: {{ratio}}:1 — clears the 4.5:1 minimum.",
+    "contrastRatioFail": "Contrast: {{ratio}}:1 — below the 4.5:1 minimum. Pick a higher-contrast color.",
     "contrastInvalid": "Enter a valid hex color (#RRGGBB).",
     "previewTitle": "Live preview",
     "previewBody": "This is not a mockup — the whole app repaints as you choose.",

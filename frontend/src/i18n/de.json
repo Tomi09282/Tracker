@@ -27,8 +27,8 @@
     "emailPlaceholder": "du@beispiel.de",
     "password": "Passwort",
     "passwordPlaceholder": "Dein Passwort",
-    "login": "Anmelden",
-    "register": "Registrieren",
+    "login": "Mich anmelden",
+    "register": "Mein Konto erstellen",
     "noAccount": "Noch kein Konto?",
     "hasAccount": "Schon ein Konto?",
     "logout": "Abmelden",
@@ -38,7 +38,9 @@
       "emailTaken": "Mit dieser E-Mail existiert bereits ein Konto.",
       "rateLimited": "Zu viele Versuche. Warte einen Moment und versuche es erneut.",
       "generic": "Das hat nicht geklappt. Bitte versuche es erneut."
-    }
+    },
+    "switchToRegister": "Registrieren",
+    "switchToLogin": "Anmelden"
   },
   "nav": {
     "home": "Start",
@@ -83,7 +85,8 @@
     "accent": "Akzentfarbe",
     "accentDefault": "Standard",
     "accentCustom": "Eigene Farbe",
-    "contrastRatio": "Kontrast: {{ratio}}:1 — erfüllt das Minimum von 4,5:1.",
+    "contrastRatioPass": "Kontrast: {{ratio}}:1 — erfüllt das Minimum von 4,5:1.",
+    "contrastRatioFail": "Kontrast: {{ratio}}:1 — unter dem Minimum von 4,5:1. Wähle eine kontrastreichere Farbe.",
     "contrastInvalid": "Gib eine gültige Hex-Farbe ein (#RRGGBB).",
     "previewTitle": "Live-Vorschau",
     "previewBody": "Das ist kein Mockup — die ganze App färbt sich um, während du wählst.",

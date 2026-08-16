@@ -5,7 +5,7 @@ import { Check, ChevronLeft, Loader2, CloudOff } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { ScreenSkeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
   useOnboarding,
   useDraftSave,
@@ -133,7 +133,10 @@ export function OnboardingPage() {
   /** The profile as it stands right now, including edits React has not re-rendered yet. */
   const live = () => ({ ...(data?.profile ?? {}), ...draftRef.current }) as Partial<OnboardingProfile>;
 
-  if (isLoading || !data) return <Skeleton />;
+  // `Skeleton` is the BLOCK — it carries no size of its own, so a bare `<Skeleton />` rendered a
+  // 0 px nothing and the first paint of onboarding was a blank page. `ScreenSkeleton` is the
+  // screen-shaped composition, which is what a full-page load branch needs.
+  if (isLoading || !data) return <ScreenSkeleton />;
 
   const current = index ?? Math.min(data.profile?.step ?? 0, STEPS.length - 1);
   const step = STEPS[current];

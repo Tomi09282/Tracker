@@ -61,11 +61,24 @@ export function MarketplacePage() {
       </div>
 
       {/* FILTERS ARE CHIPS, NOT A SELECT. Two or three options each, and a chip shows what is
-          active without being opened — on the screen most likely to be someone's first. */}
-      <div className="flex flex-wrap gap-1">
+          active without being opened — on the screen most likely to be someone's first.
+
+          ONE SCROLLING ROW, NOT A WRAPPING WALL. Nine kinds plus nine cities wrapped into two
+          multi-row groups pushed the results they filter below the fold, on the one screen whose
+          job is to show results. A chip row overflows sideways inside its own container — the
+          page body never scrolls horizontally — and the right-edge mask is what says there is
+          more, now that the scrollbar is hidden. `[scrollbar-width:none]` with nothing in its
+          place is a row that looks finished at whatever the viewport happened to cut it off at.
+
+          `aria-pressed` is the state itself. `variant` carries it for anyone who can see the
+          fill; without the attribute a screen-reader user hears the same button before and after
+          the tap, which is the filter reading as broken in the other modality. */}
+      <div className="flex gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [mask-image:linear-gradient(to_right,black_calc(100%_-_24px),transparent)]">
         <Pressable
           variant={kind === undefined ? 'secondary' : 'ghost'}
           density="compact"
+          aria-pressed={kind === undefined}
+          className="shrink-0"
           onClick={() => setKind(undefined)}
         >
           {t('marketplace.allKinds')}
@@ -75,6 +88,8 @@ export function MarketplacePage() {
             key={k.key}
             variant={kind === k.key ? 'secondary' : 'ghost'}
             density="compact"
+            aria-pressed={kind === k.key}
+            className="shrink-0"
             onClick={() => setKind(kind === k.key ? undefined : k.key)}
           >
             {t(`marketplace.kind.${k.key}`, { defaultValue: k.key })}
@@ -83,10 +98,12 @@ export function MarketplacePage() {
       </div>
 
       {(taxonomy.data?.cities ?? []).length > 0 ? (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex gap-1 overflow-x-auto pb-1 [scrollbar-width:none] [mask-image:linear-gradient(to_right,black_calc(100%_-_24px),transparent)]">
           <Pressable
             variant={city === undefined ? 'secondary' : 'ghost'}
             density="compact"
+            aria-pressed={city === undefined}
+            className="shrink-0"
             onClick={() => setCity(undefined)}
           >
             {t('marketplace.everywhere')}
@@ -96,6 +113,8 @@ export function MarketplacePage() {
               key={c.key}
               variant={city === c.key ? 'secondary' : 'ghost'}
               density="compact"
+              aria-pressed={city === c.key}
+              className="shrink-0"
               onClick={() => setCity(city === c.key ? undefined : c.key)}
             >
               {c.name}

@@ -98,9 +98,22 @@ export function ModerationQueue() {
   }
 
   return (
-    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+    // THE SAME TWELVE COLUMNS THE SHELL AROUND IT USES.
+    //
+    // This was an arbitrary two-track template — a fixed 22rem first column against a 1fr second
+    // — at `gap-4`, while the shell around it runs a 3:9 twelve-column split at `gap-6`
+    // (AdminShell.tsx:53,62,103). The two disagreed by a few percent, so switching admin sections
+    // moved the left edge of the content column sideways for no reason a reader could attribute
+    // to anything. (The old value is not quoted verbatim here on purpose: Tailwind scans comments
+    // too, and a class named in prose is a class it generates into the bundle.)
+    //
+    // 4:8 is a column ratio, not a measurement: the panel keeps its proportions and now shares an
+    // edge with the section list outside it. `min-w-0` is not decoration — it is what
+    // `minmax(0, …)` was doing before. Without it a grid child's `min-width: auto` lets a wide
+    // media row push the whole grid out instead of scrolling inside itself.
+    <div className="mt-4 grid gap-6 lg:grid-cols-12">
       {/* ── the queue ───────────────────────────────────────────────────────────────────────── */}
-      <ul className="flex flex-col gap-2" aria-label={t('admin.moderation')}>
+      <ul className="flex min-w-0 flex-col gap-2 lg:col-span-4" aria-label={t('admin.moderation')}>
         {rows.map((row) => {
           const active = row.id === selected;
           return (
@@ -147,7 +160,7 @@ export function ModerationQueue() {
       </ul>
 
       {/* ── the review panel ────────────────────────────────────────────────────────────────── */}
-      <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+      <div className="min-w-0 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4 lg:col-span-8">
         {selected === null ? (
           <EmptyState icon={ShieldCheck} title={t('admin.reviewPickTitle')} body={t('admin.reviewPickBody')} />
         ) : submission.isPending ? (

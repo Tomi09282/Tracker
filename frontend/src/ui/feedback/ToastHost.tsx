@@ -72,6 +72,12 @@ export function ToastHost({ children }: { children: ReactNode }) {
         Fixed to the BOTTOM, above the safe-area inset, and pointer-events-none on the container so
         it never swallows a tap meant for the screen behind it — only the toasts themselves are
         interactive, which matters because one of them carries an Undo.
+
+        `lg:items-end` is the desktop half of the position rule: bottom-RIGHT on a pointer screen,
+        never the centre. Centred over a wide viewport a toast lands on top of whatever the user
+        was reading, and the wider the screen the further it is from where they were looking. The
+        column is `max-w-sm`, so the cross-axis alignment is the whole change — no width, no
+        offset, no second layout.
       */}
       {/*
         `--z-toast` and `--content-pad-b` are both declared tokens, and both were nearly re-derived
@@ -81,7 +87,7 @@ export function ToastHost({ children }: { children: ReactNode }) {
         are decisions this design system already made.
       */}
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-toast)] flex flex-col items-center px-4 pb-[var(--content-pad-b)]"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-toast)] flex flex-col items-center px-4 pb-[var(--content-pad-b)] lg:items-end"
         // NOT a live region itself: each Toast already carries role="status", and nesting one live
         // region inside another makes some screen readers announce the whole stack on every change.
       >

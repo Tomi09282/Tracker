@@ -60,7 +60,8 @@ Tailwind mapping is `@theme inline` and resolves the var at use time.
 | `--surface-1` | `#12151A` | Cards. One step up from the page = "this is a thing on the page". |
 | `--surface-2` | `#181C22` | Insets: field backgrounds, bar tracks, hero boxes. A step *into* the card, not another card. |
 | `--surface-3` | `#20252D` | Sheets, toasts, scrollbar thumbs — anything that floats above everything else. |
-| `--surface-border` | `rgb(255 255 255 / 0.07)` | The hairline. It is an ink alpha, not a color, so it works on every surface in every pack. |
+| `--surface-border` | `rgb(255 255 255 / 0.12)` | The hairline. It is an ink alpha, not a color, so it works on every surface in every pack. **12%, not the 0.07 it shipped at**: this is the app's *only* card separator (border OR shadow, never both), and at 7% on a dark surface it was under half a shade off the card it bounds, so cards were separated by a 4%-step fill alone. |
+| `--surface-border-strong` | `rgb(255 255 255 / 0.22)` | The hover edge. ~2× the base **in each pack**, so it moved with it — a 0.14 strong step against a 0.12 hairline is a change nobody sees. Neon runs one step above (0.14 / 0.24, darkest surfaces); Mono one above that (0.16 / 0.28) because "heaviest border in the set" is its declared identity and the *order* is what carries it. |
 
 **Why alphas and a four-step ladder and not more surfaces:** surfaces encode *elevation*, so any new
 surface would have to answer "higher than what". Four levels cover page / card / inset / overlay,
@@ -79,13 +80,16 @@ which is every stacking relationship the product has.
 
 | Token | WHY |
 |---|---|
-| `--accent` | The single brand color. There is no secondary or tertiary hue in this product, on purpose: one accent means "accent" always reads as "act here". |
+| `--accent` | The single brand color. There is no secondary or tertiary hue in this product, on purpose: one accent means "accent" always reads as "act here". **Every pack's accent is desaturated one step off its source hue** (HSL S only; hue and lightness held): Midnight 95→76, Solar 96→77, Forest 60→48, Neon 100→80. Mono is achromatic and has nothing to take out. A saturated accent buzzes on an OLED panel in a dark room, which is the only room this app runs in. |
 | `--accent-fg` | Foreground on a filled accent. Recomputed against WCAG by the theme engine — do not hand-set it, you are fighting runtime code (`ThemeProvider.tsx:61`). |
 | `--accent-50` … `--accent-950` | Interpolated **in OKLab**, so a user's custom accent gets the same perceptual spacing as the five built-in packs. `--accent` is step 500. |
 | `--accent-hover` = 400, `--accent-pressed` = 600 | Interaction states derive from the ramp, never hand-picked per component — that is how twelve components end up with twelve hovers. |
 | `--accent-subtle` | 12% wash. The "this one is selected / active / mine" signal. **See GAPS G3.** |
+| `--on-accent-subtle` = `--text-1` | The foreground for text sitting **on** that wash, and it is deliberately not the accent. `text-accent` on `bg-accent-subtle` measures 4.82 / 4.42 / 4.08 / 3.67 over surface-0/1/2/3 — three of four below the app's own 4.5, at 11px. The wash *is* the accent at 20%, so that pair can never open a gap in any pack; the ink measures 11.70 / 10.78 / 10.00 / 9.03 and never drops below 7.10 in the worst pack. Named `on-*` to match the four foregrounds already there. |
 | `--focus-ring` = `--accent` | The ring survives a theme swap because it is the theme's own color. |
-| `--gradient-brand` | `linear-gradient(135deg, accent-400 → accent-700)`. 2–3 stops, 135°, **one gradient surface per screen**, same hue family, never behind body text — and explicitly never blue→purple, the "AI-generic" combination that sank the previous build (F-04). |
+| `--scrim` `rgb(0 0 0 / 0.50)` · `--scrim-strong` `0.65` | The modal backdrop, and the heavier one a full-height sheet uses. They were five raw `bg-black/50|65` call sites that the gate could not see — `black` is not in its palette list — so the app carried raw values while the gate printed "clean". Two names because the two weights are a real distinction: a dialog you can still see the page behind, vs. a sheet that owns the screen. |
+| `--noise-overlay` | A tiled 3% `feTurbulence` grain, inline SVG. A two-stop gradient over ~400px asks a display for ~200 steps of one hue; a 6-bit phone panel has 64 and renders bands. Noise dithers the band edges. Inline so it costs no request and the CSP needs no image origin. |
+| `--gradient-brand` | `var(--noise-overlay), linear-gradient(135deg, accent-400 → accent-700)`. 2–3 stops, 135°, **one gradient surface per screen**, same hue family, never behind body text — and explicitly never blue→purple, the "AI-generic" combination that sank the previous build (F-04). The grain is the **first** layer, i.e. on top of the gradient it is dithering. |
 
 **The ramp has no Tailwind utility.** `bg-accent-700` is a build failure (`undefined-color`). Reach
 the ramp as `bg-[var(--accent-700)]`.
@@ -102,12 +106,13 @@ the base, `-subtle` (12% wash), `-border` (30%), and `on-<name>` (a dark foregro
 | `--danger` `#F87171` | Destructive and irreversible only. **Stays red even in the monochrome pack** — color carries meaning here, so it is not the theme's to flatten. |
 | `--info` `#60A5FA` | Neutral state. Currently near-dead — two uses. See GAPS G5. |
 
-### 1.5 The Tailwind utility surface — the only 29 color names that resolve
+### 1.5 The Tailwind utility surface — the only 33 color names that resolve
 
 ```
 surface-0  surface-1  surface-2  surface-3  border-token
 text-1  text-2  text-3
-accent  accent-fg  accent-hover  accent-pressed  accent-subtle
+accent  accent-fg  accent-hover  accent-pressed  accent-subtle  accent-border  on-accent-subtle
+scrim  scrim-strong
 success  success-subtle  success-border  on-success
 warning  warning-subtle  warning-border  on-warning
 danger   danger-subtle   danger-border   on-danger
@@ -197,17 +202,26 @@ re-declares:
 | `--radius-card` | `rounded-card` | 181 uses — the single most consistent thing in the app. |
 | `--radius-sheet` | `rounded-sheet` | Sheets are larger surfaces and read as harder if they share the card radius. |
 | `--radius-chip` | `rounded-chip` | Pill by default; Mono deliberately squares it. |
+| `--radius-inset` | `rounded-inset` | **Derived, not chosen**: `max(0px, radius-card − card-pad)`. The radius a surface nested *inside* a card must use, so the two curves stay concentric — a constant gap is what the eye reads as "inside"; two equal radii read as two cards overlapping. Midnight/Forest 0 · Solar 8 · Neon 4 · Mono clamped to 0 (2−16 is negative, and a negative radius silently drops the declaration). |
 
 Note the gate does *not* catch `rounded-3` (a primitive step). It is still a violation of the written
 rule at `tokens.css:79`.
 
-### 4.2 Shadow — there is no shadow scale
+### 4.2 Shadow — two elevations, each built from three layers
 
-Exactly two tokens exist, both per-pack:
+There is still no open-ended shadow *scale*; there are exactly two heights, and each is a
+**three-layer stack** rather than a single drop shadow. Every token here is per-pack.
+
+A single `0 8px 24px` gives one distance cue, so the sheet, the floating rest timer and the command
+palette all floated at the same apparent height. The stack is the standard three: a tight **contact**
+shadow (blur ~2px) that says the element is touching something, a **mid** spread (~12–24px) that
+gives it its height, and a wide **ambient** wash (~32–48px) that says the room has light in it.
+Alphas fall as blur grows, so the three sum to roughly the weight the single layer carried.
 
 | Token | WHY |
 |---|---|
-| `--shadow-overlay` | Overlays only: sheets, floating timers, the switch knob. Midnight `0 8px 24px rgb(0 0 0 / 0.35)`; Solar deeper; Neon a colored glow; **Mono `none`**. |
+| `--shadow-overlay` | Overlays: sheets, floating timers, the switch knob. Midnight/Forest contact+`8px 24px`+`20px 44px`; Solar thrown further (its identity is "soft, deeper shadow"); Neon three **zero-offset** glow layers, because a glow that gains a y-offset is a drop shadow and this pack declares it has none; **Mono `none`**. |
+| `--shadow-overlay-strong` | The element that is on top of *another* floating element, not merely on top of the page. Same three layers pushed one step out, so "above the sheet" becomes a distance the eye can measure instead of a z-index only the code knows. **Mono `none`** — there it separates by its edge instead. |
 | `--shadow-glow` | Neon's declared identity ("pill + glow, no drop shadow"), `none` in the other four. Currently reaches no product screen — GAPS G6. |
 
 **Cards separate by border OR shadow, never both.** The old build did both (F-09). In this app the
@@ -224,6 +238,7 @@ anyway.
 | `--duration-base` | 250ms | Most transitions. |
 | `--duration-slow` | 400ms | Sheets and large surfaces — bigger things are allowed to take longer, because the eye has further to follow. |
 | `--duration-ambient` | 1200ms | **Loops, not transitions.** A skeleton shimmer never *arrives* anywhere; running it at 250ms is a strobe. Naming it is what stops nine screens reaching for Tailwind's 2s `animate-pulse`. |
+| `--duration-toast` | 4000ms | **A dwell, which is neither.** The 500ms ceiling governs how long the eye is asked to *follow* a change; this is how long a sentence is left up to be *read*. It is a token because two literals had to agree and neither could see the other: the auto-dismiss `setTimeout(…, 4000)` and the `toast-timer 4s` hairline that draws the time remaining. A drained bar over a toast that is still there is the timer lying about itself. |
 | `--ease-standard` | `cubic-bezier(0.16, 1, 0.3, 1)` | The one curve. Fast out, long settle. |
 | `--ease-linear` | `linear` | **Progress only.** An eased fill misreports how much of the hold is left. |
 
@@ -516,6 +531,18 @@ Each of these is a value with a recorded reason. Changing the value silently dis
 57. `ElementStyleProvider.tsx` must keep `CATALOG.map(`; `PlaygroundPage.tsx`'s `PREVIEWABLE` set and its `case 'E..':` arms must agree exactly; no `useElementVariant('E..')` call may be deleted, and none may be added to the three dormant elements.
 58. `tsc -b` runs `noUnusedLocals` — dropping the last usage of an imported variant or type while restyling is a build failure, not a warning.
 
+### Added by the PATTERN-GAP visual pass
+
+Appended rather than renumbered — 1–58 are cited by other documents. Each reverses something the
+file previously stated, so it is recorded here to stop the next person "restoring" it.
+
+59. **Elevation is a three-layer stack, and there are exactly two heights.** This file used to read "there is no shadow scale". There still is no open scale — `--shadow-overlay` and `--shadow-overlay-strong`, nothing between and nothing above. What changed is that each is contact + mid + ambient rather than one flat drop, because one layer gives one distance cue and every floating surface in the app read at the same height.
+60. **Neon's stack stays at zero offset and Mono's stays `none`.** Decision 24 is untouched by 59: a glow that gains a y-offset is a drop shadow, and Mono separates by edge. The stack is a *construction*, not a licence to give every pack the same shadow.
+61. **The hairline is ~12%, and the strong step moves with it.** Both halves are one decision. Raising the base alone would have collapsed the hover edge (G7) into the resting edge; the pack *ordering* — base packs < Neon < Mono — is what carries "Mono has the heaviest border", not the absolute numbers.
+62. **Accents ship desaturated.** Saturation only; hue and lightness are held, so no pack changes identity. Legibility measurably improved on Midnight (accent-as-text on surface-0: 6.31 → 6.78) and every pack stays far above `AA_NORMAL`. Do not "restore the brand colour" — the source hue is unchanged.
+63. **Text on `--accent-subtle` is `--on-accent-subtle`, never `text-accent`.** Accent-on-accent-wash is a structural contrast failure, not a bad pick: the wash *is* the accent at 20%, so it cannot open a gap in any pack at any hue.
+64. **`--radius-inset` is derived, never tabulated.** `max(0px, radius-card − card-pad)` stays correct through a pack swap and through a change to either input; five hand-written per-pack values would not.
+
 ---
 
 ## 8. GAPS — what the scale genuinely lacks
@@ -628,9 +655,10 @@ body text over it, and is the screen the product exists for.
 Every pack declares a single border opacity, so an interactive surface cannot strengthen its edge on
 hover without a raw value or misusing the accent on every hoverable row.
 
-**Proposed:** `--surface-border-strong: rgb(255 255 255 / 0.14)` per pack (0.18 for Mono, which
-already runs 0.12). **WHY:** the `interactive` Surface variant needs a hover edge that is not the
-signature color.
+**Landed.** `--surface-border-strong` now ships per pack — 0.22 for the base packs, 0.24 Neon,
+0.28 Mono, each ~2× that pack's hairline (see §1.1 and DECISION 61; the figures moved when the
+hairline came up to ~12%). **WHY:** the `interactive` Surface variant needs a hover edge that is
+not the signature color. The Surface primitive that consumes it is still open — see G4.
 
 ### G8 — One missing type step
 

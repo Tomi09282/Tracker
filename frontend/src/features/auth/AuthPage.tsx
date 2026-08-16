@@ -129,7 +129,10 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             to={mode === 'login' ? '/register' : '/login'}
             className="inline-flex min-h-[var(--target-min)] items-center text-accent underline-offset-4 hover:underline"
           >
-            {mode === 'login' ? t('auth.register') : t('auth.login')}
+            {/* Its OWN keys, not the submit button's. This control navigates; it does not
+                create an account. "Létrehozom a fiókom" is right on the button that does the
+                thing and a promise this link cannot keep. */}
+            {mode === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
           </Link>
         </p>
 

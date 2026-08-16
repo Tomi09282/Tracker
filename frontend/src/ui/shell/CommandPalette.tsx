@@ -174,7 +174,11 @@ export function CommandPalette({ commands }: { commands?: Command[] }) {
             }}
             placeholder={t('palette.placeholder')}
             aria-label={t('palette.placeholder')}
-            className="min-h-[var(--target-min)] w-full bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
+            // Same mechanism as the list rows below: `outline-none` sits in the utilities layer
+            // and beats the `:focus-visible` backstop in index.css, so the ring has to be
+            // redrawn here too. The palette opens focused on this input — losing its ring means
+            // a keyboard user cannot see where the palette put them.
+            className="min-h-[var(--target-min)] w-full bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           />
           <kbd className="text-micro rounded-field border border-[var(--surface-border)] px-1.5 py-0.5 text-text-3">
             esc
