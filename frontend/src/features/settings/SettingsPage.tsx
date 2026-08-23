@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { LogOut, ShieldCheck } from 'lucide-react';
+import { LogOut, ShieldCheck, Coins } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ThemeStudio } from './ThemeStudio';
@@ -43,6 +43,21 @@ export function SettingsPage() {
         >
           {t('auth.logout')}
         </Pressable>
+
+        {/* THE WALLET'S ONLY DOOR ON A PHONE.
+            /coins was found by the Phase 8 audit with no inbound link at all — wallet, ledger,
+            store and achievements, all finished, all unreachable below 1024px because the command
+            palette that listed them is `hidden lg:flex`. It has no bottom-bar tab in the approved
+            design either, so this row IS the path. It sits under Account rather than in its own
+            section because a balance is an account fact, not a setting.
+            check-nav.mjs asserts this link exists. */}
+        <Link
+          to="/coins"
+          className="text-body-s mt-4 flex min-h-[var(--target-min)] items-center gap-2 text-accent"
+        >
+          <Coins className="size-icon-s" aria-hidden />
+          {t('nav.coins')}
+        </Link>
       </Section>
 
       <Section title={t('settings.appearance')}>

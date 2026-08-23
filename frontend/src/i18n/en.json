@@ -21,6 +21,9 @@
     "undone": "Undone"
   },
   "auth": {
+    "emailValid": "The e-mail address looks valid",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
     "loginTitle": "Sign in to your account",
     "registerTitle": "Create an account",
     "email": "Email",
@@ -43,6 +46,8 @@
     "switchToLogin": "Sign in"
   },
   "nav": {
+    "nutritionShort": "Food",
+    "profile": "Profile",
     "home": "Home",
     "library": "Exercises",
     "settings": "Settings",

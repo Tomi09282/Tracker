@@ -21,6 +21,9 @@
     "undone": "Rückgängig gemacht"
   },
   "auth": {
+    "emailValid": "Die E-Mail-Adresse ist gültig",
+    "hidePassword": "Passwort verbergen",
+    "showPassword": "Passwort anzeigen",
     "loginTitle": "Bei deinem Konto anmelden",
     "registerTitle": "Konto erstellen",
     "email": "E-Mail",
@@ -43,6 +46,8 @@
     "switchToLogin": "Anmelden"
   },
   "nav": {
+    "nutritionShort": "Essen",
+    "profile": "Profil",
     "home": "Start",
     "library": "Übungen",
     "settings": "Einstellungen",

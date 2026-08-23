@@ -3,6 +3,7 @@ import { NavLink } from 'react-router';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useElementVariant } from '../feedback/ElementStyleProvider';
+import { PILL_MAX_TABS } from '../../app/navTabs';
 
 export interface NavTab {
   to: string;
@@ -15,38 +16,85 @@ export interface NavTab {
 /**
  * The app's ONLY primary navigation (owner requirement 12, Bible LAYOUT LAW).
  *
- * Mobile: a fixed 64 px bar plus the safe-area inset, full width.
- * Desktop (≥1024 px): a centred floating dock, 16 px above the screen bottom, backdrop-blurred.
+ * TWO SHAPES, AND THE COUNT PICKS ONE.
  *
- * Five slots is the contract, so a sixth item is clamped rather than squeezed in — an overflow
- * menu is the correct answer there, and silently shrinking five tabs into six is not.
+ * Up to five tabs the bar is a detached floating pill, inset from all three edges — the shape
+ * `v4-vegleges/sotet/02-workout-player.png` shows for a member. At six and seven it becomes a
+ * full-width slab pinned to the bottom, which is what `.../11-admin-attekintes.png` shows for an
+ * admin, labels truncated and all. Both approved mockups are right; they are drawing different
+ * roles. Seven pill cells do not fit a 320px phone once you subtract margins on both sides; seven
+ * full-width cells do, at 44px each with 12px to spare.
+ *
+ * THERE IS NO CLAMP ANY MORE.
+ *
+ * This component used to end its tab list with `slice(0, 5)`, and the reason was real: a sixth
+ * tab was once pushed by accident and the clamp swallowed it, so an admin saw five tabs and
+ * `/admin` was not among them. But a clamp hides exactly the failure it was written to catch —
+ * the tab vanished silently instead of the build breaking. The count now lives in
+ * `app/navTabs.ts` and `check-nav.mjs` asserts it, so the failure is loud and this renders
+ * whatever it is given.
+ *
+ * THE SAFE AREA IS EXPLICIT NOW, AND HAS TO BE.
+ *
+ * The old bar was `inset-x-0` with no horizontal inset and it was fine — but only by accident:
+ * `max-w-md` plus `mx-auto` capped the row at 448px and centred it, so on a notched phone in
+ * landscape the outer tabs never reached the cutout. Removing that cap to let seven cells span the
+ * width also removes the accident. `check-safe-area` inspects `top-0` and `bottom-0` only, so it
+ * would not have said a word.
  */
 export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
   const { t } = useTranslation();
   const variant = useElementVariant('E11');
-  const visible = tabs.slice(0, 5);
+
+  const pill = tabs.length <= PILL_MAX_TABS;
 
   return (
     <nav
       aria-label={t('nav.primary')}
       className={cn(
-        'fixed inset-x-0 bottom-0 z-[var(--z-nav)]',
-        'border-t border-[var(--surface-border)] bg-[var(--nav-bg)] backdrop-blur-xl',
-        'pb-[env(safe-area-inset-bottom)]',
-        // Desktop dock: detached, centred, pill-shaped, 16px off the bottom edge.
-        'lg:inset-x-auto lg:bottom-[var(--nav-dock-offset)] lg:left-1/2 lg:w-auto',
-        'lg:-translate-x-1/2 lg:rounded-chip lg:border lg:px-2 lg:pb-0',
+        'fixed bottom-0 z-[var(--z-nav)]',
+        'bg-[var(--nav-bg)] backdrop-blur-[var(--nav-blur)]',
+        // Horizontal safe area on both shapes. `max()` rather than a bare `env()` because the
+        // inset is 0 on every device without a cutout, and a pill still wants its own margin
+        // there — see .screen-x, which solves the same problem the same way.
+        'ps-[max(0px,env(safe-area-inset-left))] pe-[max(0px,env(safe-area-inset-right))]',
+        pill
+          ? [
+              // Detached: floats above the content with air on all three sides, on every width.
+              'inset-x-[max(var(--nav-dock-offset),env(safe-area-inset-left))]',
+              'bottom-[calc(var(--nav-dock-offset)+env(safe-area-inset-bottom))]',
+              'rounded-chip border border-[var(--surface-border)] px-2',
+              // Desktop keeps the same pill, centred and content-width rather than stretched.
+              'lg:inset-x-auto lg:left-1/2 lg:w-auto lg:-translate-x-1/2',
+            ]
+          : [
+              // Pinned: edge to edge, sitting on the bottom with the inset reserved below it.
+              'inset-x-0 border-t border-[var(--surface-border)]',
+              'pb-[env(safe-area-inset-bottom)]',
+              // At six or seven tabs the desktop dock would have to grow unbounded, so desktop
+              // keeps the slab too rather than becoming a very wide pill.
+              'lg:pb-0',
+            ],
       )}
     >
-      <ul className="mx-auto flex max-w-md items-stretch justify-around lg:max-w-none lg:gap-1">
-        {visible.map((tab) => {
+      <ul
+        className={cn(
+          'flex items-stretch justify-around',
+          // `mx-auto max-w-md` on the pill only. On the slab it would re-introduce the very cap
+          // that has to go: seven cells centred inside 448px are 64px each while the screen is
+          // 393px wide, which overflows rather than fits.
+          pill && 'mx-auto max-w-md lg:max-w-none lg:gap-1',
+        )}
+      >
+        {tabs.map((tab) => {
           const Icon = tab.icon;
           // `min-w-0` because `flex-1` alone does not make a flex item shrinkable: the default
           // `min-width: auto` floors it at its content width. Measured at 360px — the five links
           // came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport, unreadable
-          // and only half tappable. With the floor removed the five cells are equal.
+          // and only half tappable. With the floor removed the cells are equal, and that is what
+          // makes six and seven of them possible at all.
           return (
-            <li key={tab.to} className="min-w-0 flex-1 lg:flex-none">
+            <li key={tab.to} className={cn('min-w-0 flex-1', pill && 'lg:flex-none')}>
               <NavLink
                 to={tab.to}
                 end={tab.end}
@@ -55,11 +103,12 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     // The bar is 64px tall; the link fills it, so the whole cell is tappable
                     // rather than just the icon.
                     'flex h-[var(--nav-h)] min-w-[var(--target-min)] flex-col items-center',
-                    // No horizontal padding on the narrowest phones: the cells are equal width and the whole
-                    // cell is the tap target, so the padding bought nothing and cost 8px of label. With
-                    // it gone the two longest Hungarian labels (71px and 65px) fit a 72px cell; the
-                    // truncate below is the safety net for a longer translation, not the normal case.
-                    'justify-center gap-1 px-0 sm:px-3 lg:flex-row lg:gap-2 lg:px-4',
+                    // No horizontal padding on the narrowest phones: the cells are equal width and
+                    // the whole cell is the tap target, so the padding bought nothing and cost 8px
+                    // of label. The truncate below is the safety net — and at seven tabs it is not
+                    // a safety net any more but the expected result, which the admin mockup draws.
+                    'justify-center gap-1 px-0 sm:px-3',
+                    pill && 'lg:flex-row lg:gap-2 lg:px-4',
                     'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
                     isActive ? 'text-[var(--nav-fg-active)]' : 'text-[var(--nav-fg-idle)]',
                   )

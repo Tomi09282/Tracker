@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../chat/NotificationBell';
 import { Link } from 'react-router';
-import { Users, KeyRound, UserPlus, TriangleAlert, Archive, Ticket } from 'lucide-react';
+import { Users, KeyRound, UserPlus, TriangleAlert, Archive, Ticket, ClipboardList } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -111,6 +111,20 @@ export function CoachDashboard() {
         <div className="min-w-0">
           <p className="text-micro uppercase text-accent">{t('coaching.eyebrow')}</p>
           <h1 className="text-title-1 mt-1 text-text-1">{t('coaching.title')}</h1>
+          {/* THE PLAN LIBRARY'S DOOR.
+              `/coach/plans` held its own bottom-bar tab until the bar became role-shaped, and it
+              is the worse of the two losses: its only other in-app link is the back arrow on the
+              plan EDITOR, which you can only see once you are already inside a plan, plus the
+              command palette, which is desktop-only. Without this the whole plan library is
+              unreachable on a phone. A real anchor, not a button that navigates — a page you can
+              middle-click is a page. `check-nav.mjs` asserts this link. */}
+          <Link
+            to="/coach/plans"
+            className="text-body-s mt-2 inline-flex min-h-[var(--target-min)] items-center gap-2 text-accent"
+          >
+            <ClipboardList className="size-icon-s" aria-hidden />
+            {t('nav.plans')}
+          </Link>
         </div>
         <NotificationBell className="-mr-2 shrink-0" />
       </div>

@@ -129,6 +129,7 @@ for (const [code, bundle] of Object.entries(bundles)) {
 {
   const UNTRANSLATED_BY_DESIGN = new Map([
     ['nav.admin', 'a borrowed word in all three'],
+    ['nav.profile', 'the same borrowing: hu "Profil" and de "Profil" are the same Latin word, and neither language has a native alternative anyone would recognise on a tab'],
     ['nav.playground', 'the QA page has no product name to translate'],
     ['workout.kg', 'SI unit'],
     ['workout.metres', 'SI unit'],

@@ -21,6 +21,9 @@
     "undone": "Visszavonva"
   },
   "auth": {
+    "emailValid": "Az e-mail cím formátuma helyes",
+    "hidePassword": "Jelszó elrejtése",
+    "showPassword": "Jelszó megjelenítése",
     "loginTitle": "Jelentkezz be a fiókodba",
     "registerTitle": "Hozz létre egy fiókot",
     "email": "E-mail",
@@ -43,6 +46,8 @@
     "switchToLogin": "Belépés"
   },
   "nav": {
+    "nutritionShort": "Étkezés",
+    "profile": "Profil",
     "home": "Kezdőlap",
     "library": "Gyakorlatok",
     "settings": "Beállítások",

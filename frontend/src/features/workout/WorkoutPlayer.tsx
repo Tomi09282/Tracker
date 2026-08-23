@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Dumbbell, PlayCircle } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -133,10 +134,22 @@ export function WorkoutPlayer() {
   if (!data?.log) {
     return (
       <div className="col-mobile screen-x py-6">
+        {/* THE LIBRARY'S DOOR ON A PHONE.
+            `/library` used to hold its own bottom-bar tab and lost it when the bar became
+            role-shaped — the five member slots are Home, Edzés, Étkezés, Haladás and Profil. Its
+            only other in-app links are Home's empty state (invisible to anyone who HAS a plan
+            today) and the command palette, which is `hidden lg:flex` and opens on Cmd+K. Without
+            this action the exercise library is unreachable on a phone, which is the exact defect
+            the whole navigation change exists to fix. `check-nav.mjs` asserts this link. */}
         <EmptyState
           icon={PlayCircle} heading="h1"
           title={t('workout.noneTitle')}
           body={t('workout.noneBody')}
+          action={
+            <Pressable variant="secondary" icon={<Dumbbell className="size-icon-m" aria-hidden />}>
+              <Link to="/library">{t('nav.library')}</Link>
+            </Pressable>
+          }
         />
       </div>
     );
