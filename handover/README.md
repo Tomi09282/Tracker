@@ -15,16 +15,42 @@ Restart Claude Code afterwards so it re-reads the directory.
 
 ---
 
-## What is here — 26 skills
+## What is here — 34 skills
 
 | Area | Skills |
 |---|---|
 | **This project's standards** | `webdev-standards` — the Node/Express + encrypted-SQLite-in-a-worker-pool blueprint, the auth model, the transaction-endpoint template and its 5-pass adversarial checklist. Start here: it is the one that explains why this codebase looks the way it does. |
+| **Image and video generation** | `higgsfield-generate`, `higgsfield-brandkit`, `higgsfield-product-photoshoot`, `higgsfield-marketplace-cards`, `higgsfield-soul-id`, `higgsfield-video-explainer`, `higgsfield-websites`, `higgsfield-youtube-thumbnail` — see the note below, they need more than copying |
 | **Working method** | `brainstorming`, `writing-plans`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents`, `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `using-superpowers` |
 | **Review** | `requesting-code-review`, `receiving-code-review`, `finishing-a-development-branch`, `using-git-worktrees` |
 | **Design & UI** | `design`, `design-system-tokens`, `ui-styling`, `ui-ux-pro-max`, `impeccable`, `emil-design-eng`, `brand`, `banner-design`, `slides` |
 | **Notes** | `obsidian-markdown`, `obsidian-bases` — the vault at `docs/brain/` is written in this dialect |
 | **Meta** | `writing-skills` |
+
+### Higgsfield — copying the skills is not enough
+
+These eight are a **client**, not a product. They wrap a CLI that talks to a paid account, so on a
+fresh machine they will load, describe themselves, and then fail at the first call.
+
+Two things have to happen besides copying:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/higgsfield-ai/cli/main/install.sh | sh
+higgsfield auth login      # interactive; opens a browser
+```
+
+`higgsfield account status` should then print an e-mail and a credit balance. **The credits are
+per account and they are spent per generation** — the 27 mockups in `docs/brain/55-Screens/_mockups`
+cost real money to produce, and re-rendering them costs it again.
+
+They ship **no licence file**, which is not the same as being unrestricted — it means the terms are
+whatever Higgsfield's own site says, and nobody here has read them. That is the same footing as
+most of the other skills in this bundle (see *Licence provenance* at the bottom), and it is the
+reason the UX Engine skills are excluded instead: those carry explicit terms that forbid exactly
+this.
+
+There is **no MCP server** involved, despite how it is sometimes described. It is eight skill
+directories plus one npm CLI on `$PATH`.
 
 ---
 
