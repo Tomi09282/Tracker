@@ -12,7 +12,12 @@ const DEST = arg > -1 && process.argv[arg + 1]
   ? path.resolve(process.argv[arg + 1])
   : path.resolve('C:/Users/Petike/Documents/GymTracker/GymTracker');
 
-const TEXT_EXT = new Set(['.md', '.mermaid', '.excalidraw', '.json', '.canvas']);
+// `.webp` joined the list when 55-Screens started embedding the approved mockups. A mirror that
+// copies a note but not the image it embeds produces a note full of broken embeds, which is worse
+// than not mirroring it at all — the reader cannot tell a missing file from a wrong path.
+// The images are downsampled to 1080px on the way in (about 4 MB for all 54, against 1.04 GB of
+// originals), so this does not turn the mirror into a media sync.
+const TEXT_EXT = new Set(['.md', '.mermaid', '.excalidraw', '.json', '.canvas', '.webp']);
 
 // Dot-directories are vault-owned, never brain-owned: `.obsidian` holds the user's app config
 // (core-plugins, appearance, graph, workspace) and `.trash` holds their deletions. The mirror
