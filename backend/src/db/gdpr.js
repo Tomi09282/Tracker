@@ -117,6 +117,16 @@ export const EXPORT_TABLES = [
   // Devices, without the token hash — that is a credential, and an export is a file people email
   // to themselves.
   ['push_devices', 'SELECT id, platform, created_at FROM push_devices WHERE user_id = ?'],
+  // What a coach is paying for, without the processor's two identifiers. `provider_customer_id`
+  // and `provider_subscription_id` address a record inside Stripe, not inside this product: they
+  // are useless to the subject and they are exactly the pair somebody needs to sound legitimate
+  // on a support call. Same reasoning as the feed token and the device hash directly above.
+  // The row itself is ON DELETE CASCADE, so erasure was already answered by the schema — this
+  // closes the other half, which is that they could not SEE it.
+  [
+    'subscription',
+    'SELECT tier_key, status, current_period_end, updated_at FROM coach_subscriptions WHERE coach_id = ?',
+  ],
 
   // ── what the product did TO them ──────────────────────────────────────────────────────────
   // Their own audit trail. `actor_id` only: rows where they are the TARGET may name the admin who

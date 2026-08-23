@@ -53,12 +53,30 @@ const digest = async (p) => crypto.createHash('sha256').update(await fs.readFile
 async function mutate({ label, file, from, to, gate, expect }) {
   const full = path.resolve(file);
   const before = await fs.readFile(full, 'utf8');
-  if (!before.includes(from)) {
+
+  /*
+   * Match on LF, write back in the file's own dialect.
+   *
+   * `core.autocrlf=true` with no `.gitattributes` means a file git CHECKED OUT has CRLF on disk
+   * while a file a tool WROTE has LF, in the same tree, with `git status` clean either way because
+   * the index is LF for both. Every multi-line anchor here is written with `\n`, so the two cases
+   * aimed at src/db/worker.js started reporting "the anchor is gone" the moment that one file came
+   * back through a checkout — while the identically-shaped cases aimed at src/admin/routes.js kept
+   * passing, because that file had been written by a tool.
+   *
+   * Re-typing the anchors with `\r\n` would fix today and break on the next LF checkout. The
+   * harness is the thing that should not care.
+   */
+  const lf = (s) => s.replace(/\r\n/g, '\n');
+  const crlf = before.includes('\r\n');
+  const rewrite = (s) => (crlf ? s.replace(/\n/g, '\r\n') : s);
+
+  if (!lf(before).includes(lf(from))) {
     check(label, false, `the anchor is gone from ${file} — this case no longer tests anything`);
     return;
   }
   try {
-    await fs.writeFile(full, before.replace(from, to));
+    await fs.writeFile(full, rewrite(lf(before).replace(lf(from), lf(to))));
     const { rejected, output } = runGate(gate);
     check(
       label,
