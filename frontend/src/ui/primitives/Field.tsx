@@ -8,6 +8,14 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   hint?: string;
   error?: string;
   className?: string;
+  /**
+   * A glyph inside the field's leading edge — an envelope on an e-mail, a lock on a password.
+   *
+   * Decoration with a job: it tells you what a field wants before you have read its label, which
+   * is how a form is actually scanned. It is `aria-hidden` by construction — the label is what
+   * names the field, and a glyph that also announced itself would say the same thing twice.
+   */
+  leading?: ReactNode;
   trailing?: ReactNode;
 }
 
@@ -23,7 +31,7 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * when it appears rather than only on the next focus.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, hint, error, className, trailing, id, ...rest },
+  { label, hint, error, className, leading, trailing, id, ...rest },
   ref,
 ) {
   const autoId = useId();
@@ -53,6 +61,10 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
             // different heights in a pack that declares taller controls.
             'min-h-[var(--control-h)]',
             'text-body text-text-1 placeholder:text-text-3',
+            // The glyph occupies the leading edge, so the text has to start after it. 44px, which
+            // is the same floor every control obeys — a narrower inset would put the caret against
+            // the icon on the first character typed.
+            leading && 'ps-[var(--target-min)]',
             // Border WIDTH from the pack (Mono's 2px), border COLOR from the field's own token —
             // `--field-border` existed and nothing read it, so a field could never diverge from a
             // card even though the alias was there to let it.
@@ -65,6 +77,14 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
           )}
           {...rest}
         />
+        {leading ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 flex w-[var(--target-min)] items-center justify-center text-text-3"
+          >
+            {leading}
+          </span>
+        ) : null}
         {trailing ? (
           <span className="absolute inset-y-0 right-1 flex items-center">{trailing}</span>
         ) : null}

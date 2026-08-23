@@ -5,6 +5,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { DocRenderer } from './DocRenderer';
 import { usePost, usePriceFormatter } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 
 /**
  * One post, addressed by its opaque public id.
@@ -63,6 +64,7 @@ export function PostPage() {
 
   return (
     <article className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <AuroraBackdrop />
       <Link to="/m" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
         <ArrowLeft className="size-4" aria-hidden />
         {t('marketplace.backToFeed')}

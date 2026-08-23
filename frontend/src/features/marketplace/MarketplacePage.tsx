@@ -7,6 +7,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useFeed, useSearch, useTaxonomy, usePriceFormatter } from './usePublic';
 import type { PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 
 /**
  * The public marketplace: a feed, filters, and a search.
@@ -44,6 +45,7 @@ export function MarketplacePage() {
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <AuroraBackdrop />
       <h1 className="text-title-2">{t('marketplace.title')}</h1>
 
       <div className="relative">

@@ -172,6 +172,20 @@
      wrong instead of none. */
   --admin-sidebar-w: 15rem;
 
+  /* Backdrop blur scale (ADR-0015).
+     A SCALE, not a set of assignments — which surface uses which step is a component decision and
+     lives in Layer 3, exactly as --radius-* works. Four steps because a glass system needs to say
+     "barely", "a card", "a floating slab" and "the whole screen behind a modal", and a fifth would
+     be a step nobody could name.
+
+     These are the only blur values in the app. `backdrop-blur-[var(--blur-md)]` is the spelling;
+     Tailwind's own `backdrop-blur-xl` is a raw value in disguise and is being removed from the
+     four hand-written call sites that predate this scale. */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 28px;
+  --blur-xl: 40px;
+
   /* Z-index ladder.
      --z-sticky sits BELOW the nav: a table header that scrolled over the bottom navigation would
      be a header covering the way out of the screen. */
@@ -256,6 +270,51 @@
      F-09: border OR shadow, never both. */
   --overlay-border: transparent;
   --shadow-glow: none;
+
+  /* ─── GLASS (ADR-0015) ──────────────────────────────────────────────────────────────────────
+     Translucency as an ALPHA AXIS OVER THE EXISTING SURFACES, not as new colours.
+
+     DECISION 16 says surfaces are elevation and never new colours, and this keeps that intact:
+     --glass-1 is still surface-1, just admitting some of what is behind it. --nav-bg has been
+     built this exact way since Phase 0 (`color-mix(… 88%, transparent)`), so this generalises an
+     idea already in the file rather than introducing one.
+
+     Alpha RISES with elevation. The higher a sheet floats, the more it owns what is behind it: a
+     card lets the aurora through, a bottom sheet mostly does not, because a sheet is a surface you
+     read a form on and the thing behind it is deliberately dismissable.
+
+     THESE THREE PERCENTAGES ARE A STARTING POINT, NOT A MEASUREMENT. Deriving alpha back out of a
+     rendered mockup needs the backdrop under the card, which the image does not contain — an
+     attempt to sample it returned 0%, 94% and 100% for the same material, which measures the
+     sampling rather than the design. They get settled by holding the running app beside
+     `v4-vegleges/sotet/01-home.png`, which is the comparison that decides it anyway. */
+  --glass-1: color-mix(in srgb, var(--surface-1) 62%, transparent);
+  --glass-2: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  --glass-3: color-mix(in srgb, var(--surface-3) 84%, transparent);
+
+  /* The specular rim: the bright line along a pane's TOP edge where light catches it.
+     Rendered as `box-shadow: inset 0 1px 0 …`, which is why F-09 is not in play — an inset
+     highlight renders inside the element's own box and claims no elevation. See ADR-0016.
+     Same alpha-of-ink construction as --surface-border, so it survives any surface. */
+  --glass-rim: rgb(255 255 255 / 0.20);
+
+  /* The aurora the whole interface floats over.
+     Grain FIRST, i.e. on top — the same ordering and the same reason as --gradient-brand: three
+     overlapping wide radial gradients is the textbook banding case on a 6-bit phone panel, and
+     --noise-overlay exists to dither exactly that. The stops are soft rather than blurred at
+     runtime: `filter: blur()` on a full-viewport element is a per-frame GPU cost for an effect
+     that can be baked into the gradient for nothing. */
+  --aurora:
+    var(--noise-overlay),
+    radial-gradient(60% 42% at 18% 10%, color-mix(in srgb, var(--accent) 26%, transparent) 0%, transparent 70%),
+    radial-gradient(52% 38% at 84% 34%, color-mix(in srgb, var(--info) 20%, transparent) 0%, transparent 72%),
+    radial-gradient(70% 46% at 38% 88%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 75%);
+
+  /* The tinted holder every icon sits in across all 27 screens — three to six times per screen,
+     which makes it the most repeated NEW element in the redesign, and the reason it is a token on
+     day one rather than an inline class discovered on screen twelve. */
+  --tile-tint: color-mix(in srgb, var(--accent) 14%, transparent);
+  --tile-tint-fg: var(--accent);
 }
 
 [data-theme='solar'] {
@@ -552,7 +611,17 @@
   --field-radius: var(--radius-field);
 
   /* Cards separate by border OR shadow, never both (Bible; the old build did both — F-09). */
-  --card-bg: var(--surface-1);
+  /* GLASS (ADR-0015/0016): the card is translucent now, and it carries a rim.
+     --card-finish is the PERFORMANCE decision, not a style one, and it defaults to the cheap
+     option deliberately. `backdrop-filter` forces its element onto its own compositing layer and
+     re-samples the backdrop every frame; a list of a dozen cards on a mid-range Android is where
+     that becomes visible, and this app is used on cheap phones in gyms. A card in a scrolling
+     list gets the alpha fill and NO blur — the aurora behind it is already soft, so blurring a
+     soft gradient buys almost nothing and costs the frame budget. Only surfaces that float over
+     MOVING content (nav, sheets, toasts, the rest timer, the palette, a hero anchor) opt in. */
+  --card-bg: var(--glass-1);
+  --card-blur: 0px;
+  --card-rim: var(--glass-rim);
   --card-border: var(--surface-border);
   --card-radius: var(--radius-card);
   --card-pad: --spacing(4);            /* 16px — Bible allows 16–20, the old build used 24 */
@@ -570,15 +639,20 @@
    * which would silently take the declaration out and hand the element the browser default. */
   --radius-inset: max(0px, calc(var(--radius-card) - var(--card-pad)));
 
-  --sheet-bg: var(--surface-3);
+  --sheet-bg: var(--glass-3);
+  --sheet-blur: var(--blur-lg);
   --sheet-radius: var(--radius-sheet);
   --sheet-shadow: var(--shadow-overlay);
 
-  --nav-bg: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  /* Was a hand-rolled 88% mix — the token that proved this construction works, now folded into
+     the scale it inspired. It floats over scrolling content, so it is one of the few that blurs. */
+  --nav-bg: var(--glass-2);
+  --nav-blur: var(--blur-lg);
   --nav-fg-active: var(--accent);
   --nav-fg-idle: var(--text-3);
 
-  --toast-bg: var(--surface-3);
+  --toast-bg: var(--glass-3);
+  --toast-blur: var(--blur-lg);
 
   /* The skeleton sweep. The sheen was borrowed from --surface-3, which put the two stops of a
      moving gradient 1.07–1.11:1 apart in every pack — a 1200ms sweep across two colors nobody can
@@ -587,6 +661,42 @@
      exactly how it got flat the first time. */
   --skeleton-base: var(--surface-2);
   --skeleton-sheen: color-mix(in srgb, var(--surface-3), rgb(var(--ink)) 8%);
+}
+
+/* ── Glass, when glass is not available or not wanted ─────────────────────────────────── */
+/*
+ * Two ways the translucency has to stop, and both end at the same place: opaque surfaces.
+ *
+ * A card at 62% alpha over a bright band of the aurora, with no blur behind it to soften what
+ * shows through, is a contrast failure — the text is fighting a moving gradient. So where the
+ * blur cannot happen or should not happen, the alpha goes away with it. The two are one decision,
+ * not two.
+ *
+ * This is three declarations per block rather than thirty because the translucency lives in Layer
+ * 2 as three names. Had it been written at the call sites, this fallback would be unwriteable.
+ */
+
+/* No backdrop-filter: Firefox with the pref off, older WebViews, and any browser where the
+   compositor has bailed out. Without this the alpha survives and the blur does not, which is the
+   worst of the two states. */
+@supports not (backdrop-filter: blur(1px)) {
+  :root {
+    --glass-1: var(--surface-1);
+    --glass-2: var(--surface-2);
+    --glass-3: var(--surface-3);
+  }
+}
+
+/* And when the person has asked for less transparency at the OS level. This is an accessibility
+   preference, not a capability check: iOS "Reduce Transparency" exists because translucent chrome
+   is genuinely hard to read for some people, and honouring it is not optional. The rim stays —
+   it is an edge, not a transparency — but the surfaces go solid. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-1: var(--surface-1);
+    --glass-2: var(--surface-2);
+    --glass-3: var(--surface-3);
+  }
 }
 
 /* ── Tailwind mapping ─────────────────────────────────────────────────────────────────── */

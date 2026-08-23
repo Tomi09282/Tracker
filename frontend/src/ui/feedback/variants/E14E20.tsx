@@ -53,7 +53,7 @@ export function Sheet({
               'fixed inset-0 z-[var(--z-sheet)] bg-black/50',
               // Blur signals "the thing behind is dismissable", which is its only legitimate
               // use per the platform guidance — never as decoration.
-              'backdrop-blur-sm',
+              'backdrop-blur-[var(--blur-sm)]',
               variant === 'D' && 'bg-black/65',
             )}
             initial={motionSafe ? { opacity: 0 } : false}

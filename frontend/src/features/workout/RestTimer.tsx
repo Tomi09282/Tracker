@@ -95,7 +95,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           variant="secondary"
           aria-label={t('workout.skipRest')}
           onClick={onSkip}
-          className="shadow-[var(--shadow-overlay)] backdrop-blur"
+          className="shadow-[var(--shadow-overlay)] backdrop-blur-[var(--blur-lg)]"
         >
           <span className="text-title-3 font-display tabular-nums" aria-live="off">
             {clock}
@@ -124,7 +124,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           the overlay step for the same reason, and the shadow is the pack's own overlay token
           rather than a stock `shadow-lg`, which is a light-mode shadow at 10% black and invisible
           on these surfaces. */}
-      <div className="col-mobile flex items-center gap-3 rounded-card border-[length:var(--border-width)] border-[var(--overlay-border)] bg-surface-3/95 p-3 shadow-[var(--shadow-overlay)] backdrop-blur">
+      <div className="col-mobile flex items-center gap-3 rounded-card border-[length:var(--border-width)] border-[var(--overlay-border)] bg-surface-3/95 p-3 shadow-[var(--shadow-overlay)] backdrop-blur-[var(--blur-lg)]">
         <svg viewBox="0 0 52 52" className="size-14 shrink-0 -rotate-90" aria-hidden>
           <circle cx="26" cy="26" r={RADIUS} fill="none" stroke="var(--surface-2)" strokeWidth="4" />
           <circle
