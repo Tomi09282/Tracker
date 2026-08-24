@@ -20,6 +20,22 @@ export interface NavTabSpec {
   labelKey: string;
   /** Only the index route needs it: without `end`, `/` matches every path below it. */
   end?: boolean;
+  /**
+   * Other route prefixes this tab OWNS, for the active state only.
+   *
+   * `NavLink` decides `isActive` from its own `to`, which is right for navigation and wrong for
+   * belonging. Two measured consequences, both from the mockups:
+   *
+   *   `/library/:id`  — an exercise detail page lit NO tab at all. Six cells, all idle, on a
+   *                     screen the user reached by tapping one of them.
+   *   `/compose`      — the coach's marketplace desk lit no tab either, because `/coach` does not
+   *                     prefix-match `/compose`.
+   *
+   * A bar with nothing active is a bar that has stopped answering "where am I", which is the only
+   * question it exists to answer. Declared here beside the tab rather than computed in the bar,
+   * so `check-nav` can read the ownership as data — the same reason `labelKey` lives here.
+   */
+  owns?: readonly string[];
 }
 
 /**
@@ -48,27 +64,29 @@ export interface NavTabSpec {
 export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
   user: [
     { to: '/', icon: Home, labelKey: 'nav.home', end: true },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout' },
+    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile' },
+    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   coach: [
     { to: '/', icon: Home, labelKey: 'nav.home', end: true },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout' },
+    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile' },
+    // The marketplace desk and the plan library are the coach's work, reached from here and
+    // belonging here. `/compose` is the one the mockup names outright.
+    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
+    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   admin: [
     { to: '/', icon: Home, labelKey: 'nav.home', end: true },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout' },
+    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach' },
+    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
     { to: '/admin', icon: Shield, labelKey: 'nav.admin' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile' },
+    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
 };
 

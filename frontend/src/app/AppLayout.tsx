@@ -27,6 +27,7 @@ export function AppLayout() {
       tabsForRole(user?.role).map((spec) => ({
         to: spec.to,
         icon: spec.icon,
+        owns: spec.owns,
         label: t(spec.labelKey),
         end: spec.end,
       })),

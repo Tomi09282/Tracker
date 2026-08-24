@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
+import { NavLink, useLocation } from 'react-router';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useElementVariant } from '../feedback/ElementStyleProvider';
@@ -11,6 +11,8 @@ export interface NavTab {
   label: string;
   end?: boolean;
   badge?: number;
+  /** Route prefixes this tab owns for the ACTIVE state only. See `navTabs.ts`. */
+  owns?: readonly string[];
 }
 
 /**
@@ -45,6 +47,22 @@ export interface NavTab {
 export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
   const { t } = useTranslation();
   const variant = useElementVariant('E11');
+  const { pathname } = useLocation();
+
+  /*
+   * ACTIVE MEANS "YOU ARE SOMEWHERE THIS TAB OWNS", not "the URL equals this tab's `to`".
+   *
+   * `NavLink` answers the second question, which is the right one for navigation and the wrong one
+   * for belonging. Measured: on `/library/:id` — an exercise detail page, reached by tapping a tab
+   * — every cell in the bar rendered idle, and on `/compose` the coach's own desk lit nothing
+   * either, because `/coach` does not prefix-match `/compose`. A bar with nothing active has
+   * stopped answering the only question it exists to answer.
+   *
+   * The prefix test is boundary-aware: `/coin` must not match `/coins`, and `/m` must not match
+   * `/measurements`. So a prefix counts only when the path ends there or continues with a slash.
+   */
+  const owned = (tab: NavTab) =>
+    (tab.owns ?? []).some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   const pill = tabs.length <= PILL_MAX_TABS;
 
@@ -93,12 +111,14 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
           // came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport, unreadable
           // and only half tappable. With the floor removed the cells are equal, and that is what
           // makes six and seven of them possible at all.
+          const isOwned = owned(tab);
+
           return (
             <li key={tab.to} className={cn('min-w-0 flex-1', pill && 'lg:flex-none')}>
               <NavLink
                 to={tab.to}
                 end={tab.end}
-                className={({ isActive }) =>
+                className={({ isActive: linkActive }) =>
                   cn(
                     // The bar is 64px tall; the link fills it, so the whole cell is tappable
                     // rather than just the icon.
@@ -110,11 +130,15 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     'justify-center gap-1 px-0 sm:px-3',
                     pill && 'lg:flex-row lg:gap-2 lg:px-4',
                     'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-                    isActive ? 'text-[var(--nav-fg-active)]' : 'text-[var(--nav-fg-idle)]',
+                    linkActive || isOwned
+                      ? 'text-[var(--nav-fg-active)]'
+                      : 'text-[var(--nav-fg-idle)]',
                   )
                 }
               >
-                {({ isActive }) => (
+                {({ isActive: linkActive }) => {
+                  const isActive = linkActive || isOwned;
+                  return (
                   <>
                     <span className="relative inline-flex items-center justify-center">
                       {/* A — the active indicator is a background pill at 12% accent, drawn
@@ -155,7 +179,8 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     </span>
                     <span className="text-micro max-w-full truncate">{tab.label}</span>
                   </>
-                )}
+                  );
+                }}
               </NavLink>
             </li>
           );
