@@ -63,16 +63,31 @@ export function Gauge({
   const stroke = R * thickness;
   const r = R - stroke / 2;
   const circumference = TAU * r;
-  // The open bottom is what stops a full ring reading as a plain circle outline.
-  const sweep = 1 - gap / 360;
+
+  // A RING AND A DONUT WANT THEIR GAP IN DIFFERENT PLACES, and one `gap` number was being spent on
+  // both. A ring's gap is the open bottom that stops a full circle reading as a plain outline. A
+  // donut's gaps are the seams BETWEEN its segments — the only thing separating two adjacent arcs
+  // whose colours are one step apart on the same scale. The coach dashboard asked for a donut, got
+  // the ring's 36° hole at six o'clock, and drew all three segments packed together above it.
+  const donut = Boolean(segments && segments.length > 1);
+
+  // The seam is carved out of each segment's own end, so every arc still spans its true share of
+  // the circle and the proportions stay honest. Round caps add half a stroke at each end and would
+  // swallow a seam this size whole, so a donut draws butt caps — which is also why the ring keeps
+  // its round ones: they are what make a single arc read as a drawn stroke rather than a slice.
+  const SEAM = 0.02;
+  const sweep = donut ? 1 : 1 - gap / 360;
   const track = circumference * sweep;
+  const seam = donut ? circumference * SEAM : 0;
+  const cap = donut ? 'butt' : 'round';
 
   const arcs = segments
     ? segments.reduce<{ offset: number; drawn: Array<GaugeSegment & { dash: number; at: number }> }>(
         (acc, s) => {
           const clamped = Math.max(0, Math.min(1, s.value));
-          acc.drawn.push({ ...s, dash: track * clamped, at: acc.offset });
-          acc.offset += track * clamped;
+          const span = track * clamped;
+          acc.drawn.push({ ...s, dash: Math.max(0, span - seam), at: acc.offset });
+          acc.offset += span;
           return acc;
         },
         { offset: 0, drawn: [] },
@@ -86,9 +101,10 @@ export function Gauge({
         role="img"
         aria-labelledby={titleId}
         className="size-full -rotate-90"
-        /* The rotation puts 0° at twelve o'clock; the gap then opens at the bottom, centred,
-           because the dash offset below starts half a gap in. */
-        style={{ transform: `rotate(${-90 - gap / 2}deg)` }}
+        /* The rotation puts 0° at twelve o'clock. A ring turns a further half-gap so its open
+           bottom lands centred at six o'clock; a donut has no single hole to centre, so it starts
+           exactly at twelve and its first segment begins where the eye expects to start reading. */
+        style={{ transform: `rotate(${donut ? -90 : -90 - gap / 2}deg)` }}
       >
         <title id={titleId}>{label}</title>
         <circle
@@ -98,7 +114,7 @@ export function Gauge({
           fill="none"
           stroke="var(--surface-2)"
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap={cap}
           strokeDasharray={`${track} ${circumference}`}
         />
         {arcs.map((a, i) =>
@@ -111,7 +127,7 @@ export function Gauge({
               fill="none"
               stroke={a.color}
               strokeWidth={stroke}
-              strokeLinecap="round"
+              strokeLinecap={cap}
               strokeDasharray={`${a.dash} ${circumference}`}
               strokeDashoffset={-a.at}
               className={

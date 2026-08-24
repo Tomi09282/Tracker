@@ -89,7 +89,7 @@ let coverMode = false;
  */
 const EXEMPT = new Map([
   ['ui/feedback/variants/E14E20.tsx:top', 'the sheet pins to the BOTTOM; its top-0 case is the centred dialog, which never touches an edge'],
-  ['ui/shell/OfflineIndicator.tsx:bottom', 'pinned to the top only — `inset-x-0 top-0`'],
+  ['ui/shell/OfflineIndicator.tsx:bottom', 'sticky to the top of the layout column; it never reaches the bottom edge'],
 ]);
 
 for (const file of files) {

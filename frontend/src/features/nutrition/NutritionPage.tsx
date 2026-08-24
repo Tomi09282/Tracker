@@ -208,12 +208,11 @@ export function NutritionPage() {
                     progress={
                       m.target != null && m.target > 0 ? m.value / m.target : undefined
                     }
+                    /* The tinted card, the warning border, the amber number, the amber bar and the
+                       alert glyph all hang off this one prop now — they used to be half here and
+                       half in the component, which is how Home ended up drawing a different card
+                       for the same fact. */
                     over={over}
-                    /* Warning-tinted card and warning border on top of what `over` already does to
-                       the number, the holder and the bar. Warning, never danger. */
-                    className={
-                      over ? 'border-[var(--warning-border)] bg-[var(--warning-subtle)]' : undefined
-                    }
                   />
                 );
               })}

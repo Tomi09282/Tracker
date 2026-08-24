@@ -105,29 +105,61 @@ export function OfflineIndicator() {
   }, [drain]);
 
   const showing = offline || mine.length > 0;
-  const label = mine.length > 0 ? t('offline.queued', { count: mine.length }) : t('offline.title');
+  const count = mine.length;
+
+  // BOTH LINES AT ONCE, which is what the mockup draws and what the situation deserves.
+  // `Nincs internetkapcsolat` says what happened; `3 művelet vár feltöltésre` says what it cost.
+  // This used to be a ternary that picked one or the other, so an offline user WITH a queue was
+  // told only the number and never told why, and an offline user WITHOUT one was left to guess
+  // whether anything had been lost.
+  //
+  // When the connection is back and the outbox is draining, `offline` is false and the count
+  // becomes the strong line on its own — saying "no connection" while uploading over that
+  // connection is a lie the user can watch being told.
+  const strong = offline ? t('offline.title') : t('offline.queued', { count });
+  const detail = offline && count > 0 ? t('offline.queued', { count }) : null;
 
   return (
     <div
       role="status"
       aria-live="polite"
       className={cn(
-        'fixed inset-x-0 top-0 z-[var(--z-toast)] flex justify-center',
-        'pointer-events-none px-4 pt-[calc(env(safe-area-inset-top)+--spacing(2))]',
-        'transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-        showing ? 'translate-y-0' : '-translate-y-full',
+        // IN FLOW, NOT OVER IT. `fixed` laid this across the page header, so going offline on Home
+        // replaced the greeting with a warning instead of sitting above it. Sticky inside the
+        // layout column keeps it pinned while the page scrolls AND makes it occupy space, which is
+        // what pushes the header down the way the mockup shows. The 0fr→1fr grid is what lets that
+        // space animate open from nothing — a plain height transition needs a number to animate to,
+        // and the strip is one line tall or two depending on the queue.
+        'sticky top-0 z-[var(--z-toast)] grid overflow-hidden',
+        'transition-[grid-template-rows] duration-[var(--duration-base)] ease-[var(--ease-standard)]',
+        showing ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
       )}
     >
-      <span className="text-body-s inline-flex items-center gap-2 rounded-chip border border-[var(--warning-border)] bg-[var(--warning-subtle)] px-3 py-2 text-text-1">
-        {sending ? (
-          <UploadCloud size={20} strokeWidth={2} aria-hidden className="text-warning" />
-        ) : (
-          <CloudOff size={20} strokeWidth={2} aria-hidden className="text-warning" />
-        )}
-        {/* Rendered only while showing: an `aria-live` region whose text changes as the banner
-            slides away announces the message a second time, to nobody. */}
-        {showing ? label : null}
-      </span>
+      <div className="min-h-0 ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)]">
+        <div
+          className={cn(
+            'flex items-center gap-3 border-b border-[var(--warning-border)]',
+            // The rail runs down the LEADING edge, so it follows the writing direction rather than
+            // sitting on the left of a right-to-left layout.
+            'border-s-4 border-s-[var(--warning)] bg-[var(--warning-subtle)]',
+            'px-4 pb-3 pt-[calc(env(safe-area-inset-top)+--spacing(3))]',
+          )}
+        >
+          {sending ? (
+            <UploadCloud size={20} strokeWidth={2} aria-hidden className="shrink-0 text-warning" />
+          ) : (
+            <CloudOff size={20} strokeWidth={2} aria-hidden className="shrink-0 text-warning" />
+          )}
+          {/* Rendered only while showing: an `aria-live` region whose text changes as the strip
+              collapses announces the message a second time, to nobody. */}
+          {showing ? (
+            <span className="flex min-w-0 flex-col text-start">
+              <span className="text-body-s font-medium text-text-1">{strong}</span>
+              {detail ? <span className="text-caption text-text-2">{detail}</span> : null}
+            </span>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

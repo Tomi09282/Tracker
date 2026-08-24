@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { TriangleAlert } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Surface } from '../primitives/Surface';
 import { CountUp } from '../feedback/CountUp';
@@ -43,7 +44,25 @@ export function SummaryTile({
   const fill = progress === undefined ? undefined : Math.max(0, Math.min(1, progress));
 
   return (
-    <Surface className={cn('flex flex-col gap-tight', className)}>
+    <Surface
+      className={cn(
+        'flex flex-col gap-tight',
+        // THE BORDER IS WHAT MAKES IT THE ODD ONE OUT.
+        // An amber figure and an amber bar are both INSIDE the tile, so a row of three tiles still
+        // reads as three identical objects until you look at each in turn. The border changes the
+        // outline of the thing, which is what the eye picks up before it reads anything — and it
+        // is why the mockups draw it. Two screens had been adding this className by hand; one had
+        // forgotten, so the same over-target state looked different on Home and on Nutrition.
+        //
+        // The tint comes with it for the same reason. `over` means one thing, so it has to LOOK
+        // like one thing on all ten screens that show these tiles — and the call site that was
+        // passing both of these by hand could just as easily have passed one, or neither, or
+        // `danger` instead. Over target is a warning, never a danger: the user ate more than they
+        // planned, nothing broke.
+        over && 'border-[var(--warning-border)] bg-[var(--warning-subtle)]',
+        className,
+      )}
+    >
       <span
         aria-hidden
         className={cn(
@@ -56,10 +75,16 @@ export function SummaryTile({
 
       <p
         className={cn(
-          'text-title-1 font-display tabular-nums',
+          'text-title-1 font-display flex items-center gap-tight tabular-nums',
           over ? 'text-[var(--warning)]' : 'text-text-1',
         )}
       >
+        {/* Colour is not the signal, it is the decoration on the signal. Roughly one man in twelve
+            cannot separate amber from the ordinary ink here, and on a translucent surface the
+            difference is smaller still. The glyph is the part that survives both. */}
+        {over ? (
+          <TriangleAlert className="size-icon-s shrink-0" strokeWidth={2.5} aria-hidden />
+        ) : null}
         {/* CountUp already owns the odometer behaviour and already respects reduced motion, so a
             numeric tile animates and a `128 g` one simply renders. */}
         {typeof value === 'number' ? <CountUp to={value} /> : value}
