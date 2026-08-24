@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useDragControls } from 'motion/react';
 import { CalendarDays, Check, ChevronDown, Loader2, Search, TriangleAlert, X } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { Pressable } from '../../primitives/Pressable';
@@ -34,6 +34,15 @@ const DUR = { fast: 0.15, base: 0.25, slow: 0.4, ambient: 1.2 } as const;
 /** Past this much travel — or this much flick — a horizontal drag counts as a month change. */
 const SWIPE_PX = 48;
 const SWIPE_VELOCITY = 320;
+
+/**
+ * How far E8 variant D's sheet has to be dragged down before letting go dismisses it.
+ *
+ * Twice the month-swipe threshold, and deliberately: a month you swiped past comes back with one
+ * swipe the other way, while a sheet you dismissed by accident costs you the whole selection. The
+ * more expensive the mistake, the further the gesture has to travel to make it.
+ */
+const SHEET_DISMISS_PX = 96;
 
 type CommitState = 'idle' | 'busy' | 'ok' | 'fail';
 
@@ -177,7 +186,9 @@ function Matched({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, at)}
-      <span className="rounded-chip bg-accent-subtle text-on-accent-subtle">
+      {/* Padded, because an unpadded tint behind three letters of body text is a change nobody
+          sees at a glance — the point of marking the match is that the eye finds it first. */}
+      <span className="rounded-chip bg-accent-subtle px-1 font-semibold text-on-accent-subtle">
         {text.slice(at, at + query.length)}
       </span>
       {text.slice(at + query.length)}
@@ -211,8 +222,15 @@ export function Select({
   const [trail, setTrail] = useState<string[]>([]);
   const root = useRef<HTMLDivElement>(null);
   const closing = useRef<number | undefined>(undefined);
+  // E — clearing the query has to put the caret back where it was, or the affordance costs the
+  // user the tap it just saved them.
+  const searchRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const { state, failKey, commit } = useCommitState();
+  // D — the sheet is dragged by its grab bar, not by its body: the list scrolls, and a surface
+  // that both scrolls and drags from the same pixels does neither reliably. `dragListener={false}`
+  // hands the gesture to the handle below.
+  const sheetDrag = useDragControls();
 
   const selected = options.find((o) => o.value === value) ?? null;
 
@@ -274,6 +292,26 @@ export function Select({
     if (variant === 'C') setTrail((prev) => [v, ...prev.filter((x) => x !== v)].slice(0, 3));
   };
 
+  /**
+   * Opening and closing, with the per-variant setup each one needs.
+   *
+   * C used to open with `hover === null`, which meant its single travelling highlight did not
+   * exist until a POINTER moved over a row — so on touch, on a keyboard, and in a screenshot of
+   * the playground the variant whose entire idea is a highlight showed no highlight at all. It now
+   * opens with the highlight already parked on the current value, so the first move is a journey
+   * from somewhere rather than an appearance from nothing.
+   */
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    setQuery('');
+    if (next && variant === 'C') {
+      setHover(value);
+      setTrail(value ? [value] : []);
+    }
+    if (!next) setTrail([]);
+  };
+
   const rowInitial =
     !motionSafe
       ? false
@@ -312,7 +350,7 @@ export function Select({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
         >
           <span className={cn('flex-1 truncate', selected ? 'text-text-1' : 'text-text-3')}>
             {selected?.label ?? '—'}
@@ -322,15 +360,29 @@ export function Select({
             size={20}
             motionSafe={motionSafe}
             idle={
-              <ChevronDown
-                size={20}
-                strokeWidth={2}
-                aria-hidden
-                className={cn(
-                  'shrink-0 transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-                  open && 'rotate-180',
-                )}
-              />
+              variant === 'A' ? (
+                // A — "Spring-open" has to be visible BEFORE the panel exists, or four of the five
+                // variants present an identical closed trigger and the difference is a secret until
+                // you click. So A's caret is the only one driven by a spring: it whips past 180°
+                // and settles back, which is the same physics the panel is about to use.
+                <motion.span
+                  className="inline-flex shrink-0"
+                  animate={{ rotate: open ? 180 : 0 }}
+                  transition={motionSafe ? SPRING.soft : { duration: 0 }}
+                >
+                  <ChevronDown size={20} strokeWidth={2} aria-hidden />
+                </motion.span>
+              ) : (
+                <ChevronDown
+                  size={20}
+                  strokeWidth={2}
+                  aria-hidden
+                  className={cn(
+                    'shrink-0 transition-transform duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
+                    open && 'rotate-180',
+                  )}
+                />
+              )
             }
           />
         </Pressable>
@@ -404,13 +456,36 @@ export function Select({
               transition={
                 motionSafe ? (asSheet || variant === 'A' ? SPRING.soft : SPRING.tight) : { duration: 0 }
               }
+              // D — a sheet you can only close with a button is a dropdown wearing a sheet's
+              // shape. This one is thrown away downward, which is the gesture the shape promises.
+              // `dragElastic` is asymmetric on purpose: it gives downward and refuses upward,
+              // because a sheet already sitting on the bottom edge has nowhere up to go.
+              drag={asSheet ? 'y' : false}
+              dragListener={false}
+              dragControls={sheetDrag}
+              dragConstraints={asSheet ? { top: 0, bottom: 0 } : undefined}
+              dragElastic={asSheet ? { top: 0, bottom: 0.6 } : undefined}
+              dragMomentum={false}
+              onDragEnd={(_event, info) => {
+                if (!asSheet) return;
+                if (info.offset.y > SHEET_DISMISS_PX || info.velocity.y > SWIPE_VELOCITY) setOpen(false);
+              }}
             >
               {asSheet ? (
                 // D is not a dropdown wearing a different animation — it is a modal surface, and
                 // it has to carry a modal surface's furniture: a grab bar, its own title, and a
                 // way out that is not "guess that the scrim is tappable".
                 <li role="presentation" className="mb-2">
-                  <span aria-hidden className="mx-auto mb-2 block h-1 w-10 rounded-chip bg-surface-3" />
+                  {/* The grab bar is the drag HANDLE, so it gets a real hit area rather than the
+                      4px the stripe itself occupies — and `touch-none` because a handle that also
+                      scrolls the list underneath it fights the gesture it exists to receive. */}
+                  <div
+                    aria-hidden
+                    onPointerDown={(e) => sheetDrag.start(e)}
+                    className="flex min-h-[var(--target-min)] cursor-grab touch-none items-center justify-center active:cursor-grabbing"
+                  >
+                    <span className="block h-1 w-10 rounded-chip bg-surface-3" />
+                  </div>
                   <div className="flex items-center justify-between gap-2 pl-3">
                     <span className="text-body-strong truncate text-text-1">{label}</span>
                     <Pressable
@@ -456,6 +531,7 @@ export function Select({
                     </motion.span>
                   </AnimatePresence>
                   <input
+                    ref={searchRef}
                     autoFocus
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -464,8 +540,39 @@ export function Select({
                     // The option buttons below redraw their ring; this input removed it and
                     // replaced it with nothing. `outline-none` in the utilities layer beats the
                     // `:focus-visible` backstop in index.css, so the ring is restated here.
-                    className="min-h-[var(--target-min)] w-full bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                    // `min-w-0`: a flex item defaults to `min-width: auto`, and an input's
+                    // intrinsic width is roughly twenty characters — so beside the clear button it
+                    // refuses to shrink and pushes the row out of a narrow card instead.
+                    className="min-h-[var(--target-min)] w-full min-w-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
                   />
+                  {/* A dead end needs a way out of it. Without this, the only escape from a query
+                      that matches nothing is to select the text and delete it — and the state the
+                      control is IN (no results) is exactly the state where that is most annoying.
+                      It appears only once there is something to clear, so the resting row is
+                      unchanged. */}
+                  <AnimatePresence initial={false}>
+                    {query ? (
+                      <motion.span
+                        className="inline-flex shrink-0"
+                        initial={motionSafe ? { scale: 0.55, opacity: 0 } : false}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={motionSafe ? { scale: 0.55, opacity: 0 } : undefined}
+                        transition={motionSafe ? SPRING.tight : { duration: 0 }}
+                      >
+                        <Pressable
+                          shape="icon"
+                          variant="ghost"
+                          aria-label={t('library.clearFilters')}
+                          onClick={() => {
+                            setQuery('');
+                            searchRef.current?.focus();
+                          }}
+                        >
+                          <X size={20} strokeWidth={2} aria-hidden />
+                        </Pressable>
+                      </motion.span>
+                    ) : null}
+                  </AnimatePresence>
                 </motion.li>
               ) : null}
 
@@ -501,21 +608,43 @@ export function Select({
                         active ? 'text-accent' : 'text-text-1',
                       )}
                     >
+                      {/* B — the check is 20px of glyph moving 44px, which is honest but quiet.
+                          The rail is the same journey drawn at full row height, so the SLIDE is
+                          legible from across the room and in a playground cell four inches wide.
+                          Same layout group, so the two travel together as one object. */}
+                      {variant === 'B' && active ? (
+                        <motion.span
+                          aria-hidden
+                          layoutId={`${listId}-rail`}
+                          className="absolute inset-y-1 left-1 w-1 rounded-chip bg-accent"
+                          transition={motionSafe ? SPRING.tight : { duration: 0 }}
+                        />
+                      ) : null}
+
                       {/* C — ONE highlight, which slides between rows, plus the fading marks of
-                          the two rows before it. Every other variant lights each row on its own. */}
+                          the two rows before it. Every other variant lights each row on its own.
+                          The live highlight carries a border the ghosts do not: without it the
+                          trail is four tints of one colour and the eye cannot tell which end of it
+                          is now. */}
                       {variant === 'C' && hover === opt.value ? (
                         <motion.span
                           aria-hidden
                           layoutId={`${listId}-trail`}
-                          className="absolute inset-0 rounded-field bg-accent-subtle"
+                          className="absolute inset-0 rounded-field border-[length:var(--border-width)] border-[var(--accent-border)] bg-accent-subtle"
                           transition={motionSafe ? SPRING.base : { duration: 0 }}
                         />
                       ) : null}
                       {variant === 'C' && trailIndex > 0 ? (
-                        <span
+                        // The ghost DECAYS into its resting opacity rather than arriving at it, so
+                        // the trail behaves like something the highlight left behind. Reduced
+                        // motion keeps the mark and drops the fade: the row you came from is still
+                        // marked, it just does not animate there.
+                        <motion.span
                           aria-hidden
                           className="absolute inset-0 rounded-field bg-accent-subtle"
-                          style={{ opacity: trailIndex === 1 ? 0.5 : 0.22 }}
+                          initial={motionSafe ? { opacity: 0.85 } : false}
+                          animate={{ opacity: trailIndex === 1 ? 0.5 : 0.22 }}
+                          transition={{ duration: motionSafe ? DUR.slow : 0, ease: EASE_STANDARD }}
                         />
                       ) : null}
 
@@ -591,6 +720,14 @@ export function DatePicker({
   // D — the grid is the fallback, not the default, so it starts folded away.
   const [gridOpen, setGridOpen] = useState(false);
   const [dir, setDir] = useState(0);
+  /**
+   * A — bumped on every pick, including a pick of the day that was already chosen.
+   *
+   * The pop used to be keyed on the DATE, which meant tapping the selected day a second time
+   * changed no key, remounted nothing and produced no feedback at all — the one press in this
+   * control that looks like it did nothing is the one that confirms what you already chose.
+   */
+  const [popKey, setPopKey] = useState(0);
   const { state, failKey, commit, flash, detached } = useCommitState();
   const today = startOfDay(new Date());
 
@@ -623,6 +760,7 @@ export function DatePicker({
   };
 
   const pickDay = (d: Date) => {
+    setPopKey((k) => k + 1);
     if (variant !== 'B') {
       commit(() => onChange(d));
       return;
@@ -671,6 +809,11 @@ export function DatePicker({
               : value
                 ? startOfDay(value).getTime() === date.getTime()
                 : false;
+          // B — the anchor of a range that is still waiting for its other end. Until this existed
+          // B's first tap was indistinguishable from A's, C's or E's: one filled day, no hint that
+          // the control was mid-sentence and expecting a second word. A dashed edge instead of a
+          // fill is the difference between "chosen" and "chosen so far".
+          const pendingAnchor = variant === 'B' && isSelected && !!range && !range.end;
           // B paints outward from the start, one day at a time, so the band reads as a stroke
           // rather than as a rectangle that was always there.
           const paintDelay =
@@ -690,7 +833,14 @@ export function DatePicker({
                 'transition-[background-color,transform] duration-[var(--duration-instant)]',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
                 isSelected
-                  ? 'bg-accent text-accent-fg'
+                  ? pendingAnchor
+                    ? 'border-[length:var(--border-width)] border-dashed border-[var(--accent-border)] text-accent'
+                    : // A's fill is not a class — it is a spring that LANDS on the day (below), so
+                      // the button stays unpainted and the overlay carries the colour. Every other
+                      // variant paints it outright, which is why only A's selection has weight.
+                      variant === 'A'
+                      ? 'text-accent-fg'
+                      : 'bg-accent text-accent-fg'
                   : role === 'mid'
                     ? 'text-on-accent-subtle'
                     : 'text-text-2 hover:bg-accent-subtle',
@@ -701,12 +851,31 @@ export function DatePicker({
                 isToday && variant === 'C' && !isSelected && 'text-accent',
               )}
             >
+              {/* A — the POP. The accent fill is thrown at the day on a soft spring, so it
+                  overshoots the cell and settles into it; the day does not simply become blue.
+                  Keyed on the pick counter rather than on the date, so confirming the day you
+                  already had pops again instead of sitting there.
+
+                  Reduced motion keeps the fill and drops the throw: `initial={false}` means it is
+                  painted at full size on the frame it appears, which is the state change intact
+                  with its duration collapsed to zero — not the state change removed. */}
+              {isSelected && variant === 'A' ? (
+                <motion.span
+                  key={`pop-${popKey}`}
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-chip bg-accent"
+                  initial={motionSafe ? { scale: 0.3, opacity: 0.35 } : false}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={motionSafe ? SPRING.soft : { duration: 0 }}
+                />
+              ) : null}
+
               {/* A — a ring leaves the chosen day and fades outward. Under reduced motion it does
                   not travel: it simply sits there, a permanent halo on the selected day, so the
                   state change survives with its duration collapsed rather than being deleted. */}
               {isSelected && variant === 'A' ? (
                 <motion.span
-                  key={date.getTime()}
+                  key={`ring-${popKey}`}
                   aria-hidden
                   className="pointer-events-none absolute inset-0 rounded-chip border-[length:var(--border-width)] border-[var(--accent-border)]"
                   initial={motionSafe ? { scale: 0.55, opacity: 1 } : false}

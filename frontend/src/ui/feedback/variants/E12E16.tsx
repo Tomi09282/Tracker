@@ -74,6 +74,15 @@ export function InteractiveCard({
   const ref = useRef<HTMLButtonElement>(null);
   /** Pointer position inside the card, 0–1 on each axis. Drives B's tilt AND its glare. */
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  /**
+   * Hover and press, tracked in state rather than left to `whileHover`/`whileTap`.
+   *
+   * A's lift is not only a transform: it swaps the card onto the pack's ELEVATION tokens, which
+   * are colour and shadow — the two things Motion's gesture props do not drive here and the two
+   * things that must survive reduced motion. Motion still owns the travel; these own the material.
+   */
+  const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const [status, setStatus] = useState<CardStatus>('idle');
   const verdict = useRef<number | undefined>(undefined);
 
@@ -105,7 +114,55 @@ export function InteractiveCard({
   // B — the tilt is TRAVEL, so reduced motion drops it. The glare below is an opacity change and
   // stays: the card still answers the pointer, it just does not move.
   const tilting = variant === 'B' && pointer && motionSafe;
-  const glare = pointer ?? { x: 0.5, y: 0.5 };
+  // The light source when nothing is pointing at the card: high and to the left, where every
+  // other highlight in this system comes from (the recipe's rim is on the TOP edge). B used to be
+  // completely inert until a pointer arrived, which in a playground tile — or in a screenshot, or
+  // on a phone that is not being touched — is a plain card. A surface that catches light has to
+  // look like one at rest; the pointer then MOVES the light rather than switching it on.
+  const REST_GLARE = { x: 0.22, y: 0 };
+  const glare = pointer ?? REST_GLARE;
+
+  /**
+   * A — "Lift-press", as an ELEVATION rather than a 4px hop.
+   *
+   * The old variant was `whileHover={{ y: -4 }}`: travel and nothing else, so with reduced motion
+   * on — or on the touch devices this app is actually used in a gym on, where there is no hover at
+   * all — A was the base card. A lift is not a translation, it is a change of PLANE, and this
+   * design system already names that change: `--shadow-overlay` + `--overlay-border` are what
+   * `surface({ elevation: 'sheet' })` uses for "this has left the page".
+   *
+   * Borrowing that pair rather than inventing an elevation is what makes it correct in all five
+   * packs, F-09 included ("border OR shadow, never both"): the four shadow packs declare
+   * `--overlay-border: transparent`, so the border hands over to the shadow, and Mono declares
+   * `--shadow-overlay: none` with `--overlay-border: var(--surface-border)`, so the edge keeps the
+   * job. One pair of tokens, the pack decides which half of it is visible.
+   *
+   * PRESS is the other half of the name, and it is not the hover undone. The rim flips from the
+   * top edge to the bottom one — light from above catches the LOWER inner lip of something pushed
+   * below the surface, which is the whole read of a physical key going down. It is an inset
+   * shadow, so it claims no elevation of its own, and it survives reduced motion because it is
+   * paint, not travel.
+   */
+  const lifted = variant === 'A' && hovered && !pressed;
+  const liftStyle =
+    variant === 'A'
+      ? {
+          boxShadow: pressed
+            ? 'inset 0 -1px 0 var(--card-rim)'
+            : lifted
+              ? 'var(--shadow-overlay)'
+              : undefined,
+          borderColor: lifted ? 'var(--overlay-border)' : undefined,
+          // The recipe transitions COLOURS; the shadow is the half of the lift it cannot see.
+          // Reduced motion collapses this to ~0 through the global backstop, which is the point:
+          // the card still changes plane, it just gets there at once.
+          transition: [
+            'box-shadow var(--duration-fast) var(--ease-standard)',
+            'border-color var(--duration-fast) var(--ease-standard)',
+            'background-color var(--duration-fast) var(--ease-standard)',
+          ].join(', '),
+        }
+      : undefined;
 
   const statusChip =
     status === 'idle' ? null : (
@@ -145,13 +202,32 @@ export function InteractiveCard({
       // leave the card frozen at an angle. `pointerdown` covers touch instead, and every release
       // path below clears the pose, which is what the old `(pointer: fine)` gate was standing in
       // for — it made the variant inert on the devices this app is actually used on.
+      // The A-only state is gated on the variant for the same reason `track` is gated on B: four
+      // of the five variants would otherwise re-render on every pointer down for a value nothing
+      // reads, and this component renders once per row in a list.
+      onPointerEnter={(e) => {
+        if (variant === 'A' && e.pointerType === 'mouse') setHovered(true);
+      }}
       onPointerMove={(e) => {
         if (e.pointerType === 'mouse') track(e);
       }}
-      onPointerDown={track}
-      onPointerUp={() => setPointer(null)}
-      onPointerCancel={() => setPointer(null)}
-      onPointerLeave={() => setPointer(null)}
+      onPointerDown={(e) => {
+        if (variant === 'A') setPressed(true);
+        track(e);
+      }}
+      onPointerUp={() => {
+        setPressed(false);
+        setPointer(null);
+      }}
+      onPointerCancel={() => {
+        setPressed(false);
+        setPointer(null);
+      }}
+      onPointerLeave={() => {
+        setHovered(false);
+        setPressed(false);
+        setPointer(null);
+      }}
       aria-pressed={variant === 'E' ? !!selected : undefined}
       aria-expanded={variant === 'D' ? !!selected : undefined}
       aria-busy={status === 'busy' || undefined}
@@ -182,7 +258,7 @@ export function InteractiveCard({
         variant === 'E' && selected && 'border-accent bg-accent-subtle',
         className,
       )}
-      style={{ transformPerspective: 800 }}
+      style={{ transformPerspective: 800, ...liftStyle }}
       // ONE animate target, because Motion writes ONE transform. Feeding B's tilt through
       // `style.transform` (as this file used to) means anything else that animates a transform
       // silently overwrites it.
@@ -194,25 +270,32 @@ export function InteractiveCard({
       }}
       transition={{
         scale: motionSafe ? SPRING.base : { duration: 0 },
+        y: motionSafe ? SPRING.base : { duration: 0 },
         rotateX: { duration: motionSafe ? secs(DUR_MS.fast) : 0, ease: EASE_STANDARD },
         rotateY: { duration: motionSafe ? secs(DUR_MS.fast) : 0, ease: EASE_STANDARD },
         x: { duration: motionSafe ? secs(DUR_MS.slow) : 0, ease: EASE_STANDARD },
       }}
-      // A — lift on hover, and the press must UNDO the lift: a card that floats away from the
-      // finger reads as a card that was not pressed. The hover colour shift in the recipe answers
-      // the pointer on its own when travel is off.
-      whileHover={variant === 'A' && motionSafe ? { y: -4 } : undefined}
-      whileTap={variant === 'A' ? { y: 0, scale: 0.98 } : { scale: 0.99 }}
+      // A — the travel half of the lift. It goes PAST its resting plane on the press rather than
+      // merely back to it: a key that stops flush with the board has not been pressed, it has been
+      // released. The material half (shadow, border, rim) is in `liftStyle` above and is what
+      // still happens when travel is switched off.
+      whileHover={variant === 'A' && motionSafe ? { y: -6 } : undefined}
+      whileTap={
+        variant === 'A' ? { y: motionSafe ? 2 : 0, scale: 0.98 } : { scale: 0.99 }
+      }
     >
       {/* B — a specular highlight that follows the pointer. Without it "Tilt-glare" was only a
           tilt: the glare is the half that tells you the card has a surface catching light, and it
-          is what survives when the tilt is switched off. */}
+          is what survives when the tilt is switched off.
+          It RESTS at half strength in the top-left rather than at zero, so the variant reads as
+          glossy before anything touches it — see REST_GLARE. Tracking the pointer then brightens
+          it and moves it, which is a change of position and intensity, not an appearance. */}
       {variant === 'B' ? (
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-standard)]"
           style={{
-            opacity: pointer ? 1 : 0,
+            opacity: pointer ? 1 : 0.55,
             background: `radial-gradient(circle at ${glare.x * 100}% ${glare.y * 100}%, var(--glass-rim), transparent 55%)`,
           }}
         />
@@ -505,6 +588,25 @@ const MILESTONES = [25, 50, 75, 100] as const;
  */
 const STRIPE = 32 * Math.SQRT1_2;
 
+/**
+ * E — the ramp itself, drawn once across the FULL track.
+ *
+ * The variant used to compute a single flat colour for the current percentage and paint the fill
+ * with it. That is a colour ramp you can only read by remembering what the bar looked like a
+ * moment ago: at 45% it is a hair off `--accent`, which is what A, B and C are painted with, so
+ * five tiles side by side showed four identical bars and a ring.
+ *
+ * Drawn as a gradient the whole width of the track instead, the same fact becomes spatial — the
+ * colour under any point of the bar is the colour of THAT percentage, so the fill carries the
+ * distance already travelled and the dimmed remainder shows where it is going. Nothing has to be
+ * remembered, and it is legible in a still screenshot.
+ *
+ * The stops are the three semantic tokens the system already ranks in this order — `--info` for
+ * "started", `--accent` for "under way", `--success` for "done" — so the end of the ramp and the
+ * completion colour every other variant lands on are the same value, not a lookalike.
+ */
+const RAMP = 'linear-gradient(90deg, var(--info), var(--accent) 50%, var(--success))';
+
 export function Progress({
   value,
   label,
@@ -728,19 +830,42 @@ export function Progress({
             </>
           ) : null}
 
-          {/* E — "Color-ramp". The number is set in the ramp colour too, so the pairing is legible
-              at a glance and the colour is never the only carrier. */}
+          {/* E — "Color-ramp". Two layers of the SAME gradient: the dimmed one is the whole route,
+              the clipped one is how much of it has been walked. The number is set in the colour
+              under the leading edge, so the pairing is legible at a glance and the colour is never
+              the only carrier of the value. */}
           {variant === 'E' ? (
             <div className="flex w-full items-center gap-3">
-              <div {...bar} className="h-4 min-w-0 flex-1 overflow-hidden rounded-chip bg-surface-2">
-                <div
-                  className="h-full rounded-chip"
-                  style={{ width: `${state === 'busy' ? 100 : pct}%`, background: fill, transition: grow }}
+              <div
+                {...bar}
+                className="relative h-4 min-w-0 flex-1 overflow-hidden rounded-chip bg-surface-2"
+              >
+                {/* Where the bar is GOING. A ramp with its destination hidden is just a fill. */}
+                <span aria-hidden className="absolute inset-0 opacity-30" style={{ background: RAMP }} />
+                {/* Where it IS. Revealed with a clip rather than sized with a width, because a
+                    width would squeeze the whole gradient into the fill and every percentage
+                    would end on `--success` — the ramp has to stay anchored to the TRACK for the
+                    colour to mean a position. Busy clips to nothing: no fraction is known, so the
+                    dimmed route and the spinner are the entire message. */}
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background: state === 'error' ? fill : RAMP,
+                    clipPath: `inset(0 ${100 - (state === 'busy' ? 0 : pct)}% 0 0)`,
+                    transition: motionSafe
+                      ? 'clip-path var(--duration-slow) var(--ease-standard)'
+                      : 'none',
+                  }}
                 />
               </div>
-              <span className="text-title-3 tabular-nums" style={{ color: fill }}>
-                {pct}%
-              </span>
+              {/* A busy bar knows no percentage and must not print one; the spinner badge beside
+                  it is already saying what is true. */}
+              {state === 'busy' ? null : (
+                <span className="text-title-3 tabular-nums" style={{ color: fill }}>
+                  {pct}%
+                </span>
+              )}
             </div>
           ) : null}
         </div>

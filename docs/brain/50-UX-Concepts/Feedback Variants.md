@@ -1,7 +1,7 @@
 ---
 type: ux-concept
 title: Element feedback variants (E1–E26)
-updated: 2026-08-04
+updated: 2026-08-24
 tags: [ux, motion, feedback-law]
 ---
 
@@ -52,6 +52,31 @@ playground lists them as not-yet-built rather than showing an empty demo.
   correct even when no animation frame ever runs — see the gotchas in SHARED_MEMORY.
 - Every control keeps its accessible name, its 44×44 floor and its focus ring regardless of
   variant: the variant changes how it FEELS, never whether it works.
+
+## A variant nobody can reach is a variant nobody can judge
+
+Found on 2026-08-24, while making all five variants of every element genuinely distinct rather than
+one-or-two striking and three defaulted.
+
+**`E20` FAB — A and B were structurally mute.** `press()` short-circuits to opening the menu
+whenever a variant is expandable, and only A (speed-dial) and B (morph-sheet) are. So `run()` — the
+whole busy → tick / busy → warning machine — was unreachable for exactly the two variants whose
+purpose is to LAUNCH one of several actions. `onSelect` was typed `() => void` and called
+fire-and-forget. It now returns `unknown` and is routed through the same `run()`, which is also the
+honest shape: after tapping `Exercise`, what the user is waiting on is the exercise being added,
+not the menu closing.
+
+**`E14` sheet — the demo showed half of each variant.** The playground opened the sheet and passed
+no `status`, so five variants could be compared on their ENTRANCE and on nothing else. The demo now
+drives the panel through busy → success and busy → error, one tap apart.
+
+**`E1` button — the same defect, reported in the same pass.** Its demo action could only resolve, so
+the five ways this element says NO — a shake, a red flood from the contact point, a red sweep, a bar
+that completes in danger, a badge that slides in — could not be seen at all. Presses now alternate.
+
+**The rule this leaves behind.** *A variant's demo has to reach every state the variant can express,
+or the studio is comparing entrances.* Three elements failed it at once, and all three failures were
+invisible: the components were correct, the gates were green, and the page looked finished.
 
 ## Where to look
 

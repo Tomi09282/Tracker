@@ -33,6 +33,14 @@ export type ElementStatus = 'idle' | 'busy' | 'success' | 'error';
  */
 const SHAKE: number[] = [0, -8, 8, -6, 6, 0];
 
+/**
+ * The axes an outcome is allowed to move on.
+ *
+ * Deliberately four, and deliberately not colour: colour is how the status BADGE speaks and it
+ * already says the same thing in every variant. What a variant owns is its gesture.
+ */
+type Settle = { x?: number[]; y?: number[]; scale?: number[]; rotate?: number[] };
+
 /** How long the confirmation is HELD. Not an animation — see the note in `Sheet`. */
 const CONFIRM_MS = 900;
 
@@ -236,6 +244,39 @@ export function Sheet({
   const takeover = variant === 'E' && shown !== 'idle';
   const centred = variant === 'B' || variant === 'C';
 
+  /**
+   * WHAT EACH SHEET DOES WHEN THE ANSWER LANDS.
+   *
+   * The header badge was the same badge in all five, which is the whole complaint in one line: the
+   * variants differed on the way IN and were identical from then on. A variant is a claim about
+   * what kind of object this is, so an object that arrives like a physical panel should answer like
+   * one. Each keeps the axis it already established:
+   *
+   *   A is a thing on a spring    → kicks up and settles on yes, is rebuffed and drops back on no
+   *   B only ever grows in place  → swells on yes, flinches sideways on no
+   *   C came out of its trigger   → begins folding back toward it on yes, refuses to move on no
+   *   D is the top of a deck      → presses down into the stack on yes, the deck jolts on no
+   *
+   * Nothing for `busy` or `idle`. A sheet that twitches while it waits reads as broken, and the
+   * spinner in the header is already saying the only thing there is to say.
+   */
+  const settle: Settle = (() => {
+    if (!motionSafe || shown === 'idle' || shown === 'busy') return {};
+    const bad = shown === 'error';
+    switch (variant) {
+      case 'A':
+        return bad ? { y: [0, 18, -6, 0] } : { y: [0, -14, 0] };
+      case 'B':
+        return bad ? { x: SHAKE, scale: [1, 0.98, 1] } : { scale: [1, 1.045, 1] };
+      case 'C':
+        return bad ? { rotate: [0, -1.5, 1.5, 0] } : { scale: [1, 0.93, 1] };
+      case 'D':
+        return bad ? { rotate: [0, -1.2, 1.2, 0], y: [0, -8, 0] } : { y: [0, 10, 0] };
+      default:
+        return {};
+    }
+  })();
+
   const body = takeover ? (
     <div className="flex flex-col items-center gap-4 py-8">
       <StatusBadge status={shown as Exclude<ElementStatus, 'idle'>} size={28} box="size-12" motionSafe={motionSafe} />
@@ -333,7 +374,7 @@ export function Sheet({
                       : { opacity: 0, scale: 0.9 }
                     : false
                 }
-                animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                animate={{ opacity: 1, scale: 1, x: 0, y: 0, ...settle }}
                 exit={
                   motionSafe
                     ? variant === 'C'
@@ -378,7 +419,7 @@ export function Sheet({
                 if (info.offset.y > 96 || info.velocity.y > 600) onClose();
               }}
               initial={motionSafe ? { y: '100%' } : false}
-              animate={{ y: 0 }}
+              animate={{ y: 0, ...settle }}
               exit={motionSafe ? { y: '100%' } : undefined}
               // A sheet rides a softer spring than a button: a large surface that snaps looks
               // weightless, and the Bible caps large-surface motion at 400ms.
@@ -534,7 +575,19 @@ export function Fab({
   label: string;
   /** May return a promise; if it does, the button spins while it runs and reports how it ended. */
   onPress?: () => unknown;
-  actions?: { label: string; icon: ReactNode; onSelect: () => void }[];
+  /**
+   * `onSelect` may return a promise, and if it does the FAB reports how it ended exactly as
+   * `onPress` does — spinner, then tick or warning.
+   *
+   * IT COULD NOT BEFORE, AND THAT LEFT TWO VARIANTS MUTE. `press()` short-circuits to opening the
+   * menu whenever a variant is expandable, so for A (speed-dial) and B (morph-sheet) `run()` was
+   * unreachable: the two variants whose entire purpose is to LAUNCH one of several actions were
+   * the two that could never say whether the action worked. Routing the selection through the same
+   * `run()` fixes that without a second state machine — and it is the honest shape anyway, because
+   * what the user is waiting on after tapping `Exercise` is the exercise being added, not the menu
+   * closing.
+   */
+  actions?: { label: string; icon: ReactNode; onSelect: () => unknown }[];
   /**
    * E only: 0–100, a REAL fraction of something countable. When it is absent the halo falls back
    * to how far the page is scrolled — also a real measurement. It never invents a number.
@@ -607,14 +660,14 @@ export function Fab({
    * It is deliberately NOT variant-specific: every FAB can fail, so every FAB reports it. What the
    * variants change is the shape of the interaction around this, not whether the user is told.
    */
-  const run = async () => {
-    if (!onPress) return;
+  const run = async (work: (() => unknown) | undefined = onPress) => {
+    if (!work) return;
     if (reset.current !== null) {
       window.clearTimeout(reset.current);
       reset.current = null;
     }
     try {
-      const result = onPress();
+      const result = work();
       if (result instanceof Promise) {
         setState('busy');
         await result;
@@ -638,6 +691,36 @@ export function Fab({
 
   const glyphKey = state !== 'idle' ? state : complete ? 'complete' : 'add';
 
+  /**
+   * And the same for the FAB, whose four non-halo variants all shook identically on failure and
+   * did nothing at all on success beyond turning green — a colour change a thumb is covering at
+   * the exact moment it happens. Each answers on the axis it already lives on:
+   *
+   *   A turns a plus into a cross → it keeps turning
+   *   B swallows a sheet          → it swallows the answer
+   *   C ducks out of the way      → the glyph rolls out of the window and back
+   *   D is dragged and docked     → it snaps, the way a docked thing snaps
+   *
+   * E is the exception on purpose: it has the ring, and a glyph that jumps while a ring is closing
+   * gives the eye two things to follow and it follows neither.
+   */
+  const fabSettle: Settle = (() => {
+    if (!motionSafe || state === 'idle' || state === 'busy') return {};
+    const bad = state === 'error';
+    switch (variant) {
+      case 'A':
+        return bad ? { rotate: [0, -16, 16, -10, 0] } : { rotate: [0, 360] };
+      case 'B':
+        return bad ? { scale: [1, 1.14, 0.92, 1] } : { scale: [1, 0.78, 1] };
+      case 'C':
+        return bad ? { y: [0, -12, 4, 0] } : { y: [0, 20, -20, 0] };
+      case 'D':
+        return bad ? { x: SHAKE } : { x: [0, -14, 4, 0] };
+      default:
+        return {};
+    }
+  })();
+
   const button = (
     <Pressable
       shape="icon"
@@ -658,8 +741,15 @@ export function Fab({
           className="inline-flex"
           initial={motionSafe ? { scale: 0.6, opacity: 0 } : false}
           animate={
-            motionSafe && state === 'error'
-              ? { scale: 1, opacity: 1, rotate: 0, x: SHAKE }
+            motionSafe
+              ? {
+                  scale: 1,
+                  opacity: 1,
+                  rotate: speedDial && open ? 45 : 0,
+                  x: 0,
+                  y: 0,
+                  ...fabSettle,
+                }
               : { scale: 1, opacity: 1, rotate: speedDial && open ? 45 : 0, x: 0 }
           }
           exit={motionSafe ? { scale: 0.6, opacity: 0 } : undefined}
@@ -732,8 +822,8 @@ export function Fab({
                     icon={a.icon}
                     className="shadow-[var(--shadow-overlay)]"
                     onClick={() => {
-                      a.onSelect();
                       setOpen(false);
+                      void run(a.onSelect);
                     }}
                   >
                     {a.label}
@@ -785,8 +875,8 @@ export function Fab({
                   shape="field"
                   icon={a.icon}
                   onClick={() => {
-                    a.onSelect();
                     setOpen(false);
+                    void run(a.onSelect);
                   }}
                 >
                   {a.label}

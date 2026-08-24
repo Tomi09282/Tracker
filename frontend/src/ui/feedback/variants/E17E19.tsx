@@ -68,39 +68,156 @@ const RANGE_HANDLE = [
   '[&::-moz-range-thumb]:h-[var(--target-min)] [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:bg-transparent',
 ].join(' ');
 
+/**
+ * How a handle is DRAWN. Three looks, because three variants mean three different things by it.
+ *
+ *   puck — the default mark: a filled accent dot on the rail.
+ *   lens — C. Hollow, so the ramp underneath shows THROUGH the handle. It used to be a bar filled
+ *          with `--gradient-brand`, i.e. the whole 135° ramp squeezed into 12px, which is a smear
+ *          rather than a reading. An aperture samples the colour AT the value, which is the only
+ *          thing a gradient track is for.
+ *   ring — D's lower bound. Two identical pucks is a range whose two ends cannot be told apart,
+ *          which is the one thing a two-handle slider has to communicate.
+ */
+type ThumbLook = 'puck' | 'lens' | 'ring';
+
 /** One handle. Motion owns the transform, so the centring lives in `x`/`y` and not in a class. */
 function SliderThumb({
   pct,
   grown,
-  bar,
+  look,
+  halo,
   glide,
   motionSafe,
 }: {
   pct: number;
   grown: boolean;
-  /** Variant C swaps the puck for a gradient-filled bar — a different handle, not a tinted one. */
-  bar: boolean;
+  look: ThumbLook;
+  /**
+   * A — the 44px target, drawn.
+   *
+   * "Thumb-grow" used to be a 1.6x scale that existed only between pointerdown and pointerup, so
+   * the variant was invisible until you were already dragging it and identical to every other one
+   * in a still. The halo is the growth made legible before the gesture: the hit area the control
+   * has always had, shown at the moment you reach for it.
+   */
+  halo: boolean;
   glide: boolean;
   motionSafe: boolean;
 }) {
+  const travel = {
+    left: `${pct}%`,
+    x: '-50%',
+    y: '-50%',
+    transition: glide ? 'left var(--duration-fast) var(--ease-standard)' : 'none',
+  };
+
   return (
-    <motion.span
-      aria-hidden
-      className={cn(
-        'pointer-events-none absolute top-1/2 rounded-chip border-2 border-[var(--surface-0)]',
-        bar ? 'h-6 w-3' : 'size-5',
+    <>
+      {halo ? (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 size-11 rounded-chip bg-accent-subtle"
+          style={travel}
+          animate={{ scale: grown ? 1 : 0.35, opacity: grown ? 1 : 0 }}
+          transition={motionSafe ? SPRING.tight : { duration: 0 }}
+        />
+      ) : null}
+      <motion.span
+        aria-hidden
+        className={cn(
+          'pointer-events-none absolute top-1/2 rounded-chip border-2',
+          look === 'lens' ? 'h-3 w-5' : 'size-5',
+          look === 'ring' ? 'border-[var(--accent)]' : 'border-[var(--surface-0)]',
+        )}
+        style={{
+          ...travel,
+          background:
+            look === 'lens'
+              ? 'transparent'
+              : look === 'ring'
+                ? 'var(--surface-0)'
+                : 'var(--accent)',
+          boxShadow: 'var(--shadow-glow)',
+        }}
+        animate={{ scale: grown ? 1.6 : 1 }}
+        transition={motionSafe ? SPRING.tight : { duration: 0 }}
+      />
+    </>
+  );
+}
+
+/**
+ * E's coarse control — and the one place in this file where a refusal is answered ON the thing
+ * that refused.
+ *
+ * The shared readout says "no" in the corner of the row. That is the right place for a drag, which
+ * has no button to point at; it is the wrong place for a tap, where the user's attention is on the
+ * end they just pressed. So the pressed end swaps its own glyph for the warning and shakes, and the
+ * readout says the same thing at the same time. Same vocabulary, twice, because a tap has an
+ * origin and a drag does not.
+ */
+function SliderEnd({
+  label,
+  icon,
+  weight,
+  exhausted,
+  denied,
+  shakeKey,
+  motionSafe,
+  onPress,
+}: {
+  label: string;
+  icon: ReactNode;
+  /** How much room is left in THIS direction, 0–1. Drives both the weight and the tint. */
+  weight: number;
+  /** No room left this way. */
+  exhausted: boolean;
+  denied: boolean;
+  shakeKey: number;
+  motionSafe: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      shape="icon"
+      variant="ghost"
+      aria-label={label}
+      /*
+       * `aria-disabled`, never `disabled`.
+       *
+       * The whole point of this variant is that the end says NO out loud instead of going quiet,
+       * and a truly disabled button cannot be pressed, cannot be focused in some browsers, and
+       * therefore cannot refuse anything — it just stops existing. This announces "unavailable" to
+       * a screen reader, which is the half of the refusal a glyph and a shake cannot carry, while
+       * the press still lands and still answers.
+       */
+      aria-disabled={exhausted || undefined}
+      onClick={onPress}
+      className="shrink-0"
+    >
+      {denied ? (
+        <motion.span
+          // Keyed on the count so a SECOND press against the same end shakes again.
+          key={`deny-${shakeKey}`}
+          aria-hidden
+          className="inline-flex text-warning"
+          animate={motionSafe ? { x: [0, -5, 5, -3, 0] } : { x: 0 }}
+          transition={{ duration: motionSafe ? MOTION_S.slow : 0, ease: EASE_STANDARD }}
+        >
+          <TriangleAlert size={20} strokeWidth={2.5} />
+        </motion.span>
+      ) : (
+        <motion.span
+          aria-hidden
+          className={cn('inline-flex', weight > 0.65 ? 'text-accent' : 'text-text-3')}
+          animate={{ scale: 0.8 + 0.35 * weight }}
+          transition={motionSafe ? SPRING.tight : { duration: 0 }}
+        >
+          {icon}
+        </motion.span>
       )}
-      style={{
-        left: `${pct}%`,
-        x: '-50%',
-        y: '-50%',
-        background: bar ? 'var(--gradient-brand)' : 'var(--accent)',
-        boxShadow: 'var(--shadow-glow)',
-        transition: glide ? 'left var(--duration-fast) var(--ease-standard)' : 'none',
-      }}
-      animate={{ scale: grown ? 1.6 : 1 }}
-      transition={motionSafe ? SPRING.tight : { duration: 0 }}
-    />
+    </Pressable>
   );
 }
 
@@ -141,6 +258,16 @@ export function Slider({
   const variant = useElementVariant('E17');
   const motionSafe = useMotionSafe();
   const [grabbing, setGrabbing] = useState(false);
+  /**
+   * A's trigger is REACHING for the control, not only holding it.
+   *
+   * Hover and keyboard focus count, because a variant that only exists between pointerdown and
+   * pointerup cannot be seen in a still, cannot be seen with a keyboard at all, and is the reason
+   * "Thumb-grow" read as the plain one in the playground grid.
+   */
+  const [hovering, setHovering] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const engaged = grabbing || hovering || focused;
   const id = useId();
   const labelId = `${id}-label`;
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -157,6 +284,8 @@ export function Slider({
    */
   const [status, setStatus] = useState<SliderStatus>('idle');
   const [refusals, setRefusals] = useState(0);
+  /** Which END was refused, when there was one — E draws the answer on that button. */
+  const [deniedDir, setDeniedDir] = useState<-1 | 1 | null>(null);
   const statusRef = useRef<SliderStatus>('idle');
   const timer = useRef<number | null>(null);
 
@@ -174,10 +303,11 @@ export function Slider({
     }, ms);
   };
 
-  const refuse = () => {
+  const refuse = (dir: -1 | 1 | null = null) => {
     // A drag held past the end fires pointermove every frame. Without this the shake would restart
     // on each one and never actually play — a refusal that reads as a flicker.
     if (statusRef.current === 'limit') return;
+    setDeniedDir(dir);
     setRefusals((n) => n + 1);
     flash('limit', 700);
   };
@@ -193,11 +323,20 @@ export function Slider({
     stops.reduce((best, s) => (Math.abs(s - v) < Math.abs(best - v) ? s : best), stops[0]);
   const commit = (raw: number) => onChange(variant === 'B' ? snap(clamp(raw)) : clamp(raw));
 
+  /** Which stop B is sitting on, or -1 between them. Drives the detent flash. */
+  const stopIndex =
+    variant === 'B' ? stops.findIndex((s) => Math.abs(value - s) < 1e-6) : -1;
+
   const dual = variant === 'D';
   const [innerLow, setInnerLow] = useState(min);
   const low = Math.min(lowValue ?? innerLow, value);
   const setLow = (next: number) => {
-    const bounded = Math.min(clamp(next), value);
+    const wanted = clamp(next);
+    // D's own failure, and the only one the other four cannot have: the lower bound cannot pass
+    // the upper one. Clamping it silently is what the previous version did, and a bound that stops
+    // moving for no stated reason is indistinguishable from a stuck handle.
+    if (wanted > value) refuse();
+    const bounded = Math.min(wanted, value);
     if (onLowChange) onLowChange(bounded);
     else setInnerLow(bounded);
   };
@@ -213,24 +352,26 @@ export function Slider({
   const nudge = (dir: 1 | -1) => {
     const next = clamp(value + dir * step);
     if (next === value) {
-      refuse();
+      refuse(dir);
       return;
     }
+    setDeniedDir(null);
     commit(next);
   };
 
   const refuseAtEdge = (clientX: number) => {
     const r = trackRef.current?.getBoundingClientRect();
     if (!r) return;
-    if (value >= max && clientX > r.right + 8) refuse();
-    else if (value <= min && clientX < r.left - 8) refuse();
+    if (value >= max && clientX > r.right + 8) refuse(1);
+    else if (value <= min && clientX < r.left - 8) refuse(-1);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     const up = e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'End';
     const down =
       e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'Home';
-    if ((up && value >= max) || (down && value <= min)) refuse();
+    if (up && value >= max) refuse(1);
+    else if (down && value <= min) refuse(-1);
   };
 
   const onPointerMove = (e: PointerEvent<HTMLInputElement>) => {
@@ -294,15 +435,17 @@ export function Slider({
             {label}
           </label>
         )}
-        {/* A — the value appears while grabbing and gets out of the way afterwards. Showing it
-            permanently would compete with the label for a number the user is already dragging.
-            The two STATE answers are exempt: hiding the one moment the control has something of
-            its own to say would be hiding the entire point of them. */}
+        {/* A keeps this corner for the STATE answers ONLY.
+            The value lives in the bubble on the handle, and the bubble's whole argument is that
+            the eye should not travel to the corner of the row mid-drag — which it was doing
+            anyway, because both were shown at once and said the same number twice. So here A
+            shows the tick and the warning, and nothing else; every other variant shows the value
+            permanently, because none of them has a second place to put it. */}
         <span
           className={cn(
             'text-body-s inline-flex min-h-5 items-center tabular-nums text-text-1',
             'transition-opacity duration-[var(--duration-fast)]',
-            variant === 'A' && status === 'idle' && !grabbing && 'opacity-0',
+            variant === 'A' && status === 'idle' && 'opacity-0',
           )}
         >
           {readout}
@@ -310,7 +453,13 @@ export function Slider({
       </div>
 
       <div
-        className={cn('relative mt-2 flex items-center gap-2', variant === 'A' && 'pt-7')}
+        className={cn(
+          'relative mt-2 flex items-center gap-2',
+          // A reserves room on BOTH sides of the rail: the bubble above it, and the 44px halo
+          // below. Without the lower half the halo bleeds past the bottom of whatever card the
+          // slider sits in — visible in the playground grid, where the tiles do not clip.
+          variant === 'A' && 'pb-3 pt-7',
+        )}
         role={dual ? 'group' : undefined}
         aria-labelledby={dual ? labelId : undefined}
       >
@@ -318,25 +467,26 @@ export function Slider({
             the icon on the side you are heading for gains weight while the other loses it. That is
             also the one place a slider can be told "no" with a tap rather than a drag. */}
         {variant === 'E' ? (
-          <Pressable
-            shape="icon"
-            variant="ghost"
-            aria-label={t('common.less')}
-            onClick={() => nudge(-1)}
-            className="shrink-0"
-          >
-            <motion.span
-              aria-hidden
-              className={cn('inline-flex', pct < 35 ? 'text-accent' : 'text-text-3')}
-              animate={{ scale: 1.1 - 0.3 * (pct / 100) }}
-              transition={motionSafe ? SPRING.tight : { duration: 0 }}
-            >
-              {endIcons[0]}
-            </motion.span>
-          </Pressable>
+          <SliderEnd
+            label={t('common.less')}
+            icon={endIcons[0]}
+            weight={1 - pct / 100}
+            exhausted={value <= min}
+            denied={status === 'limit' && deniedDir === -1}
+            shakeKey={refusals}
+            motionSafe={motionSafe}
+            onPress={() => nudge(-1)}
+          />
         ) : null}
 
-        <div ref={trackRef} className="relative flex-1">
+        <div
+          ref={trackRef}
+          className="relative flex-1"
+          onPointerEnter={(e) => {
+            if (e.pointerType === 'mouse') setHovering(true);
+          }}
+          onPointerLeave={() => setHovering(false)}
+        >
           {/* The visible track. The real input sits on top at full size and opacity 0, so the
               control keeps native keyboard handling, focus and screen-reader semantics while
               looking like the design system. */}
@@ -348,12 +498,16 @@ export function Slider({
             style={variant === 'C' ? { background: 'var(--gradient-brand)' } : undefined}
           >
             {variant === 'C' ? (
-              /* C — the ramp is painted across the WHOLE track and the unspent part is covered
-                 over, so a given colour means the same value at every width. A gradient stretched
-                 to the fill would show its hot end at 5% and at 95% alike, which is a decoration
-                 rather than a reading. */
+              /* C — the ramp is painted across the WHOLE track and the unspent part is VEILED, so
+                 a given colour means the same value at every width. A gradient stretched to the
+                 fill would show its hot end at 5% and at 95% alike, which is a decoration rather
+                 than a reading.
+
+                 The veil is 85% rather than opaque on purpose: the scale you have not reached yet
+                 still ghosts through it, so the ramp reads as one continuous quantity with a
+                 water-line on it, not as a coloured bar that stops. */
               <div
-                className="absolute inset-y-0 right-0 bg-surface-2"
+                className="absolute inset-y-0 right-0 bg-surface-2/85"
                 style={{
                   left: `${pct}%`,
                   transition: glide ? 'left var(--duration-fast) var(--ease-standard)' : 'none',
@@ -396,6 +550,25 @@ export function Slider({
             </div>
           ) : null}
 
+          {/* B — the detent, made visible. A snap is a thing you FEEL on hardware and this has no
+              hardware, so the arrival gets a ring that flashes out of the handle once per stop.
+              Keyed on the stop index: crossing four stops in one drag fires four times, staying
+              on one fires once. It is gated on motion because a flash with its duration collapsed
+              to zero is not a shorter flash, it is no flash — the state change reduced motion has
+              to keep is the value LANDING, and that is the tick and the handle, both of which
+              still move instantly. */}
+          {variant === 'B' && motionSafe && stopIndex >= 0 ? (
+            <motion.span
+              key={`detent-${stopIndex}`}
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 size-5 rounded-chip border-2 border-[var(--accent)]"
+              style={{ left: `${pct}%`, x: '-50%', y: '-50%' }}
+              initial={{ scale: 1, opacity: 0.8 }}
+              animate={{ scale: 2.4, opacity: 0 }}
+              transition={{ duration: MOTION_S.base, ease: EASE_STANDARD }}
+            />
+          ) : null}
+
           {/* A — the handle becomes the readout: it grows into a puck and carries the number with
               it, instead of asking the eye to travel to the corner of the row mid-drag. */}
           {variant === 'A' ? (
@@ -410,7 +583,7 @@ export function Slider({
                 x: '-50%',
                 transition: glide ? 'left var(--duration-fast) var(--ease-standard)' : 'none',
               }}
-              animate={{ opacity: grabbing ? 1 : 0, scale: grabbing ? 1 : 0.8, y: grabbing ? 0 : 6 }}
+              animate={{ opacity: engaged ? 1 : 0, scale: engaged ? 1 : 0.8, y: engaged ? 0 : 6 }}
               transition={motionSafe ? SPRING.tight : { duration: 0 }}
             >
               {format(value)}
@@ -418,12 +591,20 @@ export function Slider({
           ) : null}
 
           {dual ? (
-            <SliderThumb pct={lowPct} grown={false} bar={false} glide={glide} motionSafe={motionSafe} />
+            <SliderThumb
+              pct={lowPct}
+              grown={false}
+              look="ring"
+              halo={false}
+              glide={glide}
+              motionSafe={motionSafe}
+            />
           ) : null}
           <SliderThumb
             pct={pct}
-            grown={variant === 'A' && grabbing}
-            bar={variant === 'C'}
+            grown={variant === 'A' && engaged}
+            look={variant === 'C' ? 'lens' : 'puck'}
+            halo={variant === 'A'}
             glide={glide}
             motionSafe={motionSafe}
           />
@@ -441,7 +622,11 @@ export function Slider({
                 onChange={(e) => setLow(Number(e.target.value))}
                 onPointerDown={() => setGrabbing(true)}
                 onPointerUp={release}
-                onBlur={release}
+                onFocus={() => setFocused(true)}
+                onBlur={() => {
+                  setFocused(false);
+                  release();
+                }}
                 className={RANGE_HANDLE}
               />
               <input
@@ -453,12 +638,22 @@ export function Slider({
                 value={value}
                 aria-label={t('common.more')}
                 aria-valuetext={format(value)}
-                onChange={(e) => commit(Math.max(Number(e.target.value), low))}
+                onChange={(e) => {
+                  const asked = Number(e.target.value);
+                  // The mirror of setLow's guard: the upper bound cannot be dragged under the
+                  // lower one, and being told so is the difference between a floor and a fault.
+                  if (asked < low) refuse();
+                  commit(Math.max(asked, low));
+                }}
                 onKeyDown={onKeyDown}
                 onPointerDown={() => setGrabbing(true)}
                 onPointerMove={onPointerMove}
                 onPointerUp={release}
-                onBlur={release}
+                onFocus={() => setFocused(true)}
+                onBlur={() => {
+                  setFocused(false);
+                  release();
+                }}
                 className={RANGE_HANDLE}
               />
             </>
@@ -476,29 +671,27 @@ export function Slider({
               onPointerDown={() => setGrabbing(true)}
               onPointerMove={onPointerMove}
               onPointerUp={release}
-              onBlur={release}
+              onFocus={() => setFocused(true)}
+              onBlur={() => {
+                setFocused(false);
+                release();
+              }}
               className="absolute inset-0 h-[var(--target-min)] w-full -translate-y-1/3 cursor-pointer opacity-0"
             />
           )}
         </div>
 
         {variant === 'E' ? (
-          <Pressable
-            shape="icon"
-            variant="ghost"
-            aria-label={t('common.more')}
-            onClick={() => nudge(1)}
-            className="shrink-0"
-          >
-            <motion.span
-              aria-hidden
-              className={cn('inline-flex', pct > 65 ? 'text-accent' : 'text-text-3')}
-              animate={{ scale: 0.8 + 0.35 * (pct / 100) }}
-              transition={motionSafe ? SPRING.tight : { duration: 0 }}
-            >
-              {endIcons[1]}
-            </motion.span>
-          </Pressable>
+          <SliderEnd
+            label={t('common.more')}
+            icon={endIcons[1]}
+            weight={pct / 100}
+            exhausted={value >= max}
+            denied={status === 'limit' && deniedDir === 1}
+            shakeKey={refusals}
+            motionSafe={motionSafe}
+            onPress={() => nudge(1)}
+          />
         ) : null}
       </div>
     </div>
@@ -510,6 +703,34 @@ export function Slider({
 export function SkeletonBlock({ className, index = 0 }: { className?: string; index?: number }) {
   const variant = useElementVariant('E18');
   const motionSafe = useMotionSafe();
+
+  /* D — Shape-morph. Measured before this: D and E rendered the base block with nothing added, so
+     two of the five names were labels on the same grey slab.
+
+     A sweep and a pulse both say "waiting" by changing BRIGHTNESS. This one says it by refusing to
+     settle on a size: the block breathes between widths, which is the honest thing a placeholder
+     can say about content whose length it does not know yet. It has to be a transform rather than
+     a width, because a width animation relayouts every sibling once per frame, and it has to be
+     Motion rather than a keyframe because `index.css` is not this file's to extend.
+
+     Static under reduced motion — falling through to the base block below leaves the slab, which
+     is the same placeholder without the movement. */
+  if (variant === 'D' && motionSafe) {
+    return (
+      <motion.div
+        aria-hidden
+        className={cn('origin-left rounded-field bg-[var(--skeleton-base)]', className)}
+        animate={{ scaleX: [1, 0.68, 1], scaleY: [1, 0.86, 1] }}
+        transition={{
+          duration: MOTION_S.ambient,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          // The same 60ms stagger C uses, so a column of them ripples instead of pumping in unison.
+          delay: index * 0.06,
+        }}
+      />
+    );
+  }
 
   return (
     <div
@@ -523,6 +744,13 @@ export function SkeletonBlock({ className, index = 0 }: { className?: string; in
         // B — a slow breath instead. Quieter on a screen full of placeholders, where a dozen
         // sweeps at once turns into noise.
         variant === 'B' && motionSafe && 'animate-[skeleton-pulse_var(--duration-ambient)_ease-in-out_infinite]',
+        // E — Exact-ghost: the OUTLINE of what is coming, at exactly its size, and nothing else.
+        // A filled slab is a claim that something is there; a dashed frame is a claim that
+        // something is reserved. It is the only one of the five with no animation at all, which is
+        // the point — on a screen that draws a dozen placeholders, silence is a design choice, and
+        // it is the variant that looks identical with reduced motion on.
+        variant === 'E' &&
+          'border-[length:var(--border-width)] border-dashed border-[var(--surface-border-strong)] bg-transparent',
         className,
       )}
       style={
@@ -631,44 +859,72 @@ export function PullToRefresh({
       ? 'text-success'
       : status === 'error'
         ? 'text-danger'
-        : armed
-          ? 'text-accent'
-          : 'text-text-2';
+        : busy
+          ? // D already said busy in `info`, and the other four said it in nothing at all. One
+            // vocabulary: four semantic colours, each meaning the same thing in every variant.
+            'text-info'
+          : armed
+            ? 'text-accent'
+            : 'text-text-2';
 
   let indicator: ReactNode;
 
   if (variant === 'A') {
-    // A — Spinner-grow: the indicator IS the progress bar. A ring closes as you pull and the whole
-    // mark grows into it, so the gesture has a readout before it has an outcome.
+    /* A — Spinner-grow: the indicator IS the progress bar. A ring closes as you pull and the whole
+       mark grows into it, so the gesture has a readout before it has an outcome.
+
+       ═══ AND THE RING IS WHAT SPINS ═══════════════════════════════════════════════════════════
+       It used to fill the ring to 100% while a second, smaller spinner turned inside it — two
+       spinners, one of which was not moving, in an 32px mark. The name is Spinner-grow: the ring
+       the pull has been drawing is the thing that should come loose and turn. So on `refreshing`
+       the arc drops back to a quarter and the whole svg rotates, with nothing in the middle.
+
+       With reduced motion nothing can rotate, so the arc stays CLOSED and the static Loader2 sits
+       in the centre — busy is still stated, it just is not stated by movement. */
     const R = 13;
     const CIRC = 2 * Math.PI * R;
-    const done = busy || settled ? 1 : progress;
+    const sweeping = busy && motionSafe;
+    const done = settled ? 1 : busy ? (sweeping ? 0.25 : 1) : progress;
     indicator = (
       <motion.span
         className={cn('relative inline-grid size-8 place-items-center', tone)}
         animate={{ scale: busy || settled ? 1 : 0.45 + 0.55 * progress }}
         transition={motionSafe ? SPRING.tight : { duration: 0 }}
       >
-        <svg viewBox="0 0 32 32" className="absolute inset-0 size-8 -rotate-90" aria-hidden>
-          <circle cx="16" cy="16" r={R} fill="none" stroke="var(--surface-2)" strokeWidth={2} />
-          <circle
-            cx="16"
-            cy="16"
-            r={R}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeDasharray={CIRC}
-            strokeDashoffset={CIRC - CIRC * done}
-            style={{
-              transition: motionSafe
-                ? 'stroke-dashoffset var(--duration-fast) var(--ease-standard)'
-                : 'none',
-            }}
-          />
-        </svg>
-        {glyph}
+        <motion.svg
+          viewBox="0 0 32 32"
+          className="absolute inset-0 size-8"
+          aria-hidden
+          animate={{ rotate: sweeping ? 360 : 0 }}
+          transition={
+            sweeping
+              ? { duration: MOTION_S.ambient, repeat: Infinity, ease: 'linear' }
+              : { duration: 0 }
+          }
+        >
+          {/* The -90° start lives on a group, not on the element Motion is rotating: an inline
+              transform and an animated one are the same property, and the animation wins. */}
+          <g transform="rotate(-90 16 16)">
+            <circle cx="16" cy="16" r={R} fill="none" stroke="var(--surface-2)" strokeWidth={2} />
+            <circle
+              cx="16"
+              cy="16"
+              r={R}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeDasharray={CIRC}
+              strokeDashoffset={CIRC - CIRC * done}
+              style={{
+                transition: motionSafe
+                  ? 'stroke-dashoffset var(--duration-fast) var(--ease-standard)'
+                  : 'none',
+              }}
+            />
+          </g>
+        </motion.svg>
+        {sweeping ? null : glyph}
       </motion.span>
     );
   } else if (variant === 'B') {
@@ -676,40 +932,70 @@ export function PullToRefresh({
     // halfway point of the gesture is the halfway point of the flip. It lands on the state glyph.
     // Flame stands in for the product mark — the one place this file is allowed to be brand.
     const flipped = progress >= 0.5 || busy || settled;
+    /*
+     * A rotateY with no perspective is not a flip — it is a horizontal squash, because an
+     * orthographic projection has no near edge to bring towards you. The coin turned edge-on and
+     * came back the same size, which is why "Logo-flip" read as a blink. 600px is the usual
+     * shallow-perspective figure for a mark this size: enough parallax to see the turn, not enough
+     * to bend the glyph.
+     *
+     * The outcome gets one MORE half-turn (180 → 540) rather than a cut: the coin lands on the
+     * answer, so success and failure arrive by the same motion that started the gesture.
+     */
+    const turn = busy ? 360 : settled ? 540 : flipped ? 180 : progress * 180;
     indicator = (
-      <motion.span
-        className={cn('inline-flex', tone)}
-        style={{ transformStyle: 'preserve-3d' }}
-        animate={{
-          rotateY: motionSafe ? (busy ? 360 : flipped ? 180 : progress * 180) : flipped ? 180 : 0,
-        }}
-        transition={
-          busy && motionSafe
-            ? { duration: MOTION_S.ambient, repeat: Infinity, ease: 'linear' }
-            : { duration: motionSafe ? MOTION_S.fast : 0, ease: EASE_STANDARD }
-        }
-      >
-        {/* The back face is counter-rotated so the glyph is readable once it has landed. While it
-            is tumbling it is not counter-rotated, because a spinner has no wrong way up. */}
-        <span
-          className="inline-flex"
-          style={{ transform: flipped && !busy ? 'rotateY(180deg)' : undefined }}
+      <span className="inline-flex" style={{ perspective: 600 }}>
+        <motion.span
+          className={cn('inline-flex', tone)}
+          style={{ transformStyle: 'preserve-3d' }}
+          animate={{ rotateY: motionSafe ? turn : flipped ? 180 : 0 }}
+          transition={
+            busy && motionSafe
+              ? { duration: MOTION_S.ambient, repeat: Infinity, ease: 'linear' }
+              : {
+                  duration: motionSafe ? (settled ? MOTION_S.slow : MOTION_S.fast) : 0,
+                  ease: EASE_STANDARD,
+                }
+          }
         >
-          {flipped ? glyph : <Flame size={20} strokeWidth={2} aria-hidden />}
-        </span>
-      </motion.span>
+          {/* The back face is counter-rotated so the glyph is readable once it has landed. While it
+              is tumbling it is not counter-rotated, because a spinner has no wrong way up. */}
+          <span
+            className="inline-flex"
+            style={{ transform: flipped && !busy ? 'rotateY(180deg)' : undefined }}
+          >
+            {flipped ? glyph : <Flame size={20} strokeWidth={2} aria-hidden />}
+          </span>
+        </motion.span>
+      </span>
     );
   } else if (variant === 'C') {
-    // C — the band stretches the mark too: squash and stretch is how a physical object shows the
-    // force on it, and it is the same force the resistance curve above is applying.
+    /* C — the band stretches the mark too: squash and stretch is how a physical object shows the
+       force on it, and it is the same force the resistance curve above is applying.
+
+       And there is now something to stretch FROM. The resistance curve and the squash were both
+       real, and both were felt rather than seen — in a still, C was the variant with no marks on
+       it. The tether is the elastic drawn: it grows out of the anchor the mark left behind, thins
+       as it is pulled (a band conserves its volume), and springs back past zero on release. It
+       lags the finger by a spring on purpose, which is the one thing in this file that is allowed
+       to lag: an elastic that tracked the pointer exactly would be a stick. */
     indicator = (
-      <motion.span
-        className={cn('inline-flex', tone)}
-        animate={{ scaleY: 1 + 0.5 * progress, scaleX: 1 - 0.2 * progress }}
-        transition={motionSafe ? SPRING.soft : { duration: 0 }}
-      >
-        {glyph}
-      </motion.span>
+      <span className="relative inline-flex">
+        <motion.span
+          aria-hidden
+          className="absolute bottom-full left-1/2 w-1 rounded-chip bg-accent-subtle"
+          style={{ x: '-50%' }}
+          animate={{ height: pull, scaleX: 1 - 0.6 * progress, opacity: pull > 0 ? 1 : 0 }}
+          transition={motionSafe ? SPRING.soft : { duration: 0 }}
+        />
+        <motion.span
+          className={cn('inline-flex', tone)}
+          animate={{ scaleY: 1 + 0.5 * progress, scaleX: 1 - 0.2 * progress }}
+          transition={motionSafe ? SPRING.soft : { duration: 0 }}
+        >
+          {glyph}
+        </motion.span>
+      </span>
     );
   } else if (variant === 'D') {
     // D — Status-morph: a chip that changes SHAPE, colour and content together. It is the only
@@ -735,11 +1021,28 @@ export function PullToRefresh({
     indicator = (
       <motion.span
         layout
-        className={cn('inline-flex items-center gap-2 rounded-chip px-3 py-1', skin)}
+        className={cn(
+          'relative inline-flex items-center gap-2 overflow-hidden rounded-chip px-3 py-1',
+          skin,
+        )}
         transition={motionSafe ? SPRING.base : { duration: 0 }}
       >
-        {glyph}
-        {word ? <span className="text-caption">{word}</span> : null}
+        {/* Before there is an outcome the chip is also the METER. Without it D's morph was a
+            three-step staircase — grey, accent, coloured — and the two thirds of the gesture
+            between the steps had nothing to show. The fill runs to the edge exactly as the chip
+            arms, so reaching the threshold and the chip turning accent are one event, not two. */}
+        {!busy && !settled ? (
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-0 bg-accent-subtle"
+            style={{
+              width: `${progress * 100}%`,
+              transition: motionSafe ? 'width var(--duration-fast) var(--ease-standard)' : 'none',
+            }}
+          />
+        ) : null}
+        <span className="relative inline-flex">{glyph}</span>
+        {word ? <span className="text-caption relative">{word}</span> : null}
       </motion.span>
     );
   } else {
@@ -844,9 +1147,24 @@ export function PullToRefresh({
         className="pointer-events-none flex h-0 items-center justify-center"
         style={{ marginTop: -THRESHOLD / 2 }}
       >
-        <span aria-hidden className="text-caption inline-flex items-center">
+        {/* The failure shake, once, for all five.
+            The glyph swap already says a refresh failed and the tone already agrees with it, but
+            both are things you have to be LOOKING at the 20px mark to read. A shake is the only
+            part of the answer that is visible from the corner of the eye, and it is the same
+            gesture the slider above uses for the same meaning — one vocabulary for "no" across the
+            file. With reduced motion the duration collapses to zero and the glyph, the colour and
+            the longer hold still carry it. */}
+        <motion.span
+          aria-hidden
+          className="text-caption inline-flex items-center"
+          animate={status === 'error' && motionSafe ? { x: [0, -6, 6, -4, 0] } : { x: 0 }}
+          transition={{
+            duration: status === 'error' && motionSafe ? MOTION_S.slow : 0,
+            ease: EASE_STANDARD,
+          }}
+        >
           {pull > 0 || busy || settled ? indicator : null}
-        </span>
+        </motion.span>
         <span className="sr-only" aria-live="polite">
           {announcement}
         </span>

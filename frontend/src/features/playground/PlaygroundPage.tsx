@@ -45,6 +45,22 @@ export const PREVIEWABLE = new Set([
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
+ * E19's demo alternates success and failure, pull by pull.
+ *
+ * Half of what pull-to-refresh has to communicate is that the refresh did NOT work — a gesture
+ * that silently returns you to stale data is worse than one that never ran. With `onRefresh`
+ * always resolving, that half of every variant was unreachable from the one screen where these
+ * are judged. Module scope rather than component state on purpose: it is not rendered, so it must
+ * not re-render anything, and it survives the five `VariantOverride` tiles independently.
+ */
+let e19Attempt = 0;
+// E1's five variants differ most in how they say NO — a shake, a red flood from the contact point,
+// a red sweep, a bar that completes in danger, a badge that slides in. None of that could be seen
+// while the demo's action could only ever resolve. Alternating means the two outcomes are one tap
+// apart, which is what makes them comparable rather than merely reachable.
+let e1Attempt = 0;
+
+/**
  * One live, interactive instance of an element.
  *
  * EXPORTED, because the admin studio needs exactly this and building a second preview harness would
@@ -61,6 +77,14 @@ export function Demo({ id }: { id: string }) {
   const [tab, setTab] = useState<'a' | 'b'>('a');
   const [picked, setPicked] = useState(false);
   const [sheet, setSheet] = useState(false);
+  // The sheet's five variants differ on the way in AND on how they answer, and a demo that only
+  // opens one shows exactly half of each. These two drive the panel through the states.
+  const [sheetStatus, setSheetStatus] = useState<'idle' | 'busy' | 'success' | 'error'>('idle');
+  const driveSheet = async (outcome: 'success' | 'error') => {
+    setSheetStatus('busy');
+    await wait(800);
+    setSheetStatus(outcome);
+  };
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const [pct, setPct] = useState(45);
   const [sel, setSel] = useState<string | null>('a');
@@ -73,7 +97,11 @@ export function Demo({ id }: { id: string }) {
         <FeedbackButton
           variant="primary"
           icon={<Share2 size={20} strokeWidth={2} aria-hidden />}
-          onAction={() => wait(900)}
+          onAction={() =>
+            wait(900).then(() => {
+              if (e1Attempt++ % 2 === 1) throw new Error('demo failure');
+            })
+          }
         >
           Save
         </FeedbackButton>
@@ -153,9 +181,34 @@ export function Demo({ id }: { id: string }) {
     case 'E14':
       return (
         <>
-          <Pressable onClick={() => setSheet(true)}>Open sheet</Pressable>
-          <Sheet open={sheet} onClose={() => setSheet(false)} title="Demo sheet">
+          <Pressable
+            onClick={() => {
+              setSheetStatus('idle');
+              setSheet(true);
+            }}
+          >
+            Open sheet
+          </Pressable>
+          <Sheet
+            open={sheet}
+            onClose={() => setSheet(false)}
+            title="Demo sheet"
+            status={sheetStatus}
+            onRetry={() => void driveSheet('success')}
+          >
             <p className="text-body-s text-text-2">Escape closes this, and focus lands inside it.</p>
+            {/* Both outcomes, one tap apart, because that is the only way to compare five
+                variants' answers rather than five variants' entrances. E hands the whole panel
+                over to the state; the other four keep the content and put a badge in the header,
+                each settling on its own axis. */}
+            <div className="mt-4 flex gap-tight">
+              <Pressable density="compact" onClick={() => void driveSheet('success')}>
+                Succeed
+              </Pressable>
+              <Pressable density="compact" variant="secondary" onClick={() => void driveSheet('error')}>
+                Fail
+              </Pressable>
+            </div>
           </Sheet>
         </>
       );
@@ -239,7 +292,14 @@ export function Demo({ id }: { id: string }) {
       );
     case 'E19':
       return (
-        <PullToRefresh onRefresh={() => wait(900)}>
+        <PullToRefresh
+          onRefresh={() =>
+            wait(900).then(() => {
+              // Odd pulls succeed, even pulls fail, so both outcomes are one gesture apart.
+              if (e19Attempt++ % 2 === 1) throw new Error('demo failure');
+            })
+          }
+        >
           <span className="text-body-s block text-text-2">Pull down from the top</span>
         </PullToRefresh>
       );
@@ -331,11 +391,29 @@ export function PlaygroundPage() {
         </section>
       ))}
 
+      {/* THE FAB NEEDS BOTH A PRESS AND A SELECTION TO BE JUDGEABLE.
+          `actions` is what makes A a speed-dial and B a morph-sheet, and for those two the outcome
+          arrives from the action you PICKED. For C, D and E there is no menu, so the press itself
+          is the work. Supplying both means every variant reaches busy → tick and busy → warning,
+          which is where their gestures differ — a spin, a swallow, a roll-through, a snap.
+          `Exercise` succeeds and `Note` fails, so the two outcomes are one tap apart. */}
       <Fab
         label="Demo action"
+        onPress={() => wait(800)}
         actions={[
-          { label: 'Exercise', icon: <Dumbbell size={20} strokeWidth={2} aria-hidden />, onSelect: () => undefined },
-          { label: 'Note', icon: <Trash2 size={20} strokeWidth={2} aria-hidden />, onSelect: () => undefined },
+          {
+            label: 'Exercise',
+            icon: <Dumbbell size={20} strokeWidth={2} aria-hidden />,
+            onSelect: () => wait(800),
+          },
+          {
+            label: 'Note',
+            icon: <Trash2 size={20} strokeWidth={2} aria-hidden />,
+            onSelect: () =>
+              wait(800).then(() => {
+                throw new Error('demo failure');
+              }),
+          },
         ]}
       />
 
