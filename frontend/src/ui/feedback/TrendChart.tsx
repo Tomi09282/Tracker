@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { plot, linePath, areaPath, longestGapDays } from './chartGeometry';
+import { formatMeasure } from '../../lib/measure';
 
 export interface TrendPoint {
   date: string;
@@ -67,7 +68,7 @@ export function TrendChart({
    */
   emptyKey?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const gradientId = useId();
 
   if (series.length < 3) {
@@ -90,9 +91,36 @@ export function TrendChart({
   const area = areaPath(pts, H);
   const gap = longestGapDays(series);
 
+  /*
+   * THE SCALE. Three ticks, and one source for both the label and the line it labels.
+   *
+   * `at` is a fraction of the plot box measured from the TOP, which is the direction SVG y runs
+   * and the direction CSS `top` runs — so the same number positions the gridline inside the
+   * stretched SVG and the HTML label beside it, and the two cannot drift apart. Writing them as
+   * separate numbers is precisely the "two things that must agree" defect this codebase keeps
+   * finding.
+   *
+   * The values come from the data's own range rather than from a rounded axis, because the plot
+   * already maps min→bottom and max→top: inventing nicer round numbers would put the labels
+   * somewhere the line never goes. Three is the count the mockup shows and about the most a
+   * 90px-tall chart can carry without the labels touching.
+   */
+  const values = series.map((p) => p.value);
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const TICKS =
+    hi === lo
+      ? // A flat series has no range to divide. One tick through the middle says "this is the
+        // value and it did not move", where three identical labels would look like a broken axis.
+        [{ at: 0.5, value: lo }]
+      : [
+          { at: 0, value: hi },
+          { at: 0.5, value: (hi + lo) / 2 },
+          { at: 1, value: lo },
+        ];
+
   const first = series[0];
   const last = series[series.length - 1];
-  const lastPt = pts[pts.length - 1];
   const delta = last.value - first.value;
 
   const good =
@@ -101,29 +129,58 @@ export function TrendChart({
   return (
     <figure className={className}>
       <figcaption className="text-caption flex items-baseline justify-between gap-2 text-text-2">
-        <span>{label}</span>
-        {/* THE ANSWER, at the size of an answer. This span used to inherit the figcaption's 12px,
-            so the current reading — the one number the chart exists to deliver — rendered SMALLER
-            than the two date labels under the axis. `text-title-3` is the scale's step for "the
-            value inside a stat block"; `items-baseline` on the row keeps it sitting on the same
-            line as its label. */}
-        <span className="text-title-3 tabular-nums text-text-1">
-          {round(last.value)} {unit}
+        {/* The unit rides with the label rather than repeating on every tick. Three ticks each
+            carrying `kg` is the same word three times in a column eight characters wide. */}
+        <span>
+          {label}
+          {unit ? <span className="ml-1 text-text-3">({unit})</span> : null}
+        </span>
+        {/* THE ANSWER, at the size of an answer.
+            It began at the figcaption's 12px — smaller than the date labels under its own axis —
+            and was raised to `text-title-3` (17px). That was still wrong by comparison: the
+            `SummaryTile` figures sitting BELOW this chart are `text-title-1` (26px), so the
+            screen's anchor carried a smaller number than the two secondary readings it anchors.
+            The spec calls this "the card's largest number", and now it is one. */}
+        <span className="text-title-1 font-display tabular-nums text-text-1">
+          {formatMeasure(last.value, i18n.language)} {unit}
           {/* The change over the WHOLE window, not since the previous point. A single-session dip
               is noise; where they started versus where they are is the question being asked.
               Held at caption size so it annotates the value rather than competing with it. */}
           {delta !== 0 ? (
             <span className={good ? 'text-caption ml-1 text-success' : 'text-caption ml-1 text-text-2'}>
               {delta > 0 ? '+' : ''}
-              {round(delta)}
+              {formatMeasure(delta, i18n.language)}
             </span>
           ) : null}
         </span>
       </figcaption>
 
-      <svg
+      {/* THE LINE USED TO FLOAT IN AN UNMARKED BOX.
+          Three paths and one dot, with no scale of any kind: a reader could see that the value went
+          down and had no way to tell whether the dip was 400 grams or four kilos. A trend chart
+          without a scale is a shape, not a measurement.
+
+          The tick labels are HTML rather than <text>, and that is forced: the SVG carries
+          `preserveAspectRatio="none"` so it can fill any width, which stretches everything inside
+          it — including glyphs. The gridlines are horizontal lines and stretch harmlessly; type
+          does not. So the gutter is a flex sibling positioned to the same fractions the lines use,
+          and both stay honest at every width. */}
+      <div className="mt-2 flex items-stretch gap-2">
+        <div className="text-caption relative w-8 shrink-0 tabular-nums text-text-3">
+          {TICKS.map((tick) => (
+            <span
+              key={tick.at}
+              className="absolute end-0 -translate-y-1/2"
+              style={{ top: `${tick.at * 100}%` }}
+            >
+              {formatMeasure(tick.value, i18n.language)}
+            </span>
+          ))}
+        </div>
+
+        <svg
         viewBox={`0 0 ${W} ${H}`}
-        className="mt-1 w-full"
+        className="w-full flex-1"
         preserveAspectRatio="none"
         role="presentation"
         aria-hidden
@@ -134,6 +191,20 @@ export function TrendChart({
             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
+        {/* Behind the data, never over it. Three lines only — one per tick — because a grid
+            dense enough to read values off is a table, and this is a shape with a scale on it. */}
+        {TICKS.map((tick) => (
+          <line
+            key={tick.at}
+            x1="0"
+            x2={W}
+            y1={PAD + tick.at * (H - PAD * 2)}
+            y2={PAD + tick.at * (H - PAD * 2)}
+            stroke="var(--surface-border)"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
         <path d={area} fill={`url(#${gradientId})`} />
         <path
           d={line}
@@ -146,15 +217,40 @@ export function TrendChart({
           // This keeps the line one consistent weight at every screen width.
           vectorEffect="non-scaling-stroke"
         />
-        <circle cx={lastPt.x} cy={lastPt.y} r="3" fill="var(--accent)" vectorEffect="non-scaling-stroke" />
+        {/* A DOT PER READING, not one on the last.
+            Every earlier measurement was a bare vertex of the polyline, so a run of readings a day
+            apart and a run three weeks apart drew the same line — which defeats the honest time
+            axis the geometry module exists to provide. The dots are what make "these four are
+            clustered and that one is alone" visible. The last one is larger: it is the value in
+            the headline, and the eye should be able to find it without counting. */}
+        {pts.map((p, i) => (
+          <circle
+            key={p.date}
+            cx={p.x}
+            cy={p.y}
+            r={i === pts.length - 1 ? 3.5 : 2}
+            fill="var(--accent)"
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
       </svg>
+      </div>
 
       <div className="text-caption flex justify-between gap-2 text-text-3">
         <span>{first.date}</span>
         {/* A break that dominates the window is NAMED, not merely drawn. The honest x axis makes the
             gap visible; saying how long it was is what stops a reader interpreting the drop after it
             as lost progress rather than as two weeks off. Two weeks because a week is ordinary. */}
-        {gap >= 14 ? <span className="truncate text-warning">{t('progress.gap', { count: gap })}</span> : null}
+        {/* A CHIP, not loose text. It sat as the middle child of a `justify-between` row with no
+            container of its own, so it drifted left and right as the two date labels changed width
+            and read as a stray amber sentence rather than as a marker on the axis. A filled pill is
+            an object: it holds its shape, it centres, and it says "this is about the gap between
+            those two dates" by looking like a thing placed between them. */}
+        {gap >= 14 ? (
+          <span className="text-caption shrink-0 rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 text-[var(--warning)]">
+            {t('progress.gap', { count: gap })}
+          </span>
+        ) : null}
         <span>{last.date}</span>
       </div>
 
@@ -172,7 +268,7 @@ export function TrendChart({
             <tr key={p.date}>
               <th scope="row">{p.date}</th>
               <td>
-                {round(p.value)} {unit}
+                {formatMeasure(p.value, i18n.language)} {unit}
               </td>
             </tr>
           ))}
@@ -183,4 +279,4 @@ export function TrendChart({
 }
 
 /** Whole numbers past 10, one decimal below it — 2.5 kg matters, 102.5 kg does not. */
-const round = (v: number) => (Math.abs(v) >= 10 ? Math.round(v) : Math.round(v * 10) / 10);
+

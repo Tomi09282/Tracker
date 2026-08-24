@@ -22,6 +22,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { TrendChart } from '../../ui/feedback/TrendChart';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { personLabel } from '../../lib/person';
+import { formatMeasure } from '../../lib/measure';
 import {
   useMeasurements,
   useMetrics,
@@ -141,7 +142,7 @@ const METRIC_ICON: Record<string, LucideIcon> = { weight: Scale, body_fat: Perce
 const iconFor = (key: string): LucideIcon => METRIC_ICON[key] ?? Ruler;
 
 function BodyTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const metrics = useMetrics();
   const measurements = useMeasurements();
   const record = useRecordMeasurement();
@@ -207,12 +208,22 @@ function BodyTab() {
 
   /** Latest reading of every metric that is not the one in the chart. */
   const tiles = useMemo(() => {
-    const out: { key: string; value: number; unit: string; date: string }[] = [];
+    const out: { key: string; value: string; unit: string; date: string }[] = [];
     for (const [key, bucket] of byMetric) {
       if (key === selected) continue;
       const last = bucket[bucket.length - 1];
       const row = rows.find((r) => r.metric_key === key);
-      out.push({ key, value: last.value, unit: unitSymbol(row?.unit), date: last.date });
+      // FORMATTED, not raw. These rendered `37,933 cm` and `18,486 %` — three decimals of a
+      // number nobody measured to three decimals — because the value went straight from the API
+      // into `SummaryTile`, which prints what it is given. Passing a string also skips CountUp's
+      // odometer, which is correct here: these are secondary readings, and the chart above is the
+      // thing that should be moving.
+      out.push({
+        key,
+        value: formatMeasure(last.value, i18n.language),
+        unit: unitSymbol(row?.unit),
+        date: last.date,
+      });
     }
     return out;
   }, [byMetric, rows, selected]);
