@@ -298,6 +298,47 @@
      Same alpha-of-ink construction as --surface-border, so it survives any surface. */
   --glass-rim: rgb(255 255 255 / 0.20);
 
+  /* ── What makes it read as GLASS rather than as a tinted panel ────────────────────────────
+   *
+   * The first pass had translucency and a rim and still looked like a flat colour, and the reason
+   * is that a real pane of glass is not evenly lit. Light lands on its top edge and falls off; the
+   * bottom edge sits in the shadow of its own thickness. A rim of one uniform alpha all the way
+   * round says "outline". A rim that is bright at the top and gone by the bottom says "object".
+   *
+   * All three of these are `box-shadow` and `background-image`, which cost nothing extra: they
+   * paint in the same pass the element was already painting in. Only `--card-blur` and
+   * `--card-saturate` touch the compositor, and they are declared separately for that reason.
+   */
+
+  /* The lit edge: a hairline inset highlight along the top, and a fainter one carrying round the
+     sides before it dies. Two insets rather than a border, because a border is on all four sides
+     at one strength by construction and that is the flatness being fixed. */
+  --glass-lip:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.22),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06);
+
+  /* The thickness: a soft dark line just inside the bottom edge, which is what a pane's own body
+     does to the light passing through it. Very low alpha — at anything stronger it stops reading
+     as depth and starts reading as a second border. */
+  --glass-underside: inset 0 -1px 0 0 rgb(0 0 0 / 0.28);
+
+  /* The sheen across the face. A single wide highlight from the top-leading corner, at an alpha
+     low enough that it is felt rather than seen — it is what stops a large card looking like a
+     rectangle of paint. `--glass-sheen-angle` is separate so a pack can turn the light source. */
+  --glass-sheen-angle: 145deg;
+  --glass-sheen: linear-gradient(
+    var(--glass-sheen-angle),
+    rgb(255 255 255 / 0.07) 0%,
+    rgb(255 255 255 / 0.02) 38%,
+    transparent 62%
+  );
+
+  /* Saturation of what shows THROUGH. This is the one that surprises people: a plain blur greys
+     the backdrop, because averaging neighbouring pixels averages their chroma too. Pushing
+     saturation back up is what makes the aurora read as colour behind the pane instead of as
+     smoke. It only applies where a backdrop-filter already exists, so it adds no new layer. */
+  --card-saturate: 1.4;
+
   /* The aurora the whole interface floats over.
      Grain FIRST, i.e. on top — the same ordering and the same reason as --gradient-brand: three
      overlapping wide radial gradients is the textbook banding case on a 6-bit phone panel, and
@@ -690,13 +731,36 @@
 /* And when the person has asked for less transparency at the OS level. This is an accessibility
    preference, not a capability check: iOS "Reduce Transparency" exists because translucent chrome
    is genuinely hard to read for some people, and honouring it is not optional. The rim stays —
-   it is an edge, not a transparency — but the surfaces go solid. */
+   it is an edge, not a transparency — but the surfaces go solid.
+   ────────────────────────────────────────────────────────────────────────────────────────────
+   THE `:not()` IS NOT A LOOPHOLE, IT IS THE POINT.
+
+   The OS preference is the DEFAULT and stays the default: `data-transparency` is absent for every
+   user who has not opened Settings, so `:not([data-transparency='full'])` matches and the surfaces
+   go solid exactly as before. What it adds is that a person can disagree with their own OS about
+   THIS app — which matters more than it sounds, because the setting is system-wide and someone who
+   turned it on for one hostile app has no other way to say "not here".
+
+   It is also the only reason the design can be reviewed at all. The whole liquid-glass pass was
+   built, shipped and judged on a machine with the preference ON, where `--glass-1` resolves to
+   `--surface-1` and `--card-blur` to `0px` — the material was never once on screen. Every report
+   that the glass "was not accurate" was a report about a fallback. */
 @media (prefers-reduced-transparency: reduce) {
-  :root {
+  :root:not([data-transparency='full']) {
     --glass-1: var(--surface-1);
     --glass-2: var(--surface-2);
     --glass-3: var(--surface-3);
   }
+}
+
+/* And the other direction: opt out of translucency without touching an OS setting. Higher
+   specificity than the plain `:root` above, so it wins wherever it is set. */
+:root[data-transparency='none'] {
+  --glass-1: var(--surface-1);
+  --glass-2: var(--surface-2);
+  --glass-3: var(--surface-3);
+  --card-blur: 0px;
+  --card-saturate: 1;
 }
 
 /* ── Tailwind mapping ─────────────────────────────────────────────────────────────────── */

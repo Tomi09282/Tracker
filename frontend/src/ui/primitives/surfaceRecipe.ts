@@ -41,10 +41,28 @@ export const surface = cva(
         bar: 'bg-[var(--nav-bg)]',
       },
       finish: {
-        /** Alpha only. The default, for the reason in the docblock above. */
-        veil: '',
-        /** Alpha plus a real backdrop blur. For surfaces that float over moving content. */
-        glass: 'backdrop-blur-[var(--blur-lg)]',
+        /**
+         * Alpha and a sheen, no backdrop-filter. The default, for the reason in the docblock.
+         *
+         * The sheen is what this variant was missing. Without a blur behind it, a 62% fill over a
+         * soft gradient is a flat wash — the eye gets translucency but no SURFACE. A single wide
+         * highlight raking across the face is the cheapest thing that says "this is a face": it is
+         * a background-image, it composites in the element's own pass, and it is the difference
+         * between a card that is see-through and a card that is made of something.
+         */
+        veil: 'bg-[image:var(--glass-sheen)]',
+        /**
+         * Alpha, the sheen, a real backdrop blur, and saturation.
+         *
+         * `saturate` is doing more work here than the blur is. Averaging neighbouring pixels
+         * averages their chroma, so a plain blur turns the aurora behind the pane into grey smoke;
+         * pushing saturation back past 1 is what makes it read as colour seen THROUGH something.
+         * It rides the same `backdrop-filter` that is already there, so it costs no extra layer.
+         */
+        glass: [
+          'bg-[image:var(--glass-sheen)]',
+          'backdrop-blur-[var(--blur-lg)] backdrop-saturate-[var(--card-saturate)]',
+        ].join(' '),
         /** Opaque. For anything that must stay legible regardless of what is behind it. */
         solid: 'bg-surface-1',
       },
@@ -56,7 +74,18 @@ export const surface = cva(
        * like plastic, not like it descended. That is the test.
        */
       rim: {
-        true: 'shadow-[inset_0_1px_0_var(--card-rim)]',
+        /*
+         * Three insets, not one, and the extra two are what took this from "tinted panel" to
+         * "pane". A single top hairline lights the top edge and leaves the other three at the
+         * border's flat alpha, so the card reads as an outlined rectangle. Real glass is lit
+         * unevenly: bright where the light lands, dark under its own thickness.
+         *
+         * `--glass-lip` carries the highlight over the top and faintly round the sides;
+         * `--glass-underside` puts the pane's own shadow just inside the bottom edge. Both are
+         * inset shadows painting in the pass the element already had, so the cost is zero — the
+         * expensive half of glass is `backdrop-filter`, and that lives on `finish`.
+         */
+        true: 'shadow-[var(--glass-lip),var(--glass-underside)]',
         false: '',
       },
       /** Hover and focus, for a card that is itself a link or a button. G4's recorded gap. */

@@ -20,6 +20,7 @@ import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ThemeStudio } from './ThemeStudio';
+import { useTheme, TRANSPARENCY, type Transparency } from '../../ui/theme/ThemeProvider';
 import { CueSettings } from './CueSettings';
 import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
 import { isValidDisplayName, personInitials, personLabel } from '../../lib/person';
@@ -54,6 +55,68 @@ function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string 
       </span>
       <h2 className="text-micro uppercase text-text-3">{title}</h2>
     </div>
+  );
+}
+
+/**
+ * Whether surfaces are see-through, in this app, regardless of the OS.
+ *
+ * ═══ WHY THIS EXISTS AT ALL ════════════════════════════════════════════════════════════════════
+ *
+ * `prefers-reduced-transparency` is an accessibility preference and the app follows it by default —
+ * that has not changed and must not. What it could not do before is be DISAGREED with. The setting
+ * is system-wide, so somebody who turned it on because one hostile app was unreadable was also
+ * turning it on here, permanently, with no way to say otherwise.
+ *
+ * It is also the reason the glass could be reviewed at all. The entire liquid-glass pass was built
+ * and judged on a machine with the preference on, where `--glass-1` resolves to `--surface-1` and
+ * `--card-blur` to `0px`: the material had never once been on screen, and every report that it
+ * "was not accurate" was a report about the fallback.
+ *
+ * A segmented control rather than a switch, because there are genuinely three answers and "follow
+ * the system" is one of them — a two-state switch would have to pick a side on the user's behalf,
+ * which is the one thing this control exists not to do.
+ */
+function TransparencyChoice() {
+  const { t } = useTranslation();
+  const { transparency, setTheme } = useTheme();
+
+  const label: Record<Transparency, string> = {
+    system: t('settings.transparencySystem'),
+    full: t('settings.transparencyFull'),
+    none: t('settings.transparencyNone'),
+  };
+
+  return (
+    <Surface className="flex flex-col gap-tight">
+      <div className="flex flex-col gap-tight">
+        <span className="text-body-strong text-text-1">{t('settings.transparency')}</span>
+        <p className="text-caption text-text-3">{t('settings.transparencyHint')}</p>
+      </div>
+      <div
+        role="radiogroup"
+        aria-label={t('settings.transparency')}
+        className="flex gap-1 rounded-chip bg-surface-2 p-1"
+      >
+        {TRANSPARENCY.map((value) => (
+          <Pressable
+            key={value}
+            role="radio"
+            aria-checked={transparency === value}
+            /* The accent fill marks a SELECTED STATE, not an action — same rule the progress tabs
+               follow. It is the only filled thing in the track, so "which one is on" is answerable
+               without reading. */
+            variant={transparency === value ? 'primary' : 'ghost'}
+            shape="chip"
+            density="compact"
+            className="flex-1"
+            onClick={() => setTheme({ transparency: value })}
+          >
+            {label[value]}
+          </Pressable>
+        ))}
+      </div>
+    </Surface>
   );
 }
 
@@ -204,6 +267,7 @@ export function SettingsPage() {
 
       <section className="flex flex-col gap-group">
         <SectionHeader icon={Palette} title={t('settings.appearance')} />
+        <TransparencyChoice />
         <Surface>
           <ThemeStudio />
         </Surface>

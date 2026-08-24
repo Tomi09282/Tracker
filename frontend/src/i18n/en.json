@@ -119,7 +119,12 @@
     "openAdmin": "Open the admin area",
     "displayName": "Display name",
     "displayNameHint": "Your coach sees this instead of your e-mail address.",
-    "displayNamePlaceholder": "How others see you"
+    "displayNamePlaceholder": "How others see you",
+    "transparency": "Translucent surfaces",
+    "transparencyHint": "The glass effect on cards and bars. Follows your system setting by default.",
+    "transparencySystem": "System",
+    "transparencyFull": "Always",
+    "transparencyNone": "Never"
   },
   "library": {
     "search": "Search",

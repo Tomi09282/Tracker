@@ -3,8 +3,22 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiWithRefresh } from '../../lib/api';
 import { useTheme, type ThemeState } from '../../ui/theme/ThemeProvider';
 
+/**
+ * What the SERVER stores, which is deliberately less than what `ThemeState` holds.
+ *
+ * `transparency` is a DEVICE answer, not an identity one. Whether translucent surfaces are
+ * readable depends on the screen in front of you and on the OS preference set on that machine —
+ * syncing it would take one device's accessibility decision and impose it on another where the
+ * honest answer may be different. It lives in localStorage and stays there; `user_theme_prefs`
+ * needs no new column and no migration.
+ *
+ * Written as an explicit Pick rather than left to `ThemeState`, so the next field added to the
+ * theme has to state which side of that line it is on instead of being synced by default.
+ */
+export type SyncedTheme = Pick<ThemeState, 'pack' | 'accent' | 'gradient'>;
+
 interface ThemeResponse {
-  theme: ThemeState;
+  theme: SyncedTheme;
 }
 
 /**
@@ -32,7 +46,7 @@ export function useThemeSync() {
   }, [query.data, setTheme]);
 
   const save = useMutation({
-    mutationFn: (theme: ThemeState) =>
+    mutationFn: (theme: SyncedTheme) =>
       apiWithRefresh('/me/theme', { method: 'PUT', body: theme }),
   });
 

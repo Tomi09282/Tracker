@@ -119,7 +119,12 @@
     "openAdmin": "Admin-Bereich öffnen",
     "displayName": "Anzeigename",
     "displayNameHint": "Dein Coach sieht das anstelle deiner E-Mail-Adresse.",
-    "displayNamePlaceholder": "Wie andere dich sehen"
+    "displayNamePlaceholder": "Wie andere dich sehen",
+    "transparency": "Transparente Flächen",
+    "transparencyHint": "Der Glaseffekt auf Karten und Leisten. Folgt standardmäßig deiner Systemeinstellung.",
+    "transparencySystem": "System",
+    "transparencyFull": "Immer",
+    "transparencyNone": "Nie"
   },
   "library": {
     "search": "Suche",

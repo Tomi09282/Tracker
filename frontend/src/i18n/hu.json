@@ -119,7 +119,12 @@
     "openAdmin": "Admin felület megnyitása",
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
-    "displayNamePlaceholder": "Ahogy mások látnak"
+    "displayNamePlaceholder": "Ahogy mások látnak",
+    "transparency": "Áttetsző felületek",
+    "transparencyHint": "Az üveghatás a kártyákon és a sávokon. Alapból a rendszer beállítását követi.",
+    "transparencySystem": "Rendszer",
+    "transparencyFull": "Mindig",
+    "transparencyNone": "Soha"
   },
   "library": {
     "search": "Keresés",
