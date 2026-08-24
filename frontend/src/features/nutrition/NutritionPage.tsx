@@ -39,8 +39,10 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
  * are supporting figures and get `SummaryTile`s, told apart by an icon rather than by their
  * position in a list.
  *
- * `MacroBars` is retired ON THIS SCREEN (it still draws the Home card), but its two rules moved
- * here rather than dying with it:
+ * `MacroBars` is retired ON THIS SCREEN, and it no longer draws the Home card either — `HomeNutrition`
+ * took that over, which leaves `MacroBars` and the `NutritionCard` that wraps it with no caller at
+ * all. They are dead weight awaiting deletion, not a live second rendering. Its two rules moved here
+ * rather than dying with it:
  *   - the fill CLAMPS at a full sweep, the figure never does. 3200 against 2400 must not draw the
  *     same picture as exactly 2400 — the arc goes full, the number tells the truth.
  *   - overshoot is WARNING, never DANGER. Someone 14 g over on fat has had a normal Tuesday, and
@@ -221,10 +223,17 @@ export function NutritionPage() {
 
       {/* ── ADD ──────────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
+        {/* A ROUNDED SQUARE, NOT A DISC — and the same 44px one the rest of the product uses.
+            `rounded-chip` resolves to `--radius-full`, so this badge was drawing a circle where
+            every other section badge (`features/home/SectionHeader`, `features/library/SectionBadge`)
+            draws `size-11 rounded-field`. A section mark that changes shape between screens stops
+            reading as "a section starts here" and starts reading as a different kind of object.
+            This is the third hand-built copy of that element; promoting it into `src/ui/` is the
+            real fix and is out of this pass's reach. */}
         <h2 className="text-title-2 flex items-center gap-tight text-text-1">
           <span
             aria-hidden
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-accent-subtle text-accent"
           >
             <Plus className="size-icon-m" strokeWidth={2} />
           </span>
@@ -345,11 +354,13 @@ export function NutritionPage() {
       {/* ── THE DAY ──────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
         <h2 className="text-title-2 flex items-center gap-tight text-text-1">
+          {/* Same badge as `Hozzáadás` above, down to the glyph size — the two section marks on
+              one screen must not be two sizes. */}
           <span
             aria-hidden
-            className="inline-flex size-9 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-accent-subtle text-accent"
           >
-            <NotebookPen className="size-icon-s" strokeWidth={2} />
+            <NotebookPen className="size-icon-m" strokeWidth={2} />
           </span>
           {t('nutrition.logged')}
         </h2>

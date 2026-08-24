@@ -85,7 +85,6 @@
     "account": "Konto",
     "appearance": "Darstellung",
     "themePacks": "Design-Pakete",
-    "accent": "Akzentfarbe",
     "accentDefault": "Standard",
     "accentCustom": "Eigene Farbe",
     "contrastRatioPass": "Kontrast: {{ratio}}:1 — erfüllt das Minimum von 4,5:1.",
@@ -93,8 +92,6 @@
     "contrastInvalid": "Gib eine gültige Hex-Farbe ein (#RRGGBB).",
     "previewTitle": "Live-Vorschau",
     "previewBody": "Das ist kein Mockup — die ganze App färbt sich um, während du wählst.",
-    "previewSecondary": "Sekundärer Text auf dieser Fläche.",
-    "saveGradient": "Verlauf speichern",
     "gradientPreview": "Verlaufsvorschau",
     "gradient": {
       "title": "Verlauf",
@@ -331,7 +328,10 @@
       "mealDefault": "Mahlzeit",
       "draftNote": "Dieser Plan ist noch ein Entwurf — der Klient sieht ihn erst nach der Aktivierung.",
       "activate": "Aktivieren"
-    }
+    },
+    "profileFull": "Fragebogen",
+    "profileIncomplete": "Unvollständig",
+    "handoverShort": "Diese Kunden können sich noch nicht anmelden."
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",
@@ -574,7 +574,12 @@
     "noneForClient": "Dieser Kunde hat noch keinen Plan",
     "noneForClientBody": "Erstelle einen neuen oder klone eine Vorlage darauf.",
     "newForClient": "Neuer Plan für diesen Kunden",
-    "missingKit": "{{count}} Gerät(e) fehlen"
+    "missingKit": "{{count}} Gerät(e) fehlen",
+    "trainingDayCount": "{{count}} Trainingstage",
+    "noTime": "keine Uhrzeit",
+    "collapseBlock": "Block ein- oder ausklappen",
+    "statusTitle": "Status",
+    "total": "Pläne insgesamt"
   },
   "progress": {
     "heading": "Fortschritt",
@@ -648,7 +653,9 @@
     "reported": "Gemeldet",
     "withdrawn": "Diese Nachricht wurde zurückgezogen",
     "sendFailed": "Die Nachricht konnte nicht gesendet werden. Dein Text ist noch da.",
-    "unavailable": "Diese Unterhaltung ist nicht mehr verfügbar."
+    "unavailable": "Diese Unterhaltung ist nicht mehr verfügbar.",
+    "composeHint": "Enter sendet, Shift+Enter für eine neue Zeile",
+    "delivered": "Zugestellt"
   },
   "notifications": {
     "title": "Mitteilungen",
@@ -658,7 +665,9 @@
     "markAllRead": "Alle als gelesen markieren",
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
-    "daysAgo": "vor {{count}} Tg."
+    "daysAgo": "vor {{count}} Tg.",
+    "unreadLabel": "ungelesen",
+    "earlier": "Früher"
   },
   "nutrition": {
     "title": "Ernährung",

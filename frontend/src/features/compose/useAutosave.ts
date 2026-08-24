@@ -45,6 +45,10 @@ export function useAutosave({
   delay?: number;
 }) {
   const [state, setState] = useState<AutosaveState>('idle');
+  // WHEN the last save landed, not just that one did. The editor has no save button, so the line
+  // under it is the entire receipt — and "Mentve" with no clock says the same thing whether the
+  // save was a second ago or before lunch. State, not a ref: it has to re-render the caption.
+  const [savedAt, setSavedAt] = useState<number | null>(null);
 
   const inFlight = useRef(false);
   const again = useRef(false);
@@ -71,6 +75,7 @@ export function useAutosave({
     try {
       await saveRef.current();
       savedSnapshot.current = sending;
+      setSavedAt(Date.now());
       // Only 'saved' if nothing moved underneath. Saying "saved" while the editor already holds
       // something newer is the same lie the URL change told in RACE-7.
       setState(serialiseRef.current() === sending ? 'saved' : 'dirty');
@@ -116,5 +121,7 @@ export function useAutosave({
     return () => document.removeEventListener('visibilitychange', onHide);
   }, [enabled, run]);
 
-  return { state, flush, adopt, hasUnsaved: enabled && current !== savedSnapshot.current };
+  // `savedAt` is NOT cleared by a later failure: the last successful save really did happen at
+  // that time, and the failed branch is loud on its own.
+  return { state, flush, adopt, savedAt, hasUnsaved: enabled && current !== savedSnapshot.current };
 }

@@ -7,11 +7,24 @@ import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
 import { ApiError, type LogSet, type PrRecord } from './useWorkout';
 
+/**
+ * What the row needs back from a check.
+ *
+ * `queued` is not a detail: a check that only reached the outbox leaves `completed_at` null, so the
+ * row is byte-for-byte a row that was never checked. Without this flag the outcome is invisible and
+ * the row goes silently pending — the one failure this screen must never have.
+ */
+export interface CheckResult {
+  records: PrRecord[];
+  /** The network was gone; the write is in the outbox and has NOT reached the server yet. */
+  queued: boolean;
+}
+
 export interface SetRowProps {
   set: LogSet;
   /** What this client did on this set last time, or null on a first encounter. */
   previous?: { weight_kg: number | null; reps: number | null } | null;
-  onCheck: (values: { weight: number | null; reps: number | null }) => Promise<PrRecord[]>;
+  onCheck: (values: { weight: number | null; reps: number | null }) => Promise<CheckResult>;
   /** Undo a recorded set. Absent means the row simply offers no undo. */
   onUndo?: () => Promise<void>;
   /** E22-E: this row is the one the finished rest handed over to. */
@@ -129,15 +142,28 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
     [],
   );
 
+  // The outbox drained and the refetch landed: the set is recorded, so the offline chip has nothing
+  // left to say and would otherwise sit in danger colours on a green row. ONLY the offline one — a
+  // conflict is still true after a refetch, and that is precisely when the lifter needs to read it.
+  useEffect(() => {
+    if (done) setFailed((f) => (f === 'offline' ? null : f));
+  }, [done]);
+
   const submit = async () => {
     if (busy || done || voided) return;
     setBusy(true);
     setFailed(null);
     try {
-      const earned = await onCheck({
+      const { records: earned, queued } = await onCheck({
         weight: weight === '' ? null : Number(weight),
         reps: reps === '' ? null : Number(reps),
       });
+      // OFFLINE IS NOT AN EXCEPTION HERE, WHICH IS WHY IT NEEDS SAYING OUT LOUD. A network failure
+      // is caught one layer down and turned into an outbox entry, so this promise RESOLVES — the
+      // catch below never runs, `completed_at` stays null because the refetch is offline too, and
+      // the row rendered exactly like one nobody had touched. The chip is the whole difference
+      // between "queued" and "you did not check that set".
+      if (queued) setFailed('offline');
       if (earned.length) {
         setRecords(earned);
         setFlashing(true);

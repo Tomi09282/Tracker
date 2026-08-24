@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../primitives/Pressable';
 import { useMotionSafe } from '../feedback/useMotionSafe';
@@ -29,6 +30,11 @@ export interface MuscleMapProps {
    * Additive and off by default: every existing call site renders exactly as before.
    */
   fill?: boolean;
+  /**
+   * Whether to print the primary/secondary key under the figure. See the note at the render site.
+   * Defaults to on — most screens tint two kinds of muscle and need to say which is which.
+   */
+  legend?: boolean;
   className?: string;
 }
 
@@ -57,7 +63,7 @@ export interface MuscleMapProps {
  * If a future change makes this map the only path to selecting a muscle, that rule is broken and
  * the fix is to restore the chip row — not to inflate these regions.
  */
-export function MuscleMap({ highlights = {}, onSelect, selected, fill = false, className }: MuscleMapProps) {
+export function MuscleMap({ highlights = {}, onSelect, selected, fill = false, legend = true, className }: MuscleMapProps) {
   const { t } = useTranslation();
   const motionSafe = useMotionSafe();
   const [side, setSide] = useState<BodySide>('front');
@@ -98,6 +104,10 @@ export function MuscleMap({ highlights = {}, onSelect, selected, fill = false, c
             density="compact"
             variant={side === s ? 'primary' : 'secondary'}
             aria-pressed={side === s}
+            /* The check is the same active-chip idiom the muscle chips below the figure use, and
+               the mockups draw it on both. Without it the two pills differ only by fill, which is
+               a colour distinction — the one kind roughly a twelfth of men cannot make. */
+            icon={side === s ? <Check className="size-icon-s" strokeWidth={3} aria-hidden /> : undefined}
             onClick={() => setSide(s)}
           >
             {t(`muscleMap.${s}`)}
@@ -191,7 +201,14 @@ export function MuscleMap({ highlights = {}, onSelect, selected, fill = false, c
         </p>
       ) : null}
 
-      {Object.keys(highlights).length > 0 ? (
+      {/* THE LEGEND IS NOT ALWAYS WANTED.
+          It earns its place where the two tints mean two different things — the workout player
+          highlights a movement's primary and secondary muscles and the reader has to tell them
+          apart. On the library screen every highlight is the same kind, so the row is two labels
+          explaining a distinction the screen is not making, sitting exactly where the mockup puts
+          the muscle chips. Opt-out rather than opt-in: the screens that need it outnumber the one
+          that does not, and a legend missing where it was needed is the worse failure. */}
+      {legend && Object.keys(highlights).length > 0 ? (
         <div className={cn('flex shrink-0 items-center gap-4', fill ? 'mt-0' : 'mt-3')}>
           <span className="text-caption inline-flex items-center gap-1.5 text-text-2">
             <span aria-hidden className="inline-block size-3 rounded-chip bg-accent" />

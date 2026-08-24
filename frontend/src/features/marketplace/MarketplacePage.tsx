@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Search, Check, Compass, WifiOff } from 'lucide-react';
+import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
@@ -49,6 +50,26 @@ import { PublicTopBar, KindTile, VerifiedBadge, kindIcon, metaLine, postDate } f
  * city filtering now has no control at all, and must come back as a secondary filter — never as a
  * second permanent row.
  */
+/**
+ * The chosen kind chip. EVERY chip keeps its ring — the unselected ones were `ghost`, which has
+ * neither fill nor border, so three of the four read as loose words rather than as a control.
+ *
+ * `bg-accent-subtle` is DESIGN.md §5.6's selected state; `primary` is not available here because
+ * `Belépés` is this screen's one filled accent control (and `primary` drags Neon's glow with it).
+ * The two `hover:` repeats are load-bearing: `secondary` ships `hover:bg-surface-2`, and `cn` is
+ * `twMerge`, which drops the base `bg-*` it has a conflict for but keeps a `hover:` it does not —
+ * so without them the selected chip turns neutral grey under the pointer.
+ *
+ * NO INK CLASS, deliberately. `--on-accent-subtle` IS `--text-1` (tokens.css) — the colour these
+ * chips already inherit from `body` — and writing `text-on-accent-subtle` here would collapse the
+ * chip's own `text-body-s` under twMerge's single text-* group, rendering the selected chip a size
+ * larger than its neighbours. Never `text-accent` on this wash either: DESIGN.md rule 63.
+ */
+const SELECTED_CHIP = [
+  'border-[var(--accent-border)] bg-accent-subtle',
+  'hover:border-[var(--accent-border)] hover:bg-accent-subtle',
+].join(' ');
+
 export function MarketplacePage() {
   const { t, i18n } = useTranslation();
   const [q, setQ] = useState('');
@@ -85,9 +106,12 @@ export function MarketplacePage() {
         <h1 className="text-display text-text-1">{t('marketplace.title')}</h1>
 
         {feed.isLoading ? (
-          <Skeleton className="aspect-video w-full rounded-card" />
+          // The skeleton carries the hero's OWN band proportion. It used to be `aspect-video` over
+          // a tile that also had a caption under it, so the search field and the whole list moved
+          // down when the feed landed — the shift a skeleton exists to prevent.
+          <Skeleton className="aspect-[5/2] w-full rounded-card" />
         ) : lead ? (
-          <FeedHero post={lead} coverKey={leadCover?.storageKey} locale={i18n.language} />
+          <FeedHero post={lead} coverKey={leadCover?.storageKey} />
         ) : null}
       </header>
 
@@ -133,11 +157,11 @@ export function MarketplacePage() {
             modality. */}
         <div className="flex gap-tight overflow-x-auto pb-1 [mask-image:linear-gradient(to_right,black_calc(100%_-_24px),transparent)] [scrollbar-width:none]">
           <Pressable
-            variant={kind === undefined ? 'secondary' : 'ghost'}
+            variant="secondary"
             shape="chip"
             density="compact"
             aria-pressed={kind === undefined}
-            className="shrink-0"
+            className={cn('shrink-0', kind === undefined && SELECTED_CHIP)}
             icon={kind === undefined ? <Check className="size-icon-s" aria-hidden /> : undefined}
             onClick={() => setKind(undefined)}
           >
@@ -146,11 +170,11 @@ export function MarketplacePage() {
           {(taxonomy.data?.kinds ?? []).map((k) => (
             <Pressable
               key={k.key}
-              variant={kind === k.key ? 'secondary' : 'ghost'}
+              variant="secondary"
               shape="chip"
               density="compact"
               aria-pressed={kind === k.key}
-              className="shrink-0"
+              className={cn('shrink-0', kind === k.key && SELECTED_CHIP)}
               icon={kind === k.key ? <Check className="size-icon-s" aria-hidden /> : undefined}
               onClick={() => setKind(kind === k.key ? undefined : k.key)}
             >
@@ -162,9 +186,11 @@ export function MarketplacePage() {
 
       <section className="flex flex-col gap-group">
         {loading ? (
-          // The skeleton carries the NEW card geometry — icon tile beside three text rows, so the
-          // swap moves nothing. A skeleton that does not match causes the shift it exists to
-          // prevent.
+          // ONE BLOCK AT THE CARD'S HEIGHT, not a drawing of its insides. `h-26` is what a card
+          // measures — 16px of padding, a caption, a title line and a footer — so the swap moves
+          // nothing, which is the only job a skeleton has. (It does NOT sketch the icon tile and
+          // the three text rows: a skeleton that mimes the content is a second copy of the card's
+          // geometry to keep in step, and it flickers as its own little layout.)
           <>
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-26 rounded-card" />
@@ -215,34 +241,37 @@ export function MarketplacePage() {
 }
 
 /**
- * The lead post at hero size.
+ * The lead post at hero size: THE COVER, AND NOTHING ELSE.
  *
- * The photograph sits ABOVE the text rather than under it. Overlaying the title on the cover is
- * what the mockup draws, and it makes the type's legibility depend on what a coach happened to
- * upload — plus a scrim tuned for a dark pack, which is exactly the "works only in dark" the
- * redesign is not allowed to ship. A cover with a caption band under it reads the same in every
- * pack and against every photograph.
+ * It carried a caption band — meta line, two-line title, coach and price — and that band was about
+ * 140px of the fold spent restating the card the reader is one tap from. The mockup and the
+ * Anchor section both make this tile the one element in the top third that is NOT a row of text;
+ * a photograph with three text rows bolted under it is a card, not an anchor. The post's identity
+ * lives on the list below and on the detail screen the tile links to, so nothing is lost, and the
+ * link keeps its name through `aria-label` now that no text sits inside it.
+ *
+ * A SHORT CINEMATIC BAND (5:2), not a 16:9 block, for the same reason: the tile has to state the
+ * marketplace holds real things without eating the search field and the first result.
  *
  * With no cover the tile is the brand gradient carrying the kind glyph. Not a grey placeholder
  * rectangle: an empty box in the top third is worse than no image at all, and the gradient is
  * the one surface per screen the Bible allows.
+ *
+ * The play disc and the `Kiemelt` pill stay cut, per the screen note's warning: there is no video
+ * player behind a play affordance and no featured flag in `PublicPost`.
  */
-function FeedHero({
-  post,
-  coverKey,
-  locale,
-}: {
-  post: PublicPost;
-  coverKey?: string;
-  locale: string;
-}) {
-  const { t } = useTranslation();
-  const formatPrice = usePriceFormatter();
-  const price = formatPrice(post.priceMinor, post.priceCurrency);
+function FeedHero({ post, coverKey }: { post: PublicPost; coverKey?: string }) {
   const Icon = kindIcon(post.kind);
 
   return (
-    <Surface as={Link} to={`/m/p/${post.id}`} interactive pad="none" className="block overflow-hidden">
+    <Surface
+      as={Link}
+      to={`/m/p/${post.id}`}
+      interactive
+      pad="none"
+      aria-label={post.title}
+      className="block overflow-hidden"
+    >
       {coverKey ? (
         <img
           // The gated serve, never a static path — and the stored bytes are a re-encoded WebP, so
@@ -250,35 +279,17 @@ function FeedHero({
           src={`/api/v1/public/media/${coverKey}`}
           alt=""
           loading="lazy"
-          className="aspect-video w-full object-cover"
+          className="aspect-[5/2] w-full object-cover"
         />
       ) : (
         <span
           aria-hidden
-          className="flex aspect-video w-full items-center justify-center"
+          className="flex aspect-[5/2] w-full items-center justify-center"
           style={{ background: 'var(--gradient-brand)' }}
         >
           <Icon className="size-16 text-accent-fg" strokeWidth={1.5} />
         </span>
       )}
-
-      <span className="flex flex-col gap-tight p-4">
-        <span className="text-caption text-text-3">
-          {metaLine([
-            t(`marketplace.kind.${post.kind}`, { defaultValue: post.kind }),
-            post.city,
-            postDate(post, locale),
-          ])}
-        </span>
-        <span className="text-title-2 font-display line-clamp-2 text-text-1">{post.title}</span>
-        <span className="text-caption flex items-center justify-between gap-tight text-text-3">
-          <span className="flex min-w-0 items-center gap-tight">
-            <span className="truncate">{post.coachName}</span>
-            {post.coachVerified === 1 ? <VerifiedBadge /> : null}
-          </span>
-          {price ? <span className="shrink-0 tabular-nums text-text-2">{price}</span> : null}
-        </span>
-      </span>
     </Surface>
   );
 }
@@ -317,13 +328,19 @@ function PostCard({ post, locale }: { post: PublicPost; locale: string }) {
 
           <span className="text-body-strong line-clamp-2 text-text-1">{post.title}</span>
 
-          <span className="text-caption flex items-center justify-between gap-tight text-text-3">
+          {/* ONE SIZE AND ONE INK STEP ABOVE THE META LINE. Who and how much are the card's second
+              question, not its last: with the footer at the meta line's `text-caption text-text-3`
+              the card read dim / bright / dim, and the price tied for least important with the
+              date. The meta line above keeps the dimmest step, which is what this rests on. */}
+          <span className="text-body-s flex items-center justify-between gap-tight text-text-2">
             <span className="flex min-w-0 items-center gap-tight">
               <span className="truncate">{post.coachName}</span>
               {post.coachVerified === 1 ? <VerifiedBadge /> : null}
             </span>
             {/* Announcements carry no price, so this footer holds only the coach's name. */}
-            {price ? <span className="shrink-0 tabular-nums text-text-2">{price}</span> : null}
+            {price ? (
+              <span className="shrink-0 font-medium tabular-nums text-text-1">{price}</span>
+            ) : null}
           </span>
         </span>
       </Surface>

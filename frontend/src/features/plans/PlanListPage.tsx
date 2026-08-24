@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { AlertCircle, ChevronRight, ClipboardList, Plus, User } from 'lucide-react';
+import { AlertCircle, Check, ChevronRight, ClipboardList, Plus, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -82,9 +82,22 @@ export function PlanListPage() {
     void navigate(`/coach/plans/${created.id}`, { state: { focusName: true } });
   };
 
+  /*
+   * Concatenated, not `cn`: `cn` is `twMerge`, which files this project's custom type scale and its
+   * text colours in one bucket, so `CHIP_TONE`'s `text-success` was silently eating `text-micro`
+   * and every chip on this screen rendered at the inherited body size. `PlanTab`'s card carries the
+   * same note for the same reason.
+   *
+   * The check rides `active` alone — it is the one status that means the client is training today,
+   * and a tone plus a glyph is what makes it findable in a column of four greys. Trailing, matching
+   * the identical chip on the client-detail plan card.
+   */
   const StatusChip = ({ status }: { status: PlanStatus }) => (
-    <span className={cn('text-micro rounded-chip px-2 py-1', CHIP_TONE[status])}>
+    <span
+      className={`text-micro inline-flex items-center gap-1 rounded-chip px-2 py-1 ${CHIP_TONE[status]}`}
+    >
       {t(`plans.status.${status}`)}
+      {status === 'active' ? <Check className="size-icon-s" strokeWidth={2} aria-hidden /> : null}
     </span>
   );
 
@@ -195,7 +208,10 @@ export function PlanListPage() {
               <p className="text-display font-display tabular-nums text-text-1">
                 <CountUp to={rows.length} />
               </p>
-              <p className="text-micro uppercase text-text-3">{t('nav.plans')}</p>
+              {/* Names the METRIC, not the screen. `nav.plans` is "Tervek" — the same word as the
+                  h1 one line above — so the anchor was captioning itself instead of saying what
+                  the number counts. */}
+              <p className="text-micro uppercase text-text-3">{t('plans.total')}</p>
 
               {/* The bar is decoration with a shape — every number in it is spelled out in the
                   legend below, as text, which is what a reader actually gets. */}

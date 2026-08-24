@@ -43,13 +43,19 @@ const ROLE_LABEL: Record<SessionUser['role'], string> = {
  * The holder is the repeated element of this redesign: a 20px glyph on its own has too little
  * visual mass to open a section, and the 44px tinted square is what makes four sections scan as
  * four objects rather than as four lines of small caps.
+ *
+ * It draws itself from `--tile-tint` / `--tile-tint-fg` at `rounded-field`, which is exactly what
+ * `features/library/SectionBadge.tsx` renders — the same element on the screen next door. The two
+ * disagreed (card radius and `accent-subtle` here, field radius and the tile tokens there), so
+ * one section header looked different depending on which screen you were on. This is still a
+ * second copy of one component; see the handover note for promoting SectionBadge into `src/ui/`.
  */
 function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
   return (
     <div className="flex items-center gap-tight">
       <span
         aria-hidden
-        className="grid size-11 shrink-0 place-items-center rounded-card bg-accent-subtle text-accent"
+        className="grid size-11 shrink-0 place-items-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
       >
         <Icon className="size-icon-m" strokeWidth={2} />
       </span>
@@ -253,9 +259,11 @@ export function SettingsPage() {
             interactive
             className="flex min-h-[var(--target-min)] items-center gap-tight"
           >
+            {/* Same holder as the section headers above — one radius and one tint for every
+                44px glyph square on the screen, rather than two that differ by four pixels. */}
             <span
               aria-hidden
-              className="grid size-11 shrink-0 place-items-center rounded-card bg-accent-subtle text-accent"
+              className="grid size-11 shrink-0 place-items-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
             >
               <Coins className="size-icon-m" strokeWidth={2} />
             </span>
@@ -278,6 +286,14 @@ export function SettingsPage() {
         <CueSettings />
       </section>
 
+      {/* NYELV before ADMIN, which is the spec's block order (7 then 8) and what the mockup shows
+          beginning right at the fold. Language is a setting every account has; the admin section
+          exists for one role and is the rarest errand on the screen, so it goes last. */}
+      <section className="flex flex-col gap-group">
+        <SectionHeader icon={Globe} title={t('common.language')} />
+        <LanguageToggle />
+      </section>
+
       {/* Admin lives HERE, not in the bottom bar. A coach already fills all five nav slots, so
           pushing an admin tab made six and the bar silently clamped the sixth away — an admin
           could not reach /admin from the navigation at all. It belongs in Settings on its own
@@ -298,11 +314,6 @@ export function SettingsPage() {
           </Surface>
         </section>
       ) : null}
-
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={Globe} title={t('common.language')} />
-        <LanguageToggle />
-      </section>
     </div>
   );
 }

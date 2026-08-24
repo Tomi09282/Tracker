@@ -61,9 +61,13 @@ function UserDonut({ users }: { users: Stats['users'] }) {
         className="aspect-square w-full max-w-72"
         label={t('admin.users')}
         thickness={0.14}
-        /* A CLOSED ring, unlike every other gauge in the app. The open bottom exists so a single
+        /* A CLOSED track, unlike every other gauge in the app. The open bottom exists so a single
            near-full arc does not read as a plain circle outline; here three coloured arcs already
-           say "donut", and a gap would take a slice out of a total that is supposed to be whole. */
+           say "donut", and a hole at six o'clock would take a slice out of a total that is
+           supposed to be whole.
+           This governs only the ZERO-SEGMENT fallback track: with segments, `Gauge` takes its
+           donut branch and carves an even seam out of each arc's own end, which is the separation
+           the design asks for between adjacent slices. */
         gap={0}
         segments={
           users.total > 0

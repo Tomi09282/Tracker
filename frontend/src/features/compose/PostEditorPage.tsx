@@ -445,8 +445,14 @@ export function PostEditorPage() {
         )}
       </div>
 
+      {/* A title is this form's floor — autosave stays off until there is one — so the control
+          says so semantically. The visible `Kötelező` marker the mockup puts on the label row is
+          waiting on a `required` string in the compose namespace; `Field`'s `marker` prop takes it
+          the day the bundles have one. `aria-required` is the half that needs no copy, and it is
+          the half a screen reader needs. */}
       <Field
         label={t('compose.postTitle')}
+        aria-required
         value={title}
         maxLength={limits?.titleMax}
         disabled={readOnly}
@@ -534,10 +540,20 @@ export function PostEditorPage() {
             <AlertCircle className="size-icon-s shrink-0" aria-hidden />
             {t('compose.autosave.failed')}
           </>
-        ) : autosave.state === 'saved' && !autosave.hasUnsaved ? (
+        ) : autosave.state === 'saved' && !autosave.hasUnsaved && autosave.savedAt !== null ? (
           <>
             <Check className="size-icon-s text-success" aria-hidden />
             {t('compose.autosave.saved')}
+            {/* THE CLOCK TIME, because "Mentve" alone reads the same a second after the save and
+                an hour after it — and this line is the only receipt a screen with no save button
+                has. `.tnum` so the minute digits do not jitter the row as they tick. Same locale
+                formatting as the chat transcript. */}
+            <span className="tnum">
+              {new Date(autosave.savedAt).toLocaleTimeString(i18n.language, {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
           </>
         ) : null}
       </p>

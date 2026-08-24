@@ -65,12 +65,21 @@ type PostStateKey = (typeof STATES)[number];
  * The mockup draws four arcs and labels three. An unlabelled arc is a chart refusing to explain
  * itself: whatever is inside the total has to be in the legend, so `Eltávolított` is here even
  * though it is usually zero.
+ *
+ * ═══ AND A POST STATE IS AN INVENTORY BUCKET, NOT AN ALARM ═════════════════════════════════════
+ *
+ * Only `live` spends the accent; the rest step DOWN in ink instead of reaching for a hue. A coach
+ * who took their own post down has not done anything wrong, and `--danger` is destructive and
+ * irreversible only, `--warning` is "look at this" (DESIGN.md §1.4) — an amber-and-red donut told
+ * a coach their own shelf was on fire. `draft` starts at `--text-2` (0.70) rather than `--text-3`
+ * so the three greys stay separable all the way down to `--surface-border-strong` (0.22). Same
+ * reasoning as `CoachDashboard`'s TEAM_COLORS and `PlanListPage`'s SEGMENT_FILL.
  */
 const ARC_COLOR: Record<PostStateKey, string> = {
   live: 'var(--accent)',
-  draft: 'var(--text-3)',
-  withdrawn: 'var(--warning)',
-  removed: 'var(--danger)',
+  draft: 'var(--text-2)',
+  withdrawn: 'var(--text-3)',
+  removed: 'var(--surface-border-strong)',
 };
 
 /**
@@ -82,6 +91,24 @@ const ARC_COLOR: Record<PostStateKey, string> = {
  */
 const PRIMARY_FILTERS: readonly PostState[] = ['all', 'draft', 'live'];
 const ALL_FILTERS: readonly PostState[] = ['all', 'draft', 'live', 'withdrawn', 'removed'];
+
+/**
+ * The chosen filter chip. It used to be `variant="primary"`, which put a second filled accent
+ * control 8px under `+ Új bejegyzés` — and the mockup spends the screen's one accent fill on that
+ * button alone. `bg-accent-subtle` is DESIGN.md §5.6's selected state, so the row now reads in
+ * three tiers: chosen wash > outlined chip > the `Több` ghost.
+ *
+ * The two `hover:` repeats are load-bearing — `secondary` ships `hover:bg-surface-2` and `cn` is
+ * `twMerge`, which keeps a `hover:` it has no conflict for, so without them the chosen chip turns
+ * grey under the pointer. No ink class on purpose: `--on-accent-subtle` IS `--text-1`, the colour
+ * the chip already inherits, and any `text-*` written here would collapse the chip's own
+ * `text-body-s` — twMerge holds size and colour in one group. Never `text-accent` on this wash
+ * (DESIGN.md rule 63).
+ */
+const SELECTED_CHIP = [
+  'border-[var(--accent-border)] bg-accent-subtle',
+  'hover:border-[var(--accent-border)] hover:bg-accent-subtle',
+].join(' ');
 
 /** The same derivation the row caption uses, so the donut and the list can never disagree. */
 function stateOf(p: ComposePost): PostStateKey {
@@ -121,7 +148,11 @@ export function ComposePage() {
           <Skeleton className="size-11 rounded-chip" />
           <Skeleton className="h-8 flex-1 rounded-card" />
         </div>
-        <Skeleton className="h-[400px] rounded-card" />
+        {/* The portfolio card's real height, recomputed from the stack it stands in: 16 card pad
+            + 160 gauge + 16 + 48 legend (four entries wrap to two lines) + 16 + 32 quota caption
+            and bar + 16 card pad. A skeleton taller than what arrives is the same layout shift as
+            one that is shorter. */}
+        <Skeleton className="h-[304px] rounded-card" />
         <div className="flex flex-col gap-tight">
           <Skeleton className="h-20 rounded-card" />
           <Skeleton className="h-20 rounded-card" />
@@ -256,10 +287,15 @@ export function ComposePage() {
           They answer the same question — what can still go out today — so splitting them into two
           cards would make the coach read two places for one answer. */}
       <Surface as="section" className="flex flex-col items-center gap-group">
+        {/* 160px, not 224. The donut is the anchor, not the screen: at `size-56` the card ran to
+            ~370px and pushed the first post row below the fold, on a screen whose stated premise
+            is that both of the coach's questions — what is out there, what can still go out today
+            — are answered above it. `thickness` 0.25 puts the band at ~13% of the diameter, which
+            is the "thick-ringed donut" the note asks for; 0.18 measured 9% and read as a hoop. */}
         <Gauge
-          className="size-56"
+          className="size-40"
           label={t('compose.posts')}
-          thickness={0.18}
+          thickness={0.25}
           segments={
             counts.total > 0
               ? STATES.map((key) => ({
@@ -313,9 +349,14 @@ export function ComposePage() {
       {/* ── posts ────────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
         <div className="flex items-center gap-tight">
+          {/* A rounded SQUARE, not a circle: `--radius-chip` is `--radius-full` in four of five
+              packs, so this rendered as a 44px disc. The one circle on this screen is the `KP`
+              monogram in the identity row, and that is what makes it read as a person rather than
+              as another kind tile. `rounded-card` and not `rounded-field` — Neon declares
+              `--radius-field: full`, which would put the disc straight back in one pack. */}
           <span
             aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-card bg-accent-subtle text-accent"
           >
             <FileText className="size-icon-m" strokeWidth={2} />
           </span>
@@ -338,7 +379,8 @@ export function ComposePage() {
               <Pressable
                 shape="chip"
                 density="compact"
-                variant={state === s ? 'primary' : 'secondary'}
+                variant="secondary"
+                className={state === s ? SELECTED_CHIP : undefined}
                 aria-pressed={state === s}
                 onClick={() => setState(s)}
                 icon={state === s ? <Check className="size-icon-s" aria-hidden /> : undefined}
@@ -387,9 +429,11 @@ export function ComposePage() {
                     )}
                   >
                     <span aria-hidden className="relative shrink-0">
+                      {/* Same rounded square as the section tile above — the row's one circle is
+                          the live badge riding on its corner. */}
                       <span
                         className={cn(
-                          'inline-flex size-11 items-center justify-center rounded-chip',
+                          'inline-flex size-11 items-center justify-center rounded-card',
                           live ? 'bg-success-subtle text-success' : 'bg-accent-subtle text-accent',
                         )}
                       >

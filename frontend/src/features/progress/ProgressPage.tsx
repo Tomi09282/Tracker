@@ -373,8 +373,14 @@ function BodyTab() {
                     <span className="text-body-strong block truncate text-text-1">
                       {t(`progress.metricName.${m.metric_key}`)}
                     </span>
+                    {/* FORMATTED, like the tiles and the chart headline above it. The raw API
+                        value put `18.486 %` in this row while the tile beside it said `18,5 %` —
+                        one measurement, two readings, on one screen. `formatMeasure` is the one
+                        rule for a body measurement, so the three sites agree by construction
+                        rather than by three call sites remembering to. */}
                     <span className="text-caption tabular-nums text-text-3">
-                      {m.measured_on} · {m.value} {unitSymbol(m.unit)}
+                      {m.measured_on} · {formatMeasure(m.value, i18n.language)}{' '}
+                      {unitSymbol(m.unit)}
                     </span>
                   </span>
                   {/* One tap, no armed state and no confirm — the same as the food log. */}

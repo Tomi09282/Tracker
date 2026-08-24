@@ -7,6 +7,7 @@ import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { usePlans, useCreatePlan, useClonePlan, type PlanSummary } from '../plans/usePlans';
+import { useOnline } from '../plans/useOnline';
 
 /**
  * The client detail screen's Plan tab.
@@ -79,6 +80,9 @@ export function PlanTab({ linkId }: { linkId: number }) {
   const createPlan = useCreatePlan();
   const clonePlan = useClonePlan();
   const [cloning, setCloning] = useState(false);
+  // Both acts here CREATE a plan, and there is no queued-write store behind the plan endpoints —
+  // a create fired offline is lost, and the coach walks away believing the client has a programme.
+  const offline = !useOnline();
 
   const plans = data?.plans ?? [];
   const mine = useMemo(() => plans.filter((p) => p.coach_client_id === linkId), [plans, linkId]);
@@ -113,6 +117,7 @@ export function PlanTab({ linkId }: { linkId: number }) {
         variant="primary"
         className="w-full"
         busy={createPlan.isPending}
+        disabled={offline}
         icon={<Plus className="size-icon-m" strokeWidth={2} aria-hidden />}
         // The plan is created THROUGH the link — the server's INSERT ... SELECT carries the
         // ownership check, so this sends the link id and nothing else that matters.
@@ -128,6 +133,7 @@ export function PlanTab({ linkId }: { linkId: number }) {
           variant="secondary"
           className="w-full"
           aria-expanded={cloning}
+          disabled={offline}
           icon={<Copy className="size-icon-s" aria-hidden />}
           onClick={() => setCloning((v) => !v)}
         >
@@ -146,6 +152,9 @@ export function PlanTab({ linkId }: { linkId: number }) {
                   variant="ghost"
                   className="w-full justify-between"
                   busy={clonePlan.isPending}
+                  // The list can already be open when the connection drops, so the rows carry the
+                  // guard too rather than relying on the toggle above them.
+                  disabled={offline}
                   onClick={() =>
                     clonePlan.mutate(
                       { id: tpl.id, coach_client_id: linkId, name: tpl.name },

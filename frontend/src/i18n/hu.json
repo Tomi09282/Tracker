@@ -85,7 +85,6 @@
     "account": "Fiók",
     "appearance": "Megjelenés",
     "themePacks": "Témacsomagok",
-    "accent": "Kiemelőszín",
     "accentDefault": "Alapértelmezett",
     "accentCustom": "Egyedi szín",
     "contrastRatioPass": "Kontraszt: {{ratio}}:1 — megfelel a 4,5:1 minimumnak.",
@@ -93,8 +92,6 @@
     "contrastInvalid": "Adj meg egy érvényes hexadecimális színt (#RRGGBB).",
     "previewTitle": "Élő előnézet",
     "previewBody": "Ez nem makett — a teljes app átszíneződik, amint választasz.",
-    "previewSecondary": "Másodlagos szöveg ezen a felületen.",
-    "saveGradient": "Gradiens mentése",
     "gradientPreview": "Gradiens előnézete",
     "gradient": {
       "title": "Gradiens",
@@ -331,7 +328,10 @@
       "mealDefault": "Étkezés",
       "draftNote": "Ez az étrend még vázlat — a kliens nem látja, amíg nem aktiválod.",
       "activate": "Aktiválás"
-    }
+    },
+    "profileFull": "Kérdőív",
+    "profileIncomplete": "Hiányos",
+    "handoverShort": "Ezek a kliensek még nem tudnak belépni."
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",
@@ -574,7 +574,12 @@
     "noneForClient": "Ennek a kliensnek még nincs terve",
     "noneForClientBody": "Készíts egy újat, vagy klónozz rá egy sablont.",
     "newForClient": "Új terv a kliensnek",
-    "missingKit": "{{count}} eszköz hiányzik"
+    "missingKit": "{{count}} eszköz hiányzik",
+    "trainingDayCount": "{{count}} edzésnap",
+    "noTime": "nincs időpont",
+    "collapseBlock": "Blokk össze- és kinyitása",
+    "statusTitle": "Állapot",
+    "total": "Terv összesen"
   },
   "progress": {
     "heading": "Fejlődés",
@@ -648,7 +653,9 @@
     "reported": "Jelentve",
     "withdrawn": "Az üzenetet visszavonták",
     "sendFailed": "Az üzenetet nem sikerült elküldeni. A szöveg megmaradt.",
-    "unavailable": "Ez a beszélgetés már nem elérhető."
+    "unavailable": "Ez a beszélgetés már nem elérhető.",
+    "composeHint": "Enter küld, Shift+Enter új sor",
+    "delivered": "Kézbesítve"
   },
   "notifications": {
     "title": "Értesítések",
@@ -658,7 +665,9 @@
     "markAllRead": "Összes olvasottnak jelölése",
     "minutesAgo": "{{count}} perce",
     "hoursAgo": "{{count}} órája",
-    "daysAgo": "{{count}} napja"
+    "daysAgo": "{{count}} napja",
+    "unreadLabel": "olvasatlan",
+    "earlier": "Korábbi"
   },
   "nutrition": {
     "title": "Táplálkozás",

@@ -5,6 +5,7 @@ import { ShieldAlert, ExternalLink } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
+import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
@@ -104,7 +105,7 @@ export function MarketplaceQueue() {
       ) : queue.data && queue.data.reports.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-2">
           {queue.data.reports.map((r) => (
-            <li key={r.id} className="flex flex-col gap-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+            <Surface as="li" key={r.id} className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-caption rounded-chip bg-surface-2 px-2 py-1 text-text-1">
                   {t(`admin.marketplace.reason.${r.reason}`, { defaultValue: r.reason })}
@@ -198,7 +199,7 @@ export function MarketplaceQueue() {
                   {t('admin.marketplace.decide')}
                 </Pressable>
               ) : null}
-            </li>
+            </Surface>
           ))}
         </ul>
       ) : (

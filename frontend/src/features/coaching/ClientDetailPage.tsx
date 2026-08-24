@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import {
   ArrowLeft,
-  Apple,
   BadgeCheck,
   CalendarDays,
   ChevronRight,
@@ -11,6 +10,7 @@ import {
   Dumbbell,
   ListChecks,
   MessageSquare,
+  Salad,
   ShieldAlert,
   Target,
   TrendingUp,
@@ -34,10 +34,14 @@ import { usePlans } from '../plans/usePlans';
 import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
 import { personLabel } from '../../lib/person';
 
-/* ── tabs ─────────────────────────────────────────────────────────────────────────────────── */
+/* ── tabs ─────────────────────────────────────────────────────────────────────────────────────
+   The glyphs are the ones the rest of the product already spends on these two nouns: the clipboard
+   is `Tervek` three rows above this strip, and the salad is `ÉTKEZÉS` in the bottom bar. `Terv` was
+   a dumbbell, which on THIS screen already means "completed sessions" — the same glyph for two
+   different facts, a thumb's width apart. */
 const TABS = [
-  { key: 'plan', icon: Dumbbell },
-  { key: 'nutrition', icon: Apple },
+  { key: 'plan', icon: ClipboardList },
+  { key: 'nutrition', icon: Salad },
   { key: 'progress', icon: TrendingUp },
   { key: 'chat', icon: MessageSquare },
 ] as const;
@@ -300,7 +304,7 @@ export function ClientDetailPage() {
 
       {/* ── the two answers that change what gets written ──────────────────────────────────── */}
       {onboarding.isPending ? (
-        <div className="grid gap-group sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-group">
           <Skeleton className="h-[104px] rounded-card" />
           <Skeleton className="h-[104px] rounded-card" />
         </div>
@@ -309,7 +313,10 @@ export function ClientDetailPage() {
           <p className="text-body-s text-text-2">{t('coaching.noProfile')}</p>
         </Surface>
       ) : (
-        <div className={cn('grid gap-group', worst && 'sm:grid-cols-2')}>
+        // Two columns at phone width, not from `sm` up: this project has no custom `sm`, so the
+        // prefix meant 640px and the pair stacked on every phone the app is used on. The three
+        // stat tiles directly above already commit to an unconditional `grid-cols-3`.
+        <div className={cn('grid gap-group', worst && 'grid-cols-2')}>
           <AnswerTile
             icon={Target}
             caption={t('onboarding.field.primary_goal')}
@@ -341,16 +348,20 @@ export function ClientDetailPage() {
       >
         <span className="flex min-w-0 items-center gap-tight">
           <ListChecks className="size-icon-m shrink-0 text-text-2" aria-hidden />
-          <span className="text-body truncate text-text-1">{t('coaching.profileTitle')}</span>
+          {/* Its own key. The sheet this row opens is titled `Kérdőív`; the row is the door to the
+              WHOLE of it, and one key serving both made the row and its destination the same
+              word. */}
+          <span className="text-body truncate text-text-1">{t('coaching.profileFull')}</span>
         </span>
         <span className="flex shrink-0 items-center gap-tight">
+          {/* A word, not a bare glyph. `Hiányos` is the state itself; a lone triangle needed an
+              `aria-label` to say anything and said nothing at all to a sighted reader who has not
+              met it before. The full sentence still lives inside the sheet, where acting on the
+              incomplete answers begins. */}
           {p?.status === 'draft' ? (
-            <TriangleAlert
-              role="img"
-              aria-label={t('coaching.profileDraft')}
-              className="size-icon-s text-warning"
-              strokeWidth={2}
-            />
+            <span className="text-caption rounded-chip bg-warning-subtle px-2 py-0.5 text-warning">
+              {t('coaching.profileIncomplete')}
+            </span>
           ) : null}
           <ChevronRight className="size-icon-m text-text-3" aria-hidden />
         </span>
@@ -381,10 +392,18 @@ export function ClientDetailPage() {
               aria-selected={tab === key}
               aria-controls={`panel-${key}`}
               tabIndex={tab === key ? 0 : -1}
-              variant={tab === key ? 'primary' : 'secondary'}
+              // The selected tab is a SELECTION, not the screen's action. As a filled `primary` it
+              // was a second one beside `Új terv a kliensnek` — and the wider of the two — which
+              // is the one-primary-per-screen rule failing where it is most visible. `accent-subtle`
+              // is the app's declared "this one is selected" wash, and `secondary` already inks it
+              // at `--text-1`, which is exactly what `--on-accent-subtle` resolves to (DESIGN.md 63
+              // forbids `text-accent` here). No text class is passed for that reason AND because
+              // `cn` is `twMerge`: any `text-*` from a call site silently eats the density's
+              // `text-body-s` and the chip would come out a different size from its neighbours.
+              variant="secondary"
               shape="chip"
               density="compact"
-              className="shrink-0"
+              className={cn('shrink-0', tab === key && 'border-accent bg-accent-subtle')}
               onClick={() => setTab(key)}
               icon={<Icon className="size-icon-s" aria-hidden />}
             >

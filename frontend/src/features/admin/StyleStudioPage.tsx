@@ -91,12 +91,16 @@ export function StyleStudioPage() {
           <span className="text-micro uppercase tabular-nums text-text-3">
             {entry.name} · {entry.id}
           </span>
+          {/* The state chips are NOT uppercased, unlike the label to their left. `aktív` and
+              `nem használt` are words about this one element, not eyebrows opening a section, and
+              both mockups draw them lowercase — the caps had been making a five-letter status read
+              louder than the element it describes. */}
           {!entry.live ? (
-            <span className="text-micro uppercase rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
+            <span className="text-micro rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
               {t('studio.inertShort')}
             </span>
           ) : active ? (
-            <span className="text-micro uppercase rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
+            <span className="text-micro rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
               {t('studio.active')}
             </span>
           ) : null}
@@ -206,7 +210,7 @@ export function StyleStudioPage() {
               <p className="text-caption tabular-nums text-text-3">{entry.id}</p>
             </div>
             {!entry.live ? (
-              <span className="text-micro uppercase shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
+              <span className="text-micro shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
                 {t('studio.inertShort')}
               </span>
             ) : null}
@@ -268,13 +272,17 @@ export function StyleStudioPage() {
                             {v} · {entry.variants[v]}
                           </span>
                           {isActive ? (
-                            <span className="text-micro uppercase inline-flex items-center gap-1 rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
+                            <span className="text-micro inline-flex items-center gap-1 rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
                               <Check className="size-icon-s" aria-hidden />
                               {t('studio.active')}
                             </span>
                           ) : null}
                         </div>
-                        <span aria-hidden className="h-px w-8 rounded-chip bg-border-token" />
+                        {/* The rule runs the width of the text block, as the mockup draws it. At
+                            32px it was a stub hanging off the label rather than a division of the
+                            card — and it is the line the one-sentence description sits under once
+                            the catalogue carries one (see the handover note). */}
+                        <span aria-hidden className="h-px w-full rounded-chip bg-border-token" />
                       </div>
 
                       <Pressable

@@ -211,8 +211,24 @@ export function ModerationQueue() {
       <ul className="flex min-w-0 flex-col gap-tight lg:col-span-4" aria-label={t('admin.moderation')}>
         {rows.map((row) => {
           const active = row.id === selected;
+          // On a phone the open row and its review are ONE object, not a row with a second card
+          // parked under it. The `li` becomes that object — it carries the accent edge, the wash
+          // and the leading bar for the whole height — and the row inside it drops to `ghost` so
+          // there is no second border drawn across the middle of the card.
+          const expanded = !wide && active;
           return (
-            <li key={row.id}>
+            <li
+              key={row.id}
+              className={cn(
+                'relative',
+                // No `overflow-hidden` here even though it would tidy the corners: the row inside
+                // is a button, its focus ring is drawn at `outline-offset-2`, and a clipped focus
+                // ring is a keyboard user losing their place. The ghost row has no fill of its own
+                // to spill past the radius anyway.
+                expanded &&
+                  'rounded-field border-[length:var(--border-width)] border-accent bg-accent-subtle',
+              )}
+            >
               {/*
                 A Pressable, not a raw <button> — `check-tokens` refuses those outside `src/ui/`,
                 and it was right to: the recipe is where the 44 px floor, the focus ring and the
@@ -224,7 +240,7 @@ export function ModerationQueue() {
               */}
               <Pressable
                 shape="field"
-                variant="secondary"
+                variant={expanded ? 'ghost' : 'secondary'}
                 onClick={() => {
                   setSelected(active ? null : row.id);
                   setRejecting(false);
@@ -234,18 +250,9 @@ export function ModerationQueue() {
                 aria-expanded={wide ? undefined : active}
                 className={cn(
                   'relative h-auto flex-col items-start gap-tight whitespace-normal py-3 pl-5',
-                  active && 'border-accent bg-accent-subtle',
+                  active && !expanded && 'border-accent bg-accent-subtle',
                 )}
               >
-                {/* The leading edge bar. Every row has one so the list reads as a column of
-                    objects; only the open one is accent. */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    'absolute inset-y-3 left-2 w-1 rounded-chip',
-                    active ? 'bg-accent' : 'bg-[var(--surface-border-strong)]',
-                  )}
-                />
                 <span className="flex w-full items-baseline gap-tight">
                   <span className="text-body min-w-0 flex-1 truncate text-text-1">{row.name}</span>
                   <span className="text-caption shrink-0 tabular-nums text-text-3">
@@ -272,7 +279,28 @@ export function ModerationQueue() {
                 </span>
               </Pressable>
 
-              {!wide && active ? <Surface className="mt-2">{review}</Surface> : null}
+              {/* Inside the same card, divided by a hairline rather than by a gap. `pl-5` keeps the
+                  review's text on the row's own left edge, clear of the accent bar. */}
+              {expanded ? (
+                <div className="border-t-[length:var(--border-width)] border-[var(--card-border)] p-[var(--card-pad)] pl-5">
+                  {review}
+                </div>
+              ) : null}
+
+              {/* The leading edge bar. Every row has one so the list reads as a column of objects;
+                  only the open one is accent, and when the review is open the bar runs the full
+                  height of it — which is what marks the whole expansion as the selection rather
+                  than just its first two lines. LAST child on purpose: it is a sibling of the
+                  button now, and two positioned siblings paint in document order, so this is what
+                  puts it over the row's own fill without spending a z-index the scale has no
+                  token for. */}
+              <span
+                aria-hidden
+                className={cn(
+                  'pointer-events-none absolute inset-y-3 left-2 w-1 rounded-chip',
+                  active ? 'bg-accent' : 'bg-[var(--surface-border-strong)]',
+                )}
+              />
             </li>
           );
         })}
@@ -330,7 +358,9 @@ function ReviewBody({
                 alt={t('admin.mediaAlt', { name: exercise.name })}
                 width={m.width ?? undefined}
                 height={m.height ?? undefined}
-                className="max-h-56 w-auto rounded-card border border-[var(--surface-border)] object-cover"
+                /* The pack owns the border width (Mono declares 2px) and the card owns its colour,
+                   so a review image follows the glass material instead of pinning a 1px hairline. */
+                className="max-h-56 w-auto rounded-card border-[length:var(--border-width)] border-[var(--card-border)] object-cover"
               />
             </li>
           ))}

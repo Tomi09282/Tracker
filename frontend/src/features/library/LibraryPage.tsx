@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Check, ChevronDown, Dumbbell, Funnel, Search, X } from 'lucide-react';
+import { Check, Dumbbell, Funnel, Search, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
@@ -111,6 +111,38 @@ export function LibraryPage() {
 
       {/* ── finding something ──────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-group">
+        {/*
+          ═══ THE MAP IS THE ANCHOR ════════════════════════════════════════════════════════════
+          The reversible direction of the map (owner requirement 21): the detail screen READS it
+          to show what an exercise targets, here the same component WRITES a filter.
+
+          It stands first because it is the only non-text control on the screen and it states the
+          premise — you can find an exercise by pointing at yourself — before a character is typed.
+          Behind a disclosure it was one grey row that read as a footnote.
+
+          Its regions are 9–33px, below the 44px floor. What licenses that is unchanged: the
+          IZOMCSOPORT chip row below does the identical filtering at full size and must stay
+          reachable (see 55-Screens/library.md).
+        */}
+        {/* BOUNDED, because the figure has no opinion about how tall it should be.
+            In its default mode the svg is `h-auto w-full`, so a 343px-wide card renders a 693px
+            figure — measured: 85% of an 812px viewport, with the search field starting at 831px,
+            entirely below the fold. An anchor that pushes the screen's primary control off the
+            screen is not an anchor.
+
+            `fill` is the mode built for this: the svg becomes `h-0 flex-1` and takes the leftover
+            height of a bounded flex column, letting the viewBox pick the width so the proportions
+            survive. The cap is viewport-relative because the constraint is "leave room for the
+            search field and the first chips", which is a fraction of the screen and not a number
+            of pixels; the floor stops it collapsing to a sliver in landscape. */}
+        <Surface className="flex max-h-[42svh] min-h-[15rem] flex-col">
+          <MuscleMap
+            fill
+            selected={muscle}
+            onSelect={(slug) => setMuscle((cur) => (cur === slug ? undefined : slug))}
+          />
+        </Surface>
+
         <FeedbackField
           /*
            * The visible `Keresés` label is hidden, not deleted. The placeholder is a full
@@ -140,44 +172,6 @@ export function LibraryPage() {
             ) : undefined
           }
         />
-
-        {/*
-          ═══ THE MAP STAYS INSIDE ITS DISCLOSURE ══════════════════════════════════════════════
-          The reversible direction of the map (owner requirement 21): the detail screen READS it
-          to show what an exercise targets, here the same component WRITES a filter.
-
-          It is collapsed by default because `MuscleMap`'s own contract says so — its regions are
-          9–33px wide and cannot be enlarged without wrecking the anatomy, so it is a SECONDARY
-          affordance whose licence to exist below the 44px floor is that the chip row underneath
-          does the identical filtering at full size. Opening it by default does not break that
-          rule, but it does put the sub-floor control first in the reading order, so the honest
-          arrangement is: full-size search, then the map behind one tap, then the chips.
-        */}
-        <Surface as="details" pad="none" className="group">
-          <summary
-            className={cn(
-              'text-body-s flex min-h-[var(--target-min)] cursor-pointer list-none items-center',
-              'justify-between gap-tight px-4 text-text-2',
-              'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-              'hover:text-text-1',
-            )}
-          >
-            {t('muscleMap.filterHint')}
-            <ChevronDown
-              aria-hidden
-              className={cn(
-                'size-icon-m shrink-0 transition-transform',
-                'duration-[var(--duration-fast)] ease-[var(--ease-standard)] group-open:rotate-180',
-              )}
-            />
-          </summary>
-          <div className="px-4 pb-4">
-            <MuscleMap
-              selected={muscle}
-              onSelect={(slug) => setMuscle((cur) => (cur === slug ? undefined : slug))}
-            />
-          </div>
-        </Surface>
 
         {/* ── the muscle-group strip: the same filter, at 44px ─────────────────────────────── */}
         <div className="flex flex-col gap-tight">
@@ -314,6 +308,10 @@ export function LibraryPage() {
                           {t(`library.difficulty.${row.difficulty}`)}
                         </span>
                       ) : null}
+                      {/* The dot binds the two words into one clause about the exercise. Parted
+                          by 8px alone they read as two unrelated labels. The `EN` pill stays
+                          separated by the gap — its own container already fences it off. */}
+                      {row.difficulty && row.exercise_type ? <span aria-hidden>·</span> : null}
                       {row.exercise_type ? <span>{t(`library.type.${row.exercise_type}`)}</span> : null}
                       {/* Honest about fallback content rather than passing English off as
                           translated — the API tells us, so the UI can too. */}

@@ -210,8 +210,16 @@ export function ExerciseDetailPage() {
             a screen may dominate and here that is the demonstration above. The figure is READ-ONLY
             — no `onSelect` — so its regions are not tap targets and not keyboard stops either. A
             region that navigated away from a read-only diagram would be a trap, not a shortcut.
+
+            `legend={false}` because the chips directly below carry the same role dots: the legend
+            here is the identical key printed twice, and the screen note records it as cut. If the
+            chip dots ever go, the legend comes back WITH them, not instead of them.
           */}
-          <MuscleMap highlights={highlights} className="mx-auto w-full max-w-[220px]" />
+          <MuscleMap
+            highlights={highlights}
+            legend={false}
+            className="mx-auto w-full max-w-[220px]"
+          />
 
           <div className="flex flex-wrap gap-tight">
             {muscles.map((m) => (

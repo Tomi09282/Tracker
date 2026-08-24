@@ -9,14 +9,19 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { MuscleMap, type MuscleRole } from '../../ui/muscle-map/MuscleMap';
 import { useExercise } from '../library/useExercises';
-import { SetRow, SET_ROW_COLS } from './SetRow';
+import { SetRow, SET_ROW_COLS, type CheckResult } from './SetRow';
 import { RestTimer } from './RestTimer';
-import { useCurrentWorkout, useCheckSet, useUndoSet, useRestTimer, type PrRecord } from './useWorkout';
+import {
+  useCurrentWorkout,
+  useCheckSet,
+  useUndoSet,
+  useRestTimer,
+  usePreviousSets,
+} from './useWorkout';
 import { vibrate, speak, tone, unlockAudio } from './cues';
 import { groupIntervalBlocks } from './intervalPlan';
 import { useIntervalTimer } from './useIntervalTimer';
 import { IntervalStage } from './IntervalStage';
-import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 
 /**
  * THE FOUR-ROW COLUMN, WRITTEN ONCE.
@@ -72,17 +77,20 @@ export function WorkoutPlayer() {
   const check = useCheckSet();
   const undo = useUndoSet();
   const { toast } = useToast();
-  // The rest ending is the cue that matters most: the phone is on the floor and nobody is looking
-  // at it. A timer that only ends visually has told the lifter nothing.
-  const restVariant = useElementVariant('E22');
-  // E22-E: which row the finished rest handed over to. Held in state rather than derived, because
-  // "the next pending set" changes the moment one is checked — deriving it would move the handover
+  // Which row the finished rest handed over to. Held in state rather than derived, because "the
+  // next pending set" changes the moment one is checked — deriving it would move the handover
   // marker onto a different row while the lifter was still looking at this one.
   const [handoverSetId, setHandoverSetId] = useState<number | null>(null);
   const rest = useRestTimer(() => {
+    // The rest ending is the cue that matters most: the phone is on the floor and nobody is looking
+    // at it. A timer that only ends visually has told the lifter nothing.
     vibrate('restOver');
     speak(t('workout.restOverSpoken'), i18n.language);
-    if (restVariant === 'E') setHandoverSetId(nextPendingRef.current);
+    // HANDOVER IS A STATE OF THIS SCREEN, NOT A VARIANT. It used to be gated on E22 = 'E', which is
+    // seeded 'A', so the ring was drawn on the next row and the row was never brought to it —
+    // half of the one behaviour the spec's Handover state describes. Scroll only, never focus:
+    // focusing opens the numeric keyboard over the very rows the lifter came back to read.
+    setHandoverSetId(nextPendingRef.current);
   });
   const [activeExercise, setActiveExercise] = useState(0);
   // THE MAP IS THE DEFAULT, and the chip offers the media. It used to be the other way round: the
@@ -149,6 +157,25 @@ export function WorkoutPlayer() {
     [data?.sets, current?.id],
   );
 
+  // ── THE PREVIOUS COLUMN ──────────────────────────────────────────────────────────────────────
+  //
+  // One request for the whole session rather than one per set, which is what the endpoint was built
+  // for. Until this was wired the column rendered an em-dash on every row of every session: the
+  // most useful number on the screen was a placeholder, and the server had been answering for it
+  // all along.
+  const { data: previousData } = usePreviousSets(Boolean(data?.log));
+  const previousBySet = useMemo(() => {
+    const map = new Map<string, { weight_kg: number | null; reps: number | null }>();
+    // The endpoint orders each movement's history newest-session-first, so the FIRST row for a pair
+    // is the most recent one. Later rows are older sessions and must not overwrite it — "last time"
+    // means last time, not the first time this set index was ever done.
+    for (const p of previousData?.previous ?? []) {
+      const key = `${p.exercise_id}:${p.set_index}`;
+      if (!map.has(key)) map.set(key, p);
+    }
+    return map;
+  }, [previousData]);
+
   // WHAT THE ANCHOR IS ACTUALLY FOR. A body map with nothing lit is a grey figure — it answers no
   // question at all, and it is the one element on this screen that is not a number. The taxonomy
   // that says which muscles this movement works, primary versus assisting, lives on the exercise,
@@ -159,6 +186,14 @@ export function WorkoutPlayer() {
     () => Object.fromEntries((exerciseDetail?.muscles ?? []).map((m) => [m.slug, m.role])),
     [exerciseDetail],
   );
+
+  // WHAT THE PANEL IS ACTUALLY SHOWING, which is not the same question as which way the toggle is
+  // set. A freestyle movement carries no `exercise_id`, so the map branch cannot draw and the
+  // placeholder is on screen with `showMedia` still false — and the chip, reading the toggle, was
+  // offering `Videó` for a panel that was already the video's stand-in. The chip names the OTHER
+  // view, so it has to be derived from the contents.
+  const mapAvailable = Boolean(current?.exercise_id);
+  const mapShown = !showMedia && mapAvailable;
 
   // The next set still to do, kept in a ref because the rest-over callback fires from the TIMER's
   // tick, not from a render — reading React state there would give whatever it was when the rest
@@ -215,7 +250,10 @@ export function WorkoutPlayer() {
     );
   }
 
-  const onCheck = async (setId: number, values: { weight: number | null; reps: number | null }): Promise<PrRecord[]> => {
+  const onCheck = async (
+    setId: number,
+    values: { weight: number | null; reps: number | null },
+  ): Promise<CheckResult> => {
     const result = await check.mutateAsync({ setId, ...values, weight_unit: 'kg' });
     // Rest starts from the set's own prescribed rest, and only after the check lands. Starting it
     // optimistically would run a timer for a set the server refused.
@@ -234,7 +272,10 @@ export function WorkoutPlayer() {
       // would be a second permanent statement of the same fact.
       toast(t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) }), 'success');
     }
-    return records;
+    // `queued` is carried to the row, not swallowed here: the outbox accepted the write but the
+    // server has not, so the row has to say `Nincs kapcsolat` instead of sitting there looking
+    // untouched. See useWorkout's outbox branch.
+    return { records, queued: result.queued === true };
   };
 
   return (
@@ -285,7 +326,7 @@ export function WorkoutPlayer() {
             }}
             onDiscardCrossed={interval.discardCrossed}
           />
-        ) : !showMedia && current?.exercise_id ? (
+        ) : mapShown ? (
           // FULL BLEED. `fill` height-constrains the 260 x 560 figure to the panel instead of
           // capping it at 280px wide, which on a wide hero left the map floating in an empty box.
           // Read-only — no `onSelect` — so the map is not an interactive target here at all, which
@@ -296,12 +337,19 @@ export function WorkoutPlayer() {
           // coach's own entry, anything the taxonomy has not been filled in for. A mark at anchor
           // scale rather than a small grey glyph in an empty panel — one reads as "nothing to show
           // here", the other reads as a broken image.
+          //
+          // Both sizes are FRACTIONS of the panel, never px. The hero is 28dvh, so a fixed glyph
+          // drifts against the circle on every viewport — which is how it ended up at 64px inside a
+          // mark only 3/5 of the panel tall: a big glyph in a circle too small for it. Measured off
+          // 02b-workout-states.webp the mark is ~77% of the panel's height; the glyph is half the
+          // mark, matching the ratio `EmptyState`'s own `anchor` mark uses, so the two anchor-scale
+          // marks in the product are drawn to one proportion.
           <div className="flex h-full items-center justify-center">
             <span
               aria-hidden
-              className="inline-flex aspect-square h-3/5 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+              className="inline-flex aspect-square h-3/4 items-center justify-center rounded-chip bg-accent-subtle text-accent"
             >
-              <Dumbbell className="size-16" strokeWidth={1.5} />
+              <Dumbbell className="size-1/2" strokeWidth={1.5} />
             </span>
           </div>
         )}
@@ -329,16 +377,21 @@ export function WorkoutPlayer() {
             shape="chip"
             density="compact"
             variant="secondary"
-            aria-pressed={showMedia}
+            // Inert on a movement with no taxonomy, rather than a control that redraws the panel it
+            // is already showing. The chip STAYS — the next movement may well have a map, and the
+            // toggle has to be discoverable when it does — but the control recipe's disabled state
+            // is what says "not for this one" instead of letting a press do nothing.
+            disabled={!mapAvailable}
+            aria-pressed={mapAvailable ? showMedia : undefined}
             onClick={() => setShowMedia((v) => !v)}
             className="absolute bottom-9 right-3"
           >
-            {showMedia ? (
-              <PersonStanding className="size-icon-s" aria-hidden />
-            ) : (
+            {mapShown ? (
               <Play className="size-icon-s" aria-hidden />
+            ) : (
+              <PersonStanding className="size-icon-s" aria-hidden />
             )}
-            {t(showMedia ? 'workout.showMuscles' : 'workout.showMedia')}
+            {t(mapShown ? 'workout.showMedia' : 'workout.showMuscles')}
           </Pressable>
         ) : null}
       </Surface>
@@ -376,6 +429,13 @@ export function WorkoutPlayer() {
             <SetRow
               key={s.id}
               set={s}
+              // A freestyle movement has no `exercise_id`, so it has no history to compare against
+              // and the column is honestly an em-dash there.
+              previous={
+                current?.exercise_id != null
+                  ? (previousBySet.get(`${current.exercise_id}:${s.set_index}`) ?? null)
+                  : null
+              }
               onCheck={(v) => onCheck(s.id, v)}
               onUndo={async () => {
                 await undo.mutateAsync({ setId: s.id, reason: 'undone from the player' });

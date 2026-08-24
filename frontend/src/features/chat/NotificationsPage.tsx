@@ -5,8 +5,8 @@ import {
   Bell,
   BellOff,
   Check,
-  CheckCheck,
   ChevronLeft,
+  CircleCheck,
   Dumbbell,
   History,
   MessageSquare,
@@ -87,10 +87,18 @@ function BellAnchor({
   count,
   loading = false,
   label,
+  caption,
 }: {
   count: number | null;
   loading?: boolean;
   label?: string;
+  /**
+   * The unit under the numeral. Split out of the count rather than interpolated into it: the
+   * figure is the anchor and the caption says what it counts, so a bare `3` never stands alone as
+   * the largest element on the screen. Absent while the count is unknown — there is nothing to
+   * name yet.
+   */
+  caption?: string;
 }) {
   const silent = count === 0;
   return (
@@ -122,7 +130,10 @@ function BellAnchor({
       {loading ? (
         <Skeleton className="mt-2 h-12 w-16" />
       ) : count != null ? (
-        <span className="text-timer tabular-nums text-text-1">{count}</span>
+        <>
+          <span className="text-timer tabular-nums text-text-1">{count}</span>
+          {caption ? <span className="text-body text-text-2">{caption}</span> : null}
+        </>
       ) : null}
     </div>
   );
@@ -141,12 +152,15 @@ function NotificationRow({
 
   const inner = (
     <>
+      {/* ONE holder treatment, read and unread alike. A solid accent fill on the unread rows put a
+          second accent surface inside a row whose own fill is already `accent-subtle`, so the
+          loudest thing on the screen was the type glyph rather than the news. The read state is
+          carried by the row's fill and by the mark at the trailing edge, which is where it is
+          legible. `on-accent-subtle` rather than `text-accent`: accent-on-accent-wash is a
+          contrast failure, not a preference (DESIGN.md 63). */}
       <span
         aria-hidden
-        className={cn(
-          'grid size-11 shrink-0 place-items-center rounded-field',
-          unread ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-accent',
-        )}
+        className="grid size-11 shrink-0 place-items-center rounded-field bg-accent-subtle text-on-accent-subtle"
       >
         <Icon className="size-icon-m" strokeWidth={2} />
       </span>
@@ -210,7 +224,7 @@ function NotificationRow({
 export function NotificationsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isPending, isError } = useNotifications();
+  const { data, isPending, isError, refetch } = useNotifications();
   const markRead = useMarkNotificationsRead();
   const online = useOnline();
 
@@ -275,6 +289,10 @@ export function NotificationsPage() {
           nothing-to-show are different facts and must not be drawn the same. */}
       <BellAnchor
         count={isError ? null : (arrival.current ?? 0)}
+        // No `{{count}}` and no plural suffix: the numeral is drawn above this line, and a
+        // suffixed key would read as dead to `check-i18n`'s unused-key pass, which matches on the
+        // literal key path.
+        caption={isError ? undefined : t('notifications.unreadLabel')}
         label={
           !isError && arrival.current
             ? // The one accessible name this screen has for the count. It is the bell link's
@@ -293,13 +311,28 @@ export function NotificationsPage() {
           busy={markRead.isPending}
           disabled={!online}
           onClick={() => markRead.mutate(undefined)}
-          icon={<CheckCheck className="size-icon-m" aria-hidden />}
+          icon={<CircleCheck className="size-icon-m" aria-hidden />}
         >
           {t('notifications.markAllRead')}
         </Pressable>
       ) : null}
 
-      {notifications.length === 0 ? (
+      {isError ? (
+        // A failed fetch leaves `notifications` empty, so without this branch the body said
+        // `Nincs értesítés` under an anchor that had just refused to claim a count — the screen
+        // contradicting itself in two blocks. Could-not-load and nothing-to-show are different
+        // facts, and only one of them has an action that can fix it.
+        <EmptyState
+          icon={BellOff}
+          title={t('auth.errors.generic')}
+          heading="h2"
+          action={
+            <Pressable variant="secondary" onClick={() => void refetch()}>
+              {t('common.retry')}
+            </Pressable>
+          }
+        />
+      ) : notifications.length === 0 ? (
         // No action suggested, because there is none. An empty state that invents a next step for
         // a screen with nothing to do is noise.
         <EmptyState
@@ -322,15 +355,19 @@ export function NotificationsPage() {
 
           {read.length > 0 ? (
             <div className="flex flex-col gap-group">
-              {/* The `KORÁBBIAK` divider, minus its label: the string needs a key that does not
-                  exist yet, and inventing one here would put an untranslated word on the screen
-                  in three languages. The rule and the holder still carry the break. */}
+              {/* The `KORÁBBIAK` divider. The word is announced rather than hidden: it is the
+                  only thing that says the rows below are already-seen news, and the list order
+                  alone does not carry that. The hairline the label replaces was never in the
+                  design — the icon holder is the break. */}
               {unread.length > 0 ? (
-                <div aria-hidden className="flex items-center gap-tight">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-3">
+                <div className="flex items-center gap-tight">
+                  <span
+                    aria-hidden
+                    className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-3"
+                  >
                     <History className="size-icon-m" strokeWidth={2} />
                   </span>
-                  <span className="h-px flex-1 bg-[var(--surface-border)]" />
+                  <p className="text-micro uppercase text-text-3">{t('notifications.earlier')}</p>
                 </div>
               ) : null}
               <ul className="flex flex-col gap-group">

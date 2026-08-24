@@ -17,6 +17,19 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    */
   leading?: ReactNode;
   trailing?: ReactNode;
+  /**
+   * Obligation marker on the label row — `Kötelező` / `Nem kötelező`.
+   *
+   * On the label row and not in the hint, because it answers a question the user asks BEFORE
+   * typing ("do I have to fill this in?") and the hint answers one they ask while typing. Both
+   * compose editors' mockups put it there, right-aligned against the label.
+   *
+   * Not `required?: boolean`: the mockups mark optional fields too, and a boolean could only say
+   * one of the two things. It is also announced — tied into `aria-describedby` — because a marker
+   * that is only visible tells a sighted user which fields they can skip and leaves everyone else
+   * to submit the form and find out.
+   */
+  marker?: string;
 }
 
 /**
@@ -31,11 +44,12 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * when it appears rather than only on the next focus.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, hint, error, className, leading, trailing, id, ...rest },
+  { label, hint, error, className, leading, trailing, marker, id, ...rest },
   ref,
 ) {
   const autoId = useId();
   const inputId = id ?? autoId;
+  const markerId = `${inputId}-marker`;
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
 
@@ -44,16 +58,26 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     // error are one group, and `--spacing-tight` is the name for that relationship. 6px was also
     // the one distance in this component that was not on the 4px grid.
     <div className={cn('flex flex-col gap-tight', className)}>
-      <label htmlFor={inputId} className="text-body-s text-text-2">
-        {label}
-      </label>
+      {/* A ROW, not just a label, whenever there is a marker. `justify-between` rather than a
+          margin so the marker sits against the field's trailing edge at any width, and `gap-2` so a
+          long label wraps before it collides. */}
+      <div className="flex items-baseline justify-between gap-2">
+        <label htmlFor={inputId} className="text-body-s text-text-2">
+          {label}
+        </label>
+        {marker ? (
+          <span id={markerId} className="text-caption shrink-0 text-text-3">
+            {marker}
+          </span>
+        ) : null}
+      </div>
 
       <div className="relative">
         <input
           ref={ref}
           id={inputId}
           aria-invalid={error ? true : undefined}
-          aria-describedby={cn(hint && hintId, error && errorId) || undefined}
+          aria-describedby={cn(marker && markerId, hint && hintId, error && errorId) || undefined}
           className={cn(
             'w-full rounded-field bg-[var(--field-bg)] px-3',
             // The floor, again — an input is a control like any other, and it reads the same

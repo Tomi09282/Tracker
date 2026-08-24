@@ -85,7 +85,6 @@
     "account": "Account",
     "appearance": "Appearance",
     "themePacks": "Theme packs",
-    "accent": "Accent color",
     "accentDefault": "Default",
     "accentCustom": "Custom color",
     "contrastRatioPass": "Contrast: {{ratio}}:1 — clears the 4.5:1 minimum.",
@@ -93,8 +92,6 @@
     "contrastInvalid": "Enter a valid hex color (#RRGGBB).",
     "previewTitle": "Live preview",
     "previewBody": "This is not a mockup — the whole app repaints as you choose.",
-    "previewSecondary": "Secondary text on this surface.",
-    "saveGradient": "Save gradient",
     "gradientPreview": "Gradient preview",
     "gradient": {
       "title": "Gradient",
@@ -331,7 +328,10 @@
       "mealDefault": "Meal",
       "draftNote": "This plan is still a draft — the client cannot see it until you activate it.",
       "activate": "Activate"
-    }
+    },
+    "profileFull": "Questionnaire",
+    "profileIncomplete": "Incomplete",
+    "handoverShort": "These clients cannot sign in yet."
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",
@@ -574,7 +574,12 @@
     "noneForClient": "This client has no plan yet",
     "noneForClientBody": "Create one, or clone a template onto them.",
     "newForClient": "New plan for this client",
-    "missingKit": "{{count}} kit missing"
+    "missingKit": "{{count}} kit missing",
+    "trainingDayCount": "{{count}} training days",
+    "noTime": "no time set",
+    "collapseBlock": "Collapse or expand block",
+    "statusTitle": "Status",
+    "total": "Plans in total"
   },
   "progress": {
     "heading": "Progress",
@@ -648,7 +653,9 @@
     "reported": "Reported",
     "withdrawn": "This message was withdrawn",
     "sendFailed": "The message could not be sent. Your text is still here.",
-    "unavailable": "This conversation is no longer available."
+    "unavailable": "This conversation is no longer available.",
+    "composeHint": "Enter sends, Shift+Enter for a new line",
+    "delivered": "Delivered"
   },
   "notifications": {
     "title": "Notifications",
@@ -658,7 +665,9 @@
     "markAllRead": "Mark all as read",
     "minutesAgo": "{{count}} min ago",
     "hoursAgo": "{{count}} h ago",
-    "daysAgo": "{{count}} d ago"
+    "daysAgo": "{{count}} d ago",
+    "unreadLabel": "unread",
+    "earlier": "Earlier"
   },
   "nutrition": {
     "title": "Nutrition",

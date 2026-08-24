@@ -64,6 +64,33 @@ export function useCurrentWorkout() {
   });
 }
 
+/** One historical set: what this client did on that movement, at that set index, last time. */
+export interface PreviousSet {
+  exercise_id: number;
+  set_index: number;
+  weight_kg: number | null;
+  reps: number | null;
+  seconds: number | null;
+  local_date: string;
+}
+
+/**
+ * THE PREVIOUS COLUMN — what turns a set into a decision instead of a guess.
+ *
+ * Its own query, not part of `/workouts/current`, because it has a different lifetime: the endpoint
+ * excludes the running log by construction, so nothing a lifter does in this session can change the
+ * answer. That is also why the key is `['workout','previous']` rather than a child of `KEY` — a
+ * child would be swept up by the check mutation's invalidation and refetch the whole history once
+ * per set, on the busiest screen in the product.
+ */
+export function usePreviousSets(enabled: boolean) {
+  return useQuery({
+    queryKey: ['workout', 'previous'] as const,
+    queryFn: () => apiWithRefresh<{ previous: PreviousSet[] }>('/workouts/current/previous'),
+    enabled,
+  });
+}
+
 export function useStartWorkout() {
   const qc = useQueryClient();
   return useMutation({

@@ -25,6 +25,20 @@ export interface SegmentedProps<T extends string> {
    */
   onChange: (next: T) => void | Promise<unknown>;
   label: string;
+  /**
+   * The choice is settled and cannot be changed. NOT the same as disabled.
+   *
+   * A post's kind is frozen after creation, and the editor answered that by deleting the control
+   * and printing a sentence instead — so the reader loses the one picture that says "three kinds
+   * exist and yours is the middle one". The mockup keeps the control and shows the answer in it.
+   *
+   * `readOnly` rather than `disabled` because the two say different things to everybody. A
+   * disabled control is greyed and skipped by the keyboard, which reads as "broken, or you lack
+   * permission"; a read-only one keeps its contrast, keeps its place in the tab order, and is
+   * announced as read-only — "this is the answer, and it is final". `aria-disabled` marks it
+   * without removing it, which is the ARIA idiom for exactly this distinction.
+   */
+  readOnly?: boolean;
 }
 
 type Phase = 'busy' | 'done' | 'failed';
@@ -75,7 +89,13 @@ function isThenable(v: unknown): v is PromiseLike<unknown> {
  * still elevates/fills — only the travel collapses to zero duration, because the user still has
  * to learn that the thing happened.
  */
-export function Segmented<T extends string>({ options, value, onChange, label }: SegmentedProps<T>) {
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+  readOnly = false,
+}: SegmentedProps<T>) {
   const variant = useElementVariant('E6');
   const motionSafe = useMotionSafe();
   const { t } = useTranslation();
@@ -199,9 +219,13 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
               role="radio"
               aria-checked={active}
               aria-busy={phase === 'busy' || undefined}
+              aria-disabled={readOnly || undefined}
               // Roving tabindex: the group is one tab stop and the arrows move inside it.
               tabIndex={active || (activeIndex === -1 && index === 0) ? 0 : -1}
-              onClick={() => select(opt.value)}
+              onClick={() => {
+                if (readOnly) return;
+                select(opt.value);
+              }}
               className={cn(
                 // Both axes of the floor, on every variant: D drops the padding to let the glyph
                 // lead, and a short label under a 16px icon is exactly how a 44px target becomes

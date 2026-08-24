@@ -25,6 +25,7 @@ import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Monogram } from './Monogram';
+import { useOnline } from '../plans/useOnline';
 import { useSession } from '../auth/useSession';
 import { personLabel } from '../../lib/person';
 import {
@@ -114,6 +115,12 @@ export function CoachDashboard() {
   const clients = useClients();
   const teams = useTeams();
   const codes = useCodes();
+
+  // Every act on this screen is a server write and there is no queued-write store behind the
+  // coaching endpoints, so a mutation fired offline is simply lost. A control that looks live and
+  // silently drops the work is worse than one that looks disabled — minting a code the coach then
+  // reads out to a client is the worst case of it.
+  const offline = !useOnline();
 
   const createTeam = useCreateTeam();
   const createCode = useCreateCode();
@@ -213,6 +220,7 @@ export function CoachDashboard() {
       variant="primary"
       shape="chip"
       busy={createCode.isPending}
+      disabled={offline}
       icon={<Plus className="size-icon-m" strokeWidth={2} aria-hidden />}
       onClick={async () => {
         const result = await createCode.mutateAsync({ kind: 'multi', max_uses: 20 });
@@ -299,8 +307,11 @@ export function CoachDashboard() {
         </div>
       ) : null}
 
-      {/* ── inventory ──────────────────────────────────────────────────────────────────────── */}
-      {clients.isPending ? (
+      {/* ── inventory ────────────────────────────────────────────────────────────────────────
+          Gated on the queries the TILES read, not on the roster's. Waiting only on `clients` made
+          the pair paint `0` and then count up to the real number the moment `teams` or `codes`
+          landed — a visible flash of wrong data in the one place the screen animates a figure. */}
+      {clients.isPending || teams.isPending || codes.isPending ? (
         <div className="grid grid-cols-2 gap-group">
           <Skeleton className="h-[140px] rounded-card" />
           <Skeleton className="h-[140px] rounded-card" />
@@ -352,7 +363,11 @@ export function CoachDashboard() {
             <p className="text-title-3 text-text-1">
               {t('coaching.handoverTitle', { count: awaitingHandover.length })}
             </p>
-            <p className="text-body-s measure mt-1 text-text-2">{t('coaching.handoverBody')}</p>
+            {/* Its own key, not the client-detail one. The detail screen wants the full
+                explanation — a coach standing on one account is about to act on it — while the
+                dashboard is a roster and this is a count with a consequence. One key served both
+                and the roster inherited a three-line paragraph. */}
+            <p className="text-body-s measure mt-1 text-text-2">{t('coaching.handoverShort')}</p>
           </div>
         </Surface>
       ) : null}
@@ -383,6 +398,7 @@ export function CoachDashboard() {
                   density="compact"
                   variant="secondary"
                   busy={revokeCode.isPending}
+                  disabled={offline}
                   onClick={() => revokeCode.mutate(c.id)}
                 >
                   {t('coaching.revoke')}
@@ -477,6 +493,7 @@ export function CoachDashboard() {
                     shape="icon"
                     variant="ghost"
                     aria-label={t('coaching.archive')}
+                    disabled={offline}
                     onClick={() => setConfirmArchive(c)}
                   >
                     <Archive className="size-icon-m" strokeWidth={2} aria-hidden />
@@ -517,7 +534,7 @@ export function CoachDashboard() {
             type="submit"
             variant="primary"
             busy={createTeam.isPending}
-            disabled={!teamName.trim()}
+            disabled={!teamName.trim() || offline}
             className="self-start"
           >
             {t('coaching.createTeam')}
@@ -560,7 +577,7 @@ export function CoachDashboard() {
             type="submit"
             variant="primary"
             busy={pregenerate.isPending}
-            disabled={!pregenEmails.trim()}
+            disabled={!pregenEmails.trim() || offline}
             className="self-start"
           >
             {t('coaching.pregenCreate')}

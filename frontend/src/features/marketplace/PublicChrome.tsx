@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import {
@@ -113,21 +114,23 @@ export function PublicTopBar({ backTo }: { backTo?: string }) {
 }
 
 /**
- * The kind glyph in its tinted holder. `--tile-tint` is the token the whole redesign leans on for
+ * The tinted holder a glyph sits in. `--tile-tint` is the token the whole redesign leans on for
  * this — a 20–24px glyph has no visual mass on its own, and the holder is what makes a row of
  * cards scan as objects instead of as a paragraph.
+ *
+ * It is its own component because the coach profile's section heading was writing a second copy of
+ * the same square by hand: one tile drawn twice is two tiles that drift.
  */
-export function KindTile({
-  kind,
+export function TileHolder({
   size = 'md',
   className,
+  children,
 }: {
-  kind: string;
-  /** `sm` on the coach profile's compact post rows, `md` on the feed card. */
+  /** `sm` on compact rows and section headings, `md` on the feed card. */
   size?: 'sm' | 'md';
   className?: string;
+  children: ReactNode;
 }) {
-  const Icon = kindIcon(kind);
   return (
     <span
       aria-hidden
@@ -138,8 +141,26 @@ export function KindTile({
         className,
       )}
     >
-      <Icon className={size === 'sm' ? 'size-icon-m' : 'size-icon-l'} strokeWidth={2} />
+      {children}
     </span>
+  );
+}
+
+/** The kind glyph in that holder — the card's entry point for the eye. */
+export function KindTile({
+  kind,
+  size = 'md',
+  className,
+}: {
+  kind: string;
+  size?: 'sm' | 'md';
+  className?: string;
+}) {
+  const Icon = kindIcon(kind);
+  return (
+    <TileHolder size={size} className={className}>
+      <Icon className={size === 'sm' ? 'size-icon-m' : 'size-icon-l'} strokeWidth={2} />
+    </TileHolder>
   );
 }
 

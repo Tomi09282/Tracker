@@ -70,15 +70,16 @@ export function HomePage() {
       </header>
 
       {today.isPending ? (
-        // The shapes are the NEW geometry — the anchor panel and one day card. A skeleton whose
-        // outline does not match what arrives is the layout shift it was supposed to prevent.
+        // ONE SHAPE, BOTH BRANCHES. Which one arrives is precisely what this cannot know yet: the
+        // week panel over a day list, or the empty panel that replaces the two of them. Both open
+        // with a card in the anchor slot and put one card under it, so that is all this draws. The
+        // section-heading pill it used to draw had no counterpart on the empty branch and vanished
+        // the moment `days` came back empty, and the lower block is sized between the two real
+        // heights rather than matching either, so neither swap drags the nutrition block far.
         <div className="flex flex-col gap-section" role="status" aria-busy="true">
           <span className="sr-only">{t('common.loading')}</span>
           <Skeleton className="h-72 w-full rounded-card" />
-          <div className="flex flex-col gap-group">
-            <Skeleton className="h-11 w-40 rounded-field" />
-            <Skeleton className="h-24 w-full rounded-card" />
-          </div>
+          <Skeleton className="h-28 w-full rounded-card" />
         </div>
       ) : (
         <>
@@ -134,18 +135,34 @@ export function HomePage() {
 
                         <div className="min-w-0 flex-1">
                           <p className="text-body-strong truncate text-text-1">{day.day_name}</p>
-                          <p className="text-caption flex items-center gap-2 text-text-3">
+                          {/* Three facts, one sentence: `5 napos program · 18:00 · 5 gyakorlat`.
+                              Parted by air alone they read as three unrelated labels, so each
+                              trailing fact brings its own middle dot — `aria-hidden`, because a
+                              screen reader already pauses between the spans and would otherwise
+                              announce the punctuation. The plan name always renders first, which
+                              is what makes a leading dot correct for every fact after it. */}
+                          <p className="text-caption flex items-center gap-1 text-text-3">
                             <span className="truncate">{day.plan_name}</span>
                             {day.start_time ? (
-                              <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
-                                <Clock className="size-icon-s" aria-hidden />
-                                {day.start_time}
-                              </span>
+                              <>
+                                <span aria-hidden className="shrink-0">
+                                  ·
+                                </span>
+                                <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
+                                  <Clock className="size-icon-s" aria-hidden />
+                                  {day.start_time}
+                                </span>
+                              </>
                             ) : null}
                             {!day.is_rest ? (
-                              <span className="shrink-0 tabular-nums">
-                                {t('home.exerciseCount', { count: day.exercise_count })}
-                              </span>
+                              <>
+                                <span aria-hidden className="shrink-0">
+                                  ·
+                                </span>
+                                <span className="shrink-0 tabular-nums">
+                                  {t('home.exerciseCount', { count: day.exercise_count })}
+                                </span>
+                              </>
                             ) : null}
                           </p>
                         </div>
@@ -187,6 +204,11 @@ export function HomePage() {
             <Surface pad="none">
               <EmptyState
                 icon={CalendarDays}
+                // The mark carries the top third here the way the ring does on the populated
+                // screen, so the page's rhythm is the same on both days. The instinct to make an
+                // empty card small and apologetic is backwards: on this route the emptiness IS
+                // the content.
+                size="anchor"
                 title={t('home.emptyTitle')}
                 body={t('home.emptyBody')}
                 action={

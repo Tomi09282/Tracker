@@ -166,7 +166,10 @@ export function PostPage() {
 
       {price ? (
         <Surface as="section" className="flex flex-col gap-tight text-center">
-          <p className="text-title-1 tabular-nums text-text-1">{price}</p>
+          {/* The display FACE, because this is the number the whole card exists for and DESIGN.md
+              makes Space Grotesk opt-in for big numbers. Not the display SIZE: `text-display` is
+              one per screen and the h1 above already spends it. */}
+          <p className="text-title-1 font-display tabular-nums text-text-1">{price}</p>
           {/* SAID PLAINLY, AND IN FULL. There is no purchase path in this phase, and a price
               beside a button that does nothing is worse than a price beside a sentence that tells
               the truth. */}

@@ -336,27 +336,42 @@ export function ProfileEditorPage() {
 
       {/* ── the two fields a coach actually retypes ──────────────────────────────────────────── */}
       <div className="flex flex-col gap-group">
+        {/* The server enforces a minimum here, so the control says so semantically. Its visible
+            `Kötelező` marker — the counterpart to the `Nem kötelező` below — is one missing string
+            away: the `marker` prop takes a `required` string from the compose namespace once the
+            bundles have one. */}
         <Field
           label={t('compose.displayName')}
+          aria-required
           value={displayName}
           maxLength={limits?.displayNameMax}
           onChange={(e) => setDisplayName(e.target.value)}
         />
 
+        {/* `Nem kötelező` belongs on the LABEL row, not in the hint slot: it answers a question
+            asked before typing, and the hint answers one asked while typing. The hint line the
+            mockup shows under this input — where the text lands on the marketplace — is still
+            missing a string; the `hint` prop takes a `headlineHint` key from the compose namespace
+            the day it exists in all three bundles, and until then the slot stays empty rather than
+            repeating the marker. */}
         <Field
           label={t('compose.headline')}
+          marker={t('compose.optional')}
           value={headline}
           maxLength={limits?.headlineMax}
           onChange={(e) => setHeadline(e.target.value)}
-          // The hint earns its line because it names WHERE the text lands.
-          hint={t('compose.optional')}
         />
       </div>
 
       {/* ── specialties, in their own box ────────────────────────────────────────────────────── */}
       <Surface as="fieldset" className="flex w-full min-w-0 flex-col gap-group">
-        <legend className="text-body-s flex items-center gap-tight text-text-2">
-          <Medal className="size-icon-m shrink-0 text-accent" aria-hidden />
+        {/* A CARD HEADING, not a field label. `Szakterületek` and `Bemutatkozás` are the two
+            sections of this form and the mockup draws them identically — same size, same
+            full-strength ink, same neutral glyph. At `text-body-s text-text-2` this one read as
+            the label of the chip row rather than as the box's title, and the accent medal made it
+            the loudest glyph on a screen whose accent belongs to `Mentés`. */}
+        <legend className="text-title-3 flex items-center gap-tight text-text-1">
+          <Medal className="size-icon-m shrink-0 text-text-2" aria-hidden />
           {t('compose.specialties', { n: specialties.length, max: specialtyMax })}
         </legend>
         <ul className="flex flex-wrap gap-tight">
@@ -389,13 +404,12 @@ export function ProfileEditorPage() {
 
       {/* ── the bio ──────────────────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-tight">
-        <label htmlFor="compose-bio" className="text-body-s flex items-center gap-tight text-text-2">
-          <span
-            aria-hidden
-            className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-          >
-            <Pencil className="size-icon-s" strokeWidth={2} />
-          </span>
+        {/* Still a `<label>` — `htmlFor` is what ties it to the textarea — but drawn as the
+            section heading it is, matching `Szakterületek` above. The pencil loses its filled
+            accent badge: the mockup draws a bare muted outline glyph, and a tinted holder here
+            claimed more weight than the specialties medal beside it. */}
+        <label htmlFor="compose-bio" className="text-title-3 flex items-center gap-tight text-text-1">
+          <Pencil className="size-icon-m shrink-0 text-text-2" aria-hidden />
           {t('compose.bio')}
         </label>
         {/* Three visible lines, not six, and no formatting toolbar: the markdown is the coach's
@@ -453,11 +467,20 @@ export function ProfileEditorPage() {
         </Surface>
       ) : null}
 
-      <div className="flex flex-wrap gap-tight">
-        <Pressable variant="primary" busy={create.isPending || save.isPending} onClick={submit}>
+      {/* TWO EQUAL TRACKS, edge to edge. `flex flex-wrap` let both buttons hug their text and sit
+          against the left margin with the right third of the row empty — and it could wrap them
+          onto two lines, which the mockup never shows. A grid keeps the pair on one row at any
+          label length; `w-full` is the house form at the same shape in `ModerationQueue`. */}
+      <div className="grid grid-cols-2 gap-tight">
+        <Pressable
+          variant="primary"
+          className="w-full"
+          busy={create.isPending || save.isPending}
+          onClick={submit}
+        >
           {isNew ? t('compose.createProfile') : t('compose.save')}
         </Pressable>
-        <Pressable variant="secondary" onClick={() => setShowPreview((v) => !v)}>
+        <Pressable variant="secondary" className="w-full" onClick={() => setShowPreview((v) => !v)}>
           <Eye className="size-icon-s" aria-hidden />
           {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
         </Pressable>

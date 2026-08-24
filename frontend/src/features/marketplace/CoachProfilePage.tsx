@@ -10,7 +10,7 @@ import { useCoach } from './usePublic';
 import type { PublicCoach, PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
-import { PublicTopBar, KindTile, InitialsAvatar, metaLine, postDate } from './PublicChrome';
+import { PublicTopBar, KindTile, TileHolder, InitialsAvatar, metaLine, postDate } from './PublicChrome';
 
 /**
  * A public coach profile, addressed by HANDLE.
@@ -49,6 +49,12 @@ import { PublicTopBar, KindTile, InitialsAvatar, metaLine, postDate } from './Pu
  * borrows that badge's credibility, and the badge is the one thing on this page the schema
  * actually enforces. Same for `Kapcsolatfelvétel`: the screen has no message path by decision, and
  * a filled primary button with no destination is a dead control on a public route.
+ *
+ * THE COMPONENT IS NOT THE BLOCKER, AND THE DECISION IS STILL OPEN. `ui/data/SummaryTile` exists
+ * and seven other features use it, so the row is one call away; a programme count is even
+ * derivable here from `posts`. What is missing is the owner's answer to the note's warning —
+ * whether the client and experience numbers are COMPUTED from real rows or TYPED by the coach —
+ * and drawing one lone tile beside two absent ones is a different block, not a smaller one.
  */
 export function CoachProfilePage() {
   const { t } = useTranslation();
@@ -155,12 +161,23 @@ function CoachProfileView({
         // as a button that does nothing is worse than a label.
         <ul className="flex flex-wrap gap-tight">
           {specialties.map((s) => (
-            <li
+            // `Surface`, not a hand-written border+bg pair: the pair named `--surface-border` and
+            // `bg-surface-2` directly, so these were the one element on the public screens that
+            // would keep the old material the day the glass card changes. `inset` is the same
+            // surface-2 well they already were; `rim={false}` because a specular lip on a 40px
+            // pill is noise. The ink is the inherited `--text-1` the mockup draws, rather than
+            // the `text-text-2` this carried — a colour class here would also collapse
+            // `text-body-s` under `cn`'s twMerge, which shares one group for every `text-*`.
+            <Surface
               key={s.key}
-              className="text-body-s rounded-chip border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-2 px-3 py-2 text-text-2"
+              as="li"
+              elevation="inset"
+              rim={false}
+              pad="none"
+              className="text-body-s rounded-chip px-3 py-2"
             >
               {t(s.i18nKey, { defaultValue: s.key })}
-            </li>
+            </Surface>
           ))}
         </ul>
       ) : null}
@@ -169,12 +186,10 @@ function CoachProfileView({
 
       <section className="flex flex-col gap-group">
         <div className="flex items-center gap-tight">
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-card bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
-          >
+          {/* The same holder the post rows below use, not a second hand-built copy of it. */}
+          <TileHolder size="sm">
             <Bookmark className="size-icon-m" strokeWidth={2} />
-          </span>
+          </TileHolder>
           <h2 className="text-title-1 text-text-1">{t('marketplace.theirPosts')}</h2>
         </div>
 

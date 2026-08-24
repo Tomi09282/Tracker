@@ -126,7 +126,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           `glass` is earned here for the reason the recipe reserves it — this card sits over a set
           list that is scrolling under it, which is the one thing a backdrop blur is worth paying a
           compositing layer for. */}
-      <Surface elevation="sheet" finish="glass" className="col-mobile flex items-center gap-3">
+      <Surface elevation="sheet" finish="glass" className="relative col-mobile flex items-center gap-3">
         {/* 48, not 56. This card floats over the exercise switcher, so every pixel it does not
             need is a pixel of the row underneath it that stays readable. */}
         <svg viewBox="0 0 52 52" className="size-12 shrink-0 -rotate-90" aria-hidden>
@@ -145,7 +145,10 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           />
         </svg>
 
-        <div className="min-w-0 flex-1">
+        {/* `pr-11` reserves the dismiss button's width even though the button no longer sits in the
+            flow — without it the next-up line would truncate underneath the X rather than before
+            it, which reads as a rendering fault rather than a truncation. */}
+        <div className="min-w-0 flex-1 pr-11">
           {/* `aria-live="off"` on purpose: a countdown that announces every second is unusable with
               a screen reader. The single announcement that matters is "rest over", below. */}
           <p className="text-title-1 font-display tabular-nums" aria-live="off">
@@ -158,7 +161,18 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
           ) : null}
         </div>
 
-        <Pressable shape="icon" variant="ghost" aria-label={t('workout.skipRest')} onClick={onSkip}>
+        {/* THE CORNER, not the middle of the trailing edge. Dismiss is the one thing on this card
+            that is not the rest, and a 44px target centred against the ring reads as the third item
+            in a row of three — one weight with the clock and the next movement. In the corner it is
+            chrome, which is what it is. Absolute rather than `self-start`: the button is 44px inside
+            a ~48px content row, so aligning it in the flow moves it by nothing. */}
+        <Pressable
+          shape="icon"
+          variant="ghost"
+          aria-label={t('workout.skipRest')}
+          onClick={onSkip}
+          className="absolute right-1 top-1"
+        >
           <X className="size-icon-m" aria-hidden />
         </Pressable>
       </Surface>

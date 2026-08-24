@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Search, ShieldOff, UserCog } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
 import { Field } from '../../ui/primitives/Field';
+import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { DataTable, nextSort, type SortDirection } from '../../ui/data/DataTable';
@@ -81,9 +82,10 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
             sort={sort}
             onSort={(key) => setSort((cur) => nextSort(cur, key))}
             empty={
-              <div className="rounded-card border border-[var(--surface-border)] bg-surface-1">
+              // `pad="none"` because `EmptyState` brings its own compression-and-release padding.
+              <Surface pad="none">
                 <EmptyState icon={Search} title={t('adminUsers.noneTitle')} body={t('adminUsers.noneBody')} />
-              </div>
+              </Surface>
             }
             columns={[
               {

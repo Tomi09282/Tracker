@@ -85,6 +85,7 @@ export function ChatPanel({
   const block = useBlockConversation(conversationId);
   const report = useReportMessage();
   const composerId = useId();
+  const hintId = `${composerId}-hint`;
 
   const [draft, setDraft] = useState('');
   const [failed, setFailed] = useState<string | null>(null);
@@ -248,6 +249,7 @@ export function ChatPanel({
           <div className="flex items-end gap-tight">
             <textarea
               id={composerId}
+              aria-describedby={hintId}
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, BODY_MAX))}
               // Enter sends, Shift+Enter breaks the line. On a phone the on-screen keyboard's
@@ -282,11 +284,20 @@ export function ChatPanel({
               <Send className="size-icon-m" aria-hidden />
             </Pressable>
           </div>
-          {/* Numerals, and `aria-hidden`: the input's own `maxLength` is what assistive tech
-              reads, and a counter that announced itself on every keystroke would be unusable. */}
-          <p aria-hidden className="text-caption text-end tabular-nums text-text-3">
-            {draft.length} / {BODY_MAX}
-          </p>
+          <div className="flex items-center justify-between gap-tight">
+            {/* The plane-button affordance, wired to the field with `aria-describedby` rather than
+                left loose in the reading order — the same shape `Field` gives its hint. A sentence
+                about an icon, announced with no owner, is noise to the one reader who cannot see
+                the icon. */}
+            <span id={hintId} className="text-caption text-text-3">
+              {t('chat.composeHint')}
+            </span>
+            {/* Numerals, and `aria-hidden`: the input's own `maxLength` is what assistive tech
+                reads, and a counter that announced itself on every keystroke would be unusable. */}
+            <p aria-hidden className="text-caption tabular-nums text-text-3">
+              {draft.length} / {BODY_MAX}
+            </p>
+          </div>
         </div>
       )}
     </div>
@@ -366,11 +377,19 @@ function Bubble({
         <span className="tabular-nums">
           {pending ? t('chat.sending') : timeOf(message.created_at, locale)}
         </span>
+        {/* Two states, not one. A sent message with no read stamp used to show a bare time, which
+            reads the same as a message that never left. `Kézbesítve` is the honest middle step.
+            The green is on the CHECK only — the word sits at the bubble's own ink, so the state
+            label outranks the timestamp beside it rather than the other way round.
+            `!pending` is load-bearing: the optimistic bubble also has a null `read_at`, and
+            "Küldés… Kézbesítve" on one line would claim a delivery that has not happened. */}
         {mine && message.read_at ? (
-          <span className="flex items-center gap-tight text-success">
-            <Check className="size-icon-s" aria-hidden />
+          <span className="flex items-center gap-tight text-on-accent-subtle">
+            <Check className="size-icon-s text-success" aria-hidden />
             {t('chat.read')}
           </span>
+        ) : mine && !pending ? (
+          <span className="text-on-accent-subtle">{t('chat.delivered')}</span>
         ) : null}
       </div>
     </Surface>

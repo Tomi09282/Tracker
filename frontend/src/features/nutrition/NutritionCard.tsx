@@ -3,10 +3,17 @@ import { Link } from 'react-router';
 import { ChevronRight } from 'lucide-react';
 import { MacroBars } from './MacroBars';
 import { useNutritionDay } from './useNutrition';
+import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
  * Today's nutrition, on Home (T4.1.7).
+ *
+ * ═══ NOTHING IMPORTS THIS ══════════════════════════════════════════════════════════════════════
+ *
+ * `features/home/HomeNutrition` renders the Home card now, so this file and the `MacroBars` it is
+ * the only consumer of are both dead. It is kept only because deleting files is outside this pass;
+ * do not extend it, and delete both rather than reviving either.
  *
  * ═══ IT RENDERS NOTHING UNTIL THERE IS SOMETHING TO SAY ════════════════════════════════════════
  *
@@ -38,7 +45,7 @@ export function NutritionCard({ date }: { date: string }) {
   if (!data || (data.items.length === 0 && data.targets == null)) return null;
 
   return (
-    <section className="mt-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4" aria-labelledby="nutrition-heading">
+    <Surface as="section" className="mt-4" aria-labelledby="nutrition-heading">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 id="nutrition-heading" className="text-title-3 text-text-1">
           {t('nutrition.card.title')}
@@ -52,6 +59,6 @@ export function NutritionCard({ date }: { date: string }) {
         </Link>
       </div>
       <MacroBars totals={data.totals} targets={data.targets} />
-    </section>
+    </Surface>
   );
 }

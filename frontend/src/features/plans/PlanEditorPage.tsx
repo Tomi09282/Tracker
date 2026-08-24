@@ -9,6 +9,7 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
 import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
   usePlan, useCreateDay, useDeleteDay, useCreateBlock, useDeleteBlock,
@@ -73,6 +74,10 @@ export function PlanEditorPage() {
   const [activeExercise, setActiveExercise] = useState<number | null>(null);
   const [statusOpen, setStatusOpen] = useState(false);
   const [pickerBlock, setPickerBlock] = useState<number | null>(null);
+  // Collapsed rather than open, so a block is expanded until the coach says otherwise: the day was
+  // just opened to look at what is in it. A Set of ids, not a single id — collapsing one block must
+  // not re-open another.
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Set<number>>(new Set());
   const [cloning, setCloning] = useState(false);
   const [copyNotice, setCopyNotice] = useState<number | null>(null);
   const [search, setSearch] = useState('');
@@ -212,41 +217,31 @@ export function PlanEditorPage() {
           )}
         />
 
+        {/* ONE metadata line, one grey, one size. The status is still a word rather than a button
+            at rest — but the type and colour go on a CHILD span, never on the Pressable's own
+            `className`: `cn` is `twMerge`, which files this project's custom font sizes and text
+            colours in the same bucket, so a `text-*` from a call site silently eats the density's
+            `text-body-s` and leaves the label at the inherited size. */}
         <div className="flex flex-wrap items-center gap-tight">
           <Pressable
             variant="ghost"
             density="compact"
             className="-ml-3"
+            aria-haspopup="dialog"
             aria-expanded={statusOpen}
             onClick={() => setStatusOpen((v) => !v)}
           >
-            {t(`plans.status.${statusValue}`)}
+            <span className="text-caption text-text-3">{t(`plans.status.${statusValue}`)}</span>
           </Pressable>
+          {/* Its own `aria-hidden` element rather than a character inside either half: it is not
+              announced, and it stays out of the `tabular-nums` run. */}
+          <span aria-hidden className="text-caption text-text-3">
+            ·
+          </span>
           <span className="text-caption tabular-nums text-text-3">
             {t('plans.revision', { n: plan.revision })}
           </span>
         </div>
-
-        {statusOpen ? (
-          <div className="flex flex-wrap gap-tight">
-            {STATUSES.map((s) => (
-              <Pressable
-                key={s}
-                shape="chip"
-                density="compact"
-                variant={statusValue === s ? 'primary' : 'secondary'}
-                aria-pressed={statusValue === s}
-                disabled={offline}
-                onClick={() => {
-                  setStatusDraft(s);
-                  setStatusOpen(false);
-                }}
-              >
-                {t(`plans.status.${s}`)}
-              </Pressable>
-            ))}
-          </div>
-        ) : null}
       </header>
 
       {/* ── The anchor ────────────────────────────────────────────────────────────────────── */}
@@ -299,7 +294,11 @@ export function PlanEditorPage() {
           })}
         </ul>
         <p className="text-caption text-center tabular-nums text-text-3">
-          {t('plans.cycle', { days: plan.cycle_days })} · {t('plans.dayCount', { count: trainingDays })}
+          {/* `trainingDayCount`, not the shared `dayCount`: the first half of this line already
+              said how many days the cycle has, so a second "4 nap" beside it reads as a
+              contradiction rather than as the number of days that actually carry work. */}
+          {t('plans.cycle', { days: plan.cycle_days })} ·{' '}
+          {t('plans.trainingDayCount', { count: trainingDays })}
         </p>
       </Surface>
 
@@ -345,8 +344,12 @@ export function PlanEditorPage() {
                   <span className="min-w-0 flex-1">
                     <span className="text-body-strong block truncate text-text-1">{day.name}</span>
                     <span className="text-caption block truncate tabular-nums text-text-3">
+                      {/* Every day card carries the same two-part suffix, so the column of
+                          captions keeps one shape. `||` rather than `??`: `start_time` is
+                          `string | null`, but an empty string would pass `??` through and leave a
+                          bare trailing separator. */}
                       {t('plans.dayIndex', { n: day.day_index + 1 })}
-                      {day.start_time ? ` · ${day.start_time}` : ''}
+                      {` · ${day.start_time || t('plans.noTime')}`}
                     </span>
                   </span>
                   {open ? (
@@ -367,150 +370,207 @@ export function PlanEditorPage() {
               </div>
 
               {open ? (
-                // The area being edited steps UP a surface level against the page, so it reads as
-                // the foreground rather than as more list.
-                <div className="flex flex-col gap-group border-t border-[var(--surface-border)] bg-surface-2 p-[var(--card-pad)]">
+                // ── THE LADDER ONLY EVER RISES ──────────────────────────────────────────────
+                // It used to invert: this panel filled to surface-2, the block card climbed to
+                // surface-3, and then the exercise rows DROPPED to surface-1 — a level below both
+                // of their parents and level with the collapsed card behind them, so the rows sank
+                // into the block instead of sitting on it.
+                // The open area is now the day card's own body, divided by the rule rather than by
+                // a tone; the block is delimited by the app's one card separator, the hairline; and
+                // the single content fill left is spent on the rows, which is the thing the mockup
+                // draws as the brightest element on the screen. The ghost `+ Gyakorlat` under them
+                // then sits a step below without any class of its own.
+                <div className="flex flex-col gap-group border-t border-[var(--surface-border)] p-[var(--card-pad)]">
                   {dayBlocks.map((block, bi) => (
-                    <div key={block.id} className="rounded-card bg-surface-3 p-tight">
+                    // `border-[length:var(--border-width)]` rather than Tailwind's `border`, so the
+                    // Mono pack's 2px edge is honoured — the same form `surfaceRecipe` uses.
+                    <div
+                      key={block.id}
+                      className="rounded-card border-[length:var(--border-width)] border-[var(--surface-border)] p-tight"
+                    >
+                      {/* Tonal squares rather than bare glyphs: on an unfilled block card a ghost
+                          icon has no edge of its own, and these are the only controls a coach hits
+                          while restructuring a day. The trash KEEPS its red glyph — only the
+                          chrome becomes tonal; destructive stays destructive. */}
                       <div className="flex items-center gap-tight">
                         <span className="text-caption min-w-0 flex-1 truncate text-text-2">
                           {t(`plans.blockKind.${block.kind}`)}
                           {block.rounds ? ` · ${t('plans.rounds', { n: block.rounds })}` : ''}
                         </span>
-                        <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveUp')} disabled={bi === 0 || offline} onClick={() => void move('blocks', dayBlocks, bi, -1)}>
+                        {/* ChevronUp-when-open, matching the day header directly above it. The
+                            mockup draws chevron-down on an expanded block, but one convention
+                            across both disclosure levels beats agreeing with a static frame. */}
+                        <Pressable
+                          shape="icon"
+                          variant="secondary"
+                          aria-label={t('plans.collapseBlock')}
+                          aria-expanded={!collapsedBlocks.has(block.id)}
+                          aria-controls={`block-${block.id}`}
+                          onClick={() =>
+                            setCollapsedBlocks((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(block.id)) {
+                                next.delete(block.id);
+                                return next;
+                              }
+                              next.add(block.id);
+                              // Collapsing the block unmounts the picker, so its state must not
+                              // stay pointing at a block nobody can see.
+                              if (pickerBlock === block.id) {
+                                setPickerBlock(null);
+                                setSearch('');
+                              }
+                              return next;
+                            })
+                          }
+                        >
+                          {collapsedBlocks.has(block.id) ? (
+                            <ChevronDown className="size-icon-s" aria-hidden />
+                          ) : (
+                            <ChevronUp className="size-icon-s" aria-hidden />
+                          )}
+                        </Pressable>
+                        <Pressable shape="icon" variant="secondary" aria-label={t('plans.moveUp')} disabled={bi === 0 || offline} onClick={() => void move('blocks', dayBlocks, bi, -1)}>
                           <ChevronUp className="size-icon-s" aria-hidden />
                         </Pressable>
-                        <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveDown')} disabled={bi === dayBlocks.length - 1 || offline} onClick={() => void move('blocks', dayBlocks, bi, 1)}>
+                        <Pressable shape="icon" variant="secondary" aria-label={t('plans.moveDown')} disabled={bi === dayBlocks.length - 1 || offline} onClick={() => void move('blocks', dayBlocks, bi, 1)}>
                           <ChevronDown className="size-icon-s" aria-hidden />
                         </Pressable>
-                        <Pressable shape="icon" variant="ghost" aria-label={t('plans.deleteBlock')} disabled={offline} onClick={() => void deleteBlock.mutateAsync({ planId, blockId: block.id })}>
+                        <Pressable shape="icon" variant="secondary" aria-label={t('plans.deleteBlock')} disabled={offline} onClick={() => void deleteBlock.mutateAsync({ planId, blockId: block.id })}>
                           <Trash2 className="size-icon-s text-danger" aria-hidden />
                         </Pressable>
                       </div>
 
-                      <ul className="mt-tight flex flex-col gap-tight">
-                        {exercisesOf(block.id).map((ex, xi, arr) => {
-                          const picked = activeExercise === ex.id;
-                          return (
-                            <li key={ex.id} className="flex items-center gap-tight rounded-field bg-surface-1 p-tight">
-                              <Pressable
-                                variant="ghost"
-                                shape="field"
-                                className="min-w-0 flex-1 px-0"
-                                aria-expanded={picked}
-                                onFocus={() => setActiveExercise(ex.id)}
-                                onClick={() => setActiveExercise(picked ? null : ex.id)}
-                              >
-                                <span className="min-w-0 flex-1">
-                                  <span className="text-body-strong block truncate text-text-1">
-                                    {ex.name ?? ex.exercise_name_snapshot}
-                                  </span>
-                                  <span className="text-caption block tabular-nums text-text-2">
-                                    {ex.target_sets} × {ex.target_reps_min ?? '?'}
-                                    {ex.target_reps_max && ex.target_reps_max !== ex.target_reps_min ? `–${ex.target_reps_max}` : ''}
-                                    {ex.target_weight_entry_value != null
-                                      ? ` · ${ex.target_weight_entry_value} ${ex.target_weight_entry_unit}`
-                                      : ''}
-                                  </span>
-                                </span>
-                              </Pressable>
-                              {picked ? (
-                                <>
-                                  <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveUp')} disabled={xi === 0 || offline} onClick={() => void move('exercises', arr, xi, -1)}>
-                                    <ChevronUp className="size-icon-s" aria-hidden />
-                                  </Pressable>
-                                  <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveDown')} disabled={xi === arr.length - 1 || offline} onClick={() => void move('exercises', arr, xi, 1)}>
-                                    <ChevronDown className="size-icon-s" aria-hidden />
-                                  </Pressable>
-                                </>
-                              ) : null}
-                              <Pressable shape="icon" variant="ghost" aria-label={t('plans.removeExercise')} disabled={offline} onClick={() => void deleteExercise.mutateAsync({ planId, rowId: ex.id })}>
-                                <Trash2 className="size-icon-s text-danger" aria-hidden />
-                              </Pressable>
-                            </li>
-                          );
-                        })}
-                      </ul>
-
-                      {pickerBlock === block.id ? (
-                        // The picker REPLACES the add button in place rather than opening over it:
-                        // the list it is adding to has to stay visible while you search it.
-                        <div className="mt-tight flex flex-col gap-tight">
-                          <Field
-                            label={t('plans.findExercise')}
-                            value={search}
-                            autoFocus
-                            onChange={(e) => setSearch(e.target.value)}
-                          />
-                          <ul className="max-h-56 overflow-y-auto">
-                            {(results.data?.pages?.[0]?.exercises ?? []).slice(0, 12).map((r) => (
-                              <li key={r.id}>
+                      {/* The block body, behind its own disclosure. `aria-controls` resolves to
+                          this wrapper, which is why it exists as an element rather than as a
+                          fragment. */}
+                      {collapsedBlocks.has(block.id) ? null : (
+                        <div id={`block-${block.id}`}>
+                        <ul className="mt-tight flex flex-col gap-tight">
+                          {exercisesOf(block.id).map((ex, xi, arr) => {
+                            const picked = activeExercise === ex.id;
+                            return (
+                              <li key={ex.id} className="flex items-center gap-tight rounded-field bg-surface-2 p-tight">
                                 <Pressable
                                   variant="ghost"
                                   shape="field"
-                                  className="w-full"
-                                  disabled={offline}
-                                  onClick={async () => {
-                                    await addExercise.mutateAsync({
-                                      planId, block_id: block.id, exercise_id: r.id,
-                                      target_sets: 3, target_reps_min: 8,
-                                    });
-                                    setPickerBlock(null);
-                                    setSearch('');
-                                  }}
+                                  className="min-w-0 flex-1 px-0"
+                                  aria-expanded={picked}
+                                  onFocus={() => setActiveExercise(ex.id)}
+                                  onClick={() => setActiveExercise(picked ? null : ex.id)}
                                 >
-                                  <span className="truncate">{r.name}</span>
-                                  {/* FLAGS, NOT A FILTER. The coach may know the client's knee is
-                                      fine this week, or that the gym has kit the questionnaire
-                                      predates. An option that vanishes teaches them nothing; one
-                                      that carries a reason lets them decide. */}
-                                  {r.conflicts?.length ? (
-                                    <span
-                                      className={cn(
-                                        'text-caption ml-auto shrink-0 rounded-chip px-2 py-0.5',
-                                        r.conflicts.some((c) => c.severity === 'avoid' && c.relation === 'loads')
-                                          ? 'bg-danger-subtle text-danger'
-                                          : 'bg-warning-subtle text-warning',
-                                      )}
-                                      title={r.conflicts
-                                        .map((c) => t(`onboarding.area.${c.body_area}`))
-                                        .join(', ')}
-                                    >
-                                      {t(`onboarding.area.${r.conflicts[0].body_area}`)}
+                                  <span className="min-w-0 flex-1">
+                                    <span className="text-body-strong block truncate text-text-1">
+                                      {ex.name ?? ex.exercise_name_snapshot}
                                     </span>
-                                  ) : null}
-                                  {r.missing_equipment?.length ? (
-                                    <span className="text-caption shrink-0 rounded-chip bg-surface-1 px-2 py-0.5 text-text-3">
-                                      {t('plans.missingKit', { count: r.missing_equipment.length })}
+                                    <span className="text-caption block tabular-nums text-text-2">
+                                      {ex.target_sets} × {ex.target_reps_min ?? '?'}
+                                      {ex.target_reps_max && ex.target_reps_max !== ex.target_reps_min ? `–${ex.target_reps_max}` : ''}
+                                      {ex.target_weight_entry_value != null
+                                        ? ` · ${ex.target_weight_entry_value} ${ex.target_weight_entry_unit}`
+                                        : ''}
                                     </span>
-                                  ) : null}
+                                  </span>
+                                </Pressable>
+                                {picked ? (
+                                  <>
+                                    <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveUp')} disabled={xi === 0 || offline} onClick={() => void move('exercises', arr, xi, -1)}>
+                                      <ChevronUp className="size-icon-s" aria-hidden />
+                                    </Pressable>
+                                    <Pressable shape="icon" variant="ghost" aria-label={t('plans.moveDown')} disabled={xi === arr.length - 1 || offline} onClick={() => void move('exercises', arr, xi, 1)}>
+                                      <ChevronDown className="size-icon-s" aria-hidden />
+                                    </Pressable>
+                                  </>
+                                ) : null}
+                                <Pressable shape="icon" variant="ghost" aria-label={t('plans.removeExercise')} disabled={offline} onClick={() => void deleteExercise.mutateAsync({ planId, rowId: ex.id })}>
+                                  <Trash2 className="size-icon-s text-danger" aria-hidden />
                                 </Pressable>
                               </li>
-                            ))}
-                          </ul>
+                            );
+                          })}
+                        </ul>
+
+                        {pickerBlock === block.id ? (
+                          // The picker REPLACES the add button in place rather than opening over it:
+                          // the list it is adding to has to stay visible while you search it.
+                          <div className="mt-tight flex flex-col gap-tight">
+                            <Field
+                              label={t('plans.findExercise')}
+                              value={search}
+                              autoFocus
+                              onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <ul className="max-h-56 overflow-y-auto">
+                              {(results.data?.pages?.[0]?.exercises ?? []).slice(0, 12).map((r) => (
+                                <li key={r.id}>
+                                  <Pressable
+                                    variant="ghost"
+                                    shape="field"
+                                    className="w-full"
+                                    disabled={offline}
+                                    onClick={async () => {
+                                      await addExercise.mutateAsync({
+                                        planId, block_id: block.id, exercise_id: r.id,
+                                        target_sets: 3, target_reps_min: 8,
+                                      });
+                                      setPickerBlock(null);
+                                      setSearch('');
+                                    }}
+                                  >
+                                    <span className="truncate">{r.name}</span>
+                                    {/* FLAGS, NOT A FILTER. The coach may know the client's knee is
+                                        fine this week, or that the gym has kit the questionnaire
+                                        predates. An option that vanishes teaches them nothing; one
+                                        that carries a reason lets them decide. */}
+                                    {r.conflicts?.length ? (
+                                      <span
+                                        className={cn(
+                                          'text-caption ml-auto shrink-0 rounded-chip px-2 py-0.5',
+                                          r.conflicts.some((c) => c.severity === 'avoid' && c.relation === 'loads')
+                                            ? 'bg-danger-subtle text-danger'
+                                            : 'bg-warning-subtle text-warning',
+                                        )}
+                                        title={r.conflicts
+                                          .map((c) => t(`onboarding.area.${c.body_area}`))
+                                          .join(', ')}
+                                      >
+                                        {t(`onboarding.area.${r.conflicts[0].body_area}`)}
+                                      </span>
+                                    ) : null}
+                                    {r.missing_equipment?.length ? (
+                                      <span className="text-caption shrink-0 rounded-chip bg-surface-1 px-2 py-0.5 text-text-3">
+                                        {t('plans.missingKit', { count: r.missing_equipment.length })}
+                                      </span>
+                                    ) : null}
+                                  </Pressable>
+                                </li>
+                              ))}
+                            </ul>
+                            <Pressable
+                              variant="ghost"
+                              density="compact"
+                              className="w-full"
+                              onClick={() => {
+                                setPickerBlock(null);
+                                setSearch('');
+                              }}
+                            >
+                              {t('common.cancel')}
+                            </Pressable>
+                          </div>
+                        ) : (
                           <Pressable
                             variant="ghost"
                             density="compact"
-                            className="w-full"
-                            onClick={() => {
-                              setPickerBlock(null);
-                              setSearch('');
-                            }}
+                            className="mt-tight w-full"
+                            icon={<Plus className="size-icon-s" aria-hidden />}
+                            disabled={offline}
+                            onClick={() => setPickerBlock(block.id)}
                           >
-                            {t('common.cancel')}
+                            {t('plans.addExercise')}
                           </Pressable>
+                        )}
                         </div>
-                      ) : (
-                        <Pressable
-                          variant="ghost"
-                          density="compact"
-                          className="mt-tight w-full"
-                          icon={<Plus className="size-icon-s" aria-hidden />}
-                          disabled={offline}
-                          onClick={() => setPickerBlock(block.id)}
-                        >
-                          {t('plans.addExercise')}
-                        </Pressable>
                       )}
                     </div>
                   ))}
@@ -662,6 +722,33 @@ export function PlanEditorPage() {
           </Surface>
         ) : null}
       </section>
+
+      {/* The status picker, out of the header and into the sheet the spec names for it. Inline, it
+          pushed the cycle strip — the anchor — down the page every time it opened, and its selected
+          chip was a second filled accent control beside the `Mentés` pill. Selected is the
+          `accent-subtle` wash instead: `secondary` already inks it at `--text-1`, which is what
+          `--on-accent-subtle` resolves to, so no `text-*` is passed (see the meta-line note). */}
+      <Sheet open={statusOpen} onClose={() => setStatusOpen(false)} title={t('plans.statusTitle')}>
+        <div className="flex flex-wrap gap-tight">
+          {STATUSES.map((s) => (
+            <Pressable
+              key={s}
+              shape="chip"
+              density="compact"
+              variant="secondary"
+              className={statusValue === s ? 'border-accent bg-accent-subtle' : undefined}
+              aria-pressed={statusValue === s}
+              disabled={offline}
+              onClick={() => {
+                setStatusDraft(s);
+                setStatusOpen(false);
+              }}
+            >
+              {t(`plans.status.${s}`)}
+            </Pressable>
+          ))}
+        </div>
+      </Sheet>
     </div>
   );
 }
