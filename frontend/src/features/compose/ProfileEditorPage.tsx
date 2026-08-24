@@ -1,25 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { ArrowLeft, Eye } from 'lucide-react';
+import { ArrowLeft, Eye, Globe, Medal, Pencil, Check } from 'lucide-react';
+import { cn } from '../../lib/cn';
 import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { Surface } from '../../ui/primitives/Surface';
+import { Switch } from '../../ui/primitives/Switch';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { DocRenderer } from '../marketplace/DocRenderer';
 import { useTaxonomy } from '../marketplace/usePublic';
 import { HandleField } from './HandleField';
+import { counterTone, COUNTER_CLASS } from './useComposeFlow';
 import {
   useComposeContext,
   useComposeProfile,
   useCreateProfile,
   useSaveProfile,
   useRenameHandle,
+  useSetProfilePublished,
   usePreview,
   conflictOf,
 } from './useCompose';
 
 /**
- * Renaming, behind a disclosure.
+ * The identity line's disclosure — handle and city, the two things the anchor DISPLAYS.
  *
  * ═══ IT IS FOLDED AWAY ON PURPOSE ══════════════════════════════════════════════════════════════
  *
@@ -33,13 +38,31 @@ import {
  * open since before a rename made elsewhere — a second tab, a phone — the server sees a `from` that
  * no longer matches and refuses, naming the handle that is actually there. Without it, this form
  * would happily revert that rename and burn both names for a month while showing a success.
+ *
+ * ═══ THE CITY LIVES HERE TOO ═══════════════════════════════════════════════════════════════════
+ *
+ * The anchor renders `@kovacspeter · Szeged` and the mockup offers no way to change either. Both
+ * editors are behind this one disclosure rather than back in the field stack, because a screen that
+ * displays a value and cannot edit it is a screen that grows the field back.
  */
-function HandleRename({ current, listed }: { current: string; listed: boolean }) {
+function IdentityDisclosure({
+  current,
+  listed,
+  city,
+  onCity,
+  onClose,
+}: {
+  current: string;
+  listed: boolean;
+  city: string;
+  onCity: (next: string) => void;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const ctx = useComposeContext();
+  const taxonomy = useTaxonomy();
   const rename = useRenameHandle();
-  const [open, setOpen] = useState(false);
-  const [next, setNext] = useState('');
+  const [next, setNext] = useState(current);
 
   const conflict = conflictOf(rename.error);
   const cooldownDays = Math.round((ctx.data?.handleRenameCooldownS ?? 2592000) / 86400);
@@ -48,26 +71,8 @@ function HandleRename({ current, listed }: { current: string; listed: boolean })
   // numbers describing one rule, only one of which could be changed.
   const retireDays = Math.round((ctx.data?.handleCooldownS ?? 31536000) / 86400);
 
-  if (!open) {
-    return (
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="text-body-s text-text-2">{t('compose.handleFixed', { handle: current })}</p>
-        <Pressable
-          variant="ghost"
-          density="compact"
-          onClick={() => {
-            setNext(current);
-            setOpen(true);
-          }}
-        >
-          {t('compose.handleChange')}
-        </Pressable>
-      </div>
-    );
-  }
-
   return (
-    <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+    <Surface as="section" className="flex flex-col gap-group">
       <h2 className="text-title-3 text-text-1">{t('compose.handleChangeTitle')}</h2>
 
       <HandleField
@@ -85,7 +90,7 @@ function HandleRename({ current, listed }: { current: string; listed: boolean })
         about a thirty-day wait would be a lie that discourages a free action.
       */}
       {listed ? (
-        <p className="text-caption rounded-card border border-warning-border bg-warning-subtle p-3 text-text-1">
+        <p className="text-caption rounded-card border-[length:var(--border-width)] border-[var(--warning-border)] bg-warning-subtle p-3 text-text-1">
           {t('compose.handleCooldownWarning', { days: cooldownDays, retireDays, handle: current })}
         </p>
       ) : null}
@@ -103,42 +108,84 @@ function HandleRename({ current, listed }: { current: string; listed: boolean })
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-tight">
         <Pressable
           variant="primary"
           density="compact"
           busy={rename.isPending}
           disabled={next === current || next.length === 0}
-          onClick={() =>
-            rename.mutate(
-              { from: current, to: next },
-              {
-                onSuccess: () => {
-                  setOpen(false);
-                },
-              },
-            )
-          }
+          onClick={() => rename.mutate({ from: current, to: next }, { onSuccess: onClose })}
         >
           {t('compose.handleChangeConfirm')}
         </Pressable>
-        <Pressable variant="ghost" density="compact" onClick={() => setOpen(false)}>
+        <Pressable variant="ghost" density="compact" onClick={onClose}>
           {t('common.cancel')}
         </Pressable>
       </div>
-    </section>
+
+      {/* The city the anchor shows. Its first option means NO city and reads `Bárhol`. */}
+      <CityPicker value={city} onChange={onCity} cities={taxonomy.data?.cities} />
+    </Surface>
+  );
+}
+
+/** The one city control, so create and edit cannot style or label it two ways. */
+function CityPicker({
+  value,
+  onChange,
+  cities,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  cities: { key: string; name: string }[] | undefined;
+}) {
+  const { t } = useTranslation();
+  return (
+    <label className="flex flex-col gap-tight">
+      <span className="text-body-s text-text-2">{t('compose.city')}</span>
+      <select
+        className="text-body min-h-[var(--control-h)] rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">{t('marketplace.everywhere')}</option>
+        {cities?.map((c) => (
+          <option key={c.key} value={c.key}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function initialsOf(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('') || '·'
   );
 }
 
 /**
  * Create or edit the public profile.
  *
+ * ═══ THE ANCHOR IS THE PERSON ══════════════════════════════════════════════════════════════════
+ *
+ * This screen edits a person, so the top third is that person: a large monogram in a thick ring,
+ * the display name in the biggest type on the screen, and the handle-and-city line under it. There
+ * is no separate `h1` — the display name IS the heading, which is why typing in the name field
+ * visibly rewrites the anchor. It doubles as a live preview of the marketplace card, which is what
+ * made the separate rendered preview card removable.
+ *
  * ═══ THE HANDLE IS ASKED FOR ONCE ══════════════════════════════════════════════════════════════
  *
- * It appears on the create form, and on the edit form only behind the disclosure above. Renaming is
- * its own operation with its own cooldown, because a LISTED profile's rename retires the old handle
- * against everybody else — that is what stops one account cycling through and locking the
- * namespace, and it is not something to leave open beside a headline field.
+ * It appears on the create form, and on the edit form only behind the identity-line disclosure.
+ * Renaming is its own operation with its own cooldown, because a LISTED profile's rename retires
+ * the old handle against everybody else.
  *
  * `PUT`, not `PATCH`: every field is sent every time and an empty box means cleared. There is no
  * absent-versus-null merge to get wrong, which is the bug where a cleared headline comes back.
@@ -151,6 +198,7 @@ export function ProfileEditorPage() {
   const taxonomy = useTaxonomy();
   const create = useCreateProfile();
   const save = useSaveProfile();
+  const setLive = useSetProfilePublished();
   const preview = usePreview();
 
   const [handle, setHandle] = useState('');
@@ -160,6 +208,8 @@ export function ProfileEditorPage() {
   const [city, setCity] = useState('');
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [identityOpen, setIdentityOpen] = useState(false);
+  const [allSpecialties, setAllSpecialties] = useState(false);
 
   const profile = loaded.data?.profile ?? null;
   const isNew = !loaded.isPending && profile === null;
@@ -182,14 +232,34 @@ export function ProfileEditorPage() {
   }, [bio, showPreview]);
 
   const limits = ctx.data?.limits;
+  const specialtyMax = limits?.specialtyMax ?? 6;
   const conflict = conflictOf(create.error) ?? conflictOf(save.error);
   const markdownReason = ((create.error ?? save.error) as { body?: { reason?: string } } | null)?.body?.reason;
 
+  /*
+   * The six chips are a SUBSET of the server taxonomy, never a hardcoded six.
+   *
+   * The coach's own specialties come first so the visible six are the ones that matter to them,
+   * and the rest sit behind the overflow. Ordered from what LOADED rather than from live state:
+   * re-sorting on every toggle would make the chip under the finger jump somewhere else.
+   */
+  const ordered = useMemo(() => {
+    const all = taxonomy.data?.specialties ?? [];
+    const mine = new Set(loaded.data?.specialties ?? []);
+    return [...all].sort((a, b) => Number(mine.has(b.key)) - Number(mine.has(a.key)));
+  }, [taxonomy.data, loaded.data]);
+  const visibleSpecialties = allSpecialties ? ordered : ordered.slice(0, 6);
+
   if (loaded.isPending) {
+    // The anchor, then the field stack — the two shapes that actually arrive.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
-        <Skeleton className="h-8 w-1/2 rounded-card" />
-        <Skeleton className="h-40 rounded-card" />
+      <div className="col-mobile screen-x flex flex-col gap-section py-6">
+        <div className="flex flex-col items-center gap-tight">
+          <Skeleton className="size-32 rounded-chip" />
+          <Skeleton className="mt-2 h-8 w-48 rounded-card" />
+          <Skeleton className="h-4 w-32 rounded-card" />
+        </div>
+        <Skeleton className="h-64 rounded-card" />
       </div>
     );
   }
@@ -212,95 +282,188 @@ export function ProfileEditorPage() {
     setSpecialties((cur) =>
       cur.includes(key)
         ? cur.filter((k) => k !== key)
-        : cur.length < (limits?.specialtyMax ?? 6)
+        : cur.length < specialtyMax
           ? [...cur, key]
           : cur,
     );
 
+  const cityName = taxonomy.data?.cities.find((c) => c.key === city)?.name ?? t('marketplace.everywhere');
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-6">
-      <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
+    <div className="col-mobile screen-x flex flex-col gap-section py-6">
+      <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight self-start text-accent">
         <ArrowLeft className="size-icon-s" aria-hidden />
         {t('compose.backToDesk')}
       </Link>
 
-      <h1 className="text-title-1">{isNew ? t('compose.createProfile') : t('compose.editProfile')}</h1>
+      {/* ── the anchor ───────────────────────────────────────────────────────────────────────
+          No camera badge and no `Kép cseréje`: there is no avatar upload on the coach profile,
+          only post covers. A control that promises an upload the API refuses is worse than a
+          monogram — so the monogram is what ships until the endpoint exists. */}
+      <div className="flex flex-col items-center gap-tight">
+        <span
+          aria-hidden
+          className="relative inline-flex size-32 items-center justify-center rounded-chip border-4 border-accent bg-surface-2"
+        >
+          <span className="text-display font-display text-accent">{initialsOf(displayName)}</span>
+        </span>
+
+        <h1 className="text-title-1 mt-2 text-center text-text-1">
+          {displayName.trim() === '' ? t('compose.createProfile') : displayName}
+        </h1>
+
+        {isNew ? null : (
+          <Pressable
+            variant="ghost"
+            density="compact"
+            aria-expanded={identityOpen}
+            onClick={() => setIdentityOpen((v) => !v)}
+          >
+            @{profile?.handle} · {cityName}
+          </Pressable>
+        )}
+      </div>
 
       {isNew ? (
-        <HandleField
-          label={t('compose.handle')}
-          value={handle}
-          onChange={setHandle}
-          hint={t('compose.handleHint')}
+        <div className="flex flex-col gap-group">
+          <HandleField
+            label={t('compose.handle')}
+            value={handle}
+            onChange={setHandle}
+            hint={t('compose.handleHint')}
+          />
+          <CityPicker value={city} onChange={setCity} cities={taxonomy.data?.cities} />
+        </div>
+      ) : identityOpen ? (
+        <IdentityDisclosure
+          current={profile?.handle ?? ''}
+          listed={profile?.listedAt !== null}
+          city={city}
+          onCity={setCity}
+          onClose={() => setIdentityOpen(false)}
         />
-      ) : (
-        <HandleRename current={profile?.handle ?? ''} listed={profile?.listedAt !== null} />
-      )}
+      ) : null}
 
-      <Field
-        label={t('compose.displayName')}
-        value={displayName}
-        maxLength={limits?.displayNameMax}
-        onChange={(e) => setDisplayName(e.target.value)}
-      />
+      {/* ── the two fields a coach actually retypes ──────────────────────────────────────────── */}
+      <div className="flex flex-col gap-group">
+        <Field
+          label={t('compose.displayName')}
+          value={displayName}
+          maxLength={limits?.displayNameMax}
+          onChange={(e) => setDisplayName(e.target.value)}
+        />
 
-      <Field
-        label={t('compose.headline')}
-        value={headline}
-        maxLength={limits?.headlineMax}
-        onChange={(e) => setHeadline(e.target.value)}
-        hint={t('compose.optional')}
-      />
+        <Field
+          label={t('compose.headline')}
+          value={headline}
+          maxLength={limits?.headlineMax}
+          onChange={(e) => setHeadline(e.target.value)}
+          // The hint earns its line because it names WHERE the text lands.
+          hint={t('compose.optional')}
+        />
+      </div>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-body-s text-text-2">{t('compose.city')}</span>
-        <select
-          className="text-body min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] px-3"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-        >
-          <option value="">{t('marketplace.everywhere')}</option>
-          {taxonomy.data?.cities.map((c) => (
-            <option key={c.key} value={c.key}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="text-body-s text-text-2">
-          {t('compose.specialties', { n: specialties.length, max: limits?.specialtyMax ?? 6 })}
+      {/* ── specialties, in their own box ────────────────────────────────────────────────────── */}
+      <Surface as="fieldset" className="flex w-full min-w-0 flex-col gap-group">
+        <legend className="text-body-s flex items-center gap-tight text-text-2">
+          <Medal className="size-icon-m shrink-0 text-accent" aria-hidden />
+          {t('compose.specialties', { n: specialties.length, max: specialtyMax })}
         </legend>
-        <ul className="flex flex-wrap gap-2">
-          {taxonomy.data?.specialties.map((s) => (
-            <li key={s.key}>
-              <Pressable
-                variant={specialties.includes(s.key) ? 'primary' : 'secondary'}
-                density="compact"
-                aria-pressed={specialties.includes(s.key)}
-                onClick={() => toggleSpecialty(s.key)}
-              >
-                {t(s.i18nKey, { defaultValue: s.key })}
+        <ul className="flex flex-wrap gap-tight">
+          {visibleSpecialties.map((s) => {
+            const on = specialties.includes(s.key);
+            return (
+              <li key={s.key}>
+                <Pressable
+                  shape="chip"
+                  density="compact"
+                  variant={on ? 'primary' : 'secondary'}
+                  aria-pressed={on}
+                  onClick={() => toggleSpecialty(s.key)}
+                  icon={on ? <Check className="size-icon-s" aria-hidden /> : undefined}
+                >
+                  {t(s.i18nKey, { defaultValue: s.key })}
+                </Pressable>
+              </li>
+            );
+          })}
+          {allSpecialties || ordered.length <= 6 ? null : (
+            <li>
+              <Pressable shape="chip" density="compact" variant="ghost" onClick={() => setAllSpecialties(true)}>
+                {t('common.more')}
               </Pressable>
             </li>
-          ))}
+          )}
         </ul>
-      </fieldset>
+      </Surface>
 
-      <label className="flex flex-col gap-1">
-        <span className="text-body-s text-text-2">{t('compose.bio')}</span>
+      {/* ── the bio ──────────────────────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-tight">
+        <label htmlFor="compose-bio" className="text-body-s flex items-center gap-tight text-text-2">
+          <span
+            aria-hidden
+            className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+          >
+            <Pencil className="size-icon-s" strokeWidth={2} />
+          </span>
+          {t('compose.bio')}
+        </label>
+        {/* Three visible lines, not six, and no formatting toolbar: the markdown is the coach's
+            own and the preview is one tap away. */}
         <textarea
-          className="text-body min-h-40 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] p-3"
+          id="compose-bio"
+          className="text-body min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
         />
-        <span className="text-caption text-text-3">
+        <span
+          className={cn('text-caption', limits ? COUNTER_CLASS[counterTone(bio.length, limits.bioMax)] : 'text-text-3')}
+        >
           {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bioMax - bio.length) }) : ''}
         </span>
-      </label>
+      </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* ── one fact, two screens ────────────────────────────────────────────────────────────
+          This switch and the desk's `Élő` / `Rejtve` pill read and write the SAME published flag,
+          and unpublishing here takes the whole back catalogue dark exactly as it does there. It is
+          hidden on create because there is nothing to publish yet. */}
+      {profile ? (
+        <Surface as="section" className="flex flex-col gap-tight">
+          <div className="flex items-center gap-group">
+            <Globe className="size-icon-m shrink-0 text-text-2" aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span id="compose-public-label" className="text-body block text-text-1">
+                {t('compose.publishProfile')}
+              </span>
+              <span className="text-caption block text-text-3">
+                {profile.publishedAt !== null ? t('compose.live') : t('compose.hidden')}
+              </span>
+            </span>
+            <Switch
+              checked={profile.publishedAt !== null}
+              disabled={setLive.isPending}
+              labelledBy="compose-public-label"
+              onChange={(nextOn) => setLive.mutate(nextOn)}
+            />
+          </div>
+
+          {setLive.data && typeof setLive.data.postsWentDark === 'number' && setLive.data.postsWentDark > 0 ? (
+            <p className="text-caption text-text-2" role="status">
+              {t('compose.wentDark', { count: setLive.data.postsWentDark })}
+            </p>
+          ) : null}
+
+          {conflictOf(setLive.error) ? (
+            <p className="text-caption text-danger" role="alert">
+              {t(`compose.reason.${conflictOf(setLive.error)?.reason}`, {
+                defaultValue: t('compose.reason.generic'),
+              })}
+            </p>
+          ) : null}
+        </Surface>
+      ) : null}
+
+      <div className="flex flex-wrap gap-tight">
         <Pressable variant="primary" busy={create.isPending || save.isPending} onClick={submit}>
           {isNew ? t('compose.createProfile') : t('compose.save')}
         </Pressable>
@@ -317,23 +480,27 @@ export function ProfileEditorPage() {
       ) : null}
 
       {conflict ? (
-        <p className="text-body-s rounded-card border border-warning-border bg-warning-subtle p-4 text-text-1" role="alert">
+        <Surface
+          as="p"
+          className="text-body-s border-[var(--warning-border)] bg-warning-subtle text-text-1"
+          role="alert"
+        >
           {t(`compose.reason.${conflict.reason}`, {
             defaultValue: t('compose.reason.generic'),
             key: conflict.key,
           })}
-        </p>
+        </Surface>
       ) : null}
 
       {showPreview ? (
-        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+        <Surface as="section" className="flex flex-col gap-group">
           <h2 className="text-title-3 text-text-1">{t('compose.preview')}</h2>
           {preview.data ? (
             <DocRenderer doc={preview.data.doc} />
           ) : (
             <p className="text-caption text-text-3">{t('compose.previewEmpty')}</p>
           )}
-        </section>
+        </Surface>
       ) : null}
     </div>
   );

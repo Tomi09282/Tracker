@@ -135,7 +135,6 @@ for (const [code, bundle] of Object.entries(bundles)) {
     ['workout.metres', 'SI unit'],
     ['plans.blockKind.emom', 'a training acronym, said the same in every gym'],
     ['plans.blockKind.amrap', 'the same'],
-    ['compose.coverMeta', 'pure format — dimensions and a size, no words'],
     ['adminMetrics.clock.utc', 'a standard, not a word'],
     ['adminUsers.role.admin', 'a borrowed word in all three'],
   ]);

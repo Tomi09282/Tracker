@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Dumbbell, PlayCircle } from 'lucide-react';
+import { Check, Dumbbell, PersonStanding, Play, PlayCircle } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { MuscleMap } from '../../ui/muscle-map/MuscleMap';
-import { SetRow } from './SetRow';
+import { useToast } from '../../ui/feedback/ToastHost';
+import { MuscleMap, type MuscleRole } from '../../ui/muscle-map/MuscleMap';
+import { useExercise } from '../library/useExercises';
+import { SetRow, SET_ROW_COLS } from './SetRow';
 import { RestTimer } from './RestTimer';
 import { useCurrentWorkout, useCheckSet, useUndoSet, useRestTimer, type PrRecord } from './useWorkout';
 import { vibrate, speak, tone, unlockAudio } from './cues';
@@ -15,6 +17,38 @@ import { groupIntervalBlocks } from './intervalPlan';
 import { useIntervalTimer } from './useIntervalTimer';
 import { IntervalStage } from './IntervalStage';
 import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
+
+/**
+ * THE FOUR-ROW COLUMN, WRITTEN ONCE.
+ *
+ * The loading state and the loaded state must be the SAME box, or the swap produces the layout
+ * shift a skeleton exists to prevent — and on this screen a layout shift is not cosmetic, it moves
+ * the check button. `h-`, never `min-h-`: this container must not be able to grow.
+ *
+ * The height subtracts exactly what the layout reserves below it, from the same token — measured,
+ * not guessed. Subtracting only `--nav-h` left the page 16 px taller than the viewport, which broke
+ * the law this whole layout exists to keep.
+ */
+const SHELL = cn(
+  'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-group py-4',
+  'h-[calc(100dvh-var(--content-pad-b))] lg:h-[calc(100dvh-var(--content-pad-b-lg))]',
+);
+
+/**
+ * The hero's footprint, and the single most load-bearing number on the screen.
+ *
+ * 28dvh is the top third of the column once the nav is subtracted, which is where the anchor
+ * belongs — and it is what leaves the set list room for four full rows plus a visibly clipped
+ * fifth at 375 x 812. It is a FIXED share of the viewport rather than an aspect ratio because the
+ * budget below it is vertical: an aspect ratio would hand a wide phone a taller hero and quietly
+ * take a set row away.
+ *
+ * The hero also keeps this height when it has nothing to show. Collapsing it on an exercise with
+ * no muscle map would move the set list up, which means the check button lands somewhere different
+ * on that exercise than on the previous one — the exact failure the no-scroll law exists to
+ * prevent.
+ */
+const HERO = 'relative h-[28dvh] w-full shrink-0 overflow-hidden';
 
 /**
  * Blueprint 3 — the guided workout player.
@@ -37,6 +71,7 @@ export function WorkoutPlayer() {
   const { data, isPending } = useCurrentWorkout();
   const check = useCheckSet();
   const undo = useUndoSet();
+  const { toast } = useToast();
   // The rest ending is the cue that matters most: the phone is on the floor and nobody is looking
   // at it. A timer that only ends visually has told the lifter nothing.
   const restVariant = useElementVariant('E22');
@@ -50,7 +85,10 @@ export function WorkoutPlayer() {
     if (restVariant === 'E') setHandoverSetId(nextPendingRef.current);
   });
   const [activeExercise, setActiveExercise] = useState(0);
-  const [showMap, setShowMap] = useState(false);
+  // THE MAP IS THE DEFAULT, and the chip offers the media. It used to be the other way round: the
+  // hero opened on a grey dumbbell glyph and the anatomy — the whole reason this panel is the
+  // anchor — was one tap away behind a chip nobody had a reason to press.
+  const [showMedia, setShowMedia] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
 
   const exercises = data?.exercises ?? [];
@@ -111,6 +149,17 @@ export function WorkoutPlayer() {
     [data?.sets, current?.id],
   );
 
+  // WHAT THE ANCHOR IS ACTUALLY FOR. A body map with nothing lit is a grey figure — it answers no
+  // question at all, and it is the one element on this screen that is not a number. The taxonomy
+  // that says which muscles this movement works, primary versus assisting, lives on the exercise,
+  // so the hero reads it from there. `enabled` is guarded inside the hook, so a freestyle set with
+  // no `exercise_id` costs no request.
+  const { data: exerciseDetail } = useExercise(current?.exercise_id ?? null, i18n.language.slice(0, 2));
+  const highlights = useMemo<Record<string, MuscleRole>>(
+    () => Object.fromEntries((exerciseDetail?.muscles ?? []).map((m) => [m.slug, m.role])),
+    [exerciseDetail],
+  );
+
   // The next set still to do, kept in a ref because the rest-over callback fires from the TIMER's
   // tick, not from a render — reading React state there would give whatever it was when the rest
   // started, which after a 90-second rest is very likely the wrong row.
@@ -121,36 +170,47 @@ export function WorkoutPlayer() {
 
   const nextUp = exercises[activeExercise + 1]?.exercise_name_snapshot ?? null;
 
+  // The set the thumb is aimed at: the first one still to do. `voided_at` is checked for the same
+  // reason the chip counts check it — a void is terminal, so a voided row can never be the one to
+  // work next.
+  const activeSetId =
+    setsForCurrent.find((s) => s.completed_at == null && s.voided_at == null)?.id ?? null;
+
   if (isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
-        <Skeleton className="aspect-video w-full rounded-card" />
-        <Skeleton className="h-14 w-full rounded-card" />
-        <Skeleton className="h-14 w-full rounded-card" />
+      // THE SAME BOX AS THE LOADED SCREEN, in the same proportions. A skeleton whose shapes do not
+      // match the real geometry causes precisely the layout shift it was put there to prevent.
+      <div className={SHELL} role="status" aria-busy="true">
+        <span className="sr-only">{t('common.loading')}</span>
+        <Skeleton className={cn(HERO, 'rounded-card')} />
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-8 w-1/2" />
+          <Skeleton className="h-7 w-16 rounded-chip" />
+        </div>
+        <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
+          <div className="h-7 shrink-0" />
+          <div className="flex flex-col gap-tight">
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-card" />
+            ))}
+          </div>
+        </Surface>
+        <div className="flex gap-3 pb-1">
+          <Skeleton className="h-11 w-28 rounded-chip" />
+          <Skeleton className="h-11 w-32 rounded-chip" />
+          <Skeleton className="h-11 w-24 rounded-chip" />
+        </div>
       </div>
     );
   }
 
   if (!data?.log) {
     return (
-      <div className="col-mobile screen-x py-6">
-        {/* THE LIBRARY'S DOOR ON A PHONE.
-            `/library` used to hold its own bottom-bar tab and lost it when the bar became
-            role-shaped — the five member slots are Home, Edzés, Étkezés, Haladás and Profil. Its
-            only other in-app links are Home's empty state (invisible to anyone who HAS a plan
-            today) and the command palette, which is `hidden lg:flex` and opens on Cmd+K. Without
-            this action the exercise library is unreachable on a phone, which is the exact defect
-            the whole navigation change exists to fix. `check-nav.mjs` asserts this link. */}
-        <EmptyState
-          icon={PlayCircle} heading="h1"
-          title={t('workout.noneTitle')}
-          body={t('workout.noneBody')}
-          action={
-            <Pressable variant="secondary" icon={<Dumbbell className="size-icon-m" aria-hidden />}>
-              <Link to="/library">{t('nav.library')}</Link>
-            </Pressable>
-          }
-        />
+      // NO ACTION HERE, DELIBERATELY. Starting a session lives on Home; a second start path is a
+      // second thing the server has to reconcile, and the library keeps its door from Home's own
+      // empty state (`check-nav` reads that one).
+      <div className="col-mobile screen-x flex h-[calc(100dvh-var(--content-pad-b))] items-center justify-center py-4 lg:h-[calc(100dvh-var(--content-pad-b-lg))]">
+        <EmptyState icon={PlayCircle} heading="h1" title={t('workout.noneTitle')} body={t('workout.noneBody')} />
       </div>
     );
   }
@@ -166,24 +226,26 @@ export function WorkoutPlayer() {
     // gets without looking, which is the only time they are worth anything.
     const records = result.records ?? [];
     vibrate(records.length ? 'personalRecord' : 'setChecked');
-    if (records.length) speak(t('workout.recordSpoken'), i18n.language);
+    if (records.length) {
+      speak(t('workout.recordSpoken'), i18n.language);
+      // THE THIRD CHANNEL, for the lifter who is not looking at the row. The haptic pattern and the
+      // spoken line already fire; the toast is the one a person catches out of the corner of an
+      // eye. Raised ONCE, and it dismisses itself — the row keeps the trophy, so a permanent toast
+      // would be a second permanent statement of the same fact.
+      toast(t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) }), 'success');
+    }
     return records;
   };
 
   return (
-    <div
-      // The whole screen, minus the nav. `h-[...]` rather than `min-h-` on purpose: this container
-      // must NOT grow, or the page scrolls and the law above is broken.
-      className={cn(
-        'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-group py-4',
-        // Exactly what the layout reserves below it, from the same token — measured, not guessed.
-        // Subtracting only `--nav-h` left the page 16 px taller than the viewport, which broke the
-        // law this whole layout exists to keep.
-        'h-[calc(100dvh-var(--content-pad-b))] lg:h-[calc(100dvh-var(--content-pad-b-lg))]',
-      )}
-    >
-      {/* ── the sticky hero ─────────────────────────────────────────────────────────────────── */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-card bg-surface-2">
+    <div className={SHELL}>
+      {/* ── THE ANCHOR ──────────────────────────────────────────────────────────────────────────
+          A framed panel that hosts the map at full bleed, not a centred small figure in a grey box.
+          `glass` is earned here and almost nowhere else on this screen: the recipe reserves the
+          backdrop blur for surfaces that float over moving content, and a hero anchor is the one
+          case on a resting page — it is a single element, so the compositing layer it costs is
+          paid once rather than once per card. */}
+      <Surface elevation="card" finish="glass" pad="none" className={HERO}>
         {intervalBlock && showTimer ? (
           <IntervalStage
             block={intervalBlock}
@@ -223,13 +285,24 @@ export function WorkoutPlayer() {
             }}
             onDiscardCrossed={interval.discardCrossed}
           />
-        ) : showMap && current?.exercise_id ? (
-          <div className="flex h-full items-center justify-center">
-            <MuscleMap className="h-full" />
-          </div>
+        ) : !showMedia && current?.exercise_id ? (
+          // FULL BLEED. `fill` height-constrains the 260 x 560 figure to the panel instead of
+          // capping it at 280px wide, which on a wide hero left the map floating in an empty box.
+          // Read-only — no `onSelect` — so the map is not an interactive target here at all, which
+          // is the rule that lets a component with 9px-wide regions exist in this product.
+          <MuscleMap highlights={highlights} fill className="h-full p-3" />
         ) : (
-          <div className="flex h-full items-center justify-center text-text-3">
-            <Dumbbell className="size-icon-l" aria-hidden />
+          // THE HONEST STAND-IN for an exercise with no map and no media: a custom movement, a
+          // coach's own entry, anything the taxonomy has not been filled in for. A mark at anchor
+          // scale rather than a small grey glyph in an empty panel — one reads as "nothing to show
+          // here", the other reads as a broken image.
+          <div className="flex h-full items-center justify-center">
+            <span
+              aria-hidden
+              className="inline-flex aspect-square h-3/5 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+            >
+              <Dumbbell className="size-16" strokeWidth={1.5} />
+            </span>
           </div>
         )}
         {/* The timer toggle only appears on a block that HAS rounds. On a straight set it would be
@@ -243,62 +316,86 @@ export function WorkoutPlayer() {
             variant={showTimer ? 'primary' : 'secondary'}
             aria-pressed={showTimer}
             onClick={() => setShowTimer((v) => !v)}
-            className="absolute bottom-2 left-2"
+            className="absolute bottom-9 left-3"
           >
             {t('workout.showTimer')}
           </Pressable>
         ) : null}
+        {/* `bottom-9`, not `bottom-3`: the map's `Fő célizom` / `Segédizom` legend owns the bottom
+            band of the panel, and a chip parked on top of the one line that explains the colours is
+            a chip that has eaten the anchor's caption. */}
         {!interval.running ? (
           <Pressable
             shape="chip"
             density="compact"
             variant="secondary"
-            aria-pressed={showMap}
-            onClick={() => setShowMap((v) => !v)}
-            className="absolute bottom-2 right-2"
+            aria-pressed={showMedia}
+            onClick={() => setShowMedia((v) => !v)}
+            className="absolute bottom-9 right-3"
           >
-            {t(showMap ? 'workout.showMedia' : 'workout.showMuscles')}
+            {showMedia ? (
+              <PersonStanding className="size-icon-s" aria-hidden />
+            ) : (
+              <Play className="size-icon-s" aria-hidden />
+            )}
+            {t(showMedia ? 'workout.showMuscles' : 'workout.showMedia')}
           </Pressable>
         ) : null}
-      </div>
+      </Surface>
 
-      <header className="flex items-baseline justify-between gap-3">
-        <h1 className="truncate text-title-2 font-display">
+      <header className="flex items-center justify-between gap-3">
+        <h1 className="text-title-1 truncate font-display">
           {current?.exercise_name_snapshot ?? t('workout.freestyle')}
         </h1>
-        <span className="text-caption shrink-0 tabular-nums text-text-2">
-          {activeExercise + 1} / {exercises.length}
+        {/* The counter is a PILL, not bare grey text. It is the one number on this row, and it has
+            to survive being read past a long exercise name that is already truncating. */}
+        <span className="text-body-s shrink-0 rounded-chip bg-surface-2 px-3 py-1 tabular-nums text-text-3">
+          <span className="text-text-1">{activeExercise + 1}</span> / {exercises.length}
         </span>
       </header>
 
-      {/* ── THE ONLY THING THAT SCROLLS ─────────────────────────────────────────────────────── */}
-      <ul className="min-h-0 space-y-1 overflow-y-auto overscroll-contain" aria-label={t('workout.sets')}>
-        <li className="grid h-8 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 px-2 text-micro uppercase text-text-3">
+      {/* ── THE ONLY THING THAT SCROLLS ─────────────────────────────────────────────────────────
+          The Surface is the frame and does NOT scroll; the `ul` inside it owns all the overflow.
+          `min-h-0` on both is what makes a grid child scroll instead of growing the page — the
+          single most common way this pattern is got wrong. The list runs to the panel's bottom edge
+          with no padding under it on purpose: a half-clipped fifth row is the affordance that says
+          "there is more", and padding would turn it into a gap. */}
+      <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
+        <div className={cn('grid h-7 shrink-0 items-center gap-2 px-2 text-micro uppercase text-text-3', SET_ROW_COLS)}>
           <span className="text-center">#</span>
           <span>{t('workout.previous')}</span>
           <span className="text-center">{t('workout.kg')}</span>
           <span className="text-center">{t('workout.reps')}</span>
           <span />
-        </li>
-        {setsForCurrent.map((s) => (
-          <SetRow
-            key={s.id}
-            set={s}
-            onCheck={(v) => onCheck(s.id, v)}
-            onUndo={async () => {
-              await undo.mutateAsync({ setId: s.id, reason: 'undone from the player' });
-              // The rest that this set started is no longer resting between anything. Leaving it
-              // running would count down to a cue for a set the lifter just took back.
-              rest.stop();
-            }}
-            autoFocus={handoverSetId === s.id}
-            disabled={check.isPending}
-          />
-        ))}
-      </ul>
+        </div>
+        <ul
+          className="flex min-h-0 flex-1 flex-col gap-tight overflow-y-auto overscroll-contain"
+          aria-label={t('workout.sets')}
+        >
+          {setsForCurrent.map((s) => (
+            <SetRow
+              key={s.id}
+              set={s}
+              onCheck={(v) => onCheck(s.id, v)}
+              onUndo={async () => {
+                await undo.mutateAsync({ setId: s.id, reason: 'undone from the player' });
+                // The rest that this set started is no longer resting between anything. Leaving it
+                // running would count down to a cue for a set the lifter just took back.
+                rest.stop();
+              }}
+              autoFocus={handoverSetId === s.id}
+              active={activeSetId === s.id}
+              disabled={check.isPending}
+            />
+          ))}
+        </ul>
+      </Surface>
 
-      {/* ── exercise switcher, pinned ───────────────────────────────────────────────────────── */}
-      <nav className="flex gap-2 overflow-x-auto pb-1" aria-label={t('workout.exercises')}>
+      {/* ── exercise switcher, pinned ───────────────────────────────────────────────────────────
+          `gap-3` rather than `gap-2`: five tight chips read as a second navigation bar competing
+          with the real one at the bottom, and loose ones read as the filter row this actually is.
+          The chip clipped at the trailing edge is deliberate — it is what says the row scrolls. */}
+      <nav className="flex shrink-0 gap-3 overflow-x-auto pb-1" aria-label={t('workout.exercises')}>
         {exercises.map((ex, i) => {
           const total = (data.sets ?? []).filter((s) => s.log_exercise_id === ex.id);
           // `voided_at` matters here for the same reason it matters on the row: the server dropped
@@ -306,6 +403,7 @@ export function WorkoutPlayer() {
           // the record says 3. Second instance of that drift found by sweeping every read of
           // `completed_at` after the row defect — the row was not the only place that had to agree.
           const done = total.filter((s) => s.completed_at != null && s.voided_at == null).length;
+          const complete = total.length > 0 && done === total.length;
           return (
             <Pressable
               key={ex.id}
@@ -316,6 +414,9 @@ export function WorkoutPlayer() {
               onClick={() => setActiveExercise(i)}
             >
               <span className="max-w-32 truncate">{ex.exercise_name_snapshot}</span>
+              {/* A finished movement gets a tick as well as a full count — the count alone is two
+                  numbers to compare at arm's length, and the tick is the same fact as a shape. */}
+              {complete ? <Check className="size-icon-s shrink-0" aria-hidden /> : null}
               <span className="tabular-nums opacity-70">
                 {done}/{total.length}
               </span>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Trophy, Undo2 } from 'lucide-react';
+import { Check, Lock, Trophy, Undo2 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
@@ -16,6 +16,15 @@ export interface SetRowProps {
   onUndo?: () => Promise<void>;
   /** E22-E: this row is the one the finished rest handed over to. */
   autoFocus?: boolean;
+  /**
+   * This is the set being worked right now — the first one still to do.
+   *
+   * Separate from `autoFocus` on purpose. `autoFocus` is the HANDOVER event (a rest just ended,
+   * scroll this row into view) and fires once; `active` is a standing fact about the list and is
+   * what draws the ring, the circled index and the filled check. Deriving the ring from the
+   * handover left every row flat until a rest happened to end.
+   */
+  active?: boolean;
   disabled?: boolean;
 }
 
@@ -28,12 +37,26 @@ const SWIPE_STEP_KG = 2.5;
 const UNDO_MS = 6000;
 
 /**
+ * The row's column geometry, exported so the list HEADER above it reads from the same string.
+ * Two copies of a five-column track is how `#` ends up over `Előző`, and nothing fails when it
+ * does — it just looks wrong to everyone except the person who changed one of them.
+ */
+export const SET_ROW_COLS = 'grid-cols-[2rem_5rem_1fr_1fr_3.5rem]';
+
+/**
  * E21 — the set-check row. The single most-used control in the product: a lifter touches it once
  * per set, mid-effort, with shaking hands.
  *
- * 56 px tall per the Bible. That is BELOW the 44 px floor for the row itself but the row is not the
- * target — the check button inside it is, and it is a full 56 × 56. The number fields are 56 tall
- * too. Nothing here is a small target.
+ * 56 px tall per the Bible, and the row is not the target — the controls inside it are. The check
+ * button sizes itself from `--control-h` (44 px, 48 in the Solar pack) and the two number fields
+ * are 44. Nothing here is a small target, and the 6 px of air left over on each edge is what stops
+ * four stacked rows reading as a spreadsheet.
+ *
+ * NOTHING IN THIS ROW MAY CHANGE ITS HEIGHT. Every state that has something extra to say — the
+ * record caption, the withdrawn chip, the hold instruction, an error chip, the undo pill — says it
+ * in an ABSOLUTE overlay. A row that grows pushes every row below it under a thumb that is already
+ * moving toward the next check button, and the failure mode is recording a lift that did not
+ * happen on a row the schema then freezes.
  *
  * ALL FIVE VARIANTS, selected by `element_style_config` through `useElementVariant`:
  *
@@ -47,7 +70,7 @@ const UNDO_MS = 6000;
  * lift rather than a property of how the row was pressed. It lives in state rather than an
  * animation so a refetch can neither replay the celebration nor erase it.
  */
-export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: SetRowProps) {
+export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disabled }: SetRowProps) {
   const { t } = useTranslation();
   const variant = useElementVariant('E21');
   const motionSafe = useMotionSafe();
@@ -217,6 +240,19 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         .join(' ')
     : '—';
 
+  const hasRecord = records.length > 0;
+  // A voided row is never "the one you are on": the void is terminal, so pointing the thumb at it
+  // would be pointing it at a control that cannot succeed.
+  const isActive = Boolean(active) && !done && !voided;
+
+  /* Both number fields, identically. 44px tall inside a 56px row — the floor is met and the row
+     still has 6px of air top and bottom, which is what stops four rows reading as a spreadsheet. */
+  const fieldClass = cn(
+    'h-11 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums text-text-1',
+    'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
+    'placeholder:text-text-3 disabled:opacity-70',
+  );
+
   const holdProps =
     variant === 'B'
       ? {
@@ -240,42 +276,68 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
     <li
       ref={rowRef}
       className={cn(
-        'relative grid h-14 grid-cols-[2.5rem_5rem_1fr_1fr_3.5rem] items-center gap-2 rounded-card px-2',
+        'relative grid h-14 items-center gap-2 rounded-card px-2',
+        SET_ROW_COLS,
         'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-        done ? 'bg-success-subtle' : 'bg-surface-1',
-        voided && 'bg-surface-1 opacity-55 line-through decoration-text-3',
-        flashing && 'bg-warning-subtle ring-2 ring-[var(--warning)]',
+        // A pending row has NO fill. Four tinted rows in a row is a paint chart; the only rows
+        // that earn a colour are the ones whose state the lifter has to read at arm's length.
+        done && 'bg-success-subtle',
+        // The record keeps its fill and ring for good, not just for the flash: a refetch must not
+        // be able to erase the fact. The flash below is the moment; this is the record.
+        hasRecord && 'bg-warning-subtle ring-2 ring-[var(--warning-border)]',
+        flashing && 'ring-2 ring-[var(--warning)]',
+        // WITHDRAWN, and it says so. The rule runs the full width of the row rather than striking
+        // only the text, so the state is legible as a SHAPE — which is the only way it works for a
+        // colour-blind lifter, and the only way it works at all in a gym mirror.
+        // (Tailwind 4 supplies `content: ""` on the `before:` variant itself, so the rule needs a
+        // box and a colour and nothing else.)
+        voided && 'text-text-3 before:absolute before:inset-x-3 before:top-1/2 before:h-px before:bg-text-3',
         // Only variant C claims horizontal gestures, and only while the row is still pending.
         variant === 'C' && !done && !voided && 'touch-pan-y select-none',
-        // The handover is announced by a ring, not by a jump: nothing moves under the thumb.
-        autoFocus && !done && 'ring-2 ring-[var(--accent)]',
+        // The row the thumb is aimed at. A ring and a fill, never a size change: a row that grows
+        // pushes every row below it under a thumb that is already moving.
+        isActive && 'bg-accent-subtle ring-2 ring-[var(--accent)]',
       )}
       onPointerDown={onDragStart}
       onPointerMove={onDragMove}
       onPointerUp={onDragEnd}
       onPointerCancel={onDragEnd}
     >
-      <span className="text-body-s text-center tabular-nums text-text-2">{set.set_index}</span>
+      <span className="flex items-center justify-center">
+        <span
+          className={cn(
+            'text-body-s inline-flex size-7 items-center justify-center rounded-chip tabular-nums text-text-2',
+            hasRecord && 'border-[length:var(--border-width)] border-[var(--warning-border)] text-warning',
+            isActive && 'border-[length:var(--border-width)] border-[var(--accent)] text-text-1',
+          )}
+        >
+          {set.set_index}
+        </span>
+      </span>
 
       {/* The PREVIOUS column. The single most useful number on the screen: it is what turns a set
           into a decision instead of a guess. */}
-      <span className="text-caption truncate tabular-nums text-text-3" title={prevLabel}>
+      <span className={cn('text-caption truncate tabular-nums', voided ? 'text-text-3' : 'text-text-2')} title={prevLabel}>
         {prevLabel}
       </span>
 
-      <input
-        inputMode="decimal"
-        aria-label={t('workout.weight')}
-        placeholder={set.target_weight_kg != null ? String(set.target_weight_kg) : t('workout.kg')}
-        value={weight}
-        disabled={done || voided || disabled}
-        onChange={(e) => setWeight(e.target.value.replace(/[^0-9.]/g, ''))}
-        className={cn(
-          'h-14 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums',
-          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-          'disabled:opacity-60',
-        )}
-      />
+      {/* THE LOCK IS NOT DECORATION. It says the value is frozen ON THE SERVER — not merely that
+          this input happens to be read-only right now. Do not reuse it for a temporarily disabled
+          field. */}
+      <div className="relative">
+        {done ? (
+          <Lock aria-hidden className="size-icon-s pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-text-3" />
+        ) : null}
+        <input
+          inputMode="decimal"
+          aria-label={t('workout.weight')}
+          placeholder={set.target_weight_kg != null ? String(set.target_weight_kg) : t('workout.kg')}
+          value={weight}
+          disabled={done || voided || disabled}
+          onChange={(e) => setWeight(e.target.value.replace(/[^0-9.]/g, ''))}
+          className={cn(fieldClass, done && 'pl-7')}
+        />
+      </div>
       <input
         inputMode="numeric"
         aria-label={t('workout.reps')}
@@ -283,42 +345,70 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         value={reps}
         disabled={done || voided || disabled}
         onChange={(e) => setReps(e.target.value.replace(/[^0-9]/g, ''))}
-        className={cn(
-          'h-14 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums',
-          'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-          'disabled:opacity-60',
-        )}
+        className={fieldClass}
       />
 
-      <Pressable
-        shape="icon"
-        variant={done ? 'primary' : 'secondary'}
-        aria-label={voided ? t('workout.withdrawn') : done ? t('workout.recorded') : variant === 'B' ? t('workout.holdToCheck') : t('workout.check')}
-        aria-pressed={done}
-        busy={busy}
-        disabled={done || voided || disabled}
-        // The fill is driven FROM `HOLD_MS`, not from a second copy of it. It used to read
-        // `animate-[hold-fill_550ms_...]` while the timer read `const HOLD_MS = 550` — two literals
-        // that had to agree, with a comment in index.css asserting they did. Changing the timer
-        // alone would have left the bar completing early, which teaches the lifter to let go before
-        // the set is recorded: the exact failure that comment exists to warn about.
-        style={{ '--hold-fill-ms': `${HOLD_MS}ms` } as CSSProperties}
-        className={cn(
-          'relative size-14 overflow-hidden',
-          // The hold's own feedback: the button fills over HOLD_MS so the lifter can see the
-          // gesture being accepted. Under reduced motion it simply darkens — the information is
-          // "this is registering", and that does not require the sweep.
-          holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-accent-subtle after:animate-[hold-fill_var(--hold-fill-ms)_linear_forwards]',
-          holding && !motionSafe && 'bg-accent-subtle',
-        )}
-        {...holdProps}
-      >
-        {records.length ? (
-          <Trophy className="size-icon-m" aria-hidden />
-        ) : (
+      {voided ? (
+        // No check button at all. `trg_log_set_void_terminal` makes a void terminal, so a check
+        // here would earn a 409 — and a control that cannot succeed is worse than no control.
+        <span />
+      ) : done ? (
+        // A recorded set has no action left, so it is not a button. A disabled Pressable would
+        // draw button chrome around a thing nobody can press, and `disabled:opacity-45` would
+        // wash the one glyph carrying the state.
+        <span className="flex items-center justify-center">
+          <span className={cn('inline-flex size-11 items-center justify-center', hasRecord ? 'text-warning' : 'text-success')}>
+            {hasRecord ? <Trophy className="size-icon-m" aria-hidden /> : <Check className="size-icon-m" aria-hidden />}
+          </span>
+          <span className="sr-only">{t('workout.recorded')}</span>
+        </span>
+      ) : (
+        <Pressable
+          shape="icon"
+          variant={isActive ? 'primary' : 'secondary'}
+          aria-label={variant === 'B' ? t('workout.holdToCheck') : t('workout.check')}
+          busy={busy}
+          disabled={disabled}
+          // The fill is driven FROM `HOLD_MS`, not from a second copy of it. It used to read
+          // `animate-[hold-fill_550ms_...]` while the timer read `const HOLD_MS = 550` — two literals
+          // that had to agree, with a comment in index.css asserting they did. Changing the timer
+          // alone would have left the bar completing early, which teaches the lifter to let go before
+          // the set is recorded: the exact failure that comment exists to warn about.
+          style={{ '--hold-fill-ms': `${HOLD_MS}ms` } as CSSProperties}
+          className={cn(
+            'relative overflow-hidden',
+            // The hold's own feedback: the button fills over HOLD_MS so the lifter can see the
+            // gesture being accepted. Under reduced motion it simply darkens — the information is
+            // "this is registering", and that does not require the sweep.
+            holding && motionSafe && 'after:absolute after:inset-0 after:origin-left after:bg-accent-subtle after:animate-[hold-fill_var(--hold-fill-ms)_linear_forwards]',
+            holding && !motionSafe && 'bg-accent-subtle',
+          )}
+          {...holdProps}
+        >
           <Check className="size-icon-m" aria-hidden />
-        )}
-      </Pressable>
+        </Pressable>
+      )}
+
+      {/* THE WITHDRAWN CHIP. Opacity and a rule alone are hard to tell from "merely disabled" at
+          arm's length, so the state gets a word. It floats at the trailing end — where the check
+          button would be — rather than taking a line of its own. */}
+      {voided ? (
+        <span className="text-caption absolute right-2 top-1/2 -translate-y-1/2 rounded-chip border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 px-3 py-1 text-text-2">
+          {t('workout.withdrawn')}
+        </span>
+      ) : null}
+
+      {/* Variant B's instruction, on the row it applies to and nowhere else. It straddles the row's
+          bottom edge and the 8px gap below it, so it costs the layout nothing — the alternative was
+          a taller active row, which moves every check button below it. */}
+      {isActive && variant === 'B' ? (
+        <span
+          aria-hidden
+          className="text-micro pointer-events-none absolute bottom-0 right-1 translate-y-1/2 rounded-chip bg-surface-2 px-2 text-text-3"
+        >
+          {t('workout.holdToCheck')}
+        </span>
+      ) : null}
 
       {/* Variant E — the undo pill. It overlays the row rather than displacing anything: the set
           list must not reflow when a set is recorded, or every row below it moves under the thumb
@@ -339,7 +429,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
         </div>
       ) : null}
 
-      {records.length ? (
+      {hasRecord ? (
         // Announced AND, for the length of the flash, SHOWN. This was `sr-only` unconditionally:
         // the gold flash and the trophy told a sighted lifter that *something* happened, and the
         // one string that says WHAT was beaten was audible only to a screen reader. The peak of
@@ -355,11 +445,14 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
           className={
             flashing
               ? cn(
-                  // max-w-32, not 40: the grid is [2.5rem_5rem_1fr_1fr_3.5rem] with gap-2 px-2, so at 375px
-                  // each 1fr is ~60px and a 160px pill starting at 4px reached ~30px into the weight
+                  // max-w-32, not 40: the grid is SET_ROW_COLS with gap-2 px-2, so at 375px each
+                  // 1fr is ~60px and a 160px pill starting at 4px reached ~30px into the weight
                   // column — covering the number just entered, for the whole 1400ms flash.
+                  //
+                  // Solid, not `bg-warning-subtle`: the record ROW is already warning-subtle, so a
+                  // subtle chip on it would be an announcement painted in the background colour.
                   'text-caption pointer-events-none absolute inset-y-1 left-1 flex max-w-32',
-                  'items-center gap-tight rounded-chip bg-warning-subtle px-2 text-warning',
+                  'items-center gap-tight rounded-chip bg-surface-1 px-2 text-warning',
                 )
               : 'sr-only'
           }
@@ -380,7 +473,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, disabled }: 
           retry. */}
       {failed ? (
         <div className="absolute inset-y-1 right-1 flex items-center gap-1" role="alert">
-          <span className="text-caption rounded-chip bg-danger-subtle px-2 py-0.5 text-danger">
+          <span className="text-caption rounded-chip bg-danger-subtle px-2 py-1 text-danger">
             {t(`workout.checkFailed.${failed}`)}
           </span>
           {/* A conflict is not retryable — the stored values differ, so re-sending the same request

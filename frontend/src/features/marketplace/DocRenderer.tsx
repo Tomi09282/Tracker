@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Check } from 'lucide-react';
 
 /**
  * The counterpart to `backend/src/public/markdown.js`. It walks a CLOSED NODE TREE into React
@@ -132,7 +133,7 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
   if (!Array.isArray(doc)) return null;
 
   return (
-    <div className={`flex flex-col gap-3 ${className ?? ''}`}>
+    <div className={`flex flex-col gap-group ${className ?? ''}`}>
       {doc.map((b, i) => {
         const inline = (b.c ?? []) as InlineNode[];
         switch (b.k) {
@@ -171,16 +172,39 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
           case 'ol': {
             const items = (b.c ?? []) as BlockNode[];
             const List = b.k === 'ol' ? 'ol' : 'ul';
+            /*
+             * ICON-LED ROWS, NOT BULLETS — and the single most important shape change on the post
+             * detail. A bullet list is exactly the form that made the previous design read as data
+             * fields: the same sentences, no visual entry point, nothing for the eye to land on.
+             * A glyph in a tinted holder gives each row an anchor, so three answers can be scanned
+             * instead of read.
+             *
+             * It lives HERE rather than in `PostPage`, because the alternative is a hand-built
+             * markup path beside the parser — two renderers, two sanitisers, and one of them will
+             * be the weaker one. The coach's bio and their post body get the same treatment, which
+             * is the whole reason there is one renderer.
+             *
+             * The ordinal is NOT `aria-hidden`: `list-style: none` (which flex implies) suppresses
+             * list semantics in some screen readers, so an ordered list has to carry its own
+             * numbers as text. The unordered marker is decoration and is hidden.
+             */
             return (
-              <List
-                key={i}
-                className={`text-body measure flex flex-col gap-1 pl-5 text-text-1 ${
-                  b.k === 'ol' ? 'list-decimal' : 'list-disc'
-                }`}
-              >
+              <List key={i} className="measure flex flex-col gap-tight">
                 {items.map((li, j) => (
-                  <li key={j}>
-                    <Inline nodes={(li.c ?? []) as InlineNode[]} />
+                  <li key={j} className="text-body flex items-start gap-tight text-text-1">
+                    <span
+                      aria-hidden={b.k === 'ul' || undefined}
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-chip bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
+                    >
+                      {b.k === 'ol' ? (
+                        <span className="text-caption tabular-nums">{j + 1}</span>
+                      ) : (
+                        <Check className="size-icon-s" strokeWidth={2.5} />
+                      )}
+                    </span>
+                    <span className="min-w-0 pt-2">
+                      <Inline nodes={(li.c ?? []) as InlineNode[]} />
+                    </span>
                   </li>
                 ))}
               </List>

@@ -90,6 +90,15 @@ export function Demo({ id }: { id: string }) {
           aria-label="Play"
           toggled={playing}
           onClick={() => setPlaying((v) => !v)}
+          // The status layer is the half of E3 a still screenshot cannot show, so the demo
+          // exercises BOTH outcomes: starting playback succeeds, stopping it fails. Presses
+          // therefore alternate spinner→tick and spinner→warning+shake. `playing` is read
+          // pre-toggle, which is what makes it alternate without a second piece of state.
+          onAction={() =>
+            wait(700).then(() => {
+              if (playing) throw new Error('demo failure');
+            })
+          }
           icon={<Play size={20} strokeWidth={2} aria-hidden />}
           altIcon={<Pause size={20} strokeWidth={2} aria-hidden />}
         />

@@ -17,6 +17,18 @@ export interface MuscleMapProps {
    */
   onSelect?: (slug: string) => void;
   selected?: string;
+  /**
+   * HERO FILL MODE. The figure is 260 × 560 — portrait — so inside a wide, short hero panel the
+   * `max-w-[280px]` cap leaves the map floating in the middle of an otherwise empty box. In fill
+   * mode the figure is HEIGHT-constrained instead: it takes whatever the container has left after
+   * the `Elöl` / `Hátul` control and the legend, and its width follows from the viewBox.
+   *
+   * The "also on the other side" caption is dropped with it. On a hero the segmented control is
+   * two inches away, and a sentence explaining a two-item toggle is a sentence.
+   *
+   * Additive and off by default: every existing call site renders exactly as before.
+   */
+  fill?: boolean;
   className?: string;
 }
 
@@ -45,7 +57,7 @@ export interface MuscleMapProps {
  * If a future change makes this map the only path to selecting a muscle, that rule is broken and
  * the fix is to restore the chip row — not to inflate these regions.
  */
-export function MuscleMap({ highlights = {}, onSelect, selected, className }: MuscleMapProps) {
+export function MuscleMap({ highlights = {}, onSelect, selected, fill = false, className }: MuscleMapProps) {
   const { t } = useTranslation();
   const motionSafe = useMotionSafe();
   const [side, setSide] = useState<BodySide>('front');
@@ -69,8 +81,16 @@ export function MuscleMap({ highlights = {}, onSelect, selected, className }: Mu
   };
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      <div className="flex gap-2">
+    <div
+      className={cn(
+        'flex flex-col items-center',
+        // `min-h-0` is what lets the figure below shrink inside a fixed-height hero instead of
+        // pushing the legend out of the panel.
+        fill && 'h-full min-h-0 gap-tight',
+        className,
+      )}
+    >
+      <div className="flex shrink-0 gap-2">
         {(['front', 'back'] as const).map((s) => (
           <Pressable
             key={s}
@@ -89,7 +109,12 @@ export function MuscleMap({ highlights = {}, onSelect, selected, className }: Mu
         viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
         role="img"
         aria-labelledby={titleId}
-        className="mt-3 h-auto w-full max-w-[280px]"
+        className={cn(
+          'h-auto w-full max-w-[280px]',
+          // `h-0 flex-1` is the flex-column idiom for "take the leftover height and no more".
+          // `w-auto` then lets the viewBox decide the width, so the figure keeps its proportions.
+          fill ? 'h-0 min-h-0 w-auto max-w-full flex-1' : 'mt-3',
+        )}
       >
         <title id={titleId}>{t(`muscleMap.${side}Title`)}</title>
 
@@ -158,7 +183,7 @@ export function MuscleMap({ highlights = {}, onSelect, selected, className }: Mu
         )}
       </svg>
 
-      {hiddenHighlights.length > 0 ? (
+      {!fill && hiddenHighlights.length > 0 ? (
         <p className="text-caption mt-2 text-text-3">
           {t('muscleMap.alsoOnOtherSide', {
             side: t(`muscleMap.${side === 'front' ? 'back' : 'front'}`).toLowerCase(),
@@ -167,7 +192,7 @@ export function MuscleMap({ highlights = {}, onSelect, selected, className }: Mu
       ) : null}
 
       {Object.keys(highlights).length > 0 ? (
-        <div className="mt-3 flex items-center gap-4">
+        <div className={cn('flex shrink-0 items-center gap-4', fill ? 'mt-0' : 'mt-3')}>
           <span className="text-caption inline-flex items-center gap-1.5 text-text-2">
             <span aria-hidden className="inline-block size-3 rounded-chip bg-accent" />
             {t('muscleMap.primary')}

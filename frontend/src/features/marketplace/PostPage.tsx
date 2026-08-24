@@ -1,20 +1,38 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, MapPin, Calendar, Users, BadgeCheck, FileQuestion } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Users, ChevronRight, FileQuestion } from 'lucide-react';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { Surface } from '../../ui/primitives/Surface';
 import { DocRenderer } from './DocRenderer';
 import { usePost, usePriceFormatter } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
+import { PublicTopBar, InitialsAvatar, VerifiedBadge } from './PublicChrome';
 
 /**
  * One post, addressed by its opaque public id.
  *
+ * This is the screen in the whole product a cold visitor is most likely to land on first. They
+ * arrive with three questions — what is this, who is behind it, what does it cost — and the layout
+ * answers them in that order before the body starts.
+ *
+ * ═══ THE ANCHOR IS THE POST'S OWN COVER ════════════════════════════════════════════════════════
+ *
+ * Not a ring and not a chart: a programme or an event is judged on what the room looks like and
+ * who is in it. The cover is also content rather than decoration — whoever published it chose it.
+ * With no cover the hero is absent entirely and the h1 becomes the anchor; a grey placeholder
+ * rectangle is worse than no image at all.
+ *
+ * NO PLAY OVERLAY. The mockup centres one on the cover and the product has no video player, so it
+ * would be a promise broken on the first tap.
+ *
  * ═══ THE PRICE IS DISPLAY ONLY, AND THE SCREEN SAYS SO ═════════════════════════════════════════
  *
- * There is no buy button, because there is no purchase path — Phase 6 ships the marketplace as a
- * noticeboard and the coach takes it from there. A price with a button that does nothing would be
- * worse than a price with a sentence explaining what happens next, so the sentence is there.
+ * There is no buy button, because there is no purchase path — this phase ships the marketplace as
+ * a noticeboard and the coach takes it from there. The mockup's `Jelentkezem` button is therefore
+ * not drawn, and the price caption keeps its FULL string: the mockup's shortened version drops
+ * "a fizetés még nem az appon keresztül megy", which is exactly the clause that stops a price
+ * beside a button from reading as a checkout.
  *
  * ═══ AND THE PAGE OWNS ITS h1 ══════════════════════════════════════════════════════════════════
  *
@@ -30,30 +48,30 @@ export function PostPage() {
   // after a conditional return is called on some renders and not others.
   const formatPrice = usePriceFormatter();
 
-  if (isLoading) {
-    return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
-        <Skeleton className="h-8 w-2/3 rounded-card" />
-        <Skeleton className="h-40 rounded-card" />
-      </div>
-    );
-  }
+  if (isLoading) return <PostSkeleton />;
 
   if (isError || !data?.post) {
     // A draft, a removed post and one that never existed are ONE answer here as well as on the
     // server. A "this was removed" message would be an oracle for the existence of removed content.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-4">
+      <div className="col-mobile screen-x flex flex-col gap-section py-4">
+        <AuroraBackdrop />
+        <PublicTopBar backTo="/m" />
         <EmptyState
           icon={FileQuestion}
           title={t('marketplace.postGoneTitle')}
           body={t('marketplace.postGoneBody')}
           heading="h1"
+          action={
+            <Link
+              to="/m"
+              className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight text-accent"
+            >
+              <ArrowLeft className="size-icon-s" aria-hidden />
+              {t('marketplace.backToFeed')}
+            </Link>
+          }
         />
-        <Link to="/m" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
-          <ArrowLeft className="size-4" aria-hidden />
-          {t('marketplace.backToFeed')}
-        </Link>
       </div>
     );
   }
@@ -63,79 +81,101 @@ export function PostPage() {
   const cover = media.find((m) => m.role === 'cover') ?? media[0];
 
   return (
-    <article className="col-mobile screen-x flex flex-col gap-4 py-4">
+    <article className="col-mobile screen-x flex flex-col gap-section py-4">
       <AuroraBackdrop />
-      <Link to="/m" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
-        <ArrowLeft className="size-4" aria-hidden />
-        {t('marketplace.backToFeed')}
-      </Link>
+      <PublicTopBar backTo="/m" />
 
-      {cover ? (
-        <img
-          // The gated serve, never a static path — and the stored bytes are a re-encoded WebP, so
-          // what arrives is what the pipeline made rather than what somebody uploaded.
-          src={`/api/v1/public/media/${cover.storageKey}`}
-          alt={cover.alt ?? ''}
-          width={cover.width}
-          height={cover.height}
-          loading="lazy"
-          className="w-full rounded-card object-cover"
-        />
-      ) : null}
+      <header className="flex flex-col gap-group">
+        {cover ? (
+          <img
+            // The gated serve, never a static path — and the stored bytes are a re-encoded WebP,
+            // so what arrives is what the pipeline made rather than what somebody uploaded.
+            src={`/api/v1/public/media/${cover.storageKey}`}
+            alt={cover.alt ?? ''}
+            width={cover.width}
+            height={cover.height}
+            loading="lazy"
+            className="aspect-video w-full rounded-card object-cover"
+          />
+        ) : null}
 
-      <header className="flex flex-col gap-2">
-        <span className="text-caption flex flex-wrap items-center gap-2 text-text-3">
-          <span className="rounded-chip bg-surface-2 px-1.5">
-            {t(`marketplace.kind.${post.kind}`, { defaultValue: post.kind })}
+        <div className="flex flex-col gap-tight">
+          {/* The time of day is gone from here: a wrapping grey caption row ranking the start
+              minute equal with the city is how the reader's real questions got buried. */}
+          <span className="text-caption flex flex-wrap items-center gap-tight text-text-3">
+            <span className="rounded-chip bg-surface-2 px-2 py-1">
+              {t(`marketplace.kind.${post.kind}`, { defaultValue: post.kind })}
+            </span>
+            {post.city ? (
+              <span className="flex items-center gap-1">
+                <MapPin className="size-icon-s" aria-hidden />
+                {post.city}
+              </span>
+            ) : null}
+            {post.eventAt ? (
+              <span className="flex items-center gap-1">
+                <Calendar className="size-icon-s" aria-hidden />
+                {new Date(post.eventAt * 1000).toLocaleDateString(i18n.language)}
+              </span>
+            ) : null}
+            {post.capacity ? (
+              <span className="flex items-center gap-1">
+                <Users className="size-icon-s" aria-hidden />
+                {t('marketplace.capacity', { count: post.capacity })}
+              </span>
+            ) : null}
           </span>
-          {post.city ? (
-            <span className="flex items-center gap-1">
-              <MapPin className="size-3" aria-hidden />
-              {post.city}
-            </span>
-          ) : null}
-          {post.eventAt ? (
-            <span className="flex items-center gap-1">
-              <Calendar className="size-3" aria-hidden />
-              {new Date(post.eventAt * 1000).toLocaleString(i18n.language)}
-            </span>
-          ) : null}
-          {post.capacity ? (
-            <span className="flex items-center gap-1">
-              <Users className="size-3" aria-hidden />
-              {t('marketplace.capacity', { count: post.capacity })}
-            </span>
-          ) : null}
-        </span>
 
-        <h1 className="text-title-1">{post.title}</h1>
+          <h1 className="text-display text-text-1">{post.title}</h1>
+        </div>
 
-        <Link
+        {/* WHO IS BEHIND IT, as a row you can tap rather than a bare text link. The verified chip
+            under the name is the same admin-granted fact the tick carries, said in words for
+            anyone who does not know what the glyph means. */}
+        <Surface
+          as={Link}
           to={`/m/c/${post.coachHandle}`}
-          className="text-body-s flex min-h-[var(--target-min)] items-center gap-1.5 text-text-2"
+          interactive
+          className="flex items-center gap-group"
         >
-          <span>{post.coachName}</span>
-          {post.coachVerified === 1 ? (
-            <BadgeCheck className="size-4 text-accent" aria-label={t('marketplace.verified')} />
-          ) : null}
-        </Link>
+          <InitialsAvatar
+            name={post.coachName}
+            className="size-14"
+            textClassName="text-title-3"
+          />
+          <span className="flex min-w-0 flex-1 flex-col gap-tight">
+            <span className="text-body-strong flex min-w-0 items-center gap-tight text-text-1">
+              <span className="truncate">{post.coachName}</span>
+              {post.coachVerified === 1 ? <VerifiedBadge /> : null}
+            </span>
+            {post.coachVerified === 1 ? (
+              <span className="text-caption self-start rounded-chip bg-surface-2 px-2 py-1 text-text-3">
+                {t('marketplace.verified')}
+              </span>
+            ) : null}
+          </span>
+          <ChevronRight className="size-icon-m shrink-0 text-text-3" aria-hidden />
+        </Surface>
       </header>
 
       {/* THE BODY. A closed node tree walked into React elements — no HTML string exists at any
-          point between the coach's keyboard and this line. */}
+          point between the coach's keyboard and this line. Its list items render as icon-led rows
+          rather than bullets, and they do it INSIDE `DocRenderer`: a hand-built markup path in
+          this page would be a second sanitiser, and one of two sanitisers is always the weaker. */}
       <DocRenderer doc={post.doc} />
 
       {price ? (
-        <section className="rounded-card border border-[var(--surface-border)] bg-surface-2 p-4">
-          <p className="text-title-3 tabular-nums text-text-1">{price}</p>
-          {/* SAID PLAINLY. There is no purchase path in this phase, and a price beside a button
-              that does nothing is worse than a price beside a sentence that tells the truth. */}
-          <p className="text-caption mt-1 text-text-3">{t('marketplace.priceNote')}</p>
-        </section>
+        <Surface as="section" className="flex flex-col gap-tight text-center">
+          <p className="text-title-1 tabular-nums text-text-1">{price}</p>
+          {/* SAID PLAINLY, AND IN FULL. There is no purchase path in this phase, and a price
+              beside a button that does nothing is worse than a price beside a sentence that tells
+              the truth. */}
+          <p className="text-caption text-text-3">{t('marketplace.priceNote')}</p>
+        </Surface>
       ) : null}
 
       {media.length > 1 ? (
-        <ul className="grid grid-cols-3 gap-2">
+        <ul className="grid grid-cols-3 gap-tight">
           {media.slice(1).map((m) => (
             <li key={m.storageKey}>
               <img
@@ -149,5 +189,43 @@ export function PostPage() {
         </ul>
       ) : null}
     </article>
+  );
+}
+
+/**
+ * The loading state, in the NEW geometry: cover, meta, title, coach row, body.
+ *
+ * The previous skeleton was a title bar and one block, which is not the shape of this screen —
+ * and a skeleton that does not match causes exactly the layout shift it exists to prevent.
+ */
+function PostSkeleton() {
+  const { t } = useTranslation();
+
+  return (
+    <div
+      className="col-mobile screen-x flex flex-col gap-section py-4"
+      role="status"
+      aria-busy="true"
+    >
+      <AuroraBackdrop />
+      <span className="sr-only">{t('common.loading')}</span>
+      <PublicTopBar backTo="/m" />
+
+      <div className="flex flex-col gap-group">
+        <Skeleton className="aspect-video w-full rounded-card" />
+        <div className="flex flex-col gap-tight">
+          <Skeleton className="h-4 w-56" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-2/3" />
+        </div>
+        <Skeleton className="h-22 rounded-card" />
+      </div>
+
+      <div className="flex flex-col gap-tight">
+        <Skeleton className="h-5 w-full" />
+        <Skeleton className="h-5 w-full" />
+        <Skeleton className="h-5 w-3/4" />
+      </div>
+    </div>
   );
 }

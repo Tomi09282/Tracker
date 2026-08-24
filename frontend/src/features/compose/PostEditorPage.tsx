@@ -1,20 +1,35 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Eye, EyeOff, Globe, ImagePlus, RotateCcw, Trash2 } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  EyeOff,
+  Globe,
+  Image as ImageIcon,
+  ImagePlus,
+  Loader2,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
+import { cn } from '../../lib/cn';
 import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { DocRenderer } from '../marketplace/DocRenderer';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { useTaxonomy } from '../marketplace/usePublic';
+import { kindIcon } from './kindIcons';
 import {
   useComposeContext,
   useComposePost,
   useCreatePost,
   useSavePost,
   usePostLifecycle,
-  usePreview,
   useUploadCover,
   useDeleteCover,
   conflictOf,
@@ -33,6 +48,23 @@ import { useAutosave } from './useAutosave';
 const newIdempotencyKey = () =>
   `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
+/**
+ * Where a coach writes one marketplace item.
+ *
+ * ═══ THE COVER IS THE ANCHOR ═══════════════════════════════════════════════════════════════════
+ *
+ * The cover is the one element a stranger sees before they read a word, so it fills the top third
+ * at full width — and that IS the preview, which is why the separate rendered-preview card is gone
+ * from this screen. It also makes a missing cover impossible to overlook.
+ *
+ * ═══ AND THE SAVE BUTTON SURVIVED THE REDESIGN ═════════════════════════════════════════════════
+ *
+ * The action row lost its save/preview pair, which is the single biggest reason this stopped
+ * reading as a form. But autosave is deliberately disabled until there is a title, so a draft
+ * holding a body and no title would otherwise have NO way to be saved at all. The save moved into
+ * the header rather than away: `Piszkozat létrehozása` on a new post, `Mentés` when dirty, a
+ * disabled `Mentve` when clean — plus Ctrl/Cmd+S and the unsaved-changes guard, both untouched.
+ */
 export function PostEditorPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -45,7 +77,6 @@ export function PostEditorPage() {
   const create = useCreatePost();
   const save = useSavePost(isNew ? '' : (publicId as string));
   const lifecycle = usePostLifecycle(isNew ? '' : (publicId as string));
-  const preview = usePreview();
   const uploadCover = useUploadCover(isNew ? '' : (publicId as string));
   const deleteCover = useDeleteCover(isNew ? '' : (publicId as string));
   const [alt, setAlt] = useState('');
@@ -64,7 +95,6 @@ export function PostEditorPage() {
   const [kind, setKind] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
   // Held in a ref, not state: it must survive a re-render so a retry sends the SAME key. Putting it
   // in state and regenerating on any render is how a retry quietly becomes a second post.
   const keyRef = useRef(newIdempotencyKey());
@@ -148,21 +178,7 @@ export function PostEditorPage() {
     if (isNew && kind === '' && taxonomy.data?.kinds.length) setKind(taxonomy.data.kinds[0].key);
   }, [isNew, kind, taxonomy.data]);
 
-  // The preview is DEBOUNCED, because it runs the real parser on the server and a keystroke is not
-  // a request. It is also the only renderer on this screen: there is no client-side markdown, so
-  // what is shown here is what the published page will show, by construction.
-  useEffect(() => {
-    if (!showPreview || body.length === 0) return undefined;
-    const id = setTimeout(() => preview.mutate({ surface: 'post', body_src: body }), 400);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, showPreview]);
-
   const limits = ctx.data?.limits;
-  const kindRow = useMemo(
-    () => taxonomy.data?.kinds.find((k) => k.key === kind),
-    [taxonomy.data, kind],
-  );
 
   /*
    * What is on screen versus what the server last confirmed.
@@ -171,8 +187,6 @@ export function PostEditorPage() {
    * difference matters at exactly one moment: autosave is disabled until there is a title, so a
    * draft with a body and no title reports `hasUnsaved: false` while holding real writing. The
    * guard has to fire for that, which is the case somebody actually loses work in.
-   *
-   * (The comment here used to say autosave had been cut, which it no longer has.)
    */
   const dirty = post
     ? title !== post.title || body !== post.bodySrc
@@ -184,18 +198,20 @@ export function PostEditorPage() {
   const bodyError = (create.error ?? save.error) as { body?: { reason?: string } } | null;
 
   if (!isNew && existing.isPending) {
+    // Heading, then the body block — the two shapes that actually arrive.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
+      <div className="col-mobile screen-x flex flex-col gap-section py-6">
         <Skeleton className="h-8 w-2/3 rounded-card" />
+        <Skeleton className="aspect-[16/9] w-full rounded-card" />
         <Skeleton className="h-40 rounded-card" />
       </div>
     );
   }
   if (!isNew && (existing.isError || !post)) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-4 py-6">
+      <div className="col-mobile screen-x flex flex-col gap-group py-6">
         <EmptyState icon={Trash2} title={t('compose.postGoneTitle')} body={t('compose.postGoneBody')} heading="h1" />
-        <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
+        <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight self-center text-accent">
           <ArrowLeft className="size-icon-s" aria-hidden />
           {t('compose.backToDesk')}
         </Link>
@@ -204,6 +220,10 @@ export function PostEditorPage() {
   }
 
   const readOnly = !!post && post.removedAt !== null;
+  // A stale save comes back WITH the row the server holds. It is a rare state, so it arrives as a
+  // sheet rather than as a panel occupying permanent vertical space — and `reset()` closing it
+  // means the sheet needs no second piece of state that could disagree with the error.
+  const staleOpen = conflict?.reason === 'stale' && !!conflict.post;
 
   const submit = async () => {
     if (isNew) {
@@ -268,75 +288,23 @@ export function PostEditorPage() {
 
   submitRef.current = submit;
 
+  const FrozenKindIcon = kindIcon(kind);
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-4 py-6">
-      <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-1 text-accent">
+    <div className="col-mobile screen-x flex flex-col gap-section py-6">
+      <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight self-start text-accent">
         <ArrowLeft className="size-icon-s" aria-hidden />
         {t('compose.backToDesk')}
       </Link>
 
-      <h1 className="text-title-1">{isNew ? t('compose.newPost') : t('compose.editPost')}</h1>
-
-      {readOnly ? (
-        <p className="text-body-s rounded-card border border-danger-border bg-danger-subtle p-4 text-text-1" role="status">
-          {t('compose.postRemoved')}
-        </p>
-      ) : null}
-
-      {isNew ? (
-        <label className="flex flex-col gap-1">
-          <span className="text-body-s text-text-2">{t('compose.kind')}</span>
-          <select
-            className="text-body min-h-[var(--target-min)] rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] px-3"
-            value={kind}
-            onChange={(e) => setKind(e.target.value)}
-          >
-            {taxonomy.data?.kinds.map((k) => (
-              <option key={k.key} value={k.key}>
-                {t(`marketplace.kind.${k.key}`, { defaultValue: k.key })}
-              </option>
-            ))}
-          </select>
-          {/* The kind is FROZEN after creation, because its shape rules are enforced by a trigger
-              that cannot re-validate a changed kind. Saying so here beats a 409 later. */}
-          <span className="text-caption text-text-3">{t('compose.kindFrozen')}</span>
-        </label>
-      ) : null}
-
-      <Field
-        label={t('compose.postTitle')}
-        value={title}
-        maxLength={limits?.titleMax}
-        disabled={readOnly}
-        onChange={(e) => setTitle(e.target.value)}
-        hint={limits ? t('compose.charsLeft', { n: Math.max(0, limits.titleMax - title.length) }) : undefined}
-        error={limits && title.length > limits.titleMax ? t('compose.overLimit') : undefined}
-      />
-
-      <label className="flex flex-col gap-1">
-        <span className="text-body-s text-text-2">{t('compose.body')}</span>
-        <textarea
-          className="text-body min-h-64 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] p-3"
-          value={body}
-          disabled={readOnly}
-          onChange={(e) => setBody(e.target.value)}
-        />
-        {/* Colour arrives before reading does, and only near the end — a counter that is loud from
-            the first character is a counter people stop seeing. */}
-        <span className={`text-caption ${limits ? COUNTER_CLASS[counterTone(body.length, limits.bodyMax)] : 'text-text-3'}`}>
-          {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bodyMax - body.length) }) : ''}
-        </span>
-      </label>
-
-      {kindRow?.requiresEventAt === 1 ? (
-        <p className="text-caption text-warning" role="status">
-          {t('compose.needsEventTime')}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
+      {/* The save lives HERE now, not in the action row — see the docblock. It is secondary on an
+          existing post because `Közzététel` below is that screen's one primary action. */}
+      <div className="flex items-start gap-group">
+        <h1 className="text-title-1 min-w-0 flex-1">{isNew ? t('compose.newPost') : t('compose.editPost')}</h1>
         <Pressable
-          variant="primary"
+          variant={isNew ? 'primary' : 'secondary'}
+          density="compact"
+          className="shrink-0"
           busy={create.isPending || save.isPending}
           // Nothing to save is a real state and the button should look like it. Ctrl+S does nothing
           // here either, so the keyboard and the button agree.
@@ -345,106 +313,23 @@ export function PostEditorPage() {
         >
           {isNew ? t('compose.createDraft') : dirty ? t('compose.save') : t('compose.saved')}
         </Pressable>
-        <Pressable variant="secondary" onClick={() => setShowPreview((v) => !v)}>
-          <Eye className="size-icon-s" aria-hidden />
-          {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
-        </Pressable>
-
-        {/*
-          The autosave state, said out loud.
-
-          `aria-live="polite"` on a region that only ever holds four short words — unlike the studio,
-          where the same attribute would have read eighty. It matters here because the whole promise
-          of autosave is that somebody can stop paying attention, and a promise nobody can hear is
-          one only sighted users get.
-
-          `failed` is deliberately loud and does not go away on its own. Everything else fades to
-          nothing when there is nothing to say.
-        */}
-        <p
-          className={`text-caption ml-auto self-center ${
-            autosave.state === 'failed' ? 'text-danger' : 'text-text-3'
-          }`}
-          aria-live="polite"
-        >
-          {autosave.state === 'saving'
-            ? t('compose.autosave.saving')
-            : autosave.state === 'failed'
-              ? t('compose.autosave.failed')
-              : autosave.state === 'saved' && !autosave.hasUnsaved
-                ? t('compose.autosave.saved')
-                : ''}
-        </p>
       </div>
 
-      {/* ── the refusals, each carrying what to do about it ─────────────────────────────────── */}
-      {bodyError?.body?.reason && !conflict ? (
-        <p className="text-body-s text-danger" role="alert">
-          {t(`compose.markdown.${bodyError.body.reason}`, { defaultValue: t('compose.markdown.generic') })}
-        </p>
+      {readOnly ? (
+        <Surface
+          as="p"
+          className="text-body-s border-[var(--danger-border)] bg-danger-subtle text-text-1"
+          role="status"
+        >
+          {t('compose.postRemoved')}
+        </Surface>
       ) : null}
 
-      {conflict ? (
-        <div className="rounded-card border border-warning-border bg-warning-subtle p-4" role="alert">
-          <p className="text-body-s text-text-1">
-            {t(`compose.reason.${conflict.reason}`, {
-              defaultValue: t('compose.reason.generic'),
-              version: conflict.activeVersion,
-              when: conflict.eligibleAt ? new Date(conflict.eligibleAt * 1000).toLocaleString(i18n.language) : '',
-              used: conflict.used,
-              max: conflict.max,
-              next: conflict.nextSlotAt ? new Date(conflict.nextSlotAt * 1000).toLocaleString(i18n.language) : '',
-              field: conflict.field,
-            })}
-          </p>
-          {/* A stale save comes back WITH the row the server holds, so the coach can compare it
-              against the text still in front of them instead of guessing which one survived. */}
-          {conflict.reason === 'stale' && conflict.post ? (
-            <div className="mt-2 flex flex-col gap-2">
-              <p className="text-caption text-text-2">{t('compose.staleServerCopy')}</p>
-              <p className="text-body-s rounded-field bg-[var(--field-bg)] p-3 text-text-1">{conflict.post.title}</p>
-              <Pressable
-                variant="secondary"
-                density="compact"
-                onClick={() => {
-                  setTitle(conflict.post!.title);
-                  setBody(conflict.post!.bodySrc);
-                  existing.refetch();
-                }}
-              >
-                {t('compose.takeServerCopy')}
-              </Pressable>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* ── preview ────────────────────────────────────────────────────────────────────────── */}
-      {showPreview ? (
-        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-          <h2 className="text-title-3 text-text-1">{t('compose.preview')}</h2>
-          {preview.isPending ? (
-            <Skeleton className="h-24 rounded-card" />
-          ) : preview.data ? (
-            <DocRenderer doc={preview.data.doc} />
-          ) : preview.error ? (
-            <p className="text-body-s text-danger" role="alert">
-              {t(`compose.markdown.${conflictOf(preview.error)?.reason ?? 'generic'}`, {
-                defaultValue: t('compose.markdown.generic'),
-              })}
-            </p>
-          ) : (
-            <p className="text-caption text-text-3">{t('compose.previewEmpty')}</p>
-          )}
-        </section>
-      ) : null}
-
-
-      {/* ── the cover ─────────────────────────────────────────────────────────────────────── */}
+      {/* ── the anchor: the cover, at full width ─────────────────────────────────────────────
+          On create there is no cover section at all — the post has to exist before an image can
+          hang off it. */}
       {post && !readOnly ? (
-        <section className="flex flex-col gap-4 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-          <h2 className="text-title-3 text-text-1">{t('compose.cover')}</h2>
-
+        <Surface as="section" pad="none" className="overflow-hidden">
           {cover ? (
             <>
               {/* Served by the AUTHOR route, not the public one. On a draft this is the only place
@@ -453,25 +338,43 @@ export function PostEditorPage() {
               <img
                 src={'/api/v1/compose/posts/' + post.id + '/cover'}
                 alt={cover.alt ?? ''}
-                className="max-h-48 w-full rounded-card object-cover"
+                className="aspect-[16/9] w-full object-cover"
               />
-              <p className="text-caption text-text-3">
-                {t('compose.coverMeta', { w: cover.width, h: cover.height, kb: Math.round(cover.bytes / 1024) })}
-              </p>
-              {/* There is NO replace: the server refuses a second cover, so changing one is delete
-                  then upload. The screen says so rather than offering a button that answers 409. */}
-              <Pressable
-                variant="secondary"
-                busy={deleteCover.isPending}
-                onClick={() => deleteCover.mutate(undefined, { onSuccess: () => feedback.ok('compose.toast.coverRemoved') })}
-              >
-                <Trash2 className="size-icon-s" aria-hidden />
-                {t('compose.removeCover')}
-              </Pressable>
-              <p className="text-caption text-text-3">{t('compose.coverReplaceNote')}</p>
+              {/* The metadata line, the alt field, the removal button and the swap caption all
+                  collapse into this one row. It reads `Kép eltávolítása` and not `Csere` because
+                  there IS no replace: the server refuses a second cover, so changing one is delete
+                  then upload, and a button that answers 409 is worse than one that says what it
+                  does. */}
+              <div className="flex items-center gap-group p-4">
+                <span
+                  aria-hidden
+                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+                >
+                  <ImageIcon className="size-icon-m" strokeWidth={2} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="text-body-s block text-accent">{t('compose.cover')}</span>
+                  <span className="text-caption block truncate text-text-3">
+                    {cover.alt ?? t('compose.coverAltHint')}
+                  </span>
+                </span>
+                <Pressable
+                  variant="ghost"
+                  density="compact"
+                  className="shrink-0"
+                  busy={deleteCover.isPending}
+                  onClick={() =>
+                    deleteCover.mutate(undefined, { onSuccess: () => feedback.ok('compose.toast.coverRemoved') })
+                  }
+                >
+                  {t('compose.removeCover')}
+                </Pressable>
+              </div>
             </>
           ) : (
-            <>
+            <div className="flex flex-col gap-group p-4">
+              {/* Alt text stays EDITABLE in the upload flow. Display-only in the caption row above
+                  is fine; display-only everywhere would mean every cover shipping without one. */}
               <Field
                 label={t('compose.coverAlt')}
                 value={alt}
@@ -479,7 +382,7 @@ export function PostEditorPage() {
                 onChange={(e) => setAlt(e.target.value)}
                 hint={t('compose.coverAltHint')}
               />
-              <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center gap-2 rounded-button border border-[var(--surface-border)] bg-surface-1 px-4 text-text-1 transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] active:scale-[0.97] hover:bg-surface-2">
+              <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center justify-center gap-tight rounded-button border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 px-4 text-text-1 transition-[transform,background-color,border-color,color] duration-[var(--duration-instant)] ease-[var(--ease-standard)] hover:bg-surface-2 active:scale-[0.97]">
                 <ImagePlus className="size-icon-s" aria-hidden />
                 {uploadCover.isPending ? t('compose.uploading') : t('compose.chooseCover')}
                 <input
@@ -498,83 +401,236 @@ export function PostEditorPage() {
                   }}
                 />
               </label>
-            </>
+            </div>
           )}
 
           {uploadCover.error || deleteCover.error ? (
-            <p className="text-body-s text-danger" role="alert">
+            <p className="text-body-s px-4 pb-4 text-danger" role="alert">
               {t(`compose.reason.${conflictOf(uploadCover.error ?? deleteCover.error)?.reason ?? 'generic'}`, {
                 defaultValue: t('compose.coverFailed'),
               })}
             </p>
           ) : null}
-        </section>
+        </Surface>
       ) : null}
 
-      {/* ── lifecycle ──────────────────────────────────────────────────────────────────────── */}
+      {/* ── type ─────────────────────────────────────────────────────────────────────────────
+          Live on create, and a plain statement afterwards. The kind is FROZEN once the post
+          exists — its shape rules are enforced by a trigger that cannot re-validate a changed
+          kind — so a control that merely LOOKS disabled would still be a control that lies. */}
+      <div className="flex flex-col gap-tight">
+        <span className="text-body-s text-text-2">{t('compose.kind')}</span>
+        {isNew ? (
+          <Segmented
+            label={t('compose.kind')}
+            value={kind}
+            onChange={setKind}
+            options={(taxonomy.data?.kinds ?? []).map((k) => {
+              const Icon = kindIcon(k.key);
+              return {
+                value: k.key,
+                label: t(`marketplace.kind.${k.key}`, { defaultValue: k.key }),
+                icon: <Icon className="size-icon-s" aria-hidden />,
+              };
+            })}
+          />
+        ) : (
+          <>
+            <p className="text-body flex items-center gap-tight text-text-1">
+              <FrozenKindIcon className="size-icon-m shrink-0 text-accent" aria-hidden />
+              {t(`marketplace.kind.${kind}`, { defaultValue: kind })}
+            </p>
+            <p className="text-caption text-text-3">{t('compose.kindFrozen')}</p>
+          </>
+        )}
+      </div>
+
+      <Field
+        label={t('compose.postTitle')}
+        value={title}
+        maxLength={limits?.titleMax}
+        disabled={readOnly}
+        onChange={(e) => setTitle(e.target.value)}
+        hint={limits ? t('compose.charsLeft', { n: Math.max(0, limits.titleMax - title.length) }) : undefined}
+        error={limits && title.length > limits.titleMax ? t('compose.overLimit') : undefined}
+      />
+
+      {/* ── the body ─────────────────────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-tight">
+        <label htmlFor="compose-body" className="text-body-s flex items-center gap-tight text-text-2">
+          <span
+            aria-hidden
+            className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+          >
+            <Pencil className="size-icon-s" strokeWidth={2} />
+          </span>
+          {t('compose.body')}
+        </label>
+        <textarea
+          id="compose-body"
+          className="text-body min-h-32 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
+          value={body}
+          disabled={readOnly}
+          onChange={(e) => setBody(e.target.value)}
+        />
+        {/* Colour arrives before reading does, and only near the end — a counter that is loud from
+            the first character is a counter people stop seeing. */}
+        <span
+          className={cn('text-caption', limits ? COUNTER_CLASS[counterTone(body.length, limits.bodyMax)] : 'text-text-3')}
+        >
+          {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bodyMax - body.length) }) : ''}
+        </span>
+      </div>
+
+      {/* ── the markdown refusal, one red line under the body ─────────────────────────────────── */}
+      {bodyError?.body?.reason && !conflict ? (
+        <p className="text-body-s text-danger" role="alert">
+          {t(`compose.markdown.${bodyError.body.reason}`, { defaultValue: t('compose.markdown.generic') })}
+        </p>
+      ) : null}
+
+      {/* Everything that is not `stale` still answers inline — those refusals name a fix that
+          applies to the form the coach is looking at. */}
+      {conflict && !staleOpen ? (
+        <Surface
+          as="p"
+          className="text-body-s border-[var(--warning-border)] bg-warning-subtle text-text-1"
+          role="alert"
+        >
+          {t(`compose.reason.${conflict.reason}`, {
+            defaultValue: t('compose.reason.generic'),
+            version: conflict.activeVersion,
+            when: conflict.eligibleAt ? new Date(conflict.eligibleAt * 1000).toLocaleString(i18n.language) : '',
+            used: conflict.used,
+            max: conflict.max,
+            next: conflict.nextSlotAt ? new Date(conflict.nextSlotAt * 1000).toLocaleString(i18n.language) : '',
+            field: conflict.field,
+          })}
+        </Surface>
+      ) : null}
+
+      {/* ── the autosave line, on its own row above the rule ──────────────────────────────────
+          `aria-live="polite"` on a region that only ever holds four short words. It matters here
+          because the whole promise of autosave is that somebody can stop paying attention, and a
+          promise nobody can hear is one only sighted users get.
+
+          `failed` is deliberately loud and does not go away on its own. Everything else fades to
+          nothing when there is nothing to say. The region is always rendered so a change inside it
+          is announced — one created at the moment it has something to say often is not. */}
+      <p
+        className={cn(
+          'text-caption flex min-h-5 items-center gap-tight',
+          autosave.state === 'failed' ? 'text-danger' : 'text-text-3',
+        )}
+        aria-live="polite"
+      >
+        {autosave.state === 'saving' ? (
+          <>
+            <Loader2 className="size-icon-s animate-spin motion-reduce:animate-none" aria-hidden />
+            {t('compose.autosave.saving')}
+          </>
+        ) : autosave.state === 'failed' ? (
+          <>
+            <AlertCircle className="size-icon-s shrink-0" aria-hidden />
+            {t('compose.autosave.failed')}
+          </>
+        ) : autosave.state === 'saved' && !autosave.hasUnsaved ? (
+          <>
+            <Check className="size-icon-s text-success" aria-hidden />
+            {t('compose.autosave.saved')}
+          </>
+        ) : null}
+      </p>
+
+      {/* ── lifecycle ────────────────────────────────────────────────────────────────────────── */}
       {post && !readOnly ? (
-        <section className="flex flex-wrap gap-2 border-t border-[var(--surface-border)] pt-4">
-          {post.publishedAt === null && post.deletedAt === null ? (
-            <Pressable
-              variant="primary"
-              busy={lifecycle.isPending}
-              onClick={() =>
-                lifecycle.mutate('publish', {
-                  onSuccess: () => feedback.ok('compose.toast.published'),
-                  onError: (e) =>
-                    feedback.failed(
-                      t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
-                    ),
-                })
-              }
-            >
-              <Globe className="size-icon-s" aria-hidden />
-              {t('compose.publish')}
-            </Pressable>
-          ) : null}
-          {/* THE UNDO IS THE POINT. Taking something down is the action people hesitate over, and a
-              one-tap way back is what makes hesitating unnecessary — the restore returns the post to
-              its ORIGINAL feed position and spends no quota, so the undo costs nothing at all. */}
-          {post.deletedAt === null ? (
-            <Pressable
-              variant="secondary"
-              busy={lifecycle.isPending}
-              onClick={() =>
-                lifecycle.mutate('withdraw', {
-                  onSuccess: () => feedback.ok('compose.toast.withdrawn', () => lifecycle.mutate('restore')),
-                })
-              }
-            >
-              <EyeOff className="size-icon-s" aria-hidden />
-              {t('compose.withdraw')}
-            </Pressable>
-          ) : (
-            <Pressable
-              variant="secondary"
-              busy={lifecycle.isPending}
-              onClick={() =>
-                lifecycle.mutate('restore', {
-                  onSuccess: () => feedback.ok('compose.toast.restored'),
-                  onError: (e) =>
-                    feedback.failed(
-                      t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
-                    ),
-                })
-              }
-            >
-              <RotateCcw className="size-icon-s" aria-hidden />
-              {t('compose.restore')}
-            </Pressable>
-          )}
+        <section className="flex flex-col gap-tight border-t-[length:var(--border-width)] border-[var(--surface-border)] pt-4">
+          <div className="flex flex-wrap gap-tight">
+            {post.publishedAt === null && post.deletedAt === null ? (
+              <Pressable
+                variant="primary"
+                busy={lifecycle.isPending}
+                onClick={() =>
+                  lifecycle.mutate('publish', {
+                    onSuccess: () => feedback.ok('compose.toast.published'),
+                    onError: (e) =>
+                      feedback.failed(
+                        t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
+                      ),
+                  })
+                }
+              >
+                <Globe className="size-icon-s" aria-hidden />
+                {t('compose.publish')}
+              </Pressable>
+            ) : null}
+            {/* THE UNDO IS THE POINT. Taking something down is the action people hesitate over, and
+                a one-tap way back is what makes hesitating unnecessary — the restore returns the
+                post to its ORIGINAL feed position and spends no quota, so the undo costs nothing. */}
+            {post.deletedAt === null ? (
+              <Pressable
+                variant="secondary"
+                busy={lifecycle.isPending}
+                onClick={() =>
+                  lifecycle.mutate('withdraw', {
+                    onSuccess: () => feedback.ok('compose.toast.withdrawn', () => lifecycle.mutate('restore')),
+                  })
+                }
+              >
+                <EyeOff className="size-icon-s" aria-hidden />
+                {t('compose.withdraw')}
+              </Pressable>
+            ) : (
+              <Pressable
+                variant="secondary"
+                busy={lifecycle.isPending}
+                onClick={() =>
+                  lifecycle.mutate('restore', {
+                    onSuccess: () => feedback.ok('compose.toast.restored'),
+                    onError: (e) =>
+                      feedback.failed(
+                        t(`compose.reason.${conflictOf(e)?.reason ?? 'generic'}`, { defaultValue: t('compose.reason.generic') }),
+                      ),
+                  })
+                }
+              >
+                <RotateCcw className="size-icon-s" aria-hidden />
+                {t('compose.restore')}
+              </Pressable>
+            )}
+          </div>
           {/* Restoring returns the post to its ORIGINAL feed position and costs no quota slot —
               published_at never moves. Worth saying, because the fear it removes is the reason
               people leave things up that they would rather take down. */}
           {post.deletedAt !== null ? (
-            <p className="text-caption w-full text-text-3">{t('compose.restoreKeepsPosition')}</p>
+            <p className="text-caption text-text-3">{t('compose.restoreKeepsPosition')}</p>
           ) : null}
         </section>
       ) : null}
+
+      {/* ── the stale conflict, as a conversation rather than a merge ─────────────────────────── */}
+      <Sheet open={staleOpen} onClose={() => save.reset()} title={t('compose.reason.stale')}>
+        <div className="flex flex-col gap-tight">
+          <p className="text-caption text-text-2">{t('compose.staleServerCopy')}</p>
+          <p className="text-body-s rounded-field bg-[var(--field-bg)] p-3 text-text-1">
+            {conflict?.post?.title}
+          </p>
+          <Pressable
+            variant="primary"
+            className="w-full"
+            onClick={() => {
+              const server = conflict?.post;
+              if (!server) return;
+              setTitle(server.title);
+              setBody(server.bodySrc);
+              save.reset();
+              existing.refetch();
+            }}
+          >
+            {t('compose.takeServerCopy')}
+          </Pressable>
+        </div>
+      </Sheet>
     </div>
   );
 }
-

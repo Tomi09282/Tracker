@@ -47,10 +47,30 @@ export interface Achievement {
   paidMinor: number | null;
 }
 
+export interface Wallet {
+  balanceMinor: number;
+  /**
+   * Lifetime earnings, in minor units — the DENOMINATOR the balance ring's arc is drawn against,
+   * so the sweep means "the share of everything you have ever earned that you still hold".
+   *
+   * ═══ OPTIONAL, AND THAT IS THE DESIGN, NOT A GAP LEFT OPEN ═══════════════════════════════════
+   *
+   * `/coins/wallet` returns `balanceMinor` and nothing else today. The one thing this screen may
+   * not do is invent the referent: `useLedger` returns ONE CAPPED PAGE with a `nextCursor`, so
+   * summing what is visible would produce a ring whose meaning changes as history grows — a
+   * 100%-full ring for a new user that quietly becomes a 12% one a year later, with no event in
+   * between. That is worse than no arc.
+   *
+   * So while this is undefined the ring renders as a quiet full track with no arc at all, and it
+   * starts meaning something the moment the server computes and sends it. No client change.
+   */
+  lifetimeEarnedMinor?: number;
+}
+
 export function useWallet() {
   return useQuery({
     queryKey: ['coin-wallet'],
-    queryFn: () => apiWithRefresh<{ balanceMinor: number }>('/coins/wallet'),
+    queryFn: () => apiWithRefresh<Wallet>('/coins/wallet'),
   });
 }
 

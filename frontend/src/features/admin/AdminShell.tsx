@@ -50,16 +50,23 @@ export function AdminShell({
   const current = sections.find((s) => s.key === active) ?? sections[0];
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-12">
+    <div className="grid gap-group lg:grid-cols-12 lg:gap-6">
       {/*
         A tablist, not a nav. These switch a panel in place; they do not navigate, and calling it
         navigation would promise a screen-reader user a page change that never happens.
+
+        ═══ PILLS ON A PHONE, THE SAME RAIL ABOVE lg ══════════════════════════════════════════════
+
+        Three sections fit across a phone as chips, so the row costs one line and the panel below it
+        starts above the fold. It is the same control either way — one horizontal scroll container
+        that turns into the vertical rail at the breakpoint — not two implementations of a tablist
+        that would have to be kept in step.
       */}
       <div
         role="tablist"
         aria-orientation="vertical"
         aria-label={t('admin.sections')}
-        className="flex gap-2 overflow-x-auto lg:col-span-3 lg:max-w-[var(--admin-sidebar-w)] lg:flex-col lg:overflow-visible"
+        className="flex gap-tight overflow-x-auto lg:col-span-3 lg:max-w-[var(--admin-sidebar-w)] lg:flex-col lg:overflow-visible"
       >
         {sections.map((s) => {
           const Icon = s.icon;
@@ -72,8 +79,16 @@ export function AdminShell({
               aria-selected={selected}
               aria-controls={`admin-panel-${s.key}`}
               variant={selected ? 'secondary' : 'ghost'}
+              shape="chip"
               density="compact"
-              className={cn('shrink-0 justify-start gap-2 lg:w-full', selected && 'font-medium')}
+              className={cn(
+                'shrink-0 justify-start gap-tight lg:w-full',
+                // The open section is the only one that gets a fill and an accent edge; the rest
+                // keep the hairline that says "this is pressable" and nothing more.
+                selected
+                  ? 'border-[length:var(--border-width)] border-accent font-medium text-accent'
+                  : 'border-[length:var(--border-width)] border-[var(--surface-border)]',
+              )}
               onClick={() => onSelect(s.key)}
             >
               <Icon className="size-icon-s shrink-0" aria-hidden />

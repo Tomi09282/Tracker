@@ -9,6 +9,13 @@ import { toCoins } from './useCoins';
 /**
  * E25 — the coin balance. Five variants.
  *
+ * ═══ IT IS NOW THE CENTRE OF THE RING, NOT A CHIP IN THE HEADER ════════════════════════════════
+ *
+ * Same component, same rules, different frame. The redesign moved the balance out of the header
+ * cluster — the least-looked-at pixel on the screen — and made it the anchor: a coin glyph, the
+ * figure in the heaviest type on the page, and a caption slot beneath it. The old inline layout
+ * was a status line; this is the thing the user came for.
+ *
  * ═══ THE NUMBER IS THE SAME IN ALL FIVE ════════════════════════════════════════════════════════
  *
  * Every variant renders `toCoins(balanceMinor)` and differs only in how it ARRIVES there. That is
@@ -23,27 +30,29 @@ import { toCoins } from './useCoins';
  * through every number the user has ever had reads as the balance being recalculated, and on a
  * screen about money that is the single impression to avoid.
  *
+ * ═══ THE DELTA LANDS UNDER THE NUMBER THAT CHANGED ═════════════════════════════════════════════
+ *
+ * It used to be a chip in the header corner, which is where the old screen put its only feedback
+ * that money had moved. Folding it into the caption slot costs the chip its own colour field and
+ * buys the confirmation landing directly beneath the figure the user is already looking at.
+ *
+ * The slot keeps its height when it is empty. A caption that appears and disappears would shove
+ * the ring's contents up and down every time a purchase settles, which is the layout shift the
+ * whole skeleton discipline exists to prevent.
+ *
  * ═══ REDUCED MOTION IS NOT "NO FEEDBACK" ═══════════════════════════════════════════════════════
  *
  * The Bible's rule: the state change still HAPPENS and is still visible, it just does not travel.
- * So with motion off the number lands immediately and the delta chip still appears — what is
- * dropped is the roll, the flight and the pulse, never the information.
+ * So with motion off the number lands immediately and the delta still appears — what is dropped
+ * is the roll, the flight and the pulse, never the information.
  */
-export function CoinBalance({
-  balanceMinor,
-  className,
-  showDelta = true,
-}: {
-  balanceMinor: number;
-  className?: string;
-  showDelta?: boolean;
-}) {
+export function CoinBalance({ balanceMinor }: { balanceMinor: number }) {
   const { t } = useTranslation();
   const variant = useElementVariant('E25');
   const motionSafe = useMotionSafe();
 
   // The PREVIOUS balance, so a change can be animated as a change. `null` on first render is what
-  // distinguishes "arrived at 1450" from "went up by 1450", and only the second deserves a chip.
+  // distinguishes "arrived at 1450" from "went up by 1450", and only the second deserves a delta.
   const previous = useRef<number | null>(null);
   const [delta, setDelta] = useState<number | null>(null);
 
@@ -65,17 +74,18 @@ export function CoinBalance({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 ${className ?? ''}`}
+      className="flex flex-col items-center gap-tight"
       // ONE announcement, on the container, so a screen reader hears "1450 coins" rather than the
       // odometer's every intermediate value. `polite` because a balance is never an interruption.
       aria-live="polite"
       aria-label={t('coins.balanceLabel', { count: coins })}
     >
       <Coins
-        className={`size-4 shrink-0 text-accent ${pulses && motionSafe ? 'animate-pulse' : ''}`}
+        className={`size-icon-m shrink-0 text-text-2 ${pulses && motionSafe ? 'animate-pulse' : ''}`}
         aria-hidden
       />
-      <span className="tabular-nums text-text-1" aria-hidden>
+
+      <span className="text-display font-display tabular-nums text-text-1" aria-hidden>
         {rolls && motionSafe ? (
           <CountUp to={coins} from={toCoins(from)} duration={600} />
         ) : (
@@ -83,18 +93,15 @@ export function CoinBalance({
         )}
       </span>
 
-      {/* THE DELTA IS THE FEEDBACK, and it survives reduced motion because it is information
-          rather than movement. Earning is accent-coloured; spending is deliberately NOT danger —
-          buying something you chose to buy is not an error. */}
-      {showDelta && delta !== null ? (
-        <span
-          className={`text-caption tabular-nums ${delta > 0 ? 'text-accent' : 'text-text-3'}`}
-          aria-hidden
-        >
-          {delta > 0 ? '+' : ''}
-          {toCoins(delta)}
-        </span>
-      ) : null}
+      {/* The caption slot. It holds the delta when one has just happened and reserves its own
+          height when it has not — see the docblock. Earning is accent-coloured; spending is
+          deliberately NOT danger, because buying something you chose to buy is not an error. */}
+      <span
+        className={`text-caption h-4 tabular-nums ${delta !== null && delta > 0 ? 'text-accent' : 'text-text-3'}`}
+        aria-hidden
+      >
+        {delta !== null ? `${delta > 0 ? '+' : ''}${toCoins(delta)}` : ''}
+      </span>
     </span>
   );
 }

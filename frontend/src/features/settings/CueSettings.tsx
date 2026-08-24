@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { LucideIcon } from 'lucide-react';
+import { Bell, Speech, Vibrate } from 'lucide-react';
 import {
   cueSnapshot,
   setCueEnabled,
@@ -13,6 +15,8 @@ import {
   type CueChannel,
 } from '../../features/workout/cues';
 import { Switch } from '../../ui/primitives/Switch';
+import { Surface } from '../../ui/primitives/Surface';
+import { cn } from '../../lib/cn';
 
 /**
  * Which cues the workout player is allowed to emit on THIS device.
@@ -35,12 +39,14 @@ function useCues() {
 
 function Row({
   channel,
+  icon: Icon,
   label,
   hint,
   available,
   onPreview,
 }: {
   channel: CueChannel;
+  icon: LucideIcon;
   label: string;
   hint: string;
   available: boolean;
@@ -51,12 +57,25 @@ function Row({
   const id = `cue-${channel}`;
 
   return (
-    <div className="flex items-start gap-3 py-2">
-      <div className="min-w-0 flex-1">
-        <span id={id} className="text-body block text-text-1">
-          {label}
+    <div className="flex items-center gap-tight px-[var(--card-pad)] py-2">
+      {/* The dim lands on the icon and the words, NOT on the whole row — the Switch already
+          carries the disabled opacity from `control.ts`, and stacking the two would sink an
+          unavailable channel to 20% and read as broken rather than as absent. */}
+      <div className={cn('flex min-w-0 flex-1 items-center gap-tight', !available && 'opacity-45')}>
+        <span
+          aria-hidden
+          className="grid size-11 shrink-0 place-items-center rounded-card bg-surface-2 text-text-2"
+        >
+          <Icon className="size-icon-m" strokeWidth={2} />
         </span>
-        <p id={`${id}-hint`} className="text-caption mt-0.5 text-text-3">{hint}</p>
+        <div className="min-w-0">
+          <span id={id} className="text-body block text-text-1">
+            {label}
+          </span>
+          <p id={`${id}-hint`} className="text-caption mt-0.5 text-text-3">
+            {hint}
+          </p>
+        </div>
       </div>
 
       <Switch
@@ -66,7 +85,6 @@ function Row({
         // A toggle for something that cannot happen would be a lie. Disabled and dimmed rather
         // than hidden, so the absence is explained rather than mysterious.
         disabled={!available}
-        className="self-center"
         onChange={(next) => {
           setCueEnabled(channel, next);
           // Turning something ON demonstrates it immediately, inside the tap so iOS counts it as a
@@ -82,9 +100,12 @@ export function CueSettings() {
   const { t, i18n } = useTranslation();
 
   return (
-    <div className="divide-y divide-[var(--surface-border)]">
+    // One card, three rows, hairlines between them — `pad="none"` because the rows own their
+    // own padding so a divider runs the full width of the card instead of floating inside it.
+    <Surface pad="none" className="divide-y divide-[var(--surface-border)] overflow-hidden">
       <Row
         channel="speech"
+        icon={Speech}
         label={t('settings.cues.speech')}
         hint={t('settings.cues.speechHint')}
         available={speechAvailable()}
@@ -92,6 +113,7 @@ export function CueSettings() {
       />
       <Row
         channel="tone"
+        icon={Bell}
         label={t('settings.cues.tone')}
         hint={t('settings.cues.toneHint')}
         available
@@ -102,11 +124,12 @@ export function CueSettings() {
       />
       <Row
         channel="haptics"
+        icon={Vibrate}
         label={t('settings.cues.haptics')}
         hint={t('settings.cues.hapticsHint')}
         available={hapticsAvailable()}
         onPreview={() => vibrate('intervalWork')}
       />
-    </div>
+    </Surface>
   );
 }

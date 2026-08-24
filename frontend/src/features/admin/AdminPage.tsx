@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { Users, Dumbbell, Image, ShieldCheck, Languages, Palette, Activity, Globe } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Users, Dumbbell, Image, ShieldCheck, Palette, Globe, RefreshCw } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
 import { CountUp } from '../../ui/feedback/CountUp';
+import { Gauge } from '../../ui/feedback/Gauge';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { Surface } from '../../ui/primitives/Surface';
+import { Pressable } from '../../ui/primitives/Pressable';
+import { SummaryTile } from '../../ui/data/SummaryTile';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
 import { ModerationQueue } from './ModerationQueue';
-import { AdminMetrics } from './AdminMetrics';
 import { AdminShell } from './AdminShell';
 import { UserSearch } from './UserSearch';
 
@@ -26,35 +28,146 @@ interface Stats {
   audit: { events_24h: number };
 }
 
-function StatCard({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: string; value: number; sub?: string }) {
+/**
+ * ═══ THE ARCS PARTITION BY ROLE, AND THAT IS THE WHOLE POINT ═══════════════════════════════════
+ *
+ * A donut claims its arcs add up to the hole. The obvious three — members, coaches, new this week —
+ * do not: `users.new_7d` counts everyone who registered in the last seven days, so a coach who
+ * signed up on Tuesday is in TWO of them, and `total − coaches − new` would silently redefine
+ * "coaches" as "coaches who did not join this week".
+ *
+ * `role` is one column on `users` — the server counts `SUM(role = 'coach')` and `SUM(role =
+ * 'admin')` off it — so member / coach / admin are disjoint by construction and sum to the total
+ * exactly. That is a partition the picture can honestly make, and it is also the one an admin
+ * actually reads: who is on the platform, in what capacity.
+ *
+ * `new_7d` is a rate, not a slice, and a rate belongs on a trend, not in a ring.
+ */
+const ARC_COLOR = ['var(--accent)', 'var(--text-2)', 'var(--text-3)'] as const;
+
+function UserDonut({ users }: { users: Stats['users'] }) {
+  const { t } = useTranslation();
+
+  const members = Math.max(0, users.total - users.coaches - users.admins);
+  const slices = [
+    { key: 'user', label: t('adminUsers.role.user'), count: members, color: ARC_COLOR[0] },
+    { key: 'coach', label: t('adminUsers.role.coach'), count: users.coaches, color: ARC_COLOR[1] },
+    { key: 'admin', label: t('adminUsers.role.admin'), count: users.admins, color: ARC_COLOR[2] },
+  ];
+
   return (
-    <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent">
-          <Icon className="size-icon-m" strokeWidth={2} aria-hidden />
+    <Surface as="section" className="flex flex-col items-center gap-group">
+      <Gauge
+        className="aspect-square w-full max-w-72"
+        label={t('admin.users')}
+        thickness={0.14}
+        /* A CLOSED ring, unlike every other gauge in the app. The open bottom exists so a single
+           near-full arc does not read as a plain circle outline; here three coloured arcs already
+           say "donut", and a gap would take a slice out of a total that is supposed to be whole. */
+        gap={0}
+        segments={
+          users.total > 0
+            ? slices.map((s) => ({ value: s.count / users.total, color: s.color, label: s.label }))
+            : []
+        }
+      >
+        <span className="flex flex-col items-center">
+          <span className="text-display font-display tabular-nums text-text-1">
+            <CountUp to={users.total} />
+          </span>
+          <span className="text-body-s text-text-2">{t('admin.users')}</span>
         </span>
-        <span className="text-micro uppercase text-text-3">{label}</span>
+      </Gauge>
+
+      <ul className="flex flex-wrap items-center justify-center gap-group">
+        {slices.map((s) => (
+          <li key={s.key} className="text-caption flex items-center gap-tight text-text-2">
+            <span aria-hidden className="size-2 shrink-0 rounded-chip" style={{ backgroundColor: s.color }} />
+            {s.label}
+            <span className="tabular-nums text-text-1">{s.count}</span>
+          </li>
+        ))}
+      </ul>
+    </Surface>
+  );
+}
+
+/**
+ * The moderation panel's own header — an icon tile, the heading with its waiting count under it,
+ * and the refresh control.
+ *
+ * ═══ WHY THE REFRESH BUTTON IS NEW ═════════════════════════════════════════════════════════════
+ *
+ * The queue only ever refetched as a side effect of a decision. So the one state that is REACHED by
+ * doing nothing — somebody else decided a submission while this list sat on screen, and opening it
+ * now 404s — had no way out except a full page reload. `admin.reviewGoneBody` literally instructs
+ * the admin to "refresh the list", and until now there was nothing to press.
+ */
+function ModerationHeader({ pending }: { pending?: number }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const fetching = useIsFetching({ queryKey: ['admin', 'moderation'] }) > 0;
+
+  return (
+    <div className="flex items-center gap-tight">
+      <span
+        aria-hidden
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+      >
+        <ShieldCheck className="size-icon-m" strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h2 className="text-title-3 text-text-1">{t('admin.moderation')}</h2>
+        {/* A count, and only when there IS one — never a grey zero, which reads both as an empty
+            queue and as a badge that is broken. */}
+        {pending ? (
+          <p className="text-caption tabular-nums text-text-3">
+            {t('admin.pendingCount', { count: pending })}
+          </p>
+        ) : null}
       </div>
-      <p className="text-display font-display mt-4 text-text-1">
-        <CountUp to={value} />
-      </p>
-      {sub ? <p className="text-caption mt-1 text-text-3">{sub}</p> : null}
+      <Pressable
+        shape="icon"
+        variant="secondary"
+        /* `common.retry` — "Újra" — is a stand-in. This control wants its own key; see the note in
+           the handover. It is the ONLY name a screen-reader user gets for the button. */
+        aria-label={t('common.retry')}
+        busy={fetching}
+        onClick={() => void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] })}
+      >
+        <RefreshCw
+          className={cn('size-icon-m', fetching && 'animate-spin motion-reduce:animate-none')}
+          strokeWidth={2}
+          aria-hidden
+        />
+      </Pressable>
     </div>
   );
 }
 
 /**
- * Admin — Bible blueprint 10: stat cards with odometer numbers, then a dense table with a
- * sticky header and row hover, inside the 1120px wide column.
+ * Admin — the platform's landing screen for the one role that can change it.
  *
- * This screen is F8-lite. The full admin, including the Element Style Studio, is Phase 7.
+ * ═══ FOUR STAT CARDS BECAME A DONUT AND TWO TILES ══════════════════════════════════════════════
+ *
+ * `FELHASZNÁLÓK`, `GYAKORLATOK`, `FORDÍTÁSOK`, `MÉDIAFÁJLOK` were four identical label-number-subline
+ * cards in a grid — four unrelated facts, read left to right, none of them the reason anybody opened
+ * this page. The user count is the one number an admin looks at twice, and what it is made of is the
+ * actual question, so it became the anchor. Translation row counts were cut outright: they change
+ * when somebody runs an import, which is not a thing anyone monitors.
+ *
+ * ═══ AND `Moderáció` IS THE SECTION THAT OPENS ═════════════════════════════════════════════════
+ *
+ * The badge on that pill is the only element on the screen that means "someone is waiting". The
+ * overview panel that used to open by default held four more stat cards and four trend charts — a
+ * metrics view, which an admin arriving to clear a queue scrolled straight past.
  */
 export function AdminPage() {
   const { t } = useTranslation();
   const { data: user } = useSession();
-  // Which panel is open. Local state rather than a route: these are four views of one screen, and
-  // a URL per view would mean four routes the palette and the router both have to know about.
-  const [section, setSection] = useState('overview');
+  // Which panel is open. Local state rather than a route: these are three views of one screen, and
+  // a URL per view would mean three routes the palette and the router both have to know about.
+  const [section, setSection] = useState('moderation');
 
   const stats = useQuery({
     queryKey: ['admin', 'stats'],
@@ -81,10 +194,12 @@ export function AdminPage() {
   }
 
   return (
-    <div className="col-wide screen-x py-6">
-      <p className="text-micro uppercase text-accent">{t('admin.eyebrow')}</p>
-      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-title-1 text-text-1">{t('admin.title')}</h1>
+    <div className="col-wide screen-x flex flex-col gap-section py-6">
+      <header className="flex flex-wrap items-center justify-between gap-group">
+        <div className="min-w-0">
+          <p className="text-micro uppercase text-accent">{t('admin.eyebrow')}</p>
+          <h1 className="text-title-1 mt-1 text-text-1">{t('admin.title')}</h1>
+        </div>
         {/* A real anchor, not a button that navigates: the studio is a page, and a page you can
             open in a new tab or middle-click is a page. */}
         <Link
@@ -94,58 +209,39 @@ export function AdminPage() {
           <Palette className="size-icon-s" aria-hidden />
           {t('admin.styleStudio')}
         </Link>
-      </div>
+      </header>
 
       {stats.isPending ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-32 rounded-card" />
-          ))}
+        // The skeletons carry the NEW geometry — a donut-proportioned card and two tile-proportioned
+        // ones. A placeholder at the old four-across grid would move the whole page on swap, which
+        // is the exact shift a skeleton exists to prevent.
+        <div className="flex flex-col gap-section">
+          <Skeleton className="h-88 w-full rounded-card" />
+          <div className="grid grid-cols-2 gap-group">
+            <Skeleton className="h-36 rounded-card" />
+            <Skeleton className="h-36 rounded-card" />
+          </div>
         </div>
       ) : stats.data ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            icon={Users}
-            label={t('admin.users')}
-            value={stats.data.users.total}
-            sub={t('admin.usersSub', { coaches: stats.data.users.coaches, new: stats.data.users.new_7d })}
-          />
-          <StatCard
-            icon={Dumbbell}
-            label={t('admin.exercises')}
-            value={stats.data.exercises.total}
-            sub={t('admin.exercisesSub', { global: stats.data.exercises.global, custom: stats.data.exercises.custom })}
-          />
-          <StatCard
-            icon={Languages}
-            label={t('admin.translations')}
-            value={stats.data.translations.rows}
-            sub={t('admin.translationsSub', { langs: stats.data.translations.langs })}
-          />
-          <StatCard
-            icon={Image}
-            label={t('admin.media')}
-            value={stats.data.media.total}
-            sub={`${(stats.data.media.bytes / 1024 / 1024).toFixed(1)} MB`}
-          />
+        <div className="flex flex-col gap-section">
+          <UserDonut users={stats.data.users} />
+          <div className="grid grid-cols-2 gap-group">
+            <SummaryTile icon={Dumbbell} value={stats.data.exercises.total} caption={t('admin.exercises')} />
+            <SummaryTile icon={Image} value={stats.data.media.total} caption={t('admin.media')} />
+          </div>
         </div>
       ) : null}
 
       {/*
-        Four sections behind a rail rather than four stacked on one page.
+        Three sections behind a pill row rather than three stacked on one page.
 
-        Stacked, an admin arriving to answer "is this account disabled" scrolled past a metrics
-        grid, four charts and a moderation table to reach the search box — and every one of those
-        fetched on arrival. Behind a rail, the section that is not open does not render, so it does
-        not fetch either: `render` is a function for that reason, not a node.
+        Stacked, an admin arriving to answer "is this account disabled" scrolled past a moderation
+        table and a marketplace queue to reach the search box — and every one of those fetched on
+        arrival. Behind the row, the section that is not open does not render, so it does not fetch
+        either: `render` is a function for that reason, not a node.
       */}
       <AdminShell
         sections={[
-          {
-            key: 'overview',
-            icon: Activity,
-            render: () => <AdminMetrics enabled={user?.role === 'admin'} />,
-          },
           {
             key: 'accounts',
             icon: Users,
@@ -156,22 +252,12 @@ export function AdminPage() {
             icon: ShieldCheck,
             badge: stats.data?.moderation.pending || undefined,
             render: () => (
-              <>
-      <section className="mt-8">
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-title-3 text-text-1">{t('admin.moderation')}</h2>
-          {stats.data ? (
-            <span className="text-caption tabular-nums text-text-3">
-              {t('admin.pendingCount', { count: stats.data.moderation.pending })}
-            </span>
-          ) : null}
-        </div>
-
-        {/* The queue AND the decision live here now. They used to be a table in this file whose
-            row carried Approve — see the header comment in ModerationQueue for why that moved. */}
-        <ModerationQueue />
-      </section>
-              </>
+              <section className="flex flex-col gap-group">
+                <ModerationHeader pending={stats.data?.moderation.pending} />
+                {/* The queue AND the decision live here now. They used to be a table in this file
+                    whose row carried Approve — see the header comment in ModerationQueue. */}
+                <ModerationQueue />
+              </section>
             ),
           },
           {
@@ -185,7 +271,8 @@ export function AdminPage() {
       />
 
       {stats.data ? (
-        <p className={cn('text-caption mt-8 text-text-3')}>
+        // Below the fold, and kept: the cheapest liveness signal on the screen.
+        <p className="text-caption text-text-3">
           {t('admin.footer', {
             sessions: stats.data.sessions.active,
             events: stats.data.audit.events_24h,
