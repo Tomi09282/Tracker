@@ -46,7 +46,8 @@
     "verify:seats": "node scripts/verify-seats.mjs",
     "verify:webhook": "node scripts/verify-webhook.mjs",
     "verify:subscription": "node scripts/verify-subscription.mjs",
-    "verify:payments": "node scripts/verify-payments-adversarial.mjs"
+    "verify:payments": "node scripts/verify-payments-adversarial.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs"
   },
   "author": "",
   "license": "ISC",
