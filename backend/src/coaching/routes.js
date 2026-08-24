@@ -123,7 +123,7 @@ router.get(
       // "how many sessions were PRESCRIBED" is the schedule rule, which is arithmetic over a
       // window rather than a column this query can join.
       `SELECT c.id AS link_id, c.status, c.origin, c.team_id, c.invited_at, c.accepted_at,
-              u.id AS client_id, u.email, u.must_change_credentials,
+              u.id AS client_id, u.email, u.display_name, u.must_change_credentials,
               t.name AS team_name,
               (SELECT COUNT(*) FROM workout_logs l
                 WHERE l.client_user_id = u.id AND l.status = 'completed'
@@ -134,7 +134,19 @@ router.get(
          JOIN users u ON u.id = c.client_id
          LEFT JOIN teams t ON t.id = c.team_id
         WHERE c.coach_id = ? AND c.status <> 'archived'
-        ORDER BY t.name IS NULL, t.name, u.email`,
+        -- A STABLE DEFAULT, NOT THE DISPLAY ORDER.
+        --
+        -- Sorting on the label rather than the address is right — the address is a string the
+        -- screen no longer shows — but SQLite compares text byte by byte under BINARY, and there
+        -- is no API on better-sqlite3 for registering a locale-aware collation. So this cannot be
+        -- the Hungarian answer: a lowercase e-mail local part sorts after every capitalised name,
+        -- and an accented initial sorts after all of ASCII.
+        --
+        -- An earlier version of this comment claimed COALESCE kept the unnamed clients "in the same
+        -- alphabet" as the named ones. Measured, it did the exact opposite. The roster's real order
+        -- is computed with Intl.Collator in CoachDashboard.tsx, which is the one place that knows
+        -- what language the reader is in; this clause only has to be deterministic.
+        ORDER BY t.name IS NULL, t.name, COALESCE(u.display_name, u.email), u.id`,
       [req.user.id],
     );
     res.json({ clients });
@@ -156,7 +168,7 @@ router.get(
     const linkId = z.coerce.number().int().positive().parse(req.params.id);
     const client = await db.get(
       `SELECT c.id AS link_id, c.status, c.origin, c.team_id, c.invited_at, c.accepted_at,
-              u.id AS client_id, u.email, u.must_change_credentials, u.created_at AS joined_at,
+              u.id AS client_id, u.email, u.display_name, u.must_change_credentials, u.created_at AS joined_at,
               t.name AS team_name
          FROM coach_clients c
          JOIN users u ON u.id = c.client_id

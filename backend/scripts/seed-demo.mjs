@@ -454,11 +454,23 @@ const PEOPLE = [
 for (const p of PEOPLE) {
   p.email = `demo.${p.slug}@tracker.local`;
   p.role = p.kind === 'coach' ? 'coach' : 'user';
+  /*
+   * THE TWO PREGENERATED CLIENTS ARE DELIBERATELY LEFT NAMELESS.
+   *
+   * `pregenerated` means the coach made the account and the person has never signed in — so they
+   * have not had the chance to say what to call them, and inventing one here would make a state
+   * that really exists impossible to see on any screen. Every list, header and monogram has to
+   * survive a NULL name, and this is what proves they do without waiting for a real user to find
+   * out. Everybody else gets the name this table has been carrying all along, unused, because
+   * until 029 there was no column to put it in.
+   */
+  p.displayName = p.kind === 'pregen' ? null : p.name;
   p.id = await insert(
-    `INSERT INTO users (email, password_hash, role, must_change_credentials, created_by, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (email, display_name, password_hash, role, must_change_credentials, created_by, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       p.email,
+      p.displayName,
       DEMO_HASH,
       p.role,
       p.kind === 'pregen' ? 1 : 0,
@@ -530,8 +542,8 @@ for (const p of PEOPLE) {
 
 // One archived link, so "archived" is a state the roster query can be seen to exclude.
 const archivedUser = await insert(
-  'INSERT INTO users (email, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-  ['demo.simon.laszlo@tracker.local', DEMO_HASH, 'user', NOW - 400 * 86400, NOW],
+  'INSERT INTO users (email, display_name, password_hash, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+  ['demo.simon.laszlo@tracker.local', 'Simon László', DEMO_HASH, 'user', NOW - 400 * 86400, NOW],
 );
 bump('users (demo)');
 await db.run(

@@ -33,7 +33,10 @@
  * is bound, and every one is scoped by the caller's own id — there is no id in the request to forge.
  */
 export const EXPORT_TABLES = [
-  ['account', 'SELECT id, email, role, created_at, updated_at, must_change_credentials FROM users WHERE id = ?'],
+  // `display_name` is in here because the user TYPED it. The gate above checks tables, not
+  // columns, so a new column on an already-exported table is exactly the kind of personal
+  // data that can be added without anything going red — this list is the only thing watching.
+  ['account', 'SELECT id, email, display_name, role, created_at, updated_at, must_change_credentials FROM users WHERE id = ?'],
   ['theme', 'SELECT pack, accent, gradient FROM user_theme_prefs WHERE user_id = ?'],
   ['onboarding', 'SELECT * FROM onboarding_profiles WHERE user_id = ?'],
   ['onboarding_equipment', 'SELECT * FROM onboarding_equipment WHERE user_id = ?'],

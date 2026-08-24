@@ -26,6 +26,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Monogram } from './Monogram';
 import { useSession } from '../auth/useSession';
+import { personLabel } from '../../lib/person';
 import {
   useClients,
   useTeams,
@@ -107,7 +108,7 @@ const LEGEND_TEAMS = TEAM_COLORS.length;
  * rather than a column. An invented denominator would be faking it.
  */
 export function CoachDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: user } = useSession();
 
   const clients = useClients();
@@ -142,7 +143,32 @@ export function CoachDashboard() {
     );
   }
 
-  const rows = clients.data?.clients ?? [];
+  /* ── THE ROSTER'S ORDER IS DECIDED HERE, NOT IN SQL ──────────────────────────────────────────
+     SQLite compares text byte by byte under its default BINARY collation, and there is no API on
+     `better-sqlite3` for registering a locale-aware one. On a Hungarian roster that is not a near
+     miss, it is the wrong answer twice over: a lowercase e-mail local part (`demo.lukacs.adam`,
+     the fallback for an account that has never been signed into) sorts after every capitalised
+     name because `d` is 0x64 and `Z` is 0x5A, and every accented initial sorts after ALL of ASCII
+     because `Á` is two bytes starting 0xC3. Measured order, before this: Balogh, Molnár, Papp,
+     Zoltán, demo.lukacs.adam, nfarkas92, Ács Ádor, Örs Ödön — the unnamed accounts herded into a
+     block at the bottom and `Ács` stranded below even them, at the very end of the alphabet.
+
+     `Intl.Collator` in the app's own language gets all of that right, and the roster is a bounded
+     list — the seat cap is what bounds it — so sorting it here costs nothing. The server's own
+     ORDER BY stays as a stable default for any other consumer; this is what the coach sees.
+
+     `sensitivity: 'base'` folds case and accent for COMPARISON only, so `Ács` files under A and an
+     unnamed account files under whatever letter it starts with, rather than either being exiled to
+     one end. `numeric` keeps `Kliens 2` before `Kliens 10`. */
+  const collator = new Intl.Collator(i18n.language, { sensitivity: 'base', numeric: true });
+  const rows = [...(clients.data?.clients ?? [])].sort(
+    (a, b) =>
+      // Teams first and in the same grouping the server sent, so the sheet's segments and the list
+      // still agree; unassigned clients last, which is what `t.name IS NULL` meant in SQL.
+      Number(a.team_name === null) - Number(b.team_name === null) ||
+      collator.compare(a.team_name ?? '', b.team_name ?? '') ||
+      collator.compare(personLabel(a), personLabel(b)),
+  );
   const awaitingHandover = rows.filter((c) => c.must_change_credentials === 1);
   const liveCodes = (codes.data?.codes ?? []).filter((c) => !c.revoked_at && c.uses < c.max_uses);
 
@@ -418,7 +444,7 @@ export function CoachDashboard() {
                     'border-t border-[var(--surface-border)] first:border-t-0',
                   )}
                 >
-                  <Monogram email={c.email} />
+                  <Monogram person={c} />
 
                   {/* The LINK id, not the client's user id. They are different id spaces and the
                       route takes the link, because the link is what carries the proof that this
@@ -429,7 +455,7 @@ export function CoachDashboard() {
                     to={`/coach/clients/${c.link_id}`}
                     className="flex min-h-[var(--target-min)] min-w-0 flex-1 flex-col justify-center"
                   >
-                    <span className="text-body block truncate text-text-1">{c.email}</span>
+                    <span className="text-body block truncate text-text-1">{personLabel(c)}</span>
                     <span className="text-caption mt-1 flex flex-wrap items-center gap-tight text-text-3">
                       {/* A client with none gets the alert tone rather than a zero in the same
                           grey as everything else — the whole value of this line is that the quiet
@@ -547,7 +573,7 @@ export function CoachDashboard() {
             <ul className="flex flex-col gap-tight">
               {(pregenerate.data?.created ?? []).map((c) => (
                 <li key={c.userId} className="flex items-center justify-between gap-3">
-                  <span className="text-body-s min-w-0 truncate text-text-1">{c.email}</span>
+                  <span className="text-body-s min-w-0 truncate text-text-1">{personLabel(c)}</span>
                   <span className="text-body-s shrink-0 tabular-nums text-text-1">
                     {c.temporaryPassword}
                   </span>
@@ -576,9 +602,9 @@ export function CoachDashboard() {
         title={t('coaching.archiveConfirmTitle')}
       >
         <div className="flex items-center gap-tight">
-          {confirmArchive ? <Monogram email={confirmArchive.email} /> : null}
+          {confirmArchive ? <Monogram person={confirmArchive} /> : null}
           <p className="text-body-s measure text-text-2">
-            {t('coaching.archiveConfirmBody', { email: confirmArchive?.email })}
+            {t('coaching.archiveConfirmBody', { email: confirmArchive ? personLabel(confirmArchive) : '' })}
           </p>
         </div>
         <div className="mt-4 flex flex-wrap gap-tight">

@@ -37,6 +37,7 @@ export interface ShareRow {
   granted_at: number;
   revoked_at: number | null;
   coach_email: string;
+  coach_display_name: string | null;
   link_status: 'invited' | 'active' | 'archived';
 }
 

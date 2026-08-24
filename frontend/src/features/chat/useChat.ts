@@ -12,6 +12,7 @@ export interface Conversation {
   unread: number;
   last_body: string | null;
   other_email: string;
+  other_display_name: string | null;
 }
 
 export interface Message {

@@ -116,7 +116,10 @@
       "haptics": "Vibration",
       "hapticsHint": "Ein Vibrieren beim Abhaken eines Satzes, bei einem Rekord und bei jedem Rundenwechsel."
     },
-    "openAdmin": "Admin-Bereich öffnen"
+    "openAdmin": "Admin-Bereich öffnen",
+    "displayName": "Anzeigename",
+    "displayNameHint": "Dein Coach sieht das anstelle deiner E-Mail-Adresse.",
+    "displayNamePlaceholder": "Wie andere dich sehen"
   },
   "library": {
     "search": "Suche",

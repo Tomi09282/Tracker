@@ -21,6 +21,7 @@ import { SummaryTile } from '../../ui/data/SummaryTile';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { TrendChart } from '../../ui/feedback/TrendChart';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { personLabel } from '../../lib/person';
 import {
   useMeasurements,
   useMetrics,
@@ -521,7 +522,9 @@ function SharingTab() {
               {(shares.data?.shares ?? []).map((s) => (
                 <Surface as="li" key={s.id} elevation="inset" rim={false} className="flex flex-col gap-tight">
                   <div className="text-body-s flex items-center justify-between gap-tight text-text-1">
-                    <span className="truncate">{s.coach_email}</span>
+                    <span className="truncate">
+                      {personLabel({ email: s.coach_email, display_name: s.coach_display_name })}
+                    </span>
                     {/* An archived link is shown as ENDED rather than hidden, because "I revoked
                         it" and "they left" are different facts and the client is entitled to
                         both. */}
@@ -581,7 +584,17 @@ function SharingTab() {
           <Surface as="ul" pad="none" className="divide-y divide-[var(--surface-border)]">
             {(log.data?.entries ?? []).slice(0, 50).map((e) => (
               <li key={e.id} className="px-4 py-2">
-                <span className="text-body-strong block truncate text-text-1">{e.viewer}</span>
+                {/* THE STORED SNAPSHOT STAYS A FULL ADDRESS; THE SCREEN DOES NOT SHOW ONE.
+                    `viewer_email_snapshot` is written at access time on purpose — an audit trail
+                    of who read someone's health data has to survive that person renaming
+                    themselves or being deleted, so it cannot be a join. But the client reading
+                    this list needs to recognise a coach, not be handed a mailbox, and the same
+                    rule that took addresses off every other screen applies here (lib/person.ts).
+                    `personLabel` on a record with no name yields the local part, which is exactly
+                    the right amount: identifying, and not deliverable. */}
+                <span className="text-body-strong block truncate text-text-1">
+                  {personLabel({ email: e.viewer })}
+                </span>
                 <span className="text-caption tabular-nums text-text-3">
                   {t(`progress.looked.${e.kind}`, { defaultValue: e.kind })} ·{' '}
                   {new Date(e.at * 1000).toLocaleString()}

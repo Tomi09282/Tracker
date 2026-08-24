@@ -1,3 +1,5 @@
+import { personInitials, type Person } from '../../lib/person';
+
 /**
  * The two-letter stand-in for a face.
  *
@@ -5,8 +7,13 @@
  * background tokens — and the redesign puts it on the roster row, on the client detail anchor and
  * in the archive confirmation, so the third copy was about to become the fourth.
  *
- * `aria-hidden` by construction: the e-mail it abbreviates is always rendered beside it, and a
- * screen reader spelling out "A N" before reading the address says the same thing twice, badly.
+ * `aria-hidden` by construction: the name it abbreviates is always rendered beside it, and a
+ * screen reader spelling out "F N" before reading "Farkas Nóra" says the same thing twice, badly.
+ *
+ * It takes the whole PERSON rather than a string, so the two letters and the name beside them can
+ * never disagree about which field they came from — `personInitials` and `personLabel` read the
+ * same record through the same fallback. It used to take an `email` and slice two characters off
+ * it, which produced `DE` for every one of the demo clients.
  *
  * ═══ WHY A `size` PROP AND NOT A `className` ═══════════════════════════════════════════════════
  *
@@ -24,10 +31,10 @@ const SIZES = {
   lg: 'inline-grid size-[104px] shrink-0 place-items-center rounded-chip bg-surface-2 text-title-1 uppercase text-text-1',
 } as const;
 
-export function Monogram({ email, size = 'sm' }: { email: string; size?: keyof typeof SIZES }) {
+export function Monogram({ person, size = 'sm' }: { person: Person; size?: keyof typeof SIZES }) {
   return (
     <span aria-hidden className={SIZES[size]}>
-      {email.slice(0, 2)}
+      {personInitials(person)}
     </span>
   );
 }

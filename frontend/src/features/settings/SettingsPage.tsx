@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import {
@@ -10,15 +11,18 @@ import {
   LogOut,
   Palette,
   ShieldCheck,
+  User,
   Volume2,
 } from 'lucide-react';
+import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ThemeStudio } from './ThemeStudio';
 import { CueSettings } from './CueSettings';
-import { useSession, useLogout, type SessionUser } from '../auth/useSession';
+import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
+import { isValidDisplayName, personInitials, personLabel } from '../../lib/person';
 
 /**
  * The role, in the user's own language. `SettingsPage` used to print `user.role` raw, so a
@@ -27,9 +31,9 @@ import { useSession, useLogout, type SessionUser } from '../auth/useSession';
  * here instead of a raw key rendered on screen.
  */
 const ROLE_LABEL: Record<SessionUser['role'], string> = {
-  user: 'admin.role.user',
-  coach: 'admin.role.coach',
-  admin: 'admin.role.admin',
+  user: 'adminUsers.role.user',
+  coach: 'adminUsers.role.coach',
+  admin: 'adminUsers.role.admin',
 };
 
 /**
@@ -76,7 +80,9 @@ export function SettingsPage() {
   // is exactly what a resolved, non-null /auth/me is. A failed session read drops the badge with
   // the email, rather than decorating an account we could not confirm.
   const sessionHealthy = !isPending && !isError && user != null;
-  const monogram = user?.email?.[0]?.toUpperCase() ?? '';
+  // Initials of the NAME, not the first letter of the address. `personInitials` is the same
+  // function the coach's roster uses, so your monogram there and here cannot disagree.
+  const monogram = user ? personInitials(user) : '';
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
@@ -129,9 +135,16 @@ export function SettingsPage() {
                   ) : null}
                 </div>
 
-                {/* On a failed session read the email slot stays EMPTY rather than showing a
-                    placeholder account — a wrong identity here is worse than a missing one. */}
-                <p className="text-body text-text-1">{user?.email}</p>
+                {/* On a failed session read both slots stay EMPTY rather than showing a
+                    placeholder account — a wrong identity here is worse than a missing one.
+
+                    The NAME is the identity and the address is a fact about the account, so they
+                    are two lines and not one. This is also the one screen in the app that still
+                    prints the address in full, and it should: it is your own, it is under a
+                    heading that says `Fiók`, and you need to know which account you are signed
+                    into. Everywhere ELSE it was a leak — see lib/person.ts. */}
+                <p className="text-body text-text-1">{user ? personLabel(user) : ''}</p>
+                <p className="text-caption text-text-3">{user?.email}</p>
 
                 {user ? (
                   <span className="text-caption rounded-chip border border-[var(--surface-border)] px-3 py-1 text-text-2">
@@ -141,6 +154,13 @@ export function SettingsPage() {
               </>
             )}
           </div>
+
+          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET.
+              `users.display_name` is NULL for everybody until somebody types here, so an endpoint
+              without this control would be a column nothing can ever fill. It sits in the account
+              block because that is what it is a fact about, and above the sign-out because the
+              spec anchors the sign-out directly under the identity cluster. */}
+          {user ? <DisplayNameRow user={user} /> : null}
 
           {/* No section card around it, and no confirmation dialog: one tap, busy while it runs.
               It renders even while the session is still loading, because it depends on there
@@ -220,5 +240,61 @@ export function SettingsPage() {
         <LanguageToggle />
       </section>
     </div>
+  );
+}
+
+/**
+ * The name editor.
+ *
+ * Its own component rather than four more `useState` calls in a screen that already has eleven:
+ * this is the only part of Settings that owns unsaved text, and unsaved text is the one kind of
+ * state that must not be lost to an unrelated re-render.
+ *
+ * ═══ WHY A SAVE BUTTON AND NOT AN AUTOSAVE ═════════════════════════════════════════════════════
+ *
+ * The project has `useAutosave` and uses it for the plan editor, where losing a draft is
+ * expensive and the field count is high. A single 120-character field is the opposite case: the
+ * server rejects anything under two characters, so an autosave would fire a failing request on
+ * the first keystroke of every name and turn a normal edit into a red field. The save is explicit,
+ * and it only appears once something has actually changed.
+ */
+function DisplayNameRow({ user }: { user: SessionUser }) {
+  const { t } = useTranslation();
+  const save = useSetDisplayName();
+  const [draft, setDraft] = useState(user.display_name ?? '');
+
+  const trimmed = draft.trim();
+  const current = user.display_name ?? '';
+  const dirty = trimmed !== current;
+  // The server's rule, so the button is disabled instead of the request being refused. It lives in
+  // `lib/person.ts` rather than here because it was written here first, as `trimmed.length`, and
+  // that counts UTF-16 units where the database counts code points — a single emoji looked valid,
+  // enabled the button, and came back as an unexplained 400.
+  const valid = isValidDisplayName(draft);
+
+  return (
+    <Surface className="flex flex-col gap-tight">
+      <Field
+        label={t('settings.displayName')}
+        hint={t('settings.displayNameHint')}
+        placeholder={t('settings.displayNamePlaceholder')}
+        value={draft}
+        maxLength={120}
+        autoComplete="name"
+        leading={<User className="size-icon-m" strokeWidth={2} aria-hidden />}
+        onChange={(e) => setDraft(e.target.value)}
+      />
+      {dirty ? (
+        <Pressable
+          variant="primary"
+          className="w-full"
+          disabled={!valid}
+          busy={save.isPending}
+          onClick={() => save.mutate(trimmed.length ? trimmed : null)}
+        >
+          {t('common.save')}
+        </Pressable>
+      ) : null}
+    </Surface>
   );
 }

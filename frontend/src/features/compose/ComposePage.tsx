@@ -21,6 +21,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { kindIcon } from './kindIcons';
+import { initialsOf } from '../../lib/person';
 import {
   useComposeContext,
   useComposePosts,
@@ -88,15 +89,6 @@ function stateOf(p: ComposePost): PostStateKey {
   if (p.deletedAt !== null) return 'withdrawn';
   if (p.publishedAt !== null) return 'live';
   return 'draft';
-}
-
-function initialsOf(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
 }
 
 export function ComposePage() {

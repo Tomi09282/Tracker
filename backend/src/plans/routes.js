@@ -146,7 +146,7 @@ router.get(
       `SELECT p.id, p.scope, p.name, p.description, p.goal, p.experience, p.cycle_days,
               p.starts_on, p.ends_on, p.status, p.revision, p.coach_client_id, p.client_user_id,
               p.created_at, p.updated_at,
-              u.email AS client_email,
+              u.email AS client_email, u.display_name AS client_display_name,
               (SELECT COUNT(*) FROM workout_plan_days d WHERE d.plan_id = p.id) AS day_count
          FROM workout_plans p
          LEFT JOIN users u ON u.id = p.client_user_id

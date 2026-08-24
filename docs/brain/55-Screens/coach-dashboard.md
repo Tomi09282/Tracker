@@ -23,7 +23,7 @@ A ring, because a roster is a countable population and the number is the first t
 3. **Two summary tiles**, side by side: a ticket tile `CSAPATOK` `3` and a key tile `ÉLŐ KÓDOK` `2`. Both numbers count up on mount. `CSAPATOK` is pressable and opens the teams sheet.
 4. **Handover banner** (only when at least one account is pending) — alert-toned card, triangle icon, headline `2 fiók átadásra vár`, and a short body line. The long sentence `Ezeknek a fiókoknak még te ismered a jelszavát, ezért a kliens addig nem tud belépni az appba, amíg sajátot nem állít be.` is cut to its consequence: `Amíg nem állítanak be saját jelszót, nem tudnak belépni`.
 5. **Section `Csatlakozási kódok`** — an icon tile, the heading, and the one primary on the screen: the `+ Új kód` pill. Under it, one row per live code: `8 / 20 felhasználva` on the left, a ghost `Visszavonás` on the right. A ghost `Előre létrehozott fiókok` button closes the section and opens the pre-gen sheet.
-6. **Section `Névsor`** — icon tile, heading, and the roster total right-aligned. Then a flat list of client rows: monogram avatar (`AN`), the email, and a meta line `6 edzés / 28 nap` that switches to the alert tone at zero, plus the mini chip `ÁTADÁSRA VÁR` where it applies. An archive icon button closes each row. The whole text column is the link to `/coach/clients/:linkId`.
+6. **Section `Névsor`** — icon tile, heading, and the roster total right-aligned. Then a flat list of client rows: monogram avatar (`AN`), the client's **name** (was the e-mail until [[0017-a-person-has-a-name]]; a roster of forty rows was a roster of forty deliverable addresses), and a meta line `6 edzés / 28 nap` that switches to the alert tone at zero, plus the mini chip `ÁTADÁSRA VÁR` where it applies. An archive icon button closes each row. The whole text column is the link to `/coach/clients/:linkId`.
 7. **Bottom nav.**
 
 ## What was merged away, and why
@@ -54,7 +54,7 @@ A ring, because a roster is a countable population and the number is the first t
 
 Reuses `Pressable` (primary pill, ghost row buttons, icon button for archive), `CountUp` on all three numbers, `Sheet` for the minted code, the archive confirmation, the teams form and the pre-gen form, `Field` inside those sheets, `CopyButton` (E2) for the code and for each `email / password` pair, `EmptyState`, `Skeleton`, `NotificationBell`, `BottomNav`, and the `control` recipe for the row surfaces.
 
-Genuinely new: the segmented ring (the shipped `Progress` E16-D ring is single-value and cannot express a split), the icon-tile section header with a trailing count, and the monogram avatar — today it is an inline `email.slice(0, 2)` and it now appears on three screens, so it should become one component.
+Genuinely new: the segmented ring (the shipped `Progress` E16-D ring is single-value and cannot express a split), the icon-tile section header with a trailing count, and the monogram avatar — was an inline `email.slice(0, 2)` on three screens, which rendered `DE` for every demo client. Now one component fed by `personInitials` ([[0017-a-person-has-a-name]]); the same function had **six** copies across the app before that.
 
 ## Navigation
 

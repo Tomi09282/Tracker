@@ -116,7 +116,10 @@
       "haptics": "Rezgés",
       "hapticsHint": "Rezgés a sorozat pipálásakor, rekordnál és körváltáskor."
     },
-    "openAdmin": "Admin felület megnyitása"
+    "openAdmin": "Admin felület megnyitása",
+    "displayName": "Megjelenített név",
+    "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
+    "displayNamePlaceholder": "Ahogy mások látnak"
   },
   "library": {
     "search": "Keresés",

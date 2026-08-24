@@ -18,6 +18,7 @@ import {
 import { useOnline } from './useOnline';
 import { useExercises } from '../library/useExercises';
 import { useClients } from '../coaching/useCoaching';
+import { personLabel } from '../../lib/person';
 
 const STATUSES = ['draft', 'active', 'paused', 'ended'] as const;
 
@@ -602,13 +603,13 @@ export function PlanEditorPage() {
                       const created = await clone.mutateAsync({
                         id: planId,
                         coach_client_id: c.link_id,
-                        name: `${plan.name} — ${c.email.split('@')[0]}`,
+                        name: `${plan.name} — ${personLabel(c)}`,
                       });
                       setCloning(false);
                       void navigate(`/coach/plans/${created.id}`);
                     }}
                   >
-                    <span className="truncate">{c.email}</span>
+                    <span className="truncate">{personLabel(c)}</span>
                   </Pressable>
                 </li>
               ))}

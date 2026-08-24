@@ -5,6 +5,8 @@ import { clearOutbox } from '../../lib/outbox';
 export interface SessionUser {
   id: number;
   email: string;
+  /** NULL until they set one. Print it through `personLabel` (lib/person.ts), never raw. */
+  display_name: string | null;
   role: 'user' | 'coach' | 'admin';
   created_at: number;
 }
@@ -43,6 +45,29 @@ export function useLogin() {
     // Refetch rather than write the user in from the response: the server decides what the
     // session is, and /me is the single source of that truth.
     onSuccess: () => qc.invalidateQueries({ queryKey: SESSION_KEY }),
+  });
+}
+
+/**
+ * Set — or clear — the name other people see.
+ *
+ * `null` is a real value the caller states explicitly, not an omission: clearing your name is
+ * something a person is allowed to do, and the endpoint's schema requires the field so that
+ * "clear it" and "I forgot to send it" cannot arrive as the same request.
+ *
+ * The response carries the fresh user, so the cache is written directly rather than invalidated —
+ * this is the one mutation where the server's answer IS the whole session row, and a refetch would
+ * make the name flicker back to its old value for a frame on a slow connection.
+ */
+export function useSetDisplayName() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (displayName: string | null) =>
+      apiWithRefresh<{ user: SessionUser }>('/auth/me', {
+        method: 'PATCH',
+        body: { displayName },
+      }),
+    onSuccess: ({ user }) => qc.setQueryData(SESSION_KEY, user),
   });
 }
 

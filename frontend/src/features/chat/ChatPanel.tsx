@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { initialsOf, personLabel } from '../../lib/person';
 import { Ban, Check, Flag, MessageSquare, Send, Undo2 } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -31,23 +32,6 @@ const dayLabel = (unix: number, locale: string) => new Date(unix * 1000).toLocal
 const timeOf = (unix: number, locale: string) =>
   new Date(unix * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
-/**
- * A monogram, from whatever the server can tell us about the other person.
- *
- * The conversations endpoint answers `other_email` and nothing else — no display name — so the
- * label is the address's LOCAL PART, never the full address. An account identifier in display
- * type is the defect this redesign exists to remove, and `user@example.com` is more of one than
- * `user`. The server already makes exactly this choice when it writes a chat notification's
- * title, so the two agree rather than each inventing a rule.
- */
-const nameFrom = (email: string) => email.split('@')[0] || email;
-
-const initialsOf = (label: string) => {
-  const parts = label.split(/[^a-zA-Z0-9À-ɏ]+/).filter(Boolean);
-  if (parts.length === 0) return label.slice(0, 2).toUpperCase();
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-};
 
 /**
  * The conversation, per blueprint 8 and [[55-Screens/coach-chat]].
@@ -113,7 +97,7 @@ export function ChatPanel({
   // already fetched and is already polling — so the anchor paints on the first frame while the
   // thread is still in flight, rather than arriving with it.
   const conversation = (conversations?.conversations ?? []).find((c) => c.id === conversationId) ?? null;
-  const name = displayName ?? (conversation ? nameFrom(conversation.other_email) : '');
+  const name = displayName ?? (conversation ? personLabel({ email: conversation.other_email, display_name: conversation.other_display_name }) : '');
 
   // Mark read when the thread has something unread AND the tab is actually visible. Without the
   // visibility check, a backgrounded tab polling every 5 s would clear the badge for someone who

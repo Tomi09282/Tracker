@@ -62,6 +62,9 @@ const common = { windowMs: 15 * 60 * 1000, standardHeaders: true, legacyHeaders:
 const loginLimiter = rateLimit({ ...common, limit: 10 });
 const registerLimiter = rateLimit({ ...common, limit: 5 });
 const refreshLimiter = rateLimit({ ...common, limit: 60 });
+// Naming yourself is a settings action, not a hot path — twenty in fifteen minutes is far more
+// than a person renaming themselves needs and far less than a script rewriting the column is after.
+const profileLimiter = rateLimit({ ...common, limit: 20 });
 
 // Per-ACCOUNT limiter layered on the per-IP ones: distributed credential stuffing spreads
 // across IPs but still converges on a single account.
@@ -303,10 +306,98 @@ router.get(
   requireAuth,
   asyncRoute(async (req, res) => {
     // Explicit column list, never SELECT * — a future column must be opted into a response.
-    const user = await db.get('SELECT id, email, role, created_at, must_change_credentials FROM users WHERE id = ?', [
-      req.user.id,
-    ]);
+    const user = await db.get(
+      'SELECT id, email, display_name, role, created_at, must_change_credentials FROM users WHERE id = ?',
+      [req.user.id],
+    );
     if (!user) return sendError(res, 401, ERR.UNAUTHORIZED, 'unauthorized');
+    res.json({ user });
+  }),
+);
+
+/**
+ * The bounds are the migration's bounds, restated.
+ *
+ * Not because the CHECK is untrusted — it is the thing that actually holds — but because a
+ * constraint violation arrives as a 500 and reads in the log as a server fault. The schema is the
+ * guarantee; this is the error message. If the two ever disagree, 029 wins and this is the bug.
+ *
+ * `null` is an explicit, reachable value: clearing your name is a thing a person is allowed to do,
+ * and it has to be distinguishable from "field omitted" (which `.strict()` plus `.optional()`
+ * would collapse). So the field is required and nullable — the client always states its intent.
+ *
+ * ═══ THE TWO BOUNDS HAVE TO COUNT THE SAME THING ═══════════════════════════════════════════════
+ *
+ * They did not. `z.string().min(2)` counts UTF-16 code units; SQLite's `length()` counts
+ * characters. For everything on the basic plane those agree, so it looked right — but a single
+ * astral character is two code units and one character, so `"🎉"` passed zod and was then refused
+ * by the CHECK. The user saw the opaque `this change is not allowed by the data model`, the log
+ * recorded `constraint refused a write`, and the sentence above about 029 winning turned out to be
+ * describing a live bug rather than a hypothetical.
+ *
+ * `[...v].length` iterates code points, which is the same unit `length()` uses. Verified by
+ * execution against this project's own SQLite: `length(trim('🎉'))` is 1.
+ */
+const CODE_POINTS = (v) => [...v].length;
+
+/**
+ * Control characters are not part of a name, and two of the ranges are actively dangerous.
+ *
+ * C0 and C1 include newline and NUL. A name with a newline in it breaks every single-line list
+ * this app renders it into, and SQLite's `length()` stops counting at the first NUL — so a name
+ * beginning with one would measure 0 to the database and pass a bound it never actually met.
+ *
+ * The bidi overrides (U+202A–U+202E, U+2066–U+2069) are the spoofing case. They re-order the text
+ * AROUND them, so a name containing one can rewrite how the rest of a coach's client row reads.
+ * Nobody's name needs them; a name in Hebrew or Arabic gets its direction from its own characters.
+ */
+const CONTROLS = new RegExp(
+  [
+    '[',
+    '\u0000-\u001F',  // C0, which is where NUL and newline live
+    '\u007F-\u009F',  // DEL and C1
+    '\u202A-\u202E',  // the bidi embeddings and overrides
+    '\u2066-\u2069',  // the bidi isolates
+    ']',
+  ].join(''),
+);
+
+const DisplayNamePatch = z
+  .object({
+    displayName: z
+      .string()
+      .trim()
+      .refine((v) => !CONTROLS.test(v), 'control characters are not part of a name')
+      .refine((v) => CODE_POINTS(v) >= 2, 'too short')
+      .refine((v) => CODE_POINTS(v) <= 120, 'too long')
+      .nullable(),
+  })
+  .strict();
+
+router.patch(
+  '/me',
+  requireAuth,
+  profileLimiter,
+  asyncRoute(async (req, res) => {
+    const body = DisplayNamePatch.parse(req.body ?? {});
+
+    // Scoped to the session's own id, which comes from the verified token and never from the
+    // request — there is no id here to forge, and no other row this statement can reach.
+    await db.writeTx([
+      {
+        sql: 'UPDATE users SET display_name = ?, updated_at = unixepoch() WHERE id = ?',
+        params: [body.displayName, req.user.id],
+      },
+    ]);
+
+    // The name is deliberately NOT logged. It is the one field on this table a person chose for
+    // themselves, and `logs/server.log` is read by people who have no business knowing it.
+    req.log.info({ userId: req.user.id, cleared: body.displayName === null }, 'display name set');
+
+    const user = await db.get(
+      'SELECT id, email, display_name, role, created_at, must_change_credentials FROM users WHERE id = ?',
+      [req.user.id],
+    );
     res.json({ user });
   }),
 );

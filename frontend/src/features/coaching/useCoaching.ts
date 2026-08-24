@@ -6,6 +6,12 @@ export interface ClientRow {
   link_id: number;
   client_id: number;
   email: string;
+  /**
+   * NULL until the person names themselves — a coach-created account whose owner has never signed
+   * in cannot have. Read it through `personLabel`, never directly: the fallback is a decision about
+   * privacy, not a `??` for each call site to make on its own. See `lib/person.ts`.
+   */
+  display_name: string | null;
   status: 'invited' | 'active' | 'archived';
   origin: 'invite' | 'team_code' | 'pregenerated' | 'manual';
   team_id: number | null;

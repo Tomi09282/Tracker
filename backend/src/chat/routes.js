@@ -65,7 +65,7 @@ router.get(
               (SELECT m.body FROM messages m
                 WHERE m.conversation_id = c.id AND m.deleted_at IS NULL
                 ORDER BY m.id DESC LIMIT 1) AS last_body,
-              u.email AS other_email
+              u.email AS other_email, u.display_name AS other_display_name
          FROM conversations c
          JOIN coach_clients cc ON cc.id = c.coach_client_id AND cc.status = 'active'
          JOIN users u ON u.id = CASE WHEN c.coach_id = ? THEN c.client_id ELSE c.coach_id END

@@ -15,6 +15,7 @@ export interface PlanSummary {
   coach_client_id: number | null;
   client_user_id: number | null;
   client_email: string | null;
+  client_display_name: string | null;
   day_count: number;
   updated_at: number;
 }

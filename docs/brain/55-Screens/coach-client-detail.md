@@ -20,7 +20,11 @@ An avatar, because this screen is about a person and every other candidate ancho
 
 1. **Back link** `Klienseim` → `/coach`.
 2. **Anchor avatar** with the status ring and badge.
-3. **Identity** — the email as h1 (wraps, never truncates: it is the client's name here), and under it a chip row: the grey team chip `Hétfői csoport` and the plain origin word `csapatkóddal` (`meghívóval` / `általad létrehozva` / `kézzel`).
+3. **Identity** — the client's **name** as h1 (wraps, never truncates), and under it a chip row: the grey team chip `Hétfői csoport` and the plain origin word `csapatkóddal` (`meghívóval` / `általad létrehozva` / `kézzel`).
+   > This line used to read *"the email as h1 … it is the client's name here"*, and at the time that
+   > was accurate: `users` had no name column and this header rendered `demo.farkas.nora@tracker.local`.
+   > Fixed by [[0017-a-person-has-a-name]] — migration 029 and `lib/person.ts`. The address is no
+   > longer on this screen at all.
 4. **Handover banner** — only when the account is still pending. Alert card with the full sentence `Ezeknek a fiókoknak még te ismered a jelszavát, ezért a kliens addig nem tud belépni az appba, amíg sajátot nem állít be.`
 5. **Three stat tiles** — circular icon, a display number, a tiny uppercase caption: `6` `EDZÉS / 28 NAP` (dumbbell), `4` `HETI EDZÉS` (calendar), `3` `TERV` (clipboard). Sessions come from the roster's 28-day count, the weekly figure from the questionnaire, the plan count from this client's plans.
 6. **Two answer tiles**, side by side. Left, neutral: `CÉL` over `Izomtömeg`. Right, alert-toned with a shield icon: `KÍMÉLENDŐ` over `Térd — kerülendő futás` and the client's own note `A térdem futás után fáj.`

@@ -17,9 +17,12 @@ const PASSWORD = 'TrackerDev123';
 const ARGON2_OPTS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 };
 
 const USERS = [
-  { email: 'user@tracker.local', role: 'user' },
-  { email: 'coach@tracker.local', role: 'coach' },
-  { email: 'admin@tracker.local', role: 'admin' },
+  // Named, because the app now shows a name wherever it used to show an address, and a dev fixture
+  // that leaves it NULL puts you on the fallback path on every screen without telling you that is
+  // what you are looking at. The demo *clients* cover the NULL case on purpose (seed-demo.mjs).
+  { email: 'user@tracker.local', role: 'user', displayName: 'Teszt Elek' },
+  { email: 'coach@tracker.local', role: 'coach', displayName: 'Kovács Péter' },
+  { email: 'admin@tracker.local', role: 'admin', displayName: 'Rendszergazda' },
 ];
 
 for (const u of USERS) {
@@ -29,14 +32,15 @@ for (const u of USERS) {
   // INSERT OR IGNORE, not ON CONFLICT(email): uniqueness here is enforced by an index on
   // `lower(trim(email))`, and an ON CONFLICT target must name a real constraint — a bare column
   // that merely happens to be unique-ish does not qualify.
-  await db.run('INSERT OR IGNORE INTO users (email, password_hash, role) VALUES (?, ?, ?)', [
+  await db.run('INSERT OR IGNORE INTO users (email, display_name, password_hash, role) VALUES (?, ?, ?, ?)', [
     u.email,
+    u.displayName,
     hash,
     u.role,
   ]);
   await db.run(
-    'UPDATE users SET password_hash = ?, role = ?, disabled_at = NULL, failed_logins = 0, next_login_at = 0 WHERE lower(trim(email)) = ?',
-    [hash, u.role, u.email],
+    'UPDATE users SET password_hash = ?, role = ?, display_name = ?, disabled_at = NULL, failed_logins = 0, next_login_at = 0 WHERE lower(trim(email)) = ?',
+    [hash, u.role, u.displayName, u.email],
   );
   console.log(`${u.email.padEnd(24)} ${u.role.padEnd(6)} ${PASSWORD}`);
 }

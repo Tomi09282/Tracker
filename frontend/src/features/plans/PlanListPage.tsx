@@ -10,6 +10,7 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { CountUp } from '../../ui/feedback/CountUp';
 import { usePlans, useCreatePlan, type PlanSummary } from './usePlans';
 import { useOnline } from './useOnline';
+import { initialsOf, personLabel } from '../../lib/person';
 
 type PlanStatus = PlanSummary['status'];
 
@@ -40,7 +41,6 @@ const CHIP_TONE: Record<PlanStatus, string> = {
 };
 
 /** `anna@example.com` → `AN`. Two letters is what fits, and it is enough to tell two clients apart. */
-const monogram = (source: string) => source.trim().slice(0, 2).toUpperCase();
 
 /**
  * The coach's plan library — [[55-Screens/coach-plans]].
@@ -105,7 +105,12 @@ export function PlanListPage() {
     </div>
   );
 
-  const Row = ({ plan }: { plan: PlanSummary }) => (
+  const Row = ({ plan }: { plan: PlanSummary }) => {
+    // A template has no client, so both fields are null and the row simply has no person on it.
+    const clientLabel = plan.client_email
+      ? personLabel({ email: plan.client_email, display_name: plan.client_display_name })
+      : '';
+    return (
     <li>
       <Surface
         as={Link}
@@ -113,21 +118,26 @@ export function PlanListPage() {
         interactive
         className="flex min-h-[var(--target-min)] items-center gap-group"
       >
-        {plan.client_email ? (
+        {clientLabel ? (
           <span
             aria-hidden
             className="text-body-s inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-surface-2 font-display text-text-2"
           >
-            {monogram(plan.client_email.split('@')[0])}
+            {initialsOf(clientLabel)}
           </span>
         ) : null}
 
         <span className="flex min-w-0 flex-1 flex-col gap-tight">
           <span className="text-body-strong block truncate text-text-1">{plan.name}</span>
-          {/* The address left the row because four wrapping near-identical strings were four rows
-              of noise. It is still ANNOUNCED — the monogram is a picture, and a picture of two
-              letters is not a client's name to a screen reader. */}
-          {plan.client_email ? <span className="sr-only">{plan.client_email}</span> : null}
+          {/* THE ADDRESS USED TO BE HERE, AND IT LEFT FOR A REASON THAT NO LONGER APPLIES.
+              Four wrapping near-identical addresses were four rows of noise, so it was demoted to
+              `sr-only` — which fixed the visual problem and kept the privacy one, reading a
+              client's full e-mail aloud to anyone using a screen reader. Since 029 there is a name
+              to show instead: short, distinct, and safe to say out loud. So it comes back, visible,
+              and the monogram beside it can go back to being decoration. */}
+          {clientLabel ? (
+            <span className="text-caption block truncate text-text-3">{clientLabel}</span>
+          ) : null}
           <span className="flex flex-wrap items-center gap-tight">
             <StatusChip status={plan.status} />
             <span className="text-caption tabular-nums text-text-2">
@@ -140,7 +150,8 @@ export function PlanListPage() {
         <ChevronRight className="size-icon-m shrink-0 text-text-3" aria-hidden />
       </Surface>
     </li>
-  );
+    );
+  };
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">

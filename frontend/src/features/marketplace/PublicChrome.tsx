@@ -13,6 +13,7 @@ import { cn } from '../../lib/cn';
 import { control } from '../../ui/primitives/control';
 import { Pressable } from '../../ui/primitives/Pressable';
 import type { PublicPost } from './usePublic';
+import { initialsOf } from '../../lib/person';
 
 /**
  * The chrome the three PUBLIC marketplace screens share.
@@ -164,15 +165,6 @@ export function VerifiedBadge({ className }: { className?: string }) {
  * verified and published-at, and nothing else. Drawing a grey placeholder person would be worse
  * than nothing — initials are real data, they differ between coaches, and they read at 144px.
  */
-const initialsOf = (name: string) =>
-  name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => [...word][0] ?? '')
-    .join('')
-    .toLocaleUpperCase();
-
 export function InitialsAvatar({
   name,
   className,

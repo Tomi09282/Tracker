@@ -48,6 +48,7 @@ const registrySrc = await fs.readFile(path.join(DIR, 'index.ts'), 'utf8');
 const registered = [...registrySrc.matchAll(/^\s{2}([a-z]{2}):\s*\{\s*label:/gm)].map((m) => m[1]);
 
 const problems = [];
+const LF = String.fromCharCode(10);
 
 for (const code of registered) {
   if (!bundles[code]) problems.push(`${code} is in the LOCALES registry but has no ${code}.json`);
@@ -252,6 +253,114 @@ for (const [code, bundle] of Object.entries(bundles)) {
         if (!seen.has(m[1])) seen.set(m[1], `${rel}:${i + 1}`);
       }
     });
+  }
+
+  /* ── keys that never appear inside `t(` at all ─────────────────────────────────────────────────
+   *
+   * THE THIRD BLIND SIDE OF THIS GATE, and the one that reached a shipped screen.
+   *
+   * The matcher above requires the key to be written literally inside the call. A key held in a
+   * lookup table is not:
+   *
+   *     const ROLE_LABEL = { user: 'admin.role.user', coach: 'admin.role.coach', ... };
+   *     ...
+   *     {t(ROLE_LABEL[user.role])}
+   *
+   * That is an ordinary way to write a role→label map, and every one of those three keys was wrong
+   * — the namespace is `adminUsers`, not `admin`. The settings screen printed the literal string
+   * `admin.role.coach` in its role chip, for every user, with this gate green. It was found by
+   * reading the screen, which is the one method this file exists to make unnecessary.
+   *
+   * ═══ THE FILTER, AND WHY IT IS NOT "EVERY KEY-SHAPED LITERAL" ═════════════════════════════════
+   *
+   * The first version of this rule flagged any string shaped like a key whose first segment was a
+   * real namespace. It was tested against deliberately plausible bait and **flagged five of seven
+   * legitimate literals** — `'nutrition.calories'` as a sort key, `'plans.list'` as a query key,
+   * `'admin.impersonate'` as an analytics event. A gate that blocks correct code gets switched off,
+   * which is strictly worse than the blind spot it was written to close.
+   *
+   * So the trigger is the SMELL ITSELF rather than the shape. This blind spot can only exist in a
+   * file where `t` is handed something that is not a quoted string — if every call in the file is
+   * `t('literal')`, the matcher above already covers all of it and there is nothing left to find.
+   * Only those files are scanned. The bait file, which never calls `t` at all, is not read.
+   *
+   * File paths are still excluded by extension: `coaching.ts` would otherwise satisfy the shape,
+   * and a key ending in `.ts` is not a thing this app has.
+   */
+  /*
+   * Written with string operations rather than a regex, and that is not a style choice.
+   *
+   * The first version of this line WAS a regex, and it reached the file with its backslashes
+   * doubled — matching a literal backslash followed by a bracket, a sequence no source file
+   * contains. So the rule ran, scanned nothing, found nothing, and the gate printed OK. It was
+   * caught by re-planting the defect the rule exists to catch and watching it pass.
+   *
+   * **A mangled escape turns a gate silently inert**, which is the same failure this file's own
+   * header describes for a missing key: no error, no output, no signal. `indexOf` cannot be
+   * mangled that way, and it reads better than the lookahead did.
+   */
+  const LF = String.fromCharCode(10);
+  const callsTIndirectly = (source) => {
+    let at = source.indexOf('t(');
+    while (at !== -1) {
+      let j = at + 2;
+      while (j < source.length && (source[j] === ' ' || source[j] === LF)) j += 1;
+      const next = source[j];
+      // A quote means the key is written out in full and the matcher above already has it. A close
+      // bracket means `t()` with no argument, which belongs to some other function entirely.
+      if (next !== "'" && next !== '"' && next !== '`' && next !== ')') return true;
+      at = source.indexOf('t(', at + 2);
+    }
+    return false;
+  };
+  const NAMESPACES = new Set([...ref.keys()].map((k) => k.split('.')[0]));
+  const KEYISH = /^[a-z][a-zA-Z0-9]*(?:\.[a-zA-Z0-9_]+){1,4}$/;
+  const FILE_EXT = /\.(ts|tsx|js|mjs|cjs|json|css|md|sql|svg|png|webp|html)$/;
+  const indirect = new Map(); // key → "file:line"
+
+  /*
+   * PROSE IS NOT CODE, and this rule reads backtick-quoted spans, which is how developers write
+   * key names in comments. Its first live run flagged `E4Toggle.tsx:45` for `common.on` and
+   * `common.off` — inside a sentence explaining that no such pair exists and that its absence is
+   * deliberate. The gate was arguing with a comment.
+   *
+   * Stripping is textual and therefore approximate: a `//` inside a string literal would truncate
+   * the line early. That direction is safe — it can only hide a candidate, and the same key
+   * written anywhere else in the file still lands. The opposite mistake, reading prose as code, is
+   * the one that makes a gate untrustworthy.
+   */
+  const codeOnly = (line) => {
+    const t = line.trim();
+    if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) return '';
+    const slashes = line.indexOf('//');
+    return slashes === -1 ? line : line.slice(0, slashes);
+  };
+
+  for (const file of srcFiles) {
+    const rel = path.relative(path.resolve('src'), file).split(path.sep).join('/');
+    const source = await fs.readFile(file, 'utf8');
+    if (!callsTIndirectly(source)) continue;
+    source.split(LF).forEach((line, i) => {
+      // `defaultValue` is the escape hatch the direct matcher already honours (see above): a key
+      // with its own fallback renders that fallback, not the key path, so it is a soft reference
+      // and not a defect. The two halves of this check have to agree about that.
+      if (line.includes('defaultValue')) return;
+      for (const m of codeOnly(line).matchAll(/['"`]([a-z][\w.]*)['"`]/g)) {
+        const key = m[1];
+        if (seen.has(key) || indirect.has(key)) continue;
+        if (!KEYISH.test(key) || FILE_EXT.test(key)) continue;
+        if (!NAMESPACES.has(key.split('.')[0])) continue;
+        indirect.set(key, `${rel}:${i + 1}`);
+      }
+    });
+  }
+
+  for (const [key, where] of indirect) {
+    if (ref.has(key)) continue;
+    problems.push(
+      `${where} holds "${key}", which is shaped like a key and whose namespace exists, in a file ` +
+        `that calls t() with a variable — no bundle has it, so the user sees the key path`,
+    );
   }
 
   for (const [key, where] of seen) {

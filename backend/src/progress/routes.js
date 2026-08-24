@@ -271,7 +271,8 @@ router.get(
   asyncRoute(async (req, res) => {
     const shares = await db.all(
       `SELECT ps.id, ps.coach_client_id, ps.share_measurements, ps.share_photos,
-              ps.granted_at, ps.revoked_at, u.email AS coach_email, cc.status AS link_status
+              ps.granted_at, ps.revoked_at, u.email AS coach_email,
+              u.display_name AS coach_display_name, cc.status AS link_status
          FROM progress_shares ps
          JOIN coach_clients cc ON cc.id = ps.coach_client_id
          JOIN users u ON u.id = cc.coach_id

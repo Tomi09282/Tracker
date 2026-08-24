@@ -12,6 +12,7 @@ import { DocRenderer } from '../marketplace/DocRenderer';
 import { useTaxonomy } from '../marketplace/usePublic';
 import { HandleField } from './HandleField';
 import { counterTone, COUNTER_CLASS } from './useComposeFlow';
+import { initialsOf } from '../../lib/person';
 import {
   useComposeContext,
   useComposeProfile,
@@ -156,17 +157,6 @@ function CityPicker({
         ))}
       </select>
     </label>
-  );
-}
-
-function initialsOf(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? '')
-      .join('') || '·'
   );
 }
 

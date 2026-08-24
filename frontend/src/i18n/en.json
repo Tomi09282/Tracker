@@ -116,7 +116,10 @@
       "haptics": "Vibration",
       "hapticsHint": "A buzz when a set is checked, on a record, and at every round change."
     },
-    "openAdmin": "Open the admin area"
+    "openAdmin": "Open the admin area",
+    "displayName": "Display name",
+    "displayNameHint": "Your coach sees this instead of your e-mail address.",
+    "displayNamePlaceholder": "How others see you"
   },
   "library": {
     "search": "Search",

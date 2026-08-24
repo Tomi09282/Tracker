@@ -155,6 +155,7 @@ export interface NutritionPlanRow {
   coach_client_id: number | null;
   client_user_id: number | null;
   client_email: string | null;
+  client_display_name: string | null;
 }
 
 export interface PlanTree {

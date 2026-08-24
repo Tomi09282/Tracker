@@ -32,6 +32,7 @@ import { PlanTab } from './PlanTab';
 import { ChatTab } from './ChatTab';
 import { usePlans } from '../plans/usePlans';
 import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
+import { personLabel } from '../../lib/person';
 
 /* ── tabs ─────────────────────────────────────────────────────────────────────────────────── */
 const TABS = [
@@ -231,7 +232,7 @@ export function ClientDetailPage() {
               pending ? 'border-[var(--warning)]' : 'border-accent',
             )}
           >
-            <Monogram email={c.email} size="lg" />
+            <Monogram person={c} size="lg" />
           </div>
           {/* Decorative: when it is amber, the banner directly below says the same thing in
               words, and when it is a check there is nothing to announce. */}
@@ -253,7 +254,7 @@ export function ClientDetailPage() {
 
         <div className="flex flex-col items-center gap-tight">
           {/* Wraps, never truncates: the e-mail is the client's name on this screen. */}
-          <h1 className="text-title-1 break-words text-text-1">{c.email}</h1>
+          <h1 className="text-title-1 break-words text-text-1">{personLabel(c)}</h1>
           <div className="text-body-s flex flex-wrap items-center justify-center gap-tight text-text-2">
             {c.team_name ? (
               <span className="rounded-chip bg-surface-2 px-3 py-2 text-text-1">{c.team_name}</span>

@@ -1,0 +1,57 @@
+-- 029_display_name.sql — a person has a name, and until now this schema had nowhere to put it.
+-- Applies on top of user_version 28.
+--
+-- ═══ WHAT WAS ACTUALLY BROKEN ══════════════════════════════════════════════════════════════════
+--
+-- Nothing in `users` was ever a label. The only `display_name` in the whole database is on
+-- `marketplace_profiles` (021), which exists for coaches who list themselves publicly — so a coach
+-- has a name and a client does not. Every screen that has to name a client therefore reached for
+-- the one human-looking string available, and printed the email:
+--
+--     <h1>demo.farkas.nora@tracker.local</h1>          -- the client detail page
+--     Monogram(email)                                  -- initials taken from the local part
+--
+-- Six frontend files do this. It is wrong in three separate ways, and only the first is cosmetic.
+--
+-- ═══ AND THE SECOND WAY IS PRIVACY ═════════════════════════════════════════════════════════════
+--
+-- The coach dashboard renders one row per client, and each row carried a full, working email
+-- address. A coach with forty clients had forty deliverable addresses on one screen — visible to
+-- anyone glancing at the phone, and lifted in one screenshot. Nothing about coaching requires it:
+-- the coach needs to know WHICH client, and the app already has an id for that.
+--
+-- A name column is what lets those screens stop showing the address. It is not decoration.
+--
+-- ═══ THE THIRD: THE EMAIL IS NOT STABLE ════════════════════════════════════════════════════════
+--
+-- An address can be changed, and when it is, every screen silently renames the person. Deriving
+-- identity from a credential means the credential's lifecycle becomes the identity's lifecycle.
+--
+-- ═══ WHY NULLABLE, AND WHY NOT BACKFILLED FROM THE EMAIL ═══════════════════════════════════════
+--
+-- The tempting move is `NOT NULL DEFAULT ''` with a backfill from the local part, so nothing has
+-- to handle the empty case. It is the wrong move, and expensively so:
+--
+--   * Copying the email in bakes TODAY's fallback into the DATA. Afterwards there is no query
+--     that can tell "this person chose to be called nfarkas92" from "nobody has asked them yet",
+--     and the prompt to set a real name can never be shown to the right people.
+--   * It undoes the privacy fix in the same statement that enables it — the address would still be
+--     on the screen, just laundered through a different column.
+--
+-- So NULL means exactly one thing: NOT SET YET. It is a legitimate and possibly permanent state —
+-- a user is never forced to name themselves — and the display layer owns the fallback, where it
+-- can be changed later without a migration.
+--
+-- ═══ THE BOUNDS ════════════════════════════════════════════════════════════════════════════════
+--
+-- Copied deliberately from `marketplace_profiles.display_name` (021) rather than re-invented, so
+-- the two name fields in this database cannot disagree about what a name is. `length()` counts
+-- characters, not bytes, so a Hungarian name spends its budget the same as an English one; the
+-- 240 ceiling is the raw guard and the trimmed 2..120 is the real rule, which together reject both
+-- a wall of whitespace and a single stray character.
+--
+-- CHECK passes on NULL — a NULL operand makes the whole expression NULL, which SQLite treats as
+-- satisfied — so the constraint binds every name that exists without forcing one to exist.
+
+ALTER TABLE users ADD COLUMN display_name TEXT
+  CHECK (length(display_name) <= 240 AND length(trim(display_name)) BETWEEN 2 AND 120);

@@ -467,7 +467,8 @@ router.get(
   asyncRoute(async (req, res) => {
     const plans = await db.all(
       `SELECT p.id, p.scope, p.name, p.description, p.goal, p.cycle_days, p.starts_on,
-              p.status, p.revision, p.coach_client_id, p.client_user_id, u.email AS client_email
+              p.status, p.revision, p.coach_client_id, p.client_user_id, u.email AS client_email,
+              u.display_name AS client_display_name
          FROM nutrition_plans p
          LEFT JOIN users u ON u.id = p.client_user_id
         WHERE p.author_user_id = ? AND p.archived_at IS NULL
