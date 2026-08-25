@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { CalendarDays, CheckCircle2, Clock, Dumbbell, Moon, PlayCircle } from 'lucide-react';
 import { NotificationBell } from '../chat/NotificationBell';
 import { cn } from '../../lib/cn';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -10,7 +11,6 @@ import { Surface } from '../../ui/primitives/Surface';
 import { useStartWorkout, useCurrentWorkout } from '../workout/useWorkout';
 import { useToday, type TodayDay } from './useToday';
 import { WeekStrip } from './WeekStrip';
-import { SectionHeader } from './SectionHeader';
 import { HomeNutrition } from './HomeNutrition';
 
 /**

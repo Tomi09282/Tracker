@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { ChevronRight, Droplet, Egg, Flame, Salad, Wheat } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { SummaryTile } from '../../ui/data/SummaryTile';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useNutritionDay } from '../nutrition/useNutrition';
-import { SectionHeader } from './SectionHeader';
 
 /**
  * Today's nutrition, on Home — [[55-Screens/01 Home]] block 6.

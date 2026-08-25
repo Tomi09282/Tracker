@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { BottomNav, type NavTab } from '../ui/nav/BottomNav';
 import { tabsForRole } from './navTabs';
 import { useSession } from '../features/auth/useSession';
-import { OfflineIndicator } from '../ui/shell/OfflineIndicator';
 import { CommandPalette } from '../ui/shell/CommandPalette';
 import { AuroraBackdrop } from '../ui/shell/AuroraBackdrop';
 
@@ -57,7 +56,6 @@ export function AppLayout() {
           them mounts its own — see AuroraBackdrop. Easy to miss, and the symptom is a screen
           that is simply flat while every other one has depth. */}
       <AuroraBackdrop />
-      <OfflineIndicator />
       <CommandPalette />
       {/* The reserved space is a TOKEN, not an inline calc: a full-height screen has to subtract
           exactly what this reserves, and two hand-written calcs drift. See --content-pad-b. */}

@@ -312,9 +312,12 @@ export function CoachDashboard() {
           the pair paint `0` and then count up to the real number the moment `teams` or `codes`
           landed — a visible flash of wrong data in the one place the screen animates a figure. */}
       {clients.isPending || teams.isPending || codes.isPending ? (
+        // 88px, not the 140 the stacked tile measured: `layout="row"` sets the puck beside the
+        // figure instead of above it, so the card lost a 44px row and a gap. Card pad 16×2 + the
+        // figure/caption column (32 + 8 + 14) — the puck is 44 and no longer the tallest thing.
         <div className="grid grid-cols-2 gap-group">
-          <Skeleton className="h-[140px] rounded-card" />
-          <Skeleton className="h-[140px] rounded-card" />
+          <Skeleton className="h-22 rounded-card" />
+          <Skeleton className="h-22 rounded-card" />
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-group">
@@ -330,6 +333,11 @@ export function CoachDashboard() {
           >
             <SummaryTile
               icon={Ticket}
+              // 06-coach-dashboard.webp draws this pair with the puck BESIDE the figure and the
+              // caption as an eyebrow (`CSAPATOK`) — the donut above already owns the screen's
+              // centred column, so a second centred stack under it competes with it.
+              layout="row"
+              captionCase="upper"
               value={teamCount}
               caption={t('coaching.teams')}
               className={cn(
@@ -342,6 +350,8 @@ export function CoachDashboard() {
 
           <SummaryTile
             icon={KeyRound}
+            layout="row"
+            captionCase="upper"
             value={liveCodes.length}
             caption={t('coaching.activeCodes')}
             className="h-full"

@@ -271,6 +271,9 @@ function BodyTab() {
                 <SummaryTile
                   key={tile.key}
                   icon={iconFor(tile.key)}
+                  // Centred, as 05-haladas.webp draws them: the chart above owns the left edge, and
+                  // two tiles hanging off it read as a third and fourth column of the same block.
+                  align="center"
                   value={`${tile.value} ${tile.unit}`}
                   caption={`${t(`progress.metricName.${tile.key}`)} · ${tile.date}`}
                 />

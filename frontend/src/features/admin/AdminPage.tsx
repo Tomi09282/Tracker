@@ -222,16 +222,33 @@ export function AdminPage() {
         <div className="flex flex-col gap-section">
           <Skeleton className="h-88 w-full rounded-card" />
           <div className="grid grid-cols-2 gap-group">
-            <Skeleton className="h-36 rounded-card" />
-            <Skeleton className="h-36 rounded-card" />
+            {/* 88px: card pad 16×2 + the figure/caption column (32 + 8 + 16). `layout="row"` puts
+                the 44px puck beside that column rather than above it, so the tile is a row shorter
+                than the 144 this placeholder used to reserve. */}
+            <Skeleton className="h-22 rounded-card" />
+            <Skeleton className="h-22 rounded-card" />
           </div>
         </div>
       ) : stats.data ? (
         <div className="flex flex-col gap-section">
           <UserDonut users={stats.data.users} />
+          {/* Puck beside the figure, as 11-admin-attekintes.webp draws them — the donut above is the
+              screen's one centred object and these two are its footnotes, not two more of it.
+              Captions stay sentence case (`Gyakorlat`, `Médiafájl`): that mockup writes them that
+              way, and unlike the coach tiles they name a thing counted, not a metric. */}
           <div className="grid grid-cols-2 gap-group">
-            <SummaryTile icon={Dumbbell} value={stats.data.exercises.total} caption={t('admin.exercises')} />
-            <SummaryTile icon={Image} value={stats.data.media.total} caption={t('admin.media')} />
+            <SummaryTile
+              icon={Dumbbell}
+              layout="row"
+              value={stats.data.exercises.total}
+              caption={t('admin.exercises')}
+            />
+            <SummaryTile
+              icon={Image}
+              layout="row"
+              value={stats.data.media.total}
+              caption={t('admin.media')}
+            />
           </div>
         </div>
       ) : null}

@@ -280,16 +280,24 @@ export function ClientDetailPage() {
         </Surface>
       ) : null}
 
-      {/* ── the three numbers ──────────────────────────────────────────────────────────────── */}
+      {/* ── the three numbers ────────────────────────────────────────────────────────────────
+          `align="center"` and `captionCase="upper"` on all three, as 07-coach-client-detail-terv.webp
+          draws them: puck over figure over an eyebrow (`EDZÉS / 28 NAP`), one axis per tile. The
+          caption is an eyebrow here rather than metadata because it names the METRIC — the header
+          above already carries the client, so these three lines are the only labels in the block. */}
       <div className="grid grid-cols-3 gap-group">
         <SummaryTile
           icon={Dumbbell}
+          align="center"
+          captionCase="upper"
           value={c.sessions_28d ?? 0}
           // The window is part of the fact. A bare "6 edzés" reads as a lifetime total.
           caption={`${t('coaching.sessions')} / ${t('plans.dayCount', { count: 28 })}`}
         />
         <SummaryTile
           icon={CalendarDays}
+          align="center"
+          captionCase="upper"
           // A dash rather than a zero when there is no questionnaire: nobody answered, which is
           // not the same claim as "they train zero times a week".
           value={p?.sessions_per_week ?? '—'}
@@ -297,6 +305,8 @@ export function ClientDetailPage() {
         />
         <SummaryTile
           icon={ClipboardList}
+          align="center"
+          captionCase="upper"
           value={plans.isPending ? '—' : planCount}
           caption={t('nav.plans')}
         />

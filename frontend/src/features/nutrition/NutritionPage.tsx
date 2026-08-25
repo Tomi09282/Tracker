@@ -18,6 +18,7 @@ import {
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { SummaryTile } from '../../ui/data/SummaryTile';
 import { Gauge } from '../../ui/feedback/Gauge';
 import { CountUp } from '../../ui/feedback/CountUp';
@@ -190,7 +191,9 @@ export function NutritionPage() {
             ? [0, 1, 2].map((i) => (
                 // Built from the tile's own parts rather than one block of a guessed height, so
                 // the footprint is the real one and the row cannot jump when the data lands.
-                <Surface key={i} className="flex flex-col gap-tight">
+                // `items-center` because the tiles below are `align="center"`: a skeleton that
+                // matches the height but not the axis still moves everything sideways on swap.
+                <Surface key={i} className="flex flex-col items-center gap-tight">
                   <Skeleton className="size-11 rounded-chip" />
                   <Skeleton className="h-8 w-16" />
                   <Skeleton className="h-4 w-full" />
@@ -204,6 +207,9 @@ export function NutritionPage() {
                   <SummaryTile
                     key={m.key}
                     icon={m.icon}
+                    // 03-nutrition.webp draws these centred under the ring — puck, figure and
+                    // caption on one axis. Home keeps the left-aligned default its own mockup shows.
+                    align="center"
                     value={`${round(m.value)}g`}
                     // No target means no `· cél` clause and no bar — the same rule the ring obeys.
                     caption={m.target != null ? `${label} · ${round(m.target)}g` : label}
@@ -223,22 +229,12 @@ export function NutritionPage() {
 
       {/* ── ADD ──────────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
-        {/* A ROUNDED SQUARE, NOT A DISC — and the same 44px one the rest of the product uses.
-            `rounded-chip` resolves to `--radius-full`, so this badge was drawing a circle where
-            every other section badge (`features/home/SectionHeader`, `features/library/SectionBadge`)
-            draws `size-11 rounded-field`. A section mark that changes shape between screens stops
-            reading as "a section starts here" and starts reading as a different kind of object.
-            This is the third hand-built copy of that element; promoting it into `src/ui/` is the
-            real fix and is out of this pass's reach. */}
-        <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-accent-subtle text-accent"
-          >
-            <Plus className="size-icon-m" strokeWidth={2} />
-          </span>
-          {t('nutrition.add')}
-        </h2>
+        {/* The real fix the hand-built copy here was waiting for: `SectionHeader` now lives in
+            `src/ui/data/`, and its markup is class-for-class what this block spelled out — same
+            `size-11 rounded-field bg-accent-subtle` mark, same `text-title-2` heading. Nothing
+            moves; what goes away is a third file deciding on its own that a section mark is a
+            rounded square and not a disc. */}
+        <SectionHeader icon={Plus} title={t('nutrition.add')} />
 
         {/* Hand-composed rather than `Field`: `Field` always renders a visible label, and a search
             box that sits directly under its own section heading would then say the same words
