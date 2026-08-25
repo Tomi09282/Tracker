@@ -22,7 +22,7 @@ export interface PressableProps
  * second path.
  */
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function Pressable(
-  { className, variant, shape, density, busy = false, icon, children, disabled, type, ...rest },
+  { className, variant, shape, density, selected, busy = false, icon, children, disabled, type, ...rest },
   ref,
 ) {
   return (
@@ -34,7 +34,7 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
       // aria-busy drives both the styling and the screen-reader announcement from one source.
       aria-busy={busy || undefined}
       disabled={disabled || busy}
-      className={cn(control({ variant, shape, density }), className)}
+      className={cn(control({ variant, shape, density, selected }), className)}
       {...rest}
     >
       {icon}

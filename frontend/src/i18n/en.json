@@ -248,7 +248,8 @@
     "primary": "Primary target",
     "secondary": "Secondary",
     "alsoOnOtherSide": "More targets on the {{side}} view.",
-    "filterHint": "Tap a muscle to filter"
+    "filterHint": "Tap a muscle to filter",
+    "viewLabel": "View"
   },
   "offline": {
     "title": "No internet connection",

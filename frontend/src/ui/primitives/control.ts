@@ -79,6 +79,31 @@ export const control = cva(
         // Destructive is never styled as primary and never sits in the primary position.
         danger: 'bg-danger text-on-danger hover:opacity-90',
       },
+      /**
+       * The selected state of a filter chip / toggle — DESIGN §5.6, `bg-accent-subtle` + accent ink.
+       *
+       * A variant rather than a call-site constant because it was already being hand-written twice
+       * (MarketplacePage, ComposePage), and the hover half is the part a call site forgets: without
+       * `hover:bg-accent-subtle` the selected chip REVERTS to `surface-2` under the pointer, which
+       * reads as "you are about to deselect" on a chip that is merely being hovered.
+       *
+       * The transparent border is not decoration: `secondary` carries a `--border-width` edge, so a
+       * selected chip that simply dropped it would shrink by 1–2px and shove the row.
+       *
+       * DECLARED BETWEEN `variant` AND `density`, deliberately. cva emits variants in key order and
+       * `cn()` runs twMerge over the result, so position decides who wins a conflict: after
+       * `variant` the fill/edge/hover overrides land, before `density` the ink sits where the
+       * eventual `text-*` colour-group fix (lib/cn.ts) will let it survive alongside `text-body-s`.
+       * Until that lands `text-body-s` swallows it — exactly as it already swallows `secondary`'s
+       * and `ghost`'s ink today, so this variant is no worse off than the four above it.
+       */
+      selected: {
+        true: [
+          'bg-accent-subtle text-on-accent-subtle',
+          'border-[length:var(--border-width)] border-transparent',
+          'hover:bg-accent-subtle hover:text-on-accent-subtle hover:border-transparent',
+        ].join(' '),
+      },
       shape: {
         button: 'rounded-button px-4',
         // Square controls: the floor already guarantees 44×44, so no width class is needed.
@@ -104,3 +129,47 @@ export const control = cva(
 );
 
 export type ControlVariants = VariantProps<typeof control>;
+
+/**
+ * The STATUS chip — a chip-shaped label that reports state and does nothing when you touch it.
+ *
+ * Separate from `control` rather than a variant of it, because everything `control` guarantees is
+ * wrong here: a `cursor-pointer` on a `<span>` promises an action that does not exist,
+ * `active:scale-[0.97]` answers a press nobody made, `min-h-[var(--control-h)]` inflates a 24px
+ * word to 44px, and the disabled/busy states have no meaning on a thing that was never a target.
+ * The 44px floor exists to protect TARGETS; applying it to a label does not make anything more
+ * accessible, it just makes the row taller.
+ *
+ * It exists because the same string kept being retyped — `workout/SetRow.tsx`'s `Visszavonva`
+ * label writes the `neutral` tone below verbatim, and the admin, coaching and library screens
+ * hand-roll the tonal ones. A tone is a semantic claim ("this is a warning"), and a claim that is
+ * copy-pasted drifts.
+ *
+ * The tone strings carry the INK and the base carries the size, in that order on purpose: under
+ * today's twMerge config `text-caption` and `text-danger` share one class group, and if the sizes
+ * came last a `danger` pill would render in the inherited colour — a warning with no warning in
+ * it. Losing the caption size to an inherited one is a smaller wrong, and both survive once
+ * `lib/cn.ts` teaches twMerge this project's font-size names.
+ */
+export const chip = cva(['inline-flex items-center gap-1 whitespace-nowrap', 'rounded-chip px-3 py-1', 'text-caption'], {
+  variants: {
+    tone: {
+      /** The default: a bordered pill on the card surface. Says "state", claims nothing about it. */
+      neutral:
+        'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 text-text-2',
+      /** Borderless, recessed — for a count or a tag that must not compete with the row it labels. */
+      quiet: 'bg-surface-2 text-text-3',
+      // `text-on-accent-subtle`, NOT `text-accent` — DESIGN §7 #63. The wash is the accent at 20%,
+      // so accent-on-accent-wash cannot open a contrast gap in any pack at any hue. Three call
+      // sites in `features/admin/` currently write the failing pair; this is the one to copy.
+      accent: 'bg-accent-subtle text-on-accent-subtle',
+      success: 'bg-success-subtle text-success',
+      warning: 'bg-warning-subtle text-warning',
+      danger: 'bg-danger-subtle text-danger',
+      info: 'bg-info-subtle text-info',
+    },
+  },
+  defaultVariants: { tone: 'neutral' },
+});
+
+export type ChipVariants = VariantProps<typeof chip>;

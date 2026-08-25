@@ -248,7 +248,8 @@
     "primary": "Hauptziel",
     "secondary": "Sekundär",
     "alsoOnOtherSide": "Weitere Ziele in der Ansicht {{side}}.",
-    "filterHint": "Tippe auf einen Muskel zum Filtern"
+    "filterHint": "Tippe auf einen Muskel zum Filtern",
+    "viewLabel": "Ansicht"
   },
   "offline": {
     "title": "Keine Internetverbindung",

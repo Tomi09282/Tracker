@@ -248,7 +248,8 @@
     "primary": "Fő célizom",
     "secondary": "Segédizom",
     "alsoOnOtherSide": "További célizmok a {{side}} nézetben.",
-    "filterHint": "Koppints egy izomra a szűréshez"
+    "filterHint": "Koppints egy izomra a szűréshez",
+    "viewLabel": "Nézet"
   },
   "offline": {
     "title": "Nincs internetkapcsolat",

@@ -11,6 +11,7 @@ import { cn } from '../../lib/cn';
  */
 export function EmptyState({
   icon: Icon,
+  badge: Badge,
   title,
   body,
   action,
@@ -18,6 +19,19 @@ export function EmptyState({
   size = 'inline',
 }: {
   icon: LucideIcon;
+  /**
+   * A second, small glyph tucked at the mark's lower-trailing corner — a COMPOSED mark.
+   *
+   * The mark is usually one icon saying what is missing. Sometimes the meaning is in the pairing:
+   * `01b-home-empty.webp` draws a calendar with a crescent moon at its corner, and home-empty.md
+   * names the moon as the part that carries the message — "nothing is scheduled, and that is fine".
+   * A bare calendar is the mark with its message removed.
+   *
+   * It sits in the corner square the circle does not fill, so it reads as tucked AGAINST the mark
+   * rather than placed inside it, and it is filled rather than outlined: at a third of the main
+   * icon's size a 1.5px open stroke is a smudge.
+   */
+  badge?: LucideIcon;
   title: string;
   body?: string;
   action?: ReactNode;
@@ -45,11 +59,26 @@ export function EmptyState({
       <span
         aria-hidden
         className={cn(
-          'inline-flex items-center justify-center rounded-chip bg-accent-subtle text-accent',
+          // `relative` is the badge's positioning context, and it is on the mark rather than on the
+          // column so the corner the badge anchors to is the CIRCLE's corner at either size.
+          'relative inline-flex items-center justify-center rounded-chip bg-accent-subtle text-accent',
           size === 'anchor' ? 'size-40' : 'size-[120px]',
         )}
       >
         <Icon size={size === 'anchor' ? 72 : 48} strokeWidth={1.5} />
+        {Badge ? (
+          // Offset in from the box corner rather than pinned to it: a circle inscribed in a square
+          // pulls away from the corner by r(1−1/√2) ≈ 29% of the radius, so a badge at inset 0
+          // floats in dead space with a visible gap. One spacing step in lands it on the curve,
+          // which is where the mockup draws the moon.
+          // No `aria-hidden` of its own, same as `Icon` above: the mark span already carries it,
+          // and the whole mark is decorative — the title is what says this.
+          <Badge
+            strokeWidth={1.5}
+            size={size === 'anchor' ? 24 : 16}
+            className={cn('absolute fill-accent', size === 'anchor' ? 'bottom-3 end-3' : 'bottom-2 end-2')}
+          />
+        ) : null}
       </span>
       <Heading className="text-title-3 mt-5 text-text-1">{title}</Heading>
       {body ? <p className="text-body-s measure mt-1 text-text-2">{body}</p> : null}

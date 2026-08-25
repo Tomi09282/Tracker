@@ -138,17 +138,37 @@ export function OfflineIndicator() {
       <div className="min-h-0 ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)]">
         <div
           className={cn(
-            'flex items-center gap-3 border-b border-[var(--warning-border)]',
+            // AN ACCENT RAIL ON A NEUTRAL CARD, NOT AN AMBER-TINTED ONE.
+            //
+            // The strip used to be a warning surface end to end: amber fill, amber border, amber
+            // glyph. 01b-home-empty.webp draws it the other way round — a dark neutral body with a
+            // hairline border and one purple rail down the leading edge (sampled off the mockup:
+            // rail rgb(144,155,234) ≈ --accent, body rgb(37,36,44), glyph rgb(224,223,228)).
+            //
+            // The difference is what the strip CLAIMS. An amber field is the same alarm colour a
+            // macro tile uses for "you are over target" — a state the user has to weigh. Being
+            // offline is not that: the writes are safe in the outbox and will go up on their own.
+            // The rail marks the strip as system chrome speaking, which is what it is.
+            'flex items-center gap-3 border-b border-[var(--surface-border)]',
             // The rail runs down the LEADING edge, so it follows the writing direction rather than
             // sitting on the left of a right-to-left layout.
-            'border-s-4 border-s-[var(--warning)] bg-[var(--warning-subtle)]',
+            'border-s-4 border-s-accent',
+            // The nav's surface pair, not the card's: this is `sticky`, so page content slides
+            // UNDER it. --card-bg is a 62% fill with no blur (see the token's own note — blur is a
+            // performance opt-in reserved for surfaces over MOVING content), and text scrolling
+            // through the strip is exactly what that buys you here. --nav-bg/--nav-blur is the pair
+            // already declared for a bar in this situation.
+            'bg-[var(--nav-bg)] backdrop-blur-[var(--nav-blur)]',
             'px-4 pb-3 pt-[calc(env(safe-area-inset-top)+--spacing(3))]',
           )}
         >
+          {/* The glyph goes neutral with the card. Amber on a neutral body would be the one loud
+              thing in the strip and would re-assert the alarm the fill just gave up; the mockup
+              draws it at text-1, the same weight as the strong line it sits beside. */}
           {sending ? (
-            <UploadCloud size={20} strokeWidth={2} aria-hidden className="shrink-0 text-warning" />
+            <UploadCloud size={20} strokeWidth={2} aria-hidden className="shrink-0 text-text-1" />
           ) : (
-            <CloudOff size={20} strokeWidth={2} aria-hidden className="shrink-0 text-warning" />
+            <CloudOff size={20} strokeWidth={2} aria-hidden className="shrink-0 text-text-1" />
           )}
           {/* Rendered only while showing: an `aria-live` region whose text changes as the strip
               collapses announces the message a second time, to nobody. */}

@@ -30,6 +30,17 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    * to submit the form and find out.
    */
   marker?: string;
+  /**
+   * Keeps the label for assistive tech only — still rendered, still `htmlFor`-bound, `sr-only`.
+   *
+   * NOT an escape hatch from "the label is always rendered": the label still exists, so a screen
+   * reader still names the field and the rule the component was built to enforce is intact. What
+   * it removes is the DUPLICATE — onboarding block 6 prints the question as a heading above the
+   * field, and a visible `label` under it would say the same sentence twice, which is worse than
+   * saying it once. Use it only where a visible element already carries the same words; anywhere
+   * else this is placeholder-only labelling with extra steps.
+   */
+  labelHidden?: boolean;
 }
 
 /**
@@ -44,7 +55,7 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * when it appears rather than only on the next focus.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, hint, error, className, leading, trailing, marker, id, ...rest },
+  { label, hint, error, className, leading, trailing, marker, labelHidden = false, id, ...rest },
   ref,
 ) {
   const autoId = useId();
@@ -53,6 +64,12 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
 
+  const labelEl = (
+    <label htmlFor={inputId} className={cn('text-body-s text-text-2', labelHidden && 'sr-only')}>
+      {label}
+    </label>
+  );
+
   return (
     // `gap-tight` (8px) rather than the old 1.5 step (6px): the label, the input and the hint or
     // error are one group, and `--spacing-tight` is the name for that relationship. 6px was also
@@ -60,17 +77,29 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     <div className={cn('flex flex-col gap-tight', className)}>
       {/* A ROW, not just a label, whenever there is a marker. `justify-between` rather than a
           margin so the marker sits against the field's trailing edge at any width, and `gap-2` so a
-          long label wraps before it collides. */}
-      <div className="flex items-baseline justify-between gap-2">
-        <label htmlFor={inputId} className="text-body-s text-text-2">
-          {label}
-        </label>
-        {marker ? (
-          <span id={markerId} className="text-caption shrink-0 text-text-3">
-            {marker}
-          </span>
-        ) : null}
-      </div>
+          long label wraps before it collides.
+          With no marker AND a hidden label there is nothing to lay out, and the row is skipped
+          rather than rendered empty: `sr-only` is `position:absolute`, so an empty flex box would
+          still collect the wrapper's `gap-tight` and open 8px of nothing above the input. */}
+      {labelHidden && !marker ? (
+        labelEl
+      ) : (
+        <div
+          className={cn(
+            'flex items-baseline gap-2',
+            // A hidden label leaves the marker alone in the row; `justify-between` would park it
+            // at the leading edge, which is the one place it must never be.
+            labelHidden ? 'justify-end' : 'justify-between',
+          )}
+        >
+          {labelEl}
+          {marker ? (
+            <span id={markerId} className="text-caption shrink-0 text-text-3">
+              {marker}
+            </span>
+          ) : null}
+        </div>
+      )}
 
       <div className="relative">
         <input

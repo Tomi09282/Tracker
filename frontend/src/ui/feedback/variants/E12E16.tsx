@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, Info, Loader2, Maximize2, Minimize2, TriangleAlert, X } from 'lucide-react';
+import { Check, Info, Loader2, Maximize2, Minimize2, TriangleAlert, Trophy, X } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { surface } from '../../primitives/surfaceRecipe';
 import { CountUp } from '../CountUp';
@@ -398,7 +398,19 @@ export function InteractiveCard({
 
 /* ══ E15 — Toast ════════════════════════════════════════════════════════════════════════════ */
 
-export type ToastKind = 'success' | 'error' | 'info';
+/**
+ * `record` is a fourth KIND, not a fourth colour of success.
+ *
+ * A personal record and a saved form are both "it worked", but they are not the same news, and the
+ * workout mockup draws the difference: a trophy on a neutral mark, no tone border, and an accent
+ * rail down the leading edge. Folding it into `success` would have put a green check on the one
+ * event in the product the lifter actually came for.
+ *
+ * A kind rather than a per-toast icon override, because an override is a prop every caller can
+ * spell differently: the tone table below stays the single place that decides what a toast looks
+ * like, which is the whole reason it exists.
+ */
+export type ToastKind = 'success' | 'error' | 'info' | 'record';
 
 export interface ToastData {
   id: number;
@@ -412,6 +424,7 @@ const TOAST_ICON: Record<ToastKind, typeof Check> = {
   success: Check,
   error: TriangleAlert,
   info: Info,
+  record: Trophy,
 };
 
 /**
@@ -426,24 +439,40 @@ const TOAST_ICON: Record<ToastKind, typeof Check> = {
  * wash over an unknown background is a toast whose own message cannot be read. The tone is carried
  * by the border and by the icon chip — which is the pattern the offline banner and the copy button
  * already use, rather than a third way of saying "this went wrong".
+ *
+ * `rail` is the fourth carrier and only `record` uses it. It is not a decoration the other three
+ * were missing: a rail and a tone border are two edges saying one thing, and `record` is precisely
+ * the kind that has NO tone border to say it with — the mockup draws a neutral box, so the accent
+ * stripe is the whole signal, not a second one.
  */
-const TOAST_TONE: Record<ToastKind, { border: string; chip: string; icon: string }> = {
-  success: {
-    border: 'border-[var(--success-border)]',
-    chip: 'bg-[var(--success-subtle)]',
-    icon: 'text-success',
-  },
-  error: {
-    border: 'border-[var(--danger-border)]',
-    chip: 'bg-[var(--danger-subtle)]',
-    icon: 'text-danger',
-  },
-  info: {
-    border: 'border-[var(--info-border)]',
-    chip: 'bg-[var(--info-subtle)]',
-    icon: 'text-info',
-  },
-};
+const TOAST_TONE: Record<ToastKind, { border: string; chip: string; icon: string; rail?: string }> =
+  {
+    success: {
+      border: 'border-[var(--success-border)]',
+      chip: 'bg-[var(--success-subtle)]',
+      icon: 'text-success',
+    },
+    error: {
+      border: 'border-[var(--danger-border)]',
+      chip: 'bg-[var(--danger-subtle)]',
+      icon: 'text-danger',
+    },
+    info: {
+      border: 'border-[var(--info-border)]',
+      chip: 'bg-[var(--info-subtle)]',
+      icon: 'text-info',
+    },
+    // Neutral box, neutral mark, accent rail — the mockup verbatim. The mark is `surface-2` rather
+    // than the near-white circle drawn there because the only near-white in the system is
+    // `rgb(var(--ink))`, an INK channel with no surface counterpart; an inverse-surface token pair
+    // is an open request against `tokens.css`, and this tone is the second caller for it.
+    record: {
+      border: 'border-[var(--surface-border)]',
+      chip: 'bg-surface-2',
+      icon: 'text-text-1',
+      rail: 'bg-accent',
+    },
+  };
 
 export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number) => void }) {
   const { t } = useTranslation();
@@ -478,6 +507,19 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
         tone.border,
       )}
     >
+      {/* The leading accent rail. `start-0`, not `left-0`: it is the reading edge, and the app
+          already writes its insets logically (`ps-`), so it follows the text direction rather than
+          jumping to the wrong side of the message in an RTL locale.
+          It sits inside the existing `overflow-hidden`, so the card radius clips it — no second
+          radius to keep in sync. `w-1` is the 4px grid step, and the toast's own `p-3` leaves 8px
+          of clearance, so nothing has to move to make room for it. */}
+      {tone.rail ? (
+        <span
+          aria-hidden
+          className={cn('pointer-events-none absolute inset-y-0 start-0 w-1', tone.rail)}
+        />
+      ) : null}
+
       <div className="flex items-center gap-3">
         <motion.span
           className={cn(

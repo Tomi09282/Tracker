@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useElementVariant } from '../feedback/ElementStyleProvider';
@@ -60,9 +60,20 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
    *
    * The prefix test is boundary-aware: `/coin` must not match `/coins`, and `/m` must not match
    * `/measurements`. So a prefix counts only when the path ends there or continues with a slash.
+   *
+   * AND THIS IS WHY THE LINK IS A PLAIN `Link` NOW.
+   *
+   * Wrapping `NavLink` and OR-ing its `isActive` with the ownership test fixed the pixels and left
+   * the semantics wrong: `aria-current` is `NavLink`'s to give, and it withholds it whenever its
+   * own match fails. So on `/library` the bar showed EDZÉS lit while announcing no current page at
+   * all — sighted and screen-reader users reading two different bars off the same markup, which is
+   * worse than the blank bar it replaced because only one of the two audiences can see the bug.
+   * Once the component owns the answer, it has to own the attribute that reports it.
    */
-  const owned = (tab: NavTab) =>
-    (tab.owns ?? []).some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const owns = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
+  // `end` is the index route's flag: without it `/` prefix-matches every path in the app.
+  const isActive = (tab: NavTab) =>
+    (tab.end ? pathname === tab.to : owns(tab.to)) || (tab.owns?.some(owns) ?? false);
 
   const pill = tabs.length <= PILL_MAX_TABS;
 
@@ -106,82 +117,73 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          // `min-w-0` because `flex-1` alone does not make a flex item shrinkable: the default
-          // `min-width: auto` floors it at its content width. Measured at 360px — the five links
-          // came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport, unreadable
-          // and only half tappable. With the floor removed the cells are equal, and that is what
-          // makes six and seven of them possible at all.
-          const isOwned = owned(tab);
+          const active = isActive(tab);
 
+          // `min-w-0` below because `flex-1` alone does not make a flex item shrinkable: the
+          // default `min-width: auto` floors it at its content width. Measured at 360px — the five
+          // links came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport,
+          // unreadable and only half tappable. With the floor removed the cells are equal, and
+          // that is what makes six and seven of them possible at all.
           return (
             <li key={tab.to} className={cn('min-w-0 flex-1', pill && 'lg:flex-none')}>
-              <NavLink
+              <Link
                 to={tab.to}
-                end={tab.end}
-                className={({ isActive: linkActive }) =>
-                  cn(
-                    // The bar is 64px tall; the link fills it, so the whole cell is tappable
-                    // rather than just the icon.
-                    'flex h-[var(--nav-h)] min-w-[var(--target-min)] flex-col items-center',
-                    // No horizontal padding on the narrowest phones: the cells are equal width and
-                    // the whole cell is the tap target, so the padding bought nothing and cost 8px
-                    // of label. The truncate below is the safety net — and at seven tabs it is not
-                    // a safety net any more but the expected result, which the admin mockup draws.
-                    'justify-center gap-1 px-0 sm:px-3',
-                    pill && 'lg:flex-row lg:gap-2 lg:px-4',
-                    'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-                    linkActive || isOwned
-                      ? 'text-[var(--nav-fg-active)]'
-                      : 'text-[var(--nav-fg-idle)]',
-                  )
-                }
+                // The whole point of computing `active` here: the attribute a screen reader reads
+                // and the colour a sighted user sees now come from one expression.
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  // The bar is 64px tall; the link fills it, so the whole cell is tappable
+                  // rather than just the icon.
+                  'flex h-[var(--nav-h)] min-w-[var(--target-min)] flex-col items-center',
+                  // No horizontal padding on the narrowest phones: the cells are equal width and
+                  // the whole cell is the tap target, so the padding bought nothing and cost 8px
+                  // of label. The truncate below is the safety net — and at seven tabs it is not
+                  // a safety net any more but the expected result, which the admin mockup draws.
+                  'justify-center gap-1 px-0 sm:px-3',
+                  pill && 'lg:flex-row lg:gap-2 lg:px-4',
+                  'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
+                  active ? 'text-[var(--nav-fg-active)]' : 'text-[var(--nav-fg-idle)]',
+                )}
               >
-                {({ isActive: linkActive }) => {
-                  const isActive = linkActive || isOwned;
-                  return (
-                  <>
-                    <span className="relative inline-flex items-center justify-center">
-                      {/* A — the active indicator is a background pill at 12% accent, drawn
-                          behind the icon rather than around the whole cell: a full-cell
-                          highlight fights the 64px bar height and reads as a button, not a tab.
-                          B — a dot below the icon instead, for a lighter bar.
-                          C — the icon itself thickens when active, with no separate marker. */}
-                      {isActive && variant === 'A' ? (
-                        <span
-                          aria-hidden
-                          className="absolute -inset-x-3 -inset-y-1 rounded-chip bg-accent-subtle"
-                        />
-                      ) : null}
-                      {isActive && variant === 'B' ? (
-                        <span
-                          aria-hidden
-                          className="absolute -bottom-1.5 size-1 rounded-chip bg-accent"
-                        />
-                      ) : null}
-                      <Icon
-                        // 24px, per the Bible. The previous build shipped 20 and it read as timid.
-                        size={24}
-                        strokeWidth={isActive && variant === 'C' ? 2.75 : 2}
-                        aria-hidden
-                        className="relative transition-[stroke-width] duration-[var(--duration-fast)]"
-                      />
-                      {typeof tab.badge === 'number' && tab.badge > 0 ? (
-                        <span
-                          className={cn(
-                            'absolute -right-2 -top-1 min-w-4 rounded-chip px-1',
-                            'text-micro tabular-nums bg-danger text-on-danger',
-                            variant === 'D' && 'animate-[badge-pop_var(--duration-base)_var(--ease-standard)]',
-                          )}
-                        >
-                          {tab.badge > 99 ? '99+' : tab.badge}
-                        </span>
-                      ) : null}
+                <span className="relative inline-flex items-center justify-center">
+                  {/* A — the active indicator is a background pill at 12% accent, drawn
+                      behind the icon rather than around the whole cell: a full-cell
+                      highlight fights the 64px bar height and reads as a button, not a tab.
+                      B — a dot below the icon instead, for a lighter bar.
+                      C — the icon itself thickens when active, with no separate marker. */}
+                  {active && variant === 'A' ? (
+                    <span
+                      aria-hidden
+                      className="absolute -inset-x-3 -inset-y-1 rounded-chip bg-accent-subtle"
+                    />
+                  ) : null}
+                  {active && variant === 'B' ? (
+                    <span
+                      aria-hidden
+                      className="absolute -bottom-1.5 size-1 rounded-chip bg-accent"
+                    />
+                  ) : null}
+                  <Icon
+                    // 24px, per the Bible. The previous build shipped 20 and it read as timid.
+                    size={24}
+                    strokeWidth={active && variant === 'C' ? 2.75 : 2}
+                    aria-hidden
+                    className="relative transition-[stroke-width] duration-[var(--duration-fast)]"
+                  />
+                  {typeof tab.badge === 'number' && tab.badge > 0 ? (
+                    <span
+                      className={cn(
+                        'absolute -right-2 -top-1 min-w-4 rounded-chip px-1',
+                        'text-micro tabular-nums bg-danger text-on-danger',
+                        variant === 'D' && 'animate-[badge-pop_var(--duration-base)_var(--ease-standard)]',
+                      )}
+                    >
+                      {tab.badge > 99 ? '99+' : tab.badge}
                     </span>
-                    <span className="text-micro max-w-full truncate">{tab.label}</span>
-                  </>
-                  );
-                }}
-              </NavLink>
+                  ) : null}
+                </span>
+                <span className="text-micro max-w-full truncate">{tab.label}</span>
+              </Link>
             </li>
           );
         })}

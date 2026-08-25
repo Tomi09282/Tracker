@@ -24,9 +24,42 @@ import { Toast, type ToastData, type ToastKind } from './variants/E12E16';
  * machine two components can disagree about.
  */
 
+/**
+ * Which edge the toast comes from.
+ *
+ * ═══ WHY THIS IS A PROP AND NOT A NEW HOUSE RULE ═══════════════════════════════════════════════
+ *
+ * `workout-states.md` block 1 draws the record toast "pinned at the top of the viewport", and
+ * `02b-workout-states.webp` shows it under the status bar. That is not a whim about that screen: on
+ * the player, the bottom of the viewport is the rest timer, the nav, AND the check button the thumb
+ * is already moving toward. A celebration that lands there covers the control it is celebrating.
+ *
+ * The alternative — moving the whole stack — was considered and rejected. `bottom` is a decision
+ * this file already made and documented for the general case (below), and a top-pinned toast on
+ * every screen would also land on the offline strip, which is sticky at the same `--z-toast` layer
+ * and would be covered by it. One screen has a reason; one screen opts in.
+ *
+ * DEFAULT IS `bottom`, so no existing caller changes behaviour by not knowing about this.
+ */
+export type ToastPlacement = 'top' | 'bottom';
+
+/** Everything optional about a raise, in one bag so the call site never counts positions. */
+export interface ToastOptions {
+  onUndo?: () => void;
+  /** Defaults to `'bottom'`. See `ToastPlacement`. */
+  placement?: ToastPlacement;
+}
+
 interface ToastApi {
-  /** Raise a toast. Returns nothing: nobody should be waiting on a notification. */
-  toast: (message: string, kind?: ToastKind, onUndo?: () => void) => void;
+  /**
+   * Raise a toast. Returns nothing: nobody should be waiting on a notification.
+   *
+   * The third argument was `onUndo?: () => void` before `placement` existed, and callers pass it
+   * that way (`useComposeFlow.ts:85` forwards an undo callback it was handed). A bare function is
+   * still accepted and still means "undo", so adding an option did not have to become a rename
+   * across files nobody was otherwise touching — and the object form is what new callers use.
+   */
+  toast: (message: string, kind?: ToastKind, options?: ToastOptions | (() => void)) => void;
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
@@ -43,22 +76,32 @@ export function useToast(): ToastApi {
   return ctx ?? { toast: () => {} };
 }
 
+/** A live toast, plus the edge it was raised at. `ToastData` is what the `Toast` component reads. */
+type Queued = ToastData & { placement: ToastPlacement };
+
 export function ToastHost({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<ToastData[]>([]);
+  const [toasts, setToasts] = useState<Queued[]>([]);
   const nextId = useRef(1);
 
   const dismiss = useCallback((id: number) => {
     setToasts((cur) => cur.filter((t) => t.id !== id));
   }, []);
 
-  const toast = useCallback<ToastApi['toast']>((message, kind = 'success', onUndo) => {
+  const toast = useCallback<ToastApi['toast']>((message, kind = 'success', options) => {
+    const opts: ToastOptions = typeof options === 'function' ? { onUndo: options } : (options ?? {});
     const id = nextId.current;
     nextId.current += 1;
     setToasts((cur) => {
       // THREE AT A TIME. A stack that grows without bound covers the thing the user is looking at,
       // and the fourth notification about the same burst of work tells them nothing the first three
       // did not. The oldest goes, because the newest is the one they caused.
-      const next = [...cur, { id, kind, message, onUndo }];
+      //
+      // The cap is on the TOTAL, not per edge: two stacks of three is six notifications on screen,
+      // which is the unbounded case wearing a disguise.
+      const next: Queued[] = [
+        ...cur,
+        { id, kind, message, onUndo: opts.onUndo, placement: opts.placement ?? 'bottom' },
+      ];
       return next.slice(-3);
     });
   }, []);
@@ -69,15 +112,15 @@ export function ToastHost({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {/*
-        Fixed to the BOTTOM, above the safe-area inset, and pointer-events-none on the container so
-        it never swallows a tap meant for the screen behind it — only the toasts themselves are
-        interactive, which matters because one of them carries an Undo.
+        Fixed to an EDGE, clear of that edge's safe-area inset, and pointer-events-none on the
+        container so it never swallows a tap meant for the screen behind it — only the toasts
+        themselves are interactive, which matters because one of them carries an Undo.
 
-        `lg:items-end` is the desktop half of the position rule: bottom-RIGHT on a pointer screen,
-        never the centre. Centred over a wide viewport a toast lands on top of whatever the user
-        was reading, and the wider the screen the further it is from where they were looking. The
-        column is `max-w-sm`, so the cross-axis alignment is the whole change — no width, no
-        offset, no second layout.
+        `lg:items-end` is the desktop half of the position rule: the trailing CORNER on a pointer
+        screen, never the centre. Centred over a wide viewport a toast lands on top of whatever the
+        user was reading, and the wider the screen the further it is from where they were looking.
+        The column is `max-w-sm`, so the cross-axis alignment is the whole change — no width, no
+        offset, no second layout. It applies to both edges for the same reason.
       */}
       {/*
         `--z-toast` and `--content-pad-b` are both declared tokens, and both were nearly re-derived
@@ -86,32 +129,55 @@ export function ToastHost({ children }: { children: ReactNode }) {
         bottom navigation on every authenticated screen. The layer order and the height of the nav
         are decisions this design system already made.
       */}
-      <div
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-toast)] flex flex-col items-center px-4 pb-[var(--content-pad-b)] lg:items-end"
-        // NOT a live region itself: each Toast already carries role="status", and nesting one live
-        // region inside another makes some screen readers announce the whole stack on every change.
-      >
-        {/*
-          THE SIZING WRAPPER SITS OUTSIDE AnimatePresence because `AnimatePresence` tracks its DIRECT
-          children: a plain keyed `div` in between hides the `Toast` from presence detection, and the
-          exit animation never runs. That is a real reason and it is the only one.
+      {/*
+        TWO STACKS, ONE PER EDGE, and each renders nothing until something is raised at it — an
+        empty `fixed` overlay is `pointer-events-none` so it costs no taps, but it does cost a
+        layer, and the top one would otherwise sit over the offline strip on every screen forever.
 
-          It is written down because the first draft claimed a different one. Measuring in a browser
-          pane whose page is `hidden`, I read `scale(0.96) translateY(24px)` on a settled toast and
-          concluded it overlapped the nav and that its buttons were 42px. Both were the frozen
-          entrance: a hidden page suspends requestAnimationFrame, Motion animates on rAF, so every
-          Motion entrance sits at its initial values forever — and `getBoundingClientRect` reports the
-          TRANSFORMED box. Measured with `offsetHeight`, which is layout: the buttons are 44px and the
-          80px bottom padding clears the 65px nav. There was nothing wrong.
-        */}
-        <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">
-          <AnimatePresence initial={false}>
-            {toasts.map((t) => (
-              <Toast key={t.id} toast={t} onDismiss={dismiss} />
-            ))}
-          </AnimatePresence>
-        </div>
-      </div>
+        `pb-[var(--content-pad-b)]` / the top inset are the two halves of the same rule: whichever
+        edge a stack is pinned to, it clears what already lives there. Below that is the nav; above
+        it is the notch.
+      */}
+      {(['bottom', 'top'] as const).map((edge) => {
+        const shown = toasts.filter((t) => t.placement === edge);
+        if (shown.length === 0) return null;
+        return (
+          <div
+            key={edge}
+            className={
+              edge === 'bottom'
+                ? 'pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-toast)] flex flex-col items-center px-4 pb-[var(--content-pad-b)] lg:items-end'
+                : 'pointer-events-none fixed inset-x-0 top-0 z-[var(--z-toast)] flex flex-col items-center px-4 pt-[calc(env(safe-area-inset-top)+--spacing(3))] lg:items-end'
+            }
+            // NOT a live region itself: each Toast already carries role="status", and nesting one
+            // live region inside another makes some screen readers announce the whole stack on
+            // every change.
+          >
+            {/*
+              THE SIZING WRAPPER SITS OUTSIDE AnimatePresence because `AnimatePresence` tracks its
+              DIRECT children: a plain keyed `div` in between hides the `Toast` from presence
+              detection, and the exit animation never runs. That is a real reason and it is the only
+              one.
+
+              It is written down because the first draft claimed a different one. Measuring in a
+              browser pane whose page is `hidden`, I read `scale(0.96) translateY(24px)` on a settled
+              toast and concluded it overlapped the nav and that its buttons were 42px. Both were the
+              frozen entrance: a hidden page suspends requestAnimationFrame, Motion animates on rAF,
+              so every Motion entrance sits at its initial values forever — and
+              `getBoundingClientRect` reports the TRANSFORMED box. Measured with `offsetHeight`,
+              which is layout: the buttons are 44px and the 80px bottom padding clears the 65px nav.
+              There was nothing wrong.
+            */}
+            <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">
+              <AnimatePresence initial={false}>
+                {shown.map((t) => (
+                  <Toast key={t.id} toast={t} onDismiss={dismiss} />
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        );
+      })}
     </ToastContext.Provider>
   );
 }

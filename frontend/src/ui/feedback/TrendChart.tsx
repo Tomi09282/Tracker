@@ -222,21 +222,27 @@ export function TrendChart({
             apart and a run three weeks apart drew the same line — which defeats the honest time
             axis the geometry module exists to provide. The dots are what make "these four are
             clustered and that one is alone" visible. The last one is larger: it is the value in
-            the headline, and the eye should be able to find it without counting. */}
+            the headline, and the eye should be able to find it without counting.
+            Keyed by date AND index, because a metric with two readings on the same day would
+            collide on a bare date key. Fill-only, so no `vectorEffect`: it governs stroke scaling
+            and these have no stroke — it stays load-bearing on the <path> above. */}
         {pts.map((p, i) => (
           <circle
-            key={p.date}
+            key={`${p.date}-${i}`}
             cx={p.x}
             cy={p.y}
             r={i === pts.length - 1 ? 3.5 : 2}
             fill="var(--accent)"
-            vectorEffect="non-scaling-stroke"
           />
         ))}
       </svg>
       </div>
 
-      <div className="text-caption flex justify-between gap-2 text-text-3">
+      {/* `items-center`, not the default stretch: the chip is taller than bare date text, and
+          stretch would hang the two dates from the top of the row instead of on its centre line.
+          `tabular-nums` keeps the two equal-length ISO dates provably equal-width, which is what
+          holds the chip in the middle rather than letting it drift with the digits. */}
+      <div className="text-caption flex items-center justify-between gap-2 tabular-nums text-text-3">
         <span>{first.date}</span>
         {/* A break that dominates the window is NAMED, not merely drawn. The honest x axis makes the
             gap visible; saying how long it was is what stops a reader interpreting the drop after it
@@ -247,7 +253,7 @@ export function TrendChart({
             an object: it holds its shape, it centres, and it says "this is about the gap between
             those two dates" by looking like a thing placed between them. */}
         {gap >= 14 ? (
-          <span className="text-caption shrink-0 rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 text-[var(--warning)]">
+          <span className="text-caption shrink-0 rounded-chip bg-warning-subtle px-2 py-0.5 text-warning">
             {t('progress.gap', { count: gap })}
           </span>
         ) : null}
@@ -277,6 +283,4 @@ export function TrendChart({
     </figure>
   );
 }
-
-/** Whole numbers past 10, one decimal below it — 2.5 kg matters, 102.5 kg does not. */
 
