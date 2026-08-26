@@ -26,6 +26,9 @@ const OnboardingPage = lazy(() =>
 const ClientDetailPage = lazy(() =>
   import('../features/coaching/ClientDetailPage').then((m) => ({ default: m.ClientDetailPage })),
 );
+const ChatPage = lazy(() =>
+  import('../features/chat/ChatPage').then((m) => ({ default: m.ChatPage })),
+);
 const WorkoutPlayer = lazy(() =>
   import('../features/workout/WorkoutPlayer').then((m) => ({ default: m.WorkoutPlayer })),
 );
@@ -124,6 +127,12 @@ export const router = createBrowserRouter([
       { path: 'admin/styles', element: suspended(<StyleStudioPage />) },
       { path: 'coach', element: suspended(<CoachDashboard />) },
       { path: 'coach/clients/:id', element: suspended(<ClientDetailPage />) },
+      // The conversation is its own SCREEN, not the fourth tab of the client detail page. The
+      // `coach-chat` spec draws it that way — top bar, identity anchor, thread, composer above the
+      // nav — and a thread inside a tab inside a scrolling page is a scrolling box in a scrolling
+      // box, which is the one shape a conversation must not have. `ChatPage` was written and had
+      // no route, so the screen existed and nothing could reach it.
+      { path: 'coach/clients/:id/chat', element: suspended(<ChatPage />) },
       { path: 'coach/plans', element: suspended(<PlanListPage />) },
       { path: 'coach/plans/:id', element: suspended(<PlanEditorPage />) },
       { path: 'onboarding', element: suspended(<OnboardingPage />) },

@@ -706,7 +706,8 @@
     "sendFailed": "The message could not be sent. Your text is still here.",
     "unavailable": "This conversation is no longer available.",
     "composeHint": "Send with the plane icon",
-    "delivered": "Delivered"
+    "delivered": "Delivered",
+    "openFull": "Open full conversation"
   },
   "notifications": {
     "title": "Notifications",

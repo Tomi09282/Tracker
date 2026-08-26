@@ -706,7 +706,8 @@
     "sendFailed": "Az üzenetet nem sikerült elküldeni. A szöveg megmaradt.",
     "unavailable": "Ez a beszélgetés már nem elérhető.",
     "composeHint": "Küldés a repülő ikonnal",
-    "delivered": "Kézbesítve"
+    "delivered": "Kézbesítve",
+    "openFull": "Teljes beszélgetés"
   },
   "notifications": {
     "title": "Értesítések",

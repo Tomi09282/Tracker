@@ -706,7 +706,8 @@
     "sendFailed": "Die Nachricht konnte nicht gesendet werden. Dein Text ist noch da.",
     "unavailable": "Diese Unterhaltung ist nicht mehr verfügbar.",
     "composeHint": "Senden mit dem Flugzeug-Symbol",
-    "delivered": "Zugestellt"
+    "delivered": "Zugestellt",
+    "openFull": "Ganze Unterhaltung öffnen"
   },
   "notifications": {
     "title": "Mitteilungen",

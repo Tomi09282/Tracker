@@ -143,13 +143,31 @@ for (const file of files) {
   const text = read(file);
   for (const [, to] of text.matchAll(/\bto=["']([^"'`]+)["']/g)) linkTargets.add(to);
   for (const [, to] of text.matchAll(/navigate\(\s*['"]([^'"]+)['"]/g)) linkTargets.add(to);
-  // `to={`/library/${id}`}` — a template literal reaches its whole parameterised family.
-  for (const [, to] of text.matchAll(/\bto=\{`([^`$]+)\$\{/g)) linkTargets.add(to.replace(/\/$/, '/:param'));
+  /*
+   * `to={`/library/${id}`}` reaches a whole parameterised family.
+   *
+   * THE WHOLE literal, not the prefix before the first interpolation. The earlier rule captured
+   * only what came before it, which is correct exactly when the parameter is LAST — and silently
+   * wrong the moment a segment follows it. A link to the standalone conversation screen was read
+   * as a link to `/coach/clients/`, so that route was reported unreachable while a link to it sat
+   * two files away. A gate that refuses correct code is a gate somebody switches off, which is
+   * worse than the blind spot it was written to close.
+   *
+   * Every interpolation becomes `:param`, which is the shape `reachable` already normalises routes
+   * to, so the two meet in the middle instead of one guessing at the other.
+   */
+  for (const [, to] of text.matchAll(/\bto=\{`([^`]+)`\}/g)) {
+    linkTargets.add(to.replace(/\$\{[^}]*\}/g, ':param').replace(/\/$/, ''));
+  }
 }
 
 const reachable = (route) => {
   if (linkTargets.has(route)) return true;
   // A parameterised route is reachable if anything links into its family.
+  // Compare with every parameter reduced to the same placeholder on BOTH sides, so a link whose
+  // parameter sits mid-path matches the route whose parameter sits there too.
+  const norm = (p) => p.replace(/\/:[^/]+/g, '/:param');
+  if ([...linkTargets].some((t) => norm(t) === norm(route))) return true;
   const stem = route.replace(/\/:[^/]+/g, '');
   return [...linkTargets].some((t) => t === stem || t.startsWith(`${stem}/`));
 };

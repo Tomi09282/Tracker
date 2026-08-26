@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+import { ChevronRight } from 'lucide-react';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useSession } from '../auth/useSession';
 import { ChatPanel } from '../chat/ChatPanel';
@@ -38,13 +40,30 @@ export function ChatTab({ linkId }: { linkId: number }) {
   }
 
   return (
-    <ChatPanel
-      conversationId={conversation.id}
-      meId={me?.id ?? -1}
-      blocked={conversation.blocked_at != null}
-      blockedByMe={conversation.blocked_by === me?.id}
-      // The thread scrolls inside its own box, so the client detail page itself does not grow.
-      className="max-h-[60vh]"
-    />
+    <div className="flex flex-col gap-tight">
+      {/* THE DOOR TO THE FULL SCREEN, and it is what makes that route reachable at all.
+          `coach-chat` is its own screen — a thread inside a tab inside a scrolling page is a
+          scrolling box in a scrolling box, which is the one shape a conversation must not have.
+          The standalone route was written and mounted with nothing linking to it, and `check-nav`
+          refused the build for exactly that: on a phone the command palette that lists it is
+          hidden below 1024px, so a route with no link is a screen nobody can open.
+          The tab keeps the panel, because reading the last few messages beside the client's plan
+          is the common case; this is the way OUT of the tab and into the conversation. */}
+      <Link
+        to={`/coach/clients/${linkId}/chat`}
+        className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-tight self-end text-accent"
+      >
+        {t('chat.openFull')}
+        <ChevronRight className="size-icon-s shrink-0" strokeWidth={2} aria-hidden />
+      </Link>
+      <ChatPanel
+        conversationId={conversation.id}
+        meId={me?.id ?? -1}
+        blocked={conversation.blocked_at != null}
+        blockedByMe={conversation.blocked_by === me?.id}
+        // The thread scrolls inside its own box, so the client detail page itself does not grow.
+        className="max-h-[60vh]"
+      />
+    </div>
   );
 }
