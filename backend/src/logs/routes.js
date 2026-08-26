@@ -201,6 +201,15 @@ router.post(
 
 /* ── the live session ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * The live session — and the records it has already earned.
+ *
+ * The records used to reach the player ONLY as the return value of the check that minted them, so
+ * the gold badge lived in a component's own state and died with it: switch exercise, reload, or
+ * come back from offline and the trophy was gone while the `workout_pr_events` row sat untouched in
+ * the database. The server is the one that knows a record was set; this is where it says so, and
+ * carrying it WITH the set means a refetch can neither erase the fact nor replay the celebration.
+ */
 router.get(
   '/workouts/current',
   requireAuth,
@@ -211,11 +220,56 @@ router.get(
     );
     if (!log) return res.json({ log: null, exercises: [], sets: [] });
 
-    const [exercises, sets] = await Promise.all([
+    const [exercises, sets, prEvents] = await Promise.all([
       db.all('SELECT * FROM workout_log_exercises WHERE log_id = ? ORDER BY position, id', [log.id]),
       db.all('SELECT * FROM workout_log_sets WHERE log_id = ? ORDER BY log_exercise_id, set_index', [log.id]),
+      // Ownership from the SESSION's own user, not from `req.user` a second time: the log was
+      // already proven theirs above, so the event and the log it belongs to are scoped by one and
+      // the same owner rather than by two claims that could drift apart.
+      //
+      // Scoped by membership in this log's SETS rather than by `workout_pr_events.log_id`, which
+      // carries no index — and this route refetches after every single set check, so that
+      // predicate would walk the client's entire record book once per rep. The subquery is a seek
+      // on `workout_log_sets_log_idx` and each id it yields a seek on
+      // `workout_pr_events_source_idx`: bounded by the session, not by how long the client has
+      // been training. A 'session_volume' record has no source set and is not a per-set trophy
+      // anyway — the membership test drops it for free.
+      //
+      // `invalidated_at IS NULL` is the same term the record book uses: a withdrawn record is
+      // history, not a badge, so voiding a set takes its trophy with it on the next refetch.
+      db.all(
+        `SELECT source_set_id, kind, rep_bucket, value, previous_value
+           FROM workout_pr_events
+          WHERE client_user_id = ? AND invalidated_at IS NULL
+            AND source_set_id IN (SELECT id FROM workout_log_sets WHERE log_id = ?)
+          ORDER BY id`,
+        [log.client_user_id, log.id],
+      ),
     ]);
-    res.json({ log, exercises, sets });
+
+    const earned = new Map();
+    for (const ev of prEvents) {
+      // The SAME shape `recordSetTx` hands back to `/sets/:id/check`, camelCase and all. Two shapes
+      // for one thing would force the player to tell a record it just earned from one it is merely
+      // being reminded of, which is exactly the distinction it must NOT make.
+      const record = {
+        kind: ev.kind,
+        repBucket: ev.rep_bucket,
+        value: ev.value,
+        previous: ev.previous_value,
+      };
+      const list = earned.get(ev.source_set_id);
+      if (list) list.push(record);
+      else earned.set(ev.source_set_id, [record]);
+    }
+
+    res.json({
+      log,
+      exercises,
+      // Attached only where there is something to attach. An empty array on all fifty rows of a
+      // long session is payload that says exactly what its absence already said.
+      sets: sets.map((s) => (earned.has(s.id) ? { ...s, records: earned.get(s.id) } : s)),
+    });
   }),
 );
 

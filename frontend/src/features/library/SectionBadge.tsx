@@ -1,22 +1,23 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cn } from '../../lib/cn';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 
 /**
- * The glyph-in-a-tinted-holder that opens a section on both library screens.
+ * The library's name for `ui/data/SectionHeader` — an IMPORT SHIM, not a second component.
  *
- * Local to this feature ON PURPOSE. The approved design uses the same badge on the nutrition and
- * progress screens too, so it wants to be a shared component — but `src/ui/` is being edited by
- * other work in parallel and a second, half-agreeing copy there is worse than one honest local
- * one. It reads `--tile-tint` / `--tile-tint-fg`, the tokens SummaryTile's icon holder already
- * uses, so promoting this file into `src/ui/data/` later changes an import path and nothing else.
+ * The argument this file used to make was the right one and it won: the heading belongs to the
+ * CALL SITE, because `IZOMCSOPORT` is an 11px caps accent line and `Végrehajtás` is a real title,
+ * and a `size` prop covering both would be one more thing to decide per screen. So the shared
+ * component grew the children slot rather than a boolean, and the markup that used to live here —
+ * `size-11`, `rounded-field`, `--tile-tint` / `--tile-tint-fg` — is now what every screen renders,
+ * including the two that were on `bg-accent-subtle`.
  *
- * The heading itself is the CHILD rather than a string prop: `IZOMCSOPORT` is a micro uppercase
- * accent line and `Végrehajtás` is a real title, and a `size` prop covering both would be one
- * more thing to decide per call site.
+ * It stays only because `features/library/ExerciseDetailPage.tsx` still imports the name and that
+ * file is outside this change's set. Retiring it is one import line there and deleting this file;
+ * `LibraryPage` has already been re-pointed, so there is exactly one caller left.
  */
 export function SectionBadge({
-  icon: Icon,
+  icon,
   children,
   className,
 }: {
@@ -25,14 +26,8 @@ export function SectionBadge({
   className?: string;
 }) {
   return (
-    <div className={cn('flex items-center gap-tight', className)}>
-      <span
-        aria-hidden
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
-      >
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
+    <SectionHeader icon={icon} className={className}>
       {children}
-    </div>
+    </SectionHeader>
   );
 }

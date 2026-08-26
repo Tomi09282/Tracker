@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import {
@@ -11,12 +11,12 @@ import {
   ClipboardList,
   Plus,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { NotificationBell } from '../chat/NotificationBell';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
 import { Surface } from '../../ui/primitives/Surface';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { SummaryTile } from '../../ui/data/SummaryTile';
 import { Gauge } from '../../ui/feedback/Gauge';
 import { CountUp } from '../../ui/feedback/CountUp';
@@ -39,40 +39,6 @@ import {
   usePregenerate,
   type ClientRow,
 } from './useCoaching';
-
-/**
- * A section's header: a tinted icon holder, the heading, and whatever belongs on the right.
- *
- * It replaces a bare `<h2>` because the redesigned screen has no rules and no card borders between
- * sections — the icon holder IS the section boundary. Local rather than shared for now; it appears
- * on several screens and wants promoting.
- */
-function SectionHead({
-  icon: Icon,
-  title,
-  trailing,
-}: {
-  icon: LucideIcon;
-  title: string;
-  trailing?: ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-tight">
-      {/* A SQUIRCLE, NOT A CIRCLE. The mockup keeps round holders for the things that stand in for
-          a person — the monogram and the bell — and draws every OBJECT holder as a rounded square.
-          `rounded-chip` is `--radius-full` in Midnight, which flattened that distinction and left
-          a 44px key glyph looking like somebody's avatar. */}
-      <span
-        aria-hidden
-        className="inline-grid size-11 shrink-0 place-items-center rounded-card bg-accent-subtle text-accent"
-      >
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
-      <h2 className="text-title-2 min-w-0 flex-1 text-text-1">{title}</h2>
-      {trailing}
-    </div>
-  );
-}
 
 /**
  * The donut's vocabulary.
@@ -391,7 +357,7 @@ export function CoachDashboard() {
 
       {/* ── join codes ─────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
-        <SectionHead icon={KeyRound} title={t('coaching.joinCodes')} trailing={mintPill} />
+        <SectionHeader icon={KeyRound} title={t('coaching.joinCodes')} action={mintPill} />
 
         {/* No live codes: the heading and the pill stay, the row list simply does not render. The
             explainer paragraph that used to sit here is stated where it matters instead — inside
@@ -438,10 +404,10 @@ export function CoachDashboard() {
 
       {/* ── roster ─────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
-        <SectionHead
+        <SectionHeader
           icon={Users}
           title={t('coaching.roster')}
-          trailing={
+          action={
             <span className="text-body shrink-0 tabular-nums text-text-3">{rows.length}</span>
           }
         />

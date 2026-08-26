@@ -25,8 +25,13 @@ token and cannot write its WHY in one line, it does not go in.
 | everything else in `src/` | All rules, no exemption. |
 
 Seven gates run on `npm run build` and all must stay green:
-`check-tokens` · `check-i18n` (777 keys × hu/en/de) · `check-interval` · `check-elements` ·
+`check-tokens` · `check-i18n` (hu/en/de) · `check-interval` · `check-elements` ·
 `check-autosave` · `check-safe-area` · `verify:outbox`, plus `tsc -b` with `noUnusedLocals`.
+
+`check-i18n` currently carries **868 keys per language** — `src/i18n/hu.json` flattened to leaf
+paths, which is the figure the gate itself prints on a green run. The count is stated here and
+nowhere else in this file, deliberately: it grows every phase, and a number a document repeats in
+three places is a number that will be wrong in two of them. Read it off a run, not off this line.
 
 ### The gate rules you will hit while styling
 
@@ -375,7 +380,7 @@ reach for a raw height to shrink one.
 
 ## 6. Voice
 
-Hungarian is primary; `en` and `de` ship from the same 777 keys. **Never hardcode visible text.**
+Hungarian is primary; `en` and `de` ship from the same key set as `hu`. **Never hardcode visible text.**
 The bundle already has a consistent voice — these rules are extracted from it, with real strings.
 
 ### 6.1 Address the user directly, informally, second person singular
@@ -453,7 +458,9 @@ the user decides what it means. This is the one voice rule that is also a color 
 
 All counts go through `{{count}}` with the i18n plural machinery — Hungarian takes a singular noun
 after a numeral (`„{{count}} gyakorlat"`, not *gyakorlatok*), and hardcoding either form breaks `en`
-and `de`. All 777 keys must exist in all three bundles or `check-i18n` fails the build.
+and `de`. Every key must exist in all three bundles — `hu` is the reference that defines the set,
+and `check-i18n` fails the build on a key missing from one bundle just as it does on a key only one
+bundle has.
 
 ---
 

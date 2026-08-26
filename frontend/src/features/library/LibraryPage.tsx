@@ -10,7 +10,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useExercises, useTaxonomies, type ExerciseFilters, type Taxonomy } from './useExercises';
 import { MuscleMap } from '../../ui/muscle-map/MuscleMap';
-import { SectionBadge } from './SectionBadge';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 
 const DIFFICULTY_DOT: Record<string, string> = {
   beginner: 'bg-success',
@@ -199,9 +199,11 @@ export function LibraryPage() {
 
         {/* ── the muscle-group strip: the same filter, at 44px ─────────────────────────────── */}
         <div className="flex flex-col gap-tight">
-          <SectionBadge icon={Funnel}>
+          {/* The heading is passed as a child and not as `title`: this one is an 11px caps
+              eyebrow over a chip strip, not the component's default `text-title-2` h2. */}
+          <SectionHeader icon={Funnel}>
             <h2 className="text-micro uppercase text-text-2">{t('library.muscle')}</h2>
-          </SectionBadge>
+          </SectionHeader>
 
           {/*
             Horizontal chip row. `overflow-x-auto` on its own container, never on the page — wide
