@@ -129,11 +129,14 @@ export function TrendChart({
   return (
     <figure className={className}>
       <figcaption className="text-caption flex items-baseline justify-between gap-2 text-text-2">
-        {/* The unit rides with the label rather than repeating on every tick. Three ticks each
-            carrying `kg` is the same word three times in a column eight characters wide. */}
-        <span>
-          {label}
-          {unit ? <span className="ml-1 text-text-3">({unit})</span> : null}
+        {/* THE UNIT BELONGS TO THE SCALE, and it is printed once.
+            It was on the tick column, then here beside the label as `Testsúly (kg)`, and the
+            headline on the right has always ended `82,4 kg` — so the word `kg` appeared twice on
+            one line, eight characters apart, in a card whose whole job is one number. The mockup
+            prints it once at the top of the tick gutter, where it labels the AXIS rather than the
+            metric, and the headline keeps its own because a value without a unit is not a value.
+        */}
+        <span>{label}
         </span>
         {/* THE ANSWER, at the size of an answer.
             It began at the figcaption's 12px — smaller than the date labels under its own axis —
@@ -175,6 +178,11 @@ export function TrendChart({
           and both stay honest at every width. */}
       <div className="mt-2 flex items-stretch gap-2">
         <div className="text-caption relative w-8 shrink-0 tabular-nums text-text-3">
+          {/* Above the topmost tick, where it labels the axis rather than the metric — which is
+              where the mockup puts it and why the caption no longer repeats it. */}
+          {unit ? (
+            <span className="absolute end-0 top-0 -translate-y-full pb-0.5">{unit}</span>
+          ) : null}
           {TICKS.map((tick) => (
             <span
               key={tick.at}
