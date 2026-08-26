@@ -327,7 +327,11 @@ export function NutritionPage() {
               </span>
             </span>
 
-            <span className="flex min-h-[var(--control-h)] shrink-0 items-center gap-tight rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3">
+            {/* The ring goes on the wrapper, not the input: the input is `outline-none` so the
+                native ring cannot cut through the pill, and `focus-within` puts it back around
+                the whole control. Same construction as the date pill in the header — without it
+                this field took focus and showed nothing for it. */}
+            <span className="flex min-h-[var(--control-h)] shrink-0 items-center gap-tight rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--focus-ring)]">
               <input
                 inputMode="decimal"
                 value={grams}

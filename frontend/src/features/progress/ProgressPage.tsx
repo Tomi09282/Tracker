@@ -21,12 +21,15 @@ import { SummaryTile } from '../../ui/data/SummaryTile';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { TrendChart } from '../../ui/feedback/TrendChart';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
+import { useToast } from '../../ui/feedback/ToastHost';
 import { personLabel } from '../../lib/person';
 import { formatMeasure } from '../../lib/measure';
 import {
   useMeasurements,
   useMetrics,
   useRecordMeasurement,
+  type PhotoRow,
   useDeleteMeasurement,
   usePhotos,
   useUploadPhoto,
@@ -147,6 +150,7 @@ function BodyTab() {
   const measurements = useMeasurements();
   const record = useRecordMeasurement();
   const remove = useDeleteMeasurement();
+  const { toast } = useToast();
 
   const [metric, setMetric] = useState<string | null>(null);
   const [value, setValue] = useState('');
@@ -378,11 +382,29 @@ function BodyTab() {
                       {unitSymbol(m.unit)}
                     </span>
                   </span>
-                  {/* One tap, no armed state and no confirm — the same as the food log. */}
+                  {/* One tap and no confirm, like the food log — but unlike the food log it is
+                      UNDOABLE, and that is what buys the missing confirmation. Every field
+                      `useRecordMeasurement` wants is already in this row, so the toast can put the
+                      measurement back exactly as it was rather than approximately. Offering undo
+                      where the delete replays, and a confirm where it cannot, is the same rule the
+                      plan editor follows — it checks `faithful` before showing the affordance. */}
                   <Pressable
                     variant="ghost"
                     shape="icon"
-                    onClick={() => remove.mutate(m.id)}
+                    onClick={() =>
+                      remove.mutate(m.id, {
+                        onSuccess: () =>
+                          toast(t('progress.measurementDeleted'), 'info', {
+                            onUndo: () =>
+                              record.mutate({
+                                metric_key: m.metric_key,
+                                measured_on: m.measured_on,
+                                value: m.value,
+                                note: m.note,
+                              }),
+                          }),
+                      })
+                    }
                     aria-label={t('common.delete')}
                   >
                     <Trash2 className="size-icon-s" aria-hidden />
@@ -404,6 +426,19 @@ function PhotosTab() {
   const upload = useUploadPhoto();
   const remove = useDeletePhoto();
   const [on, setOn] = useState(todayLocal);
+  /*
+   * A CONFIRM RATHER THAN AN UNDO, and the choice is forced rather than preferred.
+   *
+   * `useUploadPhoto` takes a `File`. Once the row is deleted the browser no longer holds the
+   * original, so there is nothing to replay — the undo the measurements list gets is not available
+   * here at any price. The friction has to come before the action instead of after it.
+   *
+   * It is also the delete that deserves it most. A food entry is re-added in ten seconds and a
+   * measurement is four fields; a photograph of your body on a particular day cannot be retaken.
+   * The comment on the food log reasons that a 44px control at the far edge is enough because the
+   * cost of a mistake is small — true there, and the premise does not travel.
+   */
+  const [confirmPhoto, setConfirmPhoto] = useState<PhotoRow | null>(null);
 
   return (
     <>
@@ -482,11 +517,15 @@ function PhotosTab() {
               <span className="text-micro absolute bottom-1 left-1 rounded-chip bg-surface-0 px-2 py-1 text-text-2">
                 {p.taken_on}
               </span>
+              {/* BACKED, for the reason the date pill two lines up is backed: this control sits
+                  on an arbitrary photograph, and a ghost button over an unknown image is a delete
+                  you can see on some of them. The date got that treatment and the destructive
+                  control beside it did not. */}
               <Pressable
                 variant="ghost"
                 shape="icon"
-                className="absolute right-0 top-0"
-                onClick={() => remove.mutate(p.id)}
+                className="absolute right-1 top-1 rounded-full bg-surface-0 text-text-1"
+                onClick={() => setConfirmPhoto(p)}
                 aria-label={t('common.delete')}
               >
                 <Trash2 className="size-icon-s" aria-hidden />
@@ -495,6 +534,32 @@ function PhotosTab() {
           ))}
         </ul>
       )}
+
+      <Sheet
+        open={confirmPhoto !== null}
+        onClose={() => setConfirmPhoto(null)}
+        title={t('progress.deletePhotoTitle')}
+      >
+        <div className="flex flex-col gap-group">
+          <p className="text-body-s text-text-2">{t('progress.deletePhotoBody')}</p>
+          {/* Cancel first and Cancel wider: the destructive option is never the one the thumb
+              lands on by default, and it is never styled as the primary action. */}
+          <div className="flex gap-tight">
+            <Pressable variant="secondary" className="flex-1" onClick={() => setConfirmPhoto(null)}>
+              {t('common.cancel')}
+            </Pressable>
+            <Pressable
+              variant="danger"
+              onClick={() => {
+                if (confirmPhoto) remove.mutate(confirmPhoto.id);
+                setConfirmPhoto(null);
+              }}
+            >
+              {t('common.delete')}
+            </Pressable>
+          </div>
+        </div>
+      </Sheet>
     </>
   );
 }
