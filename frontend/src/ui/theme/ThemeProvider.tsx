@@ -2,7 +2,21 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 import { readableOn } from './contrast';
 
-export const THEME_PACKS = ['midnight', 'solar', 'forest', 'neon', 'mono'] as const;
+/*
+ * `aurora` and `ember` are the two PURCHASABLE packs. They have been seeded in `019_coins.sql`
+ * since the coins feature shipped and drawn in the settings mockup ever since — and they were
+ * missing from this union, so `readStored` fell back to `midnight` on every hydrate for anyone
+ * who owned one. The store sold a thing the client could not hold.
+ */
+export const THEME_PACKS = [
+  'midnight',
+  'solar',
+  'forest',
+  'neon',
+  'mono',
+  'aurora',
+  'ember',
+] as const;
 export type ThemePack = (typeof THEME_PACKS)[number];
 
 /**

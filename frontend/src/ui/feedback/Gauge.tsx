@@ -100,10 +100,19 @@ export function Gauge({
         viewBox={`0 0 ${R * 2} ${R * 2}`}
         role="img"
         aria-labelledby={titleId}
-        className="size-full -rotate-90"
+        className="size-full"
         /* The rotation puts 0° at twelve o'clock. A ring turns a further half-gap so its open
            bottom lands centred at six o'clock; a donut has no single hole to centre, so it starts
-           exactly at twelve and its first segment begins where the eye expects to start reading. */
+           exactly at twelve and its first segment begins where the eye expects to start reading.
+           ────────────────────────────────────────────────────────────────────────────────────
+           NO `-rotate-90` CLASS BESIDE THIS, and the reason is a Tailwind v4 change that is easy
+           to miss. `-rotate-90` no longer emits `transform: rotate(-90deg)` — it emits the
+           STANDALONE `rotate: -90deg` property, which composes WITH `transform` rather than
+           replacing it. Measured in the browser: an element carrying both reports
+           `rotate: -90deg` AND `transform: matrix(0, -1, 1, 0, 0, 0)`, and renders at -180°.
+           The gauge's open bottom was therefore at the TOP, and a donut's first segment started
+           at six o'clock. The class was correct before the inline rotation existed; keeping both
+           is what broke it. */
         style={{ transform: `rotate(${donut ? -90 : -90 - gap / 2}deg)` }}
       >
         <title id={titleId}>{label}</title>

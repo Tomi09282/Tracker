@@ -700,21 +700,93 @@
      tell apart is a loading state that reports nothing. Deriving it from the base plus a little ink
      (~1.35:1) makes it a step that cannot be flattened again by a future surface re-tune, which is
      exactly how it got flat the first time. */
-  /* THE MUSCLE MAP'S SECONDARY FILL, and why it is not `--accent-subtle`.
+  /* THE MUSCLE MAP'S SECONDARY FILL — and it is the LIGHTEST of the three, not a middle step.
    *
-   * `--accent-subtle` is the accent at 20% over TRANSPARENT. That is right for a chip or an icon
-   * holder, which sit on a card — but the map's regions sit on the near-black page, where 20% of
-   * anything composites down to almost the same value as the idle `--surface-2` beside it. The two
-   * roles the map exists to distinguish stopped being distinguishable.
+   * `--accent-subtle` was wrong for a first reason: it is the accent at 20% over TRANSPARENT, and
+   * the map's regions sit on the near-black page, where that composites down to almost the same
+   * value as the idle fill beside it. The two roles the map exists to distinguish had stopped
+   * being distinguishable.
    *
-   * Mixed against the idle fill instead of against transparency, so the result is OPAQUE and lands
-   * where the mockup draws it: clearly brighter than an unworked muscle, clearly dimmer than a
-   * primary target. It reads the same on any backdrop, which is the point — a translucent fill on
-   * an anatomical figure changes meaning depending on what is behind that part of the body. */
-  --muscle-secondary: color-mix(in srgb, var(--accent) 45%, var(--surface-2));
+   * The first replacement was wrong for the opposite reason. It mixed 45% accent into the idle
+   * fill, reasoning that a supporting muscle should read DIMMER than a primary target. Measured
+   * off `04-gyakorlat-reszletei.webp`, that inverts the drawing:
+   *
+   *     idle abs        rgb(121, 130, 145)   grey
+   *     primary chest   rgb(122, 139, 229)   the accent itself
+   *     secondary delt  rgb(204, 211, 251)   pale, nearly white
+   *
+   * Secondary is the brightest thing on the figure. It reads as a HIGHLIGHT rather than as a
+   * lesser version of the primary — which is the honest picture: a supporting muscle is still
+   * working, and dimming it toward the idle grey says the opposite.
+   *
+   * `--accent-300` and not a new mix, because the exercise detail screen already paints its
+   * `Tricepsz` chip dot with it. Map, legend and chip become one key instead of three colours
+   * that have to be kept in step by hand. */
+  --muscle-secondary: var(--accent-300);
 
   --skeleton-base: var(--surface-2);
   --skeleton-sheen: color-mix(in srgb, var(--surface-3), rgb(var(--ink)) 8%);
+}
+
+/* ── The two packs you can buy ────────────────────────────────────────────────────────────────
+ *
+ * `019_coins.sql` has seeded `aurora` and `ember` as purchasable store items since the coins
+ * feature shipped, the settings mockup draws them as two of its three chips, and all three
+ * bundles carry their names. Neither existed here, and neither was in the client's `THEME_PACKS`
+ * union — so `readStored` fell back to `midnight` on every hydrate for anyone who owned one, and
+ * selecting one changed nothing at all. They were purchasable and inert.
+ *
+ * ═══ WHY THESE BLOCKS ARE SHORT ═══════════════════════════════════════════════════════════════
+ *
+ * The five original packs each redeclare radii, border width, control height and two shadow
+ * stacks — DESIGN rule 24, "a pack has a structural identity". ADR-0015 replaced that: the glass
+ * is ONE visual language, and what a theme supplies now is the light it floats in. So these two
+ * declare the surface ramp, the accent and the aurora, and inherit every structural token from
+ * `:root`. A card in Aurora and a card in Ember are the same object under different weather.
+ *
+ * `--surface-0` is not invented: `019_coins.sql:780-781` stores `surface_hex` per pack — #080B14
+ * and #140A08 — and that column is what the store swatch renders. Two values for one colour is
+ * the drift this codebase keeps finding, so the migration's is the one that wins and the ramp is
+ * derived up from it.
+ */
+[data-theme='aurora'] {
+  --surface-0: #080B14;
+  --surface-1: #0E1320;
+  --surface-2: #141A2A;
+  --surface-3: #1B2338;
+
+  --ink: 236 243 247;
+  /* Green-cyan, which is the one thing the name is not ambiguous about. */
+  --accent: #4FD1C5;
+  --accent-fg: #06131A;
+
+  /* Ribbons rather than the default's soft blooms: the aurora pack is named after a phenomenon
+     with SHAPE, and three round glows would be the same wallpaper in a different hue. Narrower
+     and steeper stops read as curtains of light behind the glass. */
+  --aurora:
+    var(--noise-overlay),
+    radial-gradient(38% 60% at 22% 4%, color-mix(in srgb, var(--accent) 34%, transparent) 0%, transparent 66%),
+    radial-gradient(30% 72% at 62% 0%, color-mix(in srgb, var(--info) 26%, transparent) 0%, transparent 70%),
+    radial-gradient(46% 44% at 88% 40%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 72%);
+}
+
+[data-theme='ember'] {
+  --surface-0: #140A08;
+  --surface-1: #1D110D;
+  --surface-2: #251713;
+  --surface-3: #301E18;
+
+  --ink: 247 240 236;
+  --accent: #F0803C;
+  --accent-fg: #1A0A05;
+
+  /* Low and wide, banked at the bottom — light from a fire is under you, not above. The default's
+     top-left bloom would read as a sunrise, which is a different pack. */
+  --aurora:
+    var(--noise-overlay),
+    radial-gradient(76% 44% at 32% 96%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 74%),
+    radial-gradient(52% 36% at 84% 82%, color-mix(in srgb, var(--warning) 24%, transparent) 0%, transparent 70%),
+    radial-gradient(46% 30% at 12% 22%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 76%);
 }
 
 /* ── Glass, when glass is not available or not wanted ─────────────────────────────────── */
