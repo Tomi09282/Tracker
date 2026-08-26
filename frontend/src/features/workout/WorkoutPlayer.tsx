@@ -36,7 +36,7 @@ import { IntervalStage } from './IntervalStage';
  */
 const SHELL = cn(
   'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-group py-4',
-  'h-[calc(100dvh-var(--content-pad-b))] lg:h-[calc(100dvh-var(--content-pad-b-lg))]',
+  'h-[calc(var(--viewport-h)-var(--content-pad-b))] lg:h-[calc(var(--viewport-h)-var(--content-pad-b-lg))]',
 );
 
 /**
@@ -244,7 +244,7 @@ export function WorkoutPlayer() {
       // NO ACTION HERE, DELIBERATELY. Starting a session lives on Home; a second start path is a
       // second thing the server has to reconcile, and the library keeps its door from Home's own
       // empty state (`check-nav` reads that one).
-      <div className="col-mobile screen-x flex h-[calc(100dvh-var(--content-pad-b))] items-center justify-center py-4 lg:h-[calc(100dvh-var(--content-pad-b-lg))]">
+      <div className="col-mobile screen-x flex h-[calc(var(--viewport-h)-var(--content-pad-b))] items-center justify-center py-4 lg:h-[calc(var(--viewport-h)-var(--content-pad-b-lg))]">
         <EmptyState icon={PlayCircle} heading="h1" title={t('workout.noneTitle')} body={t('workout.noneBody')} />
       </div>
     );

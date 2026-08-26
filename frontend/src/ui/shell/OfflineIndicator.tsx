@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { CloudOff, UploadCloud } from 'lucide-react';
@@ -104,6 +104,36 @@ export function OfflineIndicator() {
     };
   }, [drain]);
 
+  /*
+   * THE STRIP PUBLISHES ITS OWN HEIGHT.
+   *
+   * It is sticky and in the flow, so it takes space from every screen below it — and one of those
+   * screens (`WorkoutPlayer`) is exactly one viewport tall by law, with the check button pinned at
+   * the bottom. Without this the button leaves the screen the moment the network drops.
+   *
+   * MEASURED, not toggled between two constants. The strip is one line or two depending on the
+   * queue, it carries a safe-area inset at the top, and it animates 0fr→1fr over `--duration-slow`
+   * — so a value flipped at the `showing` boundary is wrong for the whole transition and wrong
+   * again for anyone whose outbox has something in it. `ResizeObserver` reports every frame of the
+   * open, which is what makes the player's own height follow it rather than jump at the end.
+   */
+  const stripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const root = document.documentElement;
+    const publish = () => root.style.setProperty('--offline-h', `${el.getBoundingClientRect().height}px`);
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    publish();
+    return () => {
+      ro.disconnect();
+      // Back to the token's own 0px, so a screen that outlives this component does not keep
+      // subtracting a strip that is no longer there.
+      root.style.removeProperty('--offline-h');
+    };
+  }, []);
+
   const showing = offline || mine.length > 0;
   const count = mine.length;
 
@@ -121,6 +151,7 @@ export function OfflineIndicator() {
 
   return (
     <div
+      ref={stripRef}
       role="status"
       aria-live="polite"
       className={cn(

@@ -152,6 +152,22 @@
      while sets are being checked, because a check button that moves is a check button that records
      the wrong set. */
   --content-pad-b: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+
+  /* HOW TALL A FULL-HEIGHT SCREEN ACTUALLY GETS.
+   *
+   * `100dvh` stopped being the answer the moment the offline strip became a sticky element IN THE
+   * FLOW rather than an overlay — which is what makes it push a page header down instead of
+   * covering it, and is exactly what we wanted. The cost is that on a screen whose law is "exactly
+   * one viewport tall, the page never scrolls" the strip's 45px pushes the check button off the
+   * bottom, and it does so only when the network drops: the one moment nobody is watching for a
+   * layout bug.
+   *
+   * `--offline-h` is published by `OfflineIndicator` from its own measured height, so it is right
+   * during the open animation and right for one line or two. It is 0 here so a screen that renders
+   * before the strip mounts, or in a tree that has no strip at all, computes the same answer it
+   * always did. */
+  --offline-h: 0px;
+  --viewport-h: calc(100dvh - var(--offline-h));
   --content-pad-b-lg: calc(var(--nav-h) + 32px);
   --nav-dock-offset: 16px;  /* Bible: desktop dock sits 16px above the screen bottom */
   --col-mobile: 480px;      /* mobile-shaped flows stay in this column on desktop */

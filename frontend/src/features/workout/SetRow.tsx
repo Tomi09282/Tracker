@@ -113,6 +113,23 @@ export const SET_ROW_COLS = 'grid-cols-[2rem_5rem_1fr_1fr_3.5rem]';
  * D is not exclusive: the flash fires under every variant, because a record is a fact about the
  * lift rather than a property of how the row was pressed. It lives in state rather than an
  * animation so a refetch can neither replay the celebration nor erase it.
+ *
+ * ═══ A IS THE SEEDED DEFAULT AND STAYS THE SEEDED DEFAULT ══════════════════════════════════════
+ *
+ * `02b-workout-states.webp` draws `Tartsd nyomva a rögzítéshez` on row 4, and a review read that
+ * as a defect: `002_theming.sql` seeds E21 to `A`, so the hold-fill this file gates on `B` never
+ * runs and that instruction never renders. The reading of the code is correct. The conclusion is
+ * not.
+ *
+ * A mockup shows a STATE, not a default. Migrating the seed to `B` would change the primary
+ * gesture of the most-used control in the product — the one a lifter touches once per set,
+ * mid-effort, with shaking hands — for every existing install, on the evidence of one row of one
+ * image. The trade is real in both directions (a hold refuses a knuckle brushing the screen; a tap
+ * is what a tired person expects), which is exactly why it is a VARIANT and admin-switchable at
+ * runtime rather than a constant.
+ *
+ * Anyone who wants B can switch it in the style studio and it takes effect without a deploy. That
+ * is the mechanism working as designed, and it is not the same thing as the default being wrong.
  */
 export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disabled }: SetRowProps) {
   const { t, i18n } = useTranslation();
