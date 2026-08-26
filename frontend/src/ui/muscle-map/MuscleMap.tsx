@@ -58,7 +58,7 @@ export interface MuscleMapProps {
  * Interactive muscle map.
  *
  * Fills come from theme tokens, so it re-colours with the rest of the app on a pack switch:
- * primary targets take the full accent, secondary ones the 12% subtle fill, everything else the
+ * primary targets take the full accent, secondary ones `--muscle-secondary`, everything else the
  * surface ramp. That distinction is the whole point — "this exercise works your chest, and
  * incidentally your triceps" is information a list of chips conveys far less directly.
  *
@@ -106,7 +106,7 @@ export function MuscleMap({
     if (selected === slug) return 'var(--accent)';
     const role = highlights[slug];
     if (role === 'primary') return 'var(--accent)';
-    if (role === 'secondary') return 'var(--accent-subtle)';
+    if (role === 'secondary') return 'var(--muscle-secondary)';
     return 'var(--surface-2)';
   };
 
@@ -255,7 +255,12 @@ export function MuscleMap({
             {t('muscleMap.primary')}
           </span>
           <span className="text-caption inline-flex items-center gap-1.5 text-text-2">
-            <span aria-hidden className="inline-block size-3 rounded-chip bg-accent-subtle" />
+            {/* The swatch has to be the FILL, not a near neighbour of it — a key that shows a
+                different colour from the thing it keys is worse than no key. */}
+            <span
+              aria-hidden
+              className="inline-block size-3 rounded-chip bg-[var(--muscle-secondary)]"
+            />
             {t('muscleMap.secondary')}
           </span>
         </div>

@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Pressable } from '../primitives/Pressable';
 import { setLanguage, LOCALES, LOCALE_CODES, type LocaleCode } from '../../i18n';
@@ -24,7 +25,12 @@ export function LanguageToggle() {
             key={code}
             shape="chip"
             density="compact"
-            variant={active ? 'primary' : 'ghost'}
+            /* `secondary`, not `ghost`, for the two that are off. `ghost` has neither border nor
+               fill, so inside a bordered container the unselected languages read as bare words
+               floating beside a pill rather than as two more choices — and the row stops looking
+               like a set of three. `secondary` already carries the border, the surface fill and the
+               hover edge this needs. */
+            variant={active ? 'primary' : 'secondary'}
             aria-pressed={active}
             // Tells a screen reader to switch voice for this word. Without it, "Deutsch" is read
             // with Hungarian phonetics.
@@ -32,6 +38,12 @@ export function LanguageToggle() {
             onClick={() => setLanguage(code)}
           >
             {LOCALES[code].label}
+            {/* THE CHECK IS THE PART THAT SURVIVES. Selection was carried by fill colour alone, and
+                a filled chip beside two outlined ones is a colour distinction — the one kind
+                roughly a twelfth of men cannot make, and the same argument that put a check on the
+                muscle map's side pills and on the muscle chips. `aria-pressed` above already says
+                it to a screen reader; this says it to the eye. */}
+            {active ? <Check className="size-icon-s shrink-0" strokeWidth={3} aria-hidden /> : null}
           </Pressable>
         );
       })}

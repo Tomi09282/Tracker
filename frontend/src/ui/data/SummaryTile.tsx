@@ -83,11 +83,20 @@ export function SummaryTile({
   /** Centring only means anything in the stacked layout — `row` has a puck to sit beside. */
   const centred = stacked && align === 'center';
 
-  // The step is still `text-title-1` on purpose: whether the figure should drop to `text-title-3`
-  // is an open decision paired with TrendChart's headline (haladas review) and settling half of it
-  // here would leave the chart tying the screen's own h1.
+  /*
+   * `title-3`, and this is the half of a decision whose other half is TrendChart's headline.
+   *
+   * A tile figure is a SECONDARY number on every screen that shows one — the anchor is a ring, a
+   * donut or a chart, and the tile reports something beside it. At `title-1` it tied both the
+   * screen's h1 and the chart's own answer, so a row of tiles read as loud as the thing they sit
+   * under. Cap heights in `05-haladas.webp` put the three steps at 1 : 0.82 : 0.71, which on this
+   * scale is 26 → 20 → 17 and nothing else.
+   *
+   * Ten screens render these, so this is not a per-screen tweak; if one of them needs the figure
+   * bigger, that is a prop, not an edit here.
+   */
   const figure = cn(
-    'flex items-center gap-tight text-title-1 font-display tabular-nums',
+    'flex items-center gap-tight text-title-3 font-display tabular-nums',
     // `text-center` on the Surface does nothing here: the figure is a FLEX container, and flex
     // children are placed by `justify-*`, not by text alignment. Without this the number sat at the
     // leading edge of a full-width paragraph inside a tile that was otherwise centred — and on an
@@ -121,7 +130,12 @@ export function SummaryTile({
       <span
         aria-hidden
         className={cn(
-          'inline-flex size-11 shrink-0 items-center justify-center rounded-chip',
+          // A SQUIRCLE, NOT A CIRCLE. `rounded-chip` is `--radius-full` in Midnight, so the puck
+          // came out perfectly round — and a round holder is the shape this design reserves for
+          // things that stand in for a PERSON: the monogram and the notification bell. A ticket, a
+          // key or a dumbbell wearing it reads as somebody's avatar. Every mockup draws the object
+          // holders as rounded squares, and `--radius-card` on a 44px box is the ~30% they show.
+          'inline-flex size-11 shrink-0 items-center justify-center rounded-card',
           over ? 'bg-[var(--warning-subtle)] text-[var(--warning)]' : 'bg-accent-subtle text-accent',
         )}
       >

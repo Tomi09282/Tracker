@@ -141,7 +141,15 @@ export function TrendChart({
             `SummaryTile` figures sitting BELOW this chart are `text-title-1` (26px), so the
             screen's anchor carried a smaller number than the two secondary readings it anchors.
             The spec calls this "the card's largest number", and now it is one. */}
-        <span className="text-title-1 font-display tabular-nums text-text-1">
+        {/* `title-2`, not `title-1`, and the step down is measured rather than felt.
+            Cap heights in `05-haladas.webp`: `Haladás` 49px, `82,4 kg` 40px, `84 cm` 35px — three
+            distinct steps, 1 : 0.82 : 0.71. Against a 26px h1 the only assignment on this scale
+            that preserves that order is 26 → 20 → 17, so the chart's headline is `title-2` and the
+            tiles below it are `title-3`.
+            It was 12px once, then `title-3`, then `title-1` to stop the tiles out-shouting it —
+            each fix judged against one neighbour at a time. Judged against BOTH, at `title-1` it
+            tied the screen's own h1, which is the one size an answer inside a card must not be. */}
+        <span className="text-title-2 font-display tabular-nums text-text-1">
           {formatMeasure(last.value, i18n.language)} {unit}
           {/* The change over the WHOLE window, not since the previous point. A single-session dip
               is noise; where they started versus where they are is the question being asked.

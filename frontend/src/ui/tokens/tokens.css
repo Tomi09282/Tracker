@@ -700,6 +700,19 @@
      tell apart is a loading state that reports nothing. Deriving it from the base plus a little ink
      (~1.35:1) makes it a step that cannot be flattened again by a future surface re-tune, which is
      exactly how it got flat the first time. */
+  /* THE MUSCLE MAP'S SECONDARY FILL, and why it is not `--accent-subtle`.
+   *
+   * `--accent-subtle` is the accent at 20% over TRANSPARENT. That is right for a chip or an icon
+   * holder, which sit on a card — but the map's regions sit on the near-black page, where 20% of
+   * anything composites down to almost the same value as the idle `--surface-2` beside it. The two
+   * roles the map exists to distinguish stopped being distinguishable.
+   *
+   * Mixed against the idle fill instead of against transparency, so the result is OPAQUE and lands
+   * where the mockup draws it: clearly brighter than an unworked muscle, clearly dimmer than a
+   * primary target. It reads the same on any backdrop, which is the point — a translucent fill on
+   * an anatomical figure changes meaning depending on what is behind that part of the body. */
+  --muscle-secondary: color-mix(in srgb, var(--accent) 45%, var(--surface-2));
+
   --skeleton-base: var(--surface-2);
   --skeleton-sheen: color-mix(in srgb, var(--surface-3), rgb(var(--ink)) 8%);
 }

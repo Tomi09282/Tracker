@@ -1,6 +1,25 @@
 // `UsersRound` and not a whistle: the mockups draw a whistle for the coach tab, but lucide has no
 // whistle glyph — the nearest matches are sirens. A round group of people says "my clients" at
 // 24 px more plainly than a siren says "coach", and the tab leads to the client roster.
+/*
+ * THE HALADÁS ICON IS A DECISION, NOT A DEVIATION, because the mockups do not agree with each other.
+ *
+ * A review reported that "every mockup draws HALADÁS as a three-bar column chart". Cropped and
+ * enlarged four of them to check before changing it, and found three different icons:
+ *
+ *   01-home.webp        three rising bars
+ *   01b-home-empty.webp three rising bars
+ *   05-haladas.webp     a bare zig-zag line, no axes
+ *   03-nutrition.webp   a line inside axes, with an arrowhead
+ *
+ * Two to two, so the images cannot settle it and the plurality is not an argument — the model drew
+ * whatever it drew on each pass. What settles it is the destination: the tab opens a screen whose
+ * anchor is a LINE chart over time, and an icon should predict what it leads to. Bars would promise
+ * a comparison of categories, which is the one thing that screen never shows.
+ *
+ * Left as `TrendingUp`. Recorded here so the next reviewer meets the reasoning rather than the
+ * report, and so the same change is not made and unmade a third time.
+ */
 import { Home, Dumbbell, Salad, TrendingUp, UsersRound, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -63,14 +82,17 @@ export interface NavTabSpec {
  */
 export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
   user: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true },
+    // `end` stops `/` prefix-matching every route below it, which is right — and it also stops
+    // onboarding from lighting anything, so the one screen a brand-new member sees first had a bar
+    // with nothing on it. `owns` is the exception list `end` cannot express.
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   coach: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true },
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
@@ -80,7 +102,7 @@ export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   admin: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true },
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },

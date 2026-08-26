@@ -133,7 +133,17 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
         {leading ? (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 flex w-[var(--target-min)] items-center justify-center text-text-3"
+            className={cn(
+              'pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center',
+              'w-[var(--target-min)]',
+              // THE GLYPH FOLLOWS THE FIELD'S STATE.
+              // `text-text-3` was hard-coded, so a field showing an error drew a red border, red
+              // help text — and a grey warning icon sitting inside it. The one element whose whole
+              // job is to say "something is wrong here" was the only one not saying it.
+              // `left-0` also became `start-0`: the slot is the field's LEADING edge, and in a
+              // right-to-left layout the input's own padding moves and the glyph did not.
+              error ? 'text-danger' : 'text-text-3',
+            )}
           >
             {leading}
           </span>

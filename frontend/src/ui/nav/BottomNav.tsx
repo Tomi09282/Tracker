@@ -182,7 +182,15 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     </span>
                   ) : null}
                 </span>
-                <span className="text-micro max-w-full truncate">{tab.label}</span>
+                {/* CAPS, and the tracking is the argument. `--text-micro` carries +0.06em for
+                    exactly this use (DESIGN.md §2, "eyebrows and uppercase labels"), so at sentence
+                    case the letter-spacing was doing nothing but loosening a row that did not need
+                    loosening. Every mockup draws the bar in caps.
+                    A TRANSFORM, not a change to the strings: the same `nav.*` values are the
+                    accessible names of these links and of the command palette's entries, and an
+                    all-caps accessible name is spelled out letter by letter by some screen
+                    readers. */}
+                <span className="text-micro max-w-full truncate uppercase">{tab.label}</span>
               </Link>
             </li>
           );
