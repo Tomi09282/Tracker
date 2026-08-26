@@ -89,7 +89,17 @@ export function EmptyState({
           having to remember `className="w-full"`, which four screens had each been remembering
           separately and one had not. An empty state offers exactly one action; a control that is
           the only thing to do should look like it. */}
-      {action ? <div className="mt-5 w-full [&>*]:w-full">{action}</div> : null}
+      {/* AND IT CENTRES WHAT IT STRETCHES.
+          `w-full` alone broke the one action that was not a Pressable: the marketplace's
+          "back to the feed" is a plain `<Link className="flex …">`, and a flex box widened to the
+          card with no `justify-*` puts its content against the leading edge — so a link that used
+          to sit centred under a centred column suddenly hugged the left. `Pressable` centres
+          itself through the control recipe, which is why nothing else showed it. */}
+      {action ? (
+        <div className="mt-5 w-full [&>*]:w-full [&>*]:justify-center [&>*]:text-center">
+          {action}
+        </div>
+      ) : null}
     </div>
   );
 }

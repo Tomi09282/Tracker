@@ -150,8 +150,14 @@ export function LibraryPage() {
            * three lines up says `Gyakorlatok` — a fourth statement of the same word was the
            * densest thing in the old top third. `sr-only` keeps the input NAMED for anyone who
            * hears the page instead of seeing it, which is the half that actually mattered.
+           *
+           * `labelHidden` and not `className="[&>label]:sr-only"`, which is what this was. That
+           * selector needed the label to be a DIRECT child of the field's root, and it stopped
+           * being one the moment `Field` grew an obligation-marker row to lay the label out
+           * against — so the hack silently detached and `Keresés` came back, visible, above the
+           * input. A prop the component owns cannot be broken by the component's own layout.
            */
-          className="[&>label]:sr-only"
+          labelHidden
           label={t('library.search')}
           placeholder={t('library.searchPlaceholder')}
           value={search}

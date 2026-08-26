@@ -142,15 +142,22 @@ export function PlanListPage() {
 
         <span className="flex min-w-0 flex-1 flex-col gap-tight">
           <span className="text-body-strong block truncate text-text-1">{plan.name}</span>
-          {/* THE ADDRESS USED TO BE HERE, AND IT LEFT FOR A REASON THAT NO LONGER APPLIES.
-              Four wrapping near-identical addresses were four rows of noise, so it was demoted to
-              `sr-only` — which fixed the visual problem and kept the privacy one, reading a
-              client's full e-mail aloud to anyone using a screen reader. Since 029 there is a name
-              to show instead: short, distinct, and safe to say out loud. So it comes back, visible,
-              and the monogram beside it can go back to being decoration. */}
-          {clientLabel ? (
-            <span className="text-caption block truncate text-text-3">{clientLabel}</span>
-          ) : null}
+          {/* THE CLIENT IS NAMED TO THE EAR, NOT TO THE EYE — and that is the third answer this
+              row has had, so it is worth writing down why this one stops.
+
+              It began as the full e-mail, visible: four wrapping near-identical addresses, four
+              rows of noise. It was demoted to `sr-only`, which fixed the noise and kept the privacy
+              problem — a client's whole address read aloud to anyone using a screen reader. When
+              029 gave people names I brought it back VISIBLE, on the grounds that a name is short
+              and safe to say. The mockup disagrees: `07-coach-plans.webp` draws exactly two lines,
+              the bold plan name and the chip beside `4 nap · 7 napos ciklus`, and the monogram is
+              what carries the identity.
+
+              It is right, and the reason is that this list answers "which PLAN", not "which
+              client" — the client is already implied by the monogram and confirmed one tap later.
+              So the name goes back to being announced only. The privacy objection is gone either
+              way: `personLabel` never yields an address. */}
+          {clientLabel ? <span className="sr-only">{clientLabel}</span> : null}
           <span className="flex flex-wrap items-center gap-tight">
             <StatusChip status={plan.status} />
             <span className="text-caption tabular-nums text-text-2">

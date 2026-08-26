@@ -80,18 +80,28 @@ export function SummaryTile({
 }: SummaryTileProps) {
   const fill = progress === undefined ? undefined : Math.max(0, Math.min(1, progress));
   const stacked = layout === 'stack';
+  /** Centring only means anything in the stacked layout — `row` has a puck to sit beside. */
+  const centred = stacked && align === 'center';
 
   // The step is still `text-title-1` on purpose: whether the figure should drop to `text-title-3`
   // is an open decision paired with TrendChart's headline (haladas review) and settling half of it
   // here would leave the chart tying the screen's own h1.
-  const figure = 'flex items-center gap-tight text-title-1 font-display tabular-nums';
+  const figure = cn(
+    'flex items-center gap-tight text-title-1 font-display tabular-nums',
+    // `text-center` on the Surface does nothing here: the figure is a FLEX container, and flex
+    // children are placed by `justify-*`, not by text alignment. Without this the number sat at the
+    // leading edge of a full-width paragraph inside a tile that was otherwise centred — and on an
+    // over-target tile the warning triangle sat further left still, so the three tiles in a row had
+    // three different left edges. Reported on both /progress and the client detail screen.
+    centred && 'justify-center',
+  );
 
   return (
     <Surface
       className={cn(
         'flex gap-tight',
         stacked ? 'flex-col' : 'items-center',
-        stacked && align === 'center' && 'items-center text-center',
+        centred && 'items-center text-center',
         // THE BORDER IS WHAT MAKES IT THE ODD ONE OUT.
         // An amber figure and an amber bar are both INSIDE the tile, so a row of three tiles still
         // reads as three identical objects until you look at each in turn. The border changes the
@@ -122,7 +132,17 @@ export function SummaryTile({
           beside the puck; in `stack` it is simply the rest of the column, nested at the same
           `gap-tight` so the two layouts cannot drift into two spacing rhythms. `w-full` is what
           keeps the bar the width of the TILE when `align="center"` shrinks its siblings. */}
-      <div className={cn('flex flex-col gap-tight', stacked ? 'w-full' : 'min-w-0 flex-1')}>
+      {/* `w-full` is what keeps the BAR the width of the tile, and it is also what stops the
+          Surface's `items-center` from centring anything: a full-width child has nothing left to
+          centre within. So the column centres its own children instead — the bar stays full width
+          because it is `w-full` in its own right, one line down. */}
+      <div
+        className={cn(
+          'flex flex-col gap-tight',
+          stacked ? 'w-full' : 'min-w-0 flex-1',
+          centred && 'items-center',
+        )}
+      >
         <p className={over ? `${figure} text-[var(--warning)]` : `${figure} text-text-1`}>
           {/* Colour is not the signal, it is the decoration on the signal. Roughly one man in twelve
               cannot separate amber from the ordinary ink here, and on a translucent surface the
