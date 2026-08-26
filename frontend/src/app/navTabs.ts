@@ -80,6 +80,42 @@ export interface NavTabSpec {
  * `check-nav.mjs` asserts both links exist. If you remove one, the build fails rather than the
  * feature silently disappearing on a phone.
  */
+/**
+ * Is this tab the one the user is currently inside?
+ *
+ * ═══ WHY IT LIVES HERE AND NOT IN THE BAR ══════════════════════════════════════════════════════
+ *
+ * The same reason `labelKey` does: this file is the pure one, so a gate can import it and assert
+ * over it without a DOM. `check-nav-active.mjs` runs a table of routes through this function and
+ * checks that exactly one tab lights on each — which is the guard that was missing when the bar
+ * lit EDZÉS on `/library` while announcing no current page at all, and again when `/onboarding`
+ * lit nothing for a brand-new member.
+ *
+ * The bar is a renderer. What "active" means is a fact about routes and tabs, and facts belong
+ * where they can be checked.
+ *
+ * ═══ THE TWO RULES ═════════════════════════════════════════════════════════════════════════════
+ *
+ * `end` is the index route's flag: without it `/` prefix-matches every path in the app.
+ *
+ * The prefix test is boundary-aware. `/coin` must not match `/coins` and `/m` must not match
+ * `/measurements`, so a prefix counts only where the path ends there or continues with a slash —
+ * `startsWith` alone is the bug this exists to avoid.
+ */
+export function isTabActive(
+  /*
+   * Only the three fields the rule actually reads, so it serves BOTH shapes: `NavTabSpec` here,
+   * which carries a `labelKey`, and `NavTab` in the bar, which carries a resolved `label`. Naming
+   * either concrete type would have made the rule refuse the other one — and "active" has never
+   * been a question about a label.
+   */
+  tab: Pick<NavTabSpec, 'to' | 'end' | 'owns'>,
+  pathname: string,
+): boolean {
+  const owns = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
+  return (tab.end ? pathname === tab.to : owns(tab.to)) || (tab.owns?.some(owns) ?? false);
+}
+
 export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
   user: [
     // `end` stops `/` prefix-matching every route below it, which is right — and it also stops

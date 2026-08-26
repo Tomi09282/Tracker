@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
+import { isTabActive } from '../../app/navTabs';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { useElementVariant } from '../feedback/ElementStyleProvider';
@@ -70,10 +71,10 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
    * worse than the blank bar it replaced because only one of the two audiences can see the bug.
    * Once the component owns the answer, it has to own the attribute that reports it.
    */
-  const owns = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
-  // `end` is the index route's flag: without it `/` prefix-matches every path in the app.
-  const isActive = (tab: NavTab) =>
-    (tab.end ? pathname === tab.to : owns(tab.to)) || (tab.owns?.some(owns) ?? false);
+  // The rule itself lives in `navTabs.ts`, which is the pure module a gate can import — see
+  // `isTabActive` there and `check-nav-active.mjs`. This component renders the answer; it does not
+  // own it, because a rule nothing can assert over is a rule that drifts.
+  const isActive = (tab: NavTab) => isTabActive(tab, pathname);
 
   const pill = tabs.length <= PILL_MAX_TABS;
 
