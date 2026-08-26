@@ -716,6 +716,27 @@
      tell apart is a loading state that reports nothing. Deriving it from the base plus a little ink
      (~1.35:1) makes it a step that cannot be flattened again by a future surface re-tune, which is
      exactly how it got flat the first time. */
+  /* THE FIGURE ITSELF, and why it is not built from the surface ramp.
+   *
+   * The body was `--surface-1` and an unworked muscle was `--surface-2` — #12151A on #181C22, two
+   * near-blacks a shade apart, on a near-black page. Measured: the figure was only visible where
+   * something was highlighted, so a screen whose whole job is "these are the muscles this works"
+   * showed two floating blue shapes and no body around them.
+   *
+   * Both mockups draw the opposite: a LIGHT anatomical plate on the dark glass, with the worked
+   * muscles picked out of it. That is the right way round — the figure is the subject and the
+   * highlight is the annotation, and the surface ramp is for surfaces, not for a drawing.
+   *
+   * Derived from `--ink` rather than declared as a colour, so it follows the pack and cannot fall
+   * out of step with the text beside it. Two steps apart, which is what keeps an unworked muscle
+   * legible against the flesh it sits on without competing with the accent.
+   */
+  --muscle-body: rgb(var(--ink) / 0.86);
+  --muscle-idle: rgb(var(--ink) / 0.60);
+  /* The separation between bellies. Dark against the pale figure, which is the inverse of the
+     `--surface-border` this used, and the reason that border was invisible here. */
+  --muscle-edge: rgb(0 0 0 / 0.42);
+
   /* THE MUSCLE MAP'S SECONDARY FILL — and it is the LIGHTEST of the three, not a middle step.
    *
    * `--accent-subtle` was wrong for a first reason: it is the accent at 20% over TRANSPARENT, and

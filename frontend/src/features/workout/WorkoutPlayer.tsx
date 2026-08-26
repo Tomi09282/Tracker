@@ -42,18 +42,31 @@ const SHELL = cn(
 /**
  * The hero's footprint, and the single most load-bearing number on the screen.
  *
- * 28dvh is the top third of the column once the nav is subtracted, which is where the anchor
- * belongs — and it is what leaves the set list room for four full rows plus a visibly clipped
- * fifth at 375 x 812. It is a FIXED share of the viewport rather than an aspect ratio because the
- * budget below it is vertical: an aspect ratio would hand a wide phone a taller hero and quietly
- * take a set row away.
+ * 34dvh, and the number moved because what the hero CONTAINS changed under it.
+ *
+ * 28dvh was measured when the hero was a media panel: it left the set list four full rows plus a
+ * visibly clipped fifth at 375 x 812, and that was the right trade for a thumbnail. The muscle map
+ * is not a thumbnail — it is a drawing of a body that has to be read — and the arithmetic is
+ * unforgiving in a way an image is not. The `Elöl`/`Hátul` control and the legend are FIXED
+ * heights, about 68px together, so they take 30% of a 227px hero and 25% of a 276px one. Measured
+ * at 28dvh the figure got 117px of 227 — 52% of its own card — and rendered 54px wide, at which
+ * size twelve anatomical regions are a smudge and the screen's central claim is illegible.
+ *
+ * 34dvh is what the approved mockup draws, and it puts the figure's share at about 83%, which is
+ * the mockup's proportion too. It costs one set row: the list now shows three full rows and a
+ * clipped fourth, which is also what the mockup draws. The trade was always there; it was made in
+ * the other direction when the hero held something else.
+ *
+ * Still a FIXED share of the viewport rather than an aspect ratio, for the original reason: the
+ * budget below it is vertical, and an aspect ratio would hand a wide phone a taller hero and
+ * quietly take a set row away.
  *
  * The hero also keeps this height when it has nothing to show. Collapsing it on an exercise with
  * no muscle map would move the set list up, which means the check button lands somewhere different
  * on that exercise than on the previous one — the exact failure the no-scroll law exists to
  * prevent.
  */
-const HERO = 'relative h-[28dvh] w-full shrink-0 overflow-hidden';
+const HERO = 'relative h-[34dvh] w-full shrink-0 overflow-hidden';
 
 /**
  * Blueprint 3 — the guided workout player.

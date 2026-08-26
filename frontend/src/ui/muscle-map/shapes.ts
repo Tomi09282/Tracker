@@ -13,7 +13,7 @@
  * nothing tied a shape to the body under it, so the pecs floated above the ribcage, the head read
  * as a martini glass, and the halves were not actually symmetrical.
  */
-import { CX, Y, W, x, M, L, C, Z, path, pair, type P } from './landmarks';
+import { CX, Y, W, x, M, L, C, Q, Z, path, pair, type P } from './landmarks';
 
 export type BodySide = 'front' | 'back';
 
@@ -530,6 +530,142 @@ const CALF_MEDIAL = path(
 );
 
 /* ── the map ────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Fibre striations ─────────────────────────────────────────────────────────────────────────
+ *
+ * WHAT THE FIGURE WAS MISSING, measured: 42 paths and zero lines. Every muscle was one flat
+ * silhouette, so the drawing read as a set of coloured regions rather than as a body — and both
+ * mockups draw fine fibre lines inside every belly, which is the single thing that makes an
+ * anatomical plate look like one.
+ *
+ * ═══ THEY ARE DECORATION, AND THAT IS STRUCTURAL ══════════════════════════════════════════════
+ *
+ * These carry NO slug and take NO fill. They are drawn in one `aria-hidden`, `pointer-events-none`
+ * layer above the muscle fills, so they can never intercept a tap meant for a region that is
+ * already below the 44px floor, and they cannot be confused with a selectable muscle by anything
+ * reading the tree. A striation is a texture, not a target.
+ *
+ * ═══ AND THEY FOLLOW THE FIBRE, NOT THE OUTLINE ═══════════════════════════════════════════════
+ *
+ * Each line runs the direction the muscle actually pulls — the pec fans in toward the sternum, the
+ * lat sweeps up and in toward the armpit, the rectus femoris runs straight down the thigh. Drawn
+ * across the fibre they would read as bandages. Every coordinate comes from `landmarks.ts` for the
+ * same reason the shapes do: move a landmark and the texture moves with the body.
+ */
+
+/** Chest: fans converging on the sternum, which is how the pec actually inserts. */
+const CHEST_FIBRES = [
+  path(M(p(CX - 6, Y.sternumTop + 12)), C(p(x(22), Y.sternumTop + 12), p(x(36), Y.shoulder + 4), p(x(W.chest - 8), Y.armpit))),
+  path(M(p(CX - 6, Y.sternumTop + 22)), C(p(x(24), Y.sternumTop + 24), p(x(38), Y.armpit - 2), p(x(W.chest - 6), Y.armpit + 8))),
+  path(M(p(CX - 6, Y.armpit + 4)), C(p(x(24), Y.armpit + 8), p(x(36), Y.armpit + 12), p(x(W.chest - 8), Y.armpit + 18))),
+];
+
+/** Deltoid: three short arcs radiating from the shoulder cap. */
+const DELT_FIBRES = [
+  path(M(p(x(W.shoulder - 20), Y.shoulder - 2)), Q(p(x(W.shoulder - 6), Y.shoulder + 8), p(x(W.shoulder - 8), Y.armpit + 2))),
+  path(M(p(x(W.shoulder - 26), Y.shoulder + 2)), Q(p(x(W.shoulder - 14), Y.shoulder + 12), p(x(W.shoulder - 16), Y.armpit + 4))),
+];
+
+/** Abs: the tendinous intersections across, and the linea alba down the middle. */
+const ABS_FIBRES = [
+  path(M(p(CX, Y.armpit + 26)), L(p(CX, Y.navel + 6))),
+  path(M(p(x(16), Y.ribcage - 8)), L(p(x(-16, 1), Y.ribcage - 8))),
+  path(M(p(x(15), Y.ribcage + 10)), L(p(x(-15, 1), Y.ribcage + 10))),
+  path(M(p(x(14), Y.waist + 6)), L(p(x(-14, 1), Y.waist + 6))),
+];
+
+/** Obliques: diagonals running down and in toward the hip. */
+const OBLIQUE_FIBRES = [
+  path(M(p(x(W.ribcage - 4), Y.ribcage)), L(p(x(W.waist - 6), Y.navel + 4))),
+  path(M(p(x(W.ribcage - 2), Y.ribcage + 12)), L(p(x(W.waist - 4), Y.navel + 14))),
+];
+
+/** Upper arm: two lines along the bone, which is the direction of every head of it. */
+const UPPER_ARM_FIBRES = [
+  path(M(p(x(W.armAxisTop - 5), Y.armpit + 6)), C(p(x(W.armAxisElbow - 7), Y.armpit + 40), p(x(W.armAxisElbow - 6), Y.elbow - 30), p(x(W.armAxisElbow - 4), Y.elbow - 6))),
+  path(M(p(x(W.armAxisTop + 4), Y.armpit + 8)), C(p(x(W.armAxisElbow + 4), Y.armpit + 42), p(x(W.armAxisElbow + 5), Y.elbow - 28), p(x(W.armAxisElbow + 5), Y.elbow - 6))),
+];
+
+/** Forearm: one line, because at this scale two is a smudge. */
+const FOREARM_FIBRES = [
+  path(M(p(x(W.armAxisElbow - 2), Y.elbow + 6)), C(p(x(W.armAxisWrist - 3), Y.elbow + 30), p(x(W.armAxisWrist - 2), Y.wrist - 20), p(x(W.armAxisWrist - 2), Y.wrist - 6))),
+];
+
+/** Quadriceps: the three heads, running the length of the thigh. */
+const QUAD_FIBRES = [
+  path(M(p(x(W.legAxisHip - 12), Y.crotch + 6)), C(p(x(W.legAxisKnee - 14), Y.thighMid - 20), p(x(W.legAxisKnee - 12), Y.thighMid + 20), p(x(W.legAxisKnee - 9), Y.kneeTop - 8))),
+  path(M(p(x(W.legAxisHip), Y.crotch + 4)), C(p(x(W.legAxisKnee), Y.thighMid - 20), p(x(W.legAxisKnee), Y.thighMid + 20), p(x(W.legAxisKnee), Y.kneeTop - 6))),
+  path(M(p(x(W.legAxisHip + 11), Y.crotch + 8)), C(p(x(W.legAxisKnee + 12), Y.thighMid - 16), p(x(W.legAxisKnee + 11), Y.thighMid + 22), p(x(W.legAxisKnee + 8), Y.kneeTop - 8))),
+];
+
+/** Shin: one line beside the bone. */
+const SHIN_FIBRES = [
+  path(M(p(x(W.legAxisKnee - 4), Y.kneeBottom + 6)), C(p(x(W.legAxisAnkle - 5), Y.calfMid), p(x(W.legAxisAnkle - 4), Y.calfMid + 40), p(x(W.legAxisAnkle - 3), Y.ankle - 10))),
+];
+
+/** Trapezius: the diagonal from the neck out to the shoulder. */
+const TRAP_FIBRES = [
+  path(M(p(CX - 4, Y.chin + 10)), L(p(x(W.shoulder - 22), Y.shoulder + 4))),
+  path(M(p(CX - 4, Y.sternumTop + 10)), L(p(x(W.ribcage - 2), Y.armpit + 16))),
+];
+
+/** Latissimus: sweeps up and IN, toward the armpit it inserts under. */
+const LAT_FIBRES = [
+  path(M(p(x(W.waist - 6), Y.ribcage + 16)), C(p(x(W.ribcage - 8), Y.ribcage), p(x(W.chest - 10), Y.armpit + 14), p(x(W.chest - 6), Y.armpit + 4))),
+  path(M(p(x(W.waist - 4), Y.navel)), C(p(x(W.ribcage - 4), Y.ribcage + 8), p(x(W.chest - 6), Y.armpit + 22), p(x(W.chest - 2), Y.armpit + 12))),
+];
+
+/** Lower back: the erectors, two short columns beside the spine. */
+const LOWER_BACK_FIBRES = [
+  path(M(p(x(10), Y.ribcage + 14)), L(p(x(12), Y.hip - 10))),
+];
+
+/** Glute: an arc following the fold. */
+const GLUTE_FIBRES = [
+  path(M(p(x(W.hip - 10), Y.hip - 10)), Q(p(x(20), Y.hip + 14), p(x(6), Y.crotch - 2))),
+];
+
+/** Hamstrings: the long heads down the back of the thigh. */
+const HAMSTRING_FIBRES = [
+  path(M(p(x(W.legAxisHip - 9), Y.crotch + 8)), C(p(x(W.legAxisKnee - 11), Y.thighMid), p(x(W.legAxisKnee - 10), Y.thighMid + 30), p(x(W.legAxisKnee - 8), Y.kneeTop - 8))),
+  path(M(p(x(W.legAxisHip + 8), Y.crotch + 8)), C(p(x(W.legAxisKnee + 10), Y.thighMid), p(x(W.legAxisKnee + 9), Y.thighMid + 30), p(x(W.legAxisKnee + 7), Y.kneeTop - 8))),
+];
+
+/** Calf: the two heads of the gastrocnemius, meeting at the achilles. */
+const CALF_FIBRES = [
+  path(M(p(x(W.legAxisKnee - 8), Y.kneeBottom + 8)), C(p(x(W.legAxisAnkle - 9), Y.calfMid), p(x(W.legAxisAnkle - 5), Y.calfMid + 34), p(x(W.legAxisAnkle - 2), Y.ankle - 12))),
+  path(M(p(x(W.legAxisKnee + 7), Y.kneeBottom + 8)), C(p(x(W.legAxisAnkle + 8), Y.calfMid), p(x(W.legAxisAnkle + 4), Y.calfMid + 34), p(x(W.legAxisAnkle + 1), Y.ankle - 12))),
+];
+
+/**
+ * The texture layer, per side. Mirrored like everything else, so the two halves cannot drift.
+ *
+ * Ordered roughly top to bottom, which matters only for reading the source — they are all drawn in
+ * one pass with one stroke and never overlap enough for paint order to show.
+ */
+export const STRIATIONS: Record<BodySide, string[]> = {
+  front: [
+    ...CHEST_FIBRES.flatMap(pair),
+    ...DELT_FIBRES.flatMap(pair),
+    ...ABS_FIBRES,
+    ...OBLIQUE_FIBRES.flatMap(pair),
+    ...UPPER_ARM_FIBRES.flatMap(pair),
+    ...FOREARM_FIBRES.flatMap(pair),
+    ...QUAD_FIBRES.flatMap(pair),
+    ...SHIN_FIBRES.flatMap(pair),
+  ],
+  back: [
+    ...TRAP_FIBRES.flatMap(pair),
+    ...DELT_FIBRES.flatMap(pair),
+    ...LAT_FIBRES.flatMap(pair),
+    ...UPPER_ARM_FIBRES.flatMap(pair),
+    ...FOREARM_FIBRES.flatMap(pair),
+    ...LOWER_BACK_FIBRES.flatMap(pair),
+    ...GLUTE_FIBRES.flatMap(pair),
+    ...HAMSTRING_FIBRES.flatMap(pair),
+    ...CALF_FIBRES.flatMap(pair),
+  ],
+};
 
 export const MUSCLES: MuscleShape[] = [
   // front

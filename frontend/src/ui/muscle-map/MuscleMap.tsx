@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn';
 import { Pressable } from '../primitives/Pressable';
 import { Segmented } from '../feedback/variants/E6Segmented';
 import { useMotionSafe } from '../feedback/useMotionSafe';
-import { MUSCLES_BY_SIDE, SILHOUETTE, VIEW, type BodySide } from './shapes';
+import { MUSCLES_BY_SIDE, SILHOUETTE, STRIATIONS, VIEW, type BodySide } from './shapes';
 
 export type MuscleRole = 'primary' | 'secondary';
 
@@ -91,6 +91,8 @@ export function MuscleMap({
   const { t } = useTranslation();
   const motionSafe = useMotionSafe();
   const [side, setSide] = useState<BodySide>('front');
+
+  const box = { x: 0, y: 0, ...VIEW };
   const titleId = useId();
 
   const interactive = typeof onSelect === 'function';
@@ -107,7 +109,7 @@ export function MuscleMap({
     const role = highlights[slug];
     if (role === 'primary') return 'var(--accent)';
     if (role === 'secondary') return 'var(--muscle-secondary)';
-    return 'var(--surface-2)';
+    return 'var(--muscle-idle)';
   };
 
   return (
@@ -156,13 +158,27 @@ export function MuscleMap({
       )}
 
       <svg
-        viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
+        viewBox={`${box.x} ${box.y} ${box.w} ${box.h}`}
+        /* `slice` is what makes the crop a crop: the figure covers the box at its own proportions
+           and the overflow is cut, where the default `meet` would letterbox it back to exactly the
+           size the crop exists to avoid. */
         role="img"
         aria-labelledby={titleId}
         className={cn(
           'h-auto w-full max-w-[280px]',
           // `h-0 flex-1` is the flex-column idiom for "take the leftover height and no more".
           // `w-auto` then lets the viewBox decide the width, so the figure keeps its proportions.
+          // `h-0 flex-1` is the flex-column idiom for "take the leftover height and no more".
+          // `w-auto` then lets the viewBox decide the width, so the figure keeps its proportions.
+          //
+          // A CROP WAS TRIED HERE AND MEASURED WRONG, which is worth one paragraph so it is not
+          // tried again. Covering the box and clipping the overflow does make the figure large —
+          // 92px across instead of 54 — but the hero is a wide, short band, so what survives the
+          // crop is a horizontal slice of a body. Framed to the highlight it showed a squat's
+          // thighs with nothing around them and no way to tell they were thighs; framed for
+          // context it showed the ribcage and cut the worked muscles entirely. The figure is
+          // 0.46 wide-to-tall and the band was 2.4 — no choice of frame reconciles those. The
+          // height of the hero was the real constraint, and that is where it was fixed.
           fill ? 'h-0 min-h-0 w-auto max-w-full flex-1' : 'mt-3',
         )}
       >
@@ -172,7 +188,12 @@ export function MuscleMap({
             as a scatter of disconnected blobs. Drawn as separate anatomical parts — head, neck,
             torso, arms, legs — because one continuous outline is what made the head render as a
             martini glass in the previous version. */}
-        <g fill="var(--surface-1)" stroke="var(--surface-border)" strokeWidth={1.25} strokeLinejoin="round">
+        <g
+          fill="var(--muscle-body)"
+          stroke="var(--muscle-edge)"
+          strokeWidth={1.25}
+          strokeLinejoin="round"
+        >
           {SILHOUETTE[side].map((d, i) => (
             <path key={`silhouette-${i}`} d={d} />
           ))}
@@ -195,7 +216,7 @@ export function MuscleMap({
                   ? 'fill var(--duration-base) var(--ease-standard)'
                   : 'none',
               },
-              stroke: 'var(--surface-border)',
+              stroke: 'var(--muscle-edge)',
               strokeWidth: 1,
             };
 
@@ -231,6 +252,30 @@ export function MuscleMap({
             );
           }),
         )}
+
+        {/* THE TEXTURE, LAST AND UNTOUCHABLE.
+            Fibre lines over the fills, so a highlighted muscle keeps its grain instead of becoming
+            a flat coloured shape — which is the single thing that made the drawing read as regions
+            rather than as a body, and what both mockups draw.
+
+            `pointerEvents: none` is not decoration of the comment: these lines cross regions that
+            are already below the 44px floor, and a stray stroke stealing a tap from the muscle
+            under it would turn the map's one accessibility compromise into a real failure.
+            `aria-hidden` for the same reason in the other direction — a texture is not a target and
+            must not appear in the tree beside twelve real ones. */}
+        <g
+          aria-hidden
+          fill="none"
+          stroke="var(--muscle-edge)"
+          strokeWidth={0.75}
+          strokeLinecap="round"
+          opacity={0.55}
+          style={{ pointerEvents: 'none' }}
+        >
+          {STRIATIONS[side].map((d, i) => (
+            <path key={`fibre-${i}`} d={d} />
+          ))}
+        </g>
       </svg>
 
       {!fill && hiddenHighlights.length > 0 ? (
