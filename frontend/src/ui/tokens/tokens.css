@@ -728,14 +728,45 @@
    * highlight is the annotation, and the surface ramp is for surfaces, not for a drawing.
    *
    * Derived from `--ink` rather than declared as a colour, so it follows the pack and cannot fall
-   * out of step with the text beside it. Two steps apart, which is what keeps an unworked muscle
-   * legible against the flesh it sits on without competing with the accent.
+   * out of step with the text beside it.
+   *
+   * ═══ ONE VALUE, NOT TWO — THE LINE DOES THE SEPARATING ════════════════════════════════════
+   *
+   * These were deliberately two steps apart, on the reasoning that an unworked muscle has to stay
+   * legible against the flesh it sits on. Measured against the mockup, that reasoning is backwards.
+   * Sampled from the reference plate:
+   *
+   *     head, no muscle over it   rgb(208, 208, 212)
+   *     thigh, an idle muscle     rgb(211, 208, 214)
+   *     hand, idle                rgb(210, 208, 215)
+   *     neck, idle                rgb(214, 213, 218)
+   *
+   * One grey, within noise. The design draws a LINE DRAWING: a single pale figure with thin dark
+   * lines dividing it, and colour applied only where a muscle is worked.
+   *
+   * It also buys the highlight its full contrast: against one flat field, a worked muscle is the
+   * only thing on the figure carrying colour, which is the whole claim the screen makes.
+   *
+   * ═══ AND IT HAS TO BE OPAQUE, WHICH IS THE PART THAT ACTUALLY BROKE IT ═════════════════════
+   *
+   * Collapsing the two tokens to one value changed nothing on screen, which is how the real cause
+   * turned up. This was `rgb(var(--ink) / 0.86)` — TRANSLUCENT — and the muscle shapes are painted
+   * ON TOP of the silhouette, so every muscle was 0.86 over 0.86 and composited to 0.98 while the
+   * bare torso stayed at 0.86. Measured on the running app: 38 paths, one fill string, two
+   * different values on screen. The plating was alpha stacking, and no amount of agreeing on the
+   * colour could have fixed it while the colour was see-through.
+   *
+   * Mixed rather than faded, so the ratio is applied ONCE to a flat colour instead of once per
+   * overlapping layer. 86% of ink over `--surface-1` lands at rgb(210, 213, 216) in the default
+   * pack — which is the reference plate's rgb(208..214), arrived at from the tokens rather than
+   * copied off a screenshot, and still following the pack wherever `--ink` goes.
    */
-  --muscle-body: rgb(var(--ink) / 0.86);
-  --muscle-idle: rgb(var(--ink) / 0.60);
-  /* The separation between bellies. Dark against the pale figure, which is the inverse of the
+  --muscle-body: color-mix(in srgb, rgb(var(--ink)) 86%, var(--surface-1));
+  --muscle-idle: var(--muscle-body);
+  /* The separation between bellies, and now the ONLY thing that separates them — so it carries the
+     drawing rather than trimming it. Dark against the pale figure, which is the inverse of the
      `--surface-border` this used, and the reason that border was invisible here. */
-  --muscle-edge: rgb(0 0 0 / 0.42);
+  --muscle-edge: rgb(0 0 0 / 0.55);
 
   /* THE MUSCLE MAP'S SECONDARY FILL — and it is the LIGHTEST of the three, not a middle step.
    *

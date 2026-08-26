@@ -13,7 +13,7 @@
  * nothing tied a shape to the body under it, so the pecs floated above the ribcage, the head read
  * as a martini glass, and the halves were not actually symmetrical.
  */
-import { CX, Y, W, x, M, L, C, Q, Z, path, pair, type P } from './landmarks';
+import { CX, Y, W, x, M, L, C, Q, Z, path, pair, spanMidline, type P } from './landmarks';
 
 export type BodySide = 'front' | 'back';
 
@@ -187,8 +187,10 @@ const LEG_HALF = path(
  * in the muscles drawn on top, which is the only difference that carries information.
  */
 export const SILHOUETTE: Record<BodySide, string[]> = {
-  front: [HEAD, NECK, ...pair(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
-  back: [HEAD, NECK, ...pair(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
+  // `spanMidline` and not `pair` for the torso: the two halves would each stroke their closing
+  // edge down the midline. The arms and legs are genuinely two shapes and pair correctly.
+  front: [HEAD, NECK, spanMidline(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
+  back: [HEAD, NECK, spanMidline(TORSO_HALF), ...pair(ARM_HALF), ...pair(LEG_HALF)],
 };
 
 /* ── front-view muscles ─────────────────────────────────────────────────────────────────── */
@@ -207,18 +209,24 @@ const NECK_FRONT = path(
  * and the sternal mass below it. One slug, two shapes — the seam between them is what stops the
  * chest reading as a single rounded plate.
  */
+/*
+ * The inner edge is 1.5 from the midline, not 3, so the sternal gap matches the linea alba below
+ * it. At 3 the chest parted twice as wide as the abdomen and the two gaps stacked into a single
+ * seam that widened as it climbed — the most conspicuous line on the figure, and one the reference
+ * does not have at all.
+ */
 const CHEST_UPPER = path(
-  M(p(CX - 3, Y.sternumTop + 6)),
+  M(p(CX - 1.5, Y.sternumTop + 6)),
   C(p(x(24), Y.sternumTop + 2), p(x(42), Y.shoulder + 6), p(x(W.chest - 2), Y.armpit + 2)),
-  C(p(x(W.chest - 10), Y.armpit + 10), p(x(24), Y.armpit + 14), p(CX - 3, Y.armpit + 16)),
+  C(p(x(W.chest - 10), Y.armpit + 10), p(x(24), Y.armpit + 14), p(CX - 1.5, Y.armpit + 16)),
   Z,
 );
 
 const CHEST_LOWER = path(
-  M(p(CX - 3, Y.armpit + 20)),
+  M(p(CX - 1.5, Y.armpit + 20)),
   C(p(x(26), Y.armpit + 18), p(x(W.chest - 6), Y.armpit + 12), p(x(W.chest - 4), Y.nipple)),
   C(p(x(W.chest - 6), Y.nipple + 14), p(x(W.chest - 14), Y.nipple + 26), p(x(30), Y.ribcage - 4)),
-  C(p(x(18), Y.ribcage), p(x(6), Y.ribcage - 6), p(CX - 3, Y.ribcage - 12)),
+  C(p(x(18), Y.ribcage), p(x(6), Y.ribcage - 6), p(CX - 1.5, Y.ribcage - 12)),
   Z,
 );
 
@@ -268,20 +276,36 @@ const FOREARM_FRONT = path(
  * component's rendered size that is roughly 26 px per segment, comfortably visible. The earlier
  * decision to draw one block was made on an assumption about size that turned out to be wrong.
  */
+/*
+ * The first coordinate is the half-width of the gap at the midline, and at 4 it was the widest line
+ * on the figure: 4 either side is an eight-unit channel down a 260-unit body, and with the chest
+ * gap and the neck strands landing on the same axis it read as one long seam from chin to pubis.
+ * The reference draws the linea alba as a LINE — the segments nearly touch and the divider is the
+ * stroke between them, the same grammar as every other boundary on the plate.
+ */
 const absSegment = (top: number, bottom: number, outerTop: number, outerBottom: number) =>
   path(
-    M(p(x(4), top)),
+    M(p(x(1.5), top)),
     C(p(x(outerTop - 4), top - 2), p(p(x(outerTop), top + 4)[0], top + 4), p(x(outerTop), top + 8)),
     C(p(x(outerBottom + 1), bottom - 10), p(x(outerBottom), bottom - 4), p(x(outerBottom - 3), bottom)),
-    L(p(x(4), bottom)),
+    L(p(x(1.5), bottom)),
     Z,
   );
 
+/*
+ * FOUR ROWS, not three.
+ *
+ * The reference draws an eight-pack: four pairs of segments between the ribcage and the pubis,
+ * each shorter and narrower than the one above it. Three rows read as a torso with a line across
+ * it; four read as abdominals, because the eye counts the repeats and the taper is what says
+ * "these are one muscle divided" rather than "these are three shapes".
+ */
 const ABS_SEGMENTS = [
-  absSegment(Y.ribcage + 2, Y.ribcage + 24, 21, 21),
-  absSegment(Y.ribcage + 29, Y.navel + 18, 21, 19),
+  absSegment(Y.ribcage + 2, Y.ribcage + 21, 21, 21),
+  absSegment(Y.ribcage + 23, Y.ribcage + 42, 21, 20),
+  absSegment(Y.navel - 8, Y.navel + 13, 20, 18),
   // The lowest segment is longer and tapers hardest — it runs to the pubis, not to the navel.
-  absSegment(Y.navel + 23, Y.crotch - 16, 18, 10),
+  absSegment(Y.navel + 15, Y.crotch - 16, 18, 10),
 ];
 
 /** External oblique: the flank between the ribcage and the hip. */
@@ -324,9 +348,13 @@ const VASTUS_LATERALIS = path(
     p(x(out(W.legAxisKnee, W.kneeW - 11)), Y.kneeTop - 10),
     p(x(out(W.legAxisKnee, W.kneeW - 10)), Y.thighMid + 20),
   ),
+  // The inner edge sat at half-width 29 while the rectus femoris beside it reached 26 — a
+  // three-unit channel that showed the pale torso through the middle of a lit thigh, so a worked
+  // quadriceps read as two blue stripes rather than one muscle. It now stops one unit short of its
+  // neighbour, which is a stroke's width: a line, not a gap.
   C(
-    p(x(out(W.legAxisHip, W.thighTop - 16)), Y.thighMid - 20),
-    p(x(out(W.legAxisHip, W.thighTop - 13)), Y.crotch + 10),
+    p(x(out(W.legAxisHip, W.thighTop - 19)), Y.thighMid - 20),
+    p(x(out(W.legAxisHip, W.thighTop - 17)), Y.crotch + 10),
     p(x(out(W.legAxisHip, W.thighTop - 6)), Y.crotch - 6),
   ),
   Z,
@@ -531,6 +559,177 @@ const CALF_MEDIAL = path(
 
 /* ── the map ────────────────────────────────────────────────────────────────────────────── */
 
+/* ── Anatomical detail ────────────────────────────────────────────────────────────────────────
+ *
+ * WHAT SEPARATES A SILHOUETTE FROM A PLATE.
+ *
+ * The reference draws structures this app's taxonomy does not have a slug for — serratus slips
+ * over the ribs, the sartorius crossing the thigh, the brachialis beside the biceps, the
+ * sternocleidomastoid down the neck, a kneecap, fingers. `muscle_groups` has nineteen rows and
+ * none of them is any of those, and inventing slugs the database never issues would put regions on
+ * the map that no exercise can ever light.
+ *
+ * So they are DETAIL: outlined, never filled, never selectable, never in the accessibility tree.
+ * They are what makes the body read as a body — the drawing's grammar rather than its vocabulary.
+ * A figure with twelve fillable regions and nothing between them is a diagram of twelve regions;
+ * the same figure with the tissue drawn around them is an anatomy plate that happens to be
+ * interactive.
+ *
+ * Everything here is measured from `landmarks.ts` like the muscles, and paired the same way, so
+ * the detail cannot drift off the body when a landmark moves.
+ */
+
+/** Sternocleidomastoid: the two strands from behind the ear down to the sternum notch. */
+const NECK_STRANDS = [
+  path(M(p(x(W.jaw - 3), Y.jaw + 2)), C(p(x(W.neck - 2), Y.chin + 14), p(x(9), Y.sternumTop - 10), p(x(5), Y.sternumTop + 2))),
+  path(M(p(x(W.jaw - 9), Y.jaw + 4)), C(p(x(W.neck - 7), Y.chin + 16), p(x(7), Y.sternumTop - 8), p(x(3), Y.sternumTop + 2))),
+];
+
+/** The clavicle, which is what gives the shoulder its shelf and the traps their lower edge. */
+const CLAVICLE = [
+  path(M(p(CX - 4, Y.sternumTop + 2)), C(p(x(20), Y.sternumTop - 4), p(x(38), Y.shoulder - 4), p(x(W.shoulder - 14), Y.shoulder + 2))),
+];
+
+/** Trapezius seen from the FRONT: the slope from the neck out over the clavicle. */
+const TRAP_FRONT = [
+  path(M(p(x(6), Y.chin + 12)), C(p(x(22), Y.sternumTop - 8), p(x(40), Y.sternumTop - 6), p(x(W.shoulder - 16), Y.shoulder))),
+];
+
+/**
+ * Serratus anterior: the finger-like slips that interleave with the oblique over the ribs.
+ *
+ * Four of them, shortening downward, each angled toward the armpit — the direction they pull. This
+ * is the single most recognisable structure on a front anatomy plate and its absence is most of
+ * why the flank read as blank.
+ */
+const SERRATUS = [0, 1, 2, 3].map((i) =>
+  path(
+    M(p(x(W.ribcage - 6 - i * 2), Y.armpit + 30 + i * 15)),
+    C(
+      p(x(30 - i * 2), Y.armpit + 28 + i * 15),
+      p(x(26 - i * 2), Y.armpit + 24 + i * 15),
+      p(x(23 - i), Y.armpit + 22 + i * 15),
+    ),
+  ),
+);
+
+/** Brachialis: the strip that shows outside the biceps and disappears under it at the elbow. */
+const BRACHIALIS = [
+  path(
+    M(p(x(out(W.armAxisTop, 11)), Y.armpit + 16)),
+    C(p(x(out(W.armAxisElbow, 12)), Y.armpit + 46), p(x(out(W.armAxisElbow, 10)), Y.elbow - 26), p(x(out(W.armAxisElbow, 4)), Y.elbow - 4)),
+  ),
+];
+
+/** The bundles of the forearm — four, converging on the wrist. */
+const FOREARM_BUNDLES = [0, 1, 2, 3].map((i) =>
+  path(
+    M(p(x(out(W.armAxisElbow, 8 - i * 5)), Y.elbow + 4)),
+    C(
+      p(x(out(W.armAxisWrist, 7 - i * 4)), Y.elbow + 34),
+      p(x(out(W.armAxisWrist, 5 - i * 3)), Y.wrist - 26),
+      p(x(out(W.armAxisWrist, 3 - i * 2)), Y.wrist - 4),
+    ),
+  ),
+);
+
+/** Fingers: four creases across the hand, which is all it takes to stop reading as a mitten. */
+const FINGERS = [0, 1, 2, 3].map((i) =>
+  path(
+    M(p(x(out(W.armAxisWrist, 7 - i * 4.5)), Y.wrist + 6)),
+    L(p(x(out(W.armAxisWrist, 8 - i * 5.5)), Y.fingertip - 4)),
+  ),
+);
+
+/**
+ * Sartorius: the long strap from the hip point diagonally across the thigh to the inner knee.
+ *
+ * It is what divides the quadriceps from the adductors on a plate, and without it the front of the
+ * thigh is one undivided field — which is exactly how ours read.
+ */
+const SARTORIUS = [
+  path(
+    M(p(x(W.hip - 6), Y.hip + 4)),
+    C(p(x(W.legAxisHip + 6), Y.thighMid - 30), p(x(W.legAxisKnee - 6), Y.thighMid + 20), p(x(inn(W.legAxisKnee, 10)), Y.kneeTop - 10)),
+  ),
+];
+
+/** Vastus medialis: the teardrop just above the inside of the knee. */
+const VASTUS_TEARDROP = [
+  path(
+    M(p(x(inn(W.legAxisKnee, 12)), Y.thighMid + 34)),
+    C(p(x(inn(W.legAxisKnee, 15)), Y.kneeTop - 26), p(x(inn(W.legAxisKnee, 13)), Y.kneeTop - 10), p(x(inn(W.legAxisKnee, 4)), Y.kneeTop - 4)),
+    C(p(x(out(W.legAxisKnee, 2)), Y.kneeTop - 14), p(x(inn(W.legAxisKnee, 4)), Y.thighMid + 32), p(x(inn(W.legAxisKnee, 12)), Y.thighMid + 34)),
+    Z,
+  ),
+];
+
+/** The kneecap. A joint, not a muscle, and the figure looks boneless without it. */
+const KNEECAP = [
+  path(
+    M(p(x(W.legAxisKnee - 7), Y.kneeTop + 2)),
+    C(p(x(W.legAxisKnee - 9), Y.kneeTop + 12), p(x(W.legAxisKnee + 7), Y.kneeTop + 12), p(x(W.legAxisKnee + 6), Y.kneeTop + 2)),
+    C(p(x(W.legAxisKnee + 5), Y.kneeTop - 6), p(x(W.legAxisKnee - 6), Y.kneeTop - 6), p(x(W.legAxisKnee - 7), Y.kneeTop + 2)),
+    Z,
+  ),
+];
+
+/** Tibialis anterior, running beside the shin bone. */
+const TIBIALIS = [
+  path(
+    M(p(x(inn(W.legAxisKnee, 6)), Y.kneeBottom + 10)),
+    C(p(x(inn(W.legAxisAnkle, 7)), Y.calfMid + 10), p(x(inn(W.legAxisAnkle, 5)), Y.calfMid + 50), p(x(inn(W.legAxisAnkle, 2)), Y.ankle - 8)),
+  ),
+];
+
+/** Back: the spinal groove, and the shoulder blades either side of it. */
+const SPINE = [path(M(p(CX, Y.sternumTop + 8)), L(p(CX, Y.hip - 6)))];
+
+const SCAPULA = [
+  path(
+    M(p(x(12), Y.armpit - 4)),
+    C(p(x(30), Y.armpit + 2), p(x(W.ribcage - 6), Y.armpit + 26), p(x(W.ribcage - 10), Y.ribcage - 4)),
+  ),
+  path(M(p(x(14), Y.armpit + 22)), L(p(x(W.ribcage - 8), Y.armpit + 14))),
+];
+
+/** The two heads of the gastrocnemius, meeting at the achilles. */
+const CALF_SPLIT = [
+  path(M(p(x(W.legAxisKnee), Y.kneeBottom + 10)), L(p(x(W.legAxisAnkle - 1), Y.ankle - 14))),
+];
+
+/**
+ * The detail layer, per side.
+ *
+ * Ordered the way the body layers: the things that sit UNDER the muscles first, so a highlighted
+ * region covers what should be behind it and not the other way round. In practice they are all
+ * drawn in one stroke-only pass, so this ordering is for the reader.
+ */
+export const DETAIL: Record<BodySide, string[]> = {
+  front: [
+    ...NECK_STRANDS.flatMap(pair),
+    ...CLAVICLE.flatMap(pair),
+    ...TRAP_FRONT.flatMap(pair),
+    ...SERRATUS.flatMap(pair),
+    ...BRACHIALIS.flatMap(pair),
+    ...FOREARM_BUNDLES.flatMap(pair),
+    ...FINGERS.flatMap(pair),
+    ...SARTORIUS.flatMap(pair),
+    ...VASTUS_TEARDROP.flatMap(pair),
+    ...KNEECAP.flatMap(pair),
+    ...TIBIALIS.flatMap(pair),
+  ],
+  back: [
+    ...NECK_STRANDS.flatMap(pair),
+    ...SPINE,
+    ...SCAPULA.flatMap(pair),
+    ...FOREARM_BUNDLES.flatMap(pair),
+    ...FINGERS.flatMap(pair),
+    ...KNEECAP.flatMap(pair),
+    ...CALF_SPLIT.flatMap(pair),
+  ],
+};
+
 /* ── Fibre striations ─────────────────────────────────────────────────────────────────────────
  *
  * WHAT THE FIGURE WAS MISSING, measured: 42 paths and zero lines. Every muscle was one flat
@@ -568,7 +767,8 @@ const DELT_FIBRES = [
 
 /** Abs: the tendinous intersections across, and the linea alba down the middle. */
 const ABS_FIBRES = [
-  path(M(p(CX, Y.armpit + 26)), L(p(CX, Y.navel + 6))),
+  // No stroke down the midline. The two rows of segments already leave a narrow channel there, and
+  // a line drawn inside it made three parallel darks where the reference has one gap.
   path(M(p(x(16), Y.ribcage - 8)), L(p(x(-16, 1), Y.ribcage - 8))),
   path(M(p(x(15), Y.ribcage + 10)), L(p(x(-15, 1), Y.ribcage + 10))),
   path(M(p(x(14), Y.waist + 6)), L(p(x(-14, 1), Y.waist + 6))),

@@ -106,12 +106,33 @@ export const W = {
    * a visible gap down the whole flank. Without that gap the arm and the torso fuse into one
    * silhouette and the figure loses its arms entirely — which is what happened first time.
    */
+  /*
+   * THE ARM HANGS OUT, NOT DOWN — and this is what makes the figure legible at hero size.
+   *
+   * These were 60 / 67 / 72: a twelve-unit fan from shoulder to wrist, which is an arm pinned to
+   * the ribs. The consequence was not anatomical, it was spatial. The body spanned 160 of the
+   * 260-unit box and the remaining 100 units were empty margin, so the svg — which is fitted by
+   * HEIGHT — spent a third of its width drawing nothing. Measured in the workout player: a 55px
+   * figure inside a card with room for 85.
+   *
+   * The reference holds the arms away from the body, hands clear of the thighs, and that is where
+   * its 0.81 width-to-height comes from. Fanning the axis to 60 / 84 / 108 fills the box instead of
+   * framing it: the body now spans 5..255 and the same fit renders it half again as large, with no
+   * change to the viewBox, the card, or any screen that mounts the map.
+   *
+   * 108 is the ceiling, not a preference. Plus `hand` at 10 and the finger splay beyond it, the
+   * fingertips land near 126 against a half-width of 130 — four units of air. Widening further
+   * needs `VIEW.w` to grow with it.
+   */
   armAxisTop: 60,
-  armAxisElbow: 67,
-  armAxisWrist: 72,
+  armAxisElbow: 84,
+  armAxisWrist: 108,
   upperArm: 14,
-  forearm: 11,
-  hand: 10,
+  // The forearm carries two muscle bellies and four drawn bundles; at 11 against the upper arm's
+  // 14 it tapered to a stick and the bundles had nowhere to sit. The reference draws it nearly as
+  // deep as the upper arm at the elbow, which is also what a forearm is.
+  forearm: 13,
+  hand: 12,
 
   /**
    * The leg's own centre line, for the same reason the arm has one — and it was needed for the
@@ -176,3 +197,53 @@ export function mirror(d: string): string {
 
 /** A shape and its reflection, for anything the body has two of. */
 export const pair = (d: string): string[] => [d, mirror(d)];
+
+/**
+ * Close a half-shape across the midline into ONE symmetric path.
+ *
+ * ═══ WHY `pair()` CANNOT DO THIS ══════════════════════════════════════════════════════════════
+ *
+ * `pair()` gives two shapes, and for anything the body has two of — an arm, a lat, a quadriceps —
+ * that is exactly right. For the TORSO it is wrong, and the way it was wrong took a while to find.
+ *
+ * The torso was authored as a half that starts on the midline, runs out over the shoulder and down
+ * to the crotch, and closes with `Z` — which draws a straight edge back UP the midline. Mirrored,
+ * that gives two closed shapes whose straight edges lie on top of each other, and both get stroked.
+ * Measured on the running app: a pale seam from the chin to the pubis, the most conspicuous line on
+ * the figure and one the reference plate does not have anywhere.
+ *
+ * It survived two rounds of fixes aimed at the chest gap and the linea alba, because those really
+ * were gaps and narrowing them changed nothing — the line was the body's own outline all along.
+ *
+ * This returns the half followed by its reflection walked BACKWARDS, so one pen stroke goes down
+ * one side and back up the other and the midline is never drawn. Reversal is why this needs to
+ * parse rather than concatenate: a cubic traversed the other way keeps its endpoints but swaps its
+ * control points, and appending the mirror as written would double back through the shape.
+ */
+export function spanMidline(d: string): string {
+  const body = d.replace(/Z\s*$/i, '');
+  const parts = mirror(body).match(/[MLCQ][^MLCQZ]*/g);
+  if (!parts) throw new Error(`spanMidline(): no absolute commands in: ${d}`);
+
+  let start: P | null = null;
+  const segs: { cmd: string; ctrl: P[]; end: P }[] = [];
+  for (const part of parts) {
+    const v = part.slice(1).trim().split(/[\s,]+/).filter(Boolean).map(Number);
+    const pts: P[] = [];
+    for (let i = 0; i < v.length; i += 2) pts.push([v[i], v[i + 1]]);
+    if (part[0] === 'M') {
+      start = pts[0];
+      continue;
+    }
+    segs.push({ cmd: part[0], ctrl: pts.slice(0, -1), end: pts[pts.length - 1] });
+  }
+  if (!start) throw new Error(`spanMidline(): path does not begin with M: ${d}`);
+
+  const back: string[] = [];
+  for (let i = segs.length - 1; i >= 0; i -= 1) {
+    const to = i === 0 ? start : segs[i - 1].end;
+    const c = [...segs[i].ctrl].reverse();
+    back.push(segs[i].cmd === 'L' ? L(to) : segs[i].cmd === 'Q' ? Q(c[0], to) : C(c[0], c[1], to));
+  }
+  return path(body, ...back, Z);
+}

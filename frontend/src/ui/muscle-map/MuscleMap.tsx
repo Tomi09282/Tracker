@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn';
 import { Pressable } from '../primitives/Pressable';
 import { Segmented } from '../feedback/variants/E6Segmented';
 import { useMotionSafe } from '../feedback/useMotionSafe';
-import { MUSCLES_BY_SIDE, SILHOUETTE, STRIATIONS, VIEW, type BodySide } from './shapes';
+import { DETAIL, MUSCLES_BY_SIDE, SILHOUETTE, STRIATIONS, VIEW, type BodySide } from './shapes';
 
 export type MuscleRole = 'primary' | 'secondary';
 
@@ -263,13 +263,37 @@ export function MuscleMap({
             under it would turn the map's one accessibility compromise into a real failure.
             `aria-hidden` for the same reason in the other direction — a texture is not a target and
             must not appear in the tree beside twelve real ones. */}
+        {/* THE TISSUE BETWEEN THE REGIONS, and then the grain inside them.
+            Two passes because they are different weights: the detail is anatomy the taxonomy has
+            no slug for — serratus, sartorius, the kneecap, fingers — and it carries the same line
+            as a muscle edge, because it IS an edge. The striations are texture and sit lighter, so
+            they read as grain rather than as more boundaries.
+
+            Both are `aria-hidden` and `pointerEvents: none`. These lines cross regions that are
+            already below the 44px floor, and a stray stroke stealing a tap from the muscle under it
+            would turn the map's one accessibility compromise into a real failure. */}
         <g
           aria-hidden
           fill="none"
           stroke="var(--muscle-edge)"
-          strokeWidth={0.75}
+          strokeWidth={0.9}
           strokeLinecap="round"
-          opacity={0.55}
+          strokeLinejoin="round"
+          opacity={0.8}
+          style={{ pointerEvents: 'none' }}
+        >
+          {DETAIL[side].map((d, i) => (
+            <path key={`detail-${i}`} d={d} />
+          ))}
+        </g>
+
+        <g
+          aria-hidden
+          fill="none"
+          stroke="var(--muscle-edge)"
+          strokeWidth={0.6}
+          strokeLinecap="round"
+          opacity={0.45}
           style={{ pointerEvents: 'none' }}
         >
           {STRIATIONS[side].map((d, i) => (
