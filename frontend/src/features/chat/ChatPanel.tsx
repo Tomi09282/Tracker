@@ -64,12 +64,20 @@ export function ChatPanel({
   blocked,
   blockedByMe,
   displayName,
+  showBlockAction = true,
   className,
 }: {
   conversationId: number;
   meId: number;
   blocked: boolean;
   blockedByMe: boolean;
+  /**
+   * Whether the panel draws its own `Letiltás` corner. False when the host owns a real top bar
+   * — `ChatPage` does — because a panel embedded in someone else's screen can only ever draw
+   * half of one: the left half of that row is a back link, and the panel has nowhere to go back
+   * to. `Feloldás` is unaffected; lifting a block belongs beside the closed composer.
+   */
+  showBlockAction?: boolean;
   /**
    * The other person's name, when the caller has a better one than an e-mail local part. Optional
    * because no endpoint answers a display name today; the day one does, this is where it lands.
@@ -132,15 +140,20 @@ export function ChatPanel({
       {/* ── the corner action ─────────────────────────────────────────────────────────────────
           `Letiltás` used to sit under the composer, one mis-tap from send. Blocking is rare and
           semi-irreversible, so it belongs in a corner. The row keeps its height when the chip is
-          gone (blocked conversations lose it) so the anchor does not jump on a state change. */}
-      <div className="flex min-h-11 items-start justify-end">
-        {blocked ? null : (
-          <Pressable shape="chip" density="compact" variant="ghost" onClick={() => block.mutate(true)}>
-            <Ban className="size-icon-s" aria-hidden />
-            {t('chat.block')}
-          </Pressable>
-        )}
-      </div>
+          gone (blocked conversations lose it) so the anchor does not jump on a state change.
+
+          Only when the host has no bar of its own. On the chat ROUTE this row is the left-empty
+          half of a bar the page draws properly, back link and all — see `showBlockAction`. */}
+      {showBlockAction ? (
+        <div className="flex min-h-11 items-start justify-end">
+          {blocked ? null : (
+            <Pressable shape="chip" density="compact" variant="ghost" onClick={() => block.mutate(true)}>
+              <Ban className="size-icon-s" aria-hidden />
+              {t('chat.block')}
+            </Pressable>
+          )}
+        </div>
+      ) : null}
 
       {/* ── the anchor ────────────────────────────────────────────────────────────────────────
           The ring is drawn with padding on an accent-filled circle rather than a border width, so

@@ -21,6 +21,19 @@ export interface LogSet {
   rpe: number | null;
   completed_at: number | null;
   voided_at: number | null;
+  /**
+   * The records this set earned, as the server still holds them — not a transient of the check that
+   * earned them.
+   *
+   * The row used to know about a record only from its own check response, and it unmounts on every
+   * exercise switch, so the trophy vanished on the way back. Carried WITH the set instead, so a
+   * refetch can neither replay the celebration nor erase the fact.
+   *
+   * Optional because it is served by `GET /workouts/current` and the offline check path resolves
+   * without it; the row falls back to what its own check returned. Same shape as `recordSetTx`
+   * returns, deliberately — one `PrRecord` for the client, not two.
+   */
+  records?: PrRecord[];
 }
 
 export interface LogExercise {

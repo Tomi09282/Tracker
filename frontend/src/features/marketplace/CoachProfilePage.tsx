@@ -6,7 +6,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
 import { DocRenderer } from './DocRenderer';
-import { useCoach } from './usePublic';
+import { useCoach, useTaxonomy } from './usePublic';
 import type { PublicCoach, PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
@@ -69,7 +69,7 @@ export function CoachProfilePage() {
     return (
       <div className="col-mobile screen-x flex flex-col gap-section py-4">
         <AuroraBackdrop />
-        <PublicTopBar backTo="/m" />
+        <PublicTopBar backTo="/m" cta="secondary" />
         <EmptyState
           icon={UserX}
           title={t('marketplace.coachGoneTitle')}
@@ -104,11 +104,21 @@ function CoachProfileView({
   posts: PublicPost[];
 }) {
   const { t, i18n } = useTranslation();
+  const taxonomy = useTaxonomy();
+
+  // `coach.city` is the city KEY — `public_cities.key`, CHECK-constrained to lowercase ASCII — so
+  // printing it straight through rendered `📍 budapest`, and `pecs` / `gyor` / `nyiregyhaza` with
+  // the Hungarian accents stripped. The taxonomy serves `name_native` beside the key and the query
+  // has a one-hour staleTime, so this costs at most one request per session. The key stays as the
+  // fallback while that request is in flight: a row that renders empty for a beat is worse than one
+  // that renders a slug for a beat. Same lookup `ProfileEditorPage`'s city picker already does.
+  const cityName =
+    taxonomy.data?.cities.find((c) => c.key === coach.city)?.name ?? coach.city;
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-4">
       <AuroraBackdrop />
-      <PublicTopBar backTo="/m" />
+      <PublicTopBar backTo="/m" cta="secondary" />
 
       <header className="flex flex-col items-center gap-group text-center">
         {/* THE ANCHOR. A decorative frame, never a meter — see the docblock. */}
@@ -147,7 +157,7 @@ function CoachProfileView({
               {coach.city ? (
                 <span className="flex items-center gap-1">
                   <MapPin className="size-icon-s" aria-hidden />
-                  {coach.city}
+                  {cityName}
                 </span>
               ) : null}
             </p>
@@ -302,7 +312,7 @@ function CoachProfileSkeleton() {
     >
       <AuroraBackdrop />
       <span className="sr-only">{t('common.loading')}</span>
-      <PublicTopBar backTo="/m" />
+      <PublicTopBar backTo="/m" cta="secondary" />
 
       <div className="flex flex-col items-center gap-group">
         <Skeleton className="size-36 rounded-chip" />

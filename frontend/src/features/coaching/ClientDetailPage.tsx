@@ -20,6 +20,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { chip } from '../../ui/primitives/control';
 import { Surface } from '../../ui/primitives/Surface';
 import { SummaryTile } from '../../ui/data/SummaryTile';
 import { EmptyState } from '../../ui/feedback/EmptyState';
@@ -91,8 +92,17 @@ function AnswerTile({
   // `kerülendő` and `óvatosan` are two weights of the same instruction — reaching for danger red
   // would file "be careful with this knee" alongside "this operation failed".
   const shell = tone === 'strong' ? 'border-warning-border bg-warning-subtle' : '';
+  // THE HOLDER HAS TO SPLIT BY TONE, because on `strong` the CARD is already a 12% amber wash: a
+  // 12% disc on a 12% card composites about ten points of amber and stops reading as an object at
+  // all. `--on-warning` exists for exactly this — a filled puck with dark ink, which is the one
+  // element the mockup lets pop out of the amber card. `soft` keeps its wash: there the card is an
+  // ordinary surface and the tint is the whole signal.
   const holder =
-    tone === 'neutral' ? 'bg-accent-subtle text-accent' : 'bg-[var(--warning-subtle)] text-warning';
+    tone === 'neutral'
+      ? 'bg-accent-subtle text-accent'
+      : tone === 'strong'
+        ? 'bg-warning text-on-warning'
+        : 'bg-[var(--warning-subtle)] text-warning';
   const captionTone = tone === 'neutral' ? 'text-text-3' : 'text-warning';
 
   return (
@@ -284,7 +294,13 @@ export function ClientDetailPage() {
           `align="center"` and `captionCase="upper"` on all three, as 07-coach-client-detail-terv.webp
           draws them: puck over figure over an eyebrow (`EDZÉS / 28 NAP`), one axis per tile. The
           caption is an eyebrow here rather than metadata because it names the METRIC — the header
-          above already carries the client, so these three lines are the only labels in the block. */}
+          above already carries the client, so these three lines are the only labels in the block.
+
+          THE CAPTIONS HAVE THEIR OWN KEYS. They used to borrow `coaching.sessions`,
+          `onboarding.field.sessions_per_week` and `nav.plans` — strings written to name other
+          things, each a word longer than a third of a phone's width holds at 11px. Two of the three
+          wrapped, so the row lost its shared baseline. `PlanListPage` made the same move when it
+          stopped captioning its anchor with `nav.plans`. */}
       <div className="grid grid-cols-3 gap-group">
         <SummaryTile
           icon={Dumbbell}
@@ -292,7 +308,7 @@ export function ClientDetailPage() {
           captionCase="upper"
           value={c.sessions_28d ?? 0}
           // The window is part of the fact. A bare "6 edzés" reads as a lifetime total.
-          caption={`${t('coaching.sessions')} / ${t('plans.dayCount', { count: 28 })}`}
+          caption={`${t('coaching.tile.sessions')} / ${t('plans.dayCount', { count: 28 })}`}
         />
         <SummaryTile
           icon={CalendarDays}
@@ -301,14 +317,14 @@ export function ClientDetailPage() {
           // A dash rather than a zero when there is no questionnaire: nobody answered, which is
           // not the same claim as "they train zero times a week".
           value={p?.sessions_per_week ?? '—'}
-          caption={t('onboarding.field.sessions_per_week')}
+          caption={t('coaching.tile.weekly')}
         />
         <SummaryTile
           icon={ClipboardList}
           align="center"
           captionCase="upper"
           value={plans.isPending ? '—' : planCount}
-          caption={t('nav.plans')}
+          caption={t('coaching.tile.plans')}
         />
       </div>
 
@@ -368,10 +384,12 @@ export function ClientDetailPage() {
               `aria-label` to say anything and said nothing at all to a sighted reader who has not
               met it before. The full sentence still lives inside the sheet, where acting on the
               incomplete answers begins. */}
+          {/* The `chip` recipe, not a hand-rolled pill. 8px/2px rendered a 16px slab — tighter
+              than every other status chip in the app and than the one the mockup draws; the
+              recipe's px-3 py-1 at `text-caption` is that pill, and it is the only place the
+              warning tone is spelled out. */}
           {p?.status === 'draft' ? (
-            <span className="text-caption rounded-chip bg-warning-subtle px-2 py-0.5 text-warning">
-              {t('coaching.profileIncomplete')}
-            </span>
+            <span className={chip({ tone: 'warning' })}>{t('coaching.profileIncomplete')}</span>
           ) : null}
           <ChevronRight className="size-icon-m text-text-3" aria-hidden />
         </span>
@@ -404,16 +422,19 @@ export function ClientDetailPage() {
               tabIndex={tab === key ? 0 : -1}
               // The selected tab is a SELECTION, not the screen's action. As a filled `primary` it
               // was a second one beside `Új terv a kliensnek` — and the wider of the two — which
-              // is the one-primary-per-screen rule failing where it is most visible. `accent-subtle`
-              // is the app's declared "this one is selected" wash, and `secondary` already inks it
-              // at `--text-1`, which is exactly what `--on-accent-subtle` resolves to (DESIGN.md 63
-              // forbids `text-accent` here). No text class is passed for that reason AND because
-              // `cn` is `twMerge`: any `text-*` from a call site silently eats the density's
-              // `text-body-s` and the chip would come out a different size from its neighbours.
+              // is the one-primary-per-screen rule failing where it is most visible.
+              //
+              // `selected` is the recipe's own state and replaces the hand-rolled pair it used to
+              // carry. Two things the call site was getting wrong: `border-accent` drew a hard
+              // outline the design system does not put on a selected chip (the mockup's `Terv` is
+              // a plain filled pill), and `secondary`'s `hover:bg-surface-2` was never overridden —
+              // twMerge cannot see through a modifier — so pointing at the ALREADY-selected tab
+              // turned it grey, which reads as "you are about to deselect".
               variant="secondary"
               shape="chip"
               density="compact"
-              className={cn('shrink-0', tab === key && 'border-accent bg-accent-subtle')}
+              selected={tab === key}
+              className="shrink-0"
               onClick={() => setTab(key)}
               icon={<Icon className="size-icon-s" aria-hidden />}
             >

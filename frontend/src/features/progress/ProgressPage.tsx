@@ -286,15 +286,7 @@ function BodyTab() {
       {/* ── record ─────────────────────────────────────────────────────────────────────────────
           Above the fold, which is the whole point of collapsing the other charts into tiles. */}
       <section className="flex flex-col gap-group">
-        <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-          >
-            <Plus className="size-icon-m" strokeWidth={2} />
-          </span>
-          {t('progress.record')}
-        </h2>
+        <SectionHeading icon={Plus} title={t('progress.record')} />
 
         <Surface className="flex flex-col gap-group">
           {/* FULL WIDTH, NOT flex-1 — see the block comment above `selected`. */}
@@ -522,15 +514,7 @@ function SharingTab() {
   return (
     <>
       <section className="flex flex-col gap-group">
-        <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-          >
-            <ShieldCheck className="size-icon-m" strokeWidth={2} />
-          </span>
-          {t('progress.whoCanSee')}
-        </h2>
+        <SectionHeading icon={ShieldCheck} title={t('progress.whoCanSee')} />
 
         <Surface className="flex flex-col gap-group">
           <p className="text-body-s text-text-2">{t('progress.sharingNote')}</p>
@@ -588,15 +572,7 @@ function SharingTab() {
       </section>
 
       <section className="flex flex-col gap-group">
-        <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-          >
-            <Eye className="size-icon-m" strokeWidth={2} />
-          </span>
-          {t('progress.whoLooked')}
-        </h2>
+        <SectionHeading icon={Eye} title={t('progress.whoLooked')} />
 
         {(log.data?.entries ?? []).length === 0 ? (
           <p className="text-body-s text-text-3">{t('progress.noLooks')}</p>
@@ -625,6 +601,47 @@ function SharingTab() {
         )}
       </section>
     </>
+  );
+}
+
+/**
+ * The `h2` that opens `Mérés rögzítése`, `Ki láthatja` and `Ki nézte meg`.
+ *
+ * ═══ A BADGE IS NOT A PUCK ═════════════════════════════════════════════════════════════════════
+ *
+ * The three hand-written spans this replaces were `rounded-chip bg-accent-subtle`, and
+ * `rounded-chip` is the pill radius in every pack but Mono — so on a square box it rendered as a
+ * full circle with a 12% accent wash, pixel-identical to `SummaryTile`'s icon puck sitting 60px
+ * above the first one. 05-haladas.webp draws two marks on purpose: the tile puck is a CIRCLE on an
+ * accent wash and labels a number, the section badge is a rounded SQUARE on a neutral inset fill
+ * with a hairline edge and opens a section.
+ *
+ * Every value below is measured off that mockup rather than felt:
+ *   - `size-11` — the badge box is 69px there and the value field beside it is 69px tall, so the
+ *     badge is exactly one `--control-h`. Absolute pixels do not transfer from that render (its
+ *     field is 24 CSS px), the ratio does.
+ *   - `rounded-field` — the corner runs 18px of that 69, 26% of the side. `rounded-field` is
+ *     12/44 = 27%; `rounded-card` would be 16/44 = 36%, visibly rounder than the image. It is also
+ *     what both existing section badges in this app already use.
+ *   - `bg-surface-2` — the badge fill samples the same value as the date field's inset next to it,
+ *     and `--field-bg` IS `--surface-2`.
+ *
+ * Local rather than shared, for the reason `features/library/SectionBadge.tsx` writes down: this
+ * wants to be `ui/data/SectionHeader`, but that one still carries the accent wash — the half the
+ * mockup contradicts — and `src/ui/` is being edited in parallel. Promoting this changes an import
+ * path and nothing else.
+ */
+function SectionHeading({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
+  return (
+    <h2 className="text-title-2 flex items-center gap-tight text-text-1">
+      <span
+        aria-hidden
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-field border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-2 text-accent"
+      >
+        <Icon className="size-icon-m" strokeWidth={2} />
+      </span>
+      {title}
+    </h2>
   );
 }
 

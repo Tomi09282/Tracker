@@ -30,11 +30,16 @@ import { isValidDisplayName, personInitials, personLabel } from '../../lib/perso
  * Hungarian member read the English word "user" on the one line of the screen that is about them.
  * A lookup rather than a template literal so a role the bundle has no label for is a type error
  * here instead of a raw key rendered on screen.
+ *
+ * Settings-owned keys, not `adminUsers.role.*`: that group is the ADMIN TABLE's vocabulary, where
+ * `user` is the row's role column and reads `Felhasználó`. On your own account chip the word is
+ * `Tag` — you are a member of the product, not a row in a staff table — and borrowing the admin
+ * string put the table's word on the one line of the screen that is about you.
  */
 const ROLE_LABEL: Record<SessionUser['role'], string> = {
-  user: 'adminUsers.role.user',
-  coach: 'adminUsers.role.coach',
-  admin: 'adminUsers.role.admin',
+  user: 'settings.role.user',
+  coach: 'settings.role.coach',
+  admin: 'settings.role.admin',
 };
 
 /**
@@ -109,10 +114,14 @@ function TransparencyChoice() {
             key={value}
             role="radio"
             aria-checked={transparency === value}
-            /* The accent fill marks a SELECTED STATE, not an action — same rule the progress tabs
-               follow. It is the only filled thing in the track, so "which one is on" is answerable
-               without reading. */
-            variant={transparency === value ? 'primary' : 'ghost'}
+            /* The selected wash (DESIGN §5.6), NOT `primary`. Rule 47 scopes the one filled accent
+               to the SCREEN, not to this track — and on this screen that one belongs to `Téma
+               mentése`. With the fill here the page carried two solid accent blocks at rest while
+               the real primary sat disabled at 45%, so the only action was the least prominent
+               filled thing in view. `selected` also ships the hover half a call site forgets:
+               without it the chosen chip reverts to surface-2 under the pointer. */
+            variant="ghost"
+            selected={transparency === value}
             shape="chip"
             density="compact"
             className="flex-1"
@@ -224,13 +233,6 @@ export function SettingsPage() {
             )}
           </div>
 
-          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET.
-              `users.display_name` is NULL for everybody until somebody types here, so an endpoint
-              without this control would be a column nothing can ever fill. It sits in the account
-              block because that is what it is a fact about, and above the sign-out because the
-              spec anchors the sign-out directly under the identity cluster. */}
-          {user ? <DisplayNameRow user={user} /> : null}
-
           {/* No section card around it, and no confirmation dialog: one tap, busy while it runs.
               It renders even while the session is still loading, because it depends on there
               BEING a session, not on the session's contents. */}
@@ -243,6 +245,16 @@ export function SettingsPage() {
           >
             {t('auth.logout')}
           </Pressable>
+
+          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET.
+              `users.display_name` is NULL for everybody until somebody types here, so an endpoint
+              without this control would be a column nothing can ever fill. It sits in the account
+              block because that is what it is a fact about, and BELOW the sign-out, because the
+              screen spec anchors `Kijelentkezés` directly under the identity cluster with nothing
+              between them — same reason the coins row sits there. A card of label, hint, input and
+              a conditional Save wedged above it pushed the sign-out a full card down and took
+              HANGOK ÉS REZGÉS below the fold with it. */}
+          {user ? <DisplayNameRow user={user} /> : null}
 
           {/* THE WALLET'S ONLY DOOR ON A PHONE.
               /coins was found by the Phase 8 audit with no inbound link at all — wallet, ledger,
@@ -275,10 +287,15 @@ export function SettingsPage() {
 
       <section className="flex flex-col gap-group">
         <SectionHeader icon={Palette} title={t('settings.appearance')} />
-        <TransparencyChoice />
+        {/* The appearance card is what MEGJELENÉS anchors — flame tile, chips, `Téma mentése` —
+            so it starts immediately under the header, as the mockup draws it. Transparency is a
+            later, accepted addition (ADR-0018) with no place in that image; rendering it first put
+            an unmockup'd control where the section's anchor belongs and pushed the anchor a whole
+            card down. It reads correctly as the secondary appearance setting it is. */}
         <Surface>
           <ThemeStudio />
         </Surface>
+        <TransparencyChoice />
       </section>
 
       <section className="flex flex-col gap-group">

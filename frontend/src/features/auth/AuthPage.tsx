@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { Dumbbell, Mail, Lock, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { Dumbbell, Mail, Lock, Eye, EyeOff, Check, AlertCircle, ChevronLeft } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
 import { Surface } from '../../ui/primitives/Surface';
@@ -24,7 +24,7 @@ type FormValues = z.infer<typeof schema>;
 const emailLooksValid = (value: string) => schema.shape.email.safeParse(value ?? '').success;
 
 /**
- * Auth screen — [[55-Screens/login]].
+ * Auth screen — [[55-Screens/login]] and [[55-Screens/register]].
  *
  * One vertically centred column, capped narrow, nothing else on the page: no nav, no header, no
  * marketing. It is the first screen most people ever see of the product, so it carries a second
@@ -32,6 +32,11 @@ const emailLooksValid = (value: string) => schema.shape.email.safeParse(value ??
  * A bare form floating in the middle of a dark page reads as a dialog, not as a product.
  *
  * The app name comes from the server config, never from a string in this bundle.
+ *
+ * The two modes are ONE component because they are one form, but they are not one drawing: the
+ * mockups differ on the field glyphs, on where the submit button sits and on the wordmark's ink,
+ * and each of those differences is spec'd on both sides rather than being an image accident. They
+ * are branched on `mode` below, each with the reason.
  */
 export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const { t } = useTranslation();
@@ -51,7 +56,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
-  const emailValid = emailLooksValid(watch('email'));
+  const emailValue = watch('email');
+  const emailValid = emailLooksValid(emailValue);
 
   /**
    * Map the server's stable `code` onto a translated message. Never render the server's prose
@@ -80,9 +86,36 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     }
   });
 
+  /* One primary action, visually dominant. Declared once and placed twice: `/login` draws it as
+     the last row INSIDE the card, `/register`'s mockup lifts it out to its own block below. */
+  const submit = (
+    <Pressable type="submit" variant="primary" busy={busy} className="w-full">
+      {mode === 'login' ? t('auth.login') : t('auth.register')}
+    </Pressable>
+  );
+
   return (
-    <main className="screen-x flex min-h-dvh flex-col items-center justify-center py-8">
+    // `relative` so the back control can be pinned to the column's own top-left without joining
+    // the flow — the column has to stay vertically centred whether or not that control is there.
+    <main className="screen-x relative flex min-h-dvh flex-col items-center justify-center py-8">
       <AuroraBackdrop />
+
+      {mode === 'register' ? (
+        /* The one control above the hero, and the only way back that is not the switch link at
+           the bottom. `left-0` is the inner edge of the screen gutter (an absolute box resolves
+           against the padding box), so it lines up with the card without repeating `screen-x`;
+           `safe-top` keeps it clear of the notch, which a bare `top-0` would sit under. */
+        <div className="safe-top absolute left-0 top-0">
+          <Pressable
+            variant="ghost"
+            shape="icon"
+            aria-label={t('auth.backToLogin')}
+            onClick={() => void navigate('/login')}
+          >
+            <ChevronLeft className="size-icon-m" aria-hidden />
+          </Pressable>
+        </div>
+      ) : null}
 
       <div className="flex w-full max-w-[400px] flex-col gap-section">
         {/* ── the mark ──────────────────────────────────────────────────────────────────────
@@ -98,86 +131,132 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             <Dumbbell size={56} strokeWidth={2} />
           </span>
           {/* `min-h` holds the line before the name arrives from the server, so the column below
-              does not jump when it lands. */}
-          <h1 className="text-display mt-4 min-h-10 text-center text-accent">{appName}</h1>
+              does not jump when it lands.
+              The ink differs by mode, and the mockups are explicit about it: sampled off the
+              images, /login's wordmark is the accent tint that echoes the disc while /register's
+              is plain white. On the register column the accent is spent on ONE thing — the
+              submit button — and a third accent-coloured element weakens its claim. */}
+          <h1
+            className={
+              mode === 'login'
+                ? 'text-display mt-4 min-h-10 text-center text-accent'
+                : 'text-display mt-4 min-h-10 text-center text-text-1'
+            }
+          >
+            {appName}
+          </h1>
           <p className="text-body text-center text-text-2">
             {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
           </p>
         </div>
 
         {/* ── the form ──────────────────────────────────────────────────────────────────────
-            `finish="glass"` because this is the one panel on the page and there is nothing to
-            scroll behind it — the cost that makes `veil` the default everywhere else does not
-            apply to a single static card. */}
-        <Surface as="form" onSubmit={onSubmit} noValidate finish="glass" className="flex flex-col gap-4">
-          <Field
-            label={t('auth.email')}
-            placeholder={t('auth.emailPlaceholder')}
-            type="email"
-            autoComplete="email"
-            inputMode="email"
-            leading={<Mail className="size-icon-m" />}
-            /* The tick is a FORMAT check and must never mean more than that. If it appeared only
-               for addresses that already have accounts it would be a user-enumeration oracle —
-               the same reason the failure copy never says which of the two fields was wrong. */
-            trailing={
-              emailValid ? (
-                <span
-                  className="flex size-[var(--target-min)] items-center justify-center text-[var(--success)]"
-                  title={t('auth.emailValid')}
+            The `<form>` is the outer element rather than the card, because on /register the
+            submit button leaves the card and still has to submit it.
+            `inert` while busy, not just a disabled button: the spec's busy state is "the whole
+            form is inert for the duration", and without it the inputs and the reveal toggle stay
+            live under the spinner — a value edited mid-flight is not the value being sent. */}
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          inert={busy || undefined}
+          aria-busy={busy || undefined}
+          className="flex flex-col gap-group"
+        >
+          {/* `finish="glass"` because this is the one panel on the page and there is nothing to
+              scroll behind it — the cost that makes `veil` the default everywhere else does not
+              apply to a single static card. */}
+          <Surface finish="glass" className="flex flex-col gap-4">
+            <Field
+              label={t('auth.email')}
+              placeholder={t('auth.emailPlaceholder')}
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              /* Login only. The login mockup draws an envelope and a lock on the leading edge and
+                 its spec names both; the register mockup draws both inputs plain, with the value
+                 starting at the normal padding and the only in-field glyphs trailing. */
+              leading={mode === 'login' ? <Mail className="size-icon-m" /> : undefined}
+              /* The tick is a FORMAT check and must never mean more than that. If it appeared only
+                 for addresses that already have accounts it would be a user-enumeration oracle —
+                 the same reason the failure copy never says which of the two fields was wrong.
+                 The verdict is drawn inside a filled disc, which is the defined treatment for a
+                 field verdict (catalog E7 draws its own in a round badge), not a loose tick. */
+              trailing={
+                emailValid ? (
+                  <span
+                    className="flex size-[var(--target-min)] items-center justify-center"
+                    title={t('auth.emailValid')}
+                  >
+                    <span className="flex size-6 items-center justify-center rounded-full bg-success text-on-success">
+                      <Check className="size-icon-s" strokeWidth={3} aria-hidden />
+                    </span>
+                    <span className="sr-only">{t('auth.emailValid')}</span>
+                  </span>
+                ) : undefined
+              }
+              /* Says what to change. `auth.errors.generic` is a sentence about a failed network
+                 call and belongs to the banner below; under an input it tells the user nothing.
+                 The two client-side outcomes are separated because they need different actions:
+                 an empty field wants a value, a malformed one wants a correction. */
+              error={
+                errors.email &&
+                (emailValue?.trim()
+                  ? t('auth.errors.emailFormat')
+                  : t('auth.errors.emailRequired'))
+              }
+              {...field('email')}
+            />
+
+            <Field
+              label={t('auth.password')}
+              placeholder={t('auth.passwordPlaceholder')}
+              type={revealed ? 'text' : 'password'}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              hint={mode === 'register' ? t('auth.passwordRules') : undefined}
+              leading={mode === 'login' ? <Lock className="size-icon-m" /> : undefined}
+              /* The accessible name CHANGES with state — one fixed label would announce the wrong
+                 thing half the time. `aria-pressed` says which state it is in. */
+              trailing={
+                <Pressable
+                  variant="ghost"
+                  shape="icon"
+                  aria-pressed={revealed}
+                  aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
+                  onClick={() => setRevealed((v) => !v)}
                 >
-                  <Check className="size-icon-m" strokeWidth={2.5} aria-hidden />
-                  <span className="sr-only">{t('auth.emailValid')}</span>
-                </span>
-              ) : undefined
-            }
-            error={errors.email && t('auth.errors.generic')}
-            {...field('email')}
-          />
+                  {/* The GLYPH reports the current state (masked = crossed-out eye), which is what
+                      both mockups draw; the LABEL above names the action. They are deliberately
+                      answering different questions, so the two do not track each other. */}
+                  {revealed ? (
+                    <Eye className="size-icon-m" aria-hidden />
+                  ) : (
+                    <EyeOff className="size-icon-m" aria-hidden />
+                  )}
+                </Pressable>
+              }
+              error={errors.password && t('auth.errors.passwordRequired')}
+              {...field('password')}
+            />
 
-          <Field
-            label={t('auth.password')}
-            placeholder={t('auth.passwordPlaceholder')}
-            type={revealed ? 'text' : 'password'}
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            hint={mode === 'register' ? t('auth.passwordRules') : undefined}
-            leading={<Lock className="size-icon-m" />}
-            /* The accessible name CHANGES with state — one fixed label would announce the wrong
-               thing half the time. `aria-pressed` says which state it is in. */
-            trailing={
-              <Pressable
-                variant="ghost"
-                shape="icon"
-                aria-pressed={revealed}
-                aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
-                onClick={() => setRevealed((v) => !v)}
+            {formError ? (
+              <p
+                role="alert"
+                className="text-body-s flex items-center gap-tight rounded-field border border-[var(--danger-border)] bg-[var(--danger-subtle)] px-3 py-2 text-text-1"
               >
-                {revealed ? (
-                  <EyeOff className="size-icon-m" aria-hidden />
-                ) : (
-                  <Eye className="size-icon-m" aria-hidden />
-                )}
-              </Pressable>
-            }
-            error={errors.password && t('auth.errors.generic')}
-            {...field('password')}
-          />
+                <AlertCircle className="size-icon-s shrink-0 text-[var(--danger)]" aria-hidden />
+                {formError}
+              </p>
+            ) : null}
 
-          {formError ? (
-            <p
-              role="alert"
-              className="text-body-s flex items-center gap-tight rounded-field border border-[var(--danger-border)] bg-[var(--danger-subtle)] px-3 py-2 text-text-1"
-            >
-              <AlertCircle className="size-icon-s shrink-0 text-[var(--danger)]" aria-hidden />
-              {formError}
-            </p>
-          ) : null}
+            {mode === 'login' ? submit : null}
+          </Surface>
 
-          {/* One primary action, visually dominant. */}
-          <Pressable type="submit" variant="primary" busy={busy} className="w-full">
-            {mode === 'login' ? t('auth.login') : t('auth.register')}
-          </Pressable>
-        </Surface>
+          {/* On /register the card ends after the fields and the button is its own block, edge to
+              edge with the card rather than inset by its padding. `gap-group` is the step the
+              mockup measures at — `gap-section` would open twice that. */}
+          {mode === 'register' ? submit : null}
+        </form>
 
         {/* ── the way out ───────────────────────────────────────────────────────────────── */}
         <div className="flex flex-col items-center gap-4">
@@ -208,6 +287,11 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
 
         The password reveal toggle in the mockup IS built, because it is real: client-side only,
         no route, no endpoint, nothing to wait for.
+
+        `/register`'s strength meter and its two live requirement rows are still missing. Both are
+        new SHARED components by the spec's own reasoning (the rules have to be one definition, or
+        a future password-change screen grows a second copy that drifts), so they are not this
+        file's to add.
       */}
     </main>
   );

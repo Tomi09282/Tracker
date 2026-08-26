@@ -1,8 +1,10 @@
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, Dumbbell, Info, ListOrdered, PersonStanding, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, Dumbbell, Info, ListOrdered, PersonStanding, Play, TriangleAlert } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { control } from '../../ui/primitives/control';
+import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useExercise, type Taxonomy } from './useExercises';
@@ -29,6 +31,18 @@ export function ExerciseDetailPage() {
   const params = useParams();
   const id = Number.parseInt(params.id ?? '', 10);
   const { data, isPending } = useExercise(Number.isFinite(id) ? id : null, lang);
+
+  /*
+   * The hero player has two states and the FIRST one is ours. At rest the browser's control bar is
+   * a strip pinned to the bottom edge of the frame; the mockup's anchor is one large circular play
+   * button centred on the poster — "a still photograph is a decoration, a frame with a play button
+   * on it is a promise". From the first activation the native player owns the frame, and this is
+   * deliberately one-way: an overlay that returned on pause would cover the native pause button.
+   *
+   * Declared above the early returns because hooks cannot be conditional.
+   */
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
 
   const nameOf = (tax: Taxonomy) => tax.name;
 
@@ -74,11 +88,11 @@ export function ExerciseDetailPage() {
 
   const { exercise, muscles, equipment, media, substitutions, availableLangs } = data;
   const hero = media[0];
-  // The play affordance is drawn by the browser, and ONLY when there is something to play. A play
-  // button over a still photograph is a promise the media contract cannot keep — there is no
-  // video/poster pairing in the payload, so a hand-drawn triangle here would be decoration that
-  // does nothing when tapped. When the stored media really is a video, `controls` gives a real
-  // one, at a real size, with real keyboard and screen-reader behaviour.
+  // The play affordance renders ONLY when there is something to play. Over a still photograph it
+  // would be a promise the media contract cannot keep — there is no video/poster pairing in the
+  // payload, so a triangle on a photo would be decoration that does nothing when tapped. The
+  // image and empty branches below therefore stay exactly as they were; the spec forbids the
+  // button on both by name.
   const heroIsVideo = hero?.mime.startsWith('video/') ?? false;
 
   // slug → role, exactly the shape the map wants.
@@ -144,17 +158,49 @@ export function ExerciseDetailPage() {
         <Surface
           elevation="inset"
           pad="none"
-          className="grid aspect-video w-full place-items-center overflow-hidden"
+          className="relative grid aspect-video w-full place-items-center overflow-hidden"
         >
           {heroIsVideo ? (
-            <video
-              src={`/api/v1/media/${hero.storage_key}`}
-              controls
-              playsInline
-              preload="metadata"
-              aria-label={exercise.name}
-              className="size-full object-cover"
-            />
+            <>
+              <video
+                ref={videoRef}
+                src={`/api/v1/media/${hero.storage_key}`}
+                // `preload="metadata"` is what puts the first frame under the button, so the
+                // resting state is a poster rather than a black rectangle.
+                controls={started}
+                playsInline
+                preload="metadata"
+                aria-label={exercise.name}
+                // Covers a start that did not come from the button — a keyboard activation on the
+                // element itself, or a browser that begins playback on its own.
+                onPlay={() => setStarted(true)}
+                className="size-full object-cover"
+              />
+              {!started ? (
+                // `absolute inset-0 m-auto` over a definite size centres it in the frame without
+                // giving the grid a second track. The scrim is what keeps a white glyph legible on
+                // an arbitrary photograph; the ring is the ink at its full weight, not a hairline,
+                // because it has to hold against whatever is behind it.
+                <Pressable
+                  shape="icon"
+                  variant="ghost"
+                  aria-label={t('library.playVideo')}
+                  className={cn(
+                    'absolute inset-0 m-auto size-20',
+                    'border-[length:var(--border-width)] border-[var(--text-1)]',
+                    'bg-scrim text-text-1 hover:bg-scrim-strong hover:text-text-1',
+                  )}
+                  onClick={() => {
+                    setStarted(true);
+                    // If it rejects, the native controls are already on screen and the user can
+                    // start it themselves — swallowing beats an unhandled rejection in the console.
+                    void videoRef.current?.play().catch(() => {});
+                  }}
+                >
+                  <Play className="size-icon-l" strokeWidth={2} aria-hidden />
+                </Pressable>
+              ) : null}
+            </>
           ) : hero ? (
             <img
               src={`/api/v1/media/${hero.storage_key}`}
@@ -197,6 +243,24 @@ export function ExerciseDetailPage() {
           </div>
         </div>
       </div>
+
+      {/*
+        ═══ BLOCK 6 — `Hozzáadás az edzéshez` — DELIBERATELY NOT BUILT ═══════════════════════════
+        The mockup draws a full-width filled-accent button here and the screen note calls it "the
+        single largest open question on the screen". It stays unbuilt because the API has no verb
+        for it: `backend/src/logs/routes.js` exposes `POST /workouts/start` (which takes a plan day
+        or a title, not an exercise), `POST /sets/:id/check`, `/void`, `/finish` and `/abandon` —
+        nothing appends an exercise to a running session, and a session's exercises come from its
+        plan day. Wiring the label to a navigation instead would be a button whose verb does
+        something other than what it says, which is the same lie as a play triangle over a still.
+
+        Two things that are NOT the reason, so nobody re-litigates them:
+        - Shipping it `disabled` is not the mitigation. The note's own words are "a primary button
+          that is dead most of the time is worse than no button", and §7 #45 makes disabled inert.
+        - It would also trip §7 #47 today: `MuscleMap` renders the `Elöl` / `Hátul` chips as
+          `variant={side === s ? 'primary' : 'secondary'}`, so this screen's only filled accent is
+          already a view switch. That belongs to the shared component and is recorded there.
+      */}
 
       {/* ── anatomy ────────────────────────────────────────────────────────────────────────── */}
       {muscles.length > 0 ? (

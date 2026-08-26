@@ -104,7 +104,7 @@ export function WeekStrip({ today }: { today: string }) {
         ) : (
           <Gauge
             className="size-40"
-            label={t('nav.workout')}
+            label={t('home.weeklyWorkouts')}
             value={planned > 0 ? trainedCount / planned : 0}
           >
             <p className="text-display font-display text-text-1">
@@ -115,9 +115,12 @@ export function WeekStrip({ today }: { today: string }) {
         )}
 
         {/* A caption, and the panel's accessible name. It renders in every state so the section
-            never loses its heading while the numbers are in flight. */}
+            never loses its heading while the numbers are in flight. "Heti edzés" rather than
+            "Edzés": the caption is what says the `2 / 5` counts sessions across the WEEK — bare
+            "Edzés" reads as if the ring were about one workout. The Gauge above carries the same
+            string, so the ring announces the same claim it draws. */}
         <h2 id="week-heading" className="text-micro font-body uppercase text-text-3">
-          {t('nav.workout')}
+          {t('home.weeklyWorkouts')}
         </h2>
       </div>
 

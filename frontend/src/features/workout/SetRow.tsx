@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Lock, Trophy, Undo2 } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { formatMeasure } from '../../lib/measure';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
@@ -50,6 +51,36 @@ const SWIPE_STEP_KG = 2.5;
 const UNDO_MS = 6000;
 
 /**
+ * THE DECIMAL SEPARATOR, ON THE ONE FIELD NOBODY LOOKS AT WHILE USING IT.
+ *
+ * The weight field stripped everything but digits and a DOT. A Hungarian numeric keypad offers a
+ * COMMA, and both mockups draw `62,5`, so a lifter typing what they read had the separator deleted
+ * and the field silently became `625` — a ten-fold weight, mid-set, on a row the schema then
+ * freezes. That is the same class of failure as tapping the wrong row, and it is quieter.
+ *
+ * So: accept both separators on input and normalise on the way to `Number`. Keeping only the FIRST
+ * separator matters as much as accepting the comma — `6,2,5` parses to NaN, which JSON-serialises
+ * to `null` and would post a set with no weight at all.
+ */
+const sanitizeDecimal = (raw: string): string => {
+  const kept = raw.replace(/[^0-9.,]/g, '');
+  const first = kept.search(/[.,]/);
+  if (first === -1) return kept;
+  return kept.slice(0, first + 1) + kept.slice(first + 1).replace(/[.,]/g, '');
+};
+
+/**
+ * `''` means "not entered", which is not the same claim as `0`. Whitespace covers a grouping mark.
+ * A lone separator resolves to null rather than NaN: NaN JSON-serialises to `null` anyway, and the
+ * difference matters at the call sites that branch on it before it ever reaches the wire.
+ */
+const parseDecimal = (raw: string): number | null => {
+  if (raw === '') return null;
+  const n = Number(raw.replace(/\s/g, '').replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+};
+
+/**
  * The row's column geometry, exported so the list HEADER above it reads from the same string.
  * Two copies of a five-column track is how `#` ends up over `Előző`, and nothing fails when it
  * does — it just looks wrong to everyone except the person who changed one of them.
@@ -84,7 +115,7 @@ export const SET_ROW_COLS = 'grid-cols-[2rem_5rem_1fr_1fr_3.5rem]';
  * animation so a refetch can neither replay the celebration nor erase it.
  */
 export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disabled }: SetRowProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const variant = useElementVariant('E21');
   const motionSafe = useMotionSafe();
   // THREE STATES, not two. A voided set is neither pending nor done:
@@ -101,9 +132,32 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
   // Seeded from the row, then owned by the input. A completed set shows what was recorded; a
   // pending one shows the target as a placeholder, never as a value — pre-filling the target is
   // how a lifter accidentally logs the prescription instead of what they did.
-  const [weight, setWeight] = useState(() => (set.entry_value ?? '').toString());
+  //
+  // The recorded value goes through the app's one-decimal formatter rather than `String(v)`: the
+  // mockups draw `62,5`, and `62.5` on a Hungarian screen is the same number written in a language
+  // the rest of the row is not written in. The seed only ever produces a formatted string on a row
+  // that is already `done`/`voided` — those inputs are disabled and `submit()` returns early on
+  // them — so the formatted form is never a value this row parses back.
+  const [weight, setWeight] = useState(() =>
+    set.entry_value != null ? formatMeasure(set.entry_value, i18n.language) : '',
+  );
   const [reps, setReps] = useState(() => (set.reps ?? '').toString());
-  const [records, setRecords] = useState<PrRecord[]>([]);
+  // THE TROPHY IS A FACT ABOUT THE SESSION, NOT A THING THAT HAPPENED WHILE THIS ROW WAS MOUNTED.
+  //
+  // This used to be state seeded empty and written only by the check response — and the row
+  // unmounts on every exercise switch. So leaving Fekvenyomás and coming back (or a reload, or an
+  // app resume) redrew a record set as an ordinary done row: green fill, plain index, a check where
+  // the mockup draws a trophy. The spec's wording is that the fact survives a refetch; it did not.
+  //
+  // Derived on every render rather than seeded once, because a mount-time seed also loses the
+  // offline case: an outbox-queued check resolves with `records: []`, and when the outbox drains
+  // and the refetch lands with `set.records` a seed never re-reads it. One expression fixes both.
+  //
+  // `voided ? []` is load-bearing: `hasRecord` also paints the row fill and the index ring, so a
+  // stale `set.records` arriving alongside `voided_at` would draw a struck-through row in warning
+  // colours. It also makes `undo()`'s local clear correct before the invalidation lands.
+  const [earned, setEarned] = useState<PrRecord[]>([]);
+  const records = voided ? [] : set.records?.length ? set.records : earned;
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -154,8 +208,8 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
     setBusy(true);
     setFailed(null);
     try {
-      const { records: earned, queued } = await onCheck({
-        weight: weight === '' ? null : Number(weight),
+      const { records: justEarned, queued } = await onCheck({
+        weight: parseDecimal(weight),
         reps: reps === '' ? null : Number(reps),
       });
       // OFFLINE IS NOT AN EXCEPTION HERE, WHICH IS WHY IT NEEDS SAYING OUT LOUD. A network failure
@@ -164,8 +218,8 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
       // the row rendered exactly like one nobody had touched. The chip is the whole difference
       // between "queued" and "you did not check that set".
       if (queued) setFailed('offline');
-      if (earned.length) {
-        setRecords(earned);
+      if (justEarned.length) {
+        setEarned(justEarned);
         setFlashing(true);
         // The flash is a moment, the badge is permanent. Separating them means a refetch cannot
         // replay the celebration but also cannot erase the fact.
@@ -226,7 +280,9 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
 
   const onDragStart = (e: React.PointerEvent) => {
     if (variant !== 'C' || done || voided || disabled) return;
-    dragFrom.current = { x: e.clientX, base: weight === '' ? (set.target_weight_kg ?? 0) : Number(weight) };
+    // Through the same parser as the check: the field may now legitimately hold `62,5`, and a bare
+    // `Number()` on that is NaN — a drag would then start from nothing and write NaN back.
+    dragFrom.current = { x: e.clientX, base: parseDecimal(weight) ?? set.target_weight_kg ?? 0 };
   };
 
   const onDragMove = (e: React.PointerEvent) => {
@@ -237,8 +293,11 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
     // Clamped at zero. A negative weight is not a lighter lift, it is a corrupt row, and the server
     // would reject it — but the field should never show it in the first place.
     const next = Math.max(0, from.base + steps * SWIPE_STEP_KG);
-    // Rounded to the step so a long drag cannot accumulate a value like 47.49999999999999.
-    setWeight(String(Math.round(next / SWIPE_STEP_KG) * SWIPE_STEP_KG));
+    // Rounded to the step so a long drag cannot accumulate a value like 47.49999999999999, then
+    // written in the reader's own notation — the drag feeds the same field the lifter types into,
+    // and a dot appearing under a thumb on a screen where every other weight carries a comma reads
+    // as a different number.
+    setWeight(formatMeasure(Math.round(next / SWIPE_STEP_KG) * SWIPE_STEP_KG, i18n.language));
   };
 
   const onDragEnd = () => {
@@ -253,8 +312,9 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
       await onUndo();
       setUndoOffered(false);
       // The badge goes with the set. Keeping it would leave the row claiming a record for a lift
-      // that no longer exists — and the server has already withdrawn the record itself.
-      setRecords([]);
+      // that no longer exists — and the server has already withdrawn the record itself. The
+      // `voided ?` guard above covers the server's answer; this covers the window before it lands.
+      setEarned([]);
     } finally {
       setUndoing(false);
     }
@@ -360,7 +420,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
           placeholder={set.target_weight_kg != null ? String(set.target_weight_kg) : t('workout.kg')}
           value={weight}
           disabled={done || voided || disabled}
-          onChange={(e) => setWeight(e.target.value.replace(/[^0-9.]/g, ''))}
+          onChange={(e) => setWeight(sanitizeDecimal(e.target.value))}
           className={cn(fieldClass, done && 'pl-7')}
         />
       </div>

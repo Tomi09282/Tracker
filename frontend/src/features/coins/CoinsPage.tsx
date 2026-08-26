@@ -9,10 +9,16 @@ import {
   ChevronLeft,
   Palette,
   Sparkles,
+  Flame,
+  Tag,
+  Rainbow,
+  FileText,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
+import { SummaryTile } from '../../ui/data/SummaryTile';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { Gauge } from '../../ui/feedback/Gauge';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
@@ -116,6 +122,42 @@ export function CoinsPage() {
         </Gauge>
       </div>
 
+      {/* THE RING'S TWO FLOWS — what came in, what went out — which is what makes the arc above
+          coherent rather than ornamental. Readouts, not filters: the spec is explicit that putting
+          navigation behind them would turn a summary into a menu.
+
+          Skeletons until the server actually computes the figures. See `Wallet` in useCoins.ts:
+          the one thing forbidden here is deriving them from the capped ledger page. */}
+      <div className="grid grid-cols-2 gap-group">
+        {wallet.isLoading || wallet.data?.weekEarnedMinor === undefined ? (
+          <>
+            <Skeleton className="h-22 rounded-card" />
+            <Skeleton className="h-22 rounded-card" />
+          </>
+        ) : (
+          <>
+            <SummaryTile
+              icon={Flame}
+              layout="row"
+              // A STRING, not a number: `SummaryTile` routes a numeric value through `CountUp`,
+              // which would render `180` and drop the `+` the mockup draws. The sign is the half
+              // of this tile that says which direction the money moved.
+              value={`+${toCoins(wallet.data.weekEarnedMinor)}`}
+              caption={t('coins.weekCaption')}
+            />
+            <SummaryTile
+              icon={Tag}
+              layout="row"
+              // Numeric, so it still counts up — and bare, with no minus sign, exactly as drawn.
+              // "Elköltve" already says the direction; a `−250` under that caption would read as
+              // money coming back.
+              value={toCoins(wallet.data.spentMinor ?? 0)}
+              caption={t('coins.spentCaption')}
+            />
+          </>
+        )}
+      </div>
+
       <div className="flex flex-col gap-group">
         {/* A tab is a filter, not a new screen: the header and the ring stay put. */}
         <div
@@ -173,14 +215,23 @@ export function CoinsPage() {
 /* ── STORE ──────────────────────────────────────────────────────────────────────────────────── */
 
 /**
- * The row glyph, by SKU FAMILY rather than by item.
+ * The row glyph: the item's own where the client knows the SKU, its FAMILY where it does not.
  *
- * A per-item illustration would need a server column nobody has and would break to a blank square
- * the first time somebody lists a SKU the client has never heard of. A family is stable: every
- * `theme.*` is a palette, everything else is a feature, and an unknown SKU still gets a glyph.
+ * The family rule alone is what keeps an unlisted SKU from rendering a blank square — that is the
+ * property this function exists for and the lookup does not weaken it, because the map is only
+ * ever consulted first. What it fixes is that under the family rule alone both theme packs wore
+ * the same palette glyph, so the one visual difference between the two rows was the word on them;
+ * the mockup gives each item its own mark.
  */
+const ITEM_ICON: Record<string, LucideIcon> = {
+  'theme.aurora': Rainbow,
+  'theme.ember': Flame,
+  // Drawn as the third row of 05-coins.webp. Not seeded yet; harmless until it is.
+  'feature.weekly_report': FileText,
+};
+
 function itemIcon(sku: string): LucideIcon {
-  return sku.startsWith('theme.') ? Palette : Sparkles;
+  return ITEM_ICON[sku] ?? (sku.startsWith('theme.') ? Palette : Sparkles);
 }
 
 function StoreTab({ balanceMinor }: { balanceMinor: number }) {
@@ -222,6 +273,14 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
 
   return (
     <>
+      {/* The section the tray's `Bolt` pill opens, named. Only over a POPULATED list: the two
+          early returns above own the loading and empty branches, and `EmptyState` already carries
+          the same storefront glyph plus its own title, so a header above it would say the section
+          name twice.
+          Sentence case, though the mockup draws MEGVÁSÁROLHATÓ in caps: that is the pre-redesign
+          uppercase eyebrow `SectionHeader` exists to replace, and DESIGN.md §2 keeps caps on
+          `text-micro` and its tracking — `text-title-2` set in caps has none. */}
+      <SectionHeader icon={Store} title={t('coins.storeSection')} />
       <ul className="flex flex-col gap-group">
         {items.map((item) => {
           const owned = item.owned === 1;
@@ -237,9 +296,22 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
               </span>
 
               <span className="min-w-0 flex-1">
-                <span className="text-body-strong block truncate text-text-1">{item.title}</span>
+                {/* THE CATALOGUE IS SEEDED IN ENGLISH. `coin_store_items` holds one title and one
+                    description per SKU ("A cold northern gradient set."), so trusting the API put
+                    English product copy on a Hungarian screen — the exact outcome coins.md's
+                    [!warning] says must not ship. Resolving the SKU to a local string is the half
+                    of its two options that needs no backend change.
+                    The `coins.item.` prefix is written out so check-i18n can see these keys, and
+                    `defaultValue` is what keeps a SKU the bundle has never heard of rendering the
+                    server's own title instead of a raw dotted key — same technique, same reason,
+                    as the achievement titles below. */}
+                <span className="text-body-strong block truncate text-text-1">
+                  {t(`coins.item.${item.sku}.title`, { defaultValue: item.title })}
+                </span>
                 {item.description ? (
-                  <span className="text-caption block truncate text-text-3">{item.description}</span>
+                  <span className="text-caption block truncate text-text-3">
+                    {t(`coins.item.${item.sku}.description`, { defaultValue: item.description })}
+                  </span>
                 ) : null}
               </span>
 

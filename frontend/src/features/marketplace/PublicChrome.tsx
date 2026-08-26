@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import {
@@ -60,6 +60,30 @@ export function metaLine(parts: (string | null | undefined)[]) {
 }
 
 /**
+ * The same rule for a meta row whose parts are ELEMENTS rather than strings — the post detail's
+ * row, where each group carries its own glyph and cannot be flattened into one string.
+ *
+ * The dot is inserted only BETWEEN two present groups, for the reason above: a `·` rendered beside
+ * an absent city is what leaves a row starting with a dot. It is `aria-hidden` because it is
+ * punctuation between spans a screen reader already reads as separate.
+ */
+export function metaRow(parts: (ReactNode | null | false)[]): ReactNode[] {
+  const present = parts.filter(Boolean) as ReactNode[];
+  // A keyed `Fragment`, not a wrapper span: the groups are flex children of the caller's row, and
+  // an extra inline box around each one would take them out of that layout.
+  return present.flatMap((node, i) =>
+    i === 0
+      ? [<Fragment key={`p${i}`}>{node}</Fragment>]
+      : [
+          <span key={`s${i}`} aria-hidden>
+            ·
+          </span>,
+          <Fragment key={`p${i}`}>{node}</Fragment>,
+        ],
+  );
+}
+
+/**
  * A post's own date: when it happens if it happens, otherwise when it was published.
  *
  * `Közlemény` has no event time and still wants a date on its card — the alternative is a meta
@@ -76,8 +100,23 @@ export function postDate(post: PublicPost, locale: string) {
  * `backTo` is a route when there is a known parent (`/m` from a post or a profile) and absent on
  * the feed itself, where the honest answer is browser history — a stranger who arrived on `/m`
  * from a shared link has no marketplace to go "up" to.
+ *
+ * `cta` is HOW LOUD `Belépés` is allowed to be, and it differs by route because the mockups do.
+ * On `/m` the login IS the screen's one call to action and 08-piacter.webp draws it filled. On a
+ * post and on a coach profile the mockups draw a bordered translucent pill at the same weight as
+ * the back chevron — the screen's subject is the post or the person, and DESIGN.md §5.1 spends the
+ * single filled accent on the screen's own action, not on the corner. Those two screens currently
+ * end up with ZERO filled controls, which is correct: their mockup primaries (`Jelentkezem`,
+ * `Kapcsolatfelvétel`) are both deliberately undrawn for want of a destination, and a login pill
+ * inheriting that fill would make the loudest thing on a public page the way out of it.
  */
-export function PublicTopBar({ backTo }: { backTo?: string }) {
+export function PublicTopBar({
+  backTo,
+  cta = 'primary',
+}: {
+  backTo?: string;
+  cta?: 'primary' | 'secondary';
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -106,7 +145,7 @@ export function PublicTopBar({ backTo }: { backTo?: string }) {
           signed-in reader would reintroduce the exact defect the router comment records — the
           public surface defeated at the client. It is also why this is a `Link` wearing the
           control recipe rather than a `Pressable`: navigation is an anchor. */}
-      <Link to="/login" className={control({ variant: 'primary', shape: 'chip' })}>
+      <Link to="/login" className={control({ variant: cta, shape: 'chip' })}>
         {t('auth.switchToLogin')}
       </Link>
     </div>
@@ -168,12 +207,17 @@ export function KindTile({
  * The verified tick. Admin-granted and enforced by two database triggers, which is why it is the
  * one credential on these screens that is worth drawing at all — everything else a coach can type
  * about themselves.
+ *
+ * FILLED, not outlined. `fill-*` paints the scalloped badge body in the accent and `currentColor`
+ * keeps its outline and the check on `--accent-fg`, so the glyph reads as a badge. At 16px beside a
+ * name a 1.5px open stroke is a smudge — the same measurement `EmptyState`'s badge slot documents,
+ * and the same pair `CoachProfilePage` already uses on the ring's own tick.
  */
 export function VerifiedBadge({ className }: { className?: string }) {
   const { t } = useTranslation();
   return (
     <BadgeCheck
-      className={cn('size-icon-s shrink-0 text-accent', className)}
+      className={cn('size-icon-s shrink-0 fill-accent text-accent-fg', className)}
       aria-label={t('marketplace.verified')}
     />
   );

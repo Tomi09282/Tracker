@@ -144,15 +144,21 @@ export function ComposePage() {
     // not match what arrives is the layout shift it was supposed to prevent.
     return (
       <div className="col-mobile screen-x flex flex-col gap-section py-6">
-        <div className="flex items-center gap-tight">
-          <Skeleton className="size-11 rounded-chip" />
-          <Skeleton className="h-8 flex-1 rounded-card" />
+        {/* The same header GROUP the loaded screen draws — identity, title and card a group-gap
+            apart, one section-gap from the list. The skeleton's gaps are half its job: at
+            `gap-section` throughout it was 64px shorter than what arrived. */}
+        <div className="flex flex-col gap-group">
+          <div className="flex items-center gap-tight">
+            <Skeleton className="size-11 rounded-chip" />
+            <Skeleton className="h-8 flex-1 rounded-card" />
+          </div>
+          <Skeleton className="h-8 w-2/3 rounded-card" />
+          {/* The portfolio card's real height, recomputed from the stack it stands in: 16 card pad
+              + 160 gauge + 16 + 48 legend (four entries wrap to two lines) + 16 + 32 quota caption
+              and bar + 16 card pad. A skeleton taller than what arrives is the same layout shift as
+              one that is shorter. */}
+          <Skeleton className="h-[304px] rounded-card" />
         </div>
-        {/* The portfolio card's real height, recomputed from the stack it stands in: 16 card pad
-            + 160 gauge + 16 + 48 legend (four entries wrap to two lines) + 16 + 32 quota caption
-            and bar + 16 card pad. A skeleton taller than what arrives is the same layout shift as
-            one that is shorter. */}
-        <Skeleton className="h-[304px] rounded-card" />
         <div className="flex flex-col gap-tight">
           <Skeleton className="h-20 rounded-card" />
           <Skeleton className="h-20 rounded-card" />
@@ -189,162 +195,192 @@ export function ComposePage() {
 
   const setLiveConflict = conflictOf(setLive.error);
 
+  /**
+   * A ladder card on screen means the coach has ONE thing to do next, and it is not writing.
+   *
+   * `publish` is excluded on purpose: at that rung the ladder draws no card and no CTA, so nothing
+   * is competing and `+ Új bejegyzés` keeps the fill. At every other rung the gate's own button is
+   * the accent, and drafting stays reachable as a secondary — DESIGN.md §5.1, two primaries on a
+   * screen means neither is. The demotion goes on THIS button rather than on the gate CTA: a gate
+   * card whose only action is outlined stops reading as the thing to resolve.
+   */
+  const blocked = blocker !== null && blocker !== 'publish';
+
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      {/* ── identity row ─────────────────────────────────────────────────────────────────────
-          The profile card, collapsed to one line. Two full-width buttons for operations performed
-          a handful of times a year were the loudest thing on a screen whose subject is posts — so
-          they moved behind the pill, and the pill is a REAL control, not a badge. */}
-      {profile ? (
-        <div className="flex items-center gap-tight">
-          <span
-            aria-hidden
-            className="text-body-s inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle font-display text-accent"
-          >
-            {initialsOf(profile.displayName)}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-body truncate text-text-1">{profile.displayName}</p>
-            <p className="text-caption truncate text-text-3">@{profile.handle}</p>
+      {/* ── the header group ─────────────────────────────────────────────────────────────────
+          Identity, title and the portfolio card are ONE group a group-gap apart, not four blocks a
+          section-gap apart. At `gap-section` throughout, the first post row started ~600px down and
+          the second was already clipped on an 852px viewport — on a screen whose scroll affordance
+          is supposed to BE the half-visible third row. The ~48px this returns is what the mandated
+          fourth legend entry took when the legend wrapped to two lines; it is not bought back by
+          shrinking the gauge again or by dropping that entry. */}
+      <div className="flex flex-col gap-group">
+        {/* ── identity row ─────────────────────────────────────────────────────────────────────
+            The profile card, collapsed to one line. Two full-width buttons for operations performed
+            a handful of times a year were the loudest thing on a screen whose subject is posts — so
+            they moved behind the pill, and the pill is a REAL control, not a badge. */}
+        {profile ? (
+          <div className="flex items-center gap-tight">
+            <span
+              aria-hidden
+              className="text-body-s inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle font-display text-accent"
+            >
+              {initialsOf(profile.displayName)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-body truncate text-text-1">{profile.displayName}</p>
+              <p className="text-caption truncate text-text-3">@{profile.handle}</p>
+            </div>
+            <Pressable
+              shape="chip"
+              density="compact"
+              aria-haspopup="dialog"
+              onClick={() => setProfileSheet(true)}
+              // The hover half is load-bearing, exactly as it is on SELECTED_CHIP above: `secondary`
+              // ships `hover:border-*` and `hover:bg-surface-2`, and `cn` is twMerge, which drops a
+              // base class it has a conflict for but KEEPS a `hover:` it does not — so without the
+              // repeats the live pill lost its tint under the pointer and read as "you are about to
+              // turn this off" on a control that merely opens a sheet.
+              className={cn(
+                'shrink-0',
+                isLive &&
+                  'border-[var(--success-border)] bg-success-subtle text-success hover:border-[var(--success-border)] hover:bg-success-subtle',
+              )}
+              icon={
+                isLive ? (
+                  <Globe className="size-icon-s" aria-hidden />
+                ) : (
+                  <EyeOff className="size-icon-s" aria-hidden />
+                )
+              }
+            >
+              {isLive ? t('compose.live') : t('compose.hidden')}
+            </Pressable>
           </div>
-          <Pressable
-            shape="chip"
-            density="compact"
-            aria-haspopup="dialog"
-            onClick={() => setProfileSheet(true)}
-            className={cn(
-              'shrink-0',
-              isLive && 'border-[var(--success-border)] bg-success-subtle text-success',
-            )}
-            icon={
-              isLive ? (
-                <Globe className="size-icon-s" aria-hidden />
-              ) : (
-                <EyeOff className="size-icon-s" aria-hidden />
-              )
+        ) : null}
+
+        <h1 className="text-title-1">{t('compose.title')}</h1>
+
+        {/* ── the ladder — at most one card, and only when something is unmet ───────────────────── */}
+        {profileRemoved ? (
+          // A moderator's removal is NOT the same as having no profile, and inviting the coach to
+          // "create one" after a takedown would send them at a handle they can no longer claim.
+          <Surface as="section" className="border-[var(--danger-border)] bg-danger-subtle">
+            <h2 className="text-title-3 text-text-1">{t('compose.removedTitle')}</h2>
+            <p className="text-body-s mt-1 text-text-2">{t('compose.removedBody')}</p>
+          </Surface>
+        ) : blocker === 'guidelines' ? (
+          <Surface as="section" className="flex flex-col gap-tight">
+            <h2 className="text-title-3 flex items-center gap-tight text-text-1">
+              <ShieldCheck className="size-icon-m shrink-0 text-accent" aria-hidden />
+              {t('compose.guidelinesTitle')}
+            </h2>
+            <p className="text-body-s text-text-2">
+              {t(standing.activeGuidelinesI18nKey, { defaultValue: t('compose.guidelinesBody') })}
+            </p>
+            <Pressable
+              variant="primary"
+              className="mt-2 self-start"
+              busy={accept.isPending}
+              onClick={() => accept.mutate(standing.activeGuidelinesVersion)}
+            >
+              {t('compose.guidelinesAccept', { version: standing.activeGuidelinesVersion })}
+            </Pressable>
+          </Surface>
+        ) : blocker === 'age' ? (
+          <Surface as="section" className="flex flex-col gap-tight">
+            <h2 className="text-title-3 flex items-center gap-tight text-text-1">
+              <Clock className="size-icon-m shrink-0 text-text-3" aria-hidden />
+              {t('compose.tooNewTitle')}
+            </h2>
+            {/* WHEN, not "later". A limit a person can plan around is a limit; one they cannot is a wall. */}
+            <p className="text-body-s text-text-2">
+              {t('compose.tooNewBody', {
+                when: new Date(standing.eligibleAt * 1000).toLocaleString(i18n.language),
+              })}
+            </p>
+          </Surface>
+        ) : blocker === 'profile' ? (
+          <Surface as="section" className="flex flex-col gap-tight">
+            <h2 className="text-title-3 flex items-center gap-tight text-text-1">
+              <UserPlus className="size-icon-m shrink-0 text-accent" aria-hidden />
+              {t('compose.noProfileTitle')}
+            </h2>
+            <p className="text-body-s text-text-2">{t('compose.noProfileBody')}</p>
+            <Link to="/compose/profile" className={cn(control({ variant: 'primary' }), 'mt-2 self-start')}>
+              {t('compose.createProfile')}
+            </Link>
+          </Surface>
+        ) : null}
+
+        {/* ── the anchor: inventory and quota in ONE card ───────────────────────────────────────
+            They answer the same question — what can still go out today — so splitting them into two
+            cards would make the coach read two places for one answer. */}
+        <Surface as="section" className="flex flex-col items-center gap-group">
+          {/* 160px, not 224. The donut is the anchor, not the screen: at `size-56` the card ran to
+              ~370px and pushed the first post row below the fold, on a screen whose stated premise
+              is that both of the coach's questions — what is out there, what can still go out today
+              — are answered above it. `thickness` 0.25 puts the band at ~13% of the diameter, which
+              is the "thick-ringed donut" the note asks for; 0.18 measured 9% and read as a hoop. */}
+          <Gauge
+            className="size-40"
+            label={t('compose.posts')}
+            thickness={0.25}
+            segments={
+              counts.total > 0
+                ? STATES.map((key) => ({
+                    value: counts.tally[key] / counts.total,
+                    color: ARC_COLOR[key],
+                    label: t(`compose.state.${key}`),
+                  }))
+                : []
             }
           >
-            {isLive ? t('compose.live') : t('compose.hidden')}
-          </Pressable>
-        </div>
-      ) : null}
-
-      <h1 className="text-title-1">{t('compose.title')}</h1>
-
-      {/* ── the ladder — at most one card, and only when something is unmet ───────────────────── */}
-      {profileRemoved ? (
-        // A moderator's removal is NOT the same as having no profile, and inviting the coach to
-        // "create one" after a takedown would send them at a handle they can no longer claim.
-        <Surface as="section" className="border-[var(--danger-border)] bg-danger-subtle">
-          <h2 className="text-title-3 text-text-1">{t('compose.removedTitle')}</h2>
-          <p className="text-body-s mt-1 text-text-2">{t('compose.removedBody')}</p>
-        </Surface>
-      ) : blocker === 'guidelines' ? (
-        <Surface as="section" className="flex flex-col gap-tight">
-          <h2 className="text-title-3 flex items-center gap-tight text-text-1">
-            <ShieldCheck className="size-icon-m shrink-0 text-accent" aria-hidden />
-            {t('compose.guidelinesTitle')}
-          </h2>
-          <p className="text-body-s text-text-2">
-            {t(standing.activeGuidelinesI18nKey, { defaultValue: t('compose.guidelinesBody') })}
-          </p>
-          <Pressable
-            variant="primary"
-            className="mt-2 self-start"
-            busy={accept.isPending}
-            onClick={() => accept.mutate(standing.activeGuidelinesVersion)}
-          >
-            {t('compose.guidelinesAccept', { version: standing.activeGuidelinesVersion })}
-          </Pressable>
-        </Surface>
-      ) : blocker === 'age' ? (
-        <Surface as="section" className="flex flex-col gap-tight">
-          <h2 className="text-title-3 flex items-center gap-tight text-text-1">
-            <Clock className="size-icon-m shrink-0 text-text-3" aria-hidden />
-            {t('compose.tooNewTitle')}
-          </h2>
-          {/* WHEN, not "later". A limit a person can plan around is a limit; one they cannot is a wall. */}
-          <p className="text-body-s text-text-2">
-            {t('compose.tooNewBody', {
-              when: new Date(standing.eligibleAt * 1000).toLocaleString(i18n.language),
-            })}
-          </p>
-        </Surface>
-      ) : blocker === 'profile' ? (
-        <Surface as="section" className="flex flex-col gap-tight">
-          <h2 className="text-title-3 flex items-center gap-tight text-text-1">
-            <UserPlus className="size-icon-m shrink-0 text-accent" aria-hidden />
-            {t('compose.noProfileTitle')}
-          </h2>
-          <p className="text-body-s text-text-2">{t('compose.noProfileBody')}</p>
-          <Link to="/compose/profile" className={cn(control({ variant: 'primary' }), 'mt-2 self-start')}>
-            {t('compose.createProfile')}
-          </Link>
-        </Surface>
-      ) : null}
-
-      {/* ── the anchor: inventory and quota in ONE card ───────────────────────────────────────
-          They answer the same question — what can still go out today — so splitting them into two
-          cards would make the coach read two places for one answer. */}
-      <Surface as="section" className="flex flex-col items-center gap-group">
-        {/* 160px, not 224. The donut is the anchor, not the screen: at `size-56` the card ran to
-            ~370px and pushed the first post row below the fold, on a screen whose stated premise
-            is that both of the coach's questions — what is out there, what can still go out today
-            — are answered above it. `thickness` 0.25 puts the band at ~13% of the diameter, which
-            is the "thick-ringed donut" the note asks for; 0.18 measured 9% and read as a hoop. */}
-        <Gauge
-          className="size-40"
-          label={t('compose.posts')}
-          thickness={0.25}
-          segments={
-            counts.total > 0
-              ? STATES.map((key) => ({
-                  value: counts.tally[key] / counts.total,
-                  color: ARC_COLOR[key],
-                  label: t(`compose.state.${key}`),
-                }))
-              : []
-          }
-        >
-          <span className="flex flex-col items-center">
-            <span className="text-display font-display tabular-nums text-text-1">
-              <CountUp to={counts.total} />
+            <span className="flex flex-col items-center">
+              <span className="text-display font-display tabular-nums text-text-1">
+                <CountUp to={counts.total} />
+              </span>
+              {/* THE UNIT, not the section heading. `Bejegyzések` here read "18 / Bejegyzések" in
+                  the anchor and then repeated itself as the h2 forty pixels below — and a Hungarian
+                  count takes the singular, so the plural was also wrong grammar. The h2 and the
+                  Gauge's accessible name keep `compose.posts`, where the plural is right. */}
+              <span className="text-body-s text-text-2">{t('compose.postsUnit')}</span>
             </span>
-            <span className="text-body-s text-text-2">{t('compose.posts')}</span>
-          </span>
-        </Gauge>
+          </Gauge>
 
-        <ul className="flex flex-wrap items-center justify-center gap-group">
-          {STATES.map((key) => (
-            <li key={key} className="text-caption flex items-center gap-tight text-text-2">
-              <span
-                aria-hidden
-                className="size-2 shrink-0 rounded-chip"
-                style={{ backgroundColor: ARC_COLOR[key] }}
+          <ul className="flex flex-wrap items-center justify-center gap-group">
+            {STATES.map((key) => (
+              <li key={key} className="text-caption flex items-center gap-tight text-text-2">
+                <span
+                  aria-hidden
+                  className="size-2 shrink-0 rounded-chip"
+                  style={{ backgroundColor: ARC_COLOR[key] }}
+                />
+                {t(`compose.state.${key}`)}
+                <span className="tabular-nums text-text-1">{counts.tally[key]}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex w-full flex-col gap-tight">
+            <p className="text-body-s text-text-2">
+              {t('compose.slots', { left: slotsLeft, max: quotas.postPublishDailyMax })}
+            </p>
+            {/* A BAR, not a second ring: the quota is a secondary fact and must not compete with
+                the donut it sits under. */}
+            <div className="h-1.5 w-full overflow-hidden rounded-chip bg-surface-2">
+              <div
+                className={cn(
+                  'h-full rounded-chip transition-[width] duration-[var(--duration-slow)] ease-[var(--ease-standard)]',
+                  slotsLeft === 0 ? 'bg-warning' : 'bg-accent',
+                )}
+                style={{ width: `${quotaFill * 100}%` }}
               />
-              {t(`compose.state.${key}`)}
-              <span className="tabular-nums text-text-1">{counts.tally[key]}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex w-full flex-col gap-tight">
-          <p className="text-body-s text-text-2">
-            {t('compose.slots', { left: slotsLeft, max: quotas.postPublishDailyMax })}
-          </p>
-          {/* A BAR, not a second ring: the quota is a secondary fact and must not compete with
-              the donut it sits under. */}
-          <div className="h-1.5 w-full overflow-hidden rounded-chip bg-surface-2">
-            <div
-              className={cn(
-                'h-full rounded-chip transition-[width] duration-[var(--duration-slow)] ease-[var(--ease-standard)]',
-                slotsLeft === 0 ? 'bg-warning' : 'bg-accent',
-              )}
-              style={{ width: `${quotaFill * 100}%` }}
-            />
+            </div>
           </div>
-        </div>
-      </Surface>
+        </Surface>
+      </div>
 
       {/* ── posts ────────────────────────────────────────────────────────────────────────────── */}
       <section className="flex flex-col gap-group">
@@ -363,7 +399,10 @@ export function ComposePage() {
           <h2 className="text-title-3 flex-1">{t('compose.posts')}</h2>
           <Link
             to="/compose/posts/new"
-            className={cn(control({ variant: 'primary', density: 'compact' }), 'shrink-0')}
+            className={cn(
+              control({ variant: blocked ? 'secondary' : 'primary', density: 'compact' }),
+              'shrink-0',
+            )}
           >
             <Plus className="size-icon-s" aria-hidden />
             {t('compose.newPost')}
@@ -383,9 +422,13 @@ export function ComposePage() {
                 className={state === s ? SELECTED_CHIP : undefined}
                 aria-pressed={state === s}
                 onClick={() => setState(s)}
-                icon={state === s ? <Check className="size-icon-s" aria-hidden /> : undefined}
               >
+                {/* THE CHECK TRAILS THE LABEL. `Pressable`'s `icon` slot renders ahead of the
+                    children, which read "✓ Mind" — an icon button with a word after it. The mockup
+                    draws "Mind ✓": a label that has been ticked. `control`'s base is
+                    `inline-flex … gap-2`, so the spacing is identical either way. */}
                 {t(`compose.state.${s}`)}
+                {state === s ? <Check className="size-icon-s" aria-hidden /> : null}
               </Pressable>
             </li>
           ))}
@@ -458,6 +501,21 @@ export function ComposePage() {
               );
             })}
           </ul>
+        ) : state !== 'all' ? (
+          // A FILTER THAT MATCHES NOTHING IS NOT AN EMPTY DESK. Select `Élő` with no live posts and
+          // the old copy said the coach has none while the donut directly above read 18 — a screen
+          // contradicting its own anchor in one view. The way out is the filter itself, so the
+          // action resets the chip rather than sending them to the editor.
+          <EmptyState
+            icon={FileText}
+            title={t('compose.noPostsInFilterTitle')}
+            body={t('compose.noPostsInFilterBody')}
+            action={
+              <Pressable variant="secondary" onClick={() => setState('all')}>
+                {t('compose.showAllPosts')}
+              </Pressable>
+            }
+          />
         ) : (
           <EmptyState icon={FileText} title={t('compose.noPostsTitle')} body={t('compose.noPostsBody')} />
         )}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiWithRefresh } from '../../lib/api';
 
@@ -102,6 +103,35 @@ export function useOpenConversation() {
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: CONVERSATIONS }),
   });
+}
+
+/**
+ * The conversation for one coach–client link, opened lazily and idempotently.
+ *
+ * `conversations.coach_client_id` is UNIQUE, so a coach and a client tapping chat at the same
+ * moment both land on the same thread and the POST is safe to fire without checking first.
+ *
+ * It lives here rather than in either caller because there are two of them — the client-detail
+ * tab and the chat route — and a resolver copied into both is a resolver that will drift on the
+ * first change to how a link maps to a thread.
+ */
+export function useClientConversation(linkId: number | null) {
+  const { data, isPending } = useConversations();
+  const open = useOpenConversation();
+
+  const conversation =
+    linkId == null
+      ? null
+      : ((data?.conversations ?? []).find((c) => c.coach_client_id === linkId) ?? null);
+
+  useEffect(() => {
+    if (linkId == null || isPending || conversation || open.isPending || open.isSuccess) return;
+    open.mutate(linkId);
+  }, [isPending, conversation, linkId, open]);
+
+  // Still pending while the POST is in flight: there is no thread to render yet, and a null
+  // conversation at that moment means "opening", not "gone".
+  return { conversation, isPending: isPending || (!conversation && open.isPending) };
 }
 
 /** 5 s with the thread open. Fast enough to feel live, slow enough not to be a data bill. */

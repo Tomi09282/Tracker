@@ -7,7 +7,7 @@ import { DocRenderer } from './DocRenderer';
 import { usePost, usePriceFormatter } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
-import { PublicTopBar, InitialsAvatar, VerifiedBadge } from './PublicChrome';
+import { PublicTopBar, InitialsAvatar, VerifiedBadge, metaRow } from './PublicChrome';
 
 /**
  * One post, addressed by its opaque public id.
@@ -23,8 +23,12 @@ import { PublicTopBar, InitialsAvatar, VerifiedBadge } from './PublicChrome';
  * With no cover the hero is absent entirely and the h1 becomes the anchor; a grey placeholder
  * rectangle is worse than no image at all.
  *
- * NO PLAY OVERLAY. The mockup centres one on the cover and the product has no video player, so it
- * would be a promise broken on the first tap.
+ * NO PLAY OVERLAY, AND THAT IS A DECISION RATHER THAN AN OMISSION. The mockup centres one on the
+ * cover and the product has no video player anywhere, so the disc would open this same page of
+ * prose — the spec's own sentence for that is a promise broken on the first tap. `MarketplacePage`
+ * answers the identical question the identical way on the feed hero; both need moving into
+ * `marketplace-post-detail.md`'s "What was merged away" section, which today records the cut
+ * nowhere and so keeps the image asking for it.
  *
  * ═══ THE PRICE IS DISPLAY ONLY, AND THE SCREEN SAYS SO ═════════════════════════════════════════
  *
@@ -56,7 +60,7 @@ export function PostPage() {
     return (
       <div className="col-mobile screen-x flex flex-col gap-section py-4">
         <AuroraBackdrop />
-        <PublicTopBar backTo="/m" />
+        <PublicTopBar backTo="/m" cta="secondary" />
         <EmptyState
           icon={FileQuestion}
           title={t('marketplace.postGoneTitle')}
@@ -83,7 +87,7 @@ export function PostPage() {
   return (
     <article className="col-mobile screen-x flex flex-col gap-section py-4">
       <AuroraBackdrop />
-      <PublicTopBar backTo="/m" />
+      <PublicTopBar backTo="/m" cta="secondary" />
 
       <header className="flex flex-col gap-group">
         {cover ? (
@@ -102,28 +106,39 @@ export function PostPage() {
         <div className="flex flex-col gap-tight">
           {/* The time of day is gone from here: a wrapping grey caption row ranking the start
               minute equal with the city is how the reader's real questions got buried. */}
+          {/* MIDDLE DOTS BETWEEN THE GROUPS, and only between two that are present. Whitespace
+              alone left the pill, the city and the date reading as three unrelated fragments the
+              moment the row wrapped. `metaRow` owns the conditional-separator rule that
+              `metaLine` already owns for the card's string version — the same rule written twice
+              is the one that ends up rendering a row that starts with a dot. */}
           <span className="text-caption flex flex-wrap items-center gap-tight text-text-3">
-            <span className="rounded-chip bg-surface-2 px-2 py-1">
-              {t(`marketplace.kind.${post.kind}`, { defaultValue: post.kind })}
-            </span>
-            {post.city ? (
-              <span className="flex items-center gap-1">
-                <MapPin className="size-icon-s" aria-hidden />
-                {post.city}
-              </span>
-            ) : null}
-            {post.eventAt ? (
-              <span className="flex items-center gap-1">
-                <Calendar className="size-icon-s" aria-hidden />
-                {new Date(post.eventAt * 1000).toLocaleDateString(i18n.language)}
-              </span>
-            ) : null}
-            {post.capacity ? (
-              <span className="flex items-center gap-1">
-                <Users className="size-icon-s" aria-hidden />
-                {t('marketplace.capacity', { count: post.capacity })}
-              </span>
-            ) : null}
+            {metaRow([
+              <span key="kind" className="rounded-chip bg-surface-2 px-2 py-1">
+                {t(`marketplace.kind.${post.kind}`, { defaultValue: post.kind })}
+              </span>,
+              post.city ? (
+                <span key="city" className="flex items-center gap-1">
+                  <MapPin className="size-icon-s" aria-hidden />
+                  {post.city}
+                </span>
+              ) : null,
+              post.eventAt ? (
+                <span key="date" className="flex items-center gap-1">
+                  <Calendar className="size-icon-s" aria-hidden />
+                  {new Date(post.eventAt * 1000).toLocaleDateString(i18n.language)}
+                </span>
+              ) : null,
+              // Capacity is still here rather than in the mockup's summary-tile row: two of that
+              // row's three values do not exist on `PublicPost` (see the spec's first warning), and
+              // dropping the field from here without the row to move it to would delete the
+              // reader's "is there room" answer outright.
+              post.capacity ? (
+                <span key="capacity" className="flex items-center gap-1">
+                  <Users className="size-icon-s" aria-hidden />
+                  {t('marketplace.capacity', { count: post.capacity })}
+                </span>
+              ) : null,
+            ])}
           </span>
 
           <h1 className="text-display text-text-1">{post.title}</h1>
@@ -212,7 +227,7 @@ function PostSkeleton() {
     >
       <AuroraBackdrop />
       <span className="sr-only">{t('common.loading')}</span>
-      <PublicTopBar backTo="/m" />
+      <PublicTopBar backTo="/m" cta="secondary" />
 
       <div className="flex flex-col gap-group">
         <Skeleton className="aspect-video w-full rounded-card" />

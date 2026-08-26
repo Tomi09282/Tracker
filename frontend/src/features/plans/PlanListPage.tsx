@@ -4,12 +4,14 @@ import { AlertCircle, Check, ChevronRight, ClipboardList, Plus, User } from 'luc
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { chip, type ChipVariants } from '../../ui/primitives/control';
 import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { CountUp } from '../../ui/feedback/CountUp';
 import { usePlans, useCreatePlan, type PlanSummary } from './usePlans';
 import { useOnline } from './useOnline';
+import { useSession } from '../auth/useSession';
 import { initialsOf, personLabel } from '../../lib/person';
 
 type PlanStatus = PlanSummary['status'];
@@ -32,12 +34,20 @@ const SEGMENT_FILL: Record<PlanStatus, string> = {
   ended: 'bg-[var(--surface-border-strong)]',
 };
 
-/** The row chip. Only `active` and `paused` spend a colour — a draft is not a warning. */
-const CHIP_TONE: Record<PlanStatus, string> = {
-  active: 'bg-success-subtle text-success',
-  draft: 'bg-surface-2 text-text-2',
-  paused: 'bg-warning-subtle text-warning',
-  ended: 'bg-surface-2 text-text-3',
+/**
+ * The row chip's TONE, resolved by the `chip` recipe. Only `active` and `paused` spend a colour —
+ * a draft is not a warning, so it takes the recipe's `quiet`.
+ *
+ * It used to be a map of hand-written class strings at `text-micro px-2 py-1`; the recipe is
+ * `text-caption px-3 py-1` with the same tones, and the mockup's pill is the roomier one. The
+ * reason this call site hand-rolled a string — twMerge eating the type step next to a colour — is
+ * gone since `lib/cn.ts` learned the project's font-size names.
+ */
+const CHIP_TONE: Record<PlanStatus, NonNullable<ChipVariants['tone']>> = {
+  active: 'success',
+  draft: 'quiet',
+  paused: 'warning',
+  ended: 'quiet',
 };
 
 /** `anna@example.com` → `AN`. Two letters is what fits, and it is enough to tell two clients apart. */
@@ -60,6 +70,7 @@ export function PlanListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const online = useOnline();
+  const { data: user } = useSession();
   const plans = usePlans();
   const create = useCreatePlan();
 
@@ -78,26 +89,24 @@ export function PlanListPage() {
   const startPlan = async () => {
     // A default name, because the editor is where it gets typed. See the note on `focusName`
     // in PlanEditorPage: without that focus this list fills with rows that all read the same.
-    const created = await create.mutateAsync({ name: t('plans.newName') });
+    //
+    // `plans.defaultName`, not `plans.newName` — that one is the editor input's aria-label ("Új
+    // terv neve", a FIELD LABEL), and a coach who did not type over the selected name left a row
+    // in the library literally reading it.
+    const created = await create.mutateAsync({ name: t('plans.defaultName') });
     void navigate(`/coach/plans/${created.id}`, { state: { focusName: true } });
   };
 
   /*
-   * Concatenated, not `cn`: `cn` is `twMerge`, which files this project's custom type scale and its
-   * text colours in one bucket, so `CHIP_TONE`'s `text-success` was silently eating `text-micro`
-   * and every chip on this screen rendered at the inherited body size. `PlanTab`'s card carries the
-   * same note for the same reason.
-   *
    * The check rides `active` alone — it is the one status that means the client is training today,
-   * and a tone plus a glyph is what makes it findable in a column of four greys. Trailing, matching
-   * the identical chip on the client-detail plan card.
+   * and a tone plus a glyph is what makes it findable in a column of four greys. LEADING, as
+   * 07-coach-plans.webp draws both of its `Aktív` chips: the glyph opens the meta line here, while
+   * the client-detail plan card closes its title with the same chip and keeps it trailing.
    */
   const StatusChip = ({ status }: { status: PlanStatus }) => (
-    <span
-      className={`text-micro inline-flex items-center gap-1 rounded-chip px-2 py-1 ${CHIP_TONE[status]}`}
-    >
-      {t(`plans.status.${status}`)}
+    <span className={chip({ tone: CHIP_TONE[status] })}>
       {status === 'active' ? <Check className="size-icon-s" strokeWidth={2} aria-hidden /> : null}
+      {t(`plans.status.${status}`)}
     </span>
   );
 
@@ -173,6 +182,23 @@ export function PlanListPage() {
     );
   };
 
+  // ROLE GATE, ahead of the query branches. Without it a member who opens /coach/plans got the
+  // server's 403 as the generic red alert card with an `Újra` button that fails on every press —
+  // an error dressed as something retryable. The spec owes the forbidden empty state instead, and
+  // this is the shape `CoachDashboard` already uses. The generic card stays for real failures.
+  if (user && user.role !== 'coach' && user.role !== 'admin') {
+    return (
+      <div className="col-mobile screen-x py-6">
+        <EmptyState
+          icon={ClipboardList}
+          title={t('coaching.forbiddenTitle')}
+          body={t('coaching.forbiddenBody')}
+          heading="h1"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
       <header>
@@ -193,8 +219,8 @@ export function PlanListPage() {
         </div>
       ) : plans.isError ? (
         // Generic, and the anchor is not drawn: a bar built from a partial list is a lie with a
-        // shape. This is also what a member who reaches the URL sees — the server refuses, and it
-        // is the server's refusal that matters, not the nav.
+        // shape. A REAL failure only — the 403 a member used to land here with now goes to the
+        // forbidden state above, because retrying a refusal is not a next step.
         <Surface role="alert" className="flex flex-wrap items-center gap-group">
           <span
             aria-hidden
@@ -209,54 +235,65 @@ export function PlanListPage() {
         </Surface>
       ) : (
         <>
-          {/* An empty library gets no anchor: a bar of zero segments is a decoration. */}
-          {rows.length > 0 ? (
-            <Surface className="flex flex-col items-center gap-tight">
-              <p className="text-display font-display tabular-nums text-text-1">
-                <CountUp to={rows.length} />
-              </p>
-              {/* Names the METRIC, not the screen. `nav.plans` is "Tervek" — the same word as the
-                  h1 one line above — so the anchor was captioning itself instead of saying what
-                  the number counts. */}
-              <p className="text-micro uppercase text-text-3">{t('plans.total')}</p>
+          {/* THE ANCHOR AND ITS BUTTON ARE ONE UNIT. On the root's `gap-section` all four blocks
+              sat 32px apart, so the create action read as unrelated to the library it adds to —
+              `--spacing-section` is documented as "between two things that are not each other's
+              business". The mockup hugs the button to the card and opens the air again before
+              `Sablonok`; it also buys back ~16px, which is what brings the `Kliens-tervek` head
+              back into the first screenful. */}
+          <div className="flex flex-col gap-group">
+            {/* An empty library gets no anchor: a bar of zero segments is a decoration. */}
+            {rows.length > 0 ? (
+              <Surface className="flex flex-col items-center gap-tight">
+                <p className="text-display font-display tabular-nums text-text-1">
+                  <CountUp to={rows.length} />
+                </p>
+                {/* Names the METRIC, not the screen. `nav.plans` is "Tervek" — the same word as the
+                    h1 one line above — so the anchor was captioning itself instead of saying what
+                    the number counts. */}
+                <p className="text-micro uppercase text-text-3">{t('plans.total')}</p>
 
-              {/* The bar is decoration with a shape — every number in it is spelled out in the
-                  legend below, as text, which is what a reader actually gets. */}
-              <div aria-hidden className="mt-1 flex h-6 w-full gap-1">
-                {byStatus.map(({ status, count }) => (
-                  <span
-                    key={status}
-                    className={cn('rounded-field', SEGMENT_FILL[status])}
-                    style={{ flexGrow: count }}
-                  />
-                ))}
-              </div>
-
-              <ul className="mt-1 flex flex-wrap items-center justify-center gap-x-group gap-y-tight">
-                {byStatus.map(({ status, count }) => (
-                  <li key={status} className="text-body-s flex items-center gap-tight text-text-2">
+                {/* The bar is decoration with a shape — every number in it is spelled out in the
+                    legend below, as text, which is what a reader actually gets. */}
+                <div aria-hidden className="mt-1 flex h-6 w-full gap-1">
+                  {byStatus.map(({ status, count }) => (
                     <span
-                      aria-hidden
-                      className={cn('size-2 shrink-0 rounded-chip', SEGMENT_FILL[status])}
+                      key={status}
+                      className={cn('rounded-field', SEGMENT_FILL[status])}
+                      style={{ flexGrow: count }}
                     />
-                    {t(`plans.status.${status}`)}
-                    <span className="tabular-nums text-text-1">{count}</span>
-                  </li>
-                ))}
-              </ul>
-            </Surface>
-          ) : null}
+                  ))}
+                </div>
 
-          <Pressable
-            variant="primary"
-            className="w-full"
-            icon={<Plus className="size-icon-s" aria-hidden />}
-            busy={create.isPending}
-            disabled={!online}
-            onClick={() => void startPlan()}
-          >
-            {t('plans.create')}
-          </Pressable>
+                <ul className="mt-1 flex flex-wrap items-center justify-center gap-x-group gap-y-tight">
+                  {byStatus.map(({ status, count }) => (
+                    <li key={status} className="text-body-s flex items-center gap-tight text-text-2">
+                      <span
+                        aria-hidden
+                        className={cn('size-2 shrink-0 rounded-chip', SEGMENT_FILL[status])}
+                      />
+                      {t(`plans.status.${status}`)}
+                      <span className="tabular-nums text-text-1">{count}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Surface>
+            ) : null}
+
+            <Pressable
+              variant="primary"
+              className="w-full"
+              icon={<Plus className="size-icon-s" aria-hidden />}
+              busy={create.isPending}
+              disabled={!online}
+              onClick={() => void startPlan()}
+            >
+              {/* `plans.newPlan`, not `plans.create`: "Létrehozás" was the submit label of the
+                  create card the redesign merged away, and it is still the generic create verb
+                  elsewhere. This button names the THING it makes. */}
+              {t('plans.newPlan')}
+            </Pressable>
+          </div>
 
           {rows.length === 0 ? (
             <EmptyState

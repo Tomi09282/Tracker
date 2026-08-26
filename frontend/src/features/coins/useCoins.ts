@@ -65,6 +65,15 @@ export interface Wallet {
    * starts meaning something the moment the server computes and sends it. No client change.
    */
   lifetimeEarnedMinor?: number;
+  /**
+   * The ring's two FLOWS — what came in over the last seven days, what has gone out in total.
+   * They are the tiles under the anchor, and they are optional for exactly the reason above:
+   * `useLedger` is one capped page, so deriving either of them from it would give a figure that
+   * silently changes meaning as history grows. Undefined means the tiles render as skeletons and
+   * start telling the truth the moment `/coins/wallet` computes them — again with no client change.
+   */
+  weekEarnedMinor?: number;
+  spentMinor?: number;
 }
 
 export function useWallet() {

@@ -32,6 +32,16 @@ export interface PlanDay {
   start_time: string | null;
 }
 
+/**
+ * THESE INTERFACES ARE THE WIRE, NOT A SUBSET OF IT.
+ *
+ * `GET /plans/:id` answers `SELECT *` for blocks and `SELECT px.*` for exercises, so the payload
+ * has always carried more columns than were declared here. That was harmless while the fields were
+ * only read — until the delete-undo started REPLAYING a captured row: an undeclared column is a
+ * column the snapshot silently drops, and an undo that restores something different from what was
+ * deleted is worse than no undo at all. An EMOM's time cap, a tempo string and an `assisted`
+ * load mode were each one of those.
+ */
 export interface PlanBlock {
   id: number;
   plan_id: number;
@@ -40,6 +50,8 @@ export interface PlanBlock {
   position: number;
   rounds: number | null;
   rest_seconds: number | null;
+  /** The time cap on an EMOM/AMRAP block. */
+  cap_seconds: number | null;
   label: string | null;
 }
 
@@ -58,11 +70,15 @@ export interface PlanExercise {
   target_reps_min: number | null;
   target_reps_max: number | null;
   target_seconds: number | null;
-  /** Canonical kilograms, computed by the server from what was typed. */
+  target_distance_m: number | null;
+  /** Canonical kilograms, computed by the server from what was typed. NEVER sent back on a write. */
   target_weight_kg: number | null;
   target_weight_entry_unit: 'kg' | 'lb' | null;
   target_weight_entry_value: number | null;
+  target_percent_1rm: number | null;
   target_rpe: number | null;
+  load_mode: 'external' | 'bodyweight' | 'weighted_bodyweight' | 'assisted';
+  tempo: string | null;
   rest_seconds: number | null;
   notes: string | null;
 }

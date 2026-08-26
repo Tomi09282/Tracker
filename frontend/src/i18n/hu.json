@@ -18,7 +18,8 @@
     "delete": "Törlés",
     "add": "Hozzáadás",
     "undo": "Visszavonás",
-    "undone": "Visszavonva"
+    "undone": "Visszavonva",
+    "copy": "Másolás"
   },
   "auth": {
     "emailValid": "Az e-mail cím formátuma helyes",
@@ -40,10 +41,14 @@
       "invalidCredentials": "Hibás e-mail vagy jelszó.",
       "emailTaken": "Ezzel az e-mail címmel már van fiók.",
       "rateLimited": "Túl sok próbálkozás. Várj egy kicsit, aztán próbáld újra.",
-      "generic": "Nem sikerült a művelet. Próbáld újra."
+      "generic": "Nem sikerült a művelet. Próbáld újra.",
+      "emailRequired": "Add meg az e-mail címed.",
+      "emailFormat": "Ez nem tűnik érvényes e-mail címnek.",
+      "passwordRequired": "Add meg a jelszavad."
     },
     "switchToRegister": "Regisztráció",
-    "switchToLogin": "Belépés"
+    "switchToLogin": "Belépés",
+    "backToLogin": "Vissza a belépéshez"
   },
   "nav": {
     "nutritionShort": "Étkezés",
@@ -78,7 +83,8 @@
     "done": "Kész",
     "restDay": "Pihenőnap",
     "exerciseCount": "{{count}} gyakorlat",
-    "nothingScheduled": "Nincs betervezve"
+    "nothingScheduled": "Nincs betervezve",
+    "weeklyWorkouts": "Heti edzés"
   },
   "settings": {
     "title": "Beállítások",
@@ -91,7 +97,7 @@
     "contrastRatioFail": "Kontraszt: {{ratio}}:1 — nem éri el a 4,5:1 minimumot. Válassz kontrasztosabb színt.",
     "contrastInvalid": "Adj meg egy érvényes hexadecimális színt (#RRGGBB).",
     "previewTitle": "Élő előnézet",
-    "previewBody": "Ez nem makett — a teljes app átszíneződik, amint választasz.",
+    "previewBody": "Az egész app átszíneződik, amint választasz.",
     "gradientPreview": "Gradiens előnézete",
     "gradient": {
       "title": "Gradiens",
@@ -107,11 +113,12 @@
     "cues": {
       "title": "Hangok és rezgés",
       "speech": "Beszédhang",
-      "speechHint": "A gépi hang bemondja a kört és a pihenőt. Kikapcsolva a sípszó és a rezgés megmarad.",
+      "speechHint": "Bemondja a kört és a pihenőt.",
       "tone": "Sípszó",
-      "toneHint": "Rövid hang a 3-2-1 visszaszámláláshoz és a fázisváltáshoz. iPhone-on ez az egyetlen hallható jelzés.",
+      "toneHint": "Rövid hang a visszaszámláláshoz.",
       "haptics": "Rezgés",
-      "hapticsHint": "Rezgés a sorozat pipálásakor, rekordnál és körváltáskor."
+      "hapticsHint": "Rezgés a sorozat pipálásakor.",
+      "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés."
     },
     "openAdmin": "Admin felület megnyitása",
     "displayName": "Megjelenített név",
@@ -121,7 +128,23 @@
     "transparencyHint": "Az üveghatás a kártyákon és a sávokon. Alapból a rendszer beállítását követi.",
     "transparencySystem": "Rendszer",
     "transparencyFull": "Mindig",
-    "transparencyNone": "Soha"
+    "transparencyNone": "Soha",
+    "saveTheme": "Téma mentése",
+    "themeSaveError": "A téma mentése nem sikerült — a választásod megmaradt, próbáld újra.",
+    "role": {
+      "user": "Tag",
+      "coach": "Edző",
+      "admin": "Admin"
+    },
+    "themePack": {
+      "midnight": "Éjfél",
+      "solar": "Napfény",
+      "forest": "Erdő",
+      "neon": "Neon",
+      "mono": "Mono",
+      "aurora": "Aurora",
+      "ember": "Ember"
+    }
   },
   "library": {
     "search": "Keresés",
@@ -147,7 +170,9 @@
     "howTo": "Végrehajtás",
     "substitutions": "Helyettesítő gyakorlatok",
     "rejectedTitle": "Ezt a beküldést elutasították",
-    "pendingReview": "Beküldve — moderálásra vár."
+    "pendingReview": "Beküldve — moderálásra vár.",
+    "clearSearch": "Keresés törlése",
+    "playVideo": "Videó lejátszása"
   },
   "admin": {
     "eyebrow": "Adminisztráció",
@@ -216,7 +241,18 @@
     "reviewPickBody": "A jóváhagyás megosztja a gyakorlatot a teljes könyvtárban, ezért előbb nyisd meg és nézd át.",
     "reviewGoneTitle": "Ez a beküldés már nincs a sorban",
     "reviewGoneBody": "Időközben valaki döntött róla. Frissítsd a listát.",
-    "reasonHint": "A beküldő elolvassa, a saját gyakorlatánál jelenik meg."
+    "reasonHint": "A beküldő elolvassa, a saját gyakorlatánál jelenik meg.",
+    "refreshQueue": "Sor frissítése",
+    "unit": {
+      "user": "Felhasználó",
+      "exercise": "Gyakorlat",
+      "media": "Médiafájl"
+    },
+    "legend": {
+      "members": "Tagok",
+      "coaches": "Edzők",
+      "admins": "Adminok"
+    }
   },
   "muscle": {
     "chest": "Mell",
@@ -330,9 +366,15 @@
       "draftNote": "Ez az étrend még vázlat — a kliens nem látja, amíg nem aktiválod.",
       "activate": "Aktiválás"
     },
-    "profileFull": "Kérdőív",
+    "profileFull": "Teljes kérdőív",
     "profileIncomplete": "Hiányos",
-    "handoverShort": "Ezek a kliensek még nem tudnak belépni."
+    "handoverShort": "Amíg nem állítanak be saját jelszót, nem tudnak belépni",
+    "otherTeams": "Egyéb csapatok",
+    "tile": {
+      "sessions": "Edzés",
+      "weekly": "Heti edzés",
+      "plans": "Terv"
+    }
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",
@@ -368,7 +410,7 @@
       },
       "schedule": {
         "title": "Mennyit tudsz edzeni?",
-        "body": "Az őszinte szám a jó szám. Ehhez igazítjuk a terjedelmet."
+        "body": "Az őszinte szám a jó szám."
       },
       "equipment": {
         "title": "Hol és mivel edzel?",
@@ -448,7 +490,9 @@
       "experience": "tapasztalat",
       "sessions_per_week": "heti edzésszám",
       "training_location": "helyszín"
-    }
+    },
+    "stepsTotal": "{{total}} lépésből",
+    "sessionsPerWeekHint": "Ennyi napra osztjuk szét a heti terhelést."
   },
   "workout": {
     "noneTitle": "Most nincs futó edzés",
@@ -546,7 +590,7 @@
     "deleteDay": "Nap törlése",
     "dayIndex": "{{n}}. nap",
     "cycleFull": "A {{days}} napos ciklus minden napja foglalt.",
-    "needsStart": "Aktiváláshoz kell egy kezdődátum — enélkül a kliens kezdőlapja üres marad.",
+    "needsStart": "Aktiváláshoz kell egy kezdődátum",
     "addExercise": "Gyakorlat",
     "findExercise": "Gyakorlat keresése",
     "removeExercise": "Gyakorlat eltávolítása",
@@ -580,7 +624,13 @@
     "noTime": "nincs időpont",
     "collapseBlock": "Blokk össze- és kinyitása",
     "statusTitle": "Állapot",
-    "total": "Terv összesen"
+    "total": "Terv összesen",
+    "newPlan": "Új terv",
+    "defaultName": "Új terv",
+    "dayDeleted": "Nap törölve",
+    "blockDeleted": "Blokk törölve",
+    "exerciseDeleted": "Gyakorlat törölve",
+    "undoFailed": "A visszavonás nem sikerült"
   },
   "progress": {
     "heading": "Fejlődés",
@@ -655,7 +705,7 @@
     "withdrawn": "Az üzenetet visszavonták",
     "sendFailed": "Az üzenetet nem sikerült elküldeni. A szöveg megmaradt.",
     "unavailable": "Ez a beszélgetés már nem elérhető.",
-    "composeHint": "Enter küld, Shift+Enter új sor",
+    "composeHint": "Küldés a repülő ikonnal",
     "delivered": "Kézbesítve"
   },
   "notifications": {
@@ -667,8 +717,8 @@
     "minutesAgo": "{{count}} perce",
     "hoursAgo": "{{count}} órája",
     "daysAgo": "{{count}} napja",
-    "unreadLabel": "olvasatlan",
-    "earlier": "Korábbi"
+    "unreadLabel": "olvasatlan értesítés",
+    "earlier": "Korábbiak"
   },
   "nutrition": {
     "title": "Táplálkozás",
@@ -691,8 +741,10 @@
     },
     "card": {
       "title": "Táplálkozás",
-      "open": "Megnyitás"
-    }
+      "open": "Megnyitás",
+      "targetCaption": "cél {{value}}"
+    },
+    "macroTargetShort": "cél"
   },
   "coins": {
     "title": "Érmék",
@@ -712,7 +764,23 @@
     "pays": "{{count}} érmét ad",
     "awardedNote": "Ezeket az app adja oda magától, amikor teljesíted őket — nincs mit begyűjteni.",
     "noHistoryTitle": "Még nincs mozgás",
-    "noHistoryBody": "Az érmék akkor jelennek meg itt, amikor kiérdemelted vagy elköltötted őket."
+    "noHistoryBody": "Az érmék akkor jelennek meg itt, amikor kiérdemelted vagy elköltötted őket.",
+    "balanceCaption": "Egyenleged",
+    "weekCaption": "Ezen a héten",
+    "spentCaption": "Elköltve",
+    "storeSection": "Megvásárolható",
+    "item": {
+      "theme": {
+        "aurora": {
+          "title": "Aurora",
+          "description": "Hideg, északi fényű színátmenet."
+        },
+        "ember": {
+          "title": "Ember",
+          "description": "Egyetlen meleg kiemelés."
+        }
+      }
+    }
   },
   "achievement.workout.first": "Az első edzés",
   "achievement.workout.sessions.10": "10 edzés",
@@ -736,7 +804,7 @@
     "emptyTitle": "Még nincs itt semmi",
     "emptyBody": "Amint edzők közzétesznek programokat vagy eseményeket, itt fognak megjelenni.",
     "noResultsTitle": "Nincs találat",
-    "noResultsBody": "Próbálj más szót, vagy vedd le a városszűrőt.",
+    "noResultsBody": "Próbálj más szót, vagy írd be a város nevét.",
     "searchCapped": "A keresés egy oldalnyi találatot ad. Szűkíts a szavakkal vagy a várossal, ha nem ezt kerested.",
     "backToFeed": "Vissza a piactérre",
     "postGoneTitle": "Ez a bejegyzés nem érhető el",
@@ -745,7 +813,9 @@
     "coachGoneBody": "Lehet, hogy még nincs közzétéve, vagy már nem elérhető.",
     "priceNote": "Az ár tájékoztató. A jelentkezés az edzővel közvetlenül történik — a fizetés még nem az appon keresztül megy.",
     "theirPosts": "Bejegyzései",
-    "noPostsYet": "Még nincs közzétett bejegyzése."
+    "noPostsYet": "Még nincs közzétett bejegyzése.",
+    "errorTitle": "Nem sikerült betölteni a piacteret",
+    "errorBody": "A szerver most nem válaszolt. Próbáld meg újra."
   },
   "compose": {
     "title": "Piactéri pult",
@@ -789,7 +859,7 @@
     "displayName": "Megjelenített név",
     "headline": "Egysoros bemutatkozás",
     "city": "Város",
-    "specialties": "Szakterületek ({{n}}/{{max}})",
+    "specialties": "Szakterületek",
     "optional": "Nem kötelező",
     "charsLeft": "{{n}} karakter maradt",
     "preview": "Előnézet",
@@ -873,13 +943,25 @@
     "autosave": {
       "saving": "Mentés…",
       "saved": "Mentve",
-      "failed": "A mentés nem sikerült — a szöveged megvan, próbáld újra."
-    }
+      "failed": "A mentés nem sikerült — a szöveged megvan, próbáld újra.",
+      "label": "Automatikus mentés"
+    },
+    "required": "Kötelező",
+    "headlineHint": "Ez jelenik meg a neved alatt a piactéren.",
+    "specialtiesCount": "{{n}} / {{max}} kiválasztva",
+    "publicProfile": "Nyilvános profil",
+    "publicProfileHint": "A piactéren bárki megtalál.",
+    "postsUnit": "bejegyzés",
+    "noPostsInFilterTitle": "Ebben a nézetben nincs bejegyzés",
+    "noPostsInFilterBody": "A többi bejegyzésed megvan — csak ez a szűrő nem mutatja őket.",
+    "showAllPosts": "Összes mutatása",
+    "withdrawUndoable": "A levétel bármikor visszavonható.",
+    "coverAltMissing": "Nincs képleírás"
   },
   "studio": {
     "eyebrow": "Megjelenés",
     "title": "Elem-stílus stúdió",
-    "intro": "Minden elem öt változata, élő komponenssel. Amit itt kiválasztasz, az a következő betöltésnél minden felhasználónál érvényes lesz — kódmódosítás és újratelepítés nélkül.",
+    "intro": "Minden elem öt változata, élő komponenssel.",
     "elementList": "Elemek",
     "active": "aktív",
     "isActive": "Ez az aktív",
@@ -890,7 +972,9 @@
     "inertShort": "nem használt",
     "inertExplain": "Ezt a beállítást jelenleg egyetlen komponens sem olvassa. Elmenteni és auditálni lehetne, de a termék nem változna tőle egy képpontot sem — ezért a váltás le van tiltva, amíg nem kap fogyasztót.",
     "loadFailed": "Nem sikerült betölteni a stílusokat",
-    "loadFailedBody": "A szerver nem válaszolt. Frissítsd az oldalt."
+    "loadFailedBody": "A szerver nem válaszolt. Frissítsd az oldalt.",
+    "variants": "Változatok",
+    "commitNote": "Amit itt kiválasztasz, az a következő betöltésnél minden felhasználónál érvényes lesz — kódmódosítás és újratelepítés nélkül."
   },
   "adminMetrics": {
     "title": "Mérőszámok",
@@ -928,6 +1012,24 @@
       "user": "Felhasználó",
       "coach": "Edző",
       "admin": "Admin"
+    }
+  },
+  "public": {
+    "specialty": {
+      "strength": "Erő",
+      "hypertrophy": "Izomtömeg",
+      "powerlifting": "Erőemelés",
+      "olympic_lifting": "Súlyemelés",
+      "endurance": "Állóképesség",
+      "running": "Futás",
+      "mobility": "Mobilitás",
+      "rehabilitation": "Rehabilitáció",
+      "nutrition": "Táplálkozás",
+      "weight_loss": "Fogyás",
+      "prenatal": "Kismama",
+      "senior": "Szenior",
+      "youth": "Ifjúsági",
+      "calisthenics": "Saját testsúlyos"
     }
   }
 }

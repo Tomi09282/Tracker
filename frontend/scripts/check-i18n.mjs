@@ -138,6 +138,16 @@ for (const [code, bundle] of Object.entries(bundles)) {
     ['plans.blockKind.amrap', 'the same'],
     ['adminMetrics.clock.utc', 'a standard, not a word'],
     ['adminUsers.role.admin', 'a borrowed word in all three'],
+    ['settings.role.admin', 'the same borrowed word, on your own account chip'],
+    // The theme packs are PRODUCT NAMES. They are the same string in the store, in the settings
+    // list and on the receipt, and a coach who bought "Aurora" has to be able to find "Aurora".
+    // Translating a name is how a purchase becomes unfindable in the language you bought it in.
+    ['settings.themePack.neon', 'a product name'],
+    ['settings.themePack.mono', 'a product name'],
+    ['settings.themePack.aurora', 'a product name'],
+    ['settings.themePack.ember', 'a product name'],
+    ['coins.item.theme.aurora.title', 'the same product name, in the store'],
+    ['coins.item.theme.ember.title', 'the same product name, in the store'],
   ]);
 
   // The reference bundle is Hungarian — the product's own language, and the one that shares no
@@ -195,8 +205,28 @@ for (const [code, bundle] of Object.entries(bundles)) {
   await walk(path.resolve('src'));
   const code = (await Promise.all(srcFiles.map((f) => fs.readFile(f, 'utf8')))).join('\n');
 
+  /*
+   * KEYS THE SERVER NAMES, which no scan of this repo can see.
+   *
+   * The marketplace taxonomy ships each specialty with its own `i18nKey`, and the chip renders
+   * `t(s.i18nKey, { defaultValue: s.key })`. The key path exists only in a database row, so there
+   * is no literal and no interpolated prefix in any source file — the dead-key rule reads all
+   * fourteen as unused and would have them deleted, which is exactly the wrong action: the day
+   * after, every specialty chip falls back to its raw slug in all three languages.
+   *
+   * A prefix rather than a key list, because the taxonomy is DATA. A specialty added in the admin
+   * screen must not require an edit here, and a rule that needed one would be wrong within a week.
+   */
+  const SERVER_RESOLVED = new Map([
+    [
+      'public.specialty.',
+      'named by marketplace_taxonomy rows, rendered via `t(s.i18nKey)` — see ProfileEditorPage',
+    ],
+  ]);
+
   const reference = bundles[REFERENCE];
   for (const key of reference.keys()) {
+    if ([...SERVER_RESOLVED.keys()].some((p) => key.startsWith(p))) continue;
     if (code.includes(`'${key}'`) || code.includes(`"${key}"`) || code.includes(`\`${key}\``)) continue;
     // A dynamic key: some prefix of it is built by interpolation.
     const parts = key.split('.');

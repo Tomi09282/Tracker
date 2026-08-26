@@ -46,13 +46,18 @@ interface Stats {
 const ARC_COLOR = ['var(--accent)', 'var(--text-2)', 'var(--text-3)'] as const;
 
 function UserDonut({ users }: { users: Stats['users'] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const members = Math.max(0, users.total - users.coaches - users.admins);
+  /* The legend names POPULATIONS, in the plural — `Tagok`, `Edzők`, `Adminok`, as the mockup
+     writes them. It borrowed `adminUsers.role.*`, which is the admin TABLE's vocabulary: those
+     are the singular values of one row's role column, and `Felhasználó` beside 1 147 read as a
+     label for a single person. It is also the wrong word for this arc — coaches and admins are
+     users too; the slice is the members. */
   const slices = [
-    { key: 'user', label: t('adminUsers.role.user'), count: members, color: ARC_COLOR[0] },
-    { key: 'coach', label: t('adminUsers.role.coach'), count: users.coaches, color: ARC_COLOR[1] },
-    { key: 'admin', label: t('adminUsers.role.admin'), count: users.admins, color: ARC_COLOR[2] },
+    { key: 'user', label: t('admin.legend.members'), count: members, color: ARC_COLOR[0] },
+    { key: 'coach', label: t('admin.legend.coaches'), count: users.coaches, color: ARC_COLOR[1] },
+    { key: 'admin', label: t('admin.legend.admins'), count: users.admins, color: ARC_COLOR[2] },
   ];
 
   return (
@@ -79,7 +84,10 @@ function UserDonut({ users }: { users: Stats['users'] }) {
           <span className="text-display font-display tabular-nums text-text-1">
             <CountUp to={users.total} />
           </span>
-          <span className="text-body-s text-text-2">{t('admin.users')}</span>
+          {/* SINGULAR — `Felhasználó`, the unit the figure above counts, not the plural table
+              label `admin.users` carries. It reads as the caption of a number, which is what it
+              is; the plural key still names the accounts panel and the Gauge's own description. */}
+          <span className="text-body-s text-text-2">{t('admin.unit.user')}</span>
         </span>
       </Gauge>
 
@@ -88,7 +96,10 @@ function UserDonut({ users }: { users: Stats['users'] }) {
           <li key={s.key} className="text-caption flex items-center gap-tight text-text-2">
             <span aria-hidden className="size-2 shrink-0 rounded-chip" style={{ backgroundColor: s.color }} />
             {s.label}
-            <span className="tabular-nums text-text-1">{s.count}</span>
+            {/* Grouped like every other figure on the screen. `CountUp` in the hole prints
+                `1 248` through the app's language; a raw `{count}` beside it printed `1147`, so
+                the total and its own parts disagreed about how a thousand is written. */}
+            <span className="tabular-nums text-text-1">{s.count.toLocaleString(i18n.language)}</span>
           </li>
         ))}
       </ul>
@@ -133,9 +144,9 @@ function ModerationHeader({ pending }: { pending?: number }) {
       <Pressable
         shape="icon"
         variant="secondary"
-        /* `common.retry` — "Újra" — is a stand-in. This control wants its own key; see the note in
-           the handover. It is the ONLY name a screen-reader user gets for the button. */
-        aria-label={t('common.retry')}
+        /* Its own key. `common.retry` — "Újra" — was a stand-in, and it is the ONLY name a
+           screen-reader user gets for this button: "Újra" beside a heading says try what again. */
+        aria-label={t('admin.refreshQueue')}
         busy={fetching}
         onClick={() => void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] })}
       >
@@ -234,20 +245,22 @@ export function AdminPage() {
           <UserDonut users={stats.data.users} />
           {/* Puck beside the figure, as 11-admin-attekintes.webp draws them — the donut above is the
               screen's one centred object and these two are its footnotes, not two more of it.
-              Captions stay sentence case (`Gyakorlat`, `Médiafájl`): that mockup writes them that
-              way, and unlike the coach tiles they name a thing counted, not a metric. */}
+              Captions stay sentence case AND SINGULAR (`Gyakorlat`, `Médiafájl`): that mockup
+              writes them that way, and unlike the coach tiles they name the unit the figure
+              counts, not a metric. The plural `admin.exercises` / `admin.media` are the panels'
+              table labels and stay theirs. */}
           <div className="grid grid-cols-2 gap-group">
             <SummaryTile
               icon={Dumbbell}
               layout="row"
               value={stats.data.exercises.total}
-              caption={t('admin.exercises')}
+              caption={t('admin.unit.exercise')}
             />
             <SummaryTile
               icon={Image}
               layout="row"
               value={stats.data.media.total}
-              caption={t('admin.media')}
+              caption={t('admin.unit.media')}
             />
           </div>
         </div>

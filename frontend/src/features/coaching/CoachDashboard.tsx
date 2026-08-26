@@ -58,9 +58,13 @@ function SectionHead({
 }) {
   return (
     <div className="flex items-center gap-tight">
+      {/* A SQUIRCLE, NOT A CIRCLE. The mockup keeps round holders for the things that stand in for
+          a person — the monogram and the bell — and draws every OBJECT holder as a rounded square.
+          `rounded-chip` is `--radius-full` in Midnight, which flattened that distinction and left
+          a 44px key glyph looking like somebody's avatar. */}
       <span
         aria-hidden
-        className="inline-grid size-11 shrink-0 place-items-center rounded-chip bg-accent-subtle text-accent"
+        className="inline-grid size-11 shrink-0 place-items-center rounded-card bg-accent-subtle text-accent"
       >
         <Icon className="size-icon-m" strokeWidth={2} />
       </span>
@@ -199,7 +203,10 @@ export function CoachDashboard() {
       color: TEAM_COLORS[i],
     })),
     ...(tail > 0
-      ? [{ key: 'tail', label: t('coaching.teams'), count: tail, color: TAIL_COLOR }]
+      // Its own noun, not `coaching.teams`: that string already captions the CSAPATOK tile eight
+      // pixels below with a different number in it, and one word over two quantities is a
+      // contradiction the reader has to resolve. This segment is an other-bucket, so it says so.
+      ? [{ key: 'tail', label: t('coaching.otherTeams'), count: tail, color: TAIL_COLOR }]
       : []),
     ...(unassigned > 0
       ? [
@@ -365,7 +372,7 @@ export function CoachDashboard() {
         <Surface className="flex items-start gap-group border-warning-border bg-warning-subtle">
           <span
             aria-hidden
-            className="inline-grid size-11 shrink-0 place-items-center rounded-chip bg-[var(--warning-subtle)] text-warning"
+            className="inline-grid size-11 shrink-0 place-items-center rounded-card bg-[var(--warning-subtle)] text-warning"
           >
             <TriangleAlert className="size-icon-m" strokeWidth={2} />
           </span>
@@ -498,10 +505,13 @@ export function CoachDashboard() {
                   </Link>
 
                   {/* Destructive, so it is never in the primary position and never fires without
-                      a confirmation. */}
+                      a confirmation. `secondary` rather than `ghost`: the mockup contains every
+                      roster row's action in a resting surface, and that container is the only
+                      thing telling the coach the row HAS an action — a ghost glyph reads as
+                      decoration until a pointer touches it, which a thumb never does. */}
                   <Pressable
                     shape="icon"
-                    variant="ghost"
+                    variant="secondary"
                     aria-label={t('coaching.archive')}
                     disabled={offline}
                     onClick={() => setConfirmArchive(c)}
@@ -520,7 +530,10 @@ export function CoachDashboard() {
         <p className="text-body-s measure text-text-2">{t('coaching.codeOnce')}</p>
         <Surface elevation="inset" className="mt-4 flex items-center justify-between gap-3">
           <span className="text-title-3 tabular-nums text-text-1">{mintedCode}</span>
-          <CopyButton value={mintedCode ?? ''} label={t('common.save')} />
+          {/* `common.copy`, not `common.save`. `label` is this button's aria-label in every state
+              and its visible word after a successful copy, so `Mentés` had the one control whose
+              whole job is the clipboard announcing a different verb than the one it performs. */}
+          <CopyButton value={mintedCode ?? ''} label={t('common.copy')} />
         </Surface>
       </Sheet>
 
@@ -604,7 +617,7 @@ export function CoachDashboard() {
                   <span className="text-body-s shrink-0 tabular-nums text-text-1">
                     {c.temporaryPassword}
                   </span>
-                  <CopyButton value={`${c.email} / ${c.temporaryPassword}`} label={t('common.save')} />
+                  <CopyButton value={`${c.email} / ${c.temporaryPassword}`} label={t('common.copy')} />
                 </li>
               ))}
             </ul>
@@ -635,9 +648,14 @@ export function CoachDashboard() {
           </p>
         </div>
         <div className="mt-4 flex flex-wrap gap-tight">
+          {/* The row's icon was guarded and this was not, so the sheet could be opened online and
+              fired offline: the archive is dropped and the sheet closes as if it worked. There is
+              no queued-write store behind the coaching endpoints, so the guard has to sit on the
+              control that actually mutates. */}
           <Pressable
             variant="danger"
             busy={archiveClient.isPending}
+            disabled={offline}
             onClick={async () => {
               if (confirmArchive) await archiveClient.mutateAsync(confirmArchive.link_id);
               setConfirmArchive(null);

@@ -64,7 +64,10 @@ function Row({
       <div className={cn('flex min-w-0 flex-1 items-center gap-tight', !available && 'opacity-45')}>
         <span
           aria-hidden
-          className="grid size-11 shrink-0 place-items-center rounded-card bg-surface-2 text-text-2"
+          // `rounded-field`, like every other 44px glyph square on this screen. `--radius-card`
+          // and `--radius-field` diverge sharply per pack (Neon: radius-6 vs radius-full), so the
+          // same holder rendered as a box in the section headers and a pill here.
+          className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-2"
         >
           <Icon className="size-icon-m" strokeWidth={2} />
         </span>
@@ -99,6 +102,12 @@ function Row({
 export function CueSettings() {
   const { t, i18n } = useTranslation();
 
+  // Read once, and read by BOTH props. The row already rendered dimmed and inert without a motor,
+  // but its hint never said why — and the iPhone fact ("no vibration, so the beep is the only
+  // non-visual cue left") was welded into the SÍPSZÓ hint, on a row it is not about. The spec's
+  // [!important] moves that sentence here rather than copying it, so it lives in one place.
+  const haptics = hapticsAvailable();
+
   return (
     // One card, three rows, hairlines between them — `pad="none"` because the rows own their
     // own padding so a divider runs the full width of the card instead of floating inside it.
@@ -126,8 +135,8 @@ export function CueSettings() {
         channel="haptics"
         icon={Vibrate}
         label={t('settings.cues.haptics')}
-        hint={t('settings.cues.hapticsHint')}
-        available={hapticsAvailable()}
+        hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
+        available={haptics}
         onPreview={() => vibrate('intervalWork')}
       />
     </Surface>

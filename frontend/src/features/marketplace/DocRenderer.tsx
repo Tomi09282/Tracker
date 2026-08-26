@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Target } from 'lucide-react';
+import { TileHolder } from './PublicChrome';
 
 /**
  * The counterpart to `backend/src/public/markdown.js`. It walks a CLOSED NODE TREE into React
@@ -150,13 +151,27 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
             // LEVEL 2 OR 3 ONLY — the PAGE owns its h1. A body that could mint one would break the
             // document outline of every screen it appears on, which is the thing a screen reader
             // navigates by.
+            //
+            // THE h2 IS ICON-LED, the h3 is not. A level-2 heading opens a section, and the mockup
+            // draws `Kinek szól?` with a glyph in the same tinted holder the rows beneath it use —
+            // without it the heading has less visual entry point than the sentences it introduces.
+            // ONE glyph for every h2, not one per heading: the node grammar carries no icon field,
+            // and growing it so a coach could choose would be a second authored vocabulary to
+            // validate on the server. `Target` is the mockup's own choice and the closest a
+            // renderer that cannot read the heading can get to "here is the point of this part".
+            // The holder is `aria-hidden` by construction, so the outline still reads the words.
             return b.level === 3 ? (
               <h3 key={i} className="text-title-3 mt-2 text-text-1">
                 <Inline nodes={inline} />
               </h3>
             ) : (
-              <h2 key={i} className="text-title-2 mt-2 text-text-1">
-                <Inline nodes={inline} />
+              <h2 key={i} className="text-title-2 mt-2 flex items-center gap-tight text-text-1">
+                <TileHolder size="sm">
+                  <Target className="size-icon-m" strokeWidth={2} />
+                </TileHolder>
+                <span className="min-w-0">
+                  <Inline nodes={inline} />
+                </span>
               </h2>
             );
           case 'quote':

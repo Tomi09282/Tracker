@@ -18,7 +18,8 @@
     "add": "Add",
     "delete": "Delete",
     "undo": "Undo",
-    "undone": "Undone"
+    "undone": "Undone",
+    "copy": "Copy"
   },
   "auth": {
     "emailValid": "The e-mail address looks valid",
@@ -40,10 +41,14 @@
       "invalidCredentials": "Wrong email or password.",
       "emailTaken": "An account with this email already exists.",
       "rateLimited": "Too many attempts. Wait a moment, then try again.",
-      "generic": "That didn't work. Please try again."
+      "generic": "That didn't work. Please try again.",
+      "emailRequired": "Enter your e-mail address.",
+      "emailFormat": "That does not look like a valid e-mail address.",
+      "passwordRequired": "Enter your password."
     },
     "switchToRegister": "Register",
-    "switchToLogin": "Sign in"
+    "switchToLogin": "Sign in",
+    "backToLogin": "Back to sign in"
   },
   "nav": {
     "nutritionShort": "Food",
@@ -78,7 +83,8 @@
     "done": "Done",
     "restDay": "Rest day",
     "exerciseCount": "{{count}} exercises",
-    "nothingScheduled": "Nothing scheduled"
+    "nothingScheduled": "Nothing scheduled",
+    "weeklyWorkouts": "Weekly workouts"
   },
   "settings": {
     "title": "Settings",
@@ -91,7 +97,7 @@
     "contrastRatioFail": "Contrast: {{ratio}}:1 — below the 4.5:1 minimum. Pick a higher-contrast color.",
     "contrastInvalid": "Enter a valid hex color (#RRGGBB).",
     "previewTitle": "Live preview",
-    "previewBody": "This is not a mockup — the whole app repaints as you choose.",
+    "previewBody": "The whole app repaints as you choose.",
     "gradientPreview": "Gradient preview",
     "gradient": {
       "title": "Gradient",
@@ -107,11 +113,12 @@
     "cues": {
       "title": "Sound and vibration",
       "speech": "Spoken cues",
-      "speechHint": "A synthetic voice announces the round and the rest. Turning it off keeps the beep and the vibration.",
+      "speechHint": "It announces the round and the rest.",
       "tone": "Beep",
-      "toneHint": "A short tone for the 3-2-1 countdown and every phase change. On iPhone this is the only audible cue.",
+      "toneHint": "A short tone for the countdown.",
       "haptics": "Vibration",
-      "hapticsHint": "A buzz when a set is checked, on a record, and at every round change."
+      "hapticsHint": "A buzz when a set is checked.",
+      "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left."
     },
     "openAdmin": "Open the admin area",
     "displayName": "Display name",
@@ -121,7 +128,23 @@
     "transparencyHint": "The glass effect on cards and bars. Follows your system setting by default.",
     "transparencySystem": "System",
     "transparencyFull": "Always",
-    "transparencyNone": "Never"
+    "transparencyNone": "Never",
+    "saveTheme": "Save theme",
+    "themeSaveError": "Saving the theme failed — your choice is still here, try again.",
+    "role": {
+      "user": "Member",
+      "coach": "Coach",
+      "admin": "Admin"
+    },
+    "themePack": {
+      "midnight": "Midnight",
+      "solar": "Solar",
+      "forest": "Forest",
+      "neon": "Neon",
+      "mono": "Mono",
+      "aurora": "Aurora",
+      "ember": "Ember"
+    }
   },
   "library": {
     "search": "Search",
@@ -147,7 +170,9 @@
     "howTo": "How to",
     "substitutions": "Substitutions",
     "rejectedTitle": "This submission was rejected",
-    "pendingReview": "Submitted — waiting for review."
+    "pendingReview": "Submitted — waiting for review.",
+    "clearSearch": "Clear search",
+    "playVideo": "Play video"
   },
   "admin": {
     "eyebrow": "Administration",
@@ -216,7 +241,18 @@
     "reviewPickBody": "Approving shares the exercise with the whole library, so open it and read it first.",
     "reviewGoneTitle": "This submission has left the queue",
     "reviewGoneBody": "Somebody decided it in the meantime. Refresh the list.",
-    "reasonHint": "The author reads this on their own exercise."
+    "reasonHint": "The author reads this on their own exercise.",
+    "refreshQueue": "Refresh the queue",
+    "unit": {
+      "user": "User",
+      "exercise": "Exercise",
+      "media": "Media file"
+    },
+    "legend": {
+      "members": "Members",
+      "coaches": "Coaches",
+      "admins": "Admins"
+    }
   },
   "muscle": {
     "chest": "Chest",
@@ -330,9 +366,15 @@
       "draftNote": "This plan is still a draft — the client cannot see it until you activate it.",
       "activate": "Activate"
     },
-    "profileFull": "Questionnaire",
+    "profileFull": "Full questionnaire",
     "profileIncomplete": "Incomplete",
-    "handoverShort": "These clients cannot sign in yet."
+    "handoverShort": "Until they set their own password they cannot sign in",
+    "otherTeams": "Other teams",
+    "tile": {
+      "sessions": "Sessions",
+      "weekly": "Weekly",
+      "plans": "Plans"
+    }
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",
@@ -368,7 +410,7 @@
       },
       "schedule": {
         "title": "How much can you train?",
-        "body": "The honest number is the right one. It sets the volume."
+        "body": "The honest number is the right one."
       },
       "equipment": {
         "title": "Where and with what?",
@@ -448,7 +490,9 @@
       "experience": "experience",
       "sessions_per_week": "sessions per week",
       "training_location": "location"
-    }
+    },
+    "stepsTotal": "of {{total}} steps",
+    "sessionsPerWeekHint": "We spread the weekly load across this many days."
   },
   "workout": {
     "noneTitle": "No workout running",
@@ -546,7 +590,7 @@
     "deleteDay": "Delete day",
     "dayIndex": "Day {{n}}",
     "cycleFull": "Every day of the {{days}}-day cycle is taken.",
-    "needsStart": "Activating needs a start date — without one the client’s home screen stays empty.",
+    "needsStart": "Activating needs a start date",
     "addExercise": "Exercise",
     "findExercise": "Find an exercise",
     "removeExercise": "Remove exercise",
@@ -580,7 +624,13 @@
     "noTime": "no time set",
     "collapseBlock": "Collapse or expand block",
     "statusTitle": "Status",
-    "total": "Plans in total"
+    "total": "Plans in total",
+    "newPlan": "New plan",
+    "defaultName": "New plan",
+    "dayDeleted": "Day deleted",
+    "blockDeleted": "Block deleted",
+    "exerciseDeleted": "Exercise deleted",
+    "undoFailed": "Undo failed"
   },
   "progress": {
     "heading": "Progress",
@@ -655,7 +705,7 @@
     "withdrawn": "This message was withdrawn",
     "sendFailed": "The message could not be sent. Your text is still here.",
     "unavailable": "This conversation is no longer available.",
-    "composeHint": "Enter sends, Shift+Enter for a new line",
+    "composeHint": "Send with the plane icon",
     "delivered": "Delivered"
   },
   "notifications": {
@@ -667,7 +717,7 @@
     "minutesAgo": "{{count}} min ago",
     "hoursAgo": "{{count}} h ago",
     "daysAgo": "{{count}} d ago",
-    "unreadLabel": "unread",
+    "unreadLabel": "unread notifications",
     "earlier": "Earlier"
   },
   "nutrition": {
@@ -691,8 +741,10 @@
     },
     "card": {
       "title": "Nutrition",
-      "open": "Open"
-    }
+      "open": "Open",
+      "targetCaption": "target {{value}}"
+    },
+    "macroTargetShort": "target"
   },
   "coins": {
     "title": "Coins",
@@ -712,7 +764,23 @@
     "pays": "pays {{count}}",
     "awardedNote": "These are awarded automatically when you earn them — there is nothing to collect.",
     "noHistoryTitle": "Nothing yet",
-    "noHistoryBody": "Coins appear here as you earn and spend them."
+    "noHistoryBody": "Coins appear here as you earn and spend them.",
+    "balanceCaption": "Your balance",
+    "weekCaption": "This week",
+    "spentCaption": "Spent",
+    "storeSection": "Available",
+    "item": {
+      "theme": {
+        "aurora": {
+          "title": "Aurora",
+          "description": "A cold northern gradient set."
+        },
+        "ember": {
+          "title": "Ember",
+          "description": "A single warm accent."
+        }
+      }
+    }
   },
   "achievement.workout.first": "First session",
   "achievement.workout.sessions.10": "10 sessions",
@@ -736,7 +804,7 @@
     "emptyTitle": "Nothing here yet",
     "emptyBody": "As coaches publish programmes and events, they will appear here.",
     "noResultsTitle": "No matches",
-    "noResultsBody": "Try different words, or clear the city filter.",
+    "noResultsBody": "Try different words, or type the city name.",
     "searchCapped": "Search returns one page of results. Narrow it by words or by city if this is not what you were after.",
     "backToFeed": "Back to the marketplace",
     "postGoneTitle": "This post is not available",
@@ -745,7 +813,9 @@
     "coachGoneBody": "It may not be published yet, or it may no longer be available.",
     "priceNote": "The price is for information. Signing up happens with the coach directly — payment does not go through the app yet.",
     "theirPosts": "Their posts",
-    "noPostsYet": "Nothing published yet."
+    "noPostsYet": "Nothing published yet.",
+    "errorTitle": "Couldn't load the marketplace",
+    "errorBody": "The server didn't answer just now. Please try again."
   },
   "compose": {
     "title": "Marketplace desk",
@@ -789,7 +859,7 @@
     "displayName": "Display name",
     "headline": "Headline",
     "city": "City",
-    "specialties": "Specialties ({{n}}/{{max}})",
+    "specialties": "Specialties",
     "optional": "Optional",
     "charsLeft": "{{n}} characters left",
     "preview": "Preview",
@@ -873,13 +943,25 @@
     "autosave": {
       "saving": "Saving…",
       "saved": "Saved",
-      "failed": "Autosave failed — your text is here, try again."
-    }
+      "failed": "Autosave failed — your text is here, try again.",
+      "label": "Autosave"
+    },
+    "required": "Required",
+    "headlineHint": "This appears under your name on the marketplace.",
+    "specialtiesCount": "{{n}} / {{max}} selected",
+    "publicProfile": "Public profile",
+    "publicProfileHint": "Anyone can find you on the marketplace.",
+    "postsUnit": "posts",
+    "noPostsInFilterTitle": "No posts in this view",
+    "noPostsInFilterBody": "Your other posts are still there — this filter just doesn't show them.",
+    "showAllPosts": "Show all",
+    "withdrawUndoable": "Taking it down can be undone at any time.",
+    "coverAltMissing": "No image description"
   },
   "studio": {
     "eyebrow": "Appearance",
     "title": "Element style studio",
-    "intro": "Every element against its five variants, with the real component. What you pick here applies to every user on their next load — no code change, no redeploy.",
+    "intro": "Every element against its five variants, with the real component.",
     "elementList": "Elements",
     "active": "active",
     "isActive": "Currently active",
@@ -890,7 +972,9 @@
     "inertShort": "inert",
     "inertExplain": "No component reads this setting today. It would save and it would be audited, and the product would not change by a pixel — so the switch stays disabled until something consumes it.",
     "loadFailed": "Could not load the styles",
-    "loadFailedBody": "The server did not answer. Reload the page."
+    "loadFailedBody": "The server did not answer. Reload the page.",
+    "variants": "Variants",
+    "commitNote": "What you pick here applies to every user on their next load — no code change, no redeploy."
   },
   "adminMetrics": {
     "title": "Metrics",
@@ -928,6 +1012,24 @@
       "user": "User",
       "coach": "Coach",
       "admin": "Admin"
+    }
+  },
+  "public": {
+    "specialty": {
+      "strength": "Strength",
+      "hypertrophy": "Hypertrophy",
+      "powerlifting": "Powerlifting",
+      "olympic_lifting": "Olympic lifting",
+      "endurance": "Endurance",
+      "running": "Running",
+      "mobility": "Mobility",
+      "rehabilitation": "Rehabilitation",
+      "nutrition": "Nutrition",
+      "weight_loss": "Weight loss",
+      "prenatal": "Prenatal",
+      "senior": "Senior",
+      "youth": "Youth",
+      "calisthenics": "Calisthenics"
     }
   }
 }

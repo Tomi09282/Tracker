@@ -28,8 +28,14 @@ export function NotificationBell({ className }: { className?: string }) {
     <Link
       to="/notifications"
       aria-label={unread > 0 ? t('notifications.withUnread', { count: unread }) : t('notifications.title')}
+      // A RESTING HOLDER, not a bare glyph. The bell sits over the aurora on both screens that
+      // draw it, and an unfilled 20px icon on a moving gradient has no edge of its own — the
+      // mockups give it a translucent disc with a rim, which is also what makes the badge read as
+      // riding something rather than floating. Circular here, unlike the section-head squircles:
+      // this holder stands in for a person's inbox, and the image keeps that family round.
       className={cn(
-        'relative grid size-11 place-items-center rounded-field text-text-2',
+        'relative grid size-11 place-items-center rounded-chip text-text-2',
+        'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-2',
         'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
         className,
       )}
@@ -39,10 +45,14 @@ export function NotificationBell({ className }: { className?: string }) {
         <span
           // `aria-hidden` because the count is already in the link's label. A screen reader hearing
           // "3" floating beside "Notifications, 3 unread" is reading the same fact twice.
+          //
+          // OUTSIDE the holder's corner and ACCENT-filled, as both mockups draw it. Tucked inside
+          // at `right-1 top-1` it sat on the glyph and obscured the thing it was counting, and
+          // `--danger` is reserved for destructive and irreversible: unread news is neither.
           aria-hidden
           className={cn(
-            'text-micro absolute right-1 top-1 grid min-w-4 place-items-center rounded-full px-1',
-            'bg-danger text-[var(--on-danger)] tabular-nums',
+            'text-micro absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full px-1',
+            'bg-accent text-accent-fg tabular-nums',
           )}
         >
           {data?.capped ? '99+' : unread}

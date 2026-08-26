@@ -18,7 +18,8 @@
     "add": "Hinzufügen",
     "delete": "Löschen",
     "undo": "Rückgängig",
-    "undone": "Rückgängig gemacht"
+    "undone": "Rückgängig gemacht",
+    "copy": "Kopieren"
   },
   "auth": {
     "emailValid": "Die E-Mail-Adresse ist gültig",
@@ -40,10 +41,14 @@
       "invalidCredentials": "E-Mail oder Passwort ist falsch.",
       "emailTaken": "Mit dieser E-Mail existiert bereits ein Konto.",
       "rateLimited": "Zu viele Versuche. Warte einen Moment und versuche es erneut.",
-      "generic": "Das hat nicht geklappt. Bitte versuche es erneut."
+      "generic": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "emailRequired": "Gib deine E-Mail-Adresse ein.",
+      "emailFormat": "Das sieht nicht nach einer gültigen E-Mail-Adresse aus.",
+      "passwordRequired": "Gib dein Passwort ein."
     },
     "switchToRegister": "Registrieren",
-    "switchToLogin": "Anmelden"
+    "switchToLogin": "Anmelden",
+    "backToLogin": "Zurück zur Anmeldung"
   },
   "nav": {
     "nutritionShort": "Essen",
@@ -78,7 +83,8 @@
     "done": "Erledigt",
     "restDay": "Ruhetag",
     "exerciseCount": "{{count}} Übungen",
-    "nothingScheduled": "Nichts geplant"
+    "nothingScheduled": "Nichts geplant",
+    "weeklyWorkouts": "Wöchentliches Training"
   },
   "settings": {
     "title": "Einstellungen",
@@ -91,7 +97,7 @@
     "contrastRatioFail": "Kontrast: {{ratio}}:1 — unter dem Minimum von 4,5:1. Wähle eine kontrastreichere Farbe.",
     "contrastInvalid": "Gib eine gültige Hex-Farbe ein (#RRGGBB).",
     "previewTitle": "Live-Vorschau",
-    "previewBody": "Das ist kein Mockup — die ganze App färbt sich um, während du wählst.",
+    "previewBody": "Die ganze App färbt sich um, während du wählst.",
     "gradientPreview": "Verlaufsvorschau",
     "gradient": {
       "title": "Verlauf",
@@ -107,11 +113,12 @@
     "cues": {
       "title": "Ton und Vibration",
       "speech": "Sprachansagen",
-      "speechHint": "Eine synthetische Stimme nennt Runde und Pause. Ausgeschaltet bleiben Signalton und Vibration erhalten.",
+      "speechHint": "Sie sagt die Runde und die Pause an.",
       "tone": "Signalton",
-      "toneHint": "Ein kurzer Ton für den 3-2-1-Countdown und jeden Phasenwechsel. Auf dem iPhone ist das der einzige hörbare Hinweis.",
+      "toneHint": "Ein kurzer Ton für den Countdown.",
       "haptics": "Vibration",
-      "hapticsHint": "Ein Vibrieren beim Abhaken eines Satzes, bei einem Rekord und bei jedem Rundenwechsel."
+      "hapticsHint": "Ein Vibrieren beim Abhaken eines Satzes.",
+      "hapticsUnavailable": "Dieses Gerät kann nicht vibrieren — auf dem iPhone bleibt der Signalton der einzige nicht-visuelle Hinweis."
     },
     "openAdmin": "Admin-Bereich öffnen",
     "displayName": "Anzeigename",
@@ -121,7 +128,23 @@
     "transparencyHint": "Der Glaseffekt auf Karten und Leisten. Folgt standardmäßig deiner Systemeinstellung.",
     "transparencySystem": "System",
     "transparencyFull": "Immer",
-    "transparencyNone": "Nie"
+    "transparencyNone": "Nie",
+    "saveTheme": "Theme speichern",
+    "themeSaveError": "Das Theme konnte nicht gespeichert werden — deine Auswahl bleibt erhalten, versuch es noch einmal.",
+    "role": {
+      "user": "Mitglied",
+      "coach": "Coach",
+      "admin": "Admin"
+    },
+    "themePack": {
+      "midnight": "Mitternacht",
+      "solar": "Solar",
+      "forest": "Wald",
+      "neon": "Neon",
+      "mono": "Mono",
+      "aurora": "Aurora",
+      "ember": "Ember"
+    }
   },
   "library": {
     "search": "Suche",
@@ -147,7 +170,9 @@
     "howTo": "Ausführung",
     "substitutions": "Alternativen",
     "rejectedTitle": "Diese Einreichung wurde abgelehnt",
-    "pendingReview": "Eingereicht — wartet auf Prüfung."
+    "pendingReview": "Eingereicht — wartet auf Prüfung.",
+    "clearSearch": "Suche löschen",
+    "playVideo": "Video abspielen"
   },
   "admin": {
     "eyebrow": "Verwaltung",
@@ -216,7 +241,18 @@
     "reviewPickBody": "Eine Freigabe teilt die Übung mit der gesamten Bibliothek — erst öffnen und lesen.",
     "reviewGoneTitle": "Diese Einreichung ist nicht mehr in der Warteschlange",
     "reviewGoneBody": "Jemand hat inzwischen entschieden. Liste aktualisieren.",
-    "reasonHint": "Die verfassende Person liest dies an ihrer eigenen Übung."
+    "reasonHint": "Die verfassende Person liest dies an ihrer eigenen Übung.",
+    "refreshQueue": "Warteschlange aktualisieren",
+    "unit": {
+      "user": "Nutzer",
+      "exercise": "Übung",
+      "media": "Mediendatei"
+    },
+    "legend": {
+      "members": "Mitglieder",
+      "coaches": "Coaches",
+      "admins": "Admins"
+    }
   },
   "muscle": {
     "chest": "Brust",
@@ -330,9 +366,15 @@
       "draftNote": "Dieser Plan ist noch ein Entwurf — der Klient sieht ihn erst nach der Aktivierung.",
       "activate": "Aktivieren"
     },
-    "profileFull": "Fragebogen",
+    "profileFull": "Vollständiger Fragebogen",
     "profileIncomplete": "Unvollständig",
-    "handoverShort": "Diese Kunden können sich noch nicht anmelden."
+    "handoverShort": "Bis sie ein eigenes Passwort festlegen, können sie sich nicht anmelden",
+    "otherTeams": "Weitere Teams",
+    "tile": {
+      "sessions": "Einheiten",
+      "weekly": "Pro Woche",
+      "plans": "Pläne"
+    }
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",
@@ -368,7 +410,7 @@
       },
       "schedule": {
         "title": "Wie viel kannst du trainieren?",
-        "body": "Die ehrliche Zahl ist die richtige. Sie bestimmt den Umfang."
+        "body": "Die ehrliche Zahl ist die richtige."
       },
       "equipment": {
         "title": "Wo und womit?",
@@ -448,7 +490,9 @@
       "experience": "Erfahrung",
       "sessions_per_week": "Einheiten pro Woche",
       "training_location": "Ort"
-    }
+    },
+    "stepsTotal": "von {{total}} Schritten",
+    "sessionsPerWeekHint": "Auf so viele Tage verteilen wir die Wochenlast."
   },
   "workout": {
     "noneTitle": "Kein Training aktiv",
@@ -546,7 +590,7 @@
     "deleteDay": "Tag löschen",
     "dayIndex": "Tag {{n}}",
     "cycleFull": "Jeder Tag des {{days}}-Tage-Zyklus ist belegt.",
-    "needsStart": "Zum Aktivieren fehlt ein Startdatum — ohne das bleibt der Startbildschirm des Klienten leer.",
+    "needsStart": "Zum Aktivieren fehlt ein Startdatum",
     "addExercise": "Übung",
     "findExercise": "Übung suchen",
     "removeExercise": "Übung entfernen",
@@ -580,7 +624,13 @@
     "noTime": "keine Uhrzeit",
     "collapseBlock": "Block ein- oder ausklappen",
     "statusTitle": "Status",
-    "total": "Pläne insgesamt"
+    "total": "Pläne insgesamt",
+    "newPlan": "Neuer Plan",
+    "defaultName": "Neuer Plan",
+    "dayDeleted": "Tag gelöscht",
+    "blockDeleted": "Block gelöscht",
+    "exerciseDeleted": "Übung gelöscht",
+    "undoFailed": "Rückgängig machen fehlgeschlagen"
   },
   "progress": {
     "heading": "Fortschritt",
@@ -655,7 +705,7 @@
     "withdrawn": "Diese Nachricht wurde zurückgezogen",
     "sendFailed": "Die Nachricht konnte nicht gesendet werden. Dein Text ist noch da.",
     "unavailable": "Diese Unterhaltung ist nicht mehr verfügbar.",
-    "composeHint": "Enter sendet, Shift+Enter für eine neue Zeile",
+    "composeHint": "Senden mit dem Flugzeug-Symbol",
     "delivered": "Zugestellt"
   },
   "notifications": {
@@ -667,8 +717,8 @@
     "minutesAgo": "vor {{count}} Min.",
     "hoursAgo": "vor {{count}} Std.",
     "daysAgo": "vor {{count}} Tg.",
-    "unreadLabel": "ungelesen",
-    "earlier": "Früher"
+    "unreadLabel": "ungelesene Benachrichtigungen",
+    "earlier": "Frühere"
   },
   "nutrition": {
     "title": "Ernährung",
@@ -691,8 +741,10 @@
     },
     "card": {
       "title": "Ernährung",
-      "open": "Öffnen"
-    }
+      "open": "Öffnen",
+      "targetCaption": "Ziel {{value}}"
+    },
+    "macroTargetShort": "Ziel"
   },
   "coins": {
     "title": "Münzen",
@@ -712,7 +764,23 @@
     "pays": "bringt {{count}}",
     "awardedNote": "Diese werden automatisch vergeben, sobald du sie erreichst — es gibt nichts abzuholen.",
     "noHistoryTitle": "Noch nichts",
-    "noHistoryBody": "Münzen erscheinen hier, sobald du sie verdienst oder ausgibst."
+    "noHistoryBody": "Münzen erscheinen hier, sobald du sie verdienst oder ausgibst.",
+    "balanceCaption": "Dein Guthaben",
+    "weekCaption": "Diese Woche",
+    "spentCaption": "Ausgegeben",
+    "storeSection": "Verfügbar",
+    "item": {
+      "theme": {
+        "aurora": {
+          "title": "Aurora",
+          "description": "Ein kalter, nordischer Farbverlauf."
+        },
+        "ember": {
+          "title": "Ember",
+          "description": "Ein einziger warmer Akzent."
+        }
+      }
+    }
   },
   "achievement.workout.first": "Erste Einheit",
   "achievement.workout.sessions.10": "10 Einheiten",
@@ -736,7 +804,7 @@
     "emptyTitle": "Hier ist noch nichts",
     "emptyBody": "Sobald Coaches Programme und Events veröffentlichen, erscheinen sie hier.",
     "noResultsTitle": "Keine Treffer",
-    "noResultsBody": "Versuche andere Wörter oder entferne den Stadtfilter.",
+    "noResultsBody": "Versuche andere Wörter oder gib den Städtenamen ein.",
     "searchCapped": "Die Suche liefert eine Seite Ergebnisse. Grenze sie mit Wörtern oder Stadt ein, falls das nicht passt.",
     "backToFeed": "Zurück zum Marktplatz",
     "postGoneTitle": "Dieser Beitrag ist nicht verfügbar",
@@ -745,7 +813,9 @@
     "coachGoneBody": "Es ist vielleicht noch nicht veröffentlicht oder nicht mehr verfügbar.",
     "priceNote": "Der Preis dient der Information. Die Anmeldung läuft direkt über den Coach — die Zahlung geht noch nicht über die App.",
     "theirPosts": "Seine Beiträge",
-    "noPostsYet": "Noch nichts veröffentlicht."
+    "noPostsYet": "Noch nichts veröffentlicht.",
+    "errorTitle": "Der Marktplatz konnte nicht geladen werden",
+    "errorBody": "Der Server hat gerade nicht geantwortet. Bitte versuche es erneut."
   },
   "compose": {
     "title": "Marktplatz-Pult",
@@ -789,7 +859,7 @@
     "displayName": "Anzeigename",
     "headline": "Kurzbeschreibung",
     "city": "Stadt",
-    "specialties": "Schwerpunkte ({{n}}/{{max}})",
+    "specialties": "Schwerpunkte",
     "optional": "Optional",
     "charsLeft": "Noch {{n}} Zeichen",
     "preview": "Vorschau",
@@ -873,13 +943,25 @@
     "autosave": {
       "saving": "Wird gespeichert…",
       "saved": "Gespeichert",
-      "failed": "Automatisches Speichern fehlgeschlagen — dein Text ist da, versuch es erneut."
-    }
+      "failed": "Automatisches Speichern fehlgeschlagen — dein Text ist da, versuch es erneut.",
+      "label": "Automatisches Speichern"
+    },
+    "required": "Pflichtfeld",
+    "headlineHint": "Das erscheint unter deinem Namen auf dem Marktplatz.",
+    "specialtiesCount": "{{n}} / {{max}} ausgewählt",
+    "publicProfile": "Öffentliches Profil",
+    "publicProfileHint": "Auf dem Marktplatz findet dich jeder.",
+    "postsUnit": "Beiträge",
+    "noPostsInFilterTitle": "Keine Beiträge in dieser Ansicht",
+    "noPostsInFilterBody": "Deine anderen Beiträge sind noch da — dieser Filter zeigt sie nur nicht.",
+    "showAllPosts": "Alle anzeigen",
+    "withdrawUndoable": "Das Zurückziehen lässt sich jederzeit rückgängig machen.",
+    "coverAltMissing": "Keine Bildbeschreibung"
   },
   "studio": {
     "eyebrow": "Erscheinungsbild",
     "title": "Element-Stil-Studio",
-    "intro": "Jedes Element mit seinen fünf Varianten, am echten Komponenten. Deine Auswahl gilt beim nächsten Laden für alle Nutzenden — ohne Codeänderung und ohne Redeploy.",
+    "intro": "Jedes Element mit seinen fünf Varianten, am echten Komponenten.",
     "elementList": "Elemente",
     "active": "aktiv",
     "isActive": "Derzeit aktiv",
@@ -890,7 +972,9 @@
     "inertShort": "ungenutzt",
     "inertExplain": "Diese Einstellung wird derzeit von keiner Komponente gelesen. Sie würde gespeichert und auditiert, und am Produkt änderte sich kein Pixel — deshalb bleibt der Schalter deaktiviert, bis es einen Verbraucher gibt.",
     "loadFailed": "Stile konnten nicht geladen werden",
-    "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu."
+    "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu.",
+    "variants": "Varianten",
+    "commitNote": "Was du hier wählst, gilt beim nächsten Laden für alle Nutzer — ohne Codeänderung und ohne Deployment."
   },
   "adminMetrics": {
     "title": "Kennzahlen",
@@ -928,6 +1012,24 @@
       "user": "Nutzer",
       "coach": "Coach",
       "admin": "Admin"
+    }
+  },
+  "public": {
+    "specialty": {
+      "strength": "Kraft",
+      "hypertrophy": "Muskelaufbau",
+      "powerlifting": "Kraftdreikampf",
+      "olympic_lifting": "Gewichtheben",
+      "endurance": "Ausdauer",
+      "running": "Laufen",
+      "mobility": "Mobilität",
+      "rehabilitation": "Rehabilitation",
+      "nutrition": "Ernährung",
+      "weight_loss": "Abnehmen",
+      "prenatal": "Schwangerschaft",
+      "senior": "Senioren",
+      "youth": "Jugend",
+      "calisthenics": "Calisthenics"
     }
   }
 }

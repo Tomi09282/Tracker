@@ -37,17 +37,21 @@ import { HomeNutrition } from './HomeNutrition';
  * filled primaries, which is the same as emitting none.
  */
 export function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const today = useToday();
   const current = useCurrentWorkout();
   const start = useStartWorkout();
 
-  const dateLabel = new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date());
+  // The APP's language, not the browser's — a Hungarian UI on an English phone printed
+  // "Saturday, August 22" under "Szia!". And two formatters rather than one: Intl's own hu order is
+  // month-first ("augusztus 22., szombat"), so the single-format string put the capital on the
+  // MONTH once `first-letter:uppercase` reached it. Weekday first is what the spec quotes.
+  const now = new Date();
+  const dateLabel = [
+    new Intl.DateTimeFormat(i18n.language, { weekday: 'long' }).format(now),
+    new Intl.DateTimeFormat(i18n.language, { month: 'long', day: 'numeric' }).format(now),
+  ].join(', ');
 
   const days = today.data?.days ?? [];
   const todayDate = today.data?.date ?? null;
@@ -204,6 +208,9 @@ export function HomePage() {
             <Surface pad="none">
               <EmptyState
                 icon={CalendarDays}
+                // The moon is the part that carries the meaning: a bare calendar is "no data",
+                // calendar-plus-moon is "nothing is scheduled, and that is fine".
+                badge={Moon}
                 // The mark carries the top third here the way the ring does on the populated
                 // screen, so the page's rhythm is the same on both days. The instinct to make an
                 // empty card small and apologetic is backwards: on this route the emptiness IS

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType } from 'react';
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import {
@@ -16,7 +16,6 @@ import {
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
-import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useNotifications, useMarkNotificationsRead, type AppNotification } from './useChat';
 
@@ -139,6 +138,36 @@ function BellAnchor({
   );
 }
 
+/**
+ * The empty and error bodies — WORDS ONLY, no mark of their own.
+ *
+ * `EmptyState` was doing this job and drawing a second struck-through bell in a tinted circle
+ * directly under the anchor, which is already a struck-through bell in a tinted circle at count 0.
+ * Worse, its inline mark is 120px against the anchor's 112px, so the duplicate was the LARGER of
+ * the two and the anchor stopped being the anchor. The spec is explicit that the two strings
+ * replace the list, not the mark: there is one bell on this screen and it is above.
+ *
+ * `EmptyState` itself is not wrong — it requires an `icon`, which is right for the screens that
+ * have no other mark. This screen does, so it does not use it.
+ */
+function StatelessBlock({
+  title,
+  body,
+  action,
+}: {
+  title: string;
+  body?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-tight py-12 text-center">
+      <h2 className="text-title-3 text-text-1">{title}</h2>
+      {body ? <p className="text-body-s measure text-text-2">{body}</p> : null}
+      {action ? <div className="mt-2">{action}</div> : null}
+    </div>
+  );
+}
+
 /** One row. Same shape unread and read; the surface, the border and the right-edge mark differ. */
 function NotificationRow({
   n,
@@ -167,7 +196,10 @@ function NotificationRow({
 
       <span className="flex min-w-0 flex-1 flex-col gap-tight">
         <span className="text-body-strong truncate text-text-1">{n.title}</span>
-        {n.body ? <span className="text-caption truncate text-text-2">{n.body}</span> : null}
+        {/* `text-body-s`, one step above the timestamp beside it. Both lines were `text-caption`,
+            so preview and metadata rendered identically and the row had two ranks where the
+            mockup draws three: title, preview, then the smallest text in the row. */}
+        {n.body ? <span className="text-body-s truncate text-text-2">{n.body}</span> : null}
       </span>
 
       <span className="flex shrink-0 flex-col items-end gap-tight">
@@ -249,10 +281,12 @@ export function NotificationsPage() {
   const header = (
     <header className="flex items-center gap-tight">
       {/* The back TEXT link became the control. One icon, at the target floor, where a thumb
-          reaches on a phone held in one hand. */}
+          reaches on a phone held in one hand — and `secondary`, so it has a resting holder: a
+          `ghost` chevron is invisible until hover, which on a phone never happens. `CoinsPage`
+          draws its back control the same way. */}
       <Pressable
         shape="icon"
-        variant="ghost"
+        variant="secondary"
         aria-label={t('common.back')}
         onClick={() => navigate(-1)}
       >
@@ -322,10 +356,8 @@ export function NotificationsPage() {
         // `Nincs értesítés` under an anchor that had just refused to claim a count — the screen
         // contradicting itself in two blocks. Could-not-load and nothing-to-show are different
         // facts, and only one of them has an action that can fix it.
-        <EmptyState
-          icon={BellOff}
+        <StatelessBlock
           title={t('auth.errors.generic')}
-          heading="h2"
           action={
             <Pressable variant="secondary" onClick={() => void refetch()}>
               {t('common.retry')}
@@ -335,11 +367,9 @@ export function NotificationsPage() {
       ) : notifications.length === 0 ? (
         // No action suggested, because there is none. An empty state that invents a next step for
         // a screen with nothing to do is noise.
-        <EmptyState
-          icon={BellOff}
+        <StatelessBlock
           title={t('notifications.emptyTitle')}
           body={t('notifications.emptyBody')}
-          heading="h2"
         />
       ) : (
         <div className="flex flex-col gap-section">

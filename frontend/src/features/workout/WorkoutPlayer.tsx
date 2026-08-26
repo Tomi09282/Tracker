@@ -270,7 +270,17 @@ export function WorkoutPlayer() {
       // spoken line already fire; the toast is the one a person catches out of the corner of an
       // eye. Raised ONCE, and it dismisses itself — the row keeps the trophy, so a permanent toast
       // would be a second permanent statement of the same fact.
-      toast(t('workout.newRecord', { kind: t(`workout.record.${records[0].kind}`) }), 'success');
+      //
+      // `record`, not `success`: a saved form and a personal record are both "it worked" and are
+      // not the same news, which is why E12E16 ships a fourth KIND with a trophy and an accent rail
+      // instead of a green check. `top`, not the default bottom: the bottom of this viewport is the
+      // rest timer, the nav AND the thumb path to the next check button, and the same tap that
+      // earns the record starts the rest — so a bottom toast lands on the control it celebrates.
+      // This is the screen `ToastPlacement` was built for, and it had never opted in.
+      //
+      // The message is the bare `Új rekord`, not the kind-qualified sentence: that sentence is the
+      // ROW's caption, and the toast is not a second permanent statement of the same fact.
+      toast(t('workout.recordSpoken'), 'record', { placement: 'top' });
     }
     // `queued` is carried to the row, not swallowed here: the outbox accepted the write but the
     // server has not, so the row has to say `Nincs kapcsolat` instead of sitting there looking
@@ -331,7 +341,12 @@ export function WorkoutPlayer() {
           // capping it at 280px wide, which on a wide hero left the map floating in an empty box.
           // Read-only — no `onSelect` — so the map is not an interactive target here at all, which
           // is the rule that lets a component with 9px-wide regions exist in this product.
-          <MuscleMap highlights={highlights} fill className="h-full p-3" />
+          //
+          // `sideControl="segmented"` is the whole reason that prop exists: 02-workout-player.webp
+          // draws ONE rounded track with `Elöl` in an inner pill, not the filled-accent chip pair
+          // the library and exercise-detail mockups draw. The pair also put a second saturated
+          // accent object in the hero, competing with the row's check button.
+          <MuscleMap highlights={highlights} fill sideControl="segmented" className="h-full p-3" />
         ) : (
           // THE HONEST STAND-IN for an exercise with no map and no media: a custom movement, a
           // coach's own entry, anything the taxonomy has not been filled in for. A mark at anchor
@@ -361,17 +376,24 @@ export function WorkoutPlayer() {
           <Pressable
             shape="chip"
             density="compact"
-            variant={showTimer ? 'primary' : 'secondary'}
+            // `selected`, not `primary`. Rule 47 / DESIGN §5.6: the one saturated accent object on
+            // this screen is the row's check button, and a toggle that is merely ON is the
+            // selected-chip idiom. Rule-derived rather than mockup-derived — the mockups draw no
+            // `Időzítő` chip at all, since both are straight-set blocks.
+            variant="secondary"
+            selected={showTimer}
             aria-pressed={showTimer}
             onClick={() => setShowTimer((v) => !v)}
-            className="absolute bottom-9 left-3"
+            className={cn('absolute left-3', mapShown ? 'bottom-9' : 'bottom-3')}
           >
             {t('workout.showTimer')}
           </Pressable>
         ) : null}
-        {/* `bottom-9`, not `bottom-3`: the map's `Fő célizom` / `Segédizom` legend owns the bottom
-            band of the panel, and a chip parked on top of the one line that explains the colours is
-            a chip that has eaten the anchor's caption. */}
+        {/* THE OFFSET FOLLOWS WHAT IS ACTUALLY UNDER THE CHIP. `bottom-9` clears the map's
+            `Fő célizom` / `Segédizom` legend, which owns the bottom band of the panel — a chip
+            parked on the one line that explains the colours has eaten the anchor's caption. With no
+            map there is no legend, and 36px above the edge is 16% of a 28dvh hero left as dead
+            space; 02b-workout-states.webp puts the chip just inside the corner. */}
         {!interval.running ? (
           <Pressable
             shape="chip"
@@ -379,12 +401,19 @@ export function WorkoutPlayer() {
             variant="secondary"
             // Inert on a movement with no taxonomy, rather than a control that redraws the panel it
             // is already showing. The chip STAYS — the next movement may well have a map, and the
-            // toggle has to be discoverable when it does — but the control recipe's disabled state
-            // is what says "not for this one" instead of letting a press do nothing.
-            disabled={!mapAvailable}
+            // toggle has to be discoverable when it does.
+            //
+            // `aria-disabled` + a no-op handler, NOT `disabled`: the control recipe washes a
+            // disabled chip to `opacity-45`, and over a glass hero that is the one place the label
+            // stops being readable. The mockup draws this chip at full strength on exactly the
+            // state that has no map. The refusal is kept; only the fade is dropped.
+            aria-disabled={!mapAvailable || undefined}
             aria-pressed={mapAvailable ? showMedia : undefined}
-            onClick={() => setShowMedia((v) => !v)}
-            className="absolute bottom-9 right-3"
+            onClick={() => {
+              if (!mapAvailable) return;
+              setShowMedia((v) => !v);
+            }}
+            className={cn('absolute right-3', mapShown ? 'bottom-9' : 'bottom-3')}
           >
             {mapShown ? (
               <Play className="size-icon-s" aria-hidden />
@@ -414,7 +443,12 @@ export function WorkoutPlayer() {
           with no padding under it on purpose: a half-clipped fifth row is the affordance that says
           "there is more", and padding would turn it into a gap. */}
       <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
-        <div className={cn('grid h-7 shrink-0 items-center gap-2 px-2 text-micro uppercase text-text-3', SET_ROW_COLS)}>
+        {/* SENTENCE CASE, at the caption step. Both mockups draw `#  Előző  kg  ism.` with a capital
+            E and lowercase `kg` / `ism.` — a deliberate difference from the bottom nav's caps, since
+            `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro`
+            carries +0.06em tracking that exists for uppercase eyebrows and is wrong under sentence
+            case; `text-caption` is the step for metadata under a thing. */}
+        <div className={cn('text-caption grid h-7 shrink-0 items-center gap-2 px-2 text-text-3', SET_ROW_COLS)}>
           <span className="text-center">#</span>
           <span>{t('workout.previous')}</span>
           <span className="text-center">{t('workout.kg')}</span>
@@ -469,7 +503,19 @@ export function WorkoutPlayer() {
               key={ex.id}
               shape="chip"
               density="compact"
-              variant={i === activeExercise ? 'primary' : 'secondary'}
+              // A ~140px saturated accent pill here made the screen's largest accent object a
+              // NAVIGATION chip while the one real action — the row's check button — was the
+              // smaller of the two. Both mockups draw this as the pale selected-filter pill, which
+              // is also what the row's own comment above calls this: a filter row, not a second nav.
+              //
+              // `selected` rather than a hand-written `bg-accent-subtle`: the variant carries the
+              // `hover:bg-accent-subtle` half a call site forgets, without which the current chip
+              // reverts to surface-2 under the pointer and reads as "you are about to deselect".
+              // No `text-*` at the call site — twMerge would let it swallow `density="compact"`'s
+              // `text-body-s` and render this chip a different size from its neighbours.
+              variant="secondary"
+              selected={i === activeExercise}
+              // Kept as-is: `selected` is a visual variant and carries no semantics.
               aria-current={i === activeExercise ? 'true' : undefined}
               onClick={() => setActiveExercise(i)}
             >

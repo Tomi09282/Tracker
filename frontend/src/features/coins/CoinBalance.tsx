@@ -36,9 +36,11 @@ import { toCoins } from './useCoins';
  * that money had moved. Folding it into the caption slot costs the chip its own colour field and
  * buys the confirmation landing directly beneath the figure the user is already looking at.
  *
- * The slot keeps its height when it is empty. A caption that appears and disappears would shove
- * the ring's contents up and down every time a purchase settles, which is the layout shift the
- * whole skeleton discipline exists to prevent.
+ * The slot is never EMPTY. At rest it holds the caption `Egyenleged`, which is what says the
+ * figure above it is a balance rather than a count of something; for 2.6 s after a change it holds
+ * the delta instead. The fixed `h-4` is what makes that swap cost no layout shift — it used to be
+ * reserving height for a blank line, so the ring's normal resting state was a bare number over a
+ * gap.
  *
  * ═══ REDUCED MOTION IS NOT "NO FEEDBACK" ═══════════════════════════════════════════════════════
  *
@@ -93,14 +95,15 @@ export function CoinBalance({ balanceMinor }: { balanceMinor: number }) {
         )}
       </span>
 
-      {/* The caption slot. It holds the delta when one has just happened and reserves its own
-          height when it has not — see the docblock. Earning is accent-coloured; spending is
-          deliberately NOT danger, because buying something you chose to buy is not an error. */}
+      {/* The caption slot: `Egyenleged` at rest, the delta for 2.6 s after a change — see the
+          docblock. Earning is accent-coloured; spending is deliberately NOT danger, because buying
+          something you chose to buy is not an error, and the resting caption takes the same muted
+          grey the `delta === null` branch already resolves to. */}
       <span
         className={`text-caption h-4 tabular-nums ${delta !== null && delta > 0 ? 'text-accent' : 'text-text-3'}`}
         aria-hidden
       >
-        {delta !== null ? `${delta > 0 ? '+' : ''}${toCoins(delta)}` : ''}
+        {delta !== null ? `${delta > 0 ? '+' : ''}${toCoins(delta)}` : t('coins.balanceCaption')}
       </span>
     </span>
   );

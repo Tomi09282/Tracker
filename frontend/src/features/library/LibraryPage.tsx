@@ -39,13 +39,16 @@ function useDebounced<T>(value: T, ms: number) {
   return debounced;
 }
 
-function RowSkeleton({ meta = true }: { meta?: boolean }) {
+/* ONE shape, no variants. The tail used to drop the meta bar, which gave the three appended rows a
+   different silhouette from the six above them — and a skeleton whose whole job is "nothing will
+   move when this resolves" cannot have two heights. */
+function RowSkeleton() {
   return (
     <Surface as="li" pad="none" className={ROW}>
       <Skeleton className={THUMB} />
       <div className="min-w-0 flex-1">
         <Skeleton className="h-4 w-2/3" />
-        {meta ? <Skeleton className="mt-2 h-3 w-1/3" /> : null}
+        <Skeleton className="mt-2 h-3 w-1/3" />
       </div>
     </Surface>
   );
@@ -167,13 +170,28 @@ export function LibraryPage() {
           leading={<Search className="size-icon-m" strokeWidth={2} />}
           trailing={
             search ? (
+              /*
+               * The DISC is the affordance, and it is not the tap target. `ghost` alone left a
+               * bare stroked × floating on the field's fill — over the aurora there is nothing
+               * behind it and nothing that reads as a button before it is touched. The mockup
+               * draws a filled neutral circle roughly two-fifths of the field's height with a
+               * dark × in it, so the fill goes on an inner span and the 44px `icon` box stays
+               * transparent: the Switch idiom (§5.4), a graphic at the size people expect inside
+               * a target that clears the floor. Not `bg-surface-2` — `--field-bg` IS `surface-2`,
+               * so that disc would be invisible on the very field it sits in.
+               */
               <Pressable
                 shape="icon"
                 variant="ghost"
-                aria-label={t('common.cancel')}
+                aria-label={t('library.clearSearch')}
                 onClick={() => setSearch('')}
               >
-                <X className="size-icon-m" strokeWidth={2} aria-hidden />
+                <span
+                  aria-hidden
+                  className="grid size-6 place-items-center rounded-chip bg-text-3 text-surface-1"
+                >
+                  <X className="size-icon-s" strokeWidth={2.5} />
+                </span>
               </Pressable>
             ) : undefined
           }
@@ -338,7 +356,7 @@ export function LibraryPage() {
           // The tail: identical geometry again, so the list above never moves while a page loads.
           <ul className="flex flex-col gap-tight">
             {Array.from({ length: 3 }, (_, i) => (
-              <RowSkeleton key={i} meta={false} />
+              <RowSkeleton key={i} />
             ))}
           </ul>
         ) : null}

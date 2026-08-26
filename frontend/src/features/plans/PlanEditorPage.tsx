@@ -11,10 +11,11 @@ import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { useToast } from '../../ui/feedback/ToastHost';
 import {
   usePlan, useCreateDay, useDeleteDay, useCreateBlock, useDeleteBlock,
   useAddExercise, useDeleteExercise, useReorder, useUpdatePlan, useClonePlan, useCopyDays,
-  type PlanBlock, type PlanExercise, type PlanSummary,
+  type PlanBlock, type PlanDay, type PlanExercise, type PlanSummary,
 } from './usePlans';
 import { useOnline } from './useOnline';
 import { useExercises } from '../library/useExercises';
@@ -69,6 +70,8 @@ export function PlanEditorPage() {
   const copyDays = useCopyDays();
   const clients = useClients();
   const navigate = useNavigate();
+  // The host is already mounted app-wide in `app/providers.tsx`; this is the whole wiring.
+  const { toast } = useToast();
 
   const [openDay, setOpenDay] = useState<number | null>(null);
   const [activeExercise, setActiveExercise] = useState<number | null>(null);
@@ -100,6 +103,13 @@ export function PlanEditorPage() {
    * the naming step was MOVED here, so losing it here loses it entirely.
    */
   const nameInput = useRef<HTMLInputElement>(null);
+  /* Live connectivity for the undo toasts below. A ref rather than the `offline` local, because an
+     undo callback outlives the render that created it: the value captured at delete time is stale
+     by the time the toast is tapped, which is exactly the window a connection drops in. Declared
+     up here with the other hooks — the helpers that read it sit after this component's early
+     returns, and a `useRef` down there would be a conditional hook. */
+  const onlineNow = useRef(true);
+  onlineNow.current = !offline;
   const wantsName = Boolean((location.state as { focusName?: boolean } | null)?.focusName);
   const loaded = !isPending && Boolean(data?.plan);
   useEffect(() => {
@@ -157,6 +167,138 @@ export function PlanEditorPage() {
     await reorder.mutateAsync({ planId, what, ids: next.map((x) => x.id) });
   };
 
+  /* ── DELETE, WITH A WAY BACK ─────────────────────────────────────────────
+     A trash tap on a day card takes the day and every block and exercise inside it, immediately
+     and irreversibly, and until now said nothing at all. The spec's answer is an undo toast rather
+     than a confirm sheet: a confirm interrogates every delete including the ones that were meant,
+     while an undo costs nothing until the one that was not.
+
+     Three things make it an undo rather than a gesture:
+
+     · THE SNAPSHOT IS TAKEN BEFORE THE MUTATION. Every plan mutation invalidates the whole
+       ['plans'] namespace, so a lazy read inside `onUndo` would find the rows already gone.
+     · THE REPLAY IS MAPPED, NOT ECHOED. All three POST schemas are `.strict()` and none of them
+       accepts the shape the GET returns — `is_rest` is `0 | 1` on the wire and a boolean on the
+       way in, and the exercise endpoint REJECTS `target_weight_kg`, because the server computes
+       canonical kilograms itself from `target_weight` + `target_weight_unit` and a CHECK enforces
+       that the pair agrees. Echoing a row verbatim is a 400 on every single exercise.
+     · A ROW THAT CANNOT COME BACK FAITHFULLY GETS NO UNDO. `exercise_name_snapshot` is derived
+       server-side from the joined exercise and is never client-supplied, so a row whose source
+       exercise is gone (`exercise_id === null`) returns named "Exercise". The toast still says
+       what happened; it just does not offer a button that would quietly rename the work.
+
+     The host's limits are accepted rather than fought: a 4s dwell and a hard cap of three toasts,
+     so a burst of deletes pushes the oldest undo off screen. That is `ToastHost`'s decision. */
+
+  const runUndo = (job: () => Promise<void>) => {
+    // One try, one message. A half-restored day that says nothing is the same defect this exists
+    // to remove, and an undo tapped after the connection dropped must fail loudly, not silently.
+    if (!onlineNow.current) {
+      toast(t('plans.undoFailed'), 'error');
+      return;
+    }
+    void job().catch(() => toast(t('plans.undoFailed'), 'error'));
+  };
+
+  const undoable = (rows: PlanExercise[]) => rows.every((r) => r.exercise_id != null);
+
+  /** The POST body for one prescribed exercise, under whatever block it is being restored into. */
+  const exerciseBody = (ex: PlanExercise, blockId: number) => ({
+    planId,
+    block_id: blockId,
+    exercise_id: ex.exercise_id,
+    position: ex.position,
+    target_metric: ex.target_metric,
+    load_mode: ex.load_mode,
+    target_sets: ex.target_sets,
+    target_reps_min: ex.target_reps_min,
+    target_reps_max: ex.target_reps_max,
+    target_seconds: ex.target_seconds,
+    target_distance_m: ex.target_distance_m,
+    // What the coach TYPED, in the unit they typed it in — never the canonical kilograms.
+    target_weight: ex.target_weight_entry_value,
+    target_weight_unit: ex.target_weight_entry_unit ?? 'kg',
+    target_percent_1rm: ex.target_percent_1rm,
+    target_rpe: ex.target_rpe,
+    rest_seconds: ex.rest_seconds,
+    tempo: ex.tempo,
+    notes: ex.notes,
+  });
+
+  /** One block and its rows, awaited in order because each child needs the parent's fresh id. */
+  const replayBlock = async (block: PlanBlock, rows: PlanExercise[], dayId: number) => {
+    const created = await createBlock.mutateAsync({
+      planId,
+      day_id: dayId,
+      kind: block.kind,
+      position: block.position,
+      rounds: block.rounds,
+      rest_seconds: block.rest_seconds,
+      cap_seconds: block.cap_seconds,
+      label: block.label,
+    });
+    for (const ex of rows) await addExercise.mutateAsync(exerciseBody(ex, created.id));
+  };
+
+  const removeDay = async (day: PlanDay) => {
+    const dayBlocks = blocksOf(day.id);
+    const rows = new Map(dayBlocks.map((b) => [b.id, exercisesOf(b.id)]));
+    await deleteDay.mutateAsync({ planId, dayId: day.id });
+    const faithful = [...rows.values()].every(undoable);
+    toast(
+      t('plans.dayDeleted'),
+      'info',
+      faithful
+        ? {
+            onUndo: () =>
+              runUndo(async () => {
+                const created = await createDay.mutateAsync({
+                  planId,
+                  // `day_index` and `slot` are replayed, or the day comes back in the wrong slot
+                  // of the cycle — which is the one thing the strip above exists to show.
+                  day_index: day.day_index,
+                  slot: day.slot,
+                  name: day.name,
+                  notes: day.notes,
+                  is_rest: Boolean(day.is_rest),
+                  est_minutes: day.est_minutes,
+                  start_time: day.start_time,
+                });
+                for (const b of dayBlocks) await replayBlock(b, rows.get(b.id) ?? [], created.id);
+              }),
+          }
+        : undefined,
+    );
+  };
+
+  const removeBlock = async (block: PlanBlock) => {
+    const rows = exercisesOf(block.id);
+    await deleteBlock.mutateAsync({ planId, blockId: block.id });
+    toast(
+      t('plans.blockDeleted'),
+      'info',
+      undoable(rows)
+        ? { onUndo: () => runUndo(() => replayBlock(block, rows, block.day_id)) }
+        : undefined,
+    );
+  };
+
+  const removeExercise = async (ex: PlanExercise) => {
+    await deleteExercise.mutateAsync({ planId, rowId: ex.id });
+    toast(
+      t('plans.exerciseDeleted'),
+      'info',
+      undoable([ex])
+        ? {
+            onUndo: () =>
+              runUndo(async () => {
+                await addExercise.mutateAsync(exerciseBody(ex, ex.block_id));
+              }),
+          }
+        : undefined,
+    );
+  };
+
   /* Only what CHANGED goes over the wire — a PATCH that resends the name on a status flip is a
      write that can collide with an edit made on another device for no reason. */
   const save = async () => {
@@ -173,134 +315,156 @@ export function PlanEditorPage() {
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      {/* The commit lives in the header so it is reachable without scrolling to the end of a long
-          plan — and it is disabled unless a plan-level field is actually pending, because every
-          structural edit below (a day, a block, an exercise, a reorder) commits immediately and a
-          pill implying otherwise would be a lie in every state but one. */}
-      <div className="flex items-center justify-between gap-group">
-        <Link
-          to="/coach/plans"
-          className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-tight text-text-2"
-        >
-          <ArrowLeft className="size-icon-s" aria-hidden />
-          {t('plans.title')}
-        </Link>
-        <Pressable
-          variant="primary"
-          shape="chip"
-          busy={updatePlan.isPending}
-          disabled={!canSave}
-          onClick={() => void save()}
-        >
-          {t('common.save')}
-        </Pressable>
-      </div>
-
-      <header className="flex flex-col gap-tight">
-        {/* The visible title IS the input — a plan is renamed by typing over it, not by opening a
-            form. The heading is kept for document structure: an input contributes no text to a
-            heading's accessible name, so an `h1` wrapping one is an `h1` a screen-reader user
-            cannot navigate to. */}
-        <h1 className="sr-only">{nameValue}</h1>
-        <input
-          ref={nameInput}
-          value={nameValue}
-          maxLength={120}
-          aria-label={t('plans.newName')}
-          onChange={(e) => setNameDraft(e.target.value)}
-          className={cn(
-            'text-title-1 w-full min-h-[var(--target-min)] rounded-field bg-transparent font-display text-text-1',
-            'border-[length:var(--border-width)] border-transparent px-2 -mx-2',
-            'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-            'hover:border-[var(--field-border)] focus-visible:border-accent',
-            'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-          )}
-        />
-
-        {/* ONE metadata line, one grey, one size. The status is still a word rather than a button
-            at rest — but the type and colour go on a CHILD span, never on the Pressable's own
-            `className`: `cn` is `twMerge`, which files this project's custom font sizes and text
-            colours in the same bucket, so a `text-*` from a call site silently eats the density's
-            `text-body-s` and leaves the label at the inherited size. */}
-        <div className="flex flex-wrap items-center gap-tight">
-          <Pressable
-            variant="ghost"
-            density="compact"
-            className="-ml-3"
-            aria-haspopup="dialog"
-            aria-expanded={statusOpen}
-            onClick={() => setStatusOpen((v) => !v)}
+      {/* ── The masthead: back link, title, meta line and the strip, as ONE group ──────────
+          Four children of the root at `gap-section` put 32px between each pair, and the doubled
+          air pushed the strip and the first day card down by ~64px — most of the fourth day card
+          the mockup leaves peeking at the fold. `--spacing-section` is "between two things that
+          are not each other's business", and these are one masthead over one plan.
+          `ExerciseDetailPage` groups its back-link-plus-hero the same way. The root keeps
+          `gap-section` for the real boundaries: strip → warning row → day list → below-fold. */}
+      <div className="flex flex-col gap-group">
+        {/* The commit lives in the header so it is reachable without scrolling to the end of a long
+            plan — and it is disabled unless a plan-level field is actually pending, because every
+            structural edit below (a day, a block, an exercise, a reorder) commits immediately and a
+            pill implying otherwise would be a lie in every state but one. */}
+        <div className="flex items-center justify-between gap-group">
+          <Link
+            to="/coach/plans"
+            className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-tight text-text-2"
           >
-            <span className="text-caption text-text-3">{t(`plans.status.${statusValue}`)}</span>
+            <ArrowLeft className="size-icon-s" aria-hidden />
+            {t('plans.title')}
+          </Link>
+          <Pressable
+            variant="primary"
+            shape="chip"
+            busy={updatePlan.isPending}
+            disabled={!canSave}
+            onClick={() => void save()}
+          >
+            {t('common.save')}
           </Pressable>
-          {/* Its own `aria-hidden` element rather than a character inside either half: it is not
-              announced, and it stays out of the `tabular-nums` run. */}
-          <span aria-hidden className="text-caption text-text-3">
-            ·
-          </span>
-          <span className="text-caption tabular-nums text-text-3">
-            {t('plans.revision', { n: plan.revision })}
-          </span>
         </div>
-      </header>
 
-      {/* ── The anchor ────────────────────────────────────────────────────────────────────── */}
-      <Surface as="section" aria-label={t('plans.cycle', { days: plan.cycle_days })} className="flex flex-col gap-tight">
-        {/* Written inline rather than as a nested `<DayTile>` component: a component declared
-            inside the render body gets a new identity every render, so React remounts the tiles
-            on every state change and the keyboard focus you just put on one is thrown away. */}
-        <ul className="flex gap-1 overflow-x-auto">
-          {Array.from({ length: plan.cycle_days }, (_, i) => {
-            const day = dayByIndex.get(i);
-            const selected = day != null && openDay === day.id;
-            const label = t('plans.dayIndex', { n: i + 1 });
-            return (
-              <li key={i} className="flex min-w-11 flex-1">
-                <Pressable
-                  variant="secondary"
-                  aria-pressed={day ? selected : undefined}
-                  aria-label={day ? `${day.name} · ${label}` : `${t('plans.addDay')} · ${label}`}
-                  busy={!day && createDay.isPending}
-                  disabled={!day && offline}
-                  className={cn(
-                    'h-20 w-full flex-col gap-1 rounded-field px-0',
-                    selected
-                      ? 'border-accent bg-accent-subtle text-accent'
-                      : day
-                        ? 'bg-surface-2 text-text-2'
-                        : 'border-dashed bg-transparent text-text-3',
-                  )}
-                  onClick={() => {
-                    if (day) {
-                      setOpenDay(selected ? null : day.id);
-                      return;
-                    }
-                    void createDay.mutateAsync({ planId, day_index: i, name: label });
-                  }}
-                >
-                  {day ? (
-                    day.is_rest ? (
-                      <Moon className="size-icon-m" aria-hidden />
+        <header className="flex flex-col gap-tight">
+          {/* The visible title IS the input — a plan is renamed by typing over it, not by opening a
+              form. The heading is kept for document structure: an input contributes no text to a
+              heading's accessible name, so an `h1` wrapping one is an `h1` a screen-reader user
+              cannot navigate to. */}
+          <h1 className="sr-only">{nameValue}</h1>
+          <input
+            ref={nameInput}
+            value={nameValue}
+            maxLength={120}
+            aria-label={t('plans.newName')}
+            onChange={(e) => setNameDraft(e.target.value)}
+            className={cn(
+              'text-title-1 w-full min-h-[var(--target-min)] rounded-field bg-transparent font-display text-text-1',
+              'border-[length:var(--border-width)] border-transparent px-2 -mx-2',
+              'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
+              'hover:border-[var(--field-border)] focus-visible:border-accent',
+              'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
+            )}
+          />
+
+          {/* ONE metadata line, one grey, one size. The status is still a word rather than a button
+              at rest — but the type and colour go on a CHILD span, never on the Pressable's own
+              `className`: `cn` is `twMerge`, which files this project's custom font sizes and text
+              colours in the same bucket, so a `text-*` from a call site silently eats the density's
+              `text-body-s` and leaves the label at the inherited size. */}
+          <div className="flex flex-wrap items-center gap-tight">
+            <Pressable
+              variant="ghost"
+              density="compact"
+              className="-ml-3"
+              aria-haspopup="dialog"
+              aria-expanded={statusOpen}
+              onClick={() => setStatusOpen((v) => !v)}
+            >
+              <span className="text-caption text-text-3">{t(`plans.status.${statusValue}`)}</span>
+            </Pressable>
+            {/* Its own `aria-hidden` element rather than a character inside either half: it is not
+                announced, and it stays out of the `tabular-nums` run. */}
+            <span aria-hidden className="text-caption text-text-3">
+              ·
+            </span>
+            <span className="text-caption tabular-nums text-text-3">
+              {t('plans.revision', { n: plan.revision })}
+            </span>
+          </div>
+        </header>
+
+        {/* ── The anchor ──────────────────────────────────────────────────────────────────────
+            `pad="none"` with the vertical air moved onto the card, because the seven tiles need the
+            FULL content width. Each tile is floored at 44px by the control recipe, so the row needs
+            7×44 + 6×4 = 332px; the card's inner width with 16px of horizontal padding is 329px at
+            393pt, 326px at 390pt and 311px at 375pt, so the strip overflowed and scrolled on every
+            common phone — leaving the seventh day clipped at rest, with no scroll affordance. Take
+            the horizontal padding off and the inner width is 343px at 375pt against the 332px
+            needed. The anchor's whole job is showing the cycle at once; a strip whose last slot is
+            off-screen cannot answer "is a slot still empty". */}
+        <Surface
+          as="section"
+          pad="none"
+          aria-label={t('plans.cycle', { days: plan.cycle_days })}
+          className="flex flex-col gap-tight py-[var(--card-pad)]"
+        >
+          {/* Written inline rather than as a nested `<DayTile>` component: a component declared
+              inside the render body gets a new identity every render, so React remounts the tiles
+              on every state change and the keyboard focus you just put on one is thrown away. */}
+          <ul className="flex gap-1 overflow-x-auto">
+            {Array.from({ length: plan.cycle_days }, (_, i) => {
+              const day = dayByIndex.get(i);
+              const selected = day != null && openDay === day.id;
+              const label = t('plans.dayIndex', { n: i + 1 });
+              return (
+                <li key={i} className="flex min-w-11 flex-1">
+                  <Pressable
+                    variant="secondary"
+                    aria-pressed={day ? selected : undefined}
+                    aria-label={day ? `${day.name} · ${label}` : `${t('plans.addDay')} · ${label}`}
+                    busy={!day && createDay.isPending}
+                    disabled={!day && offline}
+                    className={cn(
+                      'h-20 w-full flex-col gap-1 rounded-field px-0',
+                      selected
+                        ? 'border-accent bg-accent-subtle text-accent'
+                        : day
+                          ? 'bg-surface-2 text-text-2'
+                          : 'border-dashed bg-transparent text-text-3',
+                    )}
+                    onClick={() => {
+                      if (day) {
+                        setOpenDay(selected ? null : day.id);
+                        return;
+                      }
+                      void createDay.mutateAsync({ planId, day_index: i, name: label });
+                    }}
+                  >
+                    {day ? (
+                      day.is_rest ? (
+                        <Moon className="size-icon-m" aria-hidden />
+                      ) : (
+                        <Dumbbell className="size-icon-m" aria-hidden />
+                      )
                     ) : (
-                      <Dumbbell className="size-icon-m" aria-hidden />
-                    )
-                  ) : (
-                    <Plus className="size-icon-m" aria-hidden />
-                  )}
-                  <span className="text-caption tabular-nums">{i + 1}</span>
-                </Pressable>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="text-caption text-center tabular-nums text-text-3">
-          {/* `trainingDayCount`, not the shared `dayCount`: the first half of this line already
-              said how many days the cycle has, so a second "4 nap" beside it reads as a
-              contradiction rather than as the number of days that actually carry work. */}
-          {t('plans.cycle', { days: plan.cycle_days })} ·{' '}
-          {t('plans.trainingDayCount', { count: trainingDays })}
-        </p>
-      </Surface>
+                      <Plus className="size-icon-m" aria-hidden />
+                    )}
+                    <span className="text-caption tabular-nums">{i + 1}</span>
+                  </Pressable>
+                </li>
+              );
+            })}
+          </ul>
+          <p className="text-caption text-center tabular-nums text-text-3">
+            {/* `trainingDayCount`, not the shared `dayCount`: the first half of this line already
+                said how many days the cycle has, so a second "4 nap" beside it reads as a
+                contradiction rather than as the number of days that actually carry work. */}
+            {t('plans.cycle', { days: plan.cycle_days })} ·{' '}
+            {t('plans.trainingDayCount', { count: trainingDays })}
+          </p>
+        </Surface>
+      </div>
 
       {/* The server refuses to activate a client plan with no start date — it would generate zero
           occurrences and the client would see an empty home screen forever. Saying so here means
@@ -363,7 +527,7 @@ export function PlanEditorPage() {
                   variant="ghost"
                   aria-label={t('plans.deleteDay')}
                   disabled={offline}
-                  onClick={() => void deleteDay.mutateAsync({ planId, dayId: day.id })}
+                  onClick={() => void removeDay(day)}
                 >
                   <Trash2 className="size-icon-s text-danger" aria-hidden />
                 </Pressable>
@@ -375,12 +539,16 @@ export function PlanEditorPage() {
                 // surface-3, and then the exercise rows DROPPED to surface-1 — a level below both
                 // of their parents and level with the collapsed card behind them, so the rows sank
                 // into the block instead of sitting on it.
-                // The open area is now the day card's own body, divided by the rule rather than by
-                // a tone; the block is delimited by the app's one card separator, the hairline; and
-                // the single content fill left is spent on the rows, which is the thing the mockup
-                // draws as the brightest element on the screen. The ghost `+ Gyakorlat` under them
-                // then sits a step below without any class of its own.
-                <div className="flex flex-col gap-group border-t border-[var(--surface-border)] p-[var(--card-pad)]">
+                // The correction over-shot the other way and flattened the whole edited region to
+                // one step: card, panel and block card all on `--card-bg`, and in Midnight the
+                // rows (#181C22) were barely separable from the card (#12151A) they sat on. The
+                // spec asks for the opposite — "the open day steps up to the highest surface
+                // level, inverting against the page so the area being edited reads as foreground".
+                // So the ladder rises monotonically and stops at the top: card → 2 (this panel)
+                // → 3 (the exercise rows, the brightest thing in the mockup). The block card
+                // stays a hairline, which is the app's one card separator and needs no tone of its
+                // own; the ghost `+ Gyakorlat` under the rows then sits a step below for free.
+                <div className="flex flex-col gap-group border-t border-[var(--surface-border)] bg-surface-2 p-[var(--card-pad)]">
                   {dayBlocks.map((block, bi) => (
                     // `border-[length:var(--border-width)]` rather than Tailwind's `border`, so the
                     // Mono pack's 2px edge is honoured — the same form `surfaceRecipe` uses.
@@ -436,7 +604,7 @@ export function PlanEditorPage() {
                         <Pressable shape="icon" variant="secondary" aria-label={t('plans.moveDown')} disabled={bi === dayBlocks.length - 1 || offline} onClick={() => void move('blocks', dayBlocks, bi, 1)}>
                           <ChevronDown className="size-icon-s" aria-hidden />
                         </Pressable>
-                        <Pressable shape="icon" variant="secondary" aria-label={t('plans.deleteBlock')} disabled={offline} onClick={() => void deleteBlock.mutateAsync({ planId, blockId: block.id })}>
+                        <Pressable shape="icon" variant="secondary" aria-label={t('plans.deleteBlock')} disabled={offline} onClick={() => void removeBlock(block)}>
                           <Trash2 className="size-icon-s text-danger" aria-hidden />
                         </Pressable>
                       </div>
@@ -450,7 +618,7 @@ export function PlanEditorPage() {
                           {exercisesOf(block.id).map((ex, xi, arr) => {
                             const picked = activeExercise === ex.id;
                             return (
-                              <li key={ex.id} className="flex items-center gap-tight rounded-field bg-surface-2 p-tight">
+                              <li key={ex.id} className="flex items-center gap-tight rounded-field bg-surface-3 p-tight">
                                 <Pressable
                                   variant="ghost"
                                   shape="field"
@@ -482,7 +650,7 @@ export function PlanEditorPage() {
                                     </Pressable>
                                   </>
                                 ) : null}
-                                <Pressable shape="icon" variant="ghost" aria-label={t('plans.removeExercise')} disabled={offline} onClick={() => void deleteExercise.mutateAsync({ planId, rowId: ex.id })}>
+                                <Pressable shape="icon" variant="ghost" aria-label={t('plans.removeExercise')} disabled={offline} onClick={() => void removeExercise(ex)}>
                                   <Trash2 className="size-icon-s text-danger" aria-hidden />
                                 </Pressable>
                               </li>
@@ -610,29 +778,6 @@ export function PlanEditorPage() {
 
       {/* ── Below the fold: the things done once per plan, not once per edit ───────────────── */}
       <section className="flex flex-col gap-group">
-        {nextFreeIndex !== undefined ? (
-          <Pressable
-            variant="secondary"
-            className="w-full"
-            icon={<Plus className="size-icon-s" aria-hidden />}
-            busy={createDay.isPending}
-            disabled={offline}
-            onClick={() =>
-              void createDay.mutateAsync({
-                planId,
-                day_index: nextFreeIndex,
-                name: t('plans.dayIndex', { n: nextFreeIndex + 1 }),
-              })
-            }
-          >
-            {t('plans.addDay')}
-          </Pressable>
-        ) : (
-          // Every slot in the cycle is taken. Saying so beats a button that returns a constraint
-          // error the coach has no way to interpret.
-          <p className="text-caption text-text-3">{t('plans.cycleFull', { days: plan.cycle_days })}</p>
-        )}
-
         {/* Handing a template to a client. The whole reason templates exist, and it is a DEEP COPY:
             the two plans are independent the moment it lands, so tailoring one client's rep range
             cannot touch anyone else's. */}
@@ -721,6 +866,33 @@ export function PlanEditorPage() {
             ) : null}
           </Surface>
         ) : null}
+
+        {/* LAST in the region, which is the spec's block-9 order — clone list, cycle copy, then
+            the day-add. It is also what makes the header's `Mentés` argument true: the commit
+            moved up "so it is reachable without scrolling to the end of a long plan", and that
+            only reads as an argument if `Nap hozzáadása` is what sits at that end. */}
+        {nextFreeIndex !== undefined ? (
+          <Pressable
+            variant="secondary"
+            className="w-full"
+            icon={<Plus className="size-icon-s" aria-hidden />}
+            busy={createDay.isPending}
+            disabled={offline}
+            onClick={() =>
+              void createDay.mutateAsync({
+                planId,
+                day_index: nextFreeIndex,
+                name: t('plans.dayIndex', { n: nextFreeIndex + 1 }),
+              })
+            }
+          >
+            {t('plans.addDay')}
+          </Pressable>
+        ) : (
+          // Every slot in the cycle is taken. Saying so beats a button that returns a constraint
+          // error the coach has no way to interpret.
+          <p className="text-caption text-text-3">{t('plans.cycleFull', { days: plan.cycle_days })}</p>
+        )}
       </section>
 
       {/* The status picker, out of the header and into the sheet the spec names for it. Inline, it

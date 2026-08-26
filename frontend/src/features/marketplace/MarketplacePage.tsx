@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Search, Check, Compass, WifiOff } from 'lucide-react';
+import { Search, Check, Compass, TriangleAlert } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
@@ -34,8 +34,8 @@ import { PublicTopBar, KindTile, VerifiedBadge, kindIcon, metaLine, postDate } f
  * rows — a number the screen cannot back up. So the hero is the feed's first post, said plainly,
  * and it is sliced out of the list below so nothing is drawn twice.
  *
- * NO PLAY BUTTON EITHER. The mockup centres one on the cover, and the product has no video
- * player: a play button that navigates to text is a promise broken on the first tap.
+ * NO PLAY BUTTON EITHER, and that is a settled decision rather than a pending one — the reasoning
+ * lives on `FeedHero` below, where the tile is drawn.
  *
  * ═══ WHAT IS NOT HERE ══════════════════════════════════════════════════════════════════════════
  *
@@ -105,10 +105,17 @@ export function MarketplacePage() {
       <header className="flex flex-col gap-group">
         <h1 className="text-display text-text-1">{t('marketplace.title')}</h1>
 
-        {feed.isLoading ? (
+        {feed.isLoading || leadDetail.isLoading ? (
           // The skeleton carries the hero's OWN band proportion. It used to be `aspect-video` over
           // a tile that also had a caption under it, so the search field and the whole list moved
           // down when the feed landed — the shift a skeleton exists to prevent.
+          //
+          // It also covers the SECOND request, the one that fetches the cover. Without that the
+          // top third popped twice on a cold load — skeleton, then the gradient-with-glyph branch,
+          // then the photograph — and the middle frame read as "this post has no image". The
+          // gradient now means only what its comment says it means. `leadDetail` is disabled while
+          // there is no lead, so `isLoading` is false there and an empty feed still falls straight
+          // through to `null`.
           <Skeleton className="aspect-[5/2] w-full rounded-card" />
         ) : lead ? (
           <FeedHero post={lead} coverKey={leadCover?.storageKey} />
@@ -200,9 +207,16 @@ export function MarketplacePage() {
           // ITS OWN BRANCH, NOT THE EMPTY STATE. A failed fetch used to fall through to "Még nincs
           // itt semmi", which tells a first-time visitor the marketplace is empty when in fact the
           // request failed — the worst possible first impression, and a lie.
+          //
+          // AND IT NO LONGER CLAIMS AN OUTAGE. It said `offline.title` for any failure — a 500, a
+          // 404, a malformed payload — while `OfflineIndicator`, hoisted into `Providers` and so
+          // covering this public route, is the only thing on the page that actually probes the
+          // connection. A genuinely offline visitor got the strip AND this panel repeating it; an
+          // online visitor hitting a server error was told their phone had no internet.
           <EmptyState
-            icon={WifiOff}
-            title={t('offline.title')}
+            icon={TriangleAlert}
+            title={t('marketplace.errorTitle')}
+            body={t('marketplace.errorBody')}
             action={
               <Pressable
                 variant="secondary"
@@ -217,6 +231,11 @@ export function MarketplacePage() {
         ) : posts.length === 0 ? (
           <EmptyState
             icon={Compass}
+            // Not searching means the marketplace ITSELF is empty — `lead` is null, so the hero
+            // renders nothing either and this mark has to carry the top third the way the
+            // photograph would have. A search that returns nothing still has a populated hero and
+            // chip row above it, so there the ordinary inline size is right.
+            size={searching ? 'inline' : 'anchor'}
             title={searching ? t('marketplace.noResultsTitle') : t('marketplace.emptyTitle')}
             body={searching ? t('marketplace.noResultsBody') : t('marketplace.emptyBody')}
           />
@@ -257,8 +276,18 @@ export function MarketplacePage() {
  * rectangle: an empty box in the top third is worse than no image at all, and the gradient is
  * the one surface per screen the Bible allows.
  *
- * The play disc and the `Kiemelt` pill stay cut, per the screen note's warning: there is no video
- * player behind a play affordance and no featured flag in `PublicPost`.
+ * ═══ AND THE PLAY DISC IS CUT — DECIDED, NOT DEFERRED ══════════════════════════════════════════
+ *
+ * The screen note's warning covers the `Kiemelt` pill and the `42` badge (no featured flag, no
+ * per-kind counts). The play disc is a SEPARATE decision, and this is where it is recorded so it
+ * stops being re-litigated on every comparison pass: the spec's Components section asks whether it
+ * opens a sheet, a native player, or simply the post detail. The answer is the post detail — there
+ * is no video anywhere in this product — and the spec's own sentence says a play button that
+ * navigates to text is a promise broken on the first tap. So the tile links to `/m/p/:id` with NO
+ * overlay at all. A triangle on a photograph that opens a page of prose would be worse than the
+ * bare photograph, and the same answer holds on the post detail, which draws the same disc.
+ * `piacter.md` and `marketplace-post-detail.md` need this moved into their "What was merged away"
+ * sections; until then the image asks for something the code has already answered.
  */
 function FeedHero({ post, coverKey }: { post: PublicPost; coverKey?: string }) {
   const Icon = kindIcon(post.kind);
@@ -278,7 +307,11 @@ function FeedHero({ post, coverKey }: { post: PublicPost; coverKey?: string }) {
           // what arrives is what the pipeline made rather than what somebody uploaded.
           src={`/api/v1/public/media/${coverKey}`}
           alt=""
-          loading="lazy"
+          // EAGER, and prioritised. This is the single most important above-the-fold image on the
+          // product's front door; `loading="lazy"` deferred the one picture a cold visitor is
+          // waiting for.
+          loading="eager"
+          fetchPriority="high"
           className="aspect-[5/2] w-full object-cover"
         />
       ) : (

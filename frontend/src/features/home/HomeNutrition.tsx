@@ -81,7 +81,17 @@ export function HomeNutrition({ date }: { date: string }) {
             icon={m.icon}
             // A number animates through CountUp; `128 g` carries a unit and simply renders.
             value={m.unit ? `${m.value} ${m.unit}` : m.value}
-            caption={t(`nutrition.macro.${m.key}`)}
+            // The TARGET, not the macro name — the glyph is what says which macro this is, so
+            // the caption line is spent on the denominator the figure is missing. `round()` for
+            // display only: `m.target` stays raw below so `progress` and `over` keep their
+            // precision. No target means no `cél` clause, matching MacroBars on /nutrition.
+            caption={
+              m.target != null
+                ? t('nutrition.card.targetCaption', {
+                    value: m.unit ? `${round(m.target)} ${m.unit}` : round(m.target),
+                  })
+                : t(`nutrition.macro.${m.key}`)
+            }
             progress={m.target != null && m.target > 0 ? m.value / m.target : undefined}
             // Warning, never danger, and the copy never scolds: somebody three hundred calories
             // past their target has had a normal Tuesday. `SummaryTile` owns that colour rule.

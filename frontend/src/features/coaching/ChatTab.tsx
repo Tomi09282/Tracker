@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useSession } from '../auth/useSession';
 import { ChatPanel } from '../chat/ChatPanel';
-import { useConversations, useOpenConversation } from '../chat/useChat';
+import { useClientConversation } from '../chat/useChat';
 
 /**
  * The coach's chat, on the client detail screen.
@@ -19,17 +18,11 @@ import { useConversations, useOpenConversation } from '../chat/useChat';
 export function ChatTab({ linkId }: { linkId: number }) {
   const { t } = useTranslation();
   const { data: me } = useSession();
-  const { data, isPending } = useConversations();
-  const open = useOpenConversation();
+  // The resolver moved into `useChat` when the chat route was written: two callers, one mapping
+  // from a link to a thread.
+  const { conversation, isPending } = useClientConversation(linkId);
 
-  const conversation = (data?.conversations ?? []).find((c) => c.coach_client_id === linkId) ?? null;
-
-  useEffect(() => {
-    if (isPending || conversation || open.isPending || open.isSuccess) return;
-    open.mutate(linkId);
-  }, [isPending, conversation, linkId, open]);
-
-  if (isPending || (!conversation && open.isPending)) {
+  if (isPending) {
     return (
       <div className="flex flex-col gap-2">
         <Skeleton className="h-16 w-2/3 rounded-card" />

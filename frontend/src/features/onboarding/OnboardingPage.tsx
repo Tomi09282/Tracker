@@ -313,9 +313,14 @@ function NumberRow({
           }
           onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         />
+        {/* `rounded-field`, not `shape="icon"`'s `rounded-chip`: --radius-chip is --radius-full,
+            so the steppers rendered as two circles beside a rounded-rectangle input. The three
+            boxes are one row of controls and the mockup draws them with one corner radius.
+            `shape="icon"` still supplies the square 44×44 min-width. */}
         <Pressable
           shape="icon"
           variant="secondary"
+          className="rounded-field"
           aria-label={decLabel}
           disabled={value != null && value <= min}
           onClick={() => nudge(-step)}
@@ -325,6 +330,7 @@ function NumberRow({
         <Pressable
           shape="icon"
           variant="secondary"
+          className="rounded-field"
           aria-label={incLabel}
           disabled={value != null && value >= max}
           onClick={() => nudge(step)}
@@ -512,12 +518,15 @@ export function OnboardingPage() {
           aria-valuetext={position}
         >
           <Gauge value={(current + 1) / STEPS.length} label={position} className="size-40">
-            {/* Numerals only, and `aria-hidden`: the sentence is on the progressbar above, and a
-                screen reader reading "2" then "/ 5" then "2 / 5. lépés" says one fact three
-                times. The caption the mockup puts here needs a key that does not exist yet. */}
+            {/* `aria-hidden`: the sentence is on the progressbar above, and a screen reader
+                reading "2" then "5 lépésből" then "2 / 5. lépés" says one fact three times.
+                The caption is a WORD, not a denominator — `/ 5` hung a fraction off a numeral
+                with no numerator beside it, which is not what the ring is saying. */}
             <span aria-hidden className="flex flex-col items-center leading-none">
               <span className="text-timer tabular-nums text-text-1">{current + 1}</span>
-              <span className="text-body-s mt-1 tabular-nums text-text-2">/ {STEPS.length}</span>
+              <span className="text-body-s mt-1 text-text-2">
+                {t('onboarding.stepsTotal', { total: STEPS.length })}
+              </span>
             </span>
           </Gauge>
         </div>
@@ -588,6 +597,10 @@ export function OnboardingPage() {
             <NumberRow
               id="onb-sessions-per-week"
               label={t('onboarding.sessionsPerWeek')}
+              // Its OWN hint, not `sessionMinutesHint` — that one now belongs to the field below,
+              // and DESIGN §6.5 asks every personal question to name what the answer is for
+              // before the eye moves on. The field had nothing under it at all.
+              hint={t('onboarding.sessionsPerWeekHint')}
               icon={CalendarDays}
               value={profile.sessions_per_week ?? null}
               min={1}
@@ -797,13 +810,18 @@ export function OnboardingPage() {
 
       <footer className="flex flex-col gap-group">
         <SaveState state={saveState} t={t} />
-        <div className="flex items-center justify-between gap-group">
+        {/* The two buttons SPLIT the row — `flex-1` each, one gap between them, which is why
+            `justify-between` is gone: at content width they were two ~110px pills pinned to
+            opposite edges of a 390px screen with 150px of dead space in the middle, so the pair
+            read as two unrelated controls and the primary was a small corner target. */}
+        <div className="flex items-center gap-group">
           {/* Back is always rendered, disabled on the first step, so the footer never reflows
               and the primary action does not move under the client's thumb. It is OUTLINED
               rather than ghost: the two buttons in this row are a pair, and a ghost against a
               filled accent reads as one button and one label. */}
           <Pressable
             variant="secondary"
+            className="flex-1"
             onClick={() => go(current - 1)}
             disabled={current === 0}
             icon={<ChevronLeft className="size-icon-s" aria-hidden />}
@@ -811,11 +829,16 @@ export function OnboardingPage() {
             {t('common.back')}
           </Pressable>
           {isLast ? (
-            <Pressable variant="primary" onClick={() => void submit()} busy={complete.isPending}>
+            <Pressable
+              variant="primary"
+              className="flex-1"
+              onClick={() => void submit()}
+              busy={complete.isPending}
+            >
               {t('onboarding.finish')}
             </Pressable>
           ) : (
-            <Pressable variant="primary" onClick={() => go(current + 1)}>
+            <Pressable variant="primary" className="flex-1" onClick={() => go(current + 1)}>
               {t('common.next')}
               <ChevronRight className="size-icon-s" aria-hidden />
             </Pressable>

@@ -1,6 +1,38 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, EyeOff, Loader2, Palette } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  CircleCheck,
+  CircleGauge,
+  Coins,
+  Columns3,
+  Copy,
+  CreditCard,
+  Heart,
+  Hourglass,
+  List,
+  Loader2,
+  MessageSquare,
+  MousePointerClick,
+  Palette,
+  PanelBottom,
+  PanelTop,
+  Plus,
+  Pointer,
+  RectangleHorizontal,
+  RefreshCw,
+  SlidersHorizontal,
+  SquareCheck,
+  SquareStack,
+  TextCursorInput,
+  Timer,
+  ToggleRight,
+  Trophy,
+  UserPlus,
+} from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { CATALOG, VARIANTS, type Variant } from '../../ui/feedback/catalog';
 import { VariantOverride } from '../../ui/feedback/ElementStyleProvider';
@@ -53,6 +85,49 @@ import { useElementStyles, useSetElementVariant } from './useElementStyles';
  * two colours claiming the same state on one screen. Green stays what it is everywhere else in the
  * app — the colour of something that just happened — and that is the toast's job here.
  */
+/**
+ * A glyph per element, for the chip rail.
+ *
+ * The rail's 32px holder used to carry the element's ACTIVE LETTER, so no chip said what its
+ * element actually is — a rail of 27 identical squares reading `A`, `C`, `·`. The mockup draws the
+ * element itself in that slot (a hand-tap on `E1 Gomb`, a switch on `E4 Kapcsoló`, a card outline
+ * on `E12 Kártya`), which is what makes the rail scannable at a glance.
+ *
+ * It lives HERE and not beside `CATALOG`, which is where it belongs: `catalog.ts` is parity-checked
+ * data read by `check-element-roster.mjs`, and this screen is the only consumer. The `??` fallback
+ * means a catalogue entry added without a glyph gets a generic mark rather than an empty square,
+ * so the two files cannot go out of step in a way that breaks the rail.
+ */
+const ELEMENT_ICON: Record<string, LucideIcon> = {
+  E1: Pointer,
+  E2: Copy,
+  E3: MousePointerClick,
+  E4: ToggleRight,
+  E5: SquareCheck,
+  E6: Columns3,
+  E7: TextCursorInput,
+  E8: ChevronDown,
+  E9: Calendar,
+  E10: PanelTop,
+  E11: PanelBottom,
+  E12: CreditCard,
+  E13: List,
+  E14: SquareStack,
+  E15: MessageSquare,
+  E16: CircleGauge,
+  E17: SlidersHorizontal,
+  E18: RectangleHorizontal,
+  E19: RefreshCw,
+  E20: Plus,
+  E21: CircleCheck,
+  E22: Timer,
+  E23: Heart,
+  E24: UserPlus,
+  E25: Coins,
+  E26: Trophy,
+  E27: Hourglass,
+};
+
 export function StyleStudioPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -106,15 +181,28 @@ export function StyleStudioPage() {
           ) : null}
         </div>
 
-        <div className="grid min-h-32 place-items-center">
+        <div className="grid min-h-40 place-items-center py-2">
           {styles.isPending ? (
             // Control-shaped and control-sized, so the live component does not shove the caption
             // down when it arrives.
             <Skeleton className="h-11 w-32 rounded-button" />
           ) : previewable && active ? (
-            <VariantOverride styles={{ [entry.id]: active }}>
-              <Demo id={entry.id} />
-            </VariantOverride>
+            /* THE HERO IS DRAWN HALF AGAIN AS LARGE — and by scaling the WRAPPER, never by sizing
+               a second copy of the component. What is on this stage has to stay the real,
+               pressable thing the rows below render, or the anchor is a picture of the truth
+               rather than the truth. Unscaled it was pixel-identical to the five thumbnails and
+               the hero was distinguished only by the air around it, while these variants are
+               differences in MOTION: a sheen sweep inside a control-sized box is a rectangle that
+               flickers.
+
+               The 2/3 box is what makes 150% safe. A demo that asks for `w-full` — E7's field,
+               E13's swipe row — fills two thirds of the stage and lands back at exactly the
+               stage's width once scaled, instead of painting half its width outside the card. */
+            <div className="flex w-2/3 origin-center scale-150 justify-center">
+              <VariantOverride styles={{ [entry.id]: active }}>
+                <Demo id={entry.id} />
+              </VariantOverride>
+            </div>
           ) : (
             <p className="text-caption measure text-center text-text-3">{t('studio.noPreview')}</p>
           )}
@@ -146,40 +234,62 @@ export function StyleStudioPage() {
           >
             {CATALOG.map((e) => {
               const on = e.id === selected;
+              const Glyph = ELEMENT_ICON[e.id] ?? Palette;
               return (
                 <li key={e.id}>
                   <Pressable
-                    variant={on ? 'secondary' : 'ghost'}
+                    variant="ghost"
+                    // The SELECTED WASH (DESIGN §5.6), not `secondary`. A surface-1 fill behind a
+                    // ghost chip is a near-invisible difference in dark mode, so the accent
+                    // hairline was doing all the work of saying which element is open — and the
+                    // mockup draws the selected chip as an unmistakable filled panel. `selected`
+                    // also carries the hover half: without it the chosen chip reverted to
+                    // surface-2 under the pointer, which reads as "about to deselect".
+                    selected={on}
                     density="compact"
                     role="radio"
                     aria-checked={on}
+                    // Inert elements are muted rather than marked with a glyph of their own (the
+                    // holder is the element's now), so the fact has to reach a screen reader some
+                    // other way — the chip says it in its name instead of on its face.
+                    aria-label={e.live ? undefined : `${e.id} ${e.name} — ${t('studio.inertShort')}`}
                     className={cn(
                       'h-auto w-28 shrink-0 flex-col gap-tight py-2 text-center',
                       'lg:w-full lg:flex-row-reverse lg:justify-between lg:text-left',
                       'border-[length:var(--border-width)]',
                       on ? 'border-accent' : 'border-[var(--surface-border)]',
+                      // The whole chip carries the inert signal, which is what the spec asks for:
+                      // "their own muted treatment rather than dropping the signal".
+                      !e.live && 'opacity-60',
                     )}
                     onClick={() => setSelected(e.id)}
                   >
-                    {/* The holder carries the STATE, not a decorative glyph: the letter this
-                        element currently ships with, `·` until the fetch lands, and — for the
-                        three elements nothing reads — the crossed-out eye. A chip has nowhere to
-                        put a separate inert marker, so the marker takes the holder. */}
+                    {/* The holder carries the ELEMENT — what this chip is about. It used to carry
+                        the active LETTER, which meant no chip on the rail said what it was: 27
+                        identical squares reading `A`, `C` or `·`. The letter has not gone; see the
+                        wide-rail span below. */}
                     <span
+                      aria-hidden
                       className={cn(
-                        'text-micro inline-flex size-8 shrink-0 items-center justify-center rounded-chip uppercase tabular-nums',
+                        'inline-flex size-8 shrink-0 items-center justify-center rounded-chip',
                         e.live && on ? 'bg-accent-subtle text-accent' : 'bg-surface-2 text-text-3',
                       )}
                     >
-                      {e.live ? (
-                        (styles.data?.styles[e.id] ?? '·')
-                      ) : (
-                        <EyeOff className="size-icon-s" aria-label={t('studio.inertShort')} />
-                      )}
+                      <Glyph className="size-icon-s" strokeWidth={2} />
                     </span>
                     <span className={cn('w-full truncate lg:flex-1', !e.live && 'text-text-3')}>
                       <span className="text-caption tabular-nums mr-1 text-text-3">{e.id}</span>
                       {e.name}
+                      {/* The active letter, on the WIDE rail only. On a phone the chip is 112px
+                          and the mockup draws just `E1 Gomb`, with the running variant named in
+                          full on the hero right above it. On lg the rail is a 27-row list where
+                          this letter is the only per-element state in view, and the hero can only
+                          speak for the one element that is open. */}
+                      {e.live ? (
+                        <span className="text-caption tabular-nums ml-1 hidden text-text-3 lg:inline">
+                          · {styles.data?.styles[e.id] ?? '·'}
+                        </span>
+                      ) : null}
                     </span>
                   </Pressable>
                 </li>
@@ -205,10 +315,12 @@ export function StyleStudioPage() {
             >
               <Palette className="size-icon-m" strokeWidth={2} />
             </span>
-            <div className="min-w-0 flex-1">
-              <h2 className="text-title-3 truncate text-text-1">{entry.name}</h2>
-              <p className="text-caption tabular-nums text-text-3">{entry.id}</p>
-            </div>
+            {/* The heading names the SECTION, not the element. `Button` over `E1` here repeated
+                the identity the hero states two blocks above ("GOMB · E1") and left the list of
+                five variants under it unnamed. */}
+            <h2 className="text-title-3 min-w-0 flex-1 truncate text-text-1">
+              {t('studio.variants')}
+            </h2>
             {!entry.live ? (
               <span className="text-micro shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
                 {t('studio.inertShort')}
@@ -221,6 +333,14 @@ export function StyleStudioPage() {
               <p className="text-body-s measure text-text-2">{t('studio.inertExplain')}</p>
             </Surface>
           ) : null}
+
+          {/* THE SENTENCE THE INTRO LOST, PUT WHERE THE CONSEQUENCE IS.
+              `studio.intro` used to carry it four lines above the fold — "this applies to every
+              user on their next load, with no redeploy" — where it was skimmed once and never
+              again. It is a real and slightly alarming fact about the buttons directly below, so
+              it sits with them: DESIGN §6.4, say the consequence before the action, not in a
+              paragraph at the top of the page. */}
+          {entry.live ? <p className="text-caption measure text-text-3">{t('studio.commitNote')}</p> : null}
 
           <ul className="flex flex-col gap-group">
             {VARIANTS.map((v) => {

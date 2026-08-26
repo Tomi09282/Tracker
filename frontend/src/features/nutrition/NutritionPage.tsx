@@ -147,6 +147,10 @@ export function NutritionPage() {
             /* `segments` rather than `value` for one arc, because a single segment is the only way
                to colour the sweep: overshoot has to read amber, not accent. */
             segments={[{ value: kcalFill, color: kcalOver ? 'var(--warning)' : 'var(--accent)' }]}
+            /* A CLOSED track, against Gauge's 36° default. 03-nutrition.webp draws 1840 as a
+               fraction of a FULL circle — with the default hole the same figure would be a
+               fraction of 324°, so the arc would read fuller than the day actually is. */
+            gap={0}
             className="aspect-square w-full max-w-[220px]"
           >
             {day.isLoading ? (
@@ -212,7 +216,13 @@ export function NutritionPage() {
                     align="center"
                     value={`${round(m.value)}g`}
                     // No target means no `· cél` clause and no bar — the same rule the ring obeys.
-                    caption={m.target != null ? `${label} · ${round(m.target)}g` : label}
+                    // The word is what makes the second number a TARGET rather than a second
+                    // quantity (DESIGN.md §6.6); it had been dropped and left two bare grams.
+                    caption={
+                      m.target != null
+                        ? `${label} · ${t('nutrition.macroTargetShort')} ${round(m.target)}g`
+                        : label
+                    }
                     progress={
                       m.target != null && m.target > 0 ? m.value / m.target : undefined
                     }
@@ -331,7 +341,15 @@ export function NutritionPage() {
               {/* A FORMAT check and nothing more: it says the number is usable, not that the
                   amount is right. Hidden rather than crossed out when it is not. */}
               {gramsValid ? (
-                <Check className="size-icon-s shrink-0 text-[var(--success)]" aria-hidden />
+                /* A filled disc with the tick knocked out of it, as the mockup draws it — and the
+                   same mark the onboarding number fields and the set row already use, so one
+                   "this is valid" signal has one shape across the app. */
+                <span
+                  aria-hidden
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-chip bg-success text-on-success"
+                >
+                  <Check className="size-icon-s" strokeWidth={3} />
+                </span>
               ) : null}
             </span>
 

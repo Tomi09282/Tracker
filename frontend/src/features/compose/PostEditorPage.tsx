@@ -354,8 +354,12 @@ export function PostEditorPage() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="text-body-s block text-accent">{t('compose.cover')}</span>
+                  {/* This slot holds the image's OWN description, so its empty case gets its own
+                      string. Falling back to the upload field's hint printed a question addressed
+                      to the coach where a description belongs, and hid the fact that this cover has
+                      no alt text at all. `||` and not `??`, so an empty-string alt is caught too. */}
                   <span className="text-caption block truncate text-text-3">
-                    {cover.alt ?? t('compose.coverAltHint')}
+                    {cover.alt || t('compose.coverAltMissing')}
                   </span>
                 </span>
                 <Pressable
@@ -445,14 +449,13 @@ export function PostEditorPage() {
         )}
       </div>
 
-      {/* A title is this form's floor — autosave stays off until there is one — so the control
-          says so semantically. The visible `Kötelező` marker the mockup puts on the label row is
-          waiting on a `required` string in the compose namespace; `Field`'s `marker` prop takes it
-          the day the bundles have one. `aria-required` is the half that needs no copy, and it is
-          the half a screen reader needs. */}
+      {/* A title is this form's floor — autosave stays off until there is one — so the control says
+          so both ways: `aria-required` for a screen reader, and the `Kötelező` marker the mockup
+          draws on the label row for everyone else. */}
       <Field
         label={t('compose.postTitle')}
         aria-required
+        marker={t('compose.required')}
         value={title}
         maxLength={limits?.titleMax}
         disabled={readOnly}
@@ -464,11 +467,14 @@ export function PostEditorPage() {
       {/* ── the body ─────────────────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-tight">
         <label htmlFor="compose-body" className="text-body-s flex items-center gap-tight text-text-2">
+          {/* `size-11`, matching the cover caption's image tile above. Two accent tiles on one
+              screen at two sizes read as two different kinds of thing; at 32px this one also sat
+              smaller than the label beside it, where the mockup draws it at field height. */}
           <span
             aria-hidden
-            className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent"
+            className="inline-flex size-11 items-center justify-center rounded-chip bg-accent-subtle text-accent"
           >
-            <Pencil className="size-icon-s" strokeWidth={2} />
+            <Pencil className="size-icon-m" strokeWidth={2} />
           </span>
           {t('compose.body')}
         </label>
@@ -480,9 +486,14 @@ export function PostEditorPage() {
           onChange={(e) => setBody(e.target.value)}
         />
         {/* Colour arrives before reading does, and only near the end — a counter that is loud from
-            the first character is a counter people stop seeing. */}
+            the first character is a counter people stop seeing.
+
+            `self-end` because the mockup deliberately splits the two counters: the title's sits
+            flush left under its input (it is `Field`'s hint slot), the body's sits against the
+            textarea's trailing edge. `self-end` and not `text-right` — it shrinks the box to the
+            text instead of letting a muted line span the column. */}
         <span
-          className={cn('text-caption', limits ? COUNTER_CLASS[counterTone(body.length, limits.bodyMax)] : 'text-text-3')}
+          className={cn('text-caption self-end', limits ? COUNTER_CLASS[counterTone(body.length, limits.bodyMax)] : 'text-text-3')}
         >
           {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bodyMax - body.length) }) : ''}
         </span>
@@ -543,6 +554,12 @@ export function PostEditorPage() {
         ) : autosave.state === 'saved' && !autosave.hasUnsaved && autosave.savedAt !== null ? (
           <>
             <Check className="size-icon-s text-success" aria-hidden />
+            {/* THE LEADING PHRASE IS WHAT EXPLAINS THE MISSING SAVE BUTTON. `Mentve 14:07` alone is
+                a timestamp; `Automatikus mentés · Mentve 14:07` is the reason there is nothing to
+                press. Its own key rather than folding it into the state word, so the state stays
+                last and the `.tnum` time keeps sitting next to `Mentve`. */}
+            {t('compose.autosave.label')}
+            <span aria-hidden>·</span>
             {t('compose.autosave.saved')}
             {/* THE CLOCK TIME, because "Mentve" alone reads the same a second after the save and
                 an hour after it — and this line is the only receipt a screen with no save button
@@ -618,9 +635,14 @@ export function PostEditorPage() {
           {/* Restoring returns the post to its ORIGINAL feed position and costs no quota slot —
               published_at never moves. Worth saying, because the fear it removes is the reason
               people leave things up that they would rather take down. */}
+          {/* Exactly one caption in either state. The published/draft branch is the sentence that
+              makes taking a post down feel safe — without it the button row was followed by
+              nothing, and hesitation is what leaves things up that a coach would rather remove. */}
           {post.deletedAt !== null ? (
             <p className="text-caption text-text-3">{t('compose.restoreKeepsPosition')}</p>
-          ) : null}
+          ) : (
+            <p className="text-caption text-text-3">{t('compose.withdrawUndoable')}</p>
+          )}
         </section>
       ) : null}
 

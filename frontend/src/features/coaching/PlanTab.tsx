@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Check, ChevronRight, ClipboardList, Copy, Plus } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { chip, type ChipVariants } from '../../ui/primitives/control';
 import { Surface } from '../../ui/primitives/Surface';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
@@ -22,11 +23,19 @@ import { useOnline } from '../plans/useOnline';
  * it. Matching on the user id would keep showing a departed client's programme.
  */
 
-const STATUS_TONE: Record<PlanSummary['status'], string> = {
-  active: 'bg-success-subtle text-success',
-  draft: 'bg-surface-3 text-text-2',
-  paused: 'bg-warning-subtle text-warning',
-  ended: 'bg-surface-3 text-text-3',
+/**
+ * Status → the `chip` recipe's tone. A MAP OF TONES, not of class strings.
+ *
+ * The four pills used to be hand-written here at `px-2 py-0.5`, which renders a 16px slab — the
+ * mockup draws comfortable pills, and control.ts:143 names these coaching screens as the copies
+ * the recipe was written to absorb. A tone is a semantic claim, and a claim that is copy-pasted
+ * drifts; `quiet` for draft and ended is the recipe's own "state, but do not shout about it".
+ */
+const STATUS_TONE: Record<PlanSummary['status'], NonNullable<ChipVariants['tone']>> = {
+  active: 'success',
+  draft: 'quiet',
+  paused: 'warning',
+  ended: 'quiet',
 };
 
 function PlanCard({ plan }: { plan: PlanSummary }) {
@@ -39,11 +48,10 @@ function PlanCard({ plan }: { plan: PlanSummary }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-tight">
             <span className="text-title-3 text-text-1">{plan.name}</span>
-            {/* Concatenated, not `cn`: twMerge files a custom type scale and a colour in the same
-                bucket and would drop `text-caption`. */}
-            <span
-              className={`text-caption inline-flex items-center gap-1 rounded-chip px-2 py-0.5 ${STATUS_TONE[plan.status]}`}
-            >
+            {/* Trailing check, matching 07-coach-client-detail-terv.webp — the plan LIST draws it
+                leading, and the two mockups differ on purpose: there the chip opens the meta line,
+                here it closes the title. */}
+            <span className={chip({ tone: STATUS_TONE[plan.status] })}>
               {t(`plans.status.${plan.status}`)}
               {plan.status === 'active' ? <Check className="size-icon-s" strokeWidth={2} aria-hidden /> : null}
             </span>
@@ -122,7 +130,9 @@ export function PlanTab({ linkId }: { linkId: number }) {
         // The plan is created THROUGH the link — the server's INSERT ... SELECT carries the
         // ownership check, so this sends the link id and nothing else that matters.
         onClick={() =>
-          createPlan.mutate({ name: t('plans.newName'), coach_client_id: linkId, cycle_days: 7 })
+          // `plans.defaultName`, not `plans.newName`: the latter is the editor input's FIELD LABEL
+          // ("Új terv neve"), and creating with it left rows in the library reading like a form.
+          createPlan.mutate({ name: t('plans.defaultName'), coach_client_id: linkId, cycle_days: 7 })
         }
       >
         {t('plans.newForClient')}

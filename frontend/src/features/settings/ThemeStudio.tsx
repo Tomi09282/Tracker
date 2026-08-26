@@ -55,26 +55,52 @@ export function ThemeStudio() {
   const { cancelPreview } = theme;
   useEffect(() => cancelPreview, [cancelPreview]);
 
+  /**
+   * ═══ THE LOCAL COMMIT WAITS FOR THE SERVER ═══════════════════════════════════════════════════
+   *
+   * This used to call `setTheme` first and clear the draft unconditionally, with `save.isError`
+   * read nowhere. A failed PUT was therefore pixel-identical to a successful one — draft cleared,
+   * `dirty` false, button greyed — and the choice silently never left the device.
+   *
+   * Deferring the commit is what keeps the state, not keeping the draft: `dirty` is
+   * `shown !== theme.pack`, so a synchronous `setTheme` made it false whatever the draft held.
+   * Now the chip stays selected, the button stays live for a retry, and the app is already
+   * painted in the new pack from the tap's own `theme.preview` — so nothing flickers while the
+   * request runs, and the spec's rule holds: a failed theme save must not revert the choice,
+   * because a colour that snaps back reads as the tap not registering.
+   */
   const commit = () => {
-    theme.setTheme({ pack: shown });
     // The accent and the gradient are still part of the stored theme even though this card no
     // longer edits them — sending only the pack would blank whatever the user set before the cut.
-    save.mutate({ pack: shown, accent: theme.accent, gradient: theme.gradient });
-    setDraft(null);
+    save.mutate(
+      { pack: shown, accent: theme.accent, gradient: theme.gradient },
+      {
+        onSuccess: () => {
+          theme.setTheme({ pack: shown });
+          setDraft(null);
+        },
+        // No onError body on purpose: leaving `draft` and `theme.pack` untouched IS the recovery.
+      },
+    );
   };
 
   return (
     <div className="flex flex-col gap-group">
       {/* The live preview is a TILE now, not a card with a demo `Mentés` / `Mégse` pair inside it:
           two buttons that do nothing are two more things on a screen whose whole redesign was
-          about having fewer. The brand gradient stays on the holder — it is the smallest surface
-          that still demonstrates a repaint, and it is the only place in the product that consumes
-          `--gradient-brand` (DESIGN.md G6). */}
+          about having fewer.
+
+          The holder is the SAME 44px tinted square as every other glyph on this screen — the
+          section headers, the coins row, the cue rows. It was a `--gradient-brand` block, which
+          made it the one saturated multi-colour object in view and the token's second consumer;
+          DESIGN.md G6 gives that gradient exactly one home (the workout player's hero box), and a
+          second one is how a per-pack identity stops meaning anything. The tile still demonstrates
+          a repaint: `--tile-tint` is the accent at 14%, so it changes with the pack like the rest
+          of the card. */}
       <div className="flex items-center gap-tight">
         <span
           aria-hidden
-          className="grid size-11 shrink-0 place-items-center rounded-field text-accent-fg"
-          style={{ background: 'var(--gradient-brand)' }}
+          className="grid size-11 shrink-0 place-items-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
         >
           <Flame className="size-icon-m" strokeWidth={2} />
         </span>
@@ -106,7 +132,12 @@ export function ThemeStudio() {
                 role="radio"
                 aria-checked={on}
                 shape="chip"
-                variant={on ? 'secondary' : 'ghost'}
+                // Every chip is `secondary`, so every chip has an edge and a fill. On `ghost` the
+                // unselected packs were bare words on the card — they did not read as chips at
+                // all, and "which one is on" was answered by being the only one with a border.
+                // The mockup draws three equal outlined boxes where the selected one is marked by
+                // the accent edge, the wash and the corner check.
+                variant="secondary"
                 // A tap PREVIEWS. Hover-to-compare was removed with the commit-on-tap behaviour:
                 // leaving a chip reverted to the committed pack, which would have thrown away the
                 // pending choice the moment the pointer moved off it.
@@ -115,15 +146,18 @@ export function ThemeStudio() {
                   theme.preview({ pack });
                 }}
                 className={cn(
-                  // The border width is declared on BOTH states, transparent when idle, so the
-                  // chips keep their size as the selection moves — in a pack that declares a 2px
-                  // edge an unselected chip would otherwise be 4px narrower than the selected one.
-                  'shrink-0 capitalize',
-                  'border-[length:var(--border-width)]',
-                  on ? 'border-accent bg-accent-subtle text-on-accent-subtle' : 'border-transparent',
+                  // The border width comes from `secondary` and is therefore declared on BOTH
+                  // states, so the chips keep their size as the selection moves — in a pack that
+                  // declares a 2px edge an unselected chip would otherwise be 4px narrower than
+                  // the selected one. Only the COLOUR of the edge changes here.
+                  'shrink-0',
+                  on && 'border-accent bg-accent-subtle text-on-accent-subtle',
                 )}
               >
-                {pack}
+                {/* The pack id is a database key, not a label: `capitalize` on it rendered five
+                    English words ("Midnight") in a Hungarian UI. `defaultValue` keeps a pack
+                    seeded after the bundle printing its own id rather than a raw key. */}
+                {t(`settings.themePack.${pack}`, { defaultValue: pack })}
                 {/* The confirmation badge sits ON the chip's corner rather than inline beside the
                     word, so the chips do not change width as the selection moves — the same
                     treatment the account avatar's badge uses two blocks up. */}
@@ -141,18 +175,32 @@ export function ThemeStudio() {
         </div>
       </div>
 
-      <Pressable
-        variant="primary"
-        className="w-full"
-        busy={save.isPending}
-        // Nothing to commit means nothing to press. The alternative — a live button that re-saves
-        // the pack already stored — is exactly the "saves something already saved" the spec warns
-        // about, and it would make a successful save indistinguishable from a no-op.
-        disabled={!dirty}
-        onClick={commit}
-      >
-        {save.isPending ? t('common.saving') : t('common.save')}
-      </Pressable>
+      <div className="flex flex-col gap-tight">
+        <Pressable
+          variant="primary"
+          className="w-full"
+          busy={save.isPending}
+          // Nothing to commit means nothing to press. The alternative — a live button that re-saves
+          // the pack already stored — is exactly the "saves something already saved" the spec warns
+          // about, and it would make a successful save indistinguishable from a no-op.
+          disabled={!dirty}
+          onClick={commit}
+        >
+          {/* Its own key, not `common.save`: this button names what it saves, which is what the
+              mockup draws and what tells you the chips above are a pending choice rather than a
+              committed one. */}
+          {save.isPending ? t('common.saving') : t('settings.saveTheme')}
+        </Pressable>
+        {/* Inline under the button, where the failure happened — settings.md States → Error asks
+            for exactly this. `role="alert"` because it appears after the fact that caused it, so
+            nothing else announces it. The copy follows DESIGN §6.3: what happened, what survived,
+            what to do. */}
+        {save.isError ? (
+          <p role="alert" className="text-caption text-danger">
+            {t('settings.themeSaveError')}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

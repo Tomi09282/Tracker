@@ -203,6 +203,16 @@ export function ProfileEditorPage() {
 
   const profile = loaded.data?.profile ?? null;
   const isNew = !loaded.isPending && profile === null;
+  /*
+   * A moderator-removed profile is READ-ONLY here — the spec's `Taken down` state, and the same
+   * derivation `PostEditorPage` uses one word for one word. Without it every field, chip and toggle
+   * stayed live and `Mentés` fired a PUT the server refuses: a form that accepts edits it cannot
+   * keep is the quietest way to lose somebody's work.
+   *
+   * `!!profile` and not a `!== undefined` pair: on create `profile` is null and that already
+   * answers it, so `readOnly` is false through the whole create form.
+   */
+  const readOnly = !!profile && profile.removedAt !== null;
 
   useEffect(() => {
     if (profile) {
@@ -286,6 +296,19 @@ export function ProfileEditorPage() {
         {t('compose.backToDesk')}
       </Link>
 
+      {/* One line, the same shape the post editor's takedown banner uses. The FULL explanation
+          (`compose.removedBody`) is the desk's takedown card's job per the spec; this screen only
+          says why nothing here can be typed into. */}
+      {readOnly ? (
+        <Surface
+          as="p"
+          className="text-body-s border-[var(--danger-border)] bg-danger-subtle text-text-1"
+          role="status"
+        >
+          {t('compose.removedTitle')}
+        </Surface>
+      ) : null}
+
       {/* ── the anchor ───────────────────────────────────────────────────────────────────────
           No camera badge and no `Kép cseréje`: there is no avatar upload on the coach profile,
           only post covers. A control that promises an upload the API refuses is worse than a
@@ -302,7 +325,14 @@ export function ProfileEditorPage() {
           {displayName.trim() === '' ? t('compose.createProfile') : displayName}
         </h1>
 
-        {isNew ? null : (
+        {/* THE IDENTITY LINE STAYS EVEN WHEN NOTHING CAN BE EDITED. It is the anchor's second half
+            — the live preview of the marketplace card — so a takedown turns the trigger into plain
+            text rather than removing the line. */}
+        {isNew ? null : readOnly ? (
+          <span className="text-body-s text-text-2">
+            @{profile?.handle} · {cityName}
+          </span>
+        ) : (
           <Pressable
             variant="ghost"
             density="compact"
@@ -324,7 +354,7 @@ export function ProfileEditorPage() {
           />
           <CityPicker value={city} onChange={setCity} cities={taxonomy.data?.cities} />
         </div>
-      ) : identityOpen ? (
+      ) : !readOnly && identityOpen ? (
         <IdentityDisclosure
           current={profile?.handle ?? ''}
           listed={profile?.listedAt !== null}
@@ -336,45 +366,69 @@ export function ProfileEditorPage() {
 
       {/* ── the two fields a coach actually retypes ──────────────────────────────────────────── */}
       <div className="flex flex-col gap-group">
-        {/* The server enforces a minimum here, so the control says so semantically. Its visible
-            `Kötelező` marker — the counterpart to the `Nem kötelező` below — is one missing string
-            away: the `marker` prop takes a `required` string from the compose namespace once the
-            bundles have one. */}
+        {/* The server enforces a minimum here, so the control says so semantically AND visibly:
+            `aria-required` is the half a screen reader needs, `marker` is the half the mockup
+            draws — the right-aligned counterpart to the `Nem kötelező` on the field below. */}
         <Field
           label={t('compose.displayName')}
           aria-required
+          marker={t('compose.required')}
           value={displayName}
           maxLength={limits?.displayNameMax}
+          disabled={readOnly}
           onChange={(e) => setDisplayName(e.target.value)}
         />
 
         {/* `Nem kötelező` belongs on the LABEL row, not in the hint slot: it answers a question
-            asked before typing, and the hint answers one asked while typing. The hint line the
-            mockup shows under this input — where the text lands on the marketplace — is still
-            missing a string; the `hint` prop takes a `headlineHint` key from the compose namespace
-            the day it exists in all three bundles, and until then the slot stays empty rather than
-            repeating the marker. */}
+            asked before typing, and the hint answers one asked while typing. The hint earns its own
+            line by saying WHERE the text lands, which is the one thing the label cannot. */}
         <Field
           label={t('compose.headline')}
           marker={t('compose.optional')}
+          hint={t('compose.headlineHint')}
           value={headline}
           maxLength={limits?.headlineMax}
+          disabled={readOnly}
           onChange={(e) => setHeadline(e.target.value)}
         />
       </div>
 
       {/* ── specialties, in their own box ────────────────────────────────────────────────────── */}
-      <Surface as="fieldset" className="flex w-full min-w-0 flex-col gap-group">
+      {/*
+        A SECTION AND A HEADING, NOT A FIELDSET AND A LEGEND. A rendered `<legend>` is positioned by
+        the browser over the fieldset's block-start border and the border is drawn with a gap behind
+        it, so the card's top edge was cut open on both sides of the word — a gap that widened when
+        the legend was promoted to `text-title-3`. The mockup draws an unbroken box with the title
+        INSIDE it. A legend also shrink-to-fits, which is why no `justify-between` could push the
+        counter to the card's right edge.
+
+        The chip set is labelled on the list instead, with `role="group"`: the chips are `Pressable`s
+        carrying `aria-pressed`, i.e. toggle buttons, so there is no form-control grouping to
+        preserve — and `role="group"` is what actually gets the name announced.
+      */}
+      <Surface
+        as="section"
+        aria-labelledby="compose-specialties"
+        className="flex w-full min-w-0 flex-col gap-group"
+      >
         {/* A CARD HEADING, not a field label. `Szakterületek` and `Bemutatkozás` are the two
             sections of this form and the mockup draws them identically — same size, same
-            full-strength ink, same neutral glyph. At `text-body-s text-text-2` this one read as
-            the label of the chip row rather than as the box's title, and the accent medal made it
-            the loudest glyph on a screen whose accent belongs to `Mentés`. */}
-        <legend className="text-title-3 flex items-center gap-tight text-text-1">
-          <Medal className="size-icon-m shrink-0 text-text-2" aria-hidden />
-          {t('compose.specialties', { n: specialties.length, max: specialtyMax })}
-        </legend>
-        <ul className="flex flex-wrap gap-tight">
+            full-strength ink, same neutral glyph. The count is its own element hard against the
+            card's trailing edge, which is where the mockup puts it; folded into the title string it
+            read as part of the heading. */}
+        <div className="flex w-full items-baseline justify-between gap-2">
+          <h2
+            id="compose-specialties"
+            className="text-title-3 flex items-center gap-tight text-text-1"
+          >
+            <Medal className="size-icon-m shrink-0 text-text-2" aria-hidden />
+            {t('compose.specialties')}
+          </h2>
+          <span className="text-body-s shrink-0 text-text-3">
+            {t('compose.specialtiesCount', { n: specialties.length, max: specialtyMax })}
+          </span>
+        </div>
+        <ul role="group" aria-labelledby="compose-specialties" className="flex flex-wrap gap-tight">
           {visibleSpecialties.map((s) => {
             const on = specialties.includes(s.key);
             return (
@@ -384,6 +438,7 @@ export function ProfileEditorPage() {
                   density="compact"
                   variant={on ? 'primary' : 'secondary'}
                   aria-pressed={on}
+                  disabled={readOnly}
                   onClick={() => toggleSpecialty(s.key)}
                   icon={on ? <Check className="size-icon-s" aria-hidden /> : undefined}
                 >
@@ -414,14 +469,21 @@ export function ProfileEditorPage() {
         </label>
         {/* Three visible lines, not six, and no formatting toolbar: the markdown is the coach's
             own and the preview is one tap away. */}
+        {/* `disabled:*` on the class string as well as the attribute — the post editor's body
+            carries both, and without the utilities a disabled textarea looks identical to an
+            editable one (DESIGN.md rule 45). */}
         <textarea
           id="compose-bio"
-          className="text-body min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+          className="text-body min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
           value={bio}
+          disabled={readOnly}
           onChange={(e) => setBio(e.target.value)}
         />
+        {/* `self-end`, not `text-right`: it shrinks the box to the text so the muted line stops
+            spanning the column, and the last character lands on the textarea's trailing edge where
+            the mockup draws it. `PostEditorPage`'s body counter is the same shape. */}
         <span
-          className={cn('text-caption', limits ? COUNTER_CLASS[counterTone(bio.length, limits.bioMax)] : 'text-text-3')}
+          className={cn('text-caption self-end', limits ? COUNTER_CLASS[counterTone(bio.length, limits.bioMax)] : 'text-text-3')}
         >
           {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bioMax - bio.length) }) : ''}
         </span>
@@ -436,16 +498,21 @@ export function ProfileEditorPage() {
           <div className="flex items-center gap-group">
             <Globe className="size-icon-m shrink-0 text-text-2" aria-hidden />
             <span className="min-w-0 flex-1">
+              {/* A NOUN PHRASE, not the desk's verb. `Profil közzététele` labels the desk's publish
+                  BUTTON; on a switch row it reads as a pending action rather than as the state the
+                  toggle beside it already shows. */}
               <span id="compose-public-label" className="text-body block text-text-1">
-                {t('compose.publishProfile')}
+                {t('compose.publicProfile')}
               </span>
+              {/* And the sub-line explains the CONSEQUENCE instead of restating the toggle. `Élő` /
+                  `Rejtve` said in words exactly what the switch position said in shape. */}
               <span className="text-caption block text-text-3">
-                {profile.publishedAt !== null ? t('compose.live') : t('compose.hidden')}
+                {t('compose.publicProfileHint')}
               </span>
             </span>
             <Switch
               checked={profile.publishedAt !== null}
-              disabled={setLive.isPending}
+              disabled={setLive.isPending || readOnly}
               labelledBy="compose-public-label"
               onChange={(nextOn) => setLive.mutate(nextOn)}
             />
@@ -476,6 +543,8 @@ export function ProfileEditorPage() {
           variant="primary"
           className="w-full"
           busy={create.isPending || save.isPending}
+          // `Előnézet` beside it stays live: rendering the bio is not an edit.
+          disabled={readOnly}
           onClick={submit}
         >
           {isNew ? t('compose.createProfile') : t('compose.save')}
