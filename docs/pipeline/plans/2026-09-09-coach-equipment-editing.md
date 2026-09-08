@@ -382,10 +382,8 @@ Merge into the existing `settings` object in each file; do not add a second one.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toggle } from '../../ui/primitives/Toggle';
-import { Pressable } from '../../ui/primitives/Pressable';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { useToast } from '../../ui/feedback/ToastHost';
-import { useOnboarding, useSaveOnboarding } from '../onboarding/useOnboarding';
+import { useOnboarding, useDraftSave } from '../onboarding/useOnboarding';
 
 /**
  * The client's own equipment list, after onboarding.
@@ -393,22 +391,30 @@ import { useOnboarding, useSaveOnboarding } from '../onboarding/useOnboarding';
  * The route `/onboarding` was always live and unguarded once complete, and `PATCH /onboarding`
  * always took `equipment`. What was missing was a door, so the answer given once on step three
  * could never be revised. Same endpoint, same control, reachable.
+ *
+ * NO SAVE BUTTON. `useDraftSave` is the questionnaire's own autosave — debounced, merging two
+ * answers inside one window, flushed on `pagehide` and on unmount. A second save mechanism next
+ * to it would be a second set of those three bugs to get right.
  */
 export function EquipmentSection() {
   const { t } = useTranslation();
   const { data, isPending } = useOnboarding();
-  const save = useSaveOnboarding();
-  const { toast } = useToast();
-  const [draft, setDraft] = useState<number[] | null>(null);
+  const { save, state } = useDraftSave();
+  // Local, because the cache only moves when the debounce fires: without this the chip would sit
+  // unticked for 700ms after the tap. `OnboardingPage` holds the same local copy for the same
+  // reason — see the note above its `toggleEquipment`.
+  const [sel, setSel] = useState<number[] | null>(null);
 
   if (isPending) return <Skeleton className="h-28 w-full rounded-card" />;
 
   const options = data?.options?.equipment ?? [];
-  const current = draft ?? data?.profile?.equipment ?? [];
-  const dirty = draft !== null;
+  const current = sel ?? data?.profile?.equipment ?? [];
 
-  const toggle = (id: number) =>
-    setDraft(current.includes(id) ? current.filter((x) => x !== id) : [...current, id]);
+  const toggle = (id: number) => {
+    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    setSel(next);
+    save({ equipment: next });
+  };
 
   return (
     <div className="flex flex-col gap-group">
@@ -418,24 +424,15 @@ export function EquipmentSection() {
           <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
         ))}
       </div>
-      <Pressable
-        variant="primary"
-        disabled={!dirty}
-        busy={save.isPending}
-        onClick={async () => {
-          await save.mutateAsync({ equipment: current });
-          setDraft(null);
-          toast(t('settings.equipmentSaved'));
-        }}
-      >
-        {t('common.save')}
-      </Pressable>
+      <p aria-live="polite" className="text-caption text-text-3">
+        {state === 'saving' ? t('common.saving') : state === 'saved' ? t('settings.equipmentSaved') : ''}
+      </p>
     </div>
   );
 }
 ```
 
-Open `frontend/src/features/onboarding/useOnboarding.ts` first and use the hook names it actually exports; if the save hook is named differently, use that name here and nowhere invent one.
+`useOnboarding.ts` exports `useOnboarding()`, `useCompleteOnboarding()` and `useDraftSave(delay = 700)` — verified. `useDraftSave` returns `{ save, flush, state }` with `state` in `'idle' | 'saving' | 'saved' | 'error'`. There is no `useSaveOnboarding`; do not add one. Check that `common.saving` exists in all three i18n files and add it if not.
 
 - [ ] **Step 5: Mount it as the seventh section**
 
@@ -508,15 +505,13 @@ Match `apiWithRefresh`'s actual call signature as used elsewhere in this file �
 
 `GET /clients/:id/onboarding` returns the client's chosen equipment as objects, but not the full taxonomy to choose from. The client's own `GET /onboarding` returns `options.equipment`, and a coach calling it would get **their own** profile. Reuse `useTaxonomies` from `features/library/useExercises.ts`, which already serves the equipment taxonomy to the library screen — no new endpoint.
 
-```bash
-grep -n "useTaxonomies" -A 12 frontend/src/features/library/useExercises.ts
-```
-
-Confirm it exposes equipment as `{ id, slug, name }[]` and use it. If it does not, stop and report — do not add a fourth way to fetch the same taxonomy.
+Verified: `useTaxonomies(lang: string)` returns `{ lang, muscles: Taxonomy[], equipment: Taxonomy[] }` from `GET /taxonomies?lang=…`, with a 30-minute `staleTime`. **It takes a required `lang` argument** — pass `i18n.language`. Do not add a fourth way to fetch the same taxonomy.
 
 - [ ] **Step 3: Write the card**
 
-`ClientEquipmentCard.tsx`, same shape as `EquipmentSection` with two differences: it writes through Task 1's route, and it says out loud that the client will be told.
+`ClientEquipmentCard.tsx`, same shape as `EquipmentSection` with three differences: it writes through Task 1's route, it says out loud that the client will be told, and **it keeps an explicit save button where the client's section autosaves.**
+
+That asymmetry is deliberate and a reviewer will ask about it. Autosave is right when you are editing your own answer and the only cost of a stray tap is your own list. Here a stray tap rewrites somebody else's profile and sends them a notification, so the commit is a thing the coach does on purpose. Debouncing a side effect that lands in another person's inbox would be the wrong trade.
 
 ```tsx
 import { useState } from 'react';
@@ -529,9 +524,9 @@ import { useTaxonomies } from '../library/useExercises';
 import { useClientOnboarding, useSetClientEquipment } from './useCoaching';
 
 export function ClientEquipmentCard({ linkId }: { linkId: number }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const onboarding = useClientOnboarding(linkId);
-  const taxonomies = useTaxonomies();
+  const taxonomies = useTaxonomies(i18n.language);
   const save = useSetClientEquipment(linkId);
   const { toast } = useToast();
   const [draft, setDraft] = useState<number[] | null>(null);
