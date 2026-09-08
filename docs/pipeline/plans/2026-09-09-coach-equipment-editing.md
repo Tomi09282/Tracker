@@ -17,7 +17,8 @@ Branch: `feat/coach-tooling`.
 - **Every user-visible string exists in `hu`, `en` and `de`.** `npm run check:i18n` sits in the frontend `build` chain; a Hungarian-only string fails the build, not the runtime.
 - **No raw interactive element outside `frontend/src/ui/`.** `npm run check:tokens` rejects it. Compose `Pressable`.
 - **Every write route carries a rate limiter.** `npm run check:routes` refuses one that does not.
-- **No conditional `return` after a write inside a worker transaction.** `.transaction()` commits on return — ADR-0005, enforced by `npm run check:worker-tx`. Throw instead.
+- **No conditional `return` after a write inside a worker transaction.** `.transaction()` commits on return — ADR-0005, enforced by `npm run check:worker-tx`. Put every check that can fail *before* the first write.
+- **A worker transaction signals failure with an outcome string, never a thrown error carrying a `code`.** `backend/src/lib/http.js` states the reason: the error crosses a Piscina worker boundary and **custom properties do not survive structured cloning**, so a `code` set in the worker reaches the route as `undefined` and the caller gets a 500. Every guarded transaction in `worker.js` returns `{ outcome: '…' }`; match them.
 - **Object-level miss → 404, role gate → 403.** The coach↔client **link id** is the access key, never a pair of user ids.
 - **The audit `detail` is read back off the stored row**, never rebuilt from a JS variable, so the log and the data cannot disagree.
 - There is **no unit-test framework in this repo.** Verification is `npm run smoke` (hermetic: throwaway encrypted DB, fresh server) plus the `check:*` / `verify:*` gates. Do not add vitest or jest.
@@ -54,7 +55,7 @@ Branch: `feat/coach-tooling`.
 
 **Interfaces:**
 - Consumes: `coach_clients` (the link), `onboarding_equipment`, `equipment`, `audit_log`, `notifications`; `requireAuth`, `requireCoach` from `../auth/middleware.js`; the write limiter already used by this router.
-- Produces: facade call `setClientEquipment({ coachId, linkId, equipmentIds, requestId, ip })` → `{ clientId, count }`; route `PATCH /api/v1/clients/:linkId/onboarding/equipment` taking `{ equipment: number[] }`; audit action string `coach.client.equipment.set`; notification type `profile.equipment_changed`.
+- Produces: facade call `setClientEquipment({ coachId, linkId, equipmentIds, requestId, ip })` → `{ outcome: 'applied' | 'not_found' | 'unknown_equipment', clientId?, count? }`; route `PATCH /api/v1/clients/:linkId/onboarding/equipment` taking `{ equipment: number[] }`; audit action string `coach.client.equipment.set`; notification type `profile.equipment_changed`.
 
 - [ ] **Step 1: Write the failing smoke assertions**
 
@@ -113,26 +114,35 @@ Expected: the six new lines FAIL (`status 404` on the PATCH — the route does n
 In `backend/src/db/worker.js`, beside the other named transactions. `current` tracks the step so a throw names it; the audit detail is read back off the stored rows.
 
 ```js
-export function setClientEquipmentTx({ coachId, linkId, equipmentIds, requestId, ip }) {
-  let current = 'SELECT link';
-  return db.transaction(() => {
+export function setClientEquipmentTx({ coachId, linkId, equipmentIds, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ───────────────
+    //
+    // An OUTCOME STRING, never a thrown error carrying a code. `lib/http.js` says why: the error
+    // crosses a Piscina worker boundary and custom properties do not survive structured cloning,
+    // so a `code` set here arrives at the route as undefined and the client gets a 500. Every
+    // guarded transaction in this file returns an outcome for exactly this reason.
+
+    current = 'SELECT the link';
     // The link is the authority and carries the proof. An archived link matches nothing, so a
     // withdrawn coach loses the write on the very next request.
     const link = stmt(
       `SELECT id, client_id FROM coach_clients
         WHERE id = ? AND coach_id = ? AND status = 'active'`,
     ).get(linkId, coachId);
-    if (!link) throw Object.assign(new Error('no such link'), { code: 'NOT_FOUND' });
+    if (!link) return { outcome: 'not_found' };
 
-    current = 'validate ids';
+    current = 'validate the equipment ids';
     if (equipmentIds.length) {
       const placeholders = equipmentIds.map(() => '?').join(',');
       const found = stmt(`SELECT id FROM equipment WHERE id IN (${placeholders})`).all(...equipmentIds);
-      if (found.length !== equipmentIds.length) {
-        throw Object.assign(new Error('unknown equipment id'), { code: 'BAD_REQUEST' });
-      }
+      if (found.length !== equipmentIds.length) return { outcome: 'unknown_equipment' };
     }
 
+    // ── writes from here down; no conditional return past this line (ADR-0005) ────────────────
     current = 'replace set';
     stmt('DELETE FROM onboarding_equipment WHERE user_id = ?').run(link.client_id);
     const insert = stmt('INSERT INTO onboarding_equipment (user_id, equipment_id) VALUES (?, ?)');
@@ -165,8 +175,14 @@ export function setClientEquipmentTx({ coachId, linkId, equipmentIds, requestId,
 
     current = 'read back';
     const { c } = stmt('SELECT COUNT(*) AS c FROM onboarding_equipment WHERE user_id = ?').get(link.client_id);
-    return { clientId: link.client_id, count: c };
-  })();
+    return { outcome: 'applied', clientId: link.client_id, count: c };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
 }
 ```
 
@@ -197,22 +213,22 @@ router.patch(
   asyncRoute(async (req, res) => {
     const linkId = z.coerce.number().int().positive().parse(req.params.linkId);
     const body = CoachEquipmentBody.parse(req.body);
-    try {
-      const out = await db.setClientEquipment({
-        coachId: req.user.id,
-        linkId,
-        equipmentIds: [...new Set(body.equipment)],
-        requestId: req.id,
-        ip: req.ip,
-      });
-      res.json({ ok: true, count: out.count });
-    } catch (err) {
-      // 404 for "not yours", "archived" and "never existed" alike — the same story its neighbour
-      // tells, so the two routes cannot be used to tell those cases apart.
-      if (err?.code === 'NOT_FOUND') return sendError(res, 404, ERR.NOT_FOUND, 'not found');
-      if (err?.code === 'BAD_REQUEST') return sendError(res, 400, ERR.VALIDATION, 'unknown equipment id');
-      throw err;
+    const out = await db.setClientEquipment({
+      coachId: req.user.id,
+      linkId,
+      equipmentIds: [...new Set(body.equipment)],
+      requestId: res.locals.requestId,
+      ip: req.ip,
+    });
+
+    // Branch on the outcome string, never on a thrown error's `code` — see the note in the
+    // transaction. 404 for "not yours", "archived" and "never existed" alike, which is the same
+    // story its neighbour tells, so the two routes cannot be used to tell those cases apart.
+    if (out.outcome === 'not_found') return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (out.outcome === 'unknown_equipment') {
+      return sendError(res, 400, ERR.VALIDATION, 'unknown equipment id');
     }
+    res.json({ ok: true, count: out.count });
   }),
 );
 ```
