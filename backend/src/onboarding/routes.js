@@ -283,4 +283,40 @@ router.get(
   }),
 );
 
+const CoachEquipmentBody = z
+  .object({ equipment: z.array(z.number().int().positive()).max(64) })
+  .strict();
+
+/**
+ * The coach corrects a client's equipment list. Same link-as-key rule as the read above it: the
+ * PATCH is scoped by `linkId`, never by a client user id, so a coach who has never had access to
+ * this client cannot reach it just by guessing the right shape of body.
+ */
+router.patch(
+  '/clients/:linkId/onboarding/equipment',
+  requireAuth,
+  requireCoach,
+  saveLimiter,
+  asyncRoute(async (req, res) => {
+    const linkId = z.coerce.number().int().positive().parse(req.params.linkId);
+    const body = CoachEquipmentBody.parse(req.body);
+    const out = await db.setClientEquipment({
+      coachId: req.user.id,
+      linkId,
+      equipmentIds: [...new Set(body.equipment)],
+      requestId: res.locals.requestId,
+      ip: req.ip ?? null,
+    });
+
+    // Branch on the outcome string, never on a thrown error's `code` — see the note in the
+    // transaction. 404 for "not yours", "archived" and "never existed" alike, which is the same
+    // story its neighbour tells, so the two routes cannot be used to tell those cases apart.
+    if (out.outcome === 'not_found') return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    if (out.outcome === 'unknown_equipment') {
+      return sendError(res, 400, ERR.VALIDATION, 'unknown equipment id');
+    }
+    res.json({ ok: true, count: out.count });
+  }),
+);
+
 export default router;

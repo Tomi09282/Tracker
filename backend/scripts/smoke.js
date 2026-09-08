@@ -1389,6 +1389,49 @@ if (seeded) {
     check('nor can a plain client -> 404', res.status === 404, `status ${res.status}`);
   }
 
+  // --- the coach corrects a client's equipment (T1) ----------------------------------------------
+  {
+    const wanted = equipmentIds.slice(0, 2);
+
+    const { json: before } = await call(`/api/v1/clients/${linkId}/onboarding`, { jar: coachA });
+    const had = (before?.profile?.equipment ?? []).map((e) => e.id);
+
+    const { res, json } = await call(`/api/v1/clients/${linkId}/onboarding/equipment`, {
+      method: 'PATCH', jar: coachA, body: { equipment: wanted },
+    });
+    check('coach may set a client\'s equipment', res.status === 200, `status ${res.status}`);
+    check('the response reports what was written', json?.count === wanted.length, JSON.stringify(json));
+
+    const { json: after } = await call(`/api/v1/clients/${linkId}/onboarding`, { jar: coachA });
+    const now = (after?.profile?.equipment ?? []).map((e) => e.id).sort((a, b) => a - b);
+    const want = [...wanted].sort((a, b) => a - b);
+    check('the set is replaced, not merged', JSON.stringify(now) === JSON.stringify(want), `was ${had} now ${now}`);
+
+    const { res: bad } = await call(`/api/v1/clients/${linkId}/onboarding/equipment`, {
+      method: 'PATCH', jar: coachA, body: { equipment: [999999] },
+    });
+    check('an unknown equipment id is refused', bad.status === 400, `status ${bad.status}`);
+
+    const otherCoach = new Jar();
+    await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: otherCoach });
+    const { res: notMine } = await call(`/api/v1/clients/${linkId}/onboarding/equipment`, {
+      method: 'PATCH', jar: otherCoach, body: { equipment: equipmentIds.slice(0, 1) },
+    });
+    check('another coach gets 404, not 403', notMine.status === 404, `status ${notMine.status}`);
+
+    const { res: asMember } = await call(`/api/v1/clients/${linkId}/onboarding/equipment`, {
+      method: 'PATCH', jar: clientJar, body: { equipment: equipmentIds.slice(0, 1) },
+    });
+    check('a member gets 403 at the role gate', asMember.status === 403, `status ${asMember.status}`);
+
+    const { json: inbox } = await call('/api/v1/notifications', { jar: clientJar });
+    check(
+      'the client is told their equipment changed',
+      (inbox?.notifications ?? []).some((n) => n.type === 'profile.equipment_changed'),
+      `${inbox?.notifications?.length ?? 0} rows`,
+    );
+  }
+
   {
     // Access must end with the link, not with the token.
     await call(`/api/v1/clients/${linkId}/archive`, { method: 'POST', jar: coachA });

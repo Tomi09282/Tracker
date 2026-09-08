@@ -3814,3 +3814,80 @@ export function applySubscriptionEventTx({
     return rethrow(err, current);
   }
 }
+
+/**
+ * A coach corrects a client's equipment list. The link is the authority and carries the proof:
+ * an archived link matches nothing, so a withdrawn coach loses the write on the very next request.
+ *
+ * Replace-in-place — delete then insert, inside the same lock — so a concurrent reader never sees
+ * the set momentarily empty.
+ */
+export function setClientEquipmentTx({ coachId, linkId, equipmentIds, requestId, ip = null }) {
+  const conn = getDb();
+  let current = null;
+
+  const tx = conn.transaction(() => {
+    // ── every check that can return an error result runs BEFORE the first write ───────────────
+    //
+    // An OUTCOME STRING, never a thrown error carrying a code. `lib/http.js` says why: the error
+    // crosses a Piscina worker boundary and custom properties do not survive structured cloning,
+    // so a `code` set here arrives at the route as undefined and the client gets a 500. Every
+    // guarded transaction in this file returns an outcome for exactly this reason.
+
+    current = 'SELECT the link';
+    const link = stmt(
+      `SELECT id, client_id FROM coach_clients
+        WHERE id = ? AND coach_id = ? AND status = 'active'`,
+    ).get(linkId, coachId);
+    if (!link) return { outcome: 'not_found' };
+
+    current = 'validate the equipment ids';
+    if (equipmentIds.length) {
+      const placeholders = equipmentIds.map(() => '?').join(',');
+      const found = stmt(`SELECT id FROM equipment WHERE id IN (${placeholders})`).all(...equipmentIds);
+      if (found.length !== equipmentIds.length) return { outcome: 'unknown_equipment' };
+    }
+
+    // ── from here on, nothing may conditionally return ────────────────────────────────────────
+
+    current = 'replace set';
+    stmt('DELETE FROM onboarding_equipment WHERE user_id = ?').run(link.client_id);
+    const insert = stmt('INSERT INTO onboarding_equipment (user_id, equipment_id) VALUES (?, ?)');
+    for (const id of equipmentIds) insert.run(link.client_id, id);
+
+    current = 'INSERT audit_log';
+    stmt(
+      `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
+       VALUES (?, 'coach.client.equipment.set', 'user', ?, ?, ?, ?)`,
+    ).run(
+      coachId, link.client_id,
+      // Read back off the stored rows. A detail rebuilt from the argument would say what was
+      // asked for; this says what is there.
+      JSON.stringify({
+        linkId,
+        equipment: stmt(
+          `SELECT e.id, e.slug FROM onboarding_equipment oe
+             JOIN equipment e ON e.id = oe.equipment_id
+            WHERE oe.user_id = ? ORDER BY e.sort_order`,
+        ).all(link.client_id),
+      }),
+      requestId, ip,
+    );
+
+    current = 'INSERT notification';
+    stmt(
+      `INSERT INTO notifications (user_id, coach_client_id, type, title, body, link_path)
+       VALUES (?, ?, 'profile.equipment_changed', ?, ?, '/settings')`,
+    ).run(link.client_id, linkId, 'Felszerelés frissítve', 'Az edződ módosította az eszközeidet.');
+
+    current = 'read back';
+    const { c } = stmt('SELECT COUNT(*) AS c FROM onboarding_equipment WHERE user_id = ?').get(link.client_id);
+    return { outcome: 'applied', clientId: link.client_id, count: c };
+  });
+
+  try {
+    return tx.immediate();
+  } catch (err) {
+    return rethrow(err, current);
+  }
+}
