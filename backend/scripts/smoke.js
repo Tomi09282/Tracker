@@ -1391,7 +1391,10 @@ if (seeded) {
 
   // --- the coach corrects a client's equipment (T1) ----------------------------------------------
   {
-    const wanted = equipmentIds.slice(0, 2);
+    // `had` (set at line ~1181) is equipmentIds.slice(0, 1) — just the first id. `wanted` must be
+    // DISJOINT from `had`, not merely a superset of it: a superset would make a merge-instead-of-
+    // replace regression produce the identical final set and sail through this check undetected.
+    const wanted = equipmentIds.slice(1, 3);
 
     const { json: before } = await call(`/api/v1/clients/${linkId}/onboarding`, { jar: coachA });
     const had = (before?.profile?.equipment ?? []).map((e) => e.id);
