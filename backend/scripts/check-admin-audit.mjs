@@ -254,6 +254,51 @@ for (const [action, sources] of actions) {
   }
 }
 
+/**
+ * ═══ THE SAME ARGUMENT, FOR A COACH WRITING A CLIENT'S ROW ═════════════════════════════════════
+ *
+ * `requireRole('admin')` is not the only place a write crosses from the actor's own rows into
+ * someone else's. A coach route that writes rows keyed on the client is unattributable the moment
+ * nobody logs it, in exactly the same way an unaudited admin write is — the privilege boundary is
+ * what matters here, not the literal word "admin" in the middleware chain.
+ *
+ * Rather than infer which routes these are, name them — the same shape as UNAUDITED_BY_DESIGN
+ * above, and for the same reason: an entry is a line somebody writes and defends. A coach route
+ * added here without an audit row fails this gate.
+ */
+const COACH_CROSS_USER_WRITES = new Set([
+  'PATCH /clients/:linkId/onboarding/equipment',
+]);
+
+let coachChecked = 0;
+for (const r of routes) {
+  // `key` is built by the parser as `${method} ${route}` — use it rather than rebuilding it, so
+  // this gate and check-routes can never disagree about what a route is called.
+  if (!COACH_CROSS_USER_WRITES.has(r.key)) continue;
+  coachChecked += 1;
+
+  // Same facade-lookup expression as reachableFrom() above: find `db.<name>(` in the handler text
+  // and confirm `<name>` is a named transaction. Two spellings of the same lookup is the drift the
+  // alias note above warns about, so this reuses it rather than searching facadeToTx's keys instead.
+  const facadeName = [...r.handler.matchAll(/\bdb\.(\w+)\s*\(/g)]
+    .map((m) => m[1])
+    .find((name) => facadeToTx.has(name));
+
+  if (!facadeName) {
+    problems.push(
+      `${r.file}:${r.line} — ${r.key} writes client-owned rows but calls no named transaction; it cannot be audited under the write lock`,
+    );
+    continue;
+  }
+  const tx = facadeToTx.get(facadeName);
+  const body = txBody(tx);
+  if (!body) {
+    problems.push(`${r.file}:${r.line} — ${r.key} delegates to ${tx}, which this gate cannot read`);
+  } else if (!/INSERT INTO audit_log/.test(body)) {
+    problems.push(`${r.file}:${r.line} — ${r.key} writes another user's rows without an audit_log row`);
+  }
+}
+
 /* ── report ──────────────────────────────────────────────────────────────────────────────────── */
 
 const writes = adminRoutes.filter((r) => r.method !== 'GET');
@@ -261,6 +306,9 @@ console.log(
   `check-admin-audit: ${adminRoutes.length} admin routes — ${writes.length} writes, ` +
     `${auditedWrites} audited, ${adminRoutes.length - writes.length} reads, ` +
     `${actions.size} distinct audit actions`,
+);
+console.log(
+  `                   coach cross-user writes: ${coachChecked}/${COACH_CROSS_USER_WRITES.size} checked`,
 );
 // Naming the FORM rather than a boolean, because the three are not equally strong and the shape of
 // the drift is the interesting number: a check in the handler leaves a window between it and the
