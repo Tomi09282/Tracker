@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   User,
   Volume2,
+  Wrench,
 } from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -22,6 +23,7 @@ import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ThemeStudio } from './ThemeStudio';
 import { useTheme, TRANSPARENCY, type Transparency } from '../../ui/theme/ThemeProvider';
 import { CueSettings } from './CueSettings';
+import { EquipmentSection } from './EquipmentSection';
 import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
 import { isValidDisplayName, personInitials, personLabel } from '../../lib/person';
 
@@ -309,6 +311,14 @@ export function SettingsPage() {
       <section className="flex flex-col gap-group">
         <SectionHeader icon={Globe} title={t('common.language')} />
         <LanguageToggle />
+      </section>
+
+      {/* The client's own door onto the equipment answer given once on step three of onboarding.
+          Same endpoint, same control — see EquipmentSection's own note. It sits with the personal
+          settings, after language and before the role-gated admin block, not inside it. */}
+      <section className="flex flex-col gap-group">
+        <SectionHeader icon={Wrench} title={t('settings.equipment')} />
+        <EquipmentSection />
       </section>
 
       {/* Admin lives HERE, not in the bottom bar. A coach already fills all five nav slots, so

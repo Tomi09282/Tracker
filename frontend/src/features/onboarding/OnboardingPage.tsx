@@ -39,6 +39,7 @@ import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Field } from '../../ui/primitives/Field';
 import { Surface } from '../../ui/primitives/Surface';
+import { Toggle } from '../../ui/primitives/Toggle';
 import { Gauge } from '../../ui/feedback/Gauge';
 import { ScreenSkeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
@@ -213,22 +214,6 @@ function Choice({
       >
         {selected ? <Check className="size-icon-s" strokeWidth={3} /> : null}
       </span>
-    </Pressable>
-  );
-}
-
-/** Multi-select chip. Same reasoning as Choice, with checkbox semantics. */
-function Toggle({ on, label, onToggle }: { on: boolean; label: string; onToggle: () => void }) {
-  return (
-    <Pressable
-      role="checkbox"
-      aria-checked={on}
-      onClick={onToggle}
-      variant={on ? 'primary' : 'secondary'}
-      shape="chip"
-      icon={on ? <Check className="size-icon-s" aria-hidden /> : undefined}
-    >
-      {label}
     </Pressable>
   );
 }

@@ -29,7 +29,8 @@ An oversized circular account avatar carrying the monogram `T`, wrapped in a bol
    - a full-width filled `Téma mentése`.
 6. **`HANGOK ÉS REZGÉS`** — section header with a speaker icon holder, then a card of three rows divided by hairlines. Each row: an icon holder, the title, one short hint line, and a pill switch on the right. `Beszédhang` / `Bemondja a kört és a pihenőt.` (on) · `Sípszó` / `Rövid hang a visszaszámláláshoz.` (on) · `Rezgés` / `Rezgés a sorozat pipálásakor.` (off).
 7. **`NYELV`** — a globe icon holder and the uppercase label, beginning right at the fold. The chips `Magyar` / `English` / `Deutsch` sit just below it, reached by scrolling.
-8. **`ADMIN`** — admin only, same section shape, holding the accent link `Admin felület megnyitása`.
+8. **`FELSZERELÉS`** — a wrench icon holder and the uppercase label, sitting after `NYELV` and before the role-gated `ADMIN` block: it belongs with the personal settings every account has, not down among the role-gated ones. A hint line (`Amit el tudsz érni. Az edzésterved ehhez igazodik.`) explains why the list matters, then the equipment chips read from `/onboarding`'s own option list, rendered with the same multi-select `Toggle` chip the onboarding equipment step already uses — promoted out of that screen rather than duplicated. There is no save button: the questionnaire's own autosave (`useDraftSave`) fires on every tap, and a status line beneath the chips reports the debounced result.
+9. **`ADMIN`** — admin only, same section shape, holding the accent link `Admin felület megnyitása`.
 
 ## What was merged away, and why
 
@@ -54,20 +55,21 @@ The role is now rendered in Hungarian — `Tag` / `Edző` / `Admin` — where `S
 
 ## States
 
-- **Loading** — skeletons in the shape of the avatar, the email line and the role chip; card-shaped skeletons for the two sections. The sign-out button renders immediately: it depends on the session, not on the session's contents.
+- **Loading** — skeletons in the shape of the avatar, the email line and the role chip; card-shaped skeletons for the two sections. `FELSZERELÉS` carries its own — a single `h-28` card in place of the hint line and the chip row, since it depends on `/onboarding`, a separate request from the session read the rest of the screen waits on. The sign-out button renders immediately: it depends on the session, not on the session's contents.
 - **Empty** — none. Every block on this screen always has content.
-- **Error** — a failed session read shows the identity block with the email slot empty rather than a placeholder account; a failed theme save leaves the chip selection where the user put it and surfaces the failure inline, because silently reverting a colour choice reads as the tap not registering.
+- **Error** — a failed session read shows the identity block with the email slot empty rather than a placeholder account; a failed theme save leaves the chip selection where the user put it and surfaces the failure inline, because silently reverting a colour choice reads as the tap not registering. `FELSZERELÉS` does the same: an untick or a tick is applied to the chip immediately, and if the debounced save then fails, the chip stays where the user left it and the status line below the row switches to the questionnaire's own retry copy (`A mentés nem sikerült — a válasz megmarad, újrapróbáljuk`) rather than going silent.
+- **Saving / Saved** — `FELSZERELÉS` mirrors the onboarding questionnaire's own autosave feedback: the status line below the chips reads `Mentés folyamatban` while the debounced request is in flight and `Felszerelés mentve` once it lands, then clears on the next edit. There is no save button to disable or re-enable.
 - **Offline** — the banner above the content (`Nincs internetkapcsolat`). A theme change may queue; **sign-out must not** — a queued sign-out that appears to succeed leaves an authenticated session on a device the user believes they have left.
 - **Device-gated** — a cue channel the device cannot produce (no speech voice installed, no vibration motor) renders dimmed and inert with its hint explaining the absence.
 - **Role-gated** — admin gains the `ADMIN` section and the `Admin felület megnyitása` link. Coach sees the identical screen with the chip reading `Edző`. The link is a convenience; the route and every endpoint behind it re-check the role server-side.
 
 ## Components
 
-Reuses `Pressable`, `Switch`, `CueSettings` (kept whole — its three-channel split and its `useSyncExternalStore` wiring are unchanged), `LanguageToggle`, `useSession` / `useLogout`, the `control` recipe, `Skeleton`, `OfflineIndicator`, `BottomNav`. `ThemeStudio` survives in reduced form: the preview tile and the pack chips stay, the accent and gradient sections leave.
+Reuses `Pressable`, `Switch`, `CueSettings` (kept whole — its three-channel split and its `useSyncExternalStore` wiring are unchanged), `LanguageToggle`, `useSession` / `useLogout`, the `control` recipe, `Skeleton`, `OfflineIndicator`, `BottomNav`. `ThemeStudio` survives in reduced form: the preview tile and the pack chips stay, the accent and gradient sections leave. `EquipmentSection` reuses `Toggle` — promoted out of `OnboardingPage.tsx` into `ui/primitives/` once a second screen needed it — and `useOnboarding` / `useDraftSave` from the onboarding feature, rather than a second query or a second autosave.
 
 Deleted from this screen: `AccentPicker` and `GradientBuilder`. Keep the files — the accent picker's contrast maths (`ui/theme/contrast.ts`) is the gate any future colour input will need.
 
-Genuinely new: the avatar anchor with its status ring and badge, the role chip, the section header icon holder (repeated on every screen in this redesign), and the reduced preview tile.
+Genuinely new: the avatar anchor with its status ring and badge, the role chip, the section header icon holder (repeated on every screen in this redesign), the reduced preview tile, and `EquipmentSection` itself.
 
 ## Navigation
 

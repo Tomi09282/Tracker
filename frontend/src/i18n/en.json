@@ -121,6 +121,9 @@
       "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left."
     },
     "openAdmin": "Open the admin area",
+    "equipment": "Equipment",
+    "equipmentHint": "What you can actually reach. Your plan is built around it.",
+    "equipmentSaved": "Equipment saved",
     "displayName": "Display name",
     "displayNameHint": "Your coach sees this instead of your e-mail address.",
     "displayNamePlaceholder": "How others see you",

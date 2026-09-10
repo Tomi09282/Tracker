@@ -121,6 +121,9 @@
       "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés."
     },
     "openAdmin": "Admin felület megnyitása",
+    "equipment": "Felszerelés",
+    "equipmentHint": "Amit el tudsz érni. Az edzésterved ehhez igazodik.",
+    "equipmentSaved": "Felszerelés mentve",
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
     "displayNamePlaceholder": "Ahogy mások látnak",

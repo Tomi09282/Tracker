@@ -121,6 +121,9 @@
       "hapticsUnavailable": "Dieses Gerät kann nicht vibrieren — auf dem iPhone bleibt der Signalton der einzige nicht-visuelle Hinweis."
     },
     "openAdmin": "Admin-Bereich öffnen",
+    "equipment": "Ausrüstung",
+    "equipmentHint": "Was du tatsächlich erreichen kannst. Dein Plan richtet sich danach.",
+    "equipmentSaved": "Ausrüstung gespeichert",
     "displayName": "Anzeigename",
     "displayNameHint": "Dein Coach sieht das anstelle deiner E-Mail-Adresse.",
     "displayNamePlaceholder": "Wie andere dich sehen",
