@@ -377,7 +377,9 @@
       "sessions": "Einheiten",
       "weekly": "Pro Woche",
       "plans": "Pläne"
-    }
+    },
+    "equipmentHint": "Die Ausrüstung, die dieser Klient erreichen kann. Er wird über Änderungen benachrichtigt.",
+    "equipmentSaved": "Ausrüstung gespeichert"
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",

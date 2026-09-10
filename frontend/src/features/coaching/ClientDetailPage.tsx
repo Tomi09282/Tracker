@@ -33,6 +33,7 @@ import { PlanTab } from './PlanTab';
 import { ChatTab } from './ChatTab';
 import { usePlans } from '../plans/usePlans';
 import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
+import { ClientEquipmentCard } from './ClientEquipmentCard';
 import { personLabel } from '../../lib/person';
 
 /* ── tabs ─────────────────────────────────────────────────────────────────────────────────────
@@ -360,6 +361,13 @@ export function ClientDetailPage() {
           ) : null}
         </div>
       )}
+
+      {/* ── the equipment row, come back as an editor ──────────────────────────────────────────
+          The eleven-row table above this comment is gone on purpose (see the note at the top of
+          this component) — equipment was one of its rows, and this card is that row's return,
+          not the table's. It reads and writes through its own queries, so it renders its own
+          skeleton/no-profile/error states independently of the tiles above. */}
+      <ClientEquipmentCard linkId={linkId} />
 
       {/* ── everything else the client answered ────────────────────────────────────────────── */}
       <Pressable

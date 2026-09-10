@@ -377,7 +377,9 @@
       "sessions": "Edzés",
       "weekly": "Heti edzés",
       "plans": "Terv"
-    }
+    },
+    "equipmentHint": "A kliens elérhető eszközei. A módosításról értesítést kap.",
+    "equipmentSaved": "Felszerelés mentve"
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",

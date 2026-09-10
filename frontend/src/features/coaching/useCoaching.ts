@@ -98,6 +98,27 @@ export function useClientOnboarding(linkId: number | null) {
   });
 }
 
+/**
+ * The coach corrects a client's equipment list, through Task 1's route.
+ *
+ * No optimistic write and no cache patch here: on success we invalidate the same
+ * `['coaching','client',linkId,'onboarding']` key `useClientOnboarding` reads, so the card re-renders from
+ * what the server actually stored (deduped ids, in whatever order it returns them) rather than from the
+ * array this call sent. A failed mutation leaves the query untouched — the caller keeps its draft and
+ * can retry.
+ */
+export function useSetClientEquipment(linkId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (equipment: number[]) =>
+      apiWithRefresh(`/clients/${linkId}/onboarding/equipment`, {
+        method: 'PATCH',
+        body: { equipment },
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [...KEY, 'client', linkId, 'onboarding'] }),
+  });
+}
+
 export interface ClientLog {
   id: number;
   title: string | null;

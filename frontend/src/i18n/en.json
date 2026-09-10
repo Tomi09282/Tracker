@@ -377,7 +377,9 @@
       "sessions": "Sessions",
       "weekly": "Weekly",
       "plans": "Plans"
-    }
+    },
+    "equipmentHint": "The kit this client can reach. They are notified when you change it.",
+    "equipmentSaved": "Equipment saved"
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",
