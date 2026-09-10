@@ -282,25 +282,30 @@ for (const r of routes) {
   if (!COACH_CROSS_USER_WRITES.has(r.key)) continue;
   coachChecked += 1;
 
-  // Same facade-lookup expression as reachableFrom() above: find `db.<name>(` in the handler text
-  // and confirm `<name>` is a named transaction. Two spellings of the same lookup is the drift the
-  // alias note above warns about, so this reuses it rather than searching facadeToTx's keys instead.
-  const facadeName = [...r.handler.matchAll(/\bdb\.(\w+)\s*\(/g)]
-    .map((m) => m[1])
-    .find((name) => facadeToTx.has(name));
+  // Same delegation walk the admin rule uses: reachableFrom() collects EVERY named transaction the
+  // handler reaches (aliases like `all`/`get`/`run`/`writeTx` filtered out), not just the first
+  // `db.*` call in source order. A `.find()` over the raw calls would stop at the first match —
+  // which can be an unrelated, already-audited transaction called before the actual client write —
+  // and report the route as audited when the write that matters never was. So every delegate is
+  // checked on its own below: the union of their bodies would let one audited call launder another,
+  // unaudited one in the same handler.
+  const { delegates } = reachableFrom(r.handler);
 
-  if (!facadeName) {
+  if (!delegates.length) {
     problems.push(
       `${r.file}:${r.line} — ${r.key} writes client-owned rows but calls no named transaction; it cannot be audited under the write lock`,
     );
     continue;
   }
-  const tx = facadeToTx.get(facadeName);
-  const body = txBody(tx);
-  if (!body) {
-    problems.push(`${r.file}:${r.line} — ${r.key} delegates to ${tx}, which this gate cannot read`);
-  } else if (!/INSERT INTO audit_log/.test(body)) {
-    problems.push(`${r.file}:${r.line} — ${r.key} writes another user's rows without an audit_log row`);
+  for (const tx of delegates) {
+    const body = txBody(tx);
+    if (!body) {
+      problems.push(`${r.file}:${r.line} — ${r.key} delegates to ${tx}, which this gate cannot read`);
+    } else if (!/INSERT INTO audit_log/.test(body)) {
+      problems.push(
+        `${r.file}:${r.line} — ${r.key} writes another user's rows through ${tx}, which has no INSERT INTO audit_log`,
+      );
+    }
   }
 }
 
