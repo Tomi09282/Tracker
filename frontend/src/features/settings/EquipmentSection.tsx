@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toggle } from '../../ui/primitives/Toggle';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useOnboarding, useDraftSave } from '../onboarding/useOnboarding';
+
+/** Same set of ids, order ignored — the server does not promise an order. */
+const sameSet = (a: number[], b: number[]) => a.length === b.length && a.every((x) => b.includes(x));
 
 /**
  * The client's own equipment list, after onboarding.
@@ -19,18 +22,42 @@ export function EquipmentSection() {
   const { t } = useTranslation();
   const { data, isPending } = useOnboarding();
   const { save, state } = useDraftSave();
-  // Local, because the cache only moves when the debounce fires: without this the chip would sit
-  // unticked for 700ms after the tap. `OnboardingPage` holds the same local copy for the same
-  // reason — see the note above its `toggleEquipment`.
+  // Overlay, because the cache only moves when the debounce fires: without this the chip would
+  // sit unticked for 700ms after the tap. Mirrored into a ref alongside the state for the same
+  // reason `OnboardingPage`'s `draftRef`/`live()` exists — see the note above its
+  // `toggleEquipment`: two taps landing before React repaints must not both read the same
+  // render-closure snapshot.
   const [sel, setSel] = useState<number[] | null>(null);
+  const selRef = useRef<number[] | null>(null);
+  const serverEquipment = data?.profile?.equipment;
+
+  // The overlay exists only until the server confirms it. Once the cache holds the same set (as
+  // a set — order is not promised) the overlay predicted, drop it so the screen renders the
+  // canonical list again. Gated on the actual list rather than on `state === 'saved'`: a save in
+  // flight can finish and report 'saved' after a newer tap already queued a different patch
+  // (`useDraftSave`'s pending-merge quirk), and clearing the overlay then would let that newer
+  // tap compute its next array from a list missing its own pending edit.
+  //
+  // Consequence: once confirmed, a coach's later edit arrives through the next refetch and is
+  // what the client sees and edits from next. If the coach writes while the client's own save is
+  // still in flight, the client's save wins when it lands — last write wins, per
+  // docs/brain/60-Decisions/0013-coach-writes-client-equipment.md.
+  useEffect(() => {
+    if (selRef.current && serverEquipment && sameSet(selRef.current, serverEquipment)) {
+      selRef.current = null;
+      setSel(null);
+    }
+  }, [serverEquipment]);
 
   if (isPending) return <Skeleton className="h-28 w-full rounded-card" />;
 
   const options = data?.options?.equipment ?? [];
-  const current = sel ?? data?.profile?.equipment ?? [];
+  const current = sel ?? serverEquipment ?? [];
 
   const toggle = (id: number) => {
-    const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+    const now = selRef.current ?? serverEquipment ?? [];
+    const next = now.includes(id) ? now.filter((x) => x !== id) : [...now, id];
+    selRef.current = next;
     setSel(next);
     save({ equipment: next });
   };
