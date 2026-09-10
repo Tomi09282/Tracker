@@ -29,7 +29,7 @@
 //
 // Run: node scripts/check-admin-audit.mjs
 import fs from 'node:fs';
-import { parseRoutes } from './lib/parse-routes.mjs';
+import { parseRoutes, blankComments } from './lib/parse-routes.mjs';
 
 const ROOT = 'src';
 const WORKER = 'src/db/worker.js';
@@ -74,6 +74,11 @@ for (const m of facadeSrc.matchAll(/export const (\w+)\s*=\s*\([^)]*\)\s*=>\s*po
  * first `{` after the name is the destructuring pattern, not the body. Taking it anyway returns the
  * parameter names as the "body": no audit insert, no role check, and the gate reports four routes
  * as unaudited that audit correctly. Which it did, on the first run.
+ *
+ * Returned comment-free, for the same reason parse-routes.mjs blanks `chain`/`handler` before any
+ * consumer sees them (see blankComments' doc comment there): a `/* … *\/`-wrapped
+ * `INSERT INTO audit_log` is text that reads as audited and code that is not. Every caller of
+ * txBody() is asking a question about the code, not about what somebody wrote ABOUT the code.
  */
 function txBody(name) {
   const re = new RegExp(`export function ${name}\\b`);
@@ -103,7 +108,7 @@ function txBody(name) {
     if (workerSrc[i] === '{') depth += 1;
     else if (workerSrc[i] === '}') {
       depth -= 1;
-      if (depth === 0) return workerSrc.slice(brace, i + 1);
+      if (depth === 0) return blankComments(workerSrc.slice(brace, i + 1));
     }
   }
   return null;
