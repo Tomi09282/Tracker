@@ -20,7 +20,7 @@ const sameSet = (a: number[], b: number[]) => a.length === b.length && a.every((
  */
 export function EquipmentSection() {
   const { t } = useTranslation();
-  const { data, isPending } = useOnboarding();
+  const { data, dataUpdatedAt, isPending } = useOnboarding();
   const { save, state } = useDraftSave();
   // Overlay, because the cache only moves when the debounce fires: without this the chip would
   // sit unticked for 700ms after the tap. Mirrored into a ref alongside the state for the same
@@ -42,12 +42,19 @@ export function EquipmentSection() {
   // what the client sees and edits from next. If the coach writes while the client's own save is
   // still in flight, the client's save wins when it lands — last write wins, per
   // docs/brain/60-Decisions/0013-coach-writes-client-equipment.md.
+  //
+  // `dataUpdatedAt` is in the dependency list alongside `serverEquipment` because TanStack Query's
+  // structural sharing (`replaceEqualDeep`) keeps the very same `equipment` array object whenever a
+  // response carries the same ids in the same order — a no-net-change save, or a retry — so
+  // `serverEquipment` alone does not change identity and this effect would never re-run to check.
+  // `dataUpdatedAt` moves on every confirmation regardless, so it re-triggers the equality check
+  // every time; the check above still decides, this dependency only makes sure it runs.
   useEffect(() => {
     if (selRef.current && serverEquipment && sameSet(selRef.current, serverEquipment)) {
       selRef.current = null;
       setSel(null);
     }
-  }, [serverEquipment]);
+  }, [serverEquipment, dataUpdatedAt]);
 
   if (isPending) return <Skeleton className="h-28 w-full rounded-card" />;
 
