@@ -2,7 +2,7 @@
 type: screen-spec
 title: Beállítások — Settings
 route: /settings
-updated: 2026-08-23
+updated: 2026-09-18
 tags: [ux, screen, redesign]
 ---
 

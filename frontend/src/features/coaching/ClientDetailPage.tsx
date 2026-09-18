@@ -367,7 +367,7 @@ export function ClientDetailPage() {
           this component) — equipment was one of its rows, and this card is that row's return,
           not the table's. It reads and writes through its own queries, so it renders its own
           skeleton/no-profile/error states independently of the tiles above. */}
-      <ClientEquipmentCard linkId={linkId} />
+      <ClientEquipmentCard key={linkId} linkId={linkId} />
 
       {/* ── everything else the client answered ────────────────────────────────────────────── */}
       <Pressable

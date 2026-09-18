@@ -6,6 +6,7 @@ import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { ApiError } from '../../lib/api';
+import { sameSet } from '../../lib/equipment';
 import { useTaxonomies } from '../library/useExercises';
 import { useClientOnboarding, useSetClientEquipment } from './useCoaching';
 
@@ -80,6 +81,11 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
   const options = taxonomies.data?.equipment ?? [];
   const stored = profile.equipment.map((e) => e.id);
   const current = draft ?? stored;
+  // A chip tapped on and back off leaves `draft` non-null but equal to `stored` as a SET — and a
+  // save from here would still fire the client-facing notification and an audit row for a change
+  // that never happened. `draft === null` alone caught "never touched"; this also catches
+  // "touched and reverted".
+  const unsaved = draft !== null && !sameSet(draft, stored);
 
   const toggle = (id: number) => {
     setError(null);
@@ -90,7 +96,7 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
   };
 
   const handleSave = async () => {
-    if (draft === null) return;
+    if (!unsaved) return;
     setError(null);
     try {
       await save.mutateAsync(draft);
@@ -118,7 +124,7 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
       </div>
       <Pressable
         variant="primary"
-        disabled={draft === null || save.isPending}
+        disabled={!unsaved || save.isPending}
         busy={save.isPending}
         onClick={handleSave}
       >

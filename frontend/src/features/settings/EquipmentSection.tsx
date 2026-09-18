@@ -3,9 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Toggle } from '../../ui/primitives/Toggle';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useOnboarding, useDraftSave } from '../onboarding/useOnboarding';
-
-/** Same set of ids, order ignored — the server does not promise an order. */
-const sameSet = (a: number[], b: number[]) => a.length === b.length && a.every((x) => b.includes(x));
+import { sameSet } from '../../lib/equipment';
 
 /**
  * The client's own equipment list, after onboarding.

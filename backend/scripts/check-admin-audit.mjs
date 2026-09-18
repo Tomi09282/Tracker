@@ -273,6 +273,7 @@ for (const [action, sources] of actions) {
  */
 const COACH_CROSS_USER_WRITES = new Set([
   'PATCH /clients/:linkId/onboarding/equipment',
+  'POST /clients/pregenerate',
 ]);
 
 let coachChecked = 0;
@@ -326,6 +327,8 @@ console.log(
 console.log(
   `                   re-check: ${[...forms].map(([f, n]) => `${n} ${f}`).join(', ')}`,
 );
+
+if (coachChecked !== COACH_CROSS_USER_WRITES.size) problems.push('COACH_CROSS_USER_WRITES names a route that no longer exists — the rule is checking nothing');
 
 if (problems.length) {
   console.log('');
