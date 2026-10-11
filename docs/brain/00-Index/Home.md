@@ -7,6 +7,12 @@ tags: [index]
 > [!tip] Resuming?
 > Start at [[Next Session]] — it names the one task to do first.
 
+> [!important] The visual design changed on 2026-10-11 — Pulse is the design of record
+> The owner dropped the liquid-glass look. Every screen is now drawn in Figma in **Pulse V1
+> "Open Field"**; none of it is implemented yet. Start at [[58-Pulse/0000 Index]]; the decision is
+> [[60-Decisions/0020-pulse-replaces-liquid-glass]]. The `55-Screens` notes still describe what
+> each screen does, but no longer what it looks like.
+
 # TRACKER Brain
 
 Coach-client workout & nutrition tracking platform. This vault is a **mirror** of
