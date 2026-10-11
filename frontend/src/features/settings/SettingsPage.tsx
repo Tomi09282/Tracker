@@ -9,7 +9,6 @@ import {
   Coins,
   Globe,
   LogOut,
-  Palette,
   ShieldCheck,
   User,
   Volume2,
@@ -20,8 +19,6 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
-import { ThemeStudio } from './ThemeStudio';
-import { useTheme, TRANSPARENCY, type Transparency } from '../../ui/theme/ThemeProvider';
 import { CueSettings } from './CueSettings';
 import { EquipmentSection } from './EquipmentSection';
 import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
@@ -72,78 +69,14 @@ function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string 
 }
 
 /**
- * Whether surfaces are see-through, in this app, regardless of the OS.
- *
- * ═══ WHY THIS EXISTS AT ALL ════════════════════════════════════════════════════════════════════
- *
- * `prefers-reduced-transparency` is an accessibility preference and the app follows it by default —
- * that has not changed and must not. What it could not do before is be DISAGREED with. The setting
- * is system-wide, so somebody who turned it on because one hostile app was unreadable was also
- * turning it on here, permanently, with no way to say otherwise.
- *
- * It is also the reason the glass could be reviewed at all. The entire liquid-glass pass was built
- * and judged on a machine with the preference on, where `--glass-1` resolves to `--surface-1` and
- * `--card-blur` to `0px`: the material had never once been on screen, and every report that it
- * "was not accurate" was a report about the fallback.
- *
- * A segmented control rather than a switch, because there are genuinely three answers and "follow
- * the system" is one of them — a two-state switch would have to pick a side on the user's behalf,
- * which is the one thing this control exists not to do.
- */
-function TransparencyChoice() {
-  const { t } = useTranslation();
-  const { transparency, setTheme } = useTheme();
-
-  const label: Record<Transparency, string> = {
-    system: t('settings.transparencySystem'),
-    full: t('settings.transparencyFull'),
-    none: t('settings.transparencyNone'),
-  };
-
-  return (
-    <Surface className="flex flex-col gap-tight">
-      <div className="flex flex-col gap-tight">
-        <span className="text-body-strong text-text-1">{t('settings.transparency')}</span>
-        <p className="text-caption text-text-3">{t('settings.transparencyHint')}</p>
-      </div>
-      <div
-        role="radiogroup"
-        aria-label={t('settings.transparency')}
-        className="flex gap-1 rounded-chip bg-surface-2 p-1"
-      >
-        {TRANSPARENCY.map((value) => (
-          <Pressable
-            key={value}
-            role="radio"
-            aria-checked={transparency === value}
-            /* The selected wash (DESIGN §5.6), NOT `primary`. Rule 47 scopes the one filled accent
-               to the SCREEN, not to this track — and on this screen that one belongs to `Téma
-               mentése`. With the fill here the page carried two solid accent blocks at rest while
-               the real primary sat disabled at 45%, so the only action was the least prominent
-               filled thing in view. `selected` also ships the hover half a call site forgets:
-               without it the chosen chip reverts to surface-2 under the pointer. */
-            variant="ghost"
-            selected={transparency === value}
-            shape="chip"
-            density="compact"
-            className="flex-1"
-            onClick={() => setTheme({ transparency: value })}
-          >
-            {label[value]}
-          </Pressable>
-        ))}
-      </div>
-    </Surface>
-  );
-}
-
-/**
  * Settings — [[55-Screens/settings]].
  *
- * Almost every visit is one of three errands: sign out, silence the voice, change the theme. The
- * screen is ordered so all three are reachable without a decision, which is what the redesign
- * bought by deleting the colour laboratory that used to fill it (the gradient builder alone was
- * more controls than the entire workout player).
+ * Almost every visit is one of two errands: sign out, silence the voice. The screen is ordered so
+ * both are reachable without a decision.
+ *
+ * There is no appearance section. Pulse is the only look (owner decision D1): the theme picker,
+ * the transparency choice and the client theme engine behind them are gone, and nothing here reads
+ * a stored theme or asks the server for one.
  *
  * THE ANCHOR IS A PERSON, not a chart. This screen is about an account and a device, and the
  * identity is the one thing that has to be unambiguous before anything below it is touched:
@@ -286,19 +219,6 @@ export function SettingsPage() {
           </Surface>
         </section>
       </div>
-
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={Palette} title={t('settings.appearance')} />
-        {/* The appearance card is what MEGJELENÉS anchors — flame tile, chips, `Téma mentése` —
-            so it starts immediately under the header, as the mockup draws it. Transparency is a
-            later, accepted addition (ADR-0018) with no place in that image; rendering it first put
-            an unmockup'd control where the section's anchor belongs and pushed the anchor a whole
-            card down. It reads correctly as the secondary appearance setting it is. */}
-        <Surface>
-          <ThemeStudio />
-        </Surface>
-        <TransparencyChoice />
-      </section>
 
       <section className="flex flex-col gap-group">
         <SectionHeader icon={Volume2} title={t('settings.cues.title')} />

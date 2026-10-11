@@ -82,19 +82,23 @@ const globToRegExp = (glob) =>
       .join('.*')}$`,
   );
 
-const expand = (patterns = []) => {
+// A pattern that matches nothing is a file the package still has to create — unless the package
+// DELETES it (`deletes` in work-packages.json): then matching nothing means the deletion is done.
+// Without that distinction the brief of F1 listed the removed theme engine as "created by this
+// package" the moment F1.1 had removed it.
+const expand = (patterns = [], deletes = []) => {
   const existing = new Set();
   const toCreate = [];
   for (const pattern of patterns) {
     const re = globToRegExp(pattern);
     const hits = tracked.filter((f) => re.test(f));
-    if (hits.length === 0) toCreate.push(pattern);
+    if (hits.length === 0 && !deletes.includes(pattern)) toCreate.push(pattern);
     for (const h of hits) existing.add(h);
   }
   return { existing: [...existing].sort(), toCreate };
 };
 
-const ownership = new Map(packages.map((p) => [p.id, expand(p.owns)]));
+const ownership = new Map(packages.map((p) => [p.id, expand(p.owns, p.deletes)]));
 
 /* ── PLAN.md tables: the screen names (4.2) and the musts (4.3) ───────────────────────────────── */
 

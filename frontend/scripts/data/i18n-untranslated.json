@@ -11,10 +11,6 @@
     "adminMetrics.clock.utc": "a standard, not a word",
     "adminUsers.role.admin": "a borrowed word in all three",
     "settings.role.admin": "the same borrowed word, on your own account chip",
-    "settings.themePack.neon": "a product name",
-    "settings.themePack.mono": "a product name",
-    "settings.themePack.aurora": "a product name",
-    "settings.themePack.ember": "a product name",
     "coins.item.theme.aurora.title": "the same product name, in the store",
     "coins.item.theme.ember.title": "the same product name, in the store"
   }

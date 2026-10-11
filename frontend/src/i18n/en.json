@@ -89,27 +89,6 @@
   "settings": {
     "title": "Settings",
     "account": "Account",
-    "appearance": "Appearance",
-    "themePacks": "Theme packs",
-    "accentDefault": "Default",
-    "accentCustom": "Custom color",
-    "contrastRatioPass": "Contrast: {{ratio}}:1 — clears the 4.5:1 minimum.",
-    "contrastRatioFail": "Contrast: {{ratio}}:1 — below the 4.5:1 minimum. Pick a higher-contrast color.",
-    "contrastInvalid": "Enter a valid hex color (#RRGGBB).",
-    "previewTitle": "Live preview",
-    "previewBody": "The whole app repaints as you choose.",
-    "gradientPreview": "Gradient preview",
-    "gradient": {
-      "title": "Gradient",
-      "linear": "Linear",
-      "radial": "Radial",
-      "angle": "Angle",
-      "addStop": "Add stop",
-      "reset": "Reset",
-      "stopColor": "Stop {{n}} color",
-      "stopPosition": "Stop {{n}} position",
-      "removeStop": "Remove stop {{n}}"
-    },
     "cues": {
       "title": "Sound and vibration",
       "speech": "Spoken cues",
@@ -127,26 +106,10 @@
     "displayName": "Display name",
     "displayNameHint": "Your coach sees this instead of your e-mail address.",
     "displayNamePlaceholder": "How others see you",
-    "transparency": "Translucent surfaces",
-    "transparencyHint": "The glass effect on cards and bars. Follows your system setting by default.",
-    "transparencySystem": "System",
-    "transparencyFull": "Always",
-    "transparencyNone": "Never",
-    "saveTheme": "Save theme",
-    "themeSaveError": "Saving the theme failed — your choice is still here, try again.",
     "role": {
       "user": "Member",
       "coach": "Coach",
       "admin": "Admin"
-    },
-    "themePack": {
-      "midnight": "Midnight",
-      "solar": "Solar",
-      "forest": "Forest",
-      "neon": "Neon",
-      "mono": "Mono",
-      "aurora": "Aurora",
-      "ember": "Ember"
     }
   },
   "library": {

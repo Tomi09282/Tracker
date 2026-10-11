@@ -89,27 +89,6 @@
   "settings": {
     "title": "Beállítások",
     "account": "Fiók",
-    "appearance": "Megjelenés",
-    "themePacks": "Témacsomagok",
-    "accentDefault": "Alapértelmezett",
-    "accentCustom": "Egyedi szín",
-    "contrastRatioPass": "Kontraszt: {{ratio}}:1 — megfelel a 4,5:1 minimumnak.",
-    "contrastRatioFail": "Kontraszt: {{ratio}}:1 — nem éri el a 4,5:1 minimumot. Válassz kontrasztosabb színt.",
-    "contrastInvalid": "Adj meg egy érvényes hexadecimális színt (#RRGGBB).",
-    "previewTitle": "Élő előnézet",
-    "previewBody": "Az egész app átszíneződik, amint választasz.",
-    "gradientPreview": "Gradiens előnézete",
-    "gradient": {
-      "title": "Gradiens",
-      "linear": "Lineáris",
-      "radial": "Sugaras",
-      "angle": "Szög",
-      "addStop": "Új színpont",
-      "reset": "Alapértelmezett",
-      "stopColor": "{{n}}. színpont színe",
-      "stopPosition": "{{n}}. színpont helye",
-      "removeStop": "{{n}}. színpont törlése"
-    },
     "cues": {
       "title": "Hangok és rezgés",
       "speech": "Beszédhang",
@@ -127,26 +106,10 @@
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
     "displayNamePlaceholder": "Ahogy mások látnak",
-    "transparency": "Áttetsző felületek",
-    "transparencyHint": "Az üveghatás a kártyákon és a sávokon. Alapból a rendszer beállítását követi.",
-    "transparencySystem": "Rendszer",
-    "transparencyFull": "Mindig",
-    "transparencyNone": "Soha",
-    "saveTheme": "Téma mentése",
-    "themeSaveError": "A téma mentése nem sikerült — a választásod megmaradt, próbáld újra.",
     "role": {
       "user": "Tag",
       "coach": "Edző",
       "admin": "Admin"
-    },
-    "themePack": {
-      "midnight": "Éjfél",
-      "solar": "Napfény",
-      "forest": "Erdő",
-      "neon": "Neon",
-      "mono": "Mono",
-      "aurora": "Aurora",
-      "ember": "Ember"
     }
   },
   "library": {
