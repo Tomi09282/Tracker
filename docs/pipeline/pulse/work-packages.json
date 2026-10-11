@@ -1,0 +1,2490 @@
+{
+  "revision": 2,
+  "source": "docs/pipeline/pulse/PLAN.md (revision 2). This file is the ONE source for ownership; progress entries generate their file lists from it.",
+  "trees": {
+    "main": "C:/Users/Petike/Documents/Cursor/tracker (pulse-redesign; the owner's live view; only fast-forwarded; runs the backend and the owner's dev server)",
+    "integration": "C:/Users/Petike/Documents/Cursor/tracker-wt/int (pulse-int; every merge, build, sweep and verify:gates; preview :5189)",
+    "base": "C:/Users/Petike/Documents/Cursor/tracker-wt/base (detached 0860942; :5180)",
+    "slots": "C:/Users/Petike/Documents/Cursor/tracker-wt/slot-<1..6> (pulse/<id>; preview 518<n>)",
+    "review": "C:/Users/Petike/Documents/Cursor/tracker-wt/review-<1..2> (detached at the commit under review; preview 5187 / 5188)"
+  },
+  "accounts": {
+    "M": "user@tracker.local",
+    "C": "coach@tracker.local",
+    "A": "admin@tracker.local",
+    "N": "demo.nagy.balazs@tracker.local",
+    "R": "demo.coach.szilagyi.reka@tracker.local",
+    "K": "demo.kovacs.eszter@tracker.local",
+    "T": "demo.toth.reka@tracker.local"
+  },
+  "sandbox": {
+    "createdBy": "frontend/scripts/pulse-sandbox.mjs through the app's own API, in F3 stage D; ids in .pulse/sandbox.json and in the progress snapshot",
+    "objects": [
+      "scratch template plan (days + exercises)",
+      "scratch plan with no days",
+      "scratch draft post with a sample cover (never published)",
+      "interval plan assigned to demo.toth.reka@"
+    ],
+    "writeMember": "demo.toth.reka@tracker.local (sessions, food, measurements)",
+    "writeClient": "demo.kovacs.eszter@tracker.local (diet, equipment, chat)",
+    "rule": "the capture tool fails every non-GET /api request unless the state's writes list names it and its target is one of these; user@ is never written"
+  },
+  "frozen": {
+    "paths": [
+      "frontend/src/features/**/use*.ts",
+      "frontend/src/features/workout/cues.ts",
+      "frontend/src/features/workout/intervalPlan.ts",
+      "frontend/src/features/workout/wakeLock.ts",
+      "frontend/src/features/compose/kindIcons.ts",
+      "frontend/src/lib/outbox.ts"
+    ],
+    "except": [
+      "frontend/src/features/settings/useThemeSync.ts"
+    ],
+    "note": "Frozen for everybody (three gates mirror or import them). The one exception is deleted by F1.1 with the theme engine."
+  },
+  "foundation": [
+    {
+      "id": "F0",
+      "title": "Prep: commit the pipeline docs, create the integration worktree, export the Figma geometry, archive the asset sources, base worktree, live progress file, briefs, owner questions",
+      "owns": [
+        "docs/pipeline/pulse/progress.json",
+        "docs/pipeline/pulse/briefs/**",
+        "docs/pipeline/pulse/deviations.md",
+        "docs/pipeline/pulse/copy-to-approve.md",
+        "docs/pipeline/pulse/PLAN.md",
+        "docs/pipeline/pulse/work-packages.json",
+        "docs/pipeline/pulse/pkg/_int/**",
+        "frontend/scripts/pulse-geometry/**",
+        ".gitignore"
+      ],
+      "dependsOn": [],
+      "parallelGroup": "0.0 (INT, serial)",
+      "size": "S",
+      "acceptance": [
+        "docs/pipeline/pulse/** is committed on pulse-redesign (the only commit ever made in the main checkout); .pulse/ is git-ignored",
+        "branch pulse-int and the integration worktree C:/Users/Petike/Documents/Cursor/tracker-wt/int exist (npm ci done); the stray worktree under the session temp dir (scratchpad/pre-pull, 234089b) is removed after checking it is clean",
+        "frontend/scripts/pulse-geometry/<frame>.json exists for all 59 frames: every named layer and text node with its box relative to the frame (or the fallback of PLAN.md section 10 is recorded)",
+        "asset production folder archived to C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepek-forras/",
+        "base worktree exists at C:/Users/Petike/Documents/Cursor/tracker-wt/base (detached 0860942), npm ci and npm run build done there",
+        ".pulse/progress.live.json holds one entry per package of this file with files GENERATED from owns; one briefs/<id>.md per package",
+        "the 11 baseline gate outputs and an independent git-grep count per ratchet construct are recorded (surfaces, the ten legacy type classes, variant literals in attributes AND expressions, raw form controls, bridged var() names)",
+        "Q1-Q7 asked as option prompts (Q7 with its two annotated crops; the picture of Home's library row shown); defaults apply if unanswered"
+      ],
+      "verify": [
+        "git status (clean) in the main checkout and in the integration worktree",
+        "git worktree list",
+        "curl http://localhost:3000/readyz"
+      ],
+      "notes": "No product source changes. The seed and the database copy are NOT here: they belong to the freeze (F3 stage D), which needs the capture tool. Ask for keep-awake."
+    },
+    {
+      "id": "F1",
+      "title": "The value switch: gate data out of the scripts, theme engine out, fonts (glyph-checked), Pulse tokens + bridge, type ramp with the legacy rename, gutter, hybrid sweep (seven commits F1.0-F1.6)",
+      "owns": [
+        "frontend/src/ui/tokens/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "frontend/vite.config.ts",
+        "frontend/src/lib/cn.ts",
+        "frontend/src/i18n/**",
+        "frontend/public/**",
+        "frontend/src/ui/theme/**",
+        "frontend/src/features/settings/ThemeStudio.tsx",
+        "frontend/src/features/settings/useThemeSync.ts",
+        "frontend/src/features/settings/AccentPicker.tsx",
+        "frontend/src/features/settings/GradientBuilder.tsx",
+        "frontend/scripts/data/**"
+      ],
+      "dependsOn": [
+        "F0"
+      ],
+      "parallelGroup": "0.1-switch (INT, serial; runs beside 0.1-net)",
+      "size": "L",
+      "acceptance": [
+        "the build is green after each of F1.0-F1.5",
+        "F1.0: the outputs of check:i18n, check:elements and check:safe-area are byte-identical before and after; nobody edits those three maps inside a script again",
+        "F1.1: nothing reads localStorage tracker.theme or calls GET /me/theme; no inline script in index.html; the four settings.themePack.* exemption entries are gone from scripts/data/i18n-untranslated.json",
+        "F1.2: glyph check on a scratch page outside src with plain headless Chrome (--dump-dom): per face document.fonts.check, the canvas width of the four double-acute glyphs against the fallback-only width, equal advance of the ten digits under tabular-nums; the result is in the live progress file. Continuations are those of PLAN.md 3.3 (successor display family; stop before F1.4; the 150 KB number goes to the owner, nothing is cut silently)",
+        "F1.3: no layout metric changed (--nav-h, --content-pad-b, --control-h keep their values); every legacy token name still declared (state tokens visible, decoration neutral); a named empty block per lane exists in tokens.css and index.css",
+        "F1.4: tokens.css and TYPE_STEPS list the same 26 steps (16 Pulse + 10 legacy); git diff of the codemod shows only the three class tokens; no existing text changes size in the hybrid sweep; h1-h3 out of the display rule; no Inter / Space Grotesk in dist/",
+        "F1.6 hybrid sweep in replay: 59 states, no undeclared console error or failed request, no horizontal overflow at 360/402/430, control inventory equal to baseline except the removed theme UI; the 1280 inventories of the six desktop files equal theirs; stored as .pulse/hybrid/",
+        "a browser with a stale tracker.theme and the aurora account user@ render plain Pulse"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "node scripts/pulse-shot.mjs --frame settings-1 --storage <stale-theme.json>"
+      ],
+      "notes": "Integrator work, in the integration worktree; the main checkout is fast-forwarded after each green commit. Token values: plan-safe.md section 2.3, adopted verbatim. The only npm install of Phase 0 happens here (F1.2, F1.4). Of frontend/src/lib only cn.ts (TYPE_STEPS) is in this package; outbox.ts is frozen and the rest stays with the integrator.",
+      "stages": {
+        "0": "gate exemption data moved to scripts/data/*.json, no rule change; the four lanes branch after it",
+        "1": "client theme engine removed",
+        "2": "fonts installed dormant + the glyph and tabular-figure check",
+        "3": "colour, radius, bridge tokens, canvas; one empty named block per lane in tokens.css and index.css",
+        "4": "type ramp (16 Pulse + 10 legacy steps), the codemod of the 152 text-body / text-display / text-micro sites, families",
+        "5": "gutter",
+        "6": "hybrid sweep in replay (after the freeze)"
+      },
+      "mergeConstraints": [
+        "F1:3 after F2:a (check:canvas)",
+        "F1:4 after F2:a (type-scale binding leg) and only if the F1:2 glyph check passed",
+        "F1:6 after F3:D (the freeze and the baseline)"
+      ],
+      "preClaim": [
+        {
+          "step": "F1.0",
+          "file": "frontend/scripts/check-i18n.mjs",
+          "laterOwner": "F2",
+          "what": "reads UNTRANSLATED_BY_DESIGN from scripts/data/i18n-untranslated.json"
+        },
+        {
+          "step": "F1.0",
+          "file": "frontend/scripts/check-element-roster.mjs",
+          "laterOwner": "F2",
+          "what": "reads DORMANT from scripts/data/elements-dormant.json"
+        },
+        {
+          "step": "F1.0",
+          "file": "frontend/scripts/check-safe-area.mjs",
+          "laterOwner": "F2",
+          "what": "reads EXEMPT from scripts/data/safe-area-exempt.json"
+        },
+        {
+          "step": "F1.1",
+          "file": "frontend/src/features/settings/SettingsPage.tsx",
+          "laterOwner": "S-settings",
+          "what": "ThemeStudio import + mount and the TransparencyChoice block removed"
+        },
+        {
+          "step": "F1.1",
+          "file": "frontend/src/app/providers.tsx",
+          "laterOwner": "F13",
+          "what": "ThemeProvider mount removed"
+        },
+        {
+          "step": "F1.4",
+          "glob": "frontend/src/**/*.{ts,tsx}",
+          "laterOwner": "*",
+          "what": "codemod: text-body / text-display / text-micro -> their -legacy names at the 152 existing sites (up to 82 files); class tokens only"
+        }
+      ],
+      "deletes": [
+        "frontend/src/ui/theme/**",
+        "frontend/src/features/settings/ThemeStudio.tsx",
+        "frontend/src/features/settings/useThemeSync.ts",
+        "frontend/src/features/settings/AccentPicker.tsx",
+        "frontend/src/features/settings/GradientBuilder.tsx",
+        "frontend/public/icons.svg"
+      ]
+    },
+    {
+      "id": "F2",
+      "title": "Gates re-pointed in three merges: type-scale binding + check:canvas (a); safe-area, nav, nav-active, elements, verify:gates (b); the check:pulse ratchet (c)",
+      "owns": [
+        "frontend/scripts/check-type-scale.mjs",
+        "frontend/scripts/check-safe-area.mjs",
+        "frontend/scripts/check-nav.mjs",
+        "frontend/scripts/check-nav-active.mjs",
+        "frontend/scripts/check-tokens.mjs",
+        "frontend/scripts/check-i18n.mjs",
+        "frontend/scripts/check-element-roster.mjs",
+        "frontend/scripts/check-interval.mjs",
+        "frontend/scripts/verify-autosave.mjs",
+        "frontend/scripts/verify-outbox.mjs",
+        "frontend/scripts/verify-nav-gate.mjs",
+        "frontend/scripts/check-pulse.mjs",
+        "frontend/scripts/check-canvas.mjs",
+        "frontend/scripts/verify-gates.mjs",
+        "docs/pipeline/pulse/pkg/F2/**"
+      ],
+      "dependsOn": [
+        "F1:0"
+      ],
+      "parallelGroup": "0.1-net (parallel lane G)",
+      "size": "L",
+      "acceptance": [
+        "every changed gate is green on the code it lands on; the three exemption lists are read from scripts/data/ and the gates export their scans for the tools (PLAN.md R31)",
+        "check:pulse: every rule has an id; variant literals are matched inside any variant attribute or property, string or expression; the ten legacy type classes; font-display only as a class token in .ts/.tsx; (text|bg|border)-info*; raw inputs include type=\"file\"; a \"kept rules\" leg asserts the global :focus-visible ring and the reduced-motion backstop in index.css",
+        "check:pulse budgets: one file per lane and package holding exactly the files that id owns + pkg/_int/budget.json for everything the integrator keeps; a counted file in no budget file fails; --init generates them from work-packages.json; each rule's total equals the independent count recorded in F0, or the difference is explained in writing",
+        "check:safe-area: inset-carrying tokens resolved transitively over var(); fixed or sticky with top-0, bottom-0, inset-0 or an arbitrary top/bottom is edge-pinned; a carrying token anywhere in the element's classes satisfies it; dry-run on a copy of tokens.css with F11's planned values is green (ToastHost.tsx:149 stays green)",
+        "check:elements: export-granular rule; the 14 playground-only elements dormant; probe: E1 marked live fails",
+        "check-nav: subtree door rule green; the /compose and /m exemptions carry open:true and are printed on every run; REQUIRED_DOORS map present",
+        "check-nav-active: completeness against the router; /notifications owned by Home in the three role lists (default of Q6)",
+        "verify:gates plants one defect per gate rule and one per ratchet rule id, sees the named gate fail, restores the tree byte for byte (git status clean); anchors are whitespace-insensitive patterns in integrator files wherever a choice exists; --list-anchors prints every anchored file; the dead fourth case of verify-nav-gate is re-anchored"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/check-pulse.mjs --report against the F0 counts"
+      ],
+      "notes": "Hand-in files in pkg/F2/: shared.patch (package.json script lines, the /notifications data line per role in app/navTabs.ts) and variants.json (the 14). After this package the gate scripts return to the integrator. Budgets are NOT carried from this lane's worktree: the integrator runs --init on the merged tree in the F2:c merge commit and re-lowers the affected budgets inside every pre-claim edit commit (F16).",
+      "stages": {
+        "a": "check-type-scale binding leg (plain lengths stay mandatory) + check:canvas",
+        "b": "check-safe-area (transitive inset tokens, edge-pinned definition), check-nav (subtree doors, open exemptions printed), check-nav-active, check-element-roster (export-granular product reads; the 14 playground-only elements dormant), the stale verify-nav-gate anchor fixed, verify:gates with --list-anchors",
+        "c": "check:pulse with one rule id per rule; budgets generated by --init on the merged tree by the integrator"
+      },
+      "mergeConstraints": [
+        "F2:a before F1:3",
+        "F2:c after F1:5 and before any lane of step 0.2 (the F1.4 codemod is the last commit allowed to raise a count)"
+      ],
+      "variantElements": [
+        "E1",
+        "E3",
+        "E4",
+        "E5",
+        "E8",
+        "E9",
+        "E10",
+        "E12",
+        "E13",
+        "E16",
+        "E17",
+        "E18",
+        "E19",
+        "E20"
+      ],
+      "variantNote": "not reads this lane owns: the gate RULE changes (a read counts as live only when its exported component is imported outside features/playground), so these 14 become live:false + dormant \"playground only\" in the F2:b merge commit"
+    },
+    {
+      "id": "F3",
+      "title": "Eyes: the capture tool (record, replay, virtual time, fixtures as edits, probes, geometry, tiles, inventory), the sandbox script; then, with the integrator, the freeze and the baseline of all 59 states",
+      "owns": [
+        "frontend/scripts/pulse-shot.mjs",
+        "frontend/scripts/pulse-verify.mjs",
+        "frontend/scripts/pulse-frames.json",
+        "frontend/scripts/fixtures/**",
+        "scripts/dev-stack.mjs",
+        ".claude/launch.json",
+        "frontend/scripts/pulse-sandbox.mjs",
+        "docs/pipeline/pulse/pkg/F3/**"
+      ],
+      "dependsOn": [
+        "F1:0"
+      ],
+      "parallelGroup": "0.1-net (parallel lane V)",
+      "size": "XL",
+      "acceptance": [
+        "the specification of PLAN.md 6.0 holds row by row: modes (--replay default, --record, --record --only-missing, --live), virtual time with an advance step, steps by accessible name with an arrived assertion that FAILS the capture when its target is missing, fixtures as pointer edits for any method (mutation outcomes 200/409/500 and stubs for requests fired on open), viewports (402 x H @2, 360, 430, insets 0, scrolled-to-end, 1280, 1300 @1), outputs (PNG, tiles of at most 874 pt with a difference tile, overview, contact sheet, inventory, probe JSON)",
+        "probes: fonts; pill = button or link with the accent background and height >= 44, at most one; boxed surfaces by data-kit; overflow; 44 x 44 targets except muscle regions while a chip row is on screen; console and requests against the state's declared list; geometry against pulse-geometry/<frame>.json (2 pt, numerals 3 pt); the focus walk; under --reduced-motion no running infinite animation; the player law",
+        "replay: every /api request fulfilled from .pulse/rec/ (binary bodies included), service worker bypassed, an unrecorded request fails the capture and is reported; a non-GET is answered only by a fixture of the state",
+        "live: non-GET fail-closed except the state's writes list, and a writes list is refused unless its target is a sandbox object of .pulse/sandbox.json",
+        "login (live only): one cookie jar per account in the OS temp dir, written atomically, renewed by POST /auth/refresh under a lock; a fresh login only when a refresh is refused; the cookie is obtained BEFORE a build/capture lock is taken; the refresh cookie never enters a browser profile; Set-Cookie and Authorization headers are never stored in a recording",
+        "locks: .pulse/locks/slot-{1,2}.json with pid, package, port, previewPid, heartbeat; a dead pid or a heartbeat older than 3 minutes is taken over; pulse-verify kills a stray listener on its port, registers its preview pid, releases in finally; pulse-verify --clean clears dead locks and previews on 5180-5189",
+        "stage D: GET /my-plans/today for user@ says source \"plan\"; the sandbox objects exist (scratch template plan, zero-day plan, draft post with a cover, interval plan on demo.toth.reka@) and are in app.pulse-baseline.db; .pulse/rec/ holds every response the 59 states need, incl. GET /ui/element-styles; the freeze is copied to C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/freeze-backup/",
+        ".pulse/baseline/ holds a PNG and a .controls.json for all 59 frame states in replay from the base worktree (old look), plus a 1280 capture + inventory of the screens that use col-wide or lg:; an agent that did not build the tool has checked the contact sheet of the 59 against the frame names"
+      ],
+      "verify": [
+        "node scripts/pulse-shot.mjs --record --all (integrator, live, once)",
+        "node scripts/pulse-shot.mjs --sweep --baseline --inventory --base http://localhost:5180 (replay)",
+        "node scripts/pulse-verify.mjs --package F3 --port 5181",
+        "the same state captured twice in replay is pixel-identical"
+      ],
+      "notes": "No npm dependency (raw CDP, Chrome 154). The dev backend keeps its rate limiters on. The fixture password is read at run time from backend/scripts/seed-dev-users.mjs and never written anywhere. Ids are resolved from the freeze or from GET /api/v1/clients and /plans, never hard-coded. Fixtures of the 59 frame states live in frontend/scripts/fixtures/. Critical path of Phase 0: if replay cannot be made reliable, the fallback is risk 5 of PLAN.md section 10.",
+      "stages": {
+        "1": "pulse-shot, pulse-verify, pulse-frames.json, pulse-sandbox, dev-stack merged",
+        "D": "the freeze (integrator + this lane): seed on a training day of user@, sandbox objects, DB copy, recording, backup; then the baseline in replay from the base worktree, contact-sheet-checked"
+      }
+    },
+    {
+      "id": "F4",
+      "title": "Integration tools: ownership validator, merge check, slot sync, i18n patcher, variant patcher, fixture check, progress (live file + snapshot), source ledger",
+      "owns": [
+        "frontend/scripts/pulse-owns-check.mjs",
+        "frontend/scripts/pulse-merge-check.mjs",
+        "frontend/scripts/pulse-sync.mjs",
+        "frontend/scripts/pulse-i18n.mjs",
+        "frontend/scripts/pulse-variants.mjs",
+        "frontend/scripts/pulse-fixture-check.mjs",
+        "frontend/scripts/pulse-progress.mjs",
+        "frontend/scripts/pulse-ledger.mjs",
+        "docs/pipeline/pulse/pkg/F4/**"
+      ],
+      "dependsOn": [
+        "F1:0"
+      ],
+      "parallelGroup": "0.1-net (parallel lane T)",
+      "size": "L",
+      "acceptance": [
+        "pulse-owns-check: no two packages' owns overlap; every file under frontend/src is owned, frozen or integrator-listed; every file a package deletes is in its owns; every preClaim names a later owner; anchoredBy agrees with verify:gates --list-anchors; it is the one glob expander every other tool imports",
+        "pulse-merge-check refuses a branch that touches a path its package does not own, raises a budget, carries a fixture that fails pulse-fixture-check, or touches an anchored file without a green verify:gates run on the squashed tree",
+        "pulse-sync <id>: clears dead locks and a stray preview, restores the fixed path list (three bundles, catalog.ts, scripts/data/*.json, the paths of the package's own shared.patch), asserts git status shows owned paths only, merges pulse-redesign (or switch -C for re-use), npm ci if the lockfile changed, re-applies the COMMITTED hand-in files and stops with status blocked if one no longer applies. Test: a merge into a slot with an applied patch succeeds through it and fails without it",
+        "pulse-i18n check / apply / revert enforce PLAN.md 4.4 rules (a)-(f): add by namespace, change/remove by consumers over pulse-redesign and all pulse/* tips (the gate's own scan, imported), untranslated required exactly when en or de equals hu and written to scripts/data/i18n-untranslated.json, a removed exempted key drops its entry, patch read from the branch HEAD",
+        "pulse-i18n: an empty patch leaves the three bundles byte-identical (git diff empty); flat dotted top-level keys stay flat (a test sets an achievement.* key); CRLF line endings preserved; identical key order",
+        "pulse-variants check / apply / revert: refuse a delta whose useElementVariant read is not in a file the package owns (the gate's reader scan, imported); write catalog.ts and scripts/data/elements-dormant.json; accept lane ids as well as package ids (as does pulse-i18n)",
+        "pulse-fixture-check: a fixture is a list of pointer edits over a recording of the same endpoint; fails on a key, a type or an enum value no recording of that endpoint has",
+        "pulse-progress: sync folds .pulse/status/*.json into .pulse/progress.live.json idempotently and atomically; snapshot writes docs/pipeline/pulse/progress.json from it; files are generated from work-packages.json; sync --from-snapshot rebuilds a lost live file",
+        "pulse-ledger prints hook calls, mutation calls, doors, role / aria attributes and the counts of focus-visible:, useMotionSafe( and motion-reduce: present at the merge base and missing now, for the owned paths"
+      ],
+      "verify": [
+        "each tool run against a planted bad input (foreign path, missing de string, duplicate key, raised budget, en=de pair with an exemption, a remove racing a new consumer on another branch, a fixture with an unknown key, a dirty integrator path before a merge)",
+        "npm run build (cwd frontend/)"
+      ],
+      "notes": "Must be merged before any lane of step 0.2 starts. None of these is in the build chain. No tool re-implements a gate's rule (R31)."
+    },
+    {
+      "id": "F5",
+      "title": "Assets and media: WebP pipeline (35 sources -> 49 files, knee alpha), slots/urls modules, check:assets, Pic, UserPhoto",
+      "owns": [
+        "frontend/assets-src/**",
+        "frontend/scripts/build-pulse-assets.mjs",
+        "frontend/scripts/check-assets.mjs",
+        "frontend/src/assets/**",
+        "frontend/src/ui/media/**",
+        "frontend/src/features/playground/kit/media.tsx",
+        "docs/pipeline/pulse/kit/media.md",
+        "docs/pipeline/pulse/pkg/F5/**"
+      ],
+      "dependsOn": [
+        "F1:0"
+      ],
+      "parallelGroup": "0.1-net (parallel lane E)",
+      "size": "M",
+      "acceptance": [
+        "49 WebP files from 35 sources under src/assets/pulse/img, folder <= 1.0 MB: 14 tab icons (96), coin (72/188/376/512), medal + medal-active (168), 8 equipment stills (144), figure-front + figure-back (195/390/585), 7 heroes at 1x and 2x, texture-monogram (512); the 11 MB masters stay outside the repo",
+        "not shipped, and an excluded name in the manifest fails the gate: the five superseded steel tab-* masters, muscle-figure-front, figure-front-press, figure-front-legs, figure-back-lats, figure-back-pull, cover-gym, cover-bar, cover-track, portrait-coach",
+        "check:assets (8 assertions, the eighth: assets.json accent equals --accent) green and in the build chain; its probes fail as planted (a -lit file deleted; mix-blend-lighten added; --accent changed alone)",
+        "no mix-blend- anywhere in src; no Pulse image inlined as base64 in a JS chunk (assetsInlineLimit callback)",
+        "Pic reserves its box from the manifest, supports srcSet/sizes, bleed, lights-on fade and the lit pair; UserPhoto requires a ratio; both carry data-kit",
+        "build-pulse-assets.mjs takes --sharp-from <a checkout that has backend/node_modules> (default: the main checkout, from the git common dir) and --src <absolute source folder>, and says plainly when either is missing"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "grep dist/assets/*.js for data:image (expect none)"
+      ],
+      "notes": "Hand-in file pkg/F5/shared.patch: the package.json script line and the vite.config.ts assetsInlineLimit line. sharp is read from the main checkout's backend/node_modules (a module read, not a backend script; no backend file is touched). check:assets needs no sharp. Tell the owner: the usage terms of the AI-generated images must be checked before the first push.",
+      "mergeConstraints": [
+        "merges right after F1:3 (the baked canvas must equal --surface-0)"
+      ]
+    },
+    {
+      "id": "F6",
+      "title": "Actions keystone: lime pill with size axis, link variant, bare icon shape, three-dot busy, TextLink",
+      "owns": [
+        "frontend/src/ui/primitives/control.ts",
+        "frontend/src/ui/primitives/Pressable.tsx",
+        "frontend/src/ui/primitives/TextLink.tsx",
+        "frontend/src/features/playground/kit/actions.tsx",
+        "docs/pipeline/pulse/kit/actions.md",
+        "docs/pipeline/pulse/pkg/F6/**"
+      ],
+      "dependsOn": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "parallelGroup": "0.2-keystone (one agent, before the lanes)",
+      "size": "M",
+      "acceptance": [
+        "size axis md (44, default until closing) / lg (56) / sm (44); no existing call site changes height",
+        "link variant with tone danger, router-link form, lead / trail glyph; secondary / ghost / danger keep compiling with their bridged look",
+        "the specimen matches the kit boards: rest, pressed, disabled, busy AND keyboard focus; every export carries data-kit",
+        "full hybrid sweep passes with the intended differences listed"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Everything else composes it, so it lands alone and first. API-first: stubs + kit/actions.md in the first commit; additive prop changes only afterwards. Hand-in folder pkg/F6/ (shared.patch inside its named token block, i18n.patch.json for common.* keys if needed).",
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F7",
+      "title": "Kit specimen host in /playground with a list / board layout; TokenProof deleted; CURATED.E21 aligned to A; catalogue edits at integrations",
+      "owns": [
+        "frontend/src/features/playground/PulseKit.tsx",
+        "frontend/src/features/playground/PlaygroundPage.tsx",
+        "frontend/src/ui/TokenProof.tsx",
+        "frontend/src/ui/feedback/ElementStyleProvider.tsx",
+        "frontend/src/ui/feedback/catalog.ts"
+      ],
+      "dependsOn": [
+        "F1",
+        "F4"
+      ],
+      "parallelGroup": "0.2-keystone (INT, beside F6)",
+      "size": "S",
+      "acceptance": [
+        "PulseKit renders every file under features/playground/kit/ through import.meta.glob as the first section of /playground",
+        "a two-state control switches to the board layout: 1300 wide, three 354 columns, the order of app-components.body.js, so a capture at 1300 x H, scale 1, can be tiled against _components-1..4.png",
+        "check:elements green; every Demo case still compiles"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Integrator-owned for the whole effort: catalog.ts changes only through pulse-variants at integrations; the Demo cases change through lanes' shared.patch files (the E11 demo with the shell lane).",
+      "deletes": [
+        "frontend/src/ui/TokenProof.tsx"
+      ]
+    },
+    {
+      "id": "F8",
+      "title": "Selection: BadgeCount, Segmented skin, LanguageToggle (stage 1); ChipRow, Toggle, Switch, CheckMark, CopyButton skin (stage 2)",
+      "owns": [
+        "frontend/src/ui/primitives/BadgeCount.tsx",
+        "frontend/src/ui/primitives/ChipRow.tsx",
+        "frontend/src/ui/primitives/Toggle.tsx",
+        "frontend/src/ui/primitives/Switch.tsx",
+        "frontend/src/ui/primitives/CheckMark.tsx",
+        "frontend/src/ui/nav/LanguageToggle.tsx",
+        "frontend/src/ui/feedback/variants/E6Segmented.tsx",
+        "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
+        "frontend/src/features/playground/kit/selection.tsx",
+        "docs/pipeline/pulse/kit/selection.md",
+        "docs/pipeline/pulse/pkg/F8/**"
+      ],
+      "dependsOn": [
+        "F6"
+      ],
+      "parallelGroup": "0.2-lanes (parallel); stage 2 in 0.3",
+      "size": "L",
+      "acceptance": [
+        "roles kept: Switch role=switch, Toggle role=checkbox, Segmented radiogroup + roving tabindex + async layer, LanguageToggle lang= attributes",
+        "variants.json handed in for E6 and E2 (this lane owns the files that hold both reads)",
+        "specimens match the kit boards in every drawn state, plus keyboard focus; every export carries data-kit"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Two merges (stage 1, stage 2).",
+      "stages": {
+        "1": "BadgeCount, Segmented skin, LanguageToggle",
+        "2": "ChipRow, Toggle, Switch, CheckMark, CopyButton skin"
+      },
+      "variantElements": [
+        "E6",
+        "E2"
+      ],
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F9",
+      "title": "Structure: SectionHeader rewrite, Rule, RowStack, ListRow, EmptyState, Skeleton base, NoticeLine (stage 1); Monogram (stage 2)",
+      "owns": [
+        "frontend/src/ui/data/SectionHeader.tsx",
+        "frontend/src/ui/data/Rule.tsx",
+        "frontend/src/ui/data/RowStack.tsx",
+        "frontend/src/ui/data/ListRow.tsx",
+        "frontend/src/ui/data/Monogram.tsx",
+        "frontend/src/ui/feedback/EmptyState.tsx",
+        "frontend/src/ui/feedback/ScreenSkeleton.tsx",
+        "frontend/src/ui/feedback/NoticeLine.tsx",
+        "frontend/src/features/playground/kit/structure.tsx",
+        "docs/pipeline/pulse/kit/structure.md",
+        "docs/pipeline/pulse/pkg/F9/**"
+      ],
+      "dependsOn": [
+        "F6",
+        "F5"
+      ],
+      "parallelGroup": "0.2-lanes (parallel); stage 2 in 0.3",
+      "size": "L",
+      "acceptance": [
+        "icon / badge / size props optional and unrendered; all 35 EmptyState and 15 SectionHeader call sites compile unchanged",
+        "EmptyState stretches only a pill; links stay on the left edge",
+        "Monogram: ink background under the texture (never invisible initials)"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Two merges.",
+      "stages": {
+        "1": "SectionHeader rewrite, Rule, RowStack, ListRow, EmptyState, Skeleton base, NoticeLine",
+        "2": "Monogram"
+      },
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F10",
+      "title": "Data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp (stage 1); LedgerRow, Stepper (stage 2)",
+      "owns": [
+        "frontend/src/ui/data/Numeral.tsx",
+        "frontend/src/ui/data/StatBlock.tsx",
+        "frontend/src/ui/data/LedgerRow.tsx",
+        "frontend/src/ui/data/SegmentBar.tsx",
+        "frontend/src/ui/data/ProgressBar.tsx",
+        "frontend/src/ui/data/MacroColumns.tsx",
+        "frontend/src/ui/feedback/CountUp.tsx",
+        "frontend/src/features/playground/kit/data.tsx",
+        "docs/pipeline/pulse/kit/data.md",
+        "docs/pipeline/pulse/pkg/F10/**"
+      ],
+      "dependsOn": [
+        "F6"
+      ],
+      "parallelGroup": "0.2-lanes (parallel); stage 2 in 0.3",
+      "size": "L",
+      "acceptance": [
+        "ink-tight numerals judged on the capture against _components-2/3.png, within 3 pt",
+        "LedgerRow: one baseline; a failed read prints an em dash, never 0",
+        "ONE size mechanism for the giant numeral: the element carries text-giant and the fluid size is an inline style (fontSize: var(--giant-fluid)), never a second text-* class; --text-giant stays a plain length in tokens.css",
+        "probes: computed family, weight and line-height of the giant numeral at 360 and at 402 equal the text-giant step"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Two merges. Fallback offset tokens for text-box-trim travel in pkg/F10/shared.patch.",
+      "stages": {
+        "1": "Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp",
+        "2": "LedgerRow, Stepper"
+      },
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F11",
+      "title": "Shell: raster tab bar with fade, Screen scaffold, ScreenHeader on routeMeta, Dock, PublicLayout, lazy Home/Auth",
+      "owns": [
+        "frontend/src/app/navTabs.ts",
+        "frontend/src/app/routeMeta.ts",
+        "frontend/src/app/AppLayout.tsx",
+        "frontend/src/app/PublicLayout.tsx",
+        "frontend/src/app/router.tsx",
+        "frontend/src/app/RequireAuth.tsx",
+        "frontend/src/ui/nav/BottomNav.tsx",
+        "frontend/src/ui/shell/Screen.tsx",
+        "frontend/src/ui/shell/ScreenHeader.tsx",
+        "frontend/src/ui/shell/Dock.tsx",
+        "frontend/src/features/playground/kit/shell.tsx",
+        "docs/pipeline/pulse/kit/shell.md",
+        "docs/pipeline/pulse/pkg/F11/**"
+      ],
+      "dependsOn": [
+        "F6",
+        "F5",
+        "F2:b"
+      ],
+      "parallelGroup": "0.2-lanes (parallel)",
+      "size": "L",
+      "acceptance": [
+        "bar at y 782-838 at 402 x 874 with insets, no computed background, 5 / 6 / 7 tabs; one aria-current per route of the gate table; nothing touches an edge with zero insets; same at 360 and 430; the desktop dock still present at 1280",
+        "navTabs.ts stays importable by bare Node (icon KEY, type-only import); the bar never clamps; both horizontal insets present",
+        "--nav-h and --content-pad-b re-valued in this merge commit (from pkg/F11/shared.patch); the hybrid player still fits one viewport",
+        "ScreenHeader reads its parent from routeMeta; gate assertions for routeMeta land in the same commit",
+        "no new error screen is built: the router's existing error handling stays",
+        "variants.json handed in for E11"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png",
+        "npm run verify:gates (integration worktree, clean tree)"
+      ],
+      "notes": "Hand-in files in pkg/F11/: shared.patch (two tokens.css declarations, the E11 Demo case in PlaygroundPage.tsx), variants.json (E11), i18n.patch.json if a nav.* / common.* key is needed. Applied by the integrator in the same merge commit: check:assets tab-pair assertion on, routeMeta assertions in check-nav / check-nav-active, the safe-area scaffold assertion (a top-inset-carrying token), re-anchored verify-nav-gate. /notifications lights Home unless Q6 says otherwise.",
+      "variantElements": [
+        "E11"
+      ],
+      "i18nNamespaces": [
+        "common",
+        "nav"
+      ]
+    },
+    {
+      "id": "F12",
+      "title": "Inputs and the sheet: underline Field (stage 1); SearchField, TextArea, NumberStepper, MaskedField, DateTrigger, SelectSheet, FilePick, Sheet restyle, ConfirmSheet (stage 2)",
+      "owns": [
+        "frontend/src/ui/primitives/Field.tsx",
+        "frontend/src/ui/primitives/SearchField.tsx",
+        "frontend/src/ui/primitives/TextArea.tsx",
+        "frontend/src/ui/primitives/NumberStepper.tsx",
+        "frontend/src/ui/primitives/MaskedField.tsx",
+        "frontend/src/ui/primitives/DateTrigger.tsx",
+        "frontend/src/ui/primitives/SelectSheet.tsx",
+        "frontend/src/ui/primitives/FilePick.tsx",
+        "frontend/src/ui/feedback/variants/E7Field.tsx",
+        "frontend/src/ui/feedback/variants/E14E20.tsx",
+        "frontend/src/ui/feedback/ConfirmSheet.tsx",
+        "frontend/src/features/playground/kit/inputs.tsx",
+        "docs/pipeline/pulse/kit/inputs.md",
+        "docs/pipeline/pulse/pkg/F12/**"
+      ],
+      "dependsOn": [
+        "F6"
+      ],
+      "parallelGroup": "0.2-lanes (parallel); stage 2 in 0.3",
+      "size": "L",
+      "acceptance": [
+        "Field: label always rendered, aria-describedby wiring kept, 16 px text, focus / error / disabled underlines; the specimen shows keyboard focus",
+        "FilePick is the heir of the two raw type=\"file\" inputs (ProgressPage.tsx:471, PostEditorPage.tsx:393): a labelled trigger over a visually hidden native input",
+        "Sheet contract unchanged (open, onClose, title, children, status?, onRetry?); Escape closes, focus moves in, role=dialog aria-modal; no blur, no shadow",
+        "variants.json handed in for E7 and E14 (this lane owns the files that hold both reads)"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Two merges. E14E20.tsx also holds the playground-only E13 (SwipeItem) and E20 (Fab): this lane does not touch them; F20 removes them.",
+      "stages": {
+        "1": "underline Field",
+        "2": "SearchField, TextArea, NumberStepper, MaskedField, DateTrigger, SelectSheet, FilePick, FeedbackField skin, Sheet, ConfirmSheet"
+      },
+      "variantElements": [
+        "E7",
+        "E14"
+      ],
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F13",
+      "title": "Status zone: toast band at the top, offline line as a notice line, CommandPalette minimal restyle",
+      "owns": [
+        "frontend/src/ui/feedback/ToastHost.tsx",
+        "frontend/src/ui/feedback/variants/E12E16.tsx",
+        "frontend/src/ui/shell/OfflineIndicator.tsx",
+        "frontend/src/ui/shell/CommandPalette.tsx",
+        "frontend/src/app/providers.tsx",
+        "frontend/src/features/playground/kit/status.tsx",
+        "docs/pipeline/pulse/kit/status.md",
+        "docs/pipeline/pulse/pkg/F13/**"
+      ],
+      "dependsOn": [
+        "F6",
+        "F9:1"
+      ],
+      "parallelGroup": "0.3-lanes (parallel)",
+      "size": "L",
+      "acceptance": [
+        "toast(message, kind?, options | fn) unchanged; kinds, Undo, 4 s timer with pause, cap of 3 (three notice lines in one band); no countdown under reduced motion",
+        "OfflineIndicator: markup only; drain loop, /healthz body check and --offline-h untouched; offline line and a toast together do not overlap",
+        "an Undo toast still undoes — proven live on the SCRATCH template plan (delete a day -> Undo), never on the member's plan",
+        "variants.json handed in for E15"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png",
+        "click script, live: scratch plan -> delete a day -> Undo"
+      ],
+      "notes": "The safe-area exemption data (scripts/data/safe-area-exempt.json) changes through pkg/F13/shared.patch. E12E16.tsx also holds the playground-only E12 (InteractiveCard) and E16 (Progress): this lane does not touch them; F20 removes them.",
+      "variantElements": [
+        "E15"
+      ],
+      "i18nNamespaces": [
+        "common",
+        "offline",
+        "palette"
+      ]
+    },
+    {
+      "id": "F14",
+      "title": "Charts: TrendChart restyle, dotted gap, Sparkline",
+      "owns": [
+        "frontend/src/ui/feedback/TrendChart.tsx",
+        "frontend/src/ui/feedback/ProgressChart.tsx",
+        "frontend/src/ui/feedback/Sparkline.tsx",
+        "frontend/src/ui/feedback/chartGeometry.ts",
+        "frontend/src/features/playground/kit/charts.tsx",
+        "docs/pipeline/pulse/kit/charts.md",
+        "docs/pipeline/pulse/pkg/F14/**"
+      ],
+      "dependsOn": [
+        "F1"
+      ],
+      "parallelGroup": "0.3-lanes (parallel)",
+      "size": "M",
+      "acceptance": [
+        "no area, hairline axes, 1.5 px line, one end dot, dotted gap; the sr-only table and emptyKey kept",
+        "chartGeometry.ts stays pure and keeps its exports (check:interval green)"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Parallel-safe with everything.",
+      "i18nNamespaces": [
+        "common"
+      ]
+    },
+    {
+      "id": "F15",
+      "title": "Mannequin: stage 0 = additive props + fixed box (before wave 2); stage 1 = neutral renders + SVG regions inside MuscleMap (default of Q1)",
+      "owns": [
+        "frontend/src/ui/muscle-map/**",
+        "docs/pipeline/pulse/kit/mannequin.md",
+        "docs/pipeline/pulse/pkg/F15/**"
+      ],
+      "dependsOn": [
+        "F5"
+      ],
+      "parallelGroup": "background (own track, from step 0.1 research to Phase 1)",
+      "size": "L",
+      "acceptance": [
+        "stage 0: props additive only (uncontrolled side stays the default; every existing call site renders as before); the three screens that mount the map are pixel-equal to the sweep before it",
+        "stage 1: every roster slug has a region; regions are buttons as today; the muscle.* / muscleMap.* template consumer is kept or the dead keys are removed in this lane's own patch",
+        "stage 1: IoU >= 0.95 for every region that has a reference picture (today: chest, quads, lats and the shared shoulder cap; all 22 under Q1 option 2)",
+        "stage 1: a contact sheet of all 22 regions lit one by one, judged by an agent that did not build it; the owner signs off every region that has no reference picture, in any case the five groove-less ones",
+        "stage 1: when it merges, the seven pending-F15 frames (library-1..3, exercise-detail-1..2, workout-1..2) are captured and reviewed again and the player law probe re-runs"
+      ],
+      "verify": [
+        "node scripts/pulse-verify.mjs (build + replay captures, holds the lock)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "regression picture against the lit renders",
+        "contact sheet of the 22 regions"
+      ],
+      "notes": "No package waits for stage 1: until it lands the three screens show the existing map on Pulse tokens in the fixed box and their figure frames carry the verdict pending-F15. No new image is generated without the owner's word (Q1).",
+      "stages": {
+        "0": "additive props side / onSideChange (controlled), sideControl=\"none\", the figure in a fixed 597:1261 box — required by F18",
+        "1": "regions.ts and the new inside of MuscleMap, own track"
+      },
+      "i18nNamespaces": [
+        "muscle",
+        "muscleMap"
+      ],
+      "deletes": [
+        "frontend/src/ui/muscle-map/shapes.ts",
+        "frontend/src/ui/muscle-map/landmarks.ts"
+      ]
+    },
+    {
+      "id": "F16",
+      "title": "Integrator steps of 0.2: D2 redirect (idle Edzés -> library) and the aurora retirement",
+      "owns": [
+        "frontend/scripts/check-aurora.mjs",
+        "frontend/src/ui/shell/AuroraBackdrop.tsx"
+      ],
+      "dependsOn": [
+        "F11",
+        "F5",
+        "F2:c"
+      ],
+      "parallelGroup": "0.2-int (INT, serial, after the shell lane)",
+      "size": "S",
+      "acceptance": [
+        "no session at /workout renders <Navigate to=\"/library\" replace />; a failed session read shows an error state with common.retry; workout.noneTitle / noneBody gone from three bundles; REQUIRED_DOORS filled and probed",
+        "no <AuroraBackdrop mount, no component, no --aurora token, no check:aurora in the build chain; check:assets (its heir) was in the chain before this commit",
+        "the budgets of the packages whose files were edited before their claim are lowered in the same commits (check-pulse --fix-down)"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-shot.mjs --frame library-1 --account demo.nagy.balazs --route /workout"
+      ],
+      "notes": "Two separate commits. S-auth has not started when the aurora commit lands (F17 depends on this package).",
+      "preClaim": [
+        {
+          "step": "D2",
+          "file": "frontend/src/features/workout/WorkoutPlayer.tsx",
+          "laterOwner": "S-workout",
+          "what": "no-session branch -> <Navigate to=\"/library\" replace />; error state with common.retry"
+        },
+        {
+          "step": "aurora",
+          "file": "frontend/src/features/auth/AuthPage.tsx",
+          "laterOwner": "S-auth",
+          "what": "AuroraBackdrop mount line + import removed"
+        },
+        {
+          "step": "aurora",
+          "file": "frontend/src/features/marketplace/MarketplacePage.tsx",
+          "laterOwner": "S-marketplace",
+          "what": "AuroraBackdrop mount line + import removed"
+        },
+        {
+          "step": "aurora",
+          "file": "frontend/src/features/marketplace/PostPage.tsx",
+          "laterOwner": "S-public-pages",
+          "what": "AuroraBackdrop mount line + import removed"
+        },
+        {
+          "step": "aurora",
+          "file": "frontend/src/features/marketplace/CoachProfilePage.tsx",
+          "laterOwner": "S-public-pages",
+          "what": "AuroraBackdrop mount line + import removed"
+        }
+      ],
+      "deletes": [
+        "frontend/scripts/check-aurora.mjs",
+        "frontend/src/ui/shell/AuroraBackdrop.tsx"
+      ]
+    },
+    {
+      "id": "F17",
+      "title": "Stage-1 acceptance: opens wave 1 (Home, Auth)",
+      "owns": [
+        "docs/pipeline/pulse/review/foundation-stage1.json"
+      ],
+      "dependsOn": [
+        "F5",
+        "F6",
+        "F7",
+        "F8:1",
+        "F9:1",
+        "F10:1",
+        "F11",
+        "F12:1",
+        "F16"
+      ],
+      "parallelGroup": "acceptance (INT)",
+      "size": "S",
+      "acceptance": [
+        "the [S1] rows of PLAN.md section 5.2 hold",
+        "stage 1 of F8, F9, F10, F12 is merged; docs/pipeline/pulse/kit/*.md describes every stage-1 export"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png"
+      ],
+      "notes": "Needs only stage 1 of the two-stage lanes."
+    },
+    {
+      "id": "F18",
+      "title": "Foundation acceptance: with S-home reviewed it opens the fan-out (Gate A)",
+      "owns": [
+        "docs/pipeline/pulse/review/foundation.json"
+      ],
+      "dependsOn": [
+        "F17",
+        "F8:2",
+        "F9:2",
+        "F10:2",
+        "F12:2",
+        "F13",
+        "F14",
+        "F15:0"
+      ],
+      "parallelGroup": "acceptance (INT + one independent reviewer)",
+      "size": "S",
+      "acceptance": [
+        "all rows of PLAN.md section 5.2 hold except row 11 (the mannequin's stage 1)",
+        "every lane has a commit sha in the progress snapshot; .pulse/hybrid/ is the stored reference"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)",
+        "kit board capture (/playground, kit section, board layout, 1300 x H, scale 1) tiled against _components-1..4.png",
+        "player law probe at 402 x 874 and 360 x 640, with and without the offline line"
+      ],
+      "notes": "The reviewer built none of the lanes. F15 stage 0 is required; its stage 1 is not."
+    },
+    {
+      "id": "F19",
+      "title": "Closing cleanup: delete the bridge, legacy steps, Surface / SummaryTile / Gauge / DataTable, legacy variants; ratchet becomes bans; docs and ADR",
+      "owns": [
+        "frontend/src/ui/primitives/Surface.tsx",
+        "frontend/src/ui/primitives/surfaceRecipe.ts",
+        "frontend/src/ui/data/SummaryTile.tsx",
+        "frontend/src/ui/data/DataTable.tsx",
+        "frontend/src/ui/feedback/Gauge.tsx",
+        "frontend/src/features/coaching/Monogram.tsx",
+        "frontend/DESIGN.md",
+        "docs/brain/60-Decisions/0021-pulse-implementation.md"
+      ],
+      "dependsOn": [
+        "S-*",
+        "F20"
+      ],
+      "parallelGroup": "closing (INT, strictly last, one commit per row)",
+      "size": "L",
+      "acceptance": [
+        "every package is accepted, or merged with nothing open but visible proposed copy the owner has not ticked (listed for him)",
+        "row 1 adds RETIRED_STEMS to check-tokens in the same commit: a colour utility on a stem that lost its last mapping (on, info) fails; probe: text-on-success planted",
+        "every budget file is gone (pkg/_int/ included) and the check:pulse rules are unconditional",
+        "check:type-scale prints 16 steps (the ten legacy steps are gone from tokens.css and TYPE_STEPS); check-tokens green with the bridged names deleted",
+        "after every cleanup commit the 59 replay captures equal .pulse/final-pre/ within 0.1 % of pixels",
+        "git diff --stat master...pulse-redesign -- backend/ is empty",
+        "final.json, deviations.md and copy-to-approve.md delivered; the cookie jars in the OS temp dir are deleted"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-shot.mjs --all (replay)",
+        "npm audit --omit=dev (frontend)",
+        "npm run smoke (backend, hermetic)"
+      ],
+      "notes": "Runs after the regression sweep of PLAN.md 7.2. Also edits integrator files owned earlier by other foundation packages (tokens.css, cn.ts, control.ts, check-pulse.mjs, check-tokens.mjs) — those packages are closed by then.",
+      "deletes": [
+        "frontend/src/ui/primitives/Surface.tsx",
+        "frontend/src/ui/primitives/surfaceRecipe.ts",
+        "frontend/src/ui/data/SummaryTile.tsx",
+        "frontend/src/ui/data/DataTable.tsx",
+        "frontend/src/ui/feedback/Gauge.tsx",
+        "frontend/src/features/coaching/Monogram.tsx"
+      ]
+    },
+    {
+      "id": "F20",
+      "title": "Playground-only variants retire (default of Q3): seven variant files, four playground-only exports, their Demo and PREVIEWABLE entries",
+      "owns": [
+        "frontend/src/ui/feedback/variants/E1Button.tsx",
+        "frontend/src/ui/feedback/variants/E3IconButton.tsx",
+        "frontend/src/ui/feedback/variants/E4Toggle.tsx",
+        "frontend/src/ui/feedback/variants/E5Checkbox.tsx",
+        "frontend/src/ui/feedback/variants/E8E9.tsx",
+        "frontend/src/ui/feedback/variants/E10Tabs.tsx",
+        "frontend/src/ui/feedback/variants/E17E19.tsx"
+      ],
+      "dependsOn": [
+        "F18"
+      ],
+      "parallelGroup": "wave 4 (INT, serial, before S-style-studio)",
+      "size": "M",
+      "deletes": [
+        "frontend/src/ui/feedback/variants/E1Button.tsx",
+        "frontend/src/ui/feedback/variants/E3IconButton.tsx",
+        "frontend/src/ui/feedback/variants/E4Toggle.tsx",
+        "frontend/src/ui/feedback/variants/E5Checkbox.tsx",
+        "frontend/src/ui/feedback/variants/E8E9.tsx",
+        "frontend/src/ui/feedback/variants/E10Tabs.tsx",
+        "frontend/src/ui/feedback/variants/E17E19.tsx"
+      ],
+      "acceptance": [
+        "the seven files (4 581 lines) are deleted; InteractiveCard and Progress are gone from E12E16.tsx, SwipeItem and Fab from E14E20.tsx; their Demo cases and PREVIEWABLE entries are gone",
+        "the 27 catalogue rows stay, all live:false with a dormant reason (the frozen backend still knows 27 ids); check:elements green",
+        "pkg/_int/budget.json no longer lists the seven files; full hybrid sweep passes with the studio's and the playground's differences listed up front"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-shot.mjs --sweep --inventory in replay on the integration worktree preview (full hybrid sweep, 59 states)"
+      ],
+      "notes": "Integrator work. Also edits E12E16.tsx (F13) and E14E20.tsx (F12) and PlaygroundPage.tsx (F7) — those lanes are closed by then. Before S-style-studio, so the studio is built against the final state and closing stays a visual no-op. Under Q3 option 2 this package is cancelled; under option 3 it is replaced by the removal of studio, playground, catalogue and gate, and S-style-studio is dropped."
+    }
+  ],
+  "screens": [
+    {
+      "id": "S-home",
+      "screens": [
+        "home"
+      ],
+      "owns": [
+        "frontend/src/features/home/HomePage.tsx",
+        "frontend/src/features/home/WeekStrip.tsx",
+        "frontend/src/features/home/HomeNutrition.tsx",
+        "frontend/src/features/chat/NotificationBell.tsx",
+        "docs/pipeline/pulse/pkg/S-home/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/chat/NotificationsPage.tsx",
+        "frontend/src/features/chat/ChatPage.tsx",
+        "frontend/src/features/chat/ChatPanel.tsx"
+      ],
+      "frames": [
+        "home-1",
+        "home-2",
+        "home-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Feature inventory.md#1",
+      "account": "user@tracker.local (replay); demo.nagy.balazs@ (home-3); demo.kovacs.eszter@ (live check)",
+      "route": "/",
+      "dependsOn": [
+        "F17"
+      ],
+      "size": "M",
+      "wave": 1,
+      "notes": "Calibration screen: compared with _jovahagyott-v1-home@2x.png; its independent review is part of Gate A. home-1 (the approved frame — a state the seed cannot reach) and home-2 (a Friday session) are fixtures edited from recordings: verdict matched-fixture. home-3 is demo.nagy.balazs@ on the recording. Keep navigate(/library), both /workout links, the /nutrition link, the bell -> /notifications. Add the permanent library row (D2): a ListRow under the today block, label nav.library; it is in no frame and is masked when comparing with the approved frame. Undrawn states composed from the kit; a failed week read prints an em dash + Újra, never 0. NotificationBell keeps its export and props. May remove nutrition.card.targetCaption if HomeNutrition.tsx stops reading it (its only consumer).",
+      "i18nNamespaces": [
+        "home"
+      ],
+      "fixtureFrames": [
+        "home-1",
+        "home-2"
+      ],
+      "liveWrites": [],
+      "liveCheck": "Gate A: Home as demo.kovacs.eszter@ on one of her training days must show a real \"Indítás\" state"
+    },
+    {
+      "id": "S-auth",
+      "screens": [
+        "auth"
+      ],
+      "owns": [
+        "frontend/src/features/auth/AuthPage.tsx",
+        "docs/pipeline/pulse/pkg/S-auth/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "auth-1",
+        "auth-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/auth.md",
+      "account": "signed out",
+      "route": "/login",
+      "dependsOn": [
+        "F17"
+      ],
+      "size": "S",
+      "wave": 1,
+      "notes": "Also /register. PublicLayout + Dock. react-hook-form + zod, every error state and the language switch survive. Signed out: the 401 on /auth/me is a declared request. Never submit the register form live; its outcomes are mutation-outcome fixtures. The AuroraBackdrop mount is already gone (F16).",
+      "i18nNamespaces": [
+        "auth"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-settings",
+      "screens": [
+        "settings"
+      ],
+      "owns": [
+        "frontend/src/features/settings/SettingsPage.tsx",
+        "frontend/src/features/settings/CueSettings.tsx",
+        "frontend/src/features/settings/EquipmentSection.tsx",
+        "docs/pipeline/pulse/pkg/S-settings/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "settings-1",
+        "settings-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Feature inventory.md#3",
+      "account": "user@tracker.local",
+      "route": "/settings",
+      "dependsOn": [
+        "F17",
+        "F8:2",
+        "F9:2",
+        "F10:2",
+        "F14"
+      ],
+      "size": "L",
+      "wave": 1,
+      "notes": "Calibration screen: compared with _jovahagyott-v1-profile@2x.png, without the pack rows (D1). Starts when stage 2 of F8, F9, F10 and F14 is merged; does not wait for F18. Three new reads through coins/useCoins and progress/useProgress (import, never edit) — their responses are already in the recording of user@; a failed read prints an em dash. No Megjelenés section. The /coins row and the admin row stay (capture the admin row on admin@). KEEP to=\"/coins\" as a literal JSX attribute: a gate probe anchors on it; the integrator runs verify:gates at this merge. A tab root: no back arrow. Consumer rule: auth.logout and common.language are read only here.",
+      "i18nNamespaces": [
+        "settings"
+      ],
+      "anchoredBy": [
+        "verify-nav-gate: to=\"/coins\" in SettingsPage.tsx"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-workout",
+      "screens": [
+        "workout"
+      ],
+      "owns": [
+        "frontend/src/features/workout/WorkoutPlayer.tsx",
+        "frontend/src/features/workout/SetRow.tsx",
+        "frontend/src/features/workout/RestTimer.tsx",
+        "frontend/src/features/workout/IntervalStage.tsx",
+        "docs/pipeline/pulse/pkg/S-workout/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/workout/cues.ts",
+        "frontend/src/features/workout/intervalPlan.ts",
+        "frontend/src/features/workout/wakeLock.ts"
+      ],
+      "frames": [
+        "workout-1",
+        "workout-2",
+        "workout-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/workout.md",
+      "account": "user@tracker.local (replay only); demo.toth.reka@ (live)",
+      "route": "/workout",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "XL",
+      "wave": 2,
+      "notes": "One package, two planned runs with a WIP commit between (it keeps its slot). workout-3 is superseded by D2: demo.nagy.balazs@ at /workout must show library-1. workout-1 (a Friday session) and workout-2 (record + rest) are fixtures edited from recordings, including the POST .../check answer; timers are driven by virtual time. The interval states come from fixtures; the live smoke uses the sandbox interval plan on demo.toth.reka@. Never write on user@ or demo.kovacs.eszter@. One-viewport law: probe the active check control at 402 x 874 and 360 x 640, with and without the offline line; what gives way at 360 x 640 is the default of Q7 (the figure first, then the secondary meta line), not the agent's choice. KEEP <Navigate to=\"/library\" replace /> literal and the error state from F16. E21 / E22 -> variants.json (tap). Rest timer in flow. The side switch and the legend are drawn by the screen (kit Segmented, MuscleMap sideControl=\"none\", controlled side). No finish control (D3). The two figure frames stay pending-F15 until F15 stage 1.",
+      "i18nNamespaces": [
+        "workout"
+      ],
+      "variantElements": [
+        "E21",
+        "E22"
+      ],
+      "runs": [
+        "run 1: WorkoutPlayer + SetRow + the in-flow RestTimer — frames workout-1/2 and the one-viewport law",
+        "run 2: IntervalStage (8 sub-states), failed-check Újra / Visszavonás, the withdrawn row, the stand-in hero"
+      ],
+      "anchoredBy": [
+        "check-nav REQUIRED_DOORS: <Navigate to=\"/library\" replace /> in WorkoutPlayer.tsx"
+      ],
+      "fixtureFrames": [
+        "workout-1",
+        "workout-2"
+      ],
+      "pendingF15Frames": [
+        "workout-1",
+        "workout-2"
+      ],
+      "liveWrites": [
+        "demo.toth.reka@: start a session, check / void a set, one interval run on the sandbox interval plan"
+      ]
+    },
+    {
+      "id": "S-library",
+      "screens": [
+        "library"
+      ],
+      "owns": [
+        "frontend/src/features/library/LibraryPage.tsx",
+        "docs/pipeline/pulse/pkg/S-library/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/library/ExerciseDetailPage.tsx",
+        "frontend/src/features/library/SectionBadge.tsx"
+      ],
+      "frames": [
+        "library-1",
+        "library-2",
+        "library-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Feature inventory.md#2",
+      "account": "user@tracker.local",
+      "route": "/library",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 2,
+      "notes": "The side switch and the legend are drawn by the screen through MuscleMap side / onSideChange and sideControl=\"none\" (F15 stage 0); no other MuscleMap prop is assumed. Text-only rows. FeedbackField -> SearchField; NO variant delta (the E7 read is in F12's file). t('muscleMap.filterHint') gets a literal consumer here — the key exists, no patch is needed; the muscle and muscleMap namespaces belong to F15. No URL state. All three frames stay pending-F15 until F15 stage 1.",
+      "i18nNamespaces": [
+        "library"
+      ],
+      "pendingF15Frames": [
+        "library-1",
+        "library-2",
+        "library-3"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-plan-editor",
+      "screens": [
+        "plan-editor"
+      ],
+      "owns": [
+        "frontend/src/features/plans/PlanEditorPage.tsx",
+        "docs/pipeline/pulse/pkg/S-plan-editor/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/plans/PlanListPage.tsx"
+      ],
+      "frames": [
+        "plan-editor-1",
+        "plan-editor-2",
+        "plan-editor-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/plan-editor.md",
+      "account": "coach@tracker.local",
+      "route": "/coach/plans/:id",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-coach-plans"
+      ],
+      "size": "XL",
+      "wave": 2,
+      "notes": "After S-coach-plans (the status vocabulary and plan rows are settled there). The object of every state is fixed: the three frames = the member's own plan (id from the freeze), replay only, never written; every mutating state = the scratch template plan, live; the no-days empty state = the zero-day scratch plan; offline-disabled controls and Undo timing = CDP offline + virtual time. All ten mutations, reorder, undo toasts, offline-disabled controls, the status sheet and the empty state survive. No date field is invented.",
+      "i18nNamespaces": [
+        "plans"
+      ],
+      "liveWrites": [
+        "scratch template plan: every mutation (add, clone, copy, delete + Undo, reorder, rename, status)",
+        "zero-day scratch plan: read only (the empty state)"
+      ]
+    },
+    {
+      "id": "S-nutrition",
+      "screens": [
+        "nutrition"
+      ],
+      "owns": [
+        "frontend/src/features/nutrition/NutritionPage.tsx",
+        "frontend/src/features/nutrition/NutritionCard.tsx",
+        "frontend/src/features/nutrition/MacroBars.tsx",
+        "docs/pipeline/pulse/pkg/S-nutrition/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "nutrition-1",
+        "nutrition-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/nutrition.md",
+      "account": "user@tracker.local (replay only); demo.toth.reka@ (live)",
+      "route": "/nutrition",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "M",
+      "wave": 2,
+      "notes": "Deletes the dead NutritionCard.tsx and MacroBars.tsx. nutrition-1 by fixture. kcal / g / slash literals become keys (untranslated entries, since en and de equal hu); date trigger over the native picker; no new error or undo states. Nothing is ever logged on user@: Home, Profil and most reviewer captures read that account.",
+      "i18nNamespaces": [
+        "nutrition"
+      ],
+      "deletes": [
+        "frontend/src/features/nutrition/NutritionCard.tsx",
+        "frontend/src/features/nutrition/MacroBars.tsx"
+      ],
+      "fixtureFrames": [
+        "nutrition-1"
+      ],
+      "liveWrites": [
+        "demo.toth.reka@: log a food"
+      ]
+    },
+    {
+      "id": "S-progress",
+      "screens": [
+        "progress"
+      ],
+      "owns": [
+        "frontend/src/features/progress/ProgressPage.tsx",
+        "docs/pipeline/pulse/pkg/S-progress/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "progress-1",
+        "progress-2",
+        "progress-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/progress.md",
+      "account": "user@tracker.local (replay only); demo.toth.reka@ (live)",
+      "route": "/progress",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 2,
+      "notes": "progress-2 is seed-only: the default view is the two empty sentences. Sharing controls keep their code semantics (Q4 default). Photo delete keeps its sheet. The hand-rolled tab strip and the local toggle move onto the shared components; the raw file input (ProgressPage.tsx:471) becomes FilePick. Nothing is written on user@.",
+      "i18nNamespaces": [
+        "progress"
+      ],
+      "liveWrites": [
+        "demo.toth.reka@: add a measurement"
+      ]
+    },
+    {
+      "id": "S-coach-chat",
+      "screens": [
+        "coach-chat"
+      ],
+      "owns": [
+        "frontend/src/features/chat/ChatPage.tsx",
+        "frontend/src/features/chat/ChatPanel.tsx",
+        "docs/pipeline/pulse/pkg/S-coach-chat/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/chat/NotificationBell.tsx",
+        "frontend/src/features/chat/NotificationsPage.tsx"
+      ],
+      "frames": [
+        "coach-chat-1",
+        "coach-chat-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/coach-chat.md",
+      "account": "coach@tracker.local",
+      "route": "/coach/clients/:id/chat",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "M",
+      "wave": 2,
+      "notes": "Link ids from the freeze. ChatPanel exports and props frozen (coaching/ChatTab embeds it). No bubbles; composer through Dock. The read-receipt POST fired on opening is a declared stub in capture. The desktop layout ChatPanel has today stays (R21).",
+      "i18nNamespaces": [
+        "chat"
+      ],
+      "liveWrites": [
+        "conversation with demo.kovacs.eszter@: send one message"
+      ]
+    },
+    {
+      "id": "S-client-detail-a",
+      "screens": [
+        "client-detail"
+      ],
+      "owns": [
+        "frontend/src/features/coaching/ClientDetailPage.tsx",
+        "frontend/src/features/coaching/PlanTab.tsx",
+        "frontend/src/features/coaching/ChatTab.tsx",
+        "frontend/src/features/coaching/ClientEquipmentCard.tsx",
+        "docs/pipeline/pulse/pkg/S-client-detail-a/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/coaching/CoachDashboard.tsx",
+        "frontend/src/features/coaching/Monogram.tsx",
+        "frontend/src/features/coaching/NutritionTab.tsx",
+        "frontend/src/features/coaching/ProgressTab.tsx"
+      ],
+      "frames": [
+        "client-detail-1"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/client-detail.md",
+      "account": "coach@tracker.local",
+      "route": "/coach/clients/:id",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-coach-chat"
+      ],
+      "size": "L",
+      "wave": 2,
+      "notes": "The page, the Terv and Üzenetek tabs and the equipment card. \"Edzés / 28 nap\" is read through the existing useClients() hook in the page (import, never edit), so a deep link and in-app navigation show the same number; an em dash only while it loads or fails, never 0. ChatTab's link is the ONLY door to the chat route. The undrawn Üzenetek tab is composed from ChatPanel. Uses ui/data/Monogram (stops importing coaching/Monogram.tsx); the account state on the dot gets an accessible label. Locale defects stay 1:1. Frame on user@'s link, replay only; every write live on demo.kovacs.eszter@ only (the equipment save notifies the client). The desktop layout stays (R21).",
+      "i18nNamespaces": [
+        "coaching"
+      ],
+      "liveWrites": [
+        "demo.kovacs.eszter@: equipment save, plan creation from the Terv tab"
+      ]
+    },
+    {
+      "id": "S-client-detail-b",
+      "screens": [],
+      "owns": [
+        "frontend/src/features/coaching/NutritionTab.tsx",
+        "frontend/src/features/coaching/ProgressTab.tsx",
+        "docs/pipeline/pulse/pkg/S-client-detail-b/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/coaching/CoachDashboard.tsx",
+        "frontend/src/features/coaching/Monogram.tsx",
+        "frontend/src/features/coaching/ClientDetailPage.tsx",
+        "frontend/src/features/coaching/PlanTab.tsx",
+        "frontend/src/features/coaching/ChatTab.tsx",
+        "frontend/src/features/coaching/ClientEquipmentCard.tsx"
+      ],
+      "frames": [
+        "client-detail-2",
+        "client-detail-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/client-detail.md",
+      "account": "coach@tracker.local",
+      "route": "/coach/clients/:id",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-client-detail-a"
+      ],
+      "size": "L",
+      "wave": 2,
+      "notes": "The Táplálkozás and Haladás tab bodies of the client page (the second half of screen client-detail; S-client-detail-a owns the page). After -a: a tab body is judged inside the finished page. The diet editor writes on every tap (NutritionTab.tsx:131-262): frames on user@'s link in replay; every write state live on demo.kovacs.eszter@ only. Haladás shows what the client shares and nothing else. Locale defects stay 1:1.",
+      "partOf": "client-detail",
+      "i18nNamespaces": [
+        "coaching"
+      ],
+      "liveWrites": [
+        "demo.kovacs.eszter@: diet add day / meal / item, delete, activate"
+      ]
+    },
+    {
+      "id": "S-exercise-detail",
+      "screens": [
+        "exercise-detail"
+      ],
+      "owns": [
+        "frontend/src/features/library/ExerciseDetailPage.tsx",
+        "frontend/src/features/library/SectionBadge.tsx",
+        "docs/pipeline/pulse/pkg/S-exercise-detail/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/library/LibraryPage.tsx"
+      ],
+      "frames": [
+        "exercise-detail-1",
+        "exercise-detail-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/exercise-detail.md",
+      "account": "user@tracker.local",
+      "route": "/library/:id",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "M",
+      "wave": 3,
+      "notes": "Deletes SectionBadge.tsx. Exercise ids from the freeze. Equipment stills only through EQUIPMENT_STILL; null -> the name alone. The side switch as in S-library (drawn by the screen). Both frames stay pending-F15 until F15 stage 1.",
+      "i18nNamespaces": [
+        "library"
+      ],
+      "deletes": [
+        "frontend/src/features/library/SectionBadge.tsx"
+      ],
+      "pendingF15Frames": [
+        "exercise-detail-1",
+        "exercise-detail-2"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-coins",
+      "screens": [
+        "coins"
+      ],
+      "owns": [
+        "frontend/src/features/coins/CoinsPage.tsx",
+        "frontend/src/features/coins/CoinBalance.tsx",
+        "docs/pipeline/pulse/pkg/S-coins/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "coins-1",
+        "coins-2",
+        "coins-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/coins.md",
+      "account": "user@tracker.local",
+      "route": "/coins",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "M",
+      "wave": 3,
+      "notes": "Q2 default: a theme.* store item the user does NOT own is not listed; an owned one stays as a non-purchasable row with coins.owned (\"Megvan\"); with nothing to list, coins.storeEmptyTitle. Display only — the purchase flow is untouched and never fired live. The arc and the two tiles are not drawn. E25 / E26 -> variants.json. Statement reasons stay as the server sends them. achievement.* are flat dotted top-level keys.",
+      "i18nNamespaces": [
+        "coins",
+        "achievement"
+      ],
+      "variantElements": [
+        "E25",
+        "E26"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-notifications",
+      "screens": [
+        "notifications"
+      ],
+      "owns": [
+        "frontend/src/features/chat/NotificationsPage.tsx",
+        "docs/pipeline/pulse/pkg/S-notifications/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/chat/NotificationBell.tsx",
+        "frontend/src/features/chat/ChatPage.tsx",
+        "frontend/src/features/chat/ChatPanel.tsx"
+      ],
+      "frames": [
+        "notifications-1",
+        "notifications-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/notifications.md",
+      "account": "demo.nagy.balazs@tracker.local",
+      "route": "/notifications",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "S",
+      "wave": 3,
+      "notes": "Opening the page fires a mark-read POST (NotificationsPage.tsx:273-275): in every capture it is answered by a declared stub and never reaches the server, so notifications-1 is the recording itself if the seed leaves unread items, else a fixture. The bar lights Home (Q6 default). No invented sender names or bodies.",
+      "i18nNamespaces": [
+        "notifications"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-onboarding",
+      "screens": [
+        "onboarding"
+      ],
+      "owns": [
+        "frontend/src/features/onboarding/OnboardingPage.tsx",
+        "docs/pipeline/pulse/pkg/S-onboarding/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [
+        "onboarding-1",
+        "onboarding-2",
+        "onboarding-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/onboarding.md",
+      "account": "coach@tracker.local",
+      "route": "/onboarding",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 3,
+      "notes": "onboarding-2 and -3 by fixture. No inbound link is added. Autosave draft, five steps and the required-field refusal survive. Sticky footer through Dock. i18n namespace: onboarding.",
+      "i18nNamespaces": [
+        "onboarding"
+      ],
+      "fixtureFrames": [
+        "onboarding-2",
+        "onboarding-3"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-coach-dashboard",
+      "screens": [
+        "coach-dashboard"
+      ],
+      "owns": [
+        "frontend/src/features/coaching/CoachDashboard.tsx",
+        "docs/pipeline/pulse/pkg/S-coach-dashboard/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/coaching/ClientDetailPage.tsx",
+        "frontend/src/features/coaching/Monogram.tsx",
+        "frontend/src/features/chat/NotificationBell.tsx"
+      ],
+      "frames": [
+        "coach-dashboard-1",
+        "coach-dashboard-2",
+        "coach-dashboard-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/coach-dashboard.md",
+      "account": "coach@tracker.local",
+      "route": "/coach",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 3,
+      "notes": "coach-dashboard-2 is the mutation-outcome fixture of the mint-code POST (never mint a code live). KEEP the Tervek link (door to /coach/plans, a probe anchor) and the bell. Four sheets on the Pulse Sheet. Revoke and block keep one-tap behaviour. CopyButton is used as is — NO variant delta (the E2 read is in F8's file). Uses ui/data/Monogram. The desktop layout stays (R21).",
+      "i18nNamespaces": [
+        "coaching"
+      ],
+      "anchoredBy": [
+        "check-nav probe: the Tervek link (/coach/plans) in CoachDashboard.tsx"
+      ],
+      "fixtureFrames": [
+        "coach-dashboard-2"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-coach-plans",
+      "screens": [
+        "coach-plans"
+      ],
+      "owns": [
+        "frontend/src/features/plans/PlanListPage.tsx",
+        "docs/pipeline/pulse/pkg/S-coach-plans/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/plans/PlanEditorPage.tsx"
+      ],
+      "frames": [
+        "coach-plans-1",
+        "coach-plans-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/coach-plans.md",
+      "account": "coach@tracker.local",
+      "route": "/coach/plans",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "S",
+      "wave": 2,
+      "notes": "Moved to wave 2: the status vocabulary and the plan row are settled here before S-plan-editor starts. coach-plans-2 (empty) on demo.coach.szilagyi.reka@.",
+      "i18nNamespaces": [
+        "plans"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-compose-hub",
+      "screens": [
+        "compose-hub"
+      ],
+      "owns": [
+        "frontend/src/features/compose/ComposePage.tsx",
+        "docs/pipeline/pulse/pkg/S-compose-hub/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/compose/ProfileEditorPage.tsx",
+        "frontend/src/features/compose/PostEditorPage.tsx",
+        "frontend/src/features/compose/HandleField.tsx",
+        "frontend/src/features/compose/useAutosave.ts",
+        "frontend/src/features/compose/kindIcons.ts"
+      ],
+      "frames": [
+        "compose-hub-1",
+        "compose-hub-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/compose-hub.md",
+      "account": "coach@tracker.local",
+      "route": "/compose",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 3,
+      "notes": "Keep the doors to /compose/profile and /compose/posts/new. The gate states (removed, guidelines, too new) are composed from NoticeLine, by fixture. Never publish or withdraw a post. Reachable by URL only on a phone until Q5 is answered.",
+      "i18nNamespaces": [
+        "compose"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-public-pages",
+      "screens": [
+        "post-detail",
+        "coach-profile"
+      ],
+      "owns": [
+        "frontend/src/features/marketplace/PublicChrome.tsx",
+        "frontend/src/features/marketplace/DocRenderer.tsx",
+        "frontend/src/features/marketplace/PostPage.tsx",
+        "frontend/src/features/marketplace/CoachProfilePage.tsx",
+        "docs/pipeline/pulse/pkg/S-public-pages/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/marketplace/MarketplacePage.tsx"
+      ],
+      "frames": [
+        "post-detail-1",
+        "post-detail-2",
+        "post-detail-3",
+        "coach-profile-1",
+        "coach-profile-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/post-detail.md + docs/brain/58-Pulse/Screens/coach-profile.md",
+      "account": "signed out",
+      "route": "/m/p/:publicId",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 3,
+      "notes": "Also /m/c/:handle (kovacs-peter). post-detail-3 is the DocRenderer type specimen, not a screen. Public routes never read the session to draw chrome. DocRenderer and PublicChrome exports and props frozen (ProfileEditorPage and MarketplacePage import them). Covers through UserPhoto; the cover area is masked in the comparison. The AuroraBackdrop mounts are already gone (F16).",
+      "i18nNamespaces": [
+        "public",
+        "marketplace"
+      ],
+      "liveWrites": [],
+      "maskedAreas": [
+        "cover (the seeded covers are 320 x 180 placeholders)"
+      ]
+    },
+    {
+      "id": "S-admin",
+      "screens": [
+        "admin"
+      ],
+      "owns": [
+        "frontend/src/features/admin/AdminPage.tsx",
+        "frontend/src/features/admin/AdminShell.tsx",
+        "frontend/src/features/admin/UserSearch.tsx",
+        "frontend/src/features/admin/ModerationQueue.tsx",
+        "frontend/src/features/admin/MarketplaceQueue.tsx",
+        "frontend/src/features/admin/AdminMetrics.tsx",
+        "docs/pipeline/pulse/pkg/S-admin/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/admin/StyleStudioPage.tsx"
+      ],
+      "frames": [
+        "admin-1",
+        "admin-2",
+        "admin-3"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/admin.md",
+      "account": "admin@tracker.local",
+      "route": "/admin",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 3,
+      "notes": "Deletes the dead AdminMetrics.tsx and the 14 adminMetrics.* keys (allowed by the consumer rule: no other file reads them); the adminMetrics.clock.utc exemption entry is dropped by the tool. Keep the Stílus stúdió link (the only door to /admin/styles). The account list becomes two-line rows built from ListRow. The undrawn Piactér tab follows the moderation grammar. Approve / reject are never fired live: their outcomes are fixtures. The desktop layout stays (R21).",
+      "i18nNamespaces": [
+        "admin",
+        "adminUsers"
+      ],
+      "deletes": [
+        "frontend/src/features/admin/AdminMetrics.tsx"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-compose-post",
+      "screens": [
+        "compose-post"
+      ],
+      "owns": [
+        "frontend/src/features/compose/PostEditorPage.tsx",
+        "docs/pipeline/pulse/pkg/S-compose-post/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/compose/ComposePage.tsx",
+        "frontend/src/features/compose/ProfileEditorPage.tsx",
+        "frontend/src/features/compose/HandleField.tsx",
+        "frontend/src/features/compose/useAutosave.ts",
+        "frontend/src/features/compose/kindIcons.ts"
+      ],
+      "frames": [
+        "compose-post-1",
+        "compose-post-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/compose-post.md",
+      "account": "coach@tracker.local",
+      "route": "/compose/posts/:publicId",
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "size": "L",
+      "wave": 4,
+      "notes": "Works on the scratch draft post of the sandbox (it has a cover, so compose-post-1 can be matched, not only structured). The autosave line (saving / failed / \"Automatikus mentés · Mentve HH:MM\"), the stale-save sheet (409) and the read-only state are mutation-outcome fixtures. useAutosave.ts is not opened. The Esemény chip is drawn and no date field added. The raw cover input (PostEditorPage.tsx:393) becomes FilePick. Never publish or withdraw.",
+      "i18nNamespaces": [
+        "compose"
+      ],
+      "liveWrites": [
+        "scratch draft post: typing (autosave), cover upload"
+      ]
+    },
+    {
+      "id": "S-compose-profile",
+      "screens": [
+        "compose-profile"
+      ],
+      "owns": [
+        "frontend/src/features/compose/ProfileEditorPage.tsx",
+        "frontend/src/features/compose/HandleField.tsx",
+        "docs/pipeline/pulse/pkg/S-compose-profile/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/compose/ComposePage.tsx",
+        "frontend/src/features/compose/PostEditorPage.tsx",
+        "frontend/src/features/compose/useAutosave.ts",
+        "frontend/src/features/compose/kindIcons.ts"
+      ],
+      "frames": [
+        "compose-profile-1",
+        "compose-profile-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/compose-profile.md",
+      "account": "coach@tracker.local",
+      "route": "/compose/profile",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-public-pages"
+      ],
+      "size": "L",
+      "wave": 4,
+      "notes": "The preview renders DocRenderer from S-public-pages (props frozen). useAutosave.ts is not opened. The profile has no sandbox twin: frames are replay on coach@, save states are mutation-outcome fixtures, nothing is written live.",
+      "i18nNamespaces": [
+        "compose"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-marketplace",
+      "screens": [
+        "marketplace"
+      ],
+      "owns": [
+        "frontend/src/features/marketplace/MarketplacePage.tsx",
+        "docs/pipeline/pulse/pkg/S-marketplace/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/marketplace/PublicChrome.tsx",
+        "frontend/src/features/marketplace/DocRenderer.tsx",
+        "frontend/src/features/marketplace/PostPage.tsx",
+        "frontend/src/features/marketplace/CoachProfilePage.tsx"
+      ],
+      "frames": [
+        "marketplace-1",
+        "marketplace-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/marketplace.md",
+      "account": "signed out",
+      "route": "/m",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-public-pages"
+      ],
+      "size": "M",
+      "wave": 4,
+      "notes": "Lead post: cover only (Q4 default). Covers through UserPhoto; the cover area is masked in the comparison. In replay the public read budget (240 requests / 15 min per IP) is not touched. The AuroraBackdrop mount is already gone (F16). Reachable by URL only on a phone until Q5 is answered.",
+      "i18nNamespaces": [
+        "marketplace"
+      ],
+      "liveWrites": [],
+      "maskedAreas": [
+        "cover (the seeded covers are 320 x 180 placeholders)"
+      ]
+    },
+    {
+      "id": "S-style-studio",
+      "screens": [
+        "style-studio"
+      ],
+      "owns": [
+        "frontend/src/features/admin/StyleStudioPage.tsx",
+        "docs/pipeline/pulse/pkg/S-style-studio/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**",
+        "frontend/src/features/admin/AdminPage.tsx",
+        "frontend/src/features/admin/AdminShell.tsx",
+        "frontend/src/features/admin/UserSearch.tsx",
+        "frontend/src/features/admin/ModerationQueue.tsx",
+        "frontend/src/features/admin/MarketplaceQueue.tsx"
+      ],
+      "frames": [
+        "style-studio-1",
+        "style-studio-2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/style-studio.md",
+      "account": "admin@tracker.local",
+      "route": "/admin/styles",
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-admin",
+        "F20"
+      ],
+      "size": "M",
+      "wave": 4,
+      "notes": "Queued last, after F20. Page skin only under the default of Q3: every element reads \"nem használt\"; the parts of the two frames that show a live element (E1 with a lime pill) get the verdict structure. style-studio-2 is the mutation-outcome fixture of the save POST: nothing is saved live (a variant is a global write). Playground changes are requests to the integrator. The desktop layout (the active letter per element at lg:) stays (R21).",
+      "i18nNamespaces": [
+        "studio"
+      ],
+      "fixtureFrames": [
+        "style-studio-2"
+      ],
+      "liveWrites": []
+    }
+  ],
+  "queue": [
+    {
+      "wave": 1,
+      "agents": 3,
+      "order": [
+        "S-home",
+        "S-auth",
+        "S-settings"
+      ],
+      "opensNext": "Gate A: F18 accepted AND S-home merged and independently reviewed against the approved frame AND the live check of Home on demo.kovacs.eszter@"
+    },
+    {
+      "wave": 2,
+      "agents": 4,
+      "order": [
+        "S-workout",
+        "S-library",
+        "S-coach-plans",
+        "S-nutrition",
+        "S-progress",
+        "S-coach-chat",
+        "S-plan-editor",
+        "S-client-detail-a",
+        "S-client-detail-b"
+      ],
+      "opensNext": "Gate B (6 slots): the first four merges of wave 2 went in without a send-back for ownership or a red build, S-settings is reviewed, free RAM >= 1.5 GB"
+    },
+    {
+      "wave": 3,
+      "agents": 6,
+      "order": [
+        "S-exercise-detail",
+        "S-coins",
+        "S-notifications",
+        "S-onboarding",
+        "S-coach-dashboard",
+        "S-compose-hub",
+        "S-public-pages",
+        "S-admin"
+      ],
+      "opensNext": "rolling"
+    },
+    {
+      "wave": 4,
+      "agents": 6,
+      "order": [
+        "S-compose-post",
+        "S-compose-profile",
+        "S-marketplace",
+        "F20",
+        "S-style-studio"
+      ],
+      "opensNext": null
+    }
+  ],
+  "integrator": {
+    "owns": [
+      "frontend/src/ui/**",
+      "frontend/src/app/**",
+      "frontend/src/lib/**",
+      "frontend/src/i18n/**",
+      "frontend/src/assets/**",
+      "frontend/scripts/**",
+      "frontend/src/features/playground/**",
+      "frontend/src/features/coaching/Monogram.tsx",
+      "frontend/src/features/settings/ThemeStudio.tsx",
+      "frontend/src/features/settings/useThemeSync.ts",
+      "frontend/src/features/settings/AccentPicker.tsx",
+      "frontend/src/features/settings/GradientBuilder.tsx",
+      "frontend/src/index.css",
+      "frontend/src/main.tsx",
+      "frontend/index.html",
+      "frontend/public/**",
+      "frontend/assets-src/**",
+      "frontend/package.json",
+      "frontend/package-lock.json",
+      "frontend/vite.config.ts",
+      "frontend/tsconfig*.json",
+      "frontend/DESIGN.md",
+      ".gitignore",
+      ".claude/launch.json",
+      "scripts/dev-stack.mjs",
+      "docs/pipeline/pulse/progress.json",
+      "docs/pipeline/pulse/briefs/**",
+      "docs/pipeline/pulse/kit/**",
+      "docs/pipeline/pulse/pkg/_int/**",
+      "docs/pipeline/pulse/deviations.md",
+      "docs/pipeline/pulse/copy-to-approve.md"
+    ],
+    "handIn": {
+      "folder": "docs/pipeline/pulse/pkg/<id>/ — for screen packages AND lanes; rules: PLAN.md section 4.4 (that section is the specification, this is the index)",
+      "files": {
+        "i18n.patch.json": "{ package, base, namespaces, set[{ key, hu, en, de, after?, copy: inventory|existing-literal|fix|proposed, visible?, source, untranslated?{reason} }], change[{ key, hu|en|de: {from,to}|null, copy, source }], remove[{ key, reason }], copyQuestions[{ where, frame, note }] } — add by namespace, change/remove by consumers; untranslated exactly when en or de equals hu",
+        "variants.json": "[ { element, live: false, reason } ] — only for a useElementVariant read in a file the id owns",
+        "shared.patch": "lanes only: a git-format patch of the hunks needed in files the lane does not own (its named block in tokens.css / index.css, a package.json script line, a PlaygroundPage demo case, gate data); modifies existing files only",
+        "budget.json": "the id's check:pulse budget, generated by the integrator with --init, lowered by the id with --fix-down, deleted at zero",
+        "states.json": "undrawn states: account, steps, arrived assertion, object used, fixture (pointer edits) or writes list",
+        "handoff.json": "frames and states with one verdict each (matched | matched-fixture | structure | pending-F15), probes, inventory diff, ledger, budget, requests, deviations, proposed copy, live writes, last green build line",
+        "requests/": "one JSON per request, also dropped into C:/Users/Petike/Documents/Cursor/tracker/.pulse/inbox/: { id, from, kind: token|ui-component|ui-prop|shell|nav|gate|asset|copy-shared|fixture|sandbox|decision|bug, blocking, target, need, evidence, proposedApi, proposedPatch?, interim, status: open|accepted|rejected|deferred|done, resolution }"
+      },
+      "applied": "the id commits the hand-in file; pulse-sync applies it in the slot (never committed there); the integrator applies the SAME file at the squash merge (pulse-i18n apply, pulse-variants apply, git apply --3way)"
+    }
+  },
+  "ownerDecisions": [
+    {
+      "id": "Q1",
+      "header_hu": "Manöken",
+      "question_hu": "A manöken 22 izomrégiójából 3 vezethető le a meglévő képekből, 14-et a render barázdái mentén kell megrajzolni, 5-nek pedig nincs barázdája (az elülső és az oldalsó deltaizom egy panelen osztozik; nyak elöl; combközelítők; combtávolítók). Hogyan készüljön el a figura?",
+      "options": [
+        {
+          "label_hu": "Render + kézi rajz",
+          "description_hu": "A két semleges render fölé kézzel rajzolunk SVG régiókat, új kép nélkül. Amelyik régióhoz nincs referenciakép, azt egy áttekintő lapon mutatjuk meg, és csak a jóváhagyásoddal kerül be. Külön sávon készül; addig a régi térkép látszik Pulse színekkel.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Render + segédképek",
+          "description_hu": "Ugyanez, de izmonként egy generált, megvilágított segédképből vezetjük le a régiókat. Pontosabb, viszont kb. 14–19 új generálás kell hozzá a te eszközöddel; a segédképek nem kerülnek az appba.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Előbb új render",
+          "description_hu": "Megvárjuk az új semleges rendert, amelynek panelei egyeznek a 19 izmos listával. Addig a három képernyő a régi térképpel megy.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Marad a vektoros térkép",
+          "description_hu": "A mostani SVG térkép marad végleg, grafit tónusban. Ezt a kinézetet korábban elvetetted.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1: F15 stage 1 traces the regions by hand on its own track and spends nothing; regions without a reference picture need the owner's sign-off on a contact sheet. Until it lands the seven figure frames are pending-F15 and the three screens show the existing map on Pulse tokens. No package waits.",
+      "blocks": [
+        "F15"
+      ]
+    },
+    {
+      "id": "Q2",
+      "header_hu": "Érmebolt",
+      "question_hu": "Az érmeboltban összesen két tétel van: az Aurora és az Ember csomag (250 érme), de a Pulse-ban egyik sem viselhető. Mi legyen velük, amíg a backend csomag el nem készül?",
+      "options": [
+        {
+          "label_hu": "Elrejtés, a megvett marad",
+          "description_hu": "Akinek nincs meg, annál nem jelenik meg; akinek megvan, annál megmarad „Megvan” felirattal, nem megvehető sorként. Mindenki másnál üres a bolt, amíg a backend csomag el nem készül. Ez csak megjelenítési szűrő: a szerver egy hamisított kérésre még eladja, ezért a backend csomag kötelező marad.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Előbb a backend",
+          "description_hu": "A kivezetés és a kártalanítás backend csomagja készül el először; az Érmék képernyő csak utána kerül sorra.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Maradjon látható",
+          "description_hu": "A két tétel látszik és megvehető marad, amíg a backend csomag el nem készül.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1 inside S-coins (a display filter only; an owned item keeps its \"Megvan\" row); the backend delisting + compensation package is first on the list after this effort.",
+      "blocks": [
+        "S-coins"
+      ]
+    },
+    {
+      "id": "Q3",
+      "header_hu": "Stílusstúdió",
+      "question_hu": "A Pulse-ban minden elemnek egy kinézete van, ezért a Stílus stúdió egyetlen kapcsolója sem vezérli többé az appot: mind a 27 elem „nem használt” lesz, és a két stúdió-frame (élő elem lime gombbal) nem építhető meg pontosan. Mi legyen a stúdióval?",
+      "options": [
+        {
+          "label_hu": "Őszinte stúdió",
+          "description_hu": "Az oldal megkapja a Pulse kinézetet, és minden elemnél kiírja: „nem használt”. A csak a playgroundban élő hét változatfájl törlődik. Később elemenként visszaépíthető.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Öt változat újraírva",
+          "description_hu": "Megmarad az öt betű, mozgásra és visszajelzésre szűkítve, és újraírjuk őket. Kb. 8000 sor, plusz átdolgozás a lejátszóban és az érméknél.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Stúdió törlése",
+          "description_hu": "A stúdió, a playground, a katalógus és a hozzá tartozó ellenőrző kapu kikerül a kódból.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1: one Pulse look per element (the default already written under D1); the variant deltas come from the owners of the reads (F8, F11, F12, F13, S-workout, S-coins); F20 retires the playground-only variants; S-style-studio restyles the page last.",
+      "blocks": [
+        "S-style-studio",
+        "F20",
+        "S-workout",
+        "S-coins"
+      ]
+    },
+    {
+      "id": "Q4",
+      "header_hu": "Eltérések",
+      "question_hu": "Ha egy jóváhagyott frame és az app mai működése eltér, melyik nyerjen? Példák: megosztás a Haladáson (kód: jelölőnégyzet, frame: kapcsoló), a piactér kiemelt posztja (kód: csak borító, frame: cím, edző, ár), több toast egyszerre, Kezdőlap pihenőnapon, valamint az admin és az edzői képernyők asztali elrendezése (a frame-ek csak telefonra készültek).",
+      "options": [
+        {
+          "label_hu": "A működés nyer",
+          "description_hu": "Semmi nem tűnik el, amit ma meg lehet csinálni; a kinézet addig követi a frame-et, ameddig a működés engedi. Asztali nézetben megmarad a mai elrendezés, Pulse kinézettel. Minden eset bekerül a deviations.md listába, és utólag döntesz róluk.",
+          "recommended": true
+        },
+        {
+          "label_hu": "A frame nyer",
+          "description_hu": "A képernyő pontosan a frame szerint készül; ami nincs megrajzolva, az kikerül. Asztali nézetben minden képernyő egyetlen 430 pontos oszlop.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Esetenként kérdezz",
+          "description_hu": "Minden eltérésnél külön kérdés jön. Lassabb, de semmi nem dől el nélküled.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1: behaviour wins; every case is logged in docs/pipeline/pulse/deviations.md for a ruling afterwards. Home and Profil follow their two pixel-approved frames for chrome.",
+      "blocks": [
+        "S-progress",
+        "S-marketplace",
+        "S-home",
+        "F13",
+        "S-admin",
+        "S-coach-dashboard",
+        "S-client-detail-a",
+        "S-style-studio"
+      ]
+    },
+    {
+      "id": "Q5",
+      "header_hu": "Bejáratok",
+      "question_hu": "A Piactéri pult (/compose) és a Piactér (/m) telefonon semmilyen menüpontból nem érhető el, csak címsorból (asztali gépen a Ctrl+K palettából). A 24 áttervezett képernyőből hat ezek mögött van. Kapjanak bejáratot?",
+      "options": [
+        {
+          "label_hu": "Maradjon rejtve",
+          "description_hu": "Egyelőre csak URL-ről érhetők el. A képernyők elkészülnek, a jelentésekben „csak URL-ről” jelöléssel szerepelnek, és később döntesz a bejáratról.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Edzői kezdőlap + Profil",
+          "description_hu": "Egy „Publikálás” sor az edzői kezdőlapon és egy „Piactér” sor a Profilban.",
+          "recommended": false
+        },
+        {
+          "label_hu": "Mindkettő a Profilban",
+          "description_hu": "Mindkét sor a Profil képernyőre kerül.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1: no new door; check-nav keeps printing the two exemptions as open; the six screens are marked \"URL only\" in every report.",
+      "blocks": [
+        "S-coach-dashboard",
+        "S-settings",
+        "F2"
+      ]
+    },
+    {
+      "id": "Q6",
+      "header_hu": "Értesítések",
+      "question_hu": "Az Értesítések képernyőn a frame-eken egyik fül sem világít, az appban viszont minden bejelentkezett képernyőn világít egy. Melyik legyen?",
+      "options": [
+        {
+          "label_hu": "Kezdőlap világít",
+          "description_hu": "A csengő a Kezdőlapon van, ezért az Értesítések alatt a Kezdőlap fül marad lime.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Egyik sem",
+          "description_hu": "Pontosan úgy, ahogy a frame mutatja: az Értesítések alatt nincs kiemelt fül.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1: /notifications is owned by the Home tab in navTabs.ts and in check-nav-active.",
+      "blocks": [
+        "F2",
+        "F11",
+        "S-notifications"
+      ]
+    },
+    {
+      "id": "Q7",
+      "header_hu": "Lejátszó",
+      "question_hu": "Kis telefonon (360 × 640, offline sorral) a lejátszó megrajzolt tartalma nem fér ki egy képernyőre: kb. 680 pont magas, a hely kb. 560. Mi tűnjön el először? (A két kép a két változatot mutatja.)",
+      "options": [
+        {
+          "label_hu": "Előbb a figura",
+          "description_hu": "Először a manöken tűnik el, utána a másodlagos adatsor. A gyakorlat neve, a sorozat célja, a pipa gomb és a pihenő sora mindig a helyén marad.",
+          "recommended": true
+        },
+        {
+          "label_hu": "Görgő sorozatlista",
+          "description_hu": "A manöken kicsiben megmarad, a sorozatok listája pedig a saját területén belül görög.",
+          "recommended": false
+        }
+      ],
+      "default": "Option 1, written into the S-workout brief and deviations.md; asked with two annotated crops of workout-2 cut to 360 x 640.",
+      "blocks": [
+        "S-workout"
+      ]
+    }
+  ]
+}
