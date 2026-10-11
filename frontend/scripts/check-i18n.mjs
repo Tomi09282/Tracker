@@ -19,6 +19,7 @@
 // Usage: node scripts/check-i18n.mjs
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { readGateData } from './data/gate-data.mjs';
 
 const DIR = path.resolve('src/i18n');
 const REFERENCE = 'hu'; // The product's first language, so it is the one that defines the key set.
@@ -128,27 +129,19 @@ for (const [code, bundle] of Object.entries(bundles)) {
  * Hungarian.
  */
 {
-  const UNTRANSLATED_BY_DESIGN = new Map([
-    ['nav.admin', 'a borrowed word in all three'],
-    ['nav.profile', 'the same borrowing: hu "Profil" and de "Profil" are the same Latin word, and neither language has a native alternative anyone would recognise on a tab'],
-    ['nav.playground', 'the QA page has no product name to translate'],
-    ['workout.kg', 'SI unit'],
-    ['workout.metres', 'SI unit'],
-    ['plans.blockKind.emom', 'a training acronym, said the same in every gym'],
-    ['plans.blockKind.amrap', 'the same'],
-    ['adminMetrics.clock.utc', 'a standard, not a word'],
-    ['adminUsers.role.admin', 'a borrowed word in all three'],
-    ['settings.role.admin', 'the same borrowed word, on your own account chip'],
-    // The theme packs are PRODUCT NAMES. They are the same string in the store, in the settings
-    // list and on the receipt, and a coach who bought "Aurora" has to be able to find "Aurora".
-    // Translating a name is how a purchase becomes unfindable in the language you bought it in.
-    ['settings.themePack.neon', 'a product name'],
-    ['settings.themePack.mono', 'a product name'],
-    ['settings.themePack.aurora', 'a product name'],
-    ['settings.themePack.ember', 'a product name'],
-    ['coins.item.theme.aurora.title', 'the same product name, in the store'],
-    ['coins.item.theme.ember.title', 'the same product name, in the store'],
-  ]);
+  /*
+   * The list is DATA: `scripts/data/i18n-untranslated.json`, one reason per key. It moved out of
+   * this script because this check fails in both directions — a new identical string needs an
+   * entry, a translated or deleted key needs its entry gone — so a bundle change and its entry
+   * have to land together, and the tool that writes the bundles (`pulse-i18n`) writes this too.
+   * Nobody edits the list by hand, and the rule below did not change when it moved.
+   *
+   * On the product-name entries (`settings.themePack.*`, `coins.item.theme.*`): the theme packs
+   * are PRODUCT NAMES. They are the same string in the store, in the settings list and on the
+   * receipt, and a coach who bought "Aurora" has to be able to find "Aurora". Translating a name
+   * is how a purchase becomes unfindable in the language you bought it in.
+   */
+  const UNTRANSLATED_BY_DESIGN = readGateData('i18n-untranslated');
 
   // The reference bundle is Hungarian — the product's own language, and the one that shares no
   // vocabulary with the other two. See the note above for the measurement behind that choice.

@@ -1,0 +1,7 @@
+{
+  "about": "Edge-pinned elements that are exempt from the safe-area inset rule, as \"<file under src>:<edge>\". Read by scripts/check-safe-area.mjs as EXEMPT; changed through a hand-in patch applied by the integrator, never by hand in a slot. One reason per entry: an exemption is a written decision. The gate fails on an entry whose file no longer exists.",
+  "entries": {
+    "ui/feedback/variants/E14E20.tsx:top": "the sheet pins to the BOTTOM; its top-0 case is the centred dialog, which never touches an edge",
+    "ui/shell/OfflineIndicator.tsx:bottom": "sticky to the top of the layout column; it never reaches the bottom edge"
+  }
+}

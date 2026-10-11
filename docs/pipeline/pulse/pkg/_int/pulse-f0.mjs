@@ -405,6 +405,8 @@ const buildProgress = (previous) => {
   const gates = readJsonIfExists(path.join(BASELINE_DIR, 'gates.json'));
   const counts = readJsonIfExists(path.join(BASELINE_DIR, 'independent-counts.json'));
   const head = git(['rev-parse', '--short', 'HEAD'], ROOT);
+  // The list is taken from the index, so inside an integration commit it already holds that commit's files.
+  const listedOn = git(['diff', '--cached', '--name-only'], ROOT) ? `${head} + staged changes` : head;
 
   const entries = {};
   for (const p of packages) {
@@ -418,7 +420,7 @@ const buildProgress = (previous) => {
       wave: p.wave ?? null,
       dependsOn: p.dependsOn,
       branch: branchOf(p),
-      files: { generatedFrom: `work-packages.json@${wpHash}`, tree: head, existing: own.existing, toCreate: own.toCreate },
+      files: { generatedFrom: `work-packages.json@${wpHash}`, listedOn, existing: own.existing, toCreate: own.toCreate },
       ...(p.kind === 'screen' ? { frames: roster(p.frames, before.frames) } : {}),
       ...(p.stages
         ? { stages: Object.fromEntries(Object.keys(p.stages).map((k) => [`${p.id}:${k}`, before.stages?.[`${p.id}:${k}`] ?? { status: 'todo', commit: null }])) }

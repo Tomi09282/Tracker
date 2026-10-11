@@ -1,0 +1,8 @@
+{
+  "about": "Feedback elements that exist in the catalogue and that no component reads. Read by scripts/check-element-roster.mjs as DORMANT; written by scripts/pulse-variants.mjs, never by hand. One reason per element: it tells a reviewer whether the entry is a gap to close or a row to delete, and it is a promise that the studio labels the element as inert. The gate fails on an unread element that is not listed here, and on an entry whose element has a reader.",
+  "entries": {
+    "E23": "Like / reaction — reactions were CUT from Phase 6, so nothing renders one to style",
+    "E24": "Follow button — following exists in the schema and has no screen; the button is unbuilt",
+    "E27": "Interval stage — added by migration 012 for the interval player, which does not read it"
+  }
+}

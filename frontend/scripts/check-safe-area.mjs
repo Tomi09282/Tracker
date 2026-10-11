@@ -21,6 +21,7 @@
 // Run: node scripts/check-safe-area.mjs
 import fs from 'node:fs';
 import path from 'node:path';
+import { readGateData } from './data/gate-data.mjs';
 
 const SRC = 'src';
 const INDEX_HTML = 'index.html';
@@ -86,11 +87,12 @@ let coverMode = false;
  *
  * An exemption is a written decision. "It looked fine on my laptop" is exactly the reasoning this
  * gate exists to replace, and on a laptop every inset is zero.
+ *
+ * The list is DATA: `scripts/data/safe-area-exempt.json`, keyed `<file under src>:<edge>`, one
+ * reason per entry. A component lane that changes what an element pins to hands the entry in with
+ * its code; nobody edits the list by hand.
  */
-const EXEMPT = new Map([
-  ['ui/feedback/variants/E14E20.tsx:top', 'the sheet pins to the BOTTOM; its top-0 case is the centred dialog, which never touches an edge'],
-  ['ui/shell/OfflineIndicator.tsx:bottom', 'sticky to the top of the layout column; it never reaches the bottom edge'],
-]);
+const EXEMPT = readGateData('safe-area-exempt');
 
 for (const file of files) {
   if (!/\.tsx$/.test(file)) continue;

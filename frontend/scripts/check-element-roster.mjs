@@ -32,6 +32,7 @@
 // Run: node scripts/check-element-roster.mjs
 import fs from 'node:fs';
 import path from 'node:path';
+import { readGateData } from './data/gate-data.mjs';
 
 const SRC = 'src';
 const CATALOG = 'src/ui/feedback/catalog.ts';
@@ -43,12 +44,12 @@ const PLAYGROUND = 'src/features/playground/PlaygroundPage.tsx';
  *
  * Each needs a reason, because the reason is what tells a reviewer whether it is a gap to close or
  * a row to delete. An entry here is a promise that the studio will label it as inert.
+ *
+ * The list is DATA: `scripts/data/elements-dormant.json`, one reason per element, written by the
+ * tool that also flips `live` in the catalogue (`pulse-variants`) — the two have to change
+ * together, or check 3 and check 4 below disagree. Nobody edits it by hand.
  */
-const DORMANT = new Map([
-  ['E23', 'Like / reaction — reactions were CUT from Phase 6, so nothing renders one to style'],
-  ['E24', 'Follow button — following exists in the schema and has no screen; the button is unbuilt'],
-  ['E27', 'Interval stage — added by migration 012 for the interval player, which does not read it'],
-]);
+const DORMANT = readGateData('elements-dormant');
 
 const files = [];
 (function walk(dir) {

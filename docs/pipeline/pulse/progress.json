@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "branch": "pulse-redesign",
-  "updated": "2026-10-11T23:30:58.583Z",
+  "updated": "2026-10-11T23:36:05.279Z",
   "integrator": {
     "owner": "integrator (F0+F1.0 run)",
-    "step": "F0"
+    "step": "F1.0"
   },
   "freeze": {
     "seededOn": null,
@@ -117,18 +117,84 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           ".gitignore",
           "docs/pipeline/pulse/PLAN.md",
+          "docs/pipeline/pulse/briefs/F0.md",
+          "docs/pipeline/pulse/briefs/F1.md",
+          "docs/pipeline/pulse/briefs/F10.md",
+          "docs/pipeline/pulse/briefs/F11.md",
+          "docs/pipeline/pulse/briefs/F12.md",
+          "docs/pipeline/pulse/briefs/F13.md",
+          "docs/pipeline/pulse/briefs/F14.md",
+          "docs/pipeline/pulse/briefs/F15.md",
+          "docs/pipeline/pulse/briefs/F16.md",
+          "docs/pipeline/pulse/briefs/F17.md",
+          "docs/pipeline/pulse/briefs/F18.md",
+          "docs/pipeline/pulse/briefs/F19.md",
+          "docs/pipeline/pulse/briefs/F2.md",
+          "docs/pipeline/pulse/briefs/F20.md",
+          "docs/pipeline/pulse/briefs/F3.md",
+          "docs/pipeline/pulse/briefs/F4.md",
+          "docs/pipeline/pulse/briefs/F5.md",
+          "docs/pipeline/pulse/briefs/F6.md",
+          "docs/pipeline/pulse/briefs/F7.md",
+          "docs/pipeline/pulse/briefs/F8.md",
+          "docs/pipeline/pulse/briefs/F9.md",
+          "docs/pipeline/pulse/briefs/S-admin.md",
+          "docs/pipeline/pulse/briefs/S-auth.md",
+          "docs/pipeline/pulse/briefs/S-client-detail-a.md",
+          "docs/pipeline/pulse/briefs/S-client-detail-b.md",
+          "docs/pipeline/pulse/briefs/S-coach-chat.md",
+          "docs/pipeline/pulse/briefs/S-coach-dashboard.md",
+          "docs/pipeline/pulse/briefs/S-coach-plans.md",
+          "docs/pipeline/pulse/briefs/S-coins.md",
+          "docs/pipeline/pulse/briefs/S-compose-hub.md",
+          "docs/pipeline/pulse/briefs/S-compose-post.md",
+          "docs/pipeline/pulse/briefs/S-compose-profile.md",
+          "docs/pipeline/pulse/briefs/S-exercise-detail.md",
+          "docs/pipeline/pulse/briefs/S-home.md",
+          "docs/pipeline/pulse/briefs/S-library.md",
+          "docs/pipeline/pulse/briefs/S-marketplace.md",
+          "docs/pipeline/pulse/briefs/S-notifications.md",
+          "docs/pipeline/pulse/briefs/S-nutrition.md",
+          "docs/pipeline/pulse/briefs/S-onboarding.md",
+          "docs/pipeline/pulse/briefs/S-plan-editor.md",
+          "docs/pipeline/pulse/briefs/S-progress.md",
+          "docs/pipeline/pulse/briefs/S-public-pages.md",
+          "docs/pipeline/pulse/briefs/S-settings.md",
+          "docs/pipeline/pulse/briefs/S-style-studio.md",
+          "docs/pipeline/pulse/briefs/S-workout.md",
+          "docs/pipeline/pulse/copy-to-approve.md",
+          "docs/pipeline/pulse/deviations.md",
+          "docs/pipeline/pulse/pkg/_int/baseline/.gitattributes",
+          "docs/pipeline/pulse/pkg/_int/baseline/README.md",
+          "docs/pipeline/pulse/pkg/_int/baseline/build-dist.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates.json",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-aurora.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-autosave.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-elements.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-i18n.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-interval.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-nav-active.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-nav.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-safe-area.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-tokens.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/check-type-scale.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/gates/verify-outbox.txt",
+          "docs/pipeline/pulse/pkg/_int/baseline/independent-counts.json",
+          "docs/pipeline/pulse/pkg/_int/baseline/independent-counts.md",
+          "docs/pipeline/pulse/pkg/_int/proofs/F1.0/README.md",
+          "docs/pipeline/pulse/pkg/_int/proofs/F1.0/extract-gate-data.mjs",
+          "docs/pipeline/pulse/pkg/_int/proofs/F1.0/prove.mjs",
+          "docs/pipeline/pulse/pkg/_int/proofs/F1.0/result.json",
+          "docs/pipeline/pulse/pkg/_int/pulse-f0.mjs",
+          "docs/pipeline/pulse/pkg/_int/record-baseline.mjs",
+          "docs/pipeline/pulse/progress.json",
           "docs/pipeline/pulse/work-packages.json"
         ],
         "toCreate": [
-          "docs/pipeline/pulse/progress.json",
-          "docs/pipeline/pulse/briefs/**",
-          "docs/pipeline/pulse/deviations.md",
-          "docs/pipeline/pulse/copy-to-approve.md",
-          "docs/pipeline/pulse/pkg/_int/**",
           "frontend/scripts/pulse-geometry/**"
         ]
       },
@@ -145,11 +211,11 @@
       "requests": {},
       "liveWrites": [],
       "copyPending": 0,
-      "commit": null,
+      "commit": "1d42ef3",
       "review": null,
       "lastStep": "items 1, 3, 4, 5, 6 done; item 2 (Figma geometry -> frontend/scripts/pulse-geometry/) is being exported by another agent into .pulse/geometry/ and is not committed yet; item 7 (Q1-Q7, keep-awake) is with the orchestrator",
       "notes": "",
-      "updated": "2026-10-11T23:30:58.583Z"
+      "updated": "2026-10-11T23:33:29.466Z"
     },
     "F1": {
       "kind": "foundation",
@@ -161,7 +227,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/index.html",
           "frontend/package-lock.json",
@@ -175,6 +241,10 @@
           "frontend/public/icons.svg",
           "frontend/public/manifest.webmanifest",
           "frontend/public/sw.js",
+          "frontend/scripts/data/elements-dormant.json",
+          "frontend/scripts/data/gate-data.mjs",
+          "frontend/scripts/data/i18n-untranslated.json",
+          "frontend/scripts/data/safe-area-exempt.json",
           "frontend/src/features/settings/AccentPicker.tsx",
           "frontend/src/features/settings/GradientBuilder.tsx",
           "frontend/src/features/settings/ThemeStudio.tsx",
@@ -191,13 +261,11 @@
           "frontend/src/ui/tokens/tokens.css",
           "frontend/vite.config.ts"
         ],
-        "toCreate": [
-          "frontend/scripts/data/**"
-        ]
+        "toCreate": []
       },
       "stages": {
         "F1:0": {
-          "status": "todo",
+          "status": "integrating",
           "commit": null
         },
         "F1:1": {
@@ -225,7 +293,7 @@
           "commit": null
         }
       },
-      "status": "todo",
+      "status": "in_progress",
       "owner": null,
       "slot": null,
       "worktree": null,
@@ -240,9 +308,9 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "",
+      "lastStep": "F1.0: gate exemption lists moved to frontend/scripts/data/*.json; 11 before/after cases byte-identical",
       "notes": "",
-      "updated": "2026-10-11T23:30:58.390Z"
+      "updated": "2026-10-11T23:36:05.279Z"
     },
     "F2": {
       "kind": "foundation",
@@ -254,7 +322,7 @@
       "branch": "pulse/F2",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/scripts/check-element-roster.mjs",
           "frontend/scripts/check-i18n.mjs",
@@ -318,7 +386,7 @@
       "branch": "pulse/F3",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           ".claude/launch.json"
         ],
@@ -371,7 +439,7 @@
       "branch": "pulse/F4",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [],
         "toCreate": [
           "frontend/scripts/pulse-owns-check.mjs",
@@ -414,7 +482,7 @@
       "branch": "pulse/F5",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [],
         "toCreate": [
           "frontend/assets-src/**",
@@ -459,7 +527,7 @@
       "branch": "pulse/F6",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/primitives/Pressable.tsx",
           "frontend/src/ui/primitives/control.ts"
@@ -501,7 +569,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/playground/PlaygroundPage.tsx",
           "frontend/src/ui/TokenProof.tsx",
@@ -541,7 +609,7 @@
       "branch": "pulse/F8",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
           "frontend/src/ui/feedback/variants/E6Segmented.tsx",
@@ -598,7 +666,7 @@
       "branch": "pulse/F9",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/data/SectionHeader.tsx",
           "frontend/src/ui/feedback/EmptyState.tsx",
@@ -654,7 +722,7 @@
       "branch": "pulse/F10",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/CountUp.tsx"
         ],
@@ -711,7 +779,7 @@
       "branch": "pulse/F11",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/app/AppLayout.tsx",
           "frontend/src/app/RequireAuth.tsx",
@@ -759,7 +827,7 @@
       "branch": "pulse/F12",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E14E20.tsx",
           "frontend/src/ui/feedback/variants/E7Field.tsx",
@@ -819,7 +887,7 @@
       "branch": "pulse/F13",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/app/providers.tsx",
           "frontend/src/ui/feedback/ToastHost.tsx",
@@ -862,7 +930,7 @@
       "branch": "pulse/F14",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/ProgressChart.tsx",
           "frontend/src/ui/feedback/TrendChart.tsx",
@@ -904,7 +972,7 @@
       "branch": "pulse/F15",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/muscle-map/MuscleMap.tsx",
           "frontend/src/ui/muscle-map/landmarks.ts",
@@ -956,7 +1024,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/scripts/check-aurora.mjs",
           "frontend/src/ui/shell/AuroraBackdrop.tsx"
@@ -1000,7 +1068,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation-stage1.json"
@@ -1042,7 +1110,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation.json"
@@ -1078,7 +1146,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/DESIGN.md",
           "frontend/src/features/coaching/Monogram.tsx",
@@ -1121,7 +1189,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E10Tabs.tsx",
           "frontend/src/ui/feedback/variants/E17E19.tsx",
@@ -1162,7 +1230,7 @@
       "branch": "pulse/S-home",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationBell.tsx",
           "frontend/src/features/home/HomeNutrition.tsx",
@@ -1207,7 +1275,7 @@
       "branch": "pulse/S-auth",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/auth/AuthPage.tsx"
         ],
@@ -1252,7 +1320,7 @@
       "branch": "pulse/S-settings",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/settings/CueSettings.tsx",
           "frontend/src/features/settings/EquipmentSection.tsx",
@@ -1296,7 +1364,7 @@
       "branch": "pulse/S-workout",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/workout/IntervalStage.tsx",
           "frontend/src/features/workout/RestTimer.tsx",
@@ -1342,7 +1410,7 @@
       "branch": "pulse/S-library",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/library/LibraryPage.tsx"
         ],
@@ -1386,7 +1454,7 @@
       "branch": "pulse/S-plan-editor",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanEditorPage.tsx"
         ],
@@ -1429,7 +1497,7 @@
       "branch": "pulse/S-nutrition",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/nutrition/MacroBars.tsx",
           "frontend/src/features/nutrition/NutritionCard.tsx",
@@ -1473,7 +1541,7 @@
       "branch": "pulse/S-progress",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/progress/ProgressPage.tsx"
         ],
@@ -1516,7 +1584,7 @@
       "branch": "pulse/S-coach-chat",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/chat/ChatPage.tsx",
           "frontend/src/features/chat/ChatPanel.tsx"
@@ -1560,7 +1628,7 @@
       "branch": "pulse/S-client-detail-a",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/coaching/ChatTab.tsx",
           "frontend/src/features/coaching/ClientDetailPage.tsx",
@@ -1605,7 +1673,7 @@
       "branch": "pulse/S-client-detail-b",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/coaching/NutritionTab.tsx",
           "frontend/src/features/coaching/ProgressTab.tsx"
@@ -1648,7 +1716,7 @@
       "branch": "pulse/S-exercise-detail",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/library/ExerciseDetailPage.tsx",
           "frontend/src/features/library/SectionBadge.tsx"
@@ -1691,7 +1759,7 @@
       "branch": "pulse/S-coins",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/coins/CoinBalance.tsx",
           "frontend/src/features/coins/CoinsPage.tsx"
@@ -1735,7 +1803,7 @@
       "branch": "pulse/S-notifications",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationsPage.tsx"
         ],
@@ -1777,7 +1845,7 @@
       "branch": "pulse/S-onboarding",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/onboarding/OnboardingPage.tsx"
         ],
@@ -1820,7 +1888,7 @@
       "branch": "pulse/S-coach-dashboard",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/coaching/CoachDashboard.tsx"
         ],
@@ -1863,7 +1931,7 @@
       "branch": "pulse/S-coach-plans",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanListPage.tsx"
         ],
@@ -1905,7 +1973,7 @@
       "branch": "pulse/S-compose-hub",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/compose/ComposePage.tsx"
         ],
@@ -1947,7 +2015,7 @@
       "branch": "pulse/S-public-pages",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/marketplace/CoachProfilePage.tsx",
           "frontend/src/features/marketplace/DocRenderer.tsx",
@@ -1995,7 +2063,7 @@
       "branch": "pulse/S-admin",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/admin/AdminMetrics.tsx",
           "frontend/src/features/admin/AdminPage.tsx",
@@ -2043,7 +2111,7 @@
       "branch": "pulse/S-compose-post",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/compose/PostEditorPage.tsx"
         ],
@@ -2086,7 +2154,7 @@
       "branch": "pulse/S-compose-profile",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/compose/HandleField.tsx",
           "frontend/src/features/compose/ProfileEditorPage.tsx"
@@ -2130,7 +2198,7 @@
       "branch": "pulse/S-marketplace",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/marketplace/MarketplacePage.tsx"
         ],
@@ -2174,7 +2242,7 @@
       "branch": "pulse/S-style-studio",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "tree": "b67d5ff",
+        "listedOn": "1d42ef3 + staged changes",
         "existing": [
           "frontend/src/features/admin/StyleStudioPage.tsx"
         ],
