@@ -1,0 +1,2209 @@
+{
+  "schema": 2,
+  "branch": "pulse-redesign",
+  "updated": "2026-10-11T23:30:58.583Z",
+  "integrator": {
+    "owner": "integrator (F0+F1.0 run)",
+    "step": "F0"
+  },
+  "freeze": {
+    "seededOn": null,
+    "recordedAt": null,
+    "dbCopy": null,
+    "backup": null,
+    "sandbox": null,
+    "baselineCommit": "0860942",
+    "gates": {
+      "check:tokens": "check-tokens: OK — no raw values outside the token layer",
+      "check:i18n": "check-i18n: OK — 3 language(s) (hu, en, de), 876 keys each",
+      "check:nav": "check-nav: OK — the bar matches the design, and every screen has a door",
+      "check:nav-active": "check-nav-active: OK — 64 assertions, every route lights exactly one tab",
+      "check:interval": "check-interval: OK — 50 schedule assertions",
+      "check:elements": "check-element-roster: OK — the four frontend copies agree, and nothing inert is undeclared",
+      "check:autosave": "verify-autosave: 21 passed, 0 failed",
+      "check:type-scale": "check-type-scale: OK — 10 step(s), declared and merged alike",
+      "check:aurora": "check-aurora: 9 backdrop mount(s), no ancestor paints over any of them",
+      "check:safe-area": "check-safe-area: OK — every edge-pinned element accounts for its inset",
+      "verify:outbox": "outbox: 31 passed, 0 failed"
+    },
+    "independentCounts": {
+      "surface": 97,
+      "summary-tile": 12,
+      "gauge": 8,
+      "aurora": 9,
+      "legacy-type": 612,
+      "legacy-type-renamed-three": 149,
+      "legacy-type-all-src": 615,
+      "legacy-type-renamed-three-all-src": 152,
+      "font-display-class": 29,
+      "legacy-radius": 199,
+      "wash": 214,
+      "legacy-variant-attribute": 118,
+      "legacy-variant": 152,
+      "legacy-variant-any-quoted-literal": 164,
+      "legacy-chip-call": 3,
+      "pressable-no-variant": 30,
+      "pill-size": 59,
+      "shaped-skeleton": 94,
+      "raw-form": 22,
+      "raw-form-file-input": 2,
+      "blur-shadow": 27,
+      "reserved-surface-1": 30,
+      "reserved-surface-2-3": 92,
+      "black-white": 1,
+      "heading-icon": 48,
+      "legacy-var": 185,
+      "var-usage-all-names": 748
+    }
+  },
+  "ownerQuestions": {
+    "Q1": {
+      "default": "a",
+      "answer": null
+    },
+    "Q2": {
+      "default": "a",
+      "answer": null
+    },
+    "Q3": {
+      "default": "a",
+      "answer": null
+    },
+    "Q4": {
+      "default": "a",
+      "answer": null
+    },
+    "Q5": {
+      "default": "a",
+      "answer": null
+    },
+    "Q6": {
+      "default": "a",
+      "answer": null
+    },
+    "Q7": {
+      "default": "a",
+      "answer": null
+    }
+  },
+  "burnDown": {
+    "surface": 97,
+    "summary-tile": 12,
+    "gauge": 8,
+    "aurora": 9,
+    "legacy-type": 612,
+    "font-display-class": 29,
+    "legacy-radius": 199,
+    "wash": 214,
+    "legacy-variant": 152,
+    "legacy-chip-call": 3,
+    "pressable-no-variant": 30,
+    "pill-size": 59,
+    "shaped-skeleton": 94,
+    "raw-form": 22,
+    "blur-shadow": 27,
+    "reserved-surface-1": 30,
+    "reserved-surface-2-3": 92,
+    "black-white": 1,
+    "heading-icon": 48,
+    "legacy-var": 185
+  },
+  "packages": {
+    "F0": {
+      "kind": "foundation",
+      "title": "Prep: commit the pipeline docs, create the integration worktree, export the Figma geometry, archive the asset sources, base worktree, live progress file, briefs, owner questions",
+      "wave": null,
+      "dependsOn": [],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          ".gitignore",
+          "docs/pipeline/pulse/PLAN.md",
+          "docs/pipeline/pulse/work-packages.json"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/progress.json",
+          "docs/pipeline/pulse/briefs/**",
+          "docs/pipeline/pulse/deviations.md",
+          "docs/pipeline/pulse/copy-to-approve.md",
+          "docs/pipeline/pulse/pkg/_int/**",
+          "frontend/scripts/pulse-geometry/**"
+        ]
+      },
+      "status": "in_progress",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "items 1, 3, 4, 5, 6 done; item 2 (Figma geometry -> frontend/scripts/pulse-geometry/) is being exported by another agent into .pulse/geometry/ and is not committed yet; item 7 (Q1-Q7, keep-awake) is with the orchestrator",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.583Z"
+    },
+    "F1": {
+      "kind": "foundation",
+      "title": "The value switch: gate data out of the scripts, theme engine out, fonts (glyph-checked), Pulse tokens + bridge, type ramp with the legacy rename, gutter, hybrid sweep (seven commits F1.0-F1.6)",
+      "wave": null,
+      "dependsOn": [
+        "F0"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/index.html",
+          "frontend/package-lock.json",
+          "frontend/package.json",
+          "frontend/public/apple-touch-icon.png",
+          "frontend/public/favicon.svg",
+          "frontend/public/icon-192-maskable.png",
+          "frontend/public/icon-192.png",
+          "frontend/public/icon-512-maskable.png",
+          "frontend/public/icon-512.png",
+          "frontend/public/icons.svg",
+          "frontend/public/manifest.webmanifest",
+          "frontend/public/sw.js",
+          "frontend/src/features/settings/AccentPicker.tsx",
+          "frontend/src/features/settings/GradientBuilder.tsx",
+          "frontend/src/features/settings/ThemeStudio.tsx",
+          "frontend/src/features/settings/useThemeSync.ts",
+          "frontend/src/i18n/de.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/index.ts",
+          "frontend/src/index.css",
+          "frontend/src/lib/cn.ts",
+          "frontend/src/ui/theme/ThemeProvider.tsx",
+          "frontend/src/ui/theme/contrast.ts",
+          "frontend/src/ui/theme/palette.ts",
+          "frontend/src/ui/tokens/tokens.css",
+          "frontend/vite.config.ts"
+        ],
+        "toCreate": [
+          "frontend/scripts/data/**"
+        ]
+      },
+      "stages": {
+        "F1:0": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:2": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:3": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:4": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:5": {
+          "status": "todo",
+          "commit": null
+        },
+        "F1:6": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F2": {
+      "kind": "foundation",
+      "title": "Gates re-pointed in three merges: type-scale binding + check:canvas (a); safe-area, nav, nav-active, elements, verify:gates (b); the check:pulse ratchet (c)",
+      "wave": null,
+      "dependsOn": [
+        "F1:0"
+      ],
+      "branch": "pulse/F2",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/scripts/check-element-roster.mjs",
+          "frontend/scripts/check-i18n.mjs",
+          "frontend/scripts/check-interval.mjs",
+          "frontend/scripts/check-nav-active.mjs",
+          "frontend/scripts/check-nav.mjs",
+          "frontend/scripts/check-safe-area.mjs",
+          "frontend/scripts/check-tokens.mjs",
+          "frontend/scripts/check-type-scale.mjs",
+          "frontend/scripts/verify-autosave.mjs",
+          "frontend/scripts/verify-nav-gate.mjs",
+          "frontend/scripts/verify-outbox.mjs"
+        ],
+        "toCreate": [
+          "frontend/scripts/check-pulse.mjs",
+          "frontend/scripts/check-canvas.mjs",
+          "frontend/scripts/verify-gates.mjs",
+          "docs/pipeline/pulse/pkg/F2/**"
+        ]
+      },
+      "stages": {
+        "F2:a": {
+          "status": "todo",
+          "commit": null
+        },
+        "F2:b": {
+          "status": "todo",
+          "commit": null
+        },
+        "F2:c": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F3": {
+      "kind": "foundation",
+      "title": "Eyes: the capture tool (record, replay, virtual time, fixtures as edits, probes, geometry, tiles, inventory), the sandbox script; then, with the integrator, the freeze and the baseline of all 59 states",
+      "wave": null,
+      "dependsOn": [
+        "F1:0"
+      ],
+      "branch": "pulse/F3",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          ".claude/launch.json"
+        ],
+        "toCreate": [
+          "frontend/scripts/pulse-shot.mjs",
+          "frontend/scripts/pulse-verify.mjs",
+          "frontend/scripts/pulse-frames.json",
+          "frontend/scripts/fixtures/**",
+          "scripts/dev-stack.mjs",
+          "frontend/scripts/pulse-sandbox.mjs",
+          "docs/pipeline/pulse/pkg/F3/**"
+        ]
+      },
+      "stages": {
+        "F3:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F3:D": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F4": {
+      "kind": "foundation",
+      "title": "Integration tools: ownership validator, merge check, slot sync, i18n patcher, variant patcher, fixture check, progress (live file + snapshot), source ledger",
+      "wave": null,
+      "dependsOn": [
+        "F1:0"
+      ],
+      "branch": "pulse/F4",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [],
+        "toCreate": [
+          "frontend/scripts/pulse-owns-check.mjs",
+          "frontend/scripts/pulse-merge-check.mjs",
+          "frontend/scripts/pulse-sync.mjs",
+          "frontend/scripts/pulse-i18n.mjs",
+          "frontend/scripts/pulse-variants.mjs",
+          "frontend/scripts/pulse-fixture-check.mjs",
+          "frontend/scripts/pulse-progress.mjs",
+          "frontend/scripts/pulse-ledger.mjs",
+          "docs/pipeline/pulse/pkg/F4/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F5": {
+      "kind": "foundation",
+      "title": "Assets and media: WebP pipeline (35 sources -> 49 files, knee alpha), slots/urls modules, check:assets, Pic, UserPhoto",
+      "wave": null,
+      "dependsOn": [
+        "F1:0"
+      ],
+      "branch": "pulse/F5",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [],
+        "toCreate": [
+          "frontend/assets-src/**",
+          "frontend/scripts/build-pulse-assets.mjs",
+          "frontend/scripts/check-assets.mjs",
+          "frontend/src/assets/**",
+          "frontend/src/ui/media/**",
+          "frontend/src/features/playground/kit/media.tsx",
+          "docs/pipeline/pulse/kit/media.md",
+          "docs/pipeline/pulse/pkg/F5/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F6": {
+      "kind": "foundation",
+      "title": "Actions keystone: lime pill with size axis, link variant, bare icon shape, three-dot busy, TextLink",
+      "wave": null,
+      "dependsOn": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "branch": "pulse/F6",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/primitives/Pressable.tsx",
+          "frontend/src/ui/primitives/control.ts"
+        ],
+        "toCreate": [
+          "frontend/src/ui/primitives/TextLink.tsx",
+          "frontend/src/features/playground/kit/actions.tsx",
+          "docs/pipeline/pulse/kit/actions.md",
+          "docs/pipeline/pulse/pkg/F6/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F7": {
+      "kind": "foundation",
+      "title": "Kit specimen host in /playground with a list / board layout; TokenProof deleted; CURATED.E21 aligned to A; catalogue edits at integrations",
+      "wave": null,
+      "dependsOn": [
+        "F1",
+        "F4"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/playground/PlaygroundPage.tsx",
+          "frontend/src/ui/TokenProof.tsx",
+          "frontend/src/ui/feedback/ElementStyleProvider.tsx",
+          "frontend/src/ui/feedback/catalog.ts"
+        ],
+        "toCreate": [
+          "frontend/src/features/playground/PulseKit.tsx"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F8": {
+      "kind": "foundation",
+      "title": "Selection: BadgeCount, Segmented skin, LanguageToggle (stage 1); ChipRow, Toggle, Switch, CheckMark, CopyButton skin (stage 2)",
+      "wave": null,
+      "dependsOn": [
+        "F6"
+      ],
+      "branch": "pulse/F8",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
+          "frontend/src/ui/feedback/variants/E6Segmented.tsx",
+          "frontend/src/ui/nav/LanguageToggle.tsx",
+          "frontend/src/ui/primitives/Switch.tsx",
+          "frontend/src/ui/primitives/Toggle.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/ui/primitives/BadgeCount.tsx",
+          "frontend/src/ui/primitives/ChipRow.tsx",
+          "frontend/src/ui/primitives/CheckMark.tsx",
+          "frontend/src/features/playground/kit/selection.tsx",
+          "docs/pipeline/pulse/kit/selection.md",
+          "docs/pipeline/pulse/pkg/F8/**"
+        ]
+      },
+      "stages": {
+        "F8:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F8:2": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F9": {
+      "kind": "foundation",
+      "title": "Structure: SectionHeader rewrite, Rule, RowStack, ListRow, EmptyState, Skeleton base, NoticeLine (stage 1); Monogram (stage 2)",
+      "wave": null,
+      "dependsOn": [
+        "F6",
+        "F5"
+      ],
+      "branch": "pulse/F9",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/data/SectionHeader.tsx",
+          "frontend/src/ui/feedback/EmptyState.tsx",
+          "frontend/src/ui/feedback/ScreenSkeleton.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/ui/data/Rule.tsx",
+          "frontend/src/ui/data/RowStack.tsx",
+          "frontend/src/ui/data/ListRow.tsx",
+          "frontend/src/ui/data/Monogram.tsx",
+          "frontend/src/ui/feedback/NoticeLine.tsx",
+          "frontend/src/features/playground/kit/structure.tsx",
+          "docs/pipeline/pulse/kit/structure.md",
+          "docs/pipeline/pulse/pkg/F9/**"
+        ]
+      },
+      "stages": {
+        "F9:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F9:2": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F10": {
+      "kind": "foundation",
+      "title": "Data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp (stage 1); LedgerRow, Stepper (stage 2)",
+      "wave": null,
+      "dependsOn": [
+        "F6"
+      ],
+      "branch": "pulse/F10",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/feedback/CountUp.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/ui/data/Numeral.tsx",
+          "frontend/src/ui/data/StatBlock.tsx",
+          "frontend/src/ui/data/LedgerRow.tsx",
+          "frontend/src/ui/data/SegmentBar.tsx",
+          "frontend/src/ui/data/ProgressBar.tsx",
+          "frontend/src/ui/data/MacroColumns.tsx",
+          "frontend/src/features/playground/kit/data.tsx",
+          "docs/pipeline/pulse/kit/data.md",
+          "docs/pipeline/pulse/pkg/F10/**"
+        ]
+      },
+      "stages": {
+        "F10:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F10:2": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F11": {
+      "kind": "foundation",
+      "title": "Shell: raster tab bar with fade, Screen scaffold, ScreenHeader on routeMeta, Dock, PublicLayout, lazy Home/Auth",
+      "wave": null,
+      "dependsOn": [
+        "F6",
+        "F5",
+        "F2:b"
+      ],
+      "branch": "pulse/F11",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/app/AppLayout.tsx",
+          "frontend/src/app/RequireAuth.tsx",
+          "frontend/src/app/navTabs.ts",
+          "frontend/src/app/router.tsx",
+          "frontend/src/ui/nav/BottomNav.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/app/routeMeta.ts",
+          "frontend/src/app/PublicLayout.tsx",
+          "frontend/src/ui/shell/Screen.tsx",
+          "frontend/src/ui/shell/ScreenHeader.tsx",
+          "frontend/src/ui/shell/Dock.tsx",
+          "frontend/src/features/playground/kit/shell.tsx",
+          "docs/pipeline/pulse/kit/shell.md",
+          "docs/pipeline/pulse/pkg/F11/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F12": {
+      "kind": "foundation",
+      "title": "Inputs and the sheet: underline Field (stage 1); SearchField, TextArea, NumberStepper, MaskedField, DateTrigger, SelectSheet, FilePick, Sheet restyle, ConfirmSheet (stage 2)",
+      "wave": null,
+      "dependsOn": [
+        "F6"
+      ],
+      "branch": "pulse/F12",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/feedback/variants/E14E20.tsx",
+          "frontend/src/ui/feedback/variants/E7Field.tsx",
+          "frontend/src/ui/primitives/Field.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/ui/primitives/SearchField.tsx",
+          "frontend/src/ui/primitives/TextArea.tsx",
+          "frontend/src/ui/primitives/NumberStepper.tsx",
+          "frontend/src/ui/primitives/MaskedField.tsx",
+          "frontend/src/ui/primitives/DateTrigger.tsx",
+          "frontend/src/ui/primitives/SelectSheet.tsx",
+          "frontend/src/ui/primitives/FilePick.tsx",
+          "frontend/src/ui/feedback/ConfirmSheet.tsx",
+          "frontend/src/features/playground/kit/inputs.tsx",
+          "docs/pipeline/pulse/kit/inputs.md",
+          "docs/pipeline/pulse/pkg/F12/**"
+        ]
+      },
+      "stages": {
+        "F12:1": {
+          "status": "todo",
+          "commit": null
+        },
+        "F12:2": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F13": {
+      "kind": "foundation",
+      "title": "Status zone: toast band at the top, offline line as a notice line, CommandPalette minimal restyle",
+      "wave": null,
+      "dependsOn": [
+        "F6",
+        "F9:1"
+      ],
+      "branch": "pulse/F13",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/app/providers.tsx",
+          "frontend/src/ui/feedback/ToastHost.tsx",
+          "frontend/src/ui/feedback/variants/E12E16.tsx",
+          "frontend/src/ui/shell/CommandPalette.tsx",
+          "frontend/src/ui/shell/OfflineIndicator.tsx"
+        ],
+        "toCreate": [
+          "frontend/src/features/playground/kit/status.tsx",
+          "docs/pipeline/pulse/kit/status.md",
+          "docs/pipeline/pulse/pkg/F13/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F14": {
+      "kind": "foundation",
+      "title": "Charts: TrendChart restyle, dotted gap, Sparkline",
+      "wave": null,
+      "dependsOn": [
+        "F1"
+      ],
+      "branch": "pulse/F14",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/feedback/ProgressChart.tsx",
+          "frontend/src/ui/feedback/TrendChart.tsx",
+          "frontend/src/ui/feedback/chartGeometry.ts"
+        ],
+        "toCreate": [
+          "frontend/src/ui/feedback/Sparkline.tsx",
+          "frontend/src/features/playground/kit/charts.tsx",
+          "docs/pipeline/pulse/kit/charts.md",
+          "docs/pipeline/pulse/pkg/F14/**"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F15": {
+      "kind": "foundation",
+      "title": "Mannequin: stage 0 = additive props + fixed box (before wave 2); stage 1 = neutral renders + SVG regions inside MuscleMap (default of Q1)",
+      "wave": null,
+      "dependsOn": [
+        "F5"
+      ],
+      "branch": "pulse/F15",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/muscle-map/MuscleMap.tsx",
+          "frontend/src/ui/muscle-map/landmarks.ts",
+          "frontend/src/ui/muscle-map/shapes.ts"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/kit/mannequin.md",
+          "docs/pipeline/pulse/pkg/F15/**"
+        ]
+      },
+      "stages": {
+        "F15:0": {
+          "status": "todo",
+          "commit": null
+        },
+        "F15:1": {
+          "status": "todo",
+          "commit": null
+        }
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F16": {
+      "kind": "foundation",
+      "title": "Integrator steps of 0.2: D2 redirect (idle Edzés -> library) and the aurora retirement",
+      "wave": null,
+      "dependsOn": [
+        "F11",
+        "F5",
+        "F2:c"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/scripts/check-aurora.mjs",
+          "frontend/src/ui/shell/AuroraBackdrop.tsx"
+        ],
+        "toCreate": []
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F17": {
+      "kind": "foundation",
+      "title": "Stage-1 acceptance: opens wave 1 (Home, Auth)",
+      "wave": null,
+      "dependsOn": [
+        "F5",
+        "F6",
+        "F7",
+        "F8:1",
+        "F9:1",
+        "F10:1",
+        "F11",
+        "F12:1",
+        "F16"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [],
+        "toCreate": [
+          "docs/pipeline/pulse/review/foundation-stage1.json"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F18": {
+      "kind": "foundation",
+      "title": "Foundation acceptance: with S-home reviewed it opens the fan-out (Gate A)",
+      "wave": null,
+      "dependsOn": [
+        "F17",
+        "F8:2",
+        "F9:2",
+        "F10:2",
+        "F12:2",
+        "F13",
+        "F14",
+        "F15:0"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [],
+        "toCreate": [
+          "docs/pipeline/pulse/review/foundation.json"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F19": {
+      "kind": "foundation",
+      "title": "Closing cleanup: delete the bridge, legacy steps, Surface / SummaryTile / Gauge / DataTable, legacy variants; ratchet becomes bans; docs and ADR",
+      "wave": null,
+      "dependsOn": [
+        "S-*",
+        "F20"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/DESIGN.md",
+          "frontend/src/features/coaching/Monogram.tsx",
+          "frontend/src/ui/data/DataTable.tsx",
+          "frontend/src/ui/data/SummaryTile.tsx",
+          "frontend/src/ui/feedback/Gauge.tsx",
+          "frontend/src/ui/primitives/Surface.tsx",
+          "frontend/src/ui/primitives/surfaceRecipe.ts"
+        ],
+        "toCreate": [
+          "docs/brain/60-Decisions/0021-pulse-implementation.md"
+        ]
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "F20": {
+      "kind": "foundation",
+      "title": "Playground-only variants retire (default of Q3): seven variant files, four playground-only exports, their Demo and PREVIEWABLE entries",
+      "wave": null,
+      "dependsOn": [
+        "F18"
+      ],
+      "branch": "pulse-int",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/ui/feedback/variants/E10Tabs.tsx",
+          "frontend/src/ui/feedback/variants/E17E19.tsx",
+          "frontend/src/ui/feedback/variants/E1Button.tsx",
+          "frontend/src/ui/feedback/variants/E3IconButton.tsx",
+          "frontend/src/ui/feedback/variants/E4Toggle.tsx",
+          "frontend/src/ui/feedback/variants/E5Checkbox.tsx",
+          "frontend/src/ui/feedback/variants/E8E9.tsx"
+        ],
+        "toCreate": []
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-home": {
+      "kind": "screen",
+      "title": "Kezdőlap (`/`)",
+      "wave": 1,
+      "dependsOn": [
+        "F17"
+      ],
+      "branch": "pulse/S-home",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/chat/NotificationBell.tsx",
+          "frontend/src/features/home/HomeNutrition.tsx",
+          "frontend/src/features/home/HomePage.tsx",
+          "frontend/src/features/home/WeekStrip.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-home/**"
+        ]
+      },
+      "frames": {
+        "home-1": "todo",
+        "home-2": "todo",
+        "home-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-auth": {
+      "kind": "screen",
+      "title": "Belépés, Regisztráció (`/login`, `/register`)",
+      "wave": 1,
+      "dependsOn": [
+        "F17"
+      ],
+      "branch": "pulse/S-auth",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/auth/AuthPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-auth/**"
+        ]
+      },
+      "frames": {
+        "auth-1": "todo",
+        "auth-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-settings": {
+      "kind": "screen",
+      "title": "Profil (`/settings`)",
+      "wave": 1,
+      "dependsOn": [
+        "F17",
+        "F8:2",
+        "F9:2",
+        "F10:2",
+        "F14"
+      ],
+      "branch": "pulse/S-settings",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/settings/CueSettings.tsx",
+          "frontend/src/features/settings/EquipmentSection.tsx",
+          "frontend/src/features/settings/SettingsPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-settings/**"
+        ]
+      },
+      "frames": {
+        "settings-1": "todo",
+        "settings-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-workout": {
+      "kind": "screen",
+      "title": "Edzéslejátszó (`/workout`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-workout",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/workout/IntervalStage.tsx",
+          "frontend/src/features/workout/RestTimer.tsx",
+          "frontend/src/features/workout/SetRow.tsx",
+          "frontend/src/features/workout/WorkoutPlayer.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-workout/**"
+        ]
+      },
+      "frames": {
+        "workout-1": "todo",
+        "workout-2": "todo",
+        "workout-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-library": {
+      "kind": "screen",
+      "title": "Gyakorlatok (`/library`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-library",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/library/LibraryPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-library/**"
+        ]
+      },
+      "frames": {
+        "library-1": "todo",
+        "library-2": "todo",
+        "library-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-plan-editor": {
+      "kind": "screen",
+      "title": "Tervszerkesztő (`/coach/plans/:id`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-coach-plans"
+      ],
+      "branch": "pulse/S-plan-editor",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/plans/PlanEditorPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-plan-editor/**"
+        ]
+      },
+      "frames": {
+        "plan-editor-1": "todo",
+        "plan-editor-2": "todo",
+        "plan-editor-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-nutrition": {
+      "kind": "screen",
+      "title": "Étkezés (`/nutrition`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-nutrition",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/nutrition/MacroBars.tsx",
+          "frontend/src/features/nutrition/NutritionCard.tsx",
+          "frontend/src/features/nutrition/NutritionPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-nutrition/**"
+        ]
+      },
+      "frames": {
+        "nutrition-1": "todo",
+        "nutrition-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-progress": {
+      "kind": "screen",
+      "title": "Haladás (`/progress`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-progress",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/progress/ProgressPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-progress/**"
+        ]
+      },
+      "frames": {
+        "progress-1": "todo",
+        "progress-2": "todo",
+        "progress-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-coach-chat": {
+      "kind": "screen",
+      "title": "Csevegés (`/coach/clients/:id/chat`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-coach-chat",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/chat/ChatPage.tsx",
+          "frontend/src/features/chat/ChatPanel.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-coach-chat/**"
+        ]
+      },
+      "frames": {
+        "coach-chat-1": "todo",
+        "coach-chat-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-client-detail-a": {
+      "kind": "screen",
+      "title": "Kliens adatlap — the page, Terv and Üzenetek tabs, equipment (`/coach/clients/:id`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-coach-chat"
+      ],
+      "branch": "pulse/S-client-detail-a",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/coaching/ChatTab.tsx",
+          "frontend/src/features/coaching/ClientDetailPage.tsx",
+          "frontend/src/features/coaching/ClientEquipmentCard.tsx",
+          "frontend/src/features/coaching/PlanTab.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-client-detail-a/**"
+        ]
+      },
+      "frames": {
+        "client-detail-1": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-client-detail-b": {
+      "kind": "screen",
+      "title": "Kliens adatlap — Táplálkozás and Haladás tabs",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-client-detail-a"
+      ],
+      "branch": "pulse/S-client-detail-b",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/coaching/NutritionTab.tsx",
+          "frontend/src/features/coaching/ProgressTab.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-client-detail-b/**"
+        ]
+      },
+      "frames": {
+        "client-detail-2": "todo",
+        "client-detail-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-exercise-detail": {
+      "kind": "screen",
+      "title": "Gyakorlat részletei (`/library/:id`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-exercise-detail",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/library/ExerciseDetailPage.tsx",
+          "frontend/src/features/library/SectionBadge.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-exercise-detail/**"
+        ]
+      },
+      "frames": {
+        "exercise-detail-1": "todo",
+        "exercise-detail-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-coins": {
+      "kind": "screen",
+      "title": "Érmék (`/coins`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-coins",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/coins/CoinBalance.tsx",
+          "frontend/src/features/coins/CoinsPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-coins/**"
+        ]
+      },
+      "frames": {
+        "coins-1": "todo",
+        "coins-2": "todo",
+        "coins-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-notifications": {
+      "kind": "screen",
+      "title": "Értesítések (`/notifications`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-notifications",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/chat/NotificationsPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-notifications/**"
+        ]
+      },
+      "frames": {
+        "notifications-1": "todo",
+        "notifications-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-onboarding": {
+      "kind": "screen",
+      "title": "Onboarding (`/onboarding`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-onboarding",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/onboarding/OnboardingPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-onboarding/**"
+        ]
+      },
+      "frames": {
+        "onboarding-1": "todo",
+        "onboarding-2": "todo",
+        "onboarding-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-coach-dashboard": {
+      "kind": "screen",
+      "title": "Edzői kezdőlap (`/coach`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-coach-dashboard",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/coaching/CoachDashboard.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-coach-dashboard/**"
+        ]
+      },
+      "frames": {
+        "coach-dashboard-1": "todo",
+        "coach-dashboard-2": "todo",
+        "coach-dashboard-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-coach-plans": {
+      "kind": "screen",
+      "title": "Edzéstervek (`/coach/plans`)",
+      "wave": 2,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-coach-plans",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/plans/PlanListPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-coach-plans/**"
+        ]
+      },
+      "frames": {
+        "coach-plans-1": "todo",
+        "coach-plans-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-compose-hub": {
+      "kind": "screen",
+      "title": "Piactéri pult (`/compose`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-compose-hub",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/compose/ComposePage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-compose-hub/**"
+        ]
+      },
+      "frames": {
+        "compose-hub-1": "todo",
+        "compose-hub-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-public-pages": {
+      "kind": "screen",
+      "title": "Poszt részletei (`/m/p/:publicId`) + Edzői profil (`/m/c/:handle`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-public-pages",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/marketplace/CoachProfilePage.tsx",
+          "frontend/src/features/marketplace/DocRenderer.tsx",
+          "frontend/src/features/marketplace/PostPage.tsx",
+          "frontend/src/features/marketplace/PublicChrome.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-public-pages/**"
+        ]
+      },
+      "frames": {
+        "post-detail-1": "todo",
+        "post-detail-2": "todo",
+        "post-detail-3": "todo",
+        "coach-profile-1": "todo",
+        "coach-profile-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-admin": {
+      "kind": "screen",
+      "title": "Admin áttekintés (`/admin`)",
+      "wave": 3,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-admin",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/admin/AdminMetrics.tsx",
+          "frontend/src/features/admin/AdminPage.tsx",
+          "frontend/src/features/admin/AdminShell.tsx",
+          "frontend/src/features/admin/MarketplaceQueue.tsx",
+          "frontend/src/features/admin/ModerationQueue.tsx",
+          "frontend/src/features/admin/UserSearch.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-admin/**"
+        ]
+      },
+      "frames": {
+        "admin-1": "todo",
+        "admin-2": "todo",
+        "admin-3": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-compose-post": {
+      "kind": "screen",
+      "title": "Poszt szerkesztő (`/compose/posts/:publicId`)",
+      "wave": 4,
+      "dependsOn": [
+        "F18",
+        "S-home"
+      ],
+      "branch": "pulse/S-compose-post",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/compose/PostEditorPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-compose-post/**"
+        ]
+      },
+      "frames": {
+        "compose-post-1": "todo",
+        "compose-post-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-compose-profile": {
+      "kind": "screen",
+      "title": "Edzői profil szerkesztő (`/compose/profile`)",
+      "wave": 4,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-public-pages"
+      ],
+      "branch": "pulse/S-compose-profile",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/compose/HandleField.tsx",
+          "frontend/src/features/compose/ProfileEditorPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-compose-profile/**"
+        ]
+      },
+      "frames": {
+        "compose-profile-1": "todo",
+        "compose-profile-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-marketplace": {
+      "kind": "screen",
+      "title": "Piactér (`/m`)",
+      "wave": 4,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-public-pages"
+      ],
+      "branch": "pulse/S-marketplace",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/marketplace/MarketplacePage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-marketplace/**"
+        ]
+      },
+      "frames": {
+        "marketplace-1": "todo",
+        "marketplace-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    },
+    "S-style-studio": {
+      "kind": "screen",
+      "title": "Elem-stílus stúdió (`/admin/styles`)",
+      "wave": 4,
+      "dependsOn": [
+        "F18",
+        "S-home",
+        "S-admin",
+        "F20"
+      ],
+      "branch": "pulse/S-style-studio",
+      "files": {
+        "generatedFrom": "work-packages.json@13cd5fd3ae5c",
+        "tree": "b67d5ff",
+        "existing": [
+          "frontend/src/features/admin/StyleStudioPage.tsx"
+        ],
+        "toCreate": [
+          "docs/pipeline/pulse/pkg/S-style-studio/**"
+        ]
+      },
+      "frames": {
+        "style-studio-1": "todo",
+        "style-studio-2": "todo"
+      },
+      "status": "todo",
+      "owner": null,
+      "slot": null,
+      "worktree": null,
+      "port": null,
+      "extraStates": {},
+      "budget": {
+        "before": null,
+        "now": null
+      },
+      "requests": {},
+      "liveWrites": [],
+      "copyPending": 0,
+      "commit": null,
+      "review": null,
+      "lastStep": "",
+      "notes": "",
+      "updated": "2026-10-11T23:30:58.390Z"
+    }
+  }
+}

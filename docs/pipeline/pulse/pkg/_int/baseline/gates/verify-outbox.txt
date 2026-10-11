@@ -1,0 +1,33 @@
+PASS  a set check is queueable
+PASS  a set void is queueable
+PASS  a coin transfer is NOT
+PASS  and neither is a post
+PASS  enqueueing something off the list THROWS rather than quietly accepting it
+PASS  the write_uid is written to storage with the payload, not regenerated later  (s42-abc)
+PASS  and the entry id is NOT the idempotency key
+PASS  the flush replays the stored key verbatim  ([{"path":"/sets/42/check","uid":"s42-abc"}])
+PASS  and the entry is gone once it lands
+PASS  two attempts at the same set leave ONE entry  (1)
+PASS  and it is the corrected one  (reps=10)
+PASS  a different set is its own entry
+PASS  a network failure keeps everything queued  (2 left)
+PASS  and it stops at the first one rather than failing through the whole queue  (1 attempt(s))
+PASS  the result says nothing was sent
+PASS  nothing is left marked in-flight
+PASS  both go through  (sent 2)
+PASS  oldest first — sets belong to an order  (["/sets/42/check","/sets/43/check"])
+PASS  the queue is empty
+PASS  a 409 drops the entry instead of retrying it forever
+PASS  and it is REPORTED, not lost silently  ([["/sets/44/check",409]])
+PASS  the result counts it as dropped, not sent
+PASS  a 429 is "not now", so the entry stays
+PASS  and so is a 503
+PASS  a 422 does not
+PASS  the other user's entry is invisible to me  (1)
+PASS  a flush as me never sends the previous user's set  (["mine-51"])
+PASS  and theirs is still sitting there untouched
+PASS  clearOutbox takes EVERY user with it, which is what logout needs
+PASS  a TypeError reads as a network failure
+PASS  an ApiError-shaped object does not
+
+outbox: 31 passed, 0 failed

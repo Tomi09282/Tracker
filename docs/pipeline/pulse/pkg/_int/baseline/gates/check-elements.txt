@@ -1,0 +1,3 @@
+check-element-roster: 27 in the catalogue — 24 with live consumers, 20 previewable, 3 declared dormant
+                      live with no playground demo: E21 E22 E25 E26
+check-element-roster: OK — the four frontend copies agree, and nothing inert is undeclared

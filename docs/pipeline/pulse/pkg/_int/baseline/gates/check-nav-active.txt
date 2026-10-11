@@ -1,0 +1,1 @@
+check-nav-active: OK — 64 assertions, every route lights exactly one tab

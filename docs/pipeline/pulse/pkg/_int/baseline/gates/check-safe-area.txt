@@ -1,0 +1,2 @@
+check-safe-area: viewport-fit cover, 8 file(s) use an inset, 2 exemption(s)
+check-safe-area: OK — every edge-pinned element accounts for its inset

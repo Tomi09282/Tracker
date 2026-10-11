@@ -1,0 +1,1771 @@
+{
+  "commit": "0860942f73a1b3730e28cd56d825ae4cd4024790",
+  "dirty": false,
+  "takenWith": "plain git grep (-c for lines, -o for occurrences, -P patterns); comments are not stripped; two rules are tag scans and say so",
+  "scope": "tracked files of the tree, frontend/src",
+  "rules": {
+    "surface": {
+      "method": "git grep -P",
+      "pattern": "<Surface\\b",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 97,
+      "occurrences": 97,
+      "files": 34,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 3,
+        "features/admin/StyleStudioPage.tsx": 4,
+        "features/admin/UserSearch.tsx": 1,
+        "features/auth/AuthPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 2,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 5,
+        "features/coaching/ClientEquipmentCard.tsx": 3,
+        "features/coaching/CoachDashboard.tsx": 7,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coins/CoinsPage.tsx": 4,
+        "features/compose/ComposePage.tsx": 5,
+        "features/compose/PostEditorPage.tsx": 3,
+        "features/compose/ProfileEditorPage.tsx": 6,
+        "features/home/HomePage.tsx": 3,
+        "features/home/WeekStrip.tsx": 1,
+        "features/library/ExerciseDetailPage.tsx": 4,
+        "features/library/LibraryPage.tsx": 3,
+        "features/marketplace/CoachProfilePage.tsx": 2,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 2,
+        "features/nutrition/NutritionCard.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/onboarding/OnboardingPage.tsx": 1,
+        "features/plans/PlanEditorPage.tsx": 4,
+        "features/plans/PlanListPage.tsx": 3,
+        "features/progress/ProgressPage.tsx": 7,
+        "features/settings/CueSettings.tsx": 1,
+        "features/settings/SettingsPage.tsx": 5,
+        "features/workout/RestTimer.tsx": 1,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/data/SummaryTile.tsx": 1
+      },
+      "perMatch": {
+        "<Surface": 97
+      }
+    },
+    "summary-tile": {
+      "method": "git grep -P",
+      "pattern": "<SummaryTile\\b",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 12,
+      "occurrences": 12,
+      "files": 7,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 3,
+        "features/coaching/CoachDashboard.tsx": 2,
+        "features/coins/CoinsPage.tsx": 2,
+        "features/home/HomeNutrition.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 1
+      },
+      "perMatch": {
+        "<SummaryTile": 12
+      }
+    },
+    "gauge": {
+      "method": "git grep -P",
+      "pattern": "<Gauge\\b",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 8,
+      "occurrences": 8,
+      "files": 8,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 1,
+        "features/coins/CoinsPage.tsx": 1,
+        "features/compose/ComposePage.tsx": 1,
+        "features/home/WeekStrip.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 1,
+        "features/onboarding/OnboardingPage.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 1
+      },
+      "perMatch": {
+        "<Gauge": 8
+      }
+    },
+    "aurora": {
+      "method": "git grep -P",
+      "pattern": "<AuroraBackdrop\\b",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 9,
+      "occurrences": 9,
+      "files": 5,
+      "perFile": {
+        "app/AppLayout.tsx": 1,
+        "features/auth/AuthPage.tsx": 1,
+        "features/marketplace/CoachProfilePage.tsx": 3,
+        "features/marketplace/MarketplacePage.tsx": 1,
+        "features/marketplace/PostPage.tsx": 3
+      },
+      "perMatch": {
+        "<AuroraBackdrop": 9
+      }
+    },
+    "legacy-type": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])text-(title-1|title-2|title-3|body-strong|body-s|caption|timer|body|display|micro)(?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 606,
+      "occurrences": 612,
+      "files": 76,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 8,
+        "features/admin/AdminPage.tsx": 9,
+        "features/admin/AdminShell.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 11,
+        "features/admin/ModerationQueue.tsx": 15,
+        "features/admin/StyleStudioPage.tsx": 17,
+        "features/admin/UserSearch.tsx": 4,
+        "features/auth/AuthPage.tsx": 5,
+        "features/chat/ChatPage.tsx": 2,
+        "features/chat/ChatPanel.tsx": 12,
+        "features/chat/NotificationBell.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 11,
+        "features/coaching/ChatTab.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 20,
+        "features/coaching/ClientEquipmentCard.tsx": 5,
+        "features/coaching/CoachDashboard.tsx": 19,
+        "features/coaching/Monogram.tsx": 3,
+        "features/coaching/NutritionTab.tsx": 10,
+        "features/coaching/PlanTab.tsx": 3,
+        "features/coaching/ProgressTab.tsx": 12,
+        "features/coins/CoinBalance.tsx": 2,
+        "features/coins/CoinsPage.tsx": 15,
+        "features/compose/ComposePage.tsx": 22,
+        "features/compose/HandleField.tsx": 1,
+        "features/compose/PostEditorPage.tsx": 21,
+        "features/compose/ProfileEditorPage.tsx": 24,
+        "features/home/HomeNutrition.tsx": 1,
+        "features/home/HomePage.tsx": 8,
+        "features/home/WeekStrip.tsx": 4,
+        "features/library/ExerciseDetailPage.tsx": 17,
+        "features/library/LibraryPage.tsx": 7,
+        "features/marketplace/CoachProfilePage.tsx": 11,
+        "features/marketplace/DocRenderer.tsx": 7,
+        "features/marketplace/MarketplacePage.tsx": 8,
+        "features/marketplace/PostPage.tsx": 9,
+        "features/nutrition/MacroBars.tsx": 1,
+        "features/nutrition/NutritionCard.tsx": 2,
+        "features/nutrition/NutritionPage.tsx": 19,
+        "features/onboarding/OnboardingPage.tsx": 15,
+        "features/plans/PlanEditorPage.tsx": 19,
+        "features/plans/PlanListPage.tsx": 13,
+        "features/playground/PlaygroundPage.tsx": 21,
+        "features/progress/ProgressPage.tsx": 24,
+        "features/settings/AccentPicker.tsx": 3,
+        "features/settings/CueSettings.tsx": 2,
+        "features/settings/EquipmentSection.tsx": 3,
+        "features/settings/GradientBuilder.tsx": 3,
+        "features/settings/SettingsPage.tsx": 10,
+        "features/settings/ThemeStudio.tsx": 3,
+        "features/workout/IntervalStage.tsx": 10,
+        "features/workout/RestTimer.tsx": 3,
+        "features/workout/SetRow.tsx": 7,
+        "features/workout/WorkoutPlayer.tsx": 6,
+        "lib/cn.ts": 7,
+        "ui/TokenProof.tsx": 32,
+        "ui/data/DataTable.tsx": 2,
+        "ui/data/SectionHeader.tsx": 2,
+        "ui/data/SummaryTile.tsx": 7,
+        "ui/feedback/EmptyState.tsx": 2,
+        "ui/feedback/TrendChart.tsx": 10,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 8,
+        "ui/feedback/variants/E14E20.tsx": 4,
+        "ui/feedback/variants/E17E19.tsx": 6,
+        "ui/feedback/variants/E2CopyButton.tsx": 2,
+        "ui/feedback/variants/E4Toggle.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 2,
+        "ui/feedback/variants/E6Segmented.tsx": 1,
+        "ui/feedback/variants/E7Field.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 10,
+        "ui/muscle-map/MuscleMap.tsx": 3,
+        "ui/nav/BottomNav.tsx": 2,
+        "ui/primitives/Field.tsx": 5,
+        "ui/primitives/control.ts": 7,
+        "ui/shell/CommandPalette.tsx": 4,
+        "ui/shell/OfflineIndicator.tsx": 2
+      },
+      "perMatch": {
+        "text-micro": 72,
+        "text-display": 22,
+        "text-caption": 163,
+        "text-title-3": 45,
+        "text-body-s": 178,
+        "text-title-1": 30,
+        "text-body": 55,
+        "text-timer": 3,
+        "text-body-strong": 25,
+        "text-title-2": 19
+      },
+      "note": "class sites in .ts/.tsx. The plan quotes 615 (and 152 for the three renamed steps): those figures include 3 mentions in ui/tokens/tokens.css — see legacy-type-all-src."
+    },
+    "legacy-type-renamed-three": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])text-(body|display|micro)(?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 149,
+      "occurrences": 149,
+      "files": 52,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 4,
+        "features/admin/AdminPage.tsx": 2,
+        "features/admin/AdminShell.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 7,
+        "features/admin/StyleStudioPage.tsx": 8,
+        "features/admin/UserSearch.tsx": 2,
+        "features/auth/AuthPage.tsx": 3,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationBell.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 7,
+        "features/coaching/CoachDashboard.tsx": 7,
+        "features/coaching/Monogram.tsx": 1,
+        "features/coaching/NutritionTab.tsx": 2,
+        "features/coaching/ProgressTab.tsx": 6,
+        "features/coins/CoinBalance.tsx": 1,
+        "features/coins/CoinsPage.tsx": 1,
+        "features/compose/ComposePage.tsx": 3,
+        "features/compose/PostEditorPage.tsx": 2,
+        "features/compose/ProfileEditorPage.tsx": 4,
+        "features/home/HomePage.tsx": 1,
+        "features/home/WeekStrip.tsx": 3,
+        "features/library/ExerciseDetailPage.tsx": 6,
+        "features/library/LibraryPage.tsx": 3,
+        "features/marketplace/CoachProfilePage.tsx": 3,
+        "features/marketplace/DocRenderer.tsx": 3,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 2,
+        "features/nutrition/NutritionPage.tsx": 4,
+        "features/onboarding/OnboardingPage.tsx": 2,
+        "features/plans/PlanListPage.tsx": 4,
+        "features/playground/PlaygroundPage.tsx": 6,
+        "features/progress/ProgressPage.tsx": 3,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/CueSettings.tsx": 1,
+        "features/settings/SettingsPage.tsx": 4,
+        "features/workout/SetRow.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 1,
+        "lib/cn.ts": 1,
+        "ui/TokenProof.tsx": 11,
+        "ui/data/DataTable.tsx": 1,
+        "ui/data/SummaryTile.tsx": 2,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 3,
+        "ui/feedback/variants/E2CopyButton.tsx": 1,
+        "ui/feedback/variants/E4Toggle.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 2,
+        "ui/nav/BottomNav.tsx": 2,
+        "ui/primitives/Field.tsx": 1,
+        "ui/shell/CommandPalette.tsx": 3
+      },
+      "perMatch": {
+        "text-micro": 72,
+        "text-display": 22,
+        "text-body": 55
+      },
+      "reference": true
+    },
+    "legacy-type-all-src": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])text-(title-1|title-2|title-3|body-strong|body-s|caption|timer|body|display|micro)(?![\\w-])",
+      "pathspec": [
+        "frontend/src"
+      ],
+      "lines": 609,
+      "occurrences": 615,
+      "files": 77,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 8,
+        "features/admin/AdminPage.tsx": 9,
+        "features/admin/AdminShell.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 11,
+        "features/admin/ModerationQueue.tsx": 15,
+        "features/admin/StyleStudioPage.tsx": 17,
+        "features/admin/UserSearch.tsx": 4,
+        "features/auth/AuthPage.tsx": 5,
+        "features/chat/ChatPage.tsx": 2,
+        "features/chat/ChatPanel.tsx": 12,
+        "features/chat/NotificationBell.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 11,
+        "features/coaching/ChatTab.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 20,
+        "features/coaching/ClientEquipmentCard.tsx": 5,
+        "features/coaching/CoachDashboard.tsx": 19,
+        "features/coaching/Monogram.tsx": 3,
+        "features/coaching/NutritionTab.tsx": 10,
+        "features/coaching/PlanTab.tsx": 3,
+        "features/coaching/ProgressTab.tsx": 12,
+        "features/coins/CoinBalance.tsx": 2,
+        "features/coins/CoinsPage.tsx": 15,
+        "features/compose/ComposePage.tsx": 22,
+        "features/compose/HandleField.tsx": 1,
+        "features/compose/PostEditorPage.tsx": 21,
+        "features/compose/ProfileEditorPage.tsx": 24,
+        "features/home/HomeNutrition.tsx": 1,
+        "features/home/HomePage.tsx": 8,
+        "features/home/WeekStrip.tsx": 4,
+        "features/library/ExerciseDetailPage.tsx": 17,
+        "features/library/LibraryPage.tsx": 7,
+        "features/marketplace/CoachProfilePage.tsx": 11,
+        "features/marketplace/DocRenderer.tsx": 7,
+        "features/marketplace/MarketplacePage.tsx": 8,
+        "features/marketplace/PostPage.tsx": 9,
+        "features/nutrition/MacroBars.tsx": 1,
+        "features/nutrition/NutritionCard.tsx": 2,
+        "features/nutrition/NutritionPage.tsx": 19,
+        "features/onboarding/OnboardingPage.tsx": 15,
+        "features/plans/PlanEditorPage.tsx": 19,
+        "features/plans/PlanListPage.tsx": 13,
+        "features/playground/PlaygroundPage.tsx": 21,
+        "features/progress/ProgressPage.tsx": 24,
+        "features/settings/AccentPicker.tsx": 3,
+        "features/settings/CueSettings.tsx": 2,
+        "features/settings/EquipmentSection.tsx": 3,
+        "features/settings/GradientBuilder.tsx": 3,
+        "features/settings/SettingsPage.tsx": 10,
+        "features/settings/ThemeStudio.tsx": 3,
+        "features/workout/IntervalStage.tsx": 10,
+        "features/workout/RestTimer.tsx": 3,
+        "features/workout/SetRow.tsx": 7,
+        "features/workout/WorkoutPlayer.tsx": 6,
+        "lib/cn.ts": 7,
+        "ui/TokenProof.tsx": 32,
+        "ui/data/DataTable.tsx": 2,
+        "ui/data/SectionHeader.tsx": 2,
+        "ui/data/SummaryTile.tsx": 7,
+        "ui/feedback/EmptyState.tsx": 2,
+        "ui/feedback/TrendChart.tsx": 10,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 8,
+        "ui/feedback/variants/E14E20.tsx": 4,
+        "ui/feedback/variants/E17E19.tsx": 6,
+        "ui/feedback/variants/E2CopyButton.tsx": 2,
+        "ui/feedback/variants/E4Toggle.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 2,
+        "ui/feedback/variants/E6Segmented.tsx": 1,
+        "ui/feedback/variants/E7Field.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 10,
+        "ui/muscle-map/MuscleMap.tsx": 3,
+        "ui/nav/BottomNav.tsx": 2,
+        "ui/primitives/Field.tsx": 5,
+        "ui/primitives/control.ts": 7,
+        "ui/shell/CommandPalette.tsx": 4,
+        "ui/shell/OfflineIndicator.tsx": 2,
+        "ui/tokens/tokens.css": 3
+      },
+      "perMatch": {
+        "text-micro": 73,
+        "text-display": 22,
+        "text-caption": 163,
+        "text-title-3": 45,
+        "text-body-s": 178,
+        "text-title-1": 30,
+        "text-body": 57,
+        "text-timer": 3,
+        "text-body-strong": 25,
+        "text-title-2": 19
+      },
+      "reference": true
+    },
+    "legacy-type-renamed-three-all-src": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])text-(body|display|micro)(?![\\w-])",
+      "pathspec": [
+        "frontend/src"
+      ],
+      "lines": 152,
+      "occurrences": 152,
+      "files": 53,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 4,
+        "features/admin/AdminPage.tsx": 2,
+        "features/admin/AdminShell.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 7,
+        "features/admin/StyleStudioPage.tsx": 8,
+        "features/admin/UserSearch.tsx": 2,
+        "features/auth/AuthPage.tsx": 3,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationBell.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 7,
+        "features/coaching/CoachDashboard.tsx": 7,
+        "features/coaching/Monogram.tsx": 1,
+        "features/coaching/NutritionTab.tsx": 2,
+        "features/coaching/ProgressTab.tsx": 6,
+        "features/coins/CoinBalance.tsx": 1,
+        "features/coins/CoinsPage.tsx": 1,
+        "features/compose/ComposePage.tsx": 3,
+        "features/compose/PostEditorPage.tsx": 2,
+        "features/compose/ProfileEditorPage.tsx": 4,
+        "features/home/HomePage.tsx": 1,
+        "features/home/WeekStrip.tsx": 3,
+        "features/library/ExerciseDetailPage.tsx": 6,
+        "features/library/LibraryPage.tsx": 3,
+        "features/marketplace/CoachProfilePage.tsx": 3,
+        "features/marketplace/DocRenderer.tsx": 3,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 2,
+        "features/nutrition/NutritionPage.tsx": 4,
+        "features/onboarding/OnboardingPage.tsx": 2,
+        "features/plans/PlanListPage.tsx": 4,
+        "features/playground/PlaygroundPage.tsx": 6,
+        "features/progress/ProgressPage.tsx": 3,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/CueSettings.tsx": 1,
+        "features/settings/SettingsPage.tsx": 4,
+        "features/workout/SetRow.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 1,
+        "lib/cn.ts": 1,
+        "ui/TokenProof.tsx": 11,
+        "ui/data/DataTable.tsx": 1,
+        "ui/data/SummaryTile.tsx": 2,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 3,
+        "ui/feedback/variants/E2CopyButton.tsx": 1,
+        "ui/feedback/variants/E4Toggle.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 2,
+        "ui/nav/BottomNav.tsx": 2,
+        "ui/primitives/Field.tsx": 1,
+        "ui/shell/CommandPalette.tsx": 3,
+        "ui/tokens/tokens.css": 3
+      },
+      "perMatch": {
+        "text-micro": 73,
+        "text-display": 22,
+        "text-body": 57
+      },
+      "reference": true
+    },
+    "font-display-class": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])font-display(?![\\w:-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 29,
+      "occurrences": 29,
+      "files": 22,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 1,
+        "features/admin/AdminPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 2,
+        "features/chat/NotificationsPage.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 1,
+        "features/coins/CoinBalance.tsx": 1,
+        "features/compose/ComposePage.tsx": 2,
+        "features/compose/ProfileEditorPage.tsx": 1,
+        "features/home/WeekStrip.tsx": 1,
+        "features/marketplace/PostPage.tsx": 1,
+        "features/marketplace/PublicChrome.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 1,
+        "features/onboarding/OnboardingPage.tsx": 1,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/plans/PlanListPage.tsx": 3,
+        "features/settings/SettingsPage.tsx": 1,
+        "features/workout/IntervalStage.tsx": 1,
+        "features/workout/RestTimer.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 1,
+        "ui/TokenProof.tsx": 3,
+        "ui/data/SummaryTile.tsx": 1,
+        "ui/feedback/TrendChart.tsx": 1
+      },
+      "perMatch": {
+        "font-display": 29
+      }
+    },
+    "legacy-radius": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])rounded(-(card|field|sm|md|lg|xl|2xl|3xl))?(?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 196,
+      "occurrences": 199,
+      "files": 64,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 3,
+        "features/admin/AdminPage.tsx": 3,
+        "features/admin/MarketplaceQueue.tsx": 2,
+        "features/admin/ModerationQueue.tsx": 4,
+        "features/admin/StyleStudioPage.tsx": 1,
+        "features/admin/UserSearch.tsx": 1,
+        "features/auth/AuthPage.tsx": 1,
+        "features/chat/ChatPage.tsx": 2,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationsPage.tsx": 4,
+        "features/coaching/ChatTab.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 4,
+        "features/coaching/ClientEquipmentCard.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 5,
+        "features/coaching/NutritionTab.tsx": 6,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coaching/ProgressTab.tsx": 6,
+        "features/coins/CoinsPage.tsx": 7,
+        "features/compose/ComposePage.tsx": 13,
+        "features/compose/PostEditorPage.tsx": 5,
+        "features/compose/ProfileEditorPage.tsx": 6,
+        "features/home/HomeNutrition.tsx": 2,
+        "features/home/HomePage.tsx": 2,
+        "features/home/WeekStrip.tsx": 2,
+        "features/library/ExerciseDetailPage.tsx": 4,
+        "features/library/LibraryPage.tsx": 1,
+        "features/library/SectionBadge.tsx": 1,
+        "features/marketplace/CoachProfilePage.tsx": 2,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 4,
+        "features/marketplace/PublicChrome.tsx": 1,
+        "features/nutrition/NutritionCard.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 7,
+        "features/onboarding/OnboardingPage.tsx": 4,
+        "features/plans/PlanEditorPage.tsx": 7,
+        "features/plans/PlanListPage.tsx": 5,
+        "features/playground/PlaygroundPage.tsx": 4,
+        "features/progress/ProgressPage.tsx": 11,
+        "features/settings/AccentPicker.tsx": 2,
+        "features/settings/CueSettings.tsx": 2,
+        "features/settings/EquipmentSection.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 2,
+        "features/settings/SettingsPage.tsx": 3,
+        "features/settings/ThemeStudio.tsx": 1,
+        "features/workout/SetRow.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/TokenProof.tsx": 5,
+        "ui/data/DataTable.tsx": 1,
+        "ui/data/SectionHeader.tsx": 6,
+        "ui/data/SummaryTile.tsx": 2,
+        "ui/feedback/ScreenSkeleton.tsx": 3,
+        "ui/feedback/TrendChart.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E17E19.tsx": 2,
+        "ui/feedback/variants/E2CopyButton.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 3,
+        "ui/feedback/variants/E8E9.tsx": 6,
+        "ui/muscle-map/MuscleMap.tsx": 1,
+        "ui/muscle-map/shapes.ts": 1,
+        "ui/primitives/Field.tsx": 1,
+        "ui/primitives/Switch.tsx": 1,
+        "ui/primitives/control.ts": 1,
+        "ui/shell/CommandPalette.tsx": 3
+      },
+      "perMatch": {
+        "rounded-card": 113,
+        "rounded-field": 77,
+        "rounded": 9
+      }
+    },
+    "wash": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])(bg-[a-z]+-subtle|text-on-[a-z]+(-[a-z]+)*|border-[a-z]+-border|(text|bg|border)-info[\\w-]*|bg-\\[var\\(--tile-tint\\)\\])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 186,
+      "occurrences": 214,
+      "files": 51,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 3,
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/AdminShell.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 2,
+        "features/admin/StyleStudioPage.tsx": 5,
+        "features/admin/UserSearch.tsx": 2,
+        "features/auth/AuthPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 4,
+        "features/chat/NotificationsPage.tsx": 4,
+        "features/coaching/ClientDetailPage.tsx": 10,
+        "features/coaching/CoachDashboard.tsx": 4,
+        "features/coins/CoinsPage.tsx": 2,
+        "features/compose/ComposePage.tsx": 12,
+        "features/compose/PostEditorPage.tsx": 4,
+        "features/compose/ProfileEditorPage.tsx": 3,
+        "features/home/HomePage.tsx": 2,
+        "features/home/WeekStrip.tsx": 2,
+        "features/library/ExerciseDetailPage.tsx": 6,
+        "features/library/SectionBadge.tsx": 1,
+        "features/marketplace/DocRenderer.tsx": 1,
+        "features/marketplace/MarketplacePage.tsx": 4,
+        "features/marketplace/PublicChrome.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 4,
+        "features/onboarding/OnboardingPage.tsx": 2,
+        "features/plans/PlanEditorPage.tsx": 6,
+        "features/plans/PlanListPage.tsx": 2,
+        "features/playground/PlaygroundPage.tsx": 2,
+        "features/progress/ProgressPage.tsx": 1,
+        "features/settings/SettingsPage.tsx": 3,
+        "features/settings/ThemeStudio.tsx": 4,
+        "features/workout/SetRow.tsx": 7,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/data/SectionHeader.tsx": 2,
+        "ui/data/SummaryTile.tsx": 1,
+        "ui/feedback/EmptyState.tsx": 1,
+        "ui/feedback/TrendChart.tsx": 1,
+        "ui/feedback/variants/E10Tabs.tsx": 6,
+        "ui/feedback/variants/E12E16.tsx": 6,
+        "ui/feedback/variants/E14E20.tsx": 4,
+        "ui/feedback/variants/E17E19.tsx": 9,
+        "ui/feedback/variants/E1Button.tsx": 11,
+        "ui/feedback/variants/E2CopyButton.tsx": 9,
+        "ui/feedback/variants/E3IconButton.tsx": 3,
+        "ui/feedback/variants/E4Toggle.tsx": 2,
+        "ui/feedback/variants/E5Checkbox.tsx": 4,
+        "ui/feedback/variants/E6Segmented.tsx": 3,
+        "ui/feedback/variants/E7Field.tsx": 16,
+        "ui/feedback/variants/E8E9.tsx": 8,
+        "ui/nav/BottomNav.tsx": 2,
+        "ui/primitives/control.ts": 16,
+        "ui/shell/CommandPalette.tsx": 1
+      },
+      "perMatch": {
+        "bg-accent-subtle": 82,
+        "bg-success-subtle": 14,
+        "bg-danger-subtle": 19,
+        "bg-warning-subtle": 16,
+        "text-on-success": 19,
+        "text-on-accent-subtle": 13,
+        "border-warning-border": 7,
+        "text-on-warning": 1,
+        "bg-info-subtle": 5,
+        "text-info": 6,
+        "bg-[var(--tile-tint)]": 6,
+        "text-on-danger": 17,
+        "border-success-border": 2,
+        "border-danger-border": 2,
+        "border-accent-border": 2,
+        "border-info-border": 1,
+        "bg-info": 1,
+        "text-on-info": 1
+      }
+    },
+    "legacy-variant-attribute": {
+      "method": "git grep -P",
+      "pattern": "variant=\"(secondary|ghost|danger)\"",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 118,
+      "occurrences": 118,
+      "files": 42,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 3,
+        "features/admin/ModerationQueue.tsx": 3,
+        "features/admin/StyleStudioPage.tsx": 1,
+        "features/auth/AuthPage.tsx": 2,
+        "features/chat/ChatPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 3,
+        "features/coaching/CoachDashboard.tsx": 8,
+        "features/coaching/NutritionTab.tsx": 5,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coins/CoinsPage.tsx": 1,
+        "features/compose/ComposePage.tsx": 3,
+        "features/compose/PostEditorPage.tsx": 3,
+        "features/compose/ProfileEditorPage.tsx": 4,
+        "features/home/HomePage.tsx": 1,
+        "features/library/ExerciseDetailPage.tsx": 1,
+        "features/library/LibraryPage.tsx": 1,
+        "features/marketplace/CoachProfilePage.tsx": 1,
+        "features/marketplace/MarketplacePage.tsx": 3,
+        "features/marketplace/PublicChrome.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/onboarding/OnboardingPage.tsx": 3,
+        "features/plans/PlanEditorPage.tsx": 21,
+        "features/playground/PlaygroundPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 5,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 2,
+        "features/settings/SettingsPage.tsx": 3,
+        "features/settings/ThemeStudio.tsx": 1,
+        "features/workout/IntervalStage.tsx": 4,
+        "features/workout/RestTimer.tsx": 2,
+        "features/workout/SetRow.tsx": 3,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/TokenProof.tsx": 2,
+        "ui/data/DataTable.tsx": 1,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E17E19.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 4
+      },
+      "perMatch": {
+        "variant=\"secondary\"": 54,
+        "variant=\"danger\"": 6,
+        "variant=\"ghost\"": 58
+      },
+      "reference": true
+    },
+    "legacy-variant": {
+      "method": "git grep -P for the lines, then the literals counted on each line",
+      "pattern": "variant[^\\n]*['\"](secondary|ghost|danger)['\"]",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 147,
+      "occurrences": 152,
+      "files": 48,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/AdminShell.tsx": 2,
+        "features/admin/MarketplaceQueue.tsx": 4,
+        "features/admin/ModerationQueue.tsx": 5,
+        "features/admin/StyleStudioPage.tsx": 2,
+        "features/auth/AuthPage.tsx": 2,
+        "features/chat/ChatPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 3,
+        "features/coaching/CoachDashboard.tsx": 8,
+        "features/coaching/NutritionTab.tsx": 9,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coins/CoinsPage.tsx": 4,
+        "features/compose/ComposePage.tsx": 5,
+        "features/compose/PostEditorPage.tsx": 4,
+        "features/compose/ProfileEditorPage.tsx": 5,
+        "features/home/HomePage.tsx": 1,
+        "features/library/ExerciseDetailPage.tsx": 3,
+        "features/library/LibraryPage.tsx": 2,
+        "features/marketplace/CoachProfilePage.tsx": 1,
+        "features/marketplace/MarketplacePage.tsx": 3,
+        "features/marketplace/PublicChrome.tsx": 2,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/onboarding/OnboardingPage.tsx": 6,
+        "features/plans/PlanEditorPage.tsx": 21,
+        "features/playground/PlaygroundPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 6,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 3,
+        "features/settings/SettingsPage.tsx": 3,
+        "features/settings/ThemeStudio.tsx": 1,
+        "features/workout/IntervalStage.tsx": 4,
+        "features/workout/RestTimer.tsx": 2,
+        "features/workout/SetRow.tsx": 4,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/TokenProof.tsx": 3,
+        "ui/data/DataTable.tsx": 1,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E17E19.tsx": 1,
+        "ui/feedback/variants/E3IconButton.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 5,
+        "ui/muscle-map/MuscleMap.tsx": 1,
+        "ui/nav/LanguageToggle.tsx": 1,
+        "ui/primitives/Toggle.tsx": 1,
+        "ui/primitives/control.ts": 1
+      },
+      "note": "literals on a line that names `variant` (attribute, expression or property). A literal on a LATER line of a multi-line expression is not seen here; legacy-variant-any-quoted-literal is the upper bound."
+    },
+    "legacy-variant-any-quoted-literal": {
+      "method": "git grep -P",
+      "pattern": "['\"](secondary|ghost|danger)['\"]",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 159,
+      "occurrences": 164,
+      "files": 50,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/AdminShell.tsx": 2,
+        "features/admin/MarketplaceQueue.tsx": 4,
+        "features/admin/ModerationQueue.tsx": 6,
+        "features/admin/StyleStudioPage.tsx": 2,
+        "features/auth/AuthPage.tsx": 2,
+        "features/chat/ChatPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 3,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 3,
+        "features/coaching/CoachDashboard.tsx": 8,
+        "features/coaching/NutritionTab.tsx": 9,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coins/CoinsPage.tsx": 4,
+        "features/compose/ComposePage.tsx": 5,
+        "features/compose/PostEditorPage.tsx": 4,
+        "features/compose/ProfileEditorPage.tsx": 5,
+        "features/home/HomePage.tsx": 1,
+        "features/library/ExerciseDetailPage.tsx": 3,
+        "features/library/LibraryPage.tsx": 2,
+        "features/library/useExercises.ts": 1,
+        "features/marketplace/CoachProfilePage.tsx": 4,
+        "features/marketplace/MarketplacePage.tsx": 3,
+        "features/marketplace/PostPage.tsx": 3,
+        "features/marketplace/PublicChrome.tsx": 3,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/onboarding/OnboardingPage.tsx": 6,
+        "features/plans/PlanEditorPage.tsx": 21,
+        "features/playground/PlaygroundPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 6,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 3,
+        "features/settings/SettingsPage.tsx": 3,
+        "features/settings/ThemeStudio.tsx": 1,
+        "features/workout/IntervalStage.tsx": 4,
+        "features/workout/RestTimer.tsx": 2,
+        "features/workout/SetRow.tsx": 4,
+        "features/workout/WorkoutPlayer.tsx": 3,
+        "ui/TokenProof.tsx": 4,
+        "ui/data/DataTable.tsx": 1,
+        "ui/feedback/variants/E10Tabs.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E17E19.tsx": 1,
+        "ui/feedback/variants/E3IconButton.tsx": 1,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 5,
+        "ui/muscle-map/MuscleMap.tsx": 3,
+        "ui/nav/LanguageToggle.tsx": 1,
+        "ui/primitives/Toggle.tsx": 1,
+        "ui/primitives/control.ts": 1
+      },
+      "perMatch": {
+        "\"secondary\"": 60,
+        "'secondary'": 32,
+        "'ghost'": 7,
+        "\"danger\"": 6,
+        "\"ghost\"": 58,
+        "'danger'": 1
+      },
+      "reference": true,
+      "note": "every quoted literal anywhere, including type unions and the recipe definitions — an upper bound, not a rule."
+    },
+    "legacy-chip-call": {
+      "method": "git grep -P",
+      "pattern": "\\bchip\\(",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 3,
+      "occurrences": 3,
+      "files": 3,
+      "perFile": {
+        "features/coaching/ClientDetailPage.tsx": 1,
+        "features/coaching/PlanTab.tsx": 1,
+        "features/plans/PlanListPage.tsx": 1
+      },
+      "perMatch": {
+        "chip(": 3
+      }
+    },
+    "pressable-no-variant": {
+      "method": "tag scan (not a line grep): <Pressable …> opening tags with no variant attribute",
+      "tagsSeen": 207,
+      "occurrences": 30,
+      "files": 12,
+      "perFile": {
+        "features/compose/ComposePage.tsx": 1,
+        "features/home/WeekStrip.tsx": 1,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/plans/PlanListPage.tsx": 1,
+        "features/playground/PlaygroundPage.tsx": 4,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 1,
+        "ui/TokenProof.tsx": 5,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E1Button.tsx": 5,
+        "ui/feedback/variants/E2CopyButton.tsx": 5,
+        "ui/feedback/variants/E8E9.tsx": 2
+      }
+    },
+    "pill-size": {
+      "method": "git grep -P",
+      "pattern": "variant[^\\n]{0,80}['\"]primary['\"]",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 59,
+      "occurrences": 59,
+      "files": 35,
+      "perFile": {
+        "features/admin/MarketplaceQueue.tsx": 2,
+        "features/admin/ModerationQueue.tsx": 1,
+        "features/admin/StyleStudioPage.tsx": 1,
+        "features/auth/AuthPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 1,
+        "features/coaching/ClientEquipmentCard.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 3,
+        "features/coaching/NutritionTab.tsx": 4,
+        "features/coaching/PlanTab.tsx": 1,
+        "features/coins/CoinsPage.tsx": 1,
+        "features/compose/ComposePage.tsx": 5,
+        "features/compose/PostEditorPage.tsx": 3,
+        "features/compose/ProfileEditorPage.tsx": 3,
+        "features/home/HomePage.tsx": 2,
+        "features/library/ExerciseDetailPage.tsx": 1,
+        "features/library/LibraryPage.tsx": 3,
+        "features/nutrition/NutritionPage.tsx": 1,
+        "features/onboarding/OnboardingPage.tsx": 5,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/plans/PlanListPage.tsx": 1,
+        "features/playground/PlaygroundPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 2,
+        "features/settings/AccentPicker.tsx": 1,
+        "features/settings/GradientBuilder.tsx": 1,
+        "features/settings/SettingsPage.tsx": 1,
+        "features/settings/ThemeStudio.tsx": 1,
+        "features/workout/IntervalStage.tsx": 2,
+        "features/workout/SetRow.tsx": 1,
+        "ui/TokenProof.tsx": 2,
+        "ui/feedback/variants/E14E20.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 1,
+        "ui/muscle-map/MuscleMap.tsx": 1,
+        "ui/nav/LanguageToggle.tsx": 1,
+        "ui/primitives/Toggle.tsx": 1
+      },
+      "perMatch": {
+        "variant={status === s ? 'primary'": 1,
+        "variant=\"primary\"": 38,
+        "variant={isActive ? 'secondary' : 'primary'": 1,
+        "variant={i === dayIndex ? 'primary'": 1,
+        "variant={affordable ? 'primary'": 1,
+        "variant: 'primary'": 1,
+        "variant: blocked ? 'secondary' : 'primary'": 1,
+        "variant={isNew ? 'primary'": 1,
+        "variant={on ? 'primary'": 2,
+        "variant={side === s ? 'primary'": 2,
+        "variant={active ? 'primary'": 2,
+        "variant={selected ? 'primary'": 1,
+        "variant={(profile.units ?? 'metric') === u ? 'primary'": 1,
+        "variant={l.severity === s ? 'primary'": 1,
+        "variant={tab === key ? 'primary'": 1,
+        "variant={value.type === type ? 'primary'": 1,
+        "variant={isActive ? 'primary'": 1,
+        "variant={theme === t ? 'primary'": 1,
+        "variant={chosen ? 'primary'": 1
+      },
+      "note": "control() has no size axis at this commit, so every primary is \"a primary with no size\". Lines that name `variant` and the literal."
+    },
+    "shaped-skeleton": {
+      "method": "tag scan (not a line grep): <Skeleton …> opening tags that carry a rounded-* class",
+      "tagsSeen": 130,
+      "occurrences": 94,
+      "files": 37,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 1,
+        "features/admin/AdminPage.tsx": 3,
+        "features/admin/MarketplaceQueue.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 2,
+        "features/admin/StyleStudioPage.tsx": 2,
+        "features/admin/UserSearch.tsx": 1,
+        "features/chat/ChatPage.tsx": 3,
+        "features/chat/ChatPanel.tsx": 2,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ChatTab.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 4,
+        "features/coaching/ClientEquipmentCard.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 4,
+        "features/coaching/NutritionTab.tsx": 2,
+        "features/coaching/PlanTab.tsx": 2,
+        "features/coaching/ProgressTab.tsx": 2,
+        "features/coins/CoinsPage.tsx": 6,
+        "features/compose/ComposePage.tsx": 7,
+        "features/compose/PostEditorPage.tsx": 3,
+        "features/compose/ProfileEditorPage.tsx": 4,
+        "features/home/HomeNutrition.tsx": 2,
+        "features/home/HomePage.tsx": 2,
+        "features/home/WeekStrip.tsx": 2,
+        "features/library/ExerciseDetailPage.tsx": 2,
+        "features/library/LibraryPage.tsx": 1,
+        "features/marketplace/CoachProfilePage.tsx": 4,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 2,
+        "features/nutrition/NutritionCard.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/plans/PlanListPage.tsx": 3,
+        "features/progress/ProgressPage.tsx": 4,
+        "features/settings/EquipmentSection.tsx": 1,
+        "features/settings/SettingsPage.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 6,
+        "ui/feedback/ScreenSkeleton.tsx": 2
+      }
+    },
+    "raw-form": {
+      "method": "git grep -P",
+      "pattern": "<(input|textarea|select)\\b",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx",
+        ":(exclude)frontend/src/ui"
+      ],
+      "lines": 22,
+      "occurrences": 22,
+      "files": 11,
+      "perFile": {
+        "features/chat/ChatPanel.tsx": 1,
+        "features/coaching/NutritionTab.tsx": 2,
+        "features/compose/PostEditorPage.tsx": 2,
+        "features/compose/ProfileEditorPage.tsx": 2,
+        "features/marketplace/MarketplacePage.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 3,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 3,
+        "features/settings/AccentPicker.tsx": 2,
+        "features/settings/GradientBuilder.tsx": 3,
+        "features/workout/SetRow.tsx": 2
+      },
+      "perMatch": {
+        "<textarea": 3,
+        "<input": 17,
+        "<select": 2
+      },
+      "note": "outside frontend/src/ui"
+    },
+    "raw-form-file-input": {
+      "method": "git grep -P",
+      "pattern": "type=\"file\"",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx",
+        ":(exclude)frontend/src/ui"
+      ],
+      "lines": 2,
+      "occurrences": 2,
+      "files": 2,
+      "perFile": {
+        "features/compose/PostEditorPage.tsx": 1,
+        "features/progress/ProgressPage.tsx": 1
+      },
+      "perMatch": {
+        "type=\"file\"": 2
+      },
+      "reference": true
+    },
+    "blur-shadow": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])(backdrop-blur|blur-|shadow-(?!glow))",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 26,
+      "occurrences": 27,
+      "files": 15,
+      "perFile": {
+        "features/compose/useComposeFlow.ts": 1,
+        "features/workout/RestTimer.tsx": 2,
+        "features/workout/SetRow.tsx": 1,
+        "ui/feedback/variants/E12E16.tsx": 1,
+        "ui/feedback/variants/E14E20.tsx": 7,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E6Segmented.tsx": 1,
+        "ui/feedback/variants/E7Field.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 3,
+        "ui/nav/BottomNav.tsx": 1,
+        "ui/primitives/Switch.tsx": 1,
+        "ui/primitives/control.ts": 1,
+        "ui/primitives/surfaceRecipe.ts": 4,
+        "ui/shell/CommandPalette.tsx": 1,
+        "ui/shell/OfflineIndicator.tsx": 1
+      },
+      "perMatch": {
+        "blur-": 1,
+        "shadow-": 19,
+        "backdrop-blur": 7
+      }
+    },
+    "reserved-surface-1": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])bg-surface-1(?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 30,
+      "occurrences": 30,
+      "files": 18,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 1,
+        "features/coaching/NutritionTab.tsx": 1,
+        "features/coaching/ProgressTab.tsx": 4,
+        "features/compose/PostEditorPage.tsx": 1,
+        "features/plans/PlanEditorPage.tsx": 1,
+        "features/playground/PlaygroundPage.tsx": 3,
+        "features/progress/ProgressPage.tsx": 1,
+        "features/workout/SetRow.tsx": 2,
+        "ui/TokenProof.tsx": 2,
+        "ui/feedback/variants/E12E16.tsx": 2,
+        "ui/feedback/variants/E14E20.tsx": 2,
+        "ui/feedback/variants/E6Segmented.tsx": 1,
+        "ui/feedback/variants/E8E9.tsx": 1,
+        "ui/nav/LanguageToggle.tsx": 1,
+        "ui/primitives/Switch.tsx": 1,
+        "ui/primitives/control.ts": 2,
+        "ui/primitives/surfaceRecipe.ts": 2
+      },
+      "perMatch": {
+        "bg-surface-1": 30
+      }
+    },
+    "reserved-surface-2-3": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])bg-surface-[23](?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 92,
+      "occurrences": 92,
+      "files": 45,
+      "perFile": {
+        "features/admin/AdminMetrics.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 2,
+        "features/admin/ModerationQueue.tsx": 2,
+        "features/admin/StyleStudioPage.tsx": 3,
+        "features/chat/ChatPage.tsx": 1,
+        "features/chat/ChatPanel.tsx": 1,
+        "features/chat/NotificationBell.tsx": 1,
+        "features/chat/NotificationsPage.tsx": 2,
+        "features/coaching/ClientDetailPage.tsx": 2,
+        "features/coaching/CoachDashboard.tsx": 1,
+        "features/coaching/Monogram.tsx": 2,
+        "features/coaching/NutritionTab.tsx": 1,
+        "features/coins/CoinsPage.tsx": 2,
+        "features/compose/ComposePage.tsx": 4,
+        "features/compose/PostEditorPage.tsx": 1,
+        "features/compose/ProfileEditorPage.tsx": 1,
+        "features/library/LibraryPage.tsx": 3,
+        "features/marketplace/CoachProfilePage.tsx": 1,
+        "features/marketplace/MarketplacePage.tsx": 1,
+        "features/marketplace/PostPage.tsx": 2,
+        "features/marketplace/PublicChrome.tsx": 1,
+        "features/nutrition/MacroBars.tsx": 1,
+        "features/onboarding/OnboardingPage.tsx": 1,
+        "features/plans/PlanEditorPage.tsx": 3,
+        "features/plans/PlanListPage.tsx": 2,
+        "features/progress/ProgressPage.tsx": 3,
+        "features/settings/CueSettings.tsx": 1,
+        "features/settings/SettingsPage.tsx": 2,
+        "features/workout/IntervalStage.tsx": 1,
+        "features/workout/SetRow.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 1,
+        "ui/data/DataTable.tsx": 2,
+        "ui/data/SummaryTile.tsx": 1,
+        "ui/feedback/variants/E10Tabs.tsx": 4,
+        "ui/feedback/variants/E12E16.tsx": 8,
+        "ui/feedback/variants/E14E20.tsx": 3,
+        "ui/feedback/variants/E17E19.tsx": 5,
+        "ui/feedback/variants/E4Toggle.tsx": 3,
+        "ui/feedback/variants/E5Checkbox.tsx": 1,
+        "ui/feedback/variants/E6Segmented.tsx": 3,
+        "ui/feedback/variants/E7Field.tsx": 4,
+        "ui/feedback/variants/E8E9.tsx": 1,
+        "ui/primitives/Switch.tsx": 1,
+        "ui/primitives/control.ts": 2,
+        "ui/primitives/surfaceRecipe.ts": 2
+      },
+      "perMatch": {
+        "bg-surface-2": 78,
+        "bg-surface-3": 14
+      },
+      "note": "everywhere; the ratchet subtracts its allow-list (sheet, skeleton, disabled pill, switch track)."
+    },
+    "black-white": {
+      "method": "git grep -P",
+      "pattern": "(?<![\\w-])(bg|text)-(black|white)(?![\\w-])",
+      "pathspec": [
+        "frontend/src/*.ts",
+        "frontend/src/*.tsx"
+      ],
+      "lines": 1,
+      "occurrences": 1,
+      "files": 1,
+      "perFile": {
+        "ui/shell/CommandPalette.tsx": 1
+      },
+      "perMatch": {
+        "bg-black": 1
+      }
+    },
+    "heading-icon": {
+      "method": "tag scan (not a line grep): <EmptyState …> / <SectionHeader …> opening tags that carry icon=",
+      "tagsSeen": {
+        "EmptyState": 35,
+        "SectionHeader": 13
+      },
+      "occurrences": 48,
+      "byTag": {
+        "EmptyState": 35,
+        "SectionHeader": 13
+      },
+      "files": 27,
+      "perFile": {
+        "features/admin/AdminPage.tsx": 1,
+        "features/admin/MarketplaceQueue.tsx": 1,
+        "features/admin/ModerationQueue.tsx": 3,
+        "features/admin/StyleStudioPage.tsx": 1,
+        "features/admin/UserSearch.tsx": 1,
+        "features/chat/ChatPanel.tsx": 1,
+        "features/coaching/ClientDetailPage.tsx": 1,
+        "features/coaching/CoachDashboard.tsx": 5,
+        "features/coaching/NutritionTab.tsx": 1,
+        "features/coaching/PlanTab.tsx": 1,
+        "features/coaching/ProgressTab.tsx": 1,
+        "features/coins/CoinsPage.tsx": 3,
+        "features/compose/ComposePage.tsx": 3,
+        "features/compose/PostEditorPage.tsx": 1,
+        "features/home/HomePage.tsx": 2,
+        "features/library/LibraryPage.tsx": 2,
+        "features/marketplace/CoachProfilePage.tsx": 1,
+        "features/marketplace/MarketplacePage.tsx": 2,
+        "features/marketplace/PostPage.tsx": 1,
+        "features/nutrition/NutritionPage.tsx": 2,
+        "features/plans/PlanEditorPage.tsx": 2,
+        "features/plans/PlanListPage.tsx": 2,
+        "features/progress/ProgressPage.tsx": 2,
+        "features/workout/WorkoutPlayer.tsx": 1,
+        "features/home/HomeNutrition.tsx": 1,
+        "features/library/SectionBadge.tsx": 1,
+        "features/settings/SettingsPage.tsx": 5
+      }
+    },
+    "legacy-var": {
+      "method": "git grep -o -P, then grouped by the bridge table of plan-safe.md 2.3",
+      "pattern": "var\\(--[a-z0-9-]+",
+      "pathspec": [
+        "frontend/src",
+        ":(exclude)frontend/src/ui/tokens/tokens.css"
+      ],
+      "occurrences": 185,
+      "byKind": {
+        "decoration": 49,
+        "opaque": 10,
+        "state": 110,
+        "layout": 16,
+        "componentRevalued": 39,
+        "muscleMap": 8
+      },
+      "perName": {
+        "glass-1": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "glass-2": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "glass-3": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "glass-rim": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "glass-lip": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "glass-underside": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "glass-sheen": {
+          "kind": "decoration",
+          "occurrences": 2,
+          "files": 1
+        },
+        "card-bg": {
+          "kind": "decoration",
+          "occurrences": 2,
+          "files": 2
+        },
+        "card-rim": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "card-border": {
+          "kind": "decoration",
+          "occurrences": 7,
+          "files": 6
+        },
+        "card-blur": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "card-saturate": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "tile-tint": {
+          "kind": "decoration",
+          "occurrences": 6,
+          "files": 5
+        },
+        "aurora": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "noise-overlay": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "gradient-brand": {
+          "kind": "decoration",
+          "occurrences": 4,
+          "files": 4
+        },
+        "shadow-overlay": {
+          "kind": "decoration",
+          "occurrences": 11,
+          "files": 8
+        },
+        "shadow-overlay-strong": {
+          "kind": "decoration",
+          "occurrences": 3,
+          "files": 2
+        },
+        "sheet-shadow": {
+          "kind": "decoration",
+          "occurrences": 2,
+          "files": 1
+        },
+        "blur-sm": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "blur-md": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "blur-lg": {
+          "kind": "decoration",
+          "occurrences": 2,
+          "files": 2
+        },
+        "blur-xl": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "sheet-blur": {
+          "kind": "decoration",
+          "occurrences": 1,
+          "files": 1
+        },
+        "nav-blur": {
+          "kind": "decoration",
+          "occurrences": 2,
+          "files": 2
+        },
+        "toast-blur": {
+          "kind": "decoration",
+          "occurrences": 0,
+          "files": 0
+        },
+        "nav-bg": {
+          "kind": "opaque",
+          "occurrences": 3,
+          "files": 3
+        },
+        "toast-bg": {
+          "kind": "opaque",
+          "occurrences": 1,
+          "files": 1
+        },
+        "sheet-bg": {
+          "kind": "opaque",
+          "occurrences": 6,
+          "files": 4
+        },
+        "accent-subtle": {
+          "kind": "state",
+          "occurrences": 7,
+          "files": 5
+        },
+        "accent-border": {
+          "kind": "state",
+          "occurrences": 16,
+          "files": 11
+        },
+        "on-accent-subtle": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "success-subtle": {
+          "kind": "state",
+          "occurrences": 4,
+          "files": 4
+        },
+        "warning-subtle": {
+          "kind": "state",
+          "occurrences": 7,
+          "files": 3
+        },
+        "danger-subtle": {
+          "kind": "state",
+          "occurrences": 4,
+          "files": 4
+        },
+        "info-subtle": {
+          "kind": "state",
+          "occurrences": 2,
+          "files": 2
+        },
+        "success-border": {
+          "kind": "state",
+          "occurrences": 6,
+          "files": 4
+        },
+        "warning-border": {
+          "kind": "state",
+          "occurrences": 7,
+          "files": 5
+        },
+        "danger-border": {
+          "kind": "state",
+          "occurrences": 9,
+          "files": 8
+        },
+        "info-border": {
+          "kind": "state",
+          "occurrences": 2,
+          "files": 2
+        },
+        "on-success": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "on-warning": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "on-danger": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "on-info": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "info": {
+          "kind": "state",
+          "occurrences": 5,
+          "files": 4
+        },
+        "focus-ring": {
+          "kind": "state",
+          "occurrences": 31,
+          "files": 23
+        },
+        "accent-hover": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "tile-tint-fg": {
+          "kind": "state",
+          "occurrences": 6,
+          "files": 5
+        },
+        "overlay-border": {
+          "kind": "state",
+          "occurrences": 2,
+          "files": 2
+        },
+        "scrim-strong": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-50": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-100": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-200": {
+          "kind": "state",
+          "occurrences": 1,
+          "files": 1
+        },
+        "accent-300": {
+          "kind": "state",
+          "occurrences": 1,
+          "files": 1
+        },
+        "accent-400": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-500": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-600": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-700": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-800": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-900": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "accent-950": {
+          "kind": "state",
+          "occurrences": 0,
+          "files": 0
+        },
+        "card-pad": {
+          "kind": "layout",
+          "occurrences": 11,
+          "files": 8
+        },
+        "radius-inset": {
+          "kind": "layout",
+          "occurrences": 0,
+          "files": 0
+        },
+        "nav-dock-offset": {
+          "kind": "layout",
+          "occurrences": 2,
+          "files": 1
+        },
+        "content-pad-b-lg": {
+          "kind": "layout",
+          "occurrences": 3,
+          "files": 2
+        },
+        "field-bg": {
+          "kind": "componentRevalued",
+          "occurrences": 19,
+          "files": 12
+        },
+        "field-border": {
+          "kind": "componentRevalued",
+          "occurrences": 11,
+          "files": 8
+        },
+        "skeleton-base": {
+          "kind": "componentRevalued",
+          "occurrences": 7,
+          "files": 2
+        },
+        "skeleton-sheen": {
+          "kind": "componentRevalued",
+          "occurrences": 2,
+          "files": 2
+        },
+        "muscle-body": {
+          "kind": "muscleMap",
+          "occurrences": 1,
+          "files": 1
+        },
+        "muscle-idle": {
+          "kind": "muscleMap",
+          "occurrences": 1,
+          "files": 1
+        },
+        "muscle-edge": {
+          "kind": "muscleMap",
+          "occurrences": 4,
+          "files": 1
+        },
+        "muscle-secondary": {
+          "kind": "muscleMap",
+          "occurrences": 2,
+          "files": 1
+        }
+      },
+      "note": "occurrences = decoration + opaque + state + layout (the names the closing cleanup deletes). componentRevalued and muscleMap names stay declared with new values; they are listed so either reading can be summed. tokens.css itself is excluded, as in check-tokens."
+    },
+    "var-usage-all-names": {
+      "method": "git grep -o -P (reference table, not a rule)",
+      "reference": true,
+      "pattern": "var\\(--[a-z0-9-]+",
+      "pathspec": [
+        "frontend/src",
+        ":(exclude)frontend/src/ui/tokens/tokens.css"
+      ],
+      "occurrences": 748,
+      "perName": {
+        "surface-border": 67,
+        "target-min": 66,
+        "border-width": 61,
+        "ease-standard": 60,
+        "accent": 33,
+        "duration-fast": 32,
+        "focus-ring": 31,
+        "duration-base": 22,
+        "field-bg": 19,
+        "accent-border": 16,
+        "control-h": 13,
+        "surface-border-strong": 12,
+        "card-pad": 11,
+        "field-border": 11,
+        "shadow-overlay": 11,
+        "danger-border": 9,
+        "warning": 9,
+        "success": 9,
+        "duration-slow": 9,
+        "surface-0": 8,
+        "danger": 8,
+        "card-border": 7,
+        "warning-subtle": 7,
+        "warning-border": 7,
+        "accent-subtle": 7,
+        "duration-ambient": 7,
+        "skeleton-base": 7,
+        "success-border": 6,
+        "duration-instant": 6,
+        "tile-tint": 6,
+        "tile-tint-fg": 6,
+        "card-radius": 6,
+        "sheet-bg": 6,
+        "content-pad-b": 5,
+        "text-2": 5,
+        "info": 5,
+        "nav-h": 5,
+        "z-sheet": 5,
+        "radius-sheet": 5,
+        "danger-subtle": 4,
+        "text-1": 4,
+        "gradient-brand": 4,
+        "surface-2": 4,
+        "viewport-h": 4,
+        "success-subtle": 4,
+        "muscle-edge": 4,
+        "content-pad-b-lg": 3,
+        "text-3": 3,
+        "accent-fg": 3,
+        "surface-3": 3,
+        "z-toast": 3,
+        "z-nav": 3,
+        "shadow-overlay-strong": 3,
+        "shadow-glow": 3,
+        "nav-bg": 3,
+        "card-bg": 2,
+        "blur-lg": 2,
+        "icon-sm": 2,
+        "icon-md": 2,
+        "icon-lg": 2,
+        "skeleton-sheen": 2,
+        "overlay-border": 2,
+        "info-border": 2,
+        "info-subtle": 2,
+        "sheet-shadow": 2,
+        "e7-ramp-a": 2,
+        "muscle-secondary": 2,
+        "nav-blur": 2,
+        "nav-dock-offset": 2,
+        "glass-sheen": 2,
+        "admin-sidebar-w": 1,
+        "accent-200": 1,
+        "accent-300": 1,
+        "hold-fill-ms": 1,
+        "font-body": 1,
+        "text-body": 1,
+        "text-body--line-height": 1,
+        "font-display": 1,
+        "radius-2": 1,
+        "radius-full": 1,
+        "col-mobile": 1,
+        "col-wide": 1,
+        "accent-": 1,
+        "on-": 1,
+        "table-max-h": 1,
+        "z-sticky": 1,
+        "table-row-h": 1,
+        "token": 1,
+        "card-rim": 1,
+        "glass-rim": 1,
+        "ink": 1,
+        "toast-bg": 1,
+        "blur-sm": 1,
+        "duration-": 1,
+        "e7-bloom": 1,
+        "e7-glow": 1,
+        "e7-glow-color": 1,
+        "e7-ramp-b": 1,
+        "sheet-blur": 1,
+        "muscle-idle": 1,
+        "muscle-body": 1,
+        "nav-fg-active": 1,
+        "nav-fg-idle": 1,
+        "card-saturate": 1,
+        "glass-lip": 1,
+        "glass-underside": 1,
+        "aurora": 1,
+        "z-tooltip": 1
+      }
+    }
+  }
+}
