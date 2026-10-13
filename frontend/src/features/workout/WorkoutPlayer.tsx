@@ -458,7 +458,7 @@ export function WorkoutPlayer() {
       <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
         {/* SENTENCE CASE, at the caption step. Both mockups draw `#  Előző  kg  ism.` with a capital
             E and lowercase `kg` / `ism.` — a deliberate difference from the bottom nav's caps, since
-            `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro`
+            `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro-legacy`
             carries +0.06em tracking that exists for uppercase eyebrows and is wrong under sentence
             case; `text-caption` is the step for metadata under a thing. */}
         <div className={cn('text-caption grid h-7 shrink-0 items-center gap-2 px-2 text-text-3', SET_ROW_COLS)}>

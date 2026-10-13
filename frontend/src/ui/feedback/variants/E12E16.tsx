@@ -540,11 +540,11 @@ export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: 
           <Icon size={20} strokeWidth={2.5} aria-hidden />
         </motion.span>
 
-        {/* `text-body`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
+        {/* `text-body-legacy`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
             secondary lines. This is the sentence the user has four seconds to read, and it is the
             only place the app reports what a mutation did. The Undo beside it stays at 13 — that
             one is a control label. */}
-        <span className="text-body flex-1 text-text-1">
+        <span className="text-body-legacy flex-1 text-text-1">
           {undone ? t('common.undone') : toast.message}
         </span>
 
@@ -855,7 +855,7 @@ export function Progress({
                       // Remounted when it flips, so the pop plays on the crossing and only then.
                       key={`${m}-${reached}`}
                       className={cn(
-                        'text-micro inline-flex size-6 items-center justify-center rounded-chip tabular-nums',
+                        'text-micro-legacy inline-flex size-6 items-center justify-center rounded-chip tabular-nums',
                         reached ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-text-3',
                       )}
                       initial={motionSafe ? { scale: 0.4 } : false}

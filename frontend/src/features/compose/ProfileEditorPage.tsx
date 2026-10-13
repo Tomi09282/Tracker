@@ -145,7 +145,7 @@ function CityPicker({
     <label className="flex flex-col gap-tight">
       <span className="text-body-s text-text-2">{t('compose.city')}</span>
       <select
-        className="text-body min-h-[var(--control-h)] rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+        className="text-body-legacy min-h-[var(--control-h)] rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
@@ -318,7 +318,7 @@ export function ProfileEditorPage() {
           aria-hidden
           className="relative inline-flex size-32 items-center justify-center rounded-chip border-4 border-accent bg-surface-2"
         >
-          <span className="text-display font-display text-accent">{initialsOf(displayName)}</span>
+          <span className="text-display-legacy font-display text-accent">{initialsOf(displayName)}</span>
         </span>
 
         <h1 className="text-title-1 mt-2 text-center text-text-1">
@@ -474,7 +474,7 @@ export function ProfileEditorPage() {
             editable one (DESIGN.md rule 45). */}
         <textarea
           id="compose-bio"
-          className="text-body min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
+          className="text-body-legacy min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
           value={bio}
           disabled={readOnly}
           onChange={(e) => setBio(e.target.value)}
@@ -501,7 +501,7 @@ export function ProfileEditorPage() {
               {/* A NOUN PHRASE, not the desk's verb. `Profil közzététele` labels the desk's publish
                   BUTTON; on a switch row it reads as a pending action rather than as the state the
                   toggle beside it already shows. */}
-              <span id="compose-public-label" className="text-body block text-text-1">
+              <span id="compose-public-label" className="text-body-legacy block text-text-1">
                 {t('compose.publicProfile')}
               </span>
               {/* And the sub-line explains the CONSEQUENCE instead of restating the toggle. `Élő` /

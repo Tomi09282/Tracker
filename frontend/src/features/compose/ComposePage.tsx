@@ -229,7 +229,7 @@ export function ComposePage() {
               {initialsOf(profile.displayName)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-body truncate text-text-1">{profile.displayName}</p>
+              <p className="text-body-legacy truncate text-text-1">{profile.displayName}</p>
               <p className="text-caption truncate text-text-3">@{profile.handle}</p>
             </div>
             <Pressable
@@ -338,7 +338,7 @@ export function ComposePage() {
             }
           >
             <span className="flex flex-col items-center">
-              <span className="text-display font-display tabular-nums text-text-1">
+              <span className="text-display-legacy font-display tabular-nums text-text-1">
                 <CountUp to={counts.total} />
               </span>
               {/* THE UNIT, not the section heading. `Bejegyzések` here read "18 / Bejegyzések" in
@@ -489,7 +489,7 @@ export function ComposePage() {
                       ) : null}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="text-body block truncate text-text-1">{p.title}</span>
+                      <span className="text-body-legacy block truncate text-text-1">{p.title}</span>
                       <span className="text-caption block truncate text-text-3">
                         {t(`marketplace.kind.${p.kind}`, { defaultValue: p.kind })}
                         {' · '}

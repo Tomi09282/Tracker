@@ -103,7 +103,7 @@ export function MarketplacePage() {
       <PublicTopBar />
 
       <header className="flex flex-col gap-group">
-        <h1 className="text-display text-text-1">{t('marketplace.title')}</h1>
+        <h1 className="text-display-legacy text-text-1">{t('marketplace.title')}</h1>
 
         {feed.isLoading || leadDetail.isLoading ? (
           // The skeleton carries the hero's OWN band proportion. It used to be `aspect-video` over
@@ -141,7 +141,7 @@ export function MarketplacePage() {
             placeholder={t('marketplace.searchPlaceholder')}
             aria-label={t('marketplace.searchPlaceholder')}
             className={[
-              'text-body min-h-[var(--control-h)] w-full rounded-chip',
+              'text-body-legacy min-h-[var(--control-h)] w-full rounded-chip',
               'ps-[var(--target-min)] pe-4',
               'bg-[var(--field-bg)] text-text-1 placeholder:text-text-3',
               'border-[length:var(--border-width)] border-[var(--field-border)]',

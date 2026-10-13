@@ -113,7 +113,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
             // pack-owned height as `control.ts` so a field and the button beside it cannot end up
             // different heights in a pack that declares taller controls.
             'min-h-[var(--control-h)]',
-            'text-body text-text-1 placeholder:text-text-3',
+            'text-body-legacy text-text-1 placeholder:text-text-3',
             // The glyph occupies the leading edge, so the text has to start after it. 44px, which
             // is the same floor every control obeys — a narrower inset would put the caret against
             // the icon on the first character typed.

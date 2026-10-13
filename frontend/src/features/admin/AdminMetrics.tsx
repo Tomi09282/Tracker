@@ -58,10 +58,10 @@ function StatCard({
         <span className="inline-flex size-8 items-center justify-center rounded-chip bg-accent-subtle text-accent">
           <Icon className="size-icon-m" strokeWidth={2} aria-hidden />
         </span>
-        <span className="text-micro uppercase text-text-3">{label}</span>
+        <span className="text-micro-legacy uppercase text-text-3">{label}</span>
       </div>
       <div className="mt-4 flex items-baseline gap-2">
-        <p className="text-display font-display text-text-1">
+        <p className="text-display-legacy font-display text-text-1">
           <CountUp to={value} />
         </p>
         {/*
@@ -71,7 +71,7 @@ function StatCard({
         */}
         {delta !== undefined ? (
           <span
-            className={`text-micro tabular-nums rounded-chip px-1.5 ${
+            className={`text-micro-legacy tabular-nums rounded-chip px-1.5 ${
               delta > 0 ? 'bg-success-subtle text-success' : delta < 0 ? 'bg-danger-subtle text-danger' : 'bg-surface-2 text-text-3'
             }`}
           >
@@ -169,7 +169,7 @@ export function AdminMetrics({ enabled }: { enabled: boolean }) {
         */}
         {charts.map((c) => (
           <div key={c.key} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-            <p className="text-micro uppercase text-right text-text-3">
+            <p className="text-micro-legacy uppercase text-right text-text-3">
               {t(`adminMetrics.clock.${c.clock}`)}
             </p>
             {/* TrendChart refuses to draw fewer than three points and says so — a two-point line is

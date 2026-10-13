@@ -38,7 +38,7 @@ const SEGMENT_FILL: Record<PlanStatus, string> = {
  * The row chip's TONE, resolved by the `chip` recipe. Only `active` and `paused` spend a colour —
  * a draft is not a warning, so it takes the recipe's `quiet`.
  *
- * It used to be a map of hand-written class strings at `text-micro px-2 py-1`; the recipe is
+ * It used to be a map of hand-written class strings at `text-micro-legacy px-2 py-1`; the recipe is
  * `text-caption px-3 py-1` with the same tones, and the mockup's pill is the roomier one. The
  * reason this call site hand-rolled a string — twMerge eating the type step next to a colour — is
  * gone since `lib/cn.ts` learned the project's font-size names.
@@ -202,7 +202,7 @@ export function PlanListPage() {
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
       <header>
-        <p className="text-micro uppercase text-accent">{t('plans.eyebrow')}</p>
+        <p className="text-micro-legacy uppercase text-accent">{t('plans.eyebrow')}</p>
         <h1 className="text-title-1 font-display">{t('plans.title')}</h1>
       </header>
 
@@ -245,13 +245,13 @@ export function PlanListPage() {
             {/* An empty library gets no anchor: a bar of zero segments is a decoration. */}
             {rows.length > 0 ? (
               <Surface className="flex flex-col items-center gap-tight">
-                <p className="text-display font-display tabular-nums text-text-1">
+                <p className="text-display-legacy font-display tabular-nums text-text-1">
                   <CountUp to={rows.length} />
                 </p>
                 {/* Names the METRIC, not the screen. `nav.plans` is "Tervek" — the same word as the
                     h1 one line above — so the anchor was captioning itself instead of saying what
                     the number counts. */}
-                <p className="text-micro uppercase text-text-3">{t('plans.total')}</p>
+                <p className="text-micro-legacy uppercase text-text-3">{t('plans.total')}</p>
 
                 {/* The bar is decoration with a shape — every number in it is spelled out in the
                     legend below, as text, which is what a reader actually gets. */}

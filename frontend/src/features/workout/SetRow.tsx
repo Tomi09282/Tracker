@@ -351,7 +351,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
   /* Both number fields, identically. 44px tall inside a 56px row — the floor is met and the row
      still has 6px of air top and bottom, which is what stops four rows reading as a spreadsheet. */
   const fieldClass = cn(
-    'h-11 w-full rounded-field bg-surface-2 px-2 text-center text-body tabular-nums text-text-1',
+    'h-11 w-full rounded-field bg-surface-2 px-2 text-center text-body-legacy tabular-nums text-text-1',
     'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
     'placeholder:text-text-3 disabled:opacity-70',
   );
@@ -507,7 +507,7 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, disa
       {isActive && variant === 'B' ? (
         <span
           aria-hidden
-          className="text-micro pointer-events-none absolute bottom-0 right-1 translate-y-1/2 rounded-chip bg-surface-2 px-2 text-text-3"
+          className="text-micro-legacy pointer-events-none absolute bottom-0 right-1 translate-y-1/2 rounded-chip bg-surface-2 px-2 text-text-3"
         >
           {t('workout.holdToCheck')}
         </span>

@@ -96,7 +96,7 @@ export function DataTable<Row>({
                   // column header is the label for everything under it. At 11px, step 3 measures
                   // 3.8:1 — below the app's own AA_NORMAL, on the row that tells you what you are
                   // reading.
-                  className={cn('text-micro uppercase px-4 py-3 text-text-2', c.numeric && 'text-right')}
+                  className={cn('text-micro-legacy uppercase px-4 py-3 text-text-2', c.numeric && 'text-right')}
                 >
                   {c.sortable && onSort ? (
                     <Pressable

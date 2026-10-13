@@ -139,13 +139,13 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
           <h1
             className={
               mode === 'login'
-                ? 'text-display mt-4 min-h-10 text-center text-accent'
-                : 'text-display mt-4 min-h-10 text-center text-text-1'
+                ? 'text-display-legacy mt-4 min-h-10 text-center text-accent'
+                : 'text-display-legacy mt-4 min-h-10 text-center text-text-1'
             }
           >
             {appName}
           </h1>
-          <p className="text-body text-center text-text-2">
+          <p className="text-body-legacy text-center text-text-2">
             {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
           </p>
         </div>

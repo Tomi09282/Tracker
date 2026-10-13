@@ -51,8 +51,10 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
   the plan names); until that lands, such a number jumps sideways on a tick once F1.4 has re-pointed
   the family (three ticking sites and eleven still ones pair `tabular-nums` with the display face
   today — listed in the proof).
-- Status: open — the plan's stand-in is in force; the owner may instead rule that changing numbers are
-  set in Geist (which has tabular figures), or choose another display family. **F1.4 is held on this
-  entry (2026-10-14):** the step that switches the typefaces is "not made unless the F1.2 glyph check
-  passed", and the check is on record as failed for the display face. F1.5 (the gutter) was made ahead
-  of it; until this is ruled the app shows Pulse colours over the old two typefaces.
+- Status: ruled by the orchestrator on 2026-10-14 (recorded in `.pulse/owner-answers.md`, row DEV-003),
+  not yet by the owner, who is informed and may overrule: Big Shoulders Display stays the display face
+  everywhere; a number that changes on screen in it gets fixed-width digit cells from `Numeral`
+  (F10); until then a sideways jump of a ticking number on a hybrid screen is accepted; the glyph
+  check counts as passed for "F1.4 is made only if the glyph check passed". F1.4 was made on that
+  ruling, one commit after F1.5 (whose message still says it was held). Undoing it is one
+  `git revert` of the F1.4 commit and an `npm ci`.

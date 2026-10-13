@@ -107,7 +107,7 @@ export function WeekStrip({ today }: { today: string }) {
             label={t('home.weeklyWorkouts')}
             value={planned > 0 ? trainedCount / planned : 0}
           >
-            <p className="text-display font-display text-text-1">
+            <p className="text-display-legacy font-display text-text-1">
               <CountUp to={trainedCount} />
               <span className="text-title-2 tabular-nums text-text-3"> / {planned}</span>
             </p>
@@ -119,7 +119,7 @@ export function WeekStrip({ today }: { today: string }) {
             "Edzés": the caption is what says the `2 / 5` counts sessions across the WEEK — bare
             "Edzés" reads as if the ring were about one workout. The Gauge above carries the same
             string, so the ring announces the same claim it draws. */}
-        <h2 id="week-heading" className="text-micro font-body uppercase text-text-3">
+        <h2 id="week-heading" className="text-micro-legacy font-body uppercase text-text-3">
           {t('home.weeklyWorkouts')}
         </h2>
       </div>
@@ -151,7 +151,7 @@ export function WeekStrip({ today }: { today: string }) {
                     trained && !isToday && 'bg-success-subtle',
                   )}
                 >
-                  <span className="text-micro uppercase text-text-3">
+                  <span className="text-micro-legacy uppercase text-text-3">
                     {dayLabel.format(new Date(`${date}T00:00:00Z`))}
                   </span>
                   {/* ONE glyph, in strict priority: done beats scheduled beats blank. A rest day

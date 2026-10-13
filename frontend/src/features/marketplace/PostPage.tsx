@@ -141,7 +141,7 @@ export function PostPage() {
             ])}
           </span>
 
-          <h1 className="text-display text-text-1">{post.title}</h1>
+          <h1 className="text-display-legacy text-text-1">{post.title}</h1>
         </div>
 
         {/* WHO IS BEHIND IT, as a row you can tap rather than a bare text link. The verified chip
@@ -182,7 +182,7 @@ export function PostPage() {
       {price ? (
         <Surface as="section" className="flex flex-col gap-tight text-center">
           {/* The display FACE, because this is the number the whole card exists for and DESIGN.md
-              makes Space Grotesk opt-in for big numbers. Not the display SIZE: `text-display` is
+              makes Space Grotesk opt-in for big numbers. Not the display SIZE: `text-display-legacy` is
               one per screen and the h1 above already spends it. */}
           <p className="text-title-1 font-display tabular-nums text-text-1">{price}</p>
           {/* SAID PLAINLY, AND IN FULL. There is no purchase path in this phase, and a price

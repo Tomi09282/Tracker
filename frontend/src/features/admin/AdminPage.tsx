@@ -81,7 +81,7 @@ function UserDonut({ users }: { users: Stats['users'] }) {
         }
       >
         <span className="flex flex-col items-center">
-          <span className="text-display font-display tabular-nums text-text-1">
+          <span className="text-display-legacy font-display tabular-nums text-text-1">
             <CountUp to={users.total} />
           </span>
           {/* SINGULAR — `Felhasználó`, the unit the figure above counts, not the plural table
@@ -212,7 +212,7 @@ export function AdminPage() {
     <div className="col-wide screen-x flex flex-col gap-section py-6">
       <header className="flex flex-wrap items-center justify-between gap-group">
         <div className="min-w-0">
-          <p className="text-micro uppercase text-accent">{t('admin.eyebrow')}</p>
+          <p className="text-micro-legacy uppercase text-accent">{t('admin.eyebrow')}</p>
           <h1 className="text-title-1 mt-1 text-text-1">{t('admin.title')}</h1>
         </div>
         {/* A real anchor, not a button that navigates: the studio is a page, and a page you can

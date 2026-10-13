@@ -15,7 +15,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
  *   cn('text-title-1 tabular-nums', 'text-text-1')  ->  'tabular-nums text-text-1'
  *   cn('text-body-s',               'text-text-2')  ->  'text-text-2'
  *   cn('text-caption',              'text-warning') ->  'text-warning'
- *   cn('text-micro uppercase',      'text-text-3')  ->  'uppercase text-text-3'
+ *   cn('text-micro-legacy uppercase',      'text-text-3')  ->  'uppercase text-text-3'
  *
  * The size is gone in all four. Every component that composes a type step with an ink token in one
  * `cn()` call has been rendering at the INHERITED body size instead of its declared step — and
@@ -30,18 +30,44 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * `--text-1`, `--text-2` and `--text-3` are deliberately absent: those are the INK tokens, spelled
  * `text-text-N` at the call site, and they belong in the colour group where the merger already
  * puts them.
+ *
+ * THE LIST IS THE SAME 26 NAMES AS `--text-<step>` IN `tokens.css` — `check:type-scale` fails the
+ * build on a difference in either direction. Sixteen are the Pulse ramp. Ten are the ramp it
+ * replaces, kept with their old metrics while screens are rebuilt one by one: a legacy step
+ * dropped from here too early loses its size at every call site that still names it, even though
+ * `tokens.css` still declares it. Three of the ten carry the suffix `-legacy` because Pulse
+ * re-uses their names (`body`, `display`, `micro`) with other metrics. The ten leave this list and
+ * `tokens.css` together, in the closing cleanup.
  */
 const TYPE_STEPS = [
+  // The Pulse ramp (Pulse System §2.2).
+  'giant',
+  'num',
+  'display-xl',
   'display',
+  'eyebrow',
+  'title',
+  'body',
+  'body-m',
+  'body-b',
+  'cap',
+  'cap-m',
+  'tab',
+  'tab-on',
+  'data-l',
+  'data',
+  'micro',
+  // BRIDGE — the old ramp, old metrics. Do not use in new code.
+  'display-legacy',
+  'timer',
   'title-1',
   'title-2',
   'title-3',
-  'body',
-  'body-s',
+  'body-legacy',
   'body-strong',
+  'body-s',
   'caption',
-  'micro',
-  'timer',
+  'micro-legacy',
 ] as const;
 
 const twMerge = extendTailwindMerge({

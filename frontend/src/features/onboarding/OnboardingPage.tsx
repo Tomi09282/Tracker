@@ -518,10 +518,10 @@ export function OnboardingPage() {
 
         {/* No `stepOf` caption and no bar: the ring says both. The title is the screen's h1 and
             the largest type under the anchor. */}
-        <h1 className="text-display font-display mt-2 text-center text-text-1">
+        <h1 className="text-display-legacy font-display mt-2 text-center text-text-1">
           {t(`onboarding.step.${step}.title`)}
         </h1>
-        <p className="text-body measure text-center text-text-2">{t(`onboarding.step.${step}.body`)}</p>
+        <p className="text-body-legacy measure text-center text-text-2">{t(`onboarding.step.${step}.body`)}</p>
       </header>
 
       <main className="flex flex-col gap-section">

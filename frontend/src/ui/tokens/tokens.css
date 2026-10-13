@@ -34,18 +34,139 @@
    config, the min-target lint). Without it, --duration-base, --ease-standard, --icon-lg, --nav-h
    and the column widths silently resolve to the empty string. */
 @theme static {
-  /* Fonts. Two families, no more (Bible: TYPOGRAPHY LAW). Self-hosted via @fontsource so the
-     strict CSP never has to allow a third-party font origin. */
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-body);
+  /* Fonts. Three families, as in all 59 frames (Pulse System §2.2): a condensed display face for
+     numerals, titles and eyebrows; a text face for everything that is read; a mono face for
+     figures and codes. Self-hosted and declared by hand in ui/tokens/fonts.css — the names below
+     are the `@font-face` names of that file — so the strict CSP never has to allow a third-party
+     font origin.
 
-  /* Type scale — Bible: size/line-height/weight/tracking, exactly. Tailwind 4 attaches the
-     line-height, weight and tracking to the utility, so `text-body` carries all four. */
-  --text-display: 2.125rem;              /* 34px */
-  --text-display--line-height: 2.5rem;   /* 40px */
+     The fallbacks are metric-near on purpose. The display face BLOCKS while it loads, so its
+     fallback is only seen when the file fails, and then a condensed system face keeps a numeral
+     inside the room it was given, where a normal-width one would not.
+
+     THE DISPLAY FACE HAS NO TABULAR FIGURES (docs/pipeline/pulse/pkg/_int/proofs/F1.2, DEV-003):
+     `tabular-nums` does nothing in it — "1" is about half as wide as "0". A number that stays as
+     it is reads exactly as drawn. A number that CHANGES on screen in this face needs fixed-width
+     digit cells from its component (`Numeral`); no utility class can give it that. */
+  --font-display: 'Big Shoulders Display Variable', 'Avenir Next Condensed', 'Arial Narrow', 'Roboto Condensed', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body);
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+  /* ── The Pulse ramp — 16 roles on 7 sizes (Pulse System §2.2) ──────────────────────────────
+     Tailwind 4 attaches the line-height, weight and tracking to the utility, so `text-eyebrow`
+     carries all three. It CANNOT attach a family or a case, and in Pulse the family is part of the
+     role. Those two are bound once, in the `type-binding` block of src/index.css:
+
+       display face   giant  num  display-xl  display  eyebrow
+       mono face      data-l  data  micro
+       upper case     display-xl  display  eyebrow  micro
+
+     Everything else is the text face in sentence case. Three lists have to agree — these
+     declarations, TYPE_STEPS in src/lib/cn.ts (or the class merger deletes a step that stands
+     beside an ink colour) and that block — and `check:type-scale` fails the build when they do
+     not. Every step is a plain length; the gate refuses anything else. */
+
+  /* The ONE hero numeral of a screen: digits, "/" and ":" only. Its viewport cap is --giant-fluid,
+     below — never a second `text-…` class. */
+  --text-giant: 7.75rem;                      /* 124px */
+  --text-giant--line-height: 6.75rem;         /* 108px */
+  --text-giant--font-weight: 900;
+  --text-giant--letter-spacing: -0.01em;
+
+  --text-num: 3rem;                           /* 48px — ledger and stat numerals */
+  --text-num--line-height: 3rem;              /* 48px */
+  --text-num--font-weight: 900;
+
+  --text-display-xl: 3rem;                    /* 48px — the screen's subject line; at most one per screen */
+  --text-display-xl--line-height: 3rem;       /* 48px */
+  --text-display-xl--font-weight: 700;
+  --text-display-xl--letter-spacing: 0.01em;
+
+  --text-display: 2rem;                       /* 32px — screen title, empty-state title, in-page heading */
+  --text-display--line-height: 2.125rem;      /* 34px */
   --text-display--font-weight: 700;
-  --text-display--letter-spacing: -0.02em;
+  --text-display--letter-spacing: 0.01em;
+
+  --text-eyebrow: 1rem;                       /* 16px — section labels, ledger labels, the back link's parent */
+  --text-eyebrow--line-height: 1.25rem;       /* 20px */
+  --text-eyebrow--font-weight: 700;
+  --text-eyebrow--letter-spacing: 0.06em;
+
+  --text-title: 1.375rem;                     /* 22px — greeting, person name, sheet title */
+  --text-title--line-height: 1.75rem;         /* 28px */
+  --text-title--font-weight: 600;
+  --text-title--letter-spacing: -0.01em;
+
+  /* Three WEIGHTS of one size: a row title and the line under it stay on one baseline rhythm. */
+  --text-body: 1rem;                          /* 16px — body copy, input text (16 keeps WebKit from zooming) */
+  --text-body--line-height: 1.375rem;         /* 22px */
+  --text-body--font-weight: 400;
+
+  --text-body-m: 1rem;                        /* 16px — row titles, chips, standalone links */
+  --text-body-m--line-height: 1.375rem;       /* 22px */
+  --text-body-m--font-weight: 500;
+
+  --text-body-b: 1rem;                        /* 16px — the label of the primary pill */
+  --text-body-b--line-height: 1.375rem;       /* 22px */
+  --text-body-b--font-weight: 600;
+
+  --text-cap: 0.8125rem;                      /* 13px — meta, hints, units. Body copy never goes below this */
+  --text-cap--line-height: 1.125rem;          /* 18px */
+  --text-cap--font-weight: 400;
+
+  --text-cap-m: 0.8125rem;                    /* 13px — field labels, inline links, notices */
+  --text-cap-m--line-height: 1.125rem;        /* 18px */
+  --text-cap-m--font-weight: 500;
+
+  /* The one place where selection changes weight: the cells of the bar are fixed, nothing shifts. */
+  --text-tab: 0.6875rem;                      /* 11px — tab labels */
+  --text-tab--line-height: 0.875rem;          /* 14px */
+  --text-tab--font-weight: 500;
+  --text-tab--letter-spacing: 0.01em;
+
+  --text-tab-on: 0.6875rem;                   /* 11px — the lit tab label, the figure in a badge */
+  --text-tab-on--line-height: 0.875rem;       /* 14px */
+  --text-tab-on--font-weight: 600;
+  --text-tab-on--letter-spacing: 0.01em;
+
+  /* Mono is for figures and codes; a trailing value made of words uses `cap`. */
+  --text-data-l: 1rem;                        /* 16px — inline figures (macro values) */
+  --text-data-l--line-height: 1.25rem;        /* 20px */
+  --text-data-l--font-weight: 500;
+  --text-data-l--letter-spacing: -0.01em;
+
+  --text-data: 0.8125rem;                     /* 13px — meta with figures, weekday letters, counts */
+  --text-data--line-height: 1.125rem;         /* 18px */
+  --text-data--font-weight: 500;
+
+  --text-micro: 0.6875rem;                    /* 11px — tags, time stamps. Nothing in the product goes below this */
+  --text-micro--line-height: 1rem;            /* 16px */
+  --text-micro--font-weight: 500;
+  --text-micro--letter-spacing: 0.10em;
+
+  /* The giant numeral never outgrows a narrow phone: 124px, or 31 % of the viewport's width.
+     Deliberately OUTSIDE the --text- namespace — inside it Tailwind would generate a second
+     `text-…` utility that TYPE_STEPS does not list, and the gate would have to accept a value that
+     is not a plain length. The numeral carries `text-giant` (line-height, weight, tracking, family)
+     and this as an inline `font-size`. */
+  --giant-fluid: min(var(--text-giant), 31vw);
+
+  /* ── BRIDGE — the ten steps of the ramp Pulse replaces ─────────────────────────────────────
+     Their metrics are the old ones to the digit, so a screen that has not been rebuilt does not
+     reflow; only the family under them changed. Seven keep their names. Three had a Pulse heir of
+     the SAME name with other metrics (body 15 → 16 px, display 34/40 → 32/34, micro → mono on a
+     16 px line), so every existing use of those three was renamed to `-legacy`
+     (docs/pipeline/pulse/pkg/_int/proofs/F1.4/codemod.mjs) and the bare names above are the Pulse
+     roles. None of the ten is bound to a family or a case: a legacy heading is in the display face
+     only where its call site says `font-display`.
+
+     Do not write new code against them. The ratchet counts every use, and they leave this file
+     and TYPE_STEPS together, in one closing commit. */
+  --text-display-legacy: 2.125rem;              /* 34px */
+  --text-display-legacy--line-height: 2.5rem;   /* 40px */
+  --text-display-legacy--font-weight: 700;
+  --text-display-legacy--letter-spacing: -0.02em;
 
   /* The interval countdown. 3rem and not more: the player's hero is 193px tall at 375px wide
      (343px content x 9/16), and the stage has to fit a phase word, this number, a progress bar,
@@ -70,15 +191,18 @@
   --text-title-3--line-height: 1.5rem;   /* 24px */
   --text-title-3--font-weight: 600;
 
-  --text-body: 0.9375rem;                /* 15px */
-  --text-body--line-height: 1.375rem;    /* 22px */
-  --text-body--font-weight: 400;
+  /* Also the size every element without a type class inherits: `body` in src/index.css reads this
+     step for as long as the bridge stands, so unclassed text on a screen that has not been rebuilt
+     stays 15 / 22. */
+  --text-body-legacy: 0.9375rem;              /* 15px */
+  --text-body-legacy--line-height: 1.375rem;  /* 22px */
+  --text-body-legacy--font-weight: 400;
 
   /* The primary line of a list row — the single most repeated text role in the product, and the
-     only one the scale had no step for. `text-body font-medium` was hand-written at 13 call sites
-     across 10 files; a role patched at the call site is a role the next screen re-decides. Same
-     size and line-height as --text-body on purpose: this is a WEIGHT step, not a size step, so a
-     row title and the secondary line under it stay on one baseline rhythm. */
+     only one the old scale had no step for. `text-body font-medium` was hand-written at 13 call
+     sites across 10 files; a role patched at the call site is a role the next screen re-decides.
+     Same size and line-height as the 15 px body step on purpose: this is a WEIGHT step, not a
+     size step. Its Pulse heir is `text-body-m`. */
   --text-body-strong: 0.9375rem;              /* 15px */
   --text-body-strong--line-height: 1.375rem;  /* 22px */
   --text-body-strong--font-weight: 500;
@@ -91,10 +215,10 @@
   --text-caption--line-height: 1rem;     /* 16px */
   --text-caption--font-weight: 500;
 
-  --text-micro: 0.6875rem;               /* 11px — nothing in the product goes below this */
-  --text-micro--line-height: 0.875rem;   /* 14px */
-  --text-micro--font-weight: 600;
-  --text-micro--letter-spacing: 0.06em;
+  --text-micro-legacy: 0.6875rem;               /* 11px */
+  --text-micro-legacy--line-height: 0.875rem;   /* 14px */
+  --text-micro-legacy--font-weight: 600;
+  --text-micro-legacy--letter-spacing: 0.06em;
 
   /* Spacing: Tailwind's --spacing IS the 4px grid of record (p-1=4 … p-12=48). Declaring a
      parallel scale would give the app two sources of truth, so we do not. */

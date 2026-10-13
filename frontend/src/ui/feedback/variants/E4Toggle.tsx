@@ -401,7 +401,7 @@ export function Toggle({ checked, onChange, label, disabled }: ToggleProps) {
                     <span
                       key={mark}
                       className={cn(
-                        'text-micro flex w-5 shrink-0 justify-center',
+                        'text-micro-legacy flex w-5 shrink-0 justify-center',
                         i === 4 ? 'text-danger' : on ? 'text-accent-fg' : 'text-text-2',
                       )}
                     >

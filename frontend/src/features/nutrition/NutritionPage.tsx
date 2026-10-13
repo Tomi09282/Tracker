@@ -167,7 +167,7 @@ export function NutritionPage() {
                 />
                 <p
                   className={cn(
-                    'text-display font-display tabular-nums',
+                    'text-display-legacy font-display tabular-nums',
                     kcalOver ? 'text-[var(--warning)]' : 'text-text-1',
                   )}
                 >
@@ -262,7 +262,7 @@ export function NutritionPage() {
             }}
             placeholder={t('nutrition.searchPlaceholder')}
             aria-label={t('nutrition.searchPlaceholder')}
-            className="text-body min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] ps-[var(--target-min)] pe-12 text-text-1 outline-none placeholder:text-text-3 focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            className="text-body-legacy min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] ps-[var(--target-min)] pe-12 text-text-1 outline-none placeholder:text-text-3 focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
           />
           {q ? (
             <Pressable
@@ -337,7 +337,7 @@ export function NutritionPage() {
                 value={grams}
                 onChange={(e) => setGrams(e.target.value)}
                 aria-label={t('nutrition.grams')}
-                className="text-body w-12 bg-transparent text-right tabular-nums text-text-1 outline-none"
+                className="text-body-legacy w-12 bg-transparent text-right tabular-nums text-text-1 outline-none"
               />
               <span className="text-body-s text-text-3" aria-hidden>
                 g
@@ -396,7 +396,7 @@ export function NutritionPage() {
           <div className="flex flex-col gap-group">
             {groups.map(([label, items]) => (
               <div key={label} className="flex flex-col gap-tight">
-                <h3 className="text-micro uppercase text-text-3">{label}</h3>
+                <h3 className="text-micro-legacy uppercase text-text-3">{label}</h3>
                 {/* ONE card per group, hairline-divided inside — not one card per row. Six bordered
                     boxes is six times the edge for the same six meals. */}
                 <Surface as="ul" pad="none" className="overflow-hidden">

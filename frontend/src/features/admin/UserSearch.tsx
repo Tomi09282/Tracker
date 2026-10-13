@@ -98,13 +98,13 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
                     {/* A disabled account is the single most important fact about a row, so it is a
                         chip beside the identity rather than a column somebody has to scroll to. */}
                     {u.disabledAt !== null ? (
-                      <span className="text-micro uppercase rounded-chip bg-danger-subtle px-1.5 text-danger">
+                      <span className="text-micro-legacy uppercase rounded-chip bg-danger-subtle px-1.5 text-danger">
                         <ShieldOff className="mr-1 inline size-icon-s" aria-hidden />
                         {t('adminUsers.disabled')}
                       </span>
                     ) : null}
                     {u.mustChange === 1 ? (
-                      <span className="text-micro uppercase rounded-chip bg-warning-subtle px-1.5 text-text-1">
+                      <span className="text-micro-legacy uppercase rounded-chip bg-warning-subtle px-1.5 text-text-1">
                         {t('adminUsers.mustChange')}
                       </span>
                     ) : null}

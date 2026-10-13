@@ -440,7 +440,7 @@ export function PostEditorPage() {
           />
         ) : (
           <>
-            <p className="text-body flex items-center gap-tight text-text-1">
+            <p className="text-body-legacy flex items-center gap-tight text-text-1">
               <FrozenKindIcon className="size-icon-m shrink-0 text-accent" aria-hidden />
               {t(`marketplace.kind.${kind}`, { defaultValue: kind })}
             </p>
@@ -480,7 +480,7 @@ export function PostEditorPage() {
         </label>
         <textarea
           id="compose-body"
-          className="text-body min-h-32 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
+          className="text-body-legacy min-h-32 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
           value={body}
           disabled={readOnly}
           onChange={(e) => setBody(e.target.value)}

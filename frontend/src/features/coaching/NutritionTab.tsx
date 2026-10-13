@@ -87,7 +87,7 @@ export function NutritionTab({ linkId }: { linkId: number }) {
                   onClick={() => setOpenId(openId === p.id ? null : p.id)}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="text-body block truncate text-text-1">{p.name}</span>
+                    <span className="text-body-legacy block truncate text-text-1">{p.name}</span>
                     <span className="text-caption text-text-3">
                       {t(`plans.status.${p.status}`, { defaultValue: p.status })} ·{' '}
                       {t('coaching.nutrition.cycle', { count: p.cycle_days })}
@@ -207,7 +207,7 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
             const kcal = mine.reduce((a, b) => a + b.kcal, 0);
             return (
               <section key={m.id} className="mb-4">
-                <h4 className="text-micro mb-2 flex justify-between uppercase text-text-3">
+                <h4 className="text-micro-legacy mb-2 flex justify-between uppercase text-text-3">
                   <span>{m.name}</span>
                   <span className="tabular-nums">{Math.round(kcal)} kcal</span>
                 </h4>

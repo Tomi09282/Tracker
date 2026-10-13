@@ -120,7 +120,7 @@ export function MarketplaceQueue() {
                 </span>
               </div>
 
-              <p className="text-body text-text-1">
+              <p className="text-body-legacy text-text-1">
                 {r.postId ? r.postTitle : `@${r.profileHandle} · ${r.profileName}`}
               </p>
 

@@ -131,7 +131,7 @@ function BellAnchor({
       ) : count != null ? (
         <>
           <span className="text-timer tabular-nums text-text-1">{count}</span>
-          {caption ? <span className="text-body text-text-2">{caption}</span> : null}
+          {caption ? <span className="text-body-legacy text-text-2">{caption}</span> : null}
         </>
       ) : null}
     </div>
@@ -397,7 +397,7 @@ export function NotificationsPage() {
                   >
                     <History className="size-icon-m" strokeWidth={2} />
                   </span>
-                  <p className="text-micro uppercase text-text-3">{t('notifications.earlier')}</p>
+                  <p className="text-micro-legacy uppercase text-text-3">{t('notifications.earlier')}</p>
                 </div>
               ) : null}
               <ul className="flex flex-col gap-group">

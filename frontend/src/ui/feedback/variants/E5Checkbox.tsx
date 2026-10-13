@@ -340,7 +340,7 @@ export function Checkbox({ checked, onChange, label, disabled }: CheckboxProps) 
       <span className="relative inline-flex items-center">
         <span
           className={cn(
-            'text-body transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
+            'text-body-legacy transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
             failed ? 'text-danger' : variant === 'C' && isOn ? 'text-text-3' : 'text-text-1',
           )}
         >

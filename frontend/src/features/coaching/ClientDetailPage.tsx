@@ -58,7 +58,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4 py-1">
       <span className="text-body-s text-text-2">{label}</span>
-      <span className="text-body text-right font-medium text-text-1">{value}</span>
+      <span className="text-body-legacy text-right font-medium text-text-1">{value}</span>
     </div>
   );
 }
@@ -113,14 +113,14 @@ function AnswerTile({
       </span>
       <div className="min-w-0 flex-1">
         {/* Concatenated, not `cn`: twMerge files a custom type scale and a colour in the same
-            bucket and would drop `text-micro`. */}
-        <p className={`text-micro uppercase ${captionTone}`}>{caption}</p>
+            bucket and would drop `text-micro-legacy`. */}
+        <p className={`text-micro-legacy uppercase ${captionTone}`}>{caption}</p>
         <p className="text-body-strong mt-1 text-text-1">
           {value}
           {extra && extra > 0 ? (
             // The remainder is a COUNT rather than a silence. A coach who reads one limitation and
             // assumes it is the whole list is exactly the failure this data exists to prevent.
-            <span className="text-micro ms-2 rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 align-middle tabular-nums text-warning">
+            <span className="text-micro-legacy ms-2 rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 align-middle tabular-nums text-warning">
               +{extra}
             </span>
           ) : null}
@@ -385,7 +385,7 @@ export function ClientDetailPage() {
           {/* Its own key. The sheet this row opens is titled `Kérdőív`; the row is the door to the
               WHOLE of it, and one key serving both made the row and its destination the same
               word. */}
-          <span className="text-body truncate text-text-1">{t('coaching.profileFull')}</span>
+          <span className="text-body-legacy truncate text-text-1">{t('coaching.profileFull')}</span>
         </span>
         <span className="flex shrink-0 items-center gap-tight">
           {/* A word, not a bare glyph. `Hiányos` is the state itself; a lone triangle needed an
@@ -521,7 +521,7 @@ export function ClientDetailPage() {
                 elevation="inset"
                 className="flex flex-col gap-tight border-warning-border bg-warning-subtle"
               >
-                <p className="text-micro uppercase text-warning">{t('coaching.limitations')}</p>
+                <p className="text-micro-legacy uppercase text-warning">{t('coaching.limitations')}</p>
                 {flagged.map((l: Limitation) => (
                   <p key={l.body_area} className="text-body-s text-text-1">
                     <span className="font-medium">{t(`onboarding.area.${l.body_area}`)}</span>
@@ -536,7 +536,7 @@ export function ClientDetailPage() {
             {p.notes ? (
               <div className="flex flex-col gap-tight">
                 <span className="text-body-s text-text-2">{t('onboarding.notes')}</span>
-                <p className="text-body whitespace-pre-wrap text-text-1">{p.notes}</p>
+                <p className="text-body-legacy whitespace-pre-wrap text-text-1">{p.notes}</p>
               </div>
             ) : null}
           </div>

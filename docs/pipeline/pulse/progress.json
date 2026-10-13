@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "branch": "pulse-redesign",
-  "updated": "2026-10-13T22:24:49.460Z",
+  "updated": "2026-10-13T22:42:28.951Z",
   "integrator": {
     "owner": "integrator (F1.4+F1.5 run)",
-    "step": "F1.5 integrating (F1.4 held: the F1.2 glyph check is on record as failed for the display face, DEV-003 not ruled)"
+    "step": "F1.4 integrating (released by the DEV-003 row of .pulse/owner-answers.md)"
   },
   "freeze": {
     "seededOn": null,
@@ -124,7 +124,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           ".gitignore",
           "docs/pipeline/pulse/PLAN.md",
@@ -241,7 +241,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/index.html",
           "frontend/package-lock.json",
@@ -288,12 +288,12 @@
           "commit": "0dc7daa"
         },
         "F1:4": {
-          "status": "todo",
+          "status": "integrating",
           "commit": null
         },
         "F1:5": {
-          "status": "integrating",
-          "commit": null
+          "status": "merged",
+          "commit": "9cd6ce8"
         },
         "F1:6": {
           "status": "todo",
@@ -315,7 +315,7 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "F1.5 (gutter 24 / 16 below 376) built green, verify:gates 48 passed, look-check captured in .pulse/shots/F1.5/; committing. F1.4 is HELD: it is made only if the F1.2 glyph check passed, and the record says overall fail (Big Shoulders Display has no tabular figures; DEV-003 is not ruled)",
+      "lastStep": "F1.4 built green on the F1.5 tree: 16 Pulse + 10 legacy steps (check:type-scale 26), codemod 148 tokens / 51 files purely mechanical, three family tokens, type-binding block, h1-h3 out of the display rule, Inter + Space Grotesk removed, four fonts preloaded; verify:gates 50 passed / 0 failed / 4 dormant; committing",
       "notes": "F1.2 glyph check (HeadlessChrome 155, scratch page outside src, --dump-dom) - widths in em at 200 px:\n  Big Shoulders Display Variable 700: fonts.check false->true; ő 0.418 ű 0.433 Ő 0.428 Ű 0.419 (all present) GLYPHS PASS; 0-9 tabular-nums: UNEQUAL 0.237-0.448 em, tnum in file: no TABULAR FAIL\n  Big Shoulders Display Variable 900: fonts.check false->true; ő 0.480 ű 0.499 Ő 0.497 Ű 0.487 (all present) GLYPHS PASS; 0-9 tabular-nums: UNEQUAL 0.274-0.515 em, tnum in file: no TABULAR FAIL\n  Geist Variable 400: fonts.check false->true; ő 0.573 ű 0.575 Ő 0.739 Ű 0.689 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.600 em, tnum in file: yes TABULAR PASS\n  Geist Variable 500: fonts.check false->true; ő 0.588 ű 0.586 Ő 0.751 Ű 0.694 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.612 em, tnum in file: yes TABULAR PASS\n  Geist Variable 600: fonts.check false->true; ő 0.603 ű 0.597 Ő 0.763 Ű 0.699 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.624 em, tnum in file: yes TABULAR PASS\n  Geist Mono 500: fonts.check false->true; ő 0.600 ű 0.600 Ő 0.600 Ű 0.600 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.600 em, tnum in file: no TABULAR PASS\n  successor candidate Big Shoulders Variable 700 (not installed): GLYPHS PASS; 0-9 UNEQUAL 0.272-0.493 em TABULAR FAIL\n  successor candidate Big Shoulders Variable 900 (not installed): GLYPHS PASS; 0-9 UNEQUAL 0.289-0.534 em TABULAR FAIL\n  fonts of a Hungarian session: 127376 bytes (127.4 kB) in 6 files, within 150 KB. Dormant in the built app: yes.\n  F1.4 needs a ruling (DEV-003): Big Shoulders Display has no tabular figures; stand-in = fixed-width digit cells in Numeral.",
       "glyphCheck": {
         "step": "F1.2",
@@ -541,9 +541,67 @@
           "within": true
         },
         "dormantInBuiltApp": true,
-        "f14": "needs a ruling: the letters passed (no stand-in exists for those); the display face has no tabular figures - the plan's stand-in is fixed-width digit cells in Numeral (PLAN 10, F10); logged as DEV-003"
+        "f14": "released by the ruling above; being made",
+        "ruling": {
+          "entry": "DEV-003",
+          "by": "the orchestrator (not the owner - he is informed and may overrule)",
+          "on": "2026-10-14",
+          "source": ".pulse/owner-answers.md, row DEV-003 (it appeared at 00:27 local time, during the F1.4+F1.5 run); copied to docs/pipeline/pulse/understand/01-owner-answers.md",
+          "text": "F1.4 is released. Big Shoulders Display stays the display face everywhere. A number that changes on screen in it gets fixed-width digit cells from Numeral (F10). Until Numeral lands, a sideways jump of a ticking number on a hybrid screen is accepted. The glyph check counts as passed for \"F1.4 is made only if the glyph check passed\"."
+        }
       },
-      "updated": "2026-10-13T22:24:49.277Z"
+      "updated": "2026-10-13T22:42:28.951Z",
+      "typeRamp": {
+        "step": "F1.4",
+        "steps": {
+          "pulse": 16,
+          "legacy": 10,
+          "total": 26
+        },
+        "gate": "check-type-scale: OK - 26 step(s), declared and merged alike; bound: 5 display, 3 mono, 4 upper case",
+        "codemod": {
+          "script": "docs/pipeline/pulse/pkg/_int/proofs/F1.4/codemod.mjs",
+          "tokens": 148,
+          "files": 51,
+          "perName": {
+            "text-body": 54,
+            "text-display": 22,
+            "text-micro": 72
+          },
+          "where": {
+            "stringLiteral": 138,
+            "templateString": 2,
+            "jsxText": 0,
+            "comment": 8
+          },
+          "byExpression": {
+            "plainClassName": 115,
+            "cnArgument": 15,
+            "objectMap": 4,
+            "conditional": 3,
+            "template": 2,
+            "joinedArray": 1,
+            "cvaMap": 0,
+            "comment": 8
+          },
+          "builtAtRunTime": 0,
+          "mechanical": "50 of 51 files differ from the commit before by the suffix alone; the 51st is cn.ts (its step list was rewritten by hand)"
+        },
+        "inheritedBase": "15 / 22 (body reads --text-body-legacy until the closing cleanup)",
+        "fonts": {
+          "families": [
+            "Big Shoulders Display Variable",
+            "Geist Variable",
+            "Geist Mono"
+          ],
+          "filesInDist": 6,
+          "bytes": 127376,
+          "preloaded": 4,
+          "interOrSpaceGroteskInDist": false
+        },
+        "verifyGates": "50 passed, 0 failed, 4 dormant (the two type-binding probes are armed now)",
+        "proof": "docs/pipeline/pulse/pkg/_int/proofs/F1.4/README.md"
+      }
     },
     "F2": {
       "kind": "foundation",
@@ -555,7 +613,7 @@
       "branch": "pulse/F2",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "docs/pipeline/pulse/pkg/F2/a/.gitattributes",
           "docs/pipeline/pulse/pkg/F2/a/handoff.json",
@@ -628,7 +686,7 @@
       "branch": "pulse/F3",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           ".claude/launch.json"
         ],
@@ -681,7 +739,7 @@
       "branch": "pulse/F4",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [],
         "toCreate": [
           "frontend/scripts/pulse-owns-check.mjs",
@@ -724,7 +782,7 @@
       "branch": "pulse/F5",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [],
         "toCreate": [
           "frontend/assets-src/**",
@@ -769,7 +827,7 @@
       "branch": "pulse/F6",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/primitives/Pressable.tsx",
           "frontend/src/ui/primitives/control.ts"
@@ -811,7 +869,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/playground/PlaygroundPage.tsx",
           "frontend/src/ui/TokenProof.tsx",
@@ -851,7 +909,7 @@
       "branch": "pulse/F8",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
           "frontend/src/ui/feedback/variants/E6Segmented.tsx",
@@ -908,7 +966,7 @@
       "branch": "pulse/F9",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/data/SectionHeader.tsx",
           "frontend/src/ui/feedback/EmptyState.tsx",
@@ -964,7 +1022,7 @@
       "branch": "pulse/F10",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/feedback/CountUp.tsx"
         ],
@@ -1021,7 +1079,7 @@
       "branch": "pulse/F11",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/app/AppLayout.tsx",
           "frontend/src/app/RequireAuth.tsx",
@@ -1069,7 +1127,7 @@
       "branch": "pulse/F12",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/feedback/variants/E14E20.tsx",
           "frontend/src/ui/feedback/variants/E7Field.tsx",
@@ -1129,7 +1187,7 @@
       "branch": "pulse/F13",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/app/providers.tsx",
           "frontend/src/ui/feedback/ToastHost.tsx",
@@ -1172,7 +1230,7 @@
       "branch": "pulse/F14",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/feedback/ProgressChart.tsx",
           "frontend/src/ui/feedback/TrendChart.tsx",
@@ -1214,7 +1272,7 @@
       "branch": "pulse/F15",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/muscle-map/MuscleMap.tsx",
           "frontend/src/ui/muscle-map/landmarks.ts",
@@ -1266,7 +1324,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/scripts/check-aurora.mjs",
           "frontend/src/ui/shell/AuroraBackdrop.tsx"
@@ -1310,7 +1368,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation-stage1.json"
@@ -1352,7 +1410,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation.json"
@@ -1388,7 +1446,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/DESIGN.md",
           "frontend/src/features/coaching/Monogram.tsx",
@@ -1431,7 +1489,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/ui/feedback/variants/E10Tabs.tsx",
           "frontend/src/ui/feedback/variants/E17E19.tsx",
@@ -1472,7 +1530,7 @@
       "branch": "pulse/S-home",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/chat/NotificationBell.tsx",
           "frontend/src/features/home/HomeNutrition.tsx",
@@ -1517,7 +1575,7 @@
       "branch": "pulse/S-auth",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/auth/AuthPage.tsx"
         ],
@@ -1562,7 +1620,7 @@
       "branch": "pulse/S-settings",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/settings/CueSettings.tsx",
           "frontend/src/features/settings/EquipmentSection.tsx",
@@ -1606,7 +1664,7 @@
       "branch": "pulse/S-workout",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/workout/IntervalStage.tsx",
           "frontend/src/features/workout/RestTimer.tsx",
@@ -1652,7 +1710,7 @@
       "branch": "pulse/S-library",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/library/LibraryPage.tsx"
         ],
@@ -1696,7 +1754,7 @@
       "branch": "pulse/S-plan-editor",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/plans/PlanEditorPage.tsx"
         ],
@@ -1739,7 +1797,7 @@
       "branch": "pulse/S-nutrition",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/nutrition/MacroBars.tsx",
           "frontend/src/features/nutrition/NutritionCard.tsx",
@@ -1783,7 +1841,7 @@
       "branch": "pulse/S-progress",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/progress/ProgressPage.tsx"
         ],
@@ -1826,7 +1884,7 @@
       "branch": "pulse/S-coach-chat",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/chat/ChatPage.tsx",
           "frontend/src/features/chat/ChatPanel.tsx"
@@ -1870,7 +1928,7 @@
       "branch": "pulse/S-client-detail-a",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/coaching/ChatTab.tsx",
           "frontend/src/features/coaching/ClientDetailPage.tsx",
@@ -1915,7 +1973,7 @@
       "branch": "pulse/S-client-detail-b",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/coaching/NutritionTab.tsx",
           "frontend/src/features/coaching/ProgressTab.tsx"
@@ -1958,7 +2016,7 @@
       "branch": "pulse/S-exercise-detail",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/library/ExerciseDetailPage.tsx",
           "frontend/src/features/library/SectionBadge.tsx"
@@ -2001,7 +2059,7 @@
       "branch": "pulse/S-coins",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/coins/CoinBalance.tsx",
           "frontend/src/features/coins/CoinsPage.tsx"
@@ -2045,7 +2103,7 @@
       "branch": "pulse/S-notifications",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/chat/NotificationsPage.tsx"
         ],
@@ -2087,7 +2145,7 @@
       "branch": "pulse/S-onboarding",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/onboarding/OnboardingPage.tsx"
         ],
@@ -2130,7 +2188,7 @@
       "branch": "pulse/S-coach-dashboard",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/coaching/CoachDashboard.tsx"
         ],
@@ -2173,7 +2231,7 @@
       "branch": "pulse/S-coach-plans",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/plans/PlanListPage.tsx"
         ],
@@ -2215,7 +2273,7 @@
       "branch": "pulse/S-compose-hub",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/compose/ComposePage.tsx"
         ],
@@ -2257,7 +2315,7 @@
       "branch": "pulse/S-public-pages",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/marketplace/CoachProfilePage.tsx",
           "frontend/src/features/marketplace/DocRenderer.tsx",
@@ -2305,7 +2363,7 @@
       "branch": "pulse/S-admin",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/admin/AdminMetrics.tsx",
           "frontend/src/features/admin/AdminPage.tsx",
@@ -2353,7 +2411,7 @@
       "branch": "pulse/S-compose-post",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/compose/PostEditorPage.tsx"
         ],
@@ -2396,7 +2454,7 @@
       "branch": "pulse/S-compose-profile",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/compose/HandleField.tsx",
           "frontend/src/features/compose/ProfileEditorPage.tsx"
@@ -2440,7 +2498,7 @@
       "branch": "pulse/S-marketplace",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/marketplace/MarketplacePage.tsx"
         ],
@@ -2484,7 +2542,7 @@
       "branch": "pulse/S-style-studio",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "d582795",
+        "listedOn": "9cd6ce8",
         "existing": [
           "frontend/src/features/admin/StyleStudioPage.tsx"
         ],

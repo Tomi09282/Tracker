@@ -175,7 +175,7 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     <span
                       className={cn(
                         'absolute -right-2 -top-1 min-w-4 rounded-chip px-1',
-                        'text-micro tabular-nums bg-danger text-on-danger',
+                        'text-micro-legacy tabular-nums bg-danger text-on-danger',
                         variant === 'D' && 'animate-[badge-pop_var(--duration-base)_var(--ease-standard)]',
                       )}
                     >
@@ -191,7 +191,7 @@ export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
                     accessible names of these links and of the command palette's entries, and an
                     all-caps accessible name is spelled out letter by letter by some screen
                     readers. */}
-                <span className="text-micro max-w-full truncate uppercase">{tab.label}</span>
+                <span className="text-micro-legacy max-w-full truncate uppercase">{tab.label}</span>
               </Link>
             </li>
           );

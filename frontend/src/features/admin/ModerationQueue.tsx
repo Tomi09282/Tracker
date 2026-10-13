@@ -254,7 +254,7 @@ export function ModerationQueue() {
                 )}
               >
                 <span className="flex w-full items-baseline gap-tight">
-                  <span className="text-body min-w-0 flex-1 truncate text-text-1">{row.name}</span>
+                  <span className="text-body-legacy min-w-0 flex-1 truncate text-text-1">{row.name}</span>
                   <span className="text-caption shrink-0 tabular-nums text-text-3">
                     {ago(row.submitted_at)}
                   </span>
@@ -263,7 +263,7 @@ export function ModerationQueue() {
                   <span className="text-caption min-w-0 flex-1 truncate text-text-3">
                     {row.owner_email ?? '—'}
                   </span>
-                  <span className="text-micro flex shrink-0 items-center gap-tight text-text-3">
+                  <span className="text-micro-legacy flex shrink-0 items-center gap-tight text-text-3">
                     {row.media_count === 0 ? (
                       <>
                         <ImageOff className="size-icon-s shrink-0" strokeWidth={2} aria-hidden />
@@ -372,12 +372,12 @@ function ReviewBody({
         </p>
       )}
 
-      {exercise.description ? <p className="text-body text-text-2">{exercise.description}</p> : null}
+      {exercise.description ? <p className="text-body-legacy text-text-2">{exercise.description}</p> : null}
 
       {exercise.instructions.length > 0 ? (
         <section>
-          <h4 className="text-micro uppercase text-text-3">{t('library.howTo')}</h4>
-          <ol className="text-body mt-2 flex list-decimal flex-col gap-1 pl-5 text-text-2">
+          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.howTo')}</h4>
+          <ol className="text-body-legacy mt-2 flex list-decimal flex-col gap-1 pl-5 text-text-2">
             {exercise.instructions.map((step, i) => (
               <li key={i}>{step}</li>
             ))}
@@ -391,7 +391,7 @@ function ReviewBody({
 
       {muscles.length > 0 ? (
         <section>
-          <h4 className="text-micro uppercase text-text-3">{t('library.muscle')}</h4>
+          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.muscle')}</h4>
           <ul className="mt-2 flex flex-wrap gap-tight">
             {muscles.map((m) => (
               <li
@@ -410,7 +410,7 @@ function ReviewBody({
 
       {equipment.length > 0 ? (
         <section>
-          <h4 className="text-micro uppercase text-text-3">{t('library.equipment')}</h4>
+          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.equipment')}</h4>
           <ul className="mt-2 flex flex-wrap gap-tight">
             {equipment.map((q) => (
               <li key={q.slug} className="text-caption rounded-chip bg-surface-2 px-2 py-0.5 text-text-2">

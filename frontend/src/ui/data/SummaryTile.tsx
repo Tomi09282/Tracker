@@ -28,7 +28,7 @@ export interface SummaryTileProps {
    * same caption sentence-case (`Gyakorlat`, `Fehérje · cél 180g`, `Derék · 2026-08-20`), so there
    * is no one answer for the component to inherit.
    *
-   * It also drops the step to `text-micro`, because DESIGN.md §2 owns uppercase labels there and
+   * It also drops the step to `text-micro-legacy`, because DESIGN.md §2 owns uppercase labels there and
    * `text-caption` carries no tracking — caps at 12/500 with 0 tracking set solid, which is the
    * reason `--text-micro` has +0.06em baked in.
    */
@@ -172,7 +172,7 @@ export function SummaryTile({
         <p
           className={
             captionCase === 'upper'
-              ? 'text-micro uppercase text-text-3'
+              ? 'text-micro-legacy uppercase text-text-3'
               : 'text-caption text-text-3'
           }
         >

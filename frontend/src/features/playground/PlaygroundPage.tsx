@@ -315,7 +315,7 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
   const active = useElementVariant(id);
   if (active !== variant) return null;
   return (
-    <span className="text-micro uppercase rounded-chip bg-accent-subtle px-1.5 text-accent">
+    <span className="text-micro-legacy uppercase rounded-chip bg-accent-subtle px-1.5 text-accent">
       active
     </span>
   );
@@ -348,9 +348,9 @@ export function PlaygroundPage() {
 
   return (
     <div className="col-wide screen-x py-6">
-      <p className="text-micro uppercase text-accent">QA matrix</p>
+      <p className="text-micro-legacy uppercase text-accent">QA matrix</p>
       <h1 className="text-title-1 mt-1 text-text-1">Feedback playground</h1>
-      <p className="text-body measure mt-2 text-text-2">
+      <p className="text-body-legacy measure mt-2 text-text-2">
         Every element against all five of its variants. The variant marked <em>active</em> is the
         one the admin setting currently applies across the whole product.
       </p>
@@ -373,7 +373,7 @@ export function PlaygroundPage() {
                 className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-micro uppercase text-text-3">
+                  <span className="text-micro-legacy uppercase text-text-3">
                     {v} · {entry.variants[v]}
                   </span>
                   <ActiveBadge id={entry.id} variant={v} />
@@ -435,7 +435,7 @@ export function PlaygroundPage() {
                 <span className="text-body-s text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
                 </span>
-                <span className="text-micro uppercase rounded-chip bg-success-subtle px-1.5 text-success">live</span>
+                <span className="text-micro-legacy uppercase rounded-chip bg-success-subtle px-1.5 text-success">live</span>
               </li>
             ))}
           </ul>
@@ -459,7 +459,7 @@ export function PlaygroundPage() {
               <span className="text-body-s text-text-2">
                 <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
               </span>
-              <span className="text-micro uppercase text-text-3">phase {e.phase}</span>
+              <span className="text-micro-legacy uppercase text-text-3">phase {e.phase}</span>
             </li>
           ))}
         </ul>

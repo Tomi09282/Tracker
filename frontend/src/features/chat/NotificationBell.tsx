@@ -51,7 +51,7 @@ export function NotificationBell({ className }: { className?: string }) {
           // `--danger` is reserved for destructive and irreversible: unread news is neither.
           aria-hidden
           className={cn(
-            'text-micro absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full px-1',
+            'text-micro-legacy absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full px-1',
             'bg-accent text-accent-fg tabular-nums',
           )}
         >

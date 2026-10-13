@@ -143,7 +143,7 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
             // window is unreadable, and this is the one screen in the product where a stranger
             // reads several paragraphs.
             return (
-              <p key={i} className="text-body measure text-text-1">
+              <p key={i} className="text-body-legacy measure text-text-1">
                 <Inline nodes={inline} />
               </p>
             );
@@ -178,7 +178,7 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
             return (
               <blockquote
                 key={i}
-                className="text-body measure border-l-2 border-accent pl-3 text-text-2"
+                className="text-body-legacy measure border-l-2 border-accent pl-3 text-text-2"
               >
                 <Inline nodes={inline} />
               </blockquote>
@@ -206,7 +206,7 @@ export function DocRenderer({ doc, className }: { doc: BlockNode[] | null; class
             return (
               <List key={i} className="measure flex flex-col gap-tight">
                 {items.map((li, j) => (
-                  <li key={j} className="text-body flex items-start gap-tight text-text-1">
+                  <li key={j} className="text-body-legacy flex items-start gap-tight text-text-1">
                     <span
                       aria-hidden={b.k === 'ul' || undefined}
                       className="inline-flex size-9 shrink-0 items-center justify-center rounded-chip bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"

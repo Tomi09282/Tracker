@@ -450,7 +450,7 @@ export function Tabs<T extends string>({ items, value, onChange, label }: TabsPr
                 <motion.span
                   className={cn(
                     'relative inline-flex min-w-5 items-center justify-center overflow-hidden rounded-chip px-1.5',
-                    'text-micro tabular-nums transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
+                    'text-micro-legacy tabular-nums transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
                     // The chip goes quiet only on a switch that WORKED. A failed one keeps the
                     // count hot for the same reason it keeps the warning glyph: nothing was read.
                     variant === 'D' && active && kind !== 'error'

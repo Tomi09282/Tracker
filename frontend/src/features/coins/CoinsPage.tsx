@@ -279,7 +279,7 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
           name twice.
           Sentence case, though the mockup draws MEGVÁSÁROLHATÓ in caps: that is the pre-redesign
           uppercase eyebrow `SectionHeader` exists to replace, and DESIGN.md §2 keeps caps on
-          `text-micro` and its tracking — `text-title-2` set in caps has none. */}
+          `text-micro-legacy` and its tracking — `text-title-2` set in caps has none. */}
       <SectionHeader icon={Store} title={t('coins.storeSection')} />
       <ul className="flex flex-col gap-group">
         {items.map((item) => {

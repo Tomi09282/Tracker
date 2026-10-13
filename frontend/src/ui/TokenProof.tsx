@@ -16,14 +16,14 @@ const THEMES = ['midnight', 'solar', 'forest', 'neon', 'mono'] as const;
 type Theme = (typeof THEMES)[number];
 
 const TYPE_STEPS = [
-  { cls: 'text-display font-display', name: 'Display', spec: '34/40 · 700 · -0.02em' },
+  { cls: 'text-display-legacy font-display', name: 'Display', spec: '34/40 · 700 · -0.02em' },
   { cls: 'text-title-1 font-display', name: 'Title-1', spec: '26/32 · 700 · -0.01em' },
   { cls: 'text-title-2 font-display', name: 'Title-2', spec: '20/26 · 600' },
   { cls: 'text-title-3', name: 'Title-3', spec: '17/24 · 600' },
-  { cls: 'text-body', name: 'Body', spec: '15/22 · 400' },
+  { cls: 'text-body-legacy', name: 'Body', spec: '15/22 · 400' },
   { cls: 'text-body-s', name: 'Body-S', spec: '13/18 · 400' },
   { cls: 'text-caption', name: 'Caption', spec: '12/16 · 500' },
-  { cls: 'text-micro uppercase', name: 'Micro', spec: '11/14 · 600 · +0.06em' },
+  { cls: 'text-micro-legacy uppercase', name: 'Micro', spec: '11/14 · 600 · +0.06em' },
 ];
 
 const SURFACES = [
@@ -51,7 +51,7 @@ function readToken(name: string) {
 function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8 first:mt-0">
-      <p className="text-micro uppercase text-accent">{eyebrow}</p>
+      <p className="text-micro-legacy uppercase text-accent">{eyebrow}</p>
       <h2 className="text-title-2 mt-1 text-text-1">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -77,9 +77,9 @@ export function TokenProof() {
     <div className="min-h-dvh bg-surface-0 pb-24">
       <div className="col-mobile screen-x py-6 md:col-wide">
         <header>
-          <p className="text-micro uppercase text-accent">Phase 0 · design system</p>
-          <h1 className="text-display mt-1 text-text-1">Token proof</h1>
-          <p className="text-body measure mt-2 text-text-2">
+          <p className="text-micro-legacy uppercase text-accent">Phase 0 · design system</p>
+          <h1 className="text-display-legacy mt-1 text-text-1">Token proof</h1>
+          <p className="text-body-legacy measure mt-2 text-text-2">
             Every value on this page comes from the token layer. If a step here is wrong, every
             screen built on it will be wrong — so this is verified before any screen exists.
           </p>
@@ -130,7 +130,7 @@ export function TokenProof() {
                 <div className="h-16" style={{ background: `var(--${s.v})` }} />
                 <div className="bg-surface-1 p-3">
                   <p className="text-caption text-text-1">{s.v}</p>
-                  <p className="text-micro uppercase mt-1 text-text-3">{s.label}</p>
+                  <p className="text-micro-legacy uppercase mt-1 text-text-3">{s.label}</p>
                 </div>
               </div>
             ))}
@@ -147,15 +147,15 @@ export function TokenProof() {
           </div>
           <div className="mt-3 grid gap-2 md:grid-cols-3">
             <Card>
-              <p className="text-micro uppercase text-text-3">Default</p>
+              <p className="text-micro-legacy uppercase text-text-3">Default</p>
               <p className="text-title-3 mt-1 text-accent">accent-500</p>
             </Card>
             <Card>
-              <p className="text-micro uppercase text-text-3">Hover</p>
+              <p className="text-micro-legacy uppercase text-text-3">Hover</p>
               <p className="text-title-3 mt-1 text-accent-hover">accent-400</p>
             </Card>
             <Card>
-              <p className="text-micro uppercase text-text-3">Pressed</p>
+              <p className="text-micro-legacy uppercase text-text-3">Pressed</p>
               <p className="text-title-3 mt-1 text-accent-pressed">accent-600</p>
             </Card>
           </div>

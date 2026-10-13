@@ -153,7 +153,7 @@ export function StyleStudioPage() {
   return (
     <div className="col-wide screen-x flex flex-col gap-section py-6">
       <header className="flex flex-col gap-tight">
-        <p className="text-micro uppercase text-accent">{t('studio.eyebrow')}</p>
+        <p className="text-micro-legacy uppercase text-accent">{t('studio.eyebrow')}</p>
         <h1 className="text-title-1 text-text-1">{t('studio.title')}</h1>
         <p className="text-body-s measure text-text-2">{t('studio.intro')}</p>
       </header>
@@ -163,7 +163,7 @@ export function StyleStudioPage() {
           the element, the chip names the state, the caption names the running variant. */}
       <Surface as="section" className="flex flex-col gap-group">
         <div className="flex items-start justify-between gap-tight">
-          <span className="text-micro uppercase tabular-nums text-text-3">
+          <span className="text-micro-legacy uppercase tabular-nums text-text-3">
             {entry.name} · {entry.id}
           </span>
           {/* The state chips are NOT uppercased, unlike the label to their left. `aktív` and
@@ -171,11 +171,11 @@ export function StyleStudioPage() {
               both mockups draw them lowercase — the caps had been making a five-letter status read
               louder than the element it describes. */}
           {!entry.live ? (
-            <span className="text-micro rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
+            <span className="text-micro-legacy rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
               {t('studio.inertShort')}
             </span>
           ) : active ? (
-            <span className="text-micro rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
+            <span className="text-micro-legacy rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
               {t('studio.active')}
             </span>
           ) : null}
@@ -322,7 +322,7 @@ export function StyleStudioPage() {
               {t('studio.variants')}
             </h2>
             {!entry.live ? (
-              <span className="text-micro shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
+              <span className="text-micro-legacy shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
                 {t('studio.inertShort')}
               </span>
             ) : null}
@@ -381,18 +381,18 @@ export function StyleStudioPage() {
                         // The full "no live preview" sentence is on the hero, where there is room
                         // for it. Repeating it five times in a 100px stage would be five walls of
                         // text nobody reads.
-                        <span className="text-micro uppercase tabular-nums text-text-3">{v}</span>
+                        <span className="text-micro-legacy uppercase tabular-nums text-text-3">{v}</span>
                       )}
                     </Surface>
 
                     <div className="flex min-w-0 flex-1 flex-col gap-tight lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex min-w-0 flex-col gap-tight">
                         <div className="flex flex-wrap items-center gap-tight">
-                          <span className="text-micro uppercase text-text-3">
+                          <span className="text-micro-legacy uppercase text-text-3">
                             {v} · {entry.variants[v]}
                           </span>
                           {isActive ? (
-                            <span className="text-micro inline-flex items-center gap-1 rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
+                            <span className="text-micro-legacy inline-flex items-center gap-1 rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
                               <Check className="size-icon-s" aria-hidden />
                               {t('studio.active')}
                             </span>

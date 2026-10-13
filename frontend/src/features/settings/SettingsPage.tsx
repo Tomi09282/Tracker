@@ -63,7 +63,7 @@ function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string 
       >
         <Icon className="size-icon-m" strokeWidth={2} />
       </span>
-      <h2 className="text-micro uppercase text-text-3">{title}</h2>
+      <h2 className="text-micro-legacy uppercase text-text-3">{title}</h2>
     </div>
   );
 }
@@ -156,7 +156,7 @@ export function SettingsPage() {
                     prints the address in full, and it should: it is your own, it is under a
                     heading that says `Fiók`, and you need to know which account you are signed
                     into. Everywhere ELSE it was a leak — see lib/person.ts. */}
-                <p className="text-body text-text-1">{user ? personLabel(user) : ''}</p>
+                <p className="text-body-legacy text-text-1">{user ? personLabel(user) : ''}</p>
                 <p className="text-caption text-text-3">{user?.email}</p>
 
                 {user ? (
@@ -214,7 +214,7 @@ export function SettingsPage() {
             >
               <Coins className="size-icon-m" strokeWidth={2} />
             </span>
-            <span className="text-body flex-1 text-text-1">{t('nav.coins')}</span>
+            <span className="text-body-legacy flex-1 text-text-1">{t('nav.coins')}</span>
             <ChevronRight className="size-icon-m shrink-0 text-text-3" strokeWidth={2} aria-hidden />
           </Surface>
         </section>
@@ -254,7 +254,7 @@ export function SettingsPage() {
             as={Link}
             to="/admin"
             interactive
-            className="text-body flex min-h-[var(--target-min)] items-center gap-tight text-accent"
+            className="text-body-legacy flex min-h-[var(--target-min)] items-center gap-tight text-accent"
           >
             <span className="flex-1">{t('settings.openAdmin')}</span>
             <ChevronRight className="size-icon-m shrink-0" strokeWidth={2} aria-hidden />

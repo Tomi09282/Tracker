@@ -99,7 +99,7 @@ export function AdminShell({
                 when it means something can only mean the one thing.
               */}
               {s.badge ? (
-                <span className="text-micro tabular-nums ml-auto rounded-chip bg-accent-subtle px-1.5 text-accent">
+                <span className="text-micro-legacy tabular-nums ml-auto rounded-chip bg-accent-subtle px-1.5 text-accent">
                   {s.badge}
                 </span>
               ) : null}

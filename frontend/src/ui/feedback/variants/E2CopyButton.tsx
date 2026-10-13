@@ -451,7 +451,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
               aria-hidden
               className={cn(
                 'pointer-events-none absolute -right-1 -top-1 min-w-4 text-center',
-                'rounded-chip bg-accent px-1.5 text-micro tabular-nums text-accent-fg',
+                'rounded-chip bg-accent px-1.5 text-micro-legacy tabular-nums text-accent-fg',
               )}
               initial={motionSafe ? { scale: 0.4, y: 10, opacity: 0 } : false}
               animate={{ scale: 1, y: 0, opacity: 1 }}

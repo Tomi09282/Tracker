@@ -161,7 +161,7 @@ export function ChatPanel({
           and a ring at 1px is not an anchor. The name IS the heading; there is no second one. */}
       <div className="flex flex-col items-center gap-tight">
         <span aria-hidden className="inline-flex rounded-full bg-accent p-1">
-          <span className="text-display font-display grid size-28 place-items-center rounded-full bg-surface-2 text-accent">
+          <span className="text-display-legacy font-display grid size-28 place-items-center rounded-full bg-surface-2 text-accent">
             {name ? initialsOf(name) : ''}
           </span>
         </span>
@@ -277,7 +277,7 @@ export function ChatPanel({
               maxLength={BODY_MAX}
               className={cn(
                 'min-h-[var(--target-min)] max-h-32 flex-1 resize-none rounded-field px-3 py-3',
-                'bg-[var(--field-bg)] text-body text-text-1',
+                'bg-[var(--field-bg)] text-body-legacy text-text-1',
                 'border-[length:var(--border-width)] border-[var(--field-border)]',
                 'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
                 'outline-none focus-visible:border-accent focus-visible:outline-2',
@@ -363,7 +363,7 @@ function Bubble({
           auto-linking: a clickable URL in a message from someone you have not met is an
           exfiltration surface, and this product has a report flow precisely because not every
           message is friendly. */}
-      <p className="text-body whitespace-pre-wrap break-words">{message.body}</p>
+      <p className="text-body-legacy whitespace-pre-wrap break-words">{message.body}</p>
 
       {/* The meta line lives inside the bubble and is right-aligned on both sides — see the
           column-reverse note on the panel. */}

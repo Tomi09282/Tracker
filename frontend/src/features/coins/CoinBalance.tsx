@@ -87,7 +87,7 @@ export function CoinBalance({ balanceMinor }: { balanceMinor: number }) {
         aria-hidden
       />
 
-      <span className="text-display font-display tabular-nums text-text-1" aria-hidden>
+      <span className="text-display-legacy font-display tabular-nums text-text-1" aria-hidden>
         {rolls && motionSafe ? (
           <CountUp to={coins} from={toCoins(from)} duration={600} />
         ) : (

@@ -27,7 +27,7 @@ import { personInitials, type Person } from '../../lib/person';
  * report's `needsShared`.
  */
 const SIZES = {
-  sm: 'inline-grid size-11 shrink-0 place-items-center rounded-chip bg-surface-2 text-body uppercase text-text-2',
+  sm: 'inline-grid size-11 shrink-0 place-items-center rounded-chip bg-surface-2 text-body-legacy uppercase text-text-2',
   lg: 'inline-grid size-[104px] shrink-0 place-items-center rounded-chip bg-surface-2 text-title-1 uppercase text-text-1',
 } as const;
 

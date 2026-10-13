@@ -1,12 +1,13 @@
 /* ui/tokens/fonts.css — the three Pulse faces, declared by hand.
  *
- * ═══ DORMANT UNTIL THE TYPE STEP ═══════════════════════════════════════════════════════════════
+ * ═══ DECLARED HERE, SWITCHED ON IN tokens.css ══════════════════════════════════════════════════
  *
- * These rules only DECLARE the faces. No family token in `tokens.css` names them yet, and a browser
- * fetches a font file only when rendered text asks for its family AND contains a character inside
- * its `unicode-range` — so this file changes nothing on screen and downloads nothing. The step that
- * re-points `--font-display`, `--font-body` and `--font-mono` (and removes Inter and Space Grotesk)
- * switches them on.
+ * These rules only DECLARE the faces. `--font-display`, `--font-body` and `--font-mono` in
+ * `tokens.css` name them, and a browser fetches a font file only when rendered text asks for its
+ * family AND contains a character inside its `unicode-range` — so an English screen never downloads
+ * a `latin-ext` file it does not need, and the mono face costs nothing until a figure is set in it.
+ * The four files nearly every Hungarian screen needs (both subsets of the display and the text
+ * face) are preloaded by the hook in `vite.config.ts`.
  *
  * ═══ WHY NOT THE PACKAGES' OWN CSS ═════════════════════════════════════════════════════════════
  *

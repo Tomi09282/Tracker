@@ -77,7 +77,7 @@ export function ExerciseDetailPage() {
      */
     return (
       <div className="col-mobile screen-x flex flex-col gap-group py-6">
-        <p className="text-body text-text-2">{t('library.emptyTitle')}</p>
+        <p className="text-body-legacy text-text-2">{t('library.emptyTitle')}</p>
         <Link to="/library" className={cn(control({ variant: 'secondary' }), 'self-start')}>
           <ArrowLeft className="size-icon-m" strokeWidth={2} aria-hidden />
           {t('nav.library')}
@@ -233,7 +233,7 @@ export function ExerciseDetailPage() {
             {exercise.translated === 0 && lang !== 'en' ? (
               <span
                 className={cn(
-                  'text-micro uppercase inline-flex items-center rounded-chip px-3 py-2',
+                  'text-micro-legacy uppercase inline-flex items-center rounded-chip px-3 py-2',
                   'border-[length:var(--border-width)] border-warning-border bg-warning-subtle text-warning',
                 )}
               >
@@ -266,7 +266,7 @@ export function ExerciseDetailPage() {
       {muscles.length > 0 ? (
         <section className="flex flex-col gap-group">
           <SectionBadge icon={PersonStanding}>
-            <h2 className="text-micro uppercase text-accent">{t('library.muscle')}</h2>
+            <h2 className="text-micro-legacy uppercase text-accent">{t('library.muscle')}</h2>
           </SectionBadge>
 
           {/*
@@ -317,7 +317,7 @@ export function ExerciseDetailPage() {
       */}
       {!hero && equipment.length > 0 ? (
         <section className="flex flex-col gap-tight">
-          <h2 className="text-micro uppercase text-text-2">{t('library.equipment')}</h2>
+          <h2 className="text-micro-legacy uppercase text-text-2">{t('library.equipment')}</h2>
           <div className="flex flex-wrap gap-tight">
             {equipment.map((q) => (
               <span
@@ -346,7 +346,7 @@ export function ExerciseDetailPage() {
                 >
                   {i + 1}
                 </span>
-                <span className="text-body measure mt-1 text-text-2">{step}</span>
+                <span className="text-body-legacy measure mt-1 text-text-2">{step}</span>
               </li>
             ))}
           </ol>
@@ -359,7 +359,7 @@ export function ExerciseDetailPage() {
           that renders a title and a photograph is not a detail page.
         */
         <section>
-          <p className="text-body measure text-text-2">{exercise.description}</p>
+          <p className="text-body-legacy measure text-text-2">{exercise.description}</p>
         </section>
       ) : null}
 

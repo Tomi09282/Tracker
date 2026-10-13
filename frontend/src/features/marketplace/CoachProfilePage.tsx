@@ -127,7 +127,7 @@ function CoachProfileView({
             <InitialsAvatar
               name={coach.displayName}
               className="size-full"
-              textClassName="text-display"
+              textClassName="text-display-legacy"
             />
           </div>
           {coach.verified === 1 ? (
@@ -144,8 +144,8 @@ function CoachProfileView({
         </div>
 
         <div className="flex flex-col items-center gap-tight">
-          <h1 className="text-display text-text-1">{coach.displayName}</h1>
-          {coach.headline ? <p className="text-body text-text-2">{coach.headline}</p> : null}
+          <h1 className="text-display-legacy text-text-1">{coach.displayName}</h1>
+          {coach.headline ? <p className="text-body-legacy text-text-2">{coach.headline}</p> : null}
 
           {/* `@handle` gave up this slot. A handle is an address, not a credential, and it was
               occupying the one line under the name a visitor reads. It still lives in the URL,

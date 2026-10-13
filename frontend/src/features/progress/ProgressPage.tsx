@@ -299,7 +299,7 @@ function BodyTab() {
             <select
               value={selected}
               onChange={(e) => setMetric(e.target.value)}
-              className="text-body min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1"
+              className="text-body-legacy min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1"
             >
               {metricList.map((m) => (
                 <option key={m.key} value={m.key}>
@@ -514,7 +514,7 @@ function PhotosTab() {
               />
               {/* SOLID, not a veil: this pill sits on a photograph, and an alpha fill over an
                   unknown image is a date you can read on some of them. */}
-              <span className="text-micro absolute bottom-1 left-1 rounded-chip bg-surface-0 px-2 py-1 text-text-2">
+              <span className="text-micro-legacy absolute bottom-1 left-1 rounded-chip bg-surface-0 px-2 py-1 text-text-2">
                 {p.taken_on}
               </span>
               {/* BACKED, for the reason the date pill two lines up is backed: this control sits
@@ -598,7 +598,7 @@ function SharingTab() {
                         it" and "they left" are different facts and the client is entitled to
                         both. */}
                     {s.link_status !== 'active' ? (
-                      <span className="text-micro shrink-0 rounded-chip border-[length:var(--border-width)] border-[var(--surface-border)] px-2 py-1 uppercase text-text-3">
+                      <span className="text-micro-legacy shrink-0 rounded-chip border-[length:var(--border-width)] border-[var(--surface-border)] px-2 py-1 uppercase text-text-3">
                         {t('progress.linkEnded')}
                       </span>
                     ) : null}

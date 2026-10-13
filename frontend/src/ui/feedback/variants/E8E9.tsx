@@ -543,7 +543,7 @@ export function Select({
                     // `min-w-0`: a flex item defaults to `min-width: auto`, and an input's
                     // intrinsic width is roughly twenty characters — so beside the clear button it
                     // refuses to shrink and pushes the row out of a narrow card instead.
-                    className="min-h-[var(--target-min)] w-full min-w-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+                    className="min-h-[var(--target-min)] w-full min-w-0 bg-transparent text-body-legacy text-text-1 outline-none placeholder:text-text-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
                   />
                   {/* A dead end needs a way out of it. Without this, the only escape from a query
                       that matches nothing is to select the text and delete it — and the state the
@@ -598,7 +598,7 @@ export function Select({
                       onFocus={() => markHover(opt.value)}
                       className={cn(
                         'relative flex min-h-[var(--target-min)] w-full cursor-pointer items-center justify-between gap-2',
-                        'rounded-field px-3 text-left text-body outline-none',
+                        'rounded-field px-3 text-left text-body-legacy outline-none',
                         'transition-colors duration-[var(--duration-instant)]',
                         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
                         // D's rows are thumb-sized, not pointer-sized: a sheet exists because the

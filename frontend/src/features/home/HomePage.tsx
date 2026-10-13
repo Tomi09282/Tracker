@@ -67,7 +67,7 @@ export function HomePage() {
       {/* No page title and no breadcrumb: the active nav tab already says where you are. */}
       <header className="flex items-start justify-between gap-group">
         <div className="min-w-0">
-          <h1 className="text-display text-text-1">{t('home.greeting')}</h1>
+          <h1 className="text-display-legacy text-text-1">{t('home.greeting')}</h1>
           <p className="text-body-s truncate text-text-2 first-letter:uppercase">{dateLabel}</p>
         </div>
         <NotificationBell className="-mr-2 shrink-0" />

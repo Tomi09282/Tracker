@@ -1,16 +1,8 @@
 @import 'tailwindcss';
 
-/* Self-hosted fonts — the strict CSP allows no third-party font or style origin.
-   Inter ships as a variable font (one file, every weight); Space Grotesk is display-only, so
-   we pull just the three weights the type scale actually uses. */
-@import '@fontsource-variable/inter/index.css';
-@import '@fontsource/space-grotesk/500.css';
-@import '@fontsource/space-grotesk/600.css';
-@import '@fontsource/space-grotesk/700.css';
-
-/* The three Pulse faces (Big Shoulders Display, Geist, Geist Mono), declared and DORMANT: no family
-   token names them yet, so nothing is downloaded and nothing changes on screen. The type step
-   switches them on and removes the four imports above. */
+/* The three Pulse faces — Big Shoulders Display, Geist, Geist Mono — self-hosted and declared by
+   hand in ui/tokens/fonts.css (the strict CSP allows no third-party font or style origin). The
+   family tokens of tokens.css name them; the type-binding block below gives each step its face. */
 @import './ui/tokens/fonts.css';
 
 @import './ui/tokens/tokens.css';
@@ -26,15 +18,21 @@
     background: var(--surface-0);
     color: var(--text-1);
     font-family: var(--font-body);
-    font-size: var(--text-body);
-    line-height: var(--text-body--line-height);
+    /* The size every element WITHOUT a type class inherits. It stays the old 15 / 22 for as long as
+       the bridge stands, so unclassed text on a screen that has not been rebuilt does not reflow;
+       a rebuilt screen names its Pulse step on every text. The closing cleanup deletes the legacy
+       step, and check:tokens then forces this rule onto --text-body (16 / 22). */
+    font-size: var(--text-body-legacy);
+    line-height: var(--text-body-legacy--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  /* Display face is opt-in per element (headings, brand, big numbers) — never global. */
-  .font-display,
-  h1, h2, h3 {
+  /* The display face is opt-in — never global, and never by TAG. `h1, h2, h3` used to be in this
+     selector; in Pulse a heading is whatever its role says (a sheet title, a name and the greeting
+     are the text face), so the tag decides nothing and the role classes carry the family: see the
+     type-binding block below. */
+  .font-display {
     font-family: var(--font-display);
   }
 
@@ -79,6 +77,27 @@
   /* Images always reserve their box, so async content cannot shift the layout (banned pattern
      F-13 in the previous build: 20 unreserved images on one list). */
   img, video { display: block; max-width: 100%; height: auto; }
+}
+
+/*
+ * Family and case of the type ramp, bound ONCE.
+ *
+ * Tailwind attaches size, line-height, weight and tracking to a `text-<step>` utility. It has no
+ * way to attach a family or a case, and in Pulse both are part of the role: an eyebrow in the text
+ * face is not an eyebrow. Written at every call site (`font-display text-eyebrow uppercase`) the
+ * role would be re-decided by every screen; bound here it cannot drift.
+ *
+ * In `components`, so an explicit `font-body` or `normal-case` utility at a call site still wins.
+ * Only `.text-<step>` selectors, only these two properties, only between the two markers:
+ * `check:type-scale` reads this block and compares it with the ramp, in both directions.
+ * The ten legacy steps are deliberately absent — they keep whatever face their call site names.
+ */
+@layer components {
+  /* type-binding:start */
+  .text-giant, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
+  .text-data-l, .text-data, .text-micro { font-family: var(--font-mono); }
+  .text-display-xl, .text-display, .text-eyebrow, .text-micro { text-transform: uppercase; }
+  /* type-binding:end */
 }
 
 @layer utilities {

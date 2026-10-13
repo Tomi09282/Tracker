@@ -72,7 +72,7 @@ function Row({
           <Icon className="size-icon-m" strokeWidth={2} />
         </span>
         <div className="min-w-0">
-          <span id={id} className="text-body block text-text-1">
+          <span id={id} className="text-body-legacy block text-text-1">
             {label}
           </span>
           <p id={`${id}-hint`} className="text-caption mt-0.5 text-text-3">

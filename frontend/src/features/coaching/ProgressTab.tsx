@@ -111,7 +111,7 @@ export function ProgressTab({ linkId }: { linkId: number }) {
           recent would produce a line through one point. */}
       {chartable.length ? (
         <section aria-labelledby="progress-heading">
-          <h3 id="progress-heading" className="text-micro uppercase text-text-2">
+          <h3 id="progress-heading" className="text-micro-legacy uppercase text-text-2">
             {t('progress.heading')}
           </h3>
           <div className="mt-2 flex flex-col gap-4">
@@ -124,7 +124,7 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
       {prs.length ? (
         <section aria-labelledby="records-heading">
-          <h3 id="records-heading" className="text-micro uppercase text-text-2">
+          <h3 id="records-heading" className="text-micro-legacy uppercase text-text-2">
             {t('coaching.records')}
           </h3>
           <ul className="mt-2 flex flex-col gap-2">
@@ -135,7 +135,7 @@ export function ProgressTab({ linkId }: { linkId: number }) {
               >
                 <Trophy className="size-icon-m shrink-0 text-warning" aria-hidden />
                 <div className="min-w-0 flex-1">
-                  <p className="text-body truncate">{r.exercise_name_snapshot}</p>
+                  <p className="text-body-legacy truncate">{r.exercise_name_snapshot}</p>
                   <p className="text-caption text-text-2">
                     {t(`workout.record.${r.kind}`)}
                     {r.rep_bucket > 0 ? ` · ${r.rep_bucket}${r.rep_bucket === 13 ? '+' : ''}` : ''}
@@ -143,7 +143,7 @@ export function ProgressTab({ linkId }: { linkId: number }) {
                     {r.local_date}
                   </p>
                 </div>
-                <span className="text-body shrink-0 tabular-nums font-medium">
+                <span className="text-body-legacy shrink-0 tabular-nums font-medium">
                   {Math.round(r.value * 10) / 10}
                   <span className="text-caption ml-1 text-text-2">{r.value_unit}</span>
                 </span>
@@ -155,14 +155,14 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
       {logs.length ? (
         <section aria-labelledby="sessions-heading">
-          <h3 id="sessions-heading" className="text-micro uppercase text-text-2">
+          <h3 id="sessions-heading" className="text-micro-legacy uppercase text-text-2">
             {t('coaching.sessions')}
           </h3>
           <ul className="mt-2 flex flex-col gap-2">
             {logs.map((l) => (
               <li key={l.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
                 <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-body truncate font-medium">
+                  <p className="text-body-legacy truncate font-medium">
                     {l.day_name_snapshot ?? l.title ?? t('workout.freestyle')}
                   </p>
                   <span className="text-caption shrink-0 tabular-nums text-text-2">{l.local_date}</span>

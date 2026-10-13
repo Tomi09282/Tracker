@@ -216,7 +216,7 @@ export function CoachDashboard() {
           thing its entire layout is built around. */}
       <header className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-micro uppercase text-accent">{t('coaching.eyebrow')}</p>
+          <p className="text-micro-legacy uppercase text-accent">{t('coaching.eyebrow')}</p>
           <h1 className="text-title-1 mt-1 text-text-1">{t('coaching.title')}</h1>
           {/* THE PLAN LIBRARY'S DOOR.
               `/coach/plans` held its own bottom-bar tab until the bar became role-shaped, and it
@@ -256,10 +256,10 @@ export function CoachDashboard() {
             }))}
           >
             <div className="flex flex-col items-center">
-              <p className="text-display font-display tabular-nums text-text-1">
+              <p className="text-display-legacy font-display tabular-nums text-text-1">
                 <CountUp to={rows.length} />
               </p>
-              <p className="text-micro uppercase text-text-3">{t('coaching.clients')}</p>
+              <p className="text-micro-legacy uppercase text-text-3">{t('coaching.clients')}</p>
             </div>
           </Gauge>
 
@@ -373,7 +373,7 @@ export function CoachDashboard() {
               >
                 {/* The code itself is unrecoverable, so the row identifies it by what it does
                     rather than by what it is. */}
-                <span className="text-body min-w-0 truncate text-text-1">
+                <span className="text-body-legacy min-w-0 truncate text-text-1">
                   {t('coaching.codeUses', { used: c.uses, max: c.max_uses })}
                 </span>
                 <Pressable
@@ -408,7 +408,7 @@ export function CoachDashboard() {
           icon={Users}
           title={t('coaching.roster')}
           action={
-            <span className="text-body shrink-0 tabular-nums text-text-3">{rows.length}</span>
+            <span className="text-body-legacy shrink-0 tabular-nums text-text-3">{rows.length}</span>
           }
         />
 
@@ -454,7 +454,7 @@ export function CoachDashboard() {
                     to={`/coach/clients/${c.link_id}`}
                     className="flex min-h-[var(--target-min)] min-w-0 flex-1 flex-col justify-center"
                   >
-                    <span className="text-body block truncate text-text-1">{personLabel(c)}</span>
+                    <span className="text-body-legacy block truncate text-text-1">{personLabel(c)}</span>
                     <span className="text-caption mt-1 flex flex-wrap items-center gap-tight text-text-3">
                       {/* A client with none gets the alert tone rather than a zero in the same
                           grey as everything else — the whole value of this line is that the quiet
@@ -463,7 +463,7 @@ export function CoachDashboard() {
                         {t('coaching.sessions28d', { count: c.sessions_28d ?? 0 })}
                       </span>
                       {c.must_change_credentials === 1 ? (
-                        <span className="text-micro uppercase rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 text-warning">
+                        <span className="text-micro-legacy uppercase rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 text-warning">
                           {t('coaching.pending')}
                         </span>
                       ) : null}

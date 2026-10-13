@@ -110,7 +110,7 @@ export function LibraryPage() {
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      <h1 className="text-display text-text-1">{t('nav.library')}</h1>
+      <h1 className="text-display-legacy text-text-1">{t('nav.library')}</h1>
 
       {/* ── finding something ──────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-group">
@@ -202,7 +202,7 @@ export function LibraryPage() {
           {/* The heading is passed as a child and not as `title`: this one is an 11px caps
               eyebrow over a chip strip, not the component's default `text-title-2` h2. */}
           <SectionHeader icon={Funnel}>
-            <h2 className="text-micro uppercase text-text-2">{t('library.muscle')}</h2>
+            <h2 className="text-micro-legacy uppercase text-text-2">{t('library.muscle')}</h2>
           </SectionHeader>
 
           {/*
@@ -342,7 +342,7 @@ export function LibraryPage() {
                       {/* Honest about fallback content rather than passing English off as
                           translated — the API tells us, so the UI can too. */}
                       {row.translated === 0 && lang !== 'en' ? (
-                        <span className="text-micro uppercase rounded-chip bg-surface-2 px-1.5">en</span>
+                        <span className="text-micro-legacy uppercase rounded-chip bg-surface-2 px-1.5">en</span>
                       ) : null}
                     </span>
                   </span>
