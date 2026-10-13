@@ -19,13 +19,12 @@
 
 ## You own — and write nothing else
 
-Files that exist today (1):
+Files that exist today (2):
 
+- `docs/pipeline/pulse/pkg/S-compose-post/budget.json`
 - `frontend/src/features/compose/PostEditorPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-compose-post/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-compose-post/**`
 
 ## Must not touch
 

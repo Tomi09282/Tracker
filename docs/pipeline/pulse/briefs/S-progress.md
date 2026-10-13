@@ -19,13 +19,12 @@
 
 ## You own — and write nothing else
 
-Files that exist today (1):
+Files that exist today (2):
 
+- `docs/pipeline/pulse/pkg/S-progress/budget.json`
 - `frontend/src/features/progress/ProgressPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-progress/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-progress/**`
 
 ## Must not touch
 

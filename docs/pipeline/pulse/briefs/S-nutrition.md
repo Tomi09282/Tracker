@@ -19,15 +19,14 @@
 
 ## You own — and write nothing else
 
-Files that exist today (3):
+Files that exist today (4):
 
+- `docs/pipeline/pulse/pkg/S-nutrition/budget.json`
 - `frontend/src/features/nutrition/MacroBars.tsx`
 - `frontend/src/features/nutrition/NutritionCard.tsx`
 - `frontend/src/features/nutrition/NutritionPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-nutrition/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-nutrition/**`
 
 Deleted by this package:
 

@@ -19,13 +19,12 @@
 
 ## You own — and write nothing else
 
-Files that exist today (1):
+Files that exist today (2):
 
+- `docs/pipeline/pulse/pkg/S-coach-dashboard/budget.json`
 - `frontend/src/features/coaching/CoachDashboard.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-coach-dashboard/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-coach-dashboard/**`
 
 ## Must not touch
 

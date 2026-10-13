@@ -19,14 +19,13 @@
 
 ## You own — and write nothing else
 
-Files that exist today (2):
+Files that exist today (3):
 
+- `docs/pipeline/pulse/pkg/S-compose-profile/budget.json`
 - `frontend/src/features/compose/HandleField.tsx`
 - `frontend/src/features/compose/ProfileEditorPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-compose-profile/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-compose-profile/**`
 
 ## Must not touch
 

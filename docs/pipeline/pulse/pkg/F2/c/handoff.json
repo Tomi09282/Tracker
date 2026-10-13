@@ -1,0 +1,57 @@
+{
+  "id": "F2:c",
+  "branch": "pulse/F2c",
+  "verifiedOn": "pulse-redesign b82e875 (F4), merged into the branch as 3528860",
+  "what": "check:pulse, the ratchet: 20 counted rules + 2 kept rules, per-file counts against budgets that only go down, one probe per rule id in verify:gates",
+  "files": {
+    "frontend/scripts/check-pulse.mjs": "NEW - the gate. Counter (own lexer, tag and expression scanner), in-memory proof of every rule on each run (76 sources), budgets (judge / --init / --fix-down), kept rules, --report / --where / --list-rules, exports for the tools",
+    "frontend/scripts/verify-gates.mjs": "EXTENDED, not rewritten: 10 lines that read the ratchet's probes from the gate (pulse.verifyGatesProbes) + the three check:assets probes of R-F5-01, applied from the request's own patch",
+    "docs/pipeline/pulse/pkg/F2/c/shared.patch": "HAND-IN - frontend/package.json: the check:pulse script and its place in the build chain (after check:tokens, PLAN 3.6)",
+    "docs/pipeline/pulse/pkg/F2/c/counts.md": "the ratchet beside the independent count of F0: every difference explained",
+    "docs/pipeline/pulse/pkg/F2/c/counts.base.txt": "every line on which the two counters disagree, base tree 0860942",
+    "docs/pipeline/pulse/pkg/F2/c/counts.now.txt": "the same for today's tree",
+    "docs/pipeline/pulse/pkg/F2/c/compare.mjs": "produces the two listings and the lexer-against-TypeScript comparison; reads only",
+    "docs/pipeline/pulse/pkg/F2/c/verify-gates.run.txt": "the full verify-gates run in the slot: 78 passed, 0 failed, 4 dormant",
+    "docs/pipeline/pulse/pkg/F2/c/requests/R-F2c-01.json": "notice to the integrator: R-F5-01 is applied on this branch"
+  },
+  "handIn": ["docs/pipeline/pulse/pkg/F2/c/shared.patch"],
+  "notCommittedOnPurpose": "no budget.json anywhere: the integrator generates them with --init on the merged tree in the merge commit (pulse-merge-check refuses a budget created on a branch)",
+  "integratorSteps": [
+    "node scripts/pulse-merge-check.mjs F2c   (preflight in the slot said: all 8 touched paths are F2's, no budget raised, countRules found; REQUIRES verify:gates)",
+    "git merge --squash pulse/F2c",
+    "git cat-file blob pulse/F2c:docs/pipeline/pulse/pkg/F2/c/shared.patch | git apply --3way -   (frontend/package.json only)",
+    "do NOT apply pkg/F5/requests/R-F5-01.patch - the squash carries it; close R-F5-01",
+    "cd frontend && node scripts/check-pulse.mjs --init   (in the slot: 33 budget files, 1768 sites in 84 files; pkg/_int/budget.json holds 15 files / 269 sites)",
+    "npm run build under a heavy lock",
+    "node scripts/verify-gates.mjs --allow-dirty   (in the slot: 78 passed, 0 failed, 4 dormant), again on the committed tree, then pulse-merge-check F2c --squashed",
+    "commit the budget files with the squash; copy the per-rule totals the gate prints into the burn-down of the progress file"
+  ],
+  "rules": {
+    "counted": ["surface", "summary-tile", "gauge", "aurora", "legacy-type", "font-display-class", "legacy-radius", "wash", "legacy-variant", "pill-size", "pressable-no-variant", "legacy-chip-call", "shaped-skeleton", "raw-form", "blur-shadow", "reserved-surface-1", "reserved-surface-2-3", "black-white", "legacy-var", "heading-icon"],
+    "kept": ["kept/focus-ring", "kept/reduced-motion"],
+    "totalsToday": { "surface": 95, "summary-tile": 12, "gauge": 8, "aurora": 9, "legacy-type": 561, "font-display-class": 29, "legacy-radius": 170, "wash": 201, "legacy-variant": 146, "pill-size": 55, "pressable-no-variant": 28, "legacy-chip-call": 3, "shaped-skeleton": 94, "raw-form": 17, "blur-shadow": 28, "reserved-surface-1": 29, "reserved-surface-2-3": 83, "black-white": 1, "legacy-var": 152, "heading-icon": 47 },
+    "againstTheF0Record": "11 rules equal to the unit on the base tree; legacy-type and legacy-radius differ only by comments; 7 differ by a rule decision, each site named in counts.md"
+  },
+  "probes": {
+    "inVerifyGates": "25 for check:pulse - pulse/rule/<id> for each of the 20 rule ids (a planted src/verify-gates-probe.tsx, expecting '[<id>] src/verify-gates-probe.tsx — <n> counted, and the file is in no budget file'), pulse/budget-raised, pulse/file-out-of-its-budget, pulse/dead-budget-entry (all three in pkg/_int/budget.json, an integrator file), pulse/focus-ring-deleted, pulse/reduced-motion-deleted (src/index.css)",
+    "newAnchoredFile": "docs/pipeline/pulse/pkg/_int/budget.json (verify-gates --list-anchors prints it once it exists): a merge that lowers the integrator's own budget needs a verify:gates run; a package lowering its own budget does not",
+    "inTheGate": "every run first counts each rule's probe and its controls in memory (76 sources) and fails with 'rule `x` no longer counts what it exists for' - a broken pattern cannot print a green total"
+  },
+  "apiForOtherLanes": {
+    "frontend/scripts/check-pulse.mjs": "export function countRules(source, relPath) -> { ruleId: n } - pure, relPath relative to frontend/ ('src/...'; 'frontend/src/...' is accepted); scanSource(source, relPath) -> [{ rule, index }]; scanTree({ root }) -> { files: Map<'src/…', counts>, totals, scanned }; readBudgets(dir), judge(tree, budgets, { ownership }), loadOwnership(), keptRuleProblems(cssText), RULES, verifyGatesProbes({ plant }). Importing the module runs nothing",
+    "while working": "node scripts/check-pulse.mjs --where <budget id | file>  lists every counted site by line; --report prints totals per rule and per budget; --fix-down <id> lowers a budget to the count, deletes emptied entries and the emptied file, never raises",
+    "budget.json": "{ about, id, files: { 'frontend/src/…': { ruleId: n } } } - repo-relative paths as in work-packages.json; no other number in the file (pulse-merge-check compares every numeric leaf)"
+  },
+  "forTheKitLanes": [
+    "F12: paint the bottom sheet with its token - bg-[var(--sheet-bg)] - not with the surface-2 utility: the rule reserved-surface-2-3 allows that utility only in ScreenSkeleton.tsx (the skeleton), as disabled:… in control.ts (the disabled pill) and, for surface-3, in Switch.tsx (the off track). The sheet file E14E20.tsx also holds legacy boxes, so it could not be allowed as a whole. A further entry is one line in SURFACE_ALLOW (a request of kind 'gate').",
+    "F6: once control() has its size axis, every primary without a size is already counted (pill-size, 55 today); Pressable must hand `size` on to control() - `control({ variant, shape })` with a default of 'primary' and no size would count",
+    "every lane: --fix-down <your id> before hand-off, and commit your budget.json; an emptied budget file deletes itself"
+  ],
+  "limits": [
+    "a variant that travels through a prop of another file is counted only where that prop is declared (PublicChrome's `cta`); the six call sites cta=\"secondary\" are not",
+    "a class name assembled at run time; a `size` that arrives through a spread",
+    "the ownership leg and --init import the glob expander of pulse-owns-check.mjs (R31); in a tree without that script the leg prints that it is skipped and --init refuses"
+  ],
+  "build": "npm run build exit 0 in the slot under heavy-2 (01:19:42-01:19:59, 2026-10-14), with shared.patch applied and budgets from --init; 14 gate scripts, 2541 modules; the built CSS has the same 85 056 bytes and not one class more than the integration build - the gate script spells no utility Tailwind could pick up",
+  "leftInTheSlot": "nothing: shared.patch reversed, the generated budget files deleted, git status clean"
+}

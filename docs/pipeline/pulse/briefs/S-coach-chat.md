@@ -19,14 +19,13 @@
 
 ## You own — and write nothing else
 
-Files that exist today (2):
+Files that exist today (3):
 
+- `docs/pipeline/pulse/pkg/S-coach-chat/budget.json`
 - `frontend/src/features/chat/ChatPage.tsx`
 - `frontend/src/features/chat/ChatPanel.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-coach-chat/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-coach-chat/**`
 
 ## Must not touch
 

@@ -20,14 +20,13 @@
 
 ## You own — and write nothing else
 
-Files that exist today (2):
+Files that exist today (3):
 
+- `docs/pipeline/pulse/pkg/S-client-detail-b/budget.json`
 - `frontend/src/features/coaching/NutritionTab.tsx`
 - `frontend/src/features/coaching/ProgressTab.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-client-detail-b/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-client-detail-b/**`
 
 ## Must not touch
 

@@ -19,14 +19,13 @@
 
 ## You own — and write nothing else
 
-Files that exist today (2):
+Files that exist today (3):
 
+- `docs/pipeline/pulse/pkg/S-exercise-detail/budget.json`
 - `frontend/src/features/library/ExerciseDetailPage.tsx`
 - `frontend/src/features/library/SectionBadge.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-exercise-detail/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-exercise-detail/**`
 
 Deleted by this package:
 

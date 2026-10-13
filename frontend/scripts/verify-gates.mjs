@@ -663,6 +663,35 @@ const PROBES = [
     mutate: swap(/((?<![\w-])--surface-0:\s*)#[0-9a-fA-F]{3,8}/, '$1#123456'),
     expect: /and `--surface-0` is #123456/,
   },
+  /* ── check:assets ───────────────────────────────────────────────────────────────────────────
+   * Three of its legs, in this runner's vocabulary. The gate carries its own, wider proof —
+   * `node scripts/check-assets.mjs --probe` plants 22 defects, among them a DELETED `-lit` file,
+   * in copies under the OS temp folder — because deleting a binary is not a text mutation. */
+  {
+    id: 'assets/tab-without-lit-raster',
+    gate: 'check:assets',
+    label: 'a tab icon that lost its lit raster is caught',
+    file: 'src/assets/pulse/slots.ts',
+    mutate: swap(/('tab-home':\s*\{[^}]*?\blit:\s*)true/, '$1false'),
+    expect: /tab icon key "home" has no lit raster/,
+  },
+  {
+    id: 'assets/blend-mode',
+    gate: 'check:assets',
+    label: 'a blend mode on an image is caught (the heir of check:aurora)',
+    file: PLANT,
+    // Assembled, never spelled out: Tailwind scans this script for class names too.
+    create: () => `export const Probe = () => <img className="${['mix', 'blend', 'lighten'].join('-')}" alt="" />;${LF}`,
+    expect: /src\/verify-gates-probe\.tsx:1 uses a blend mode/,
+  },
+  {
+    id: 'assets/accent-moved-alone',
+    gate: 'check:assets',
+    label: 'the accent changed without the lit rasters is caught',
+    file: TOKENS,
+    mutate: swap(/((?<![\w-])--accent:\s*)#[0-9a-fA-F]{3,8}/, '$1#FF5A1F'),
+    expect: /declares --accent as #FF5A1F/,
+  },
 ];
 
 /* ═══ the runner ═══════════════════════════════════════════════════════════════════════════════ */
@@ -881,6 +910,16 @@ const readRecords = () => {
     return [];
   }
 };
+
+/* ── check:pulse: its probes come from the gate itself ────────────────────────────────────────────
+ * The ratchet has one rule per legacy construct, and every rule carries the defect it exists for.
+ * So the list is not typed here a second time: one planted file per rule id, the two kept rules and
+ * the ways a budget can lie are read from `check-pulse.mjs` — a rule added there arrives here with
+ * its probe, and a rule cannot exist without one. */
+if (exists(GATES['check:pulse'])) {
+  const pulse = await import(pathToFileURL(abs(GATES['check:pulse'])).href);
+  PROBES.push(...pulse.verifyGatesProbes({ plant: PLANT }));
+}
 
 /* ── main ─────────────────────────────────────────────────────────────────────────────────────── */
 

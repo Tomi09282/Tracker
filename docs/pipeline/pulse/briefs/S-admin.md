@@ -19,8 +19,9 @@
 
 ## You own — and write nothing else
 
-Files that exist today (6):
+Files that exist today (7):
 
+- `docs/pipeline/pulse/pkg/S-admin/budget.json`
 - `frontend/src/features/admin/AdminMetrics.tsx`
 - `frontend/src/features/admin/AdminPage.tsx`
 - `frontend/src/features/admin/AdminShell.tsx`
@@ -28,9 +29,7 @@ Files that exist today (6):
 - `frontend/src/features/admin/ModerationQueue.tsx`
 - `frontend/src/features/admin/UserSearch.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-admin/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-admin/**`
 
 Deleted by this package:
 

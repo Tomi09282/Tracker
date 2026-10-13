@@ -19,15 +19,14 @@
 
 ## You own — and write nothing else
 
-Files that exist today (3):
+Files that exist today (4):
 
+- `docs/pipeline/pulse/pkg/S-settings/budget.json`
 - `frontend/src/features/settings/CueSettings.tsx`
 - `frontend/src/features/settings/EquipmentSection.tsx`
 - `frontend/src/features/settings/SettingsPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-settings/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-settings/**`
 
 ## Must not touch
 

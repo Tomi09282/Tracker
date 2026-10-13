@@ -19,16 +19,15 @@
 
 ## You own — and write nothing else
 
-Files that exist today (4):
+Files that exist today (5):
 
+- `docs/pipeline/pulse/pkg/S-workout/budget.json`
 - `frontend/src/features/workout/IntervalStage.tsx`
 - `frontend/src/features/workout/RestTimer.tsx`
 - `frontend/src/features/workout/SetRow.tsx`
 - `frontend/src/features/workout/WorkoutPlayer.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-workout/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-workout/**`
 
 ## Must not touch
 

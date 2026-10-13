@@ -19,14 +19,13 @@
 
 ## You own — and write nothing else
 
-Files that exist today (2):
+Files that exist today (3):
 
+- `docs/pipeline/pulse/pkg/S-coins/budget.json`
 - `frontend/src/features/coins/CoinBalance.tsx`
 - `frontend/src/features/coins/CoinsPage.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-coins/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-coins/**`
 
 ## Must not touch
 

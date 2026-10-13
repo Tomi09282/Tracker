@@ -197,6 +197,10 @@ const filesBlock = (p) => {
       out.push(`\n(${existing.length} files; the full list is this package's \`files.existing\` in the progress file.)`);
     } else {
       out.push(bullets(existing, code));
+      // A folder pattern that already holds a file (a hand-in folder with its generated budget.json)
+      // is still owned as a whole: say so, or the list reads as "these files and nothing else".
+      const open = p.owns.filter((o) => o.includes('*') && !toCreate.includes(o));
+      if (open.length) out.push(`\nAnd whatever else this package adds under: ${open.map(code).join(', ')}`);
     }
   }
   if (toCreate.length) {

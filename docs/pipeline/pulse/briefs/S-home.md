@@ -19,16 +19,15 @@
 
 ## You own — and write nothing else
 
-Files that exist today (4):
+Files that exist today (5):
 
+- `docs/pipeline/pulse/pkg/S-home/budget.json`
 - `frontend/src/features/chat/NotificationBell.tsx`
 - `frontend/src/features/home/HomeNutrition.tsx`
 - `frontend/src/features/home/HomePage.tsx`
 - `frontend/src/features/home/WeekStrip.tsx`
 
-Not in the tree yet — created by this package (1):
-
-- `docs/pipeline/pulse/pkg/S-home/**`
+And whatever else this package adds under: `docs/pipeline/pulse/pkg/S-home/**`
 
 ## Must not touch
 
