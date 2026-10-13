@@ -205,3 +205,59 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Lane blocks ──────────────────────────────────────────────────────────────────────────
+ *
+ * One named, EMPTY block per foundation lane — the twin of the blocks at the end of
+ * ui/tokens/tokens.css. A lane that needs a keyframe or a hand-written class does not edit the
+ * layers above: it writes COMPLETE rules between its own two markers, inside the layer they belong
+ * to —
+ *
+ *     @layer utilities { @keyframes … }     a keyframe
+ *     @layer components { .name { … } }     a class a utility cannot express
+ *
+ * — and hands the hunk in as docs/pipeline/pulse/pkg/<id>/shared.patch. Never unlayered: unlayered
+ * CSS beats every layer, so a rule written bare here would silently win over a utility at a call
+ * site. The blocks are three lines apart, so two lanes never touch neighbouring lines. The emptied
+ * markers are deleted in the closing cleanup.
+ */
+
+/* F5 — assets: Pic, UserPhoto */
+/* lane:F5 */
+/* /lane:F5 */
+
+/* F6 — actions: control(), Pressable, TextLink */
+/* lane:F6 */
+/* /lane:F6 */
+
+/* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */
+/* lane:F8 */
+/* /lane:F8 */
+
+/* F9 — structure: SectionHeader, Rule, RowStack, ListRow, EmptyState, Skeleton, NoticeLine, Monogram */
+/* lane:F9 */
+/* /lane:F9 */
+
+/* F10 — data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp, LedgerRow */
+/* lane:F10 */
+/* /lane:F10 */
+
+/* F11 — shell: tab bar, Screen, ScreenHeader, Dock, PublicLayout */
+/* lane:F11 */
+/* /lane:F11 */
+
+/* F12 — inputs and the sheet: Field, SearchField, TextArea, NumberStepper, SelectSheet, Sheet */
+/* lane:F12 */
+/* /lane:F12 */
+
+/* F13 — status zone: toast band, offline line, command palette */
+/* lane:F13 */
+/* /lane:F13 */
+
+/* F14 — charts: TrendChart, Sparkline */
+/* lane:F14 */
+/* /lane:F14 */
+
+/* F15 — mannequin: MuscleMap */
+/* lane:F15 */
+/* /lane:F15 */

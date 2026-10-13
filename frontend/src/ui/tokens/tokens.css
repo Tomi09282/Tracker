@@ -3,20 +3,36 @@
  * THIS IS THE ONLY FILE IN src/ ALLOWED TO CONTAIN A RAW COLOR, RADIUS OR DURATION.
  * `npm run check:tokens` fails the build on any raw value found elsewhere.
  *
- *   Layer 1  primitives  — theme-independent scales (@theme, becomes Tailwind utilities)
- *   Layer 2  semantics   — one block per [data-theme], identical token names across packs
+ *   Layer 1  primitives  — look-independent scales (@theme, becomes Tailwind utilities)
+ *   Layer 2  semantics   — ONE `:root` block: Pulse V1 "Open Field" is the only look
  *   Layer 3  component   — thin aliases over layer 2, referenced by components
  *
- * Every value below is dictated by the VISUAL DESIGN BIBLE. Where the Bible gives an exact
- * number, that number is here verbatim — the previous implementation drifted on all of them
- * (see ADR-0006) and every screen inherited the drift.
+ * PULSE IN ONE PARAGRAPH. A near-black room in which things light up: one canvas, one acid-lime
+ * lamp, 1 px rules, no boxes, no blur, no shadow except the glow of the one primary pill. The law is
+ * `docs/brain/58-Pulse/Pulse System.md`; where a value is given there, that value is here verbatim.
+ *
+ * THE BRIDGE. The liquid-glass look this file used to describe is gone, but 140 files were written
+ * against its token NAMES. Every one of those names is still declared below, so nothing fails the
+ * `undeclared-token` rule while screens are rebuilt one by one — and the VALUES are Pulse:
+ *
+ *   a name that carries STATE      (selected, error, focus, a role)   keeps a visible, derived value
+ *   a name that was DECORATION     (glass, blur, shadow, aurora, tint) is neutral: transparent / none / 0
+ *   a fixed bar or a floating layer (nav, toast, sheet)               stays OPAQUE — text scrolls under it
+ *
+ * Each such declaration is marked BRIDGE. They are deleted together in the closing cleanup, when the
+ * last consumer is gone; until then do not write new code against a BRIDGE name.
+ *
+ * THERE ARE NO THEME PACKS. One look, no `[data-theme]`, no translucency setting. The mechanism to
+ * bring a pack back is kept cheap on purpose: every lit value derives from `--accent`, so a future
+ * pack is one `:root[data-theme='x'] { --accent: … }` line (plus a second set of the lit rasters —
+ * the tab icons and medals are pixels, and a token cannot reach them).
  */
 
 /* ── Layer 1 — primitives ─────────────────────────────────────────────────────────────── */
 /* `static` is load-bearing: Tailwind tree-shakes @theme variables it sees no utility for, and
    half of this layer is consumed through var() from component CSS and from JS (the motion
-   config, the theme engine, the min-target lint). Without it, --duration-base, --ease-standard,
-   --icon-lg, --nav-h and the column widths silently resolve to the empty string. */
+   config, the min-target lint). Without it, --duration-base, --ease-standard, --icon-lg, --nav-h
+   and the column widths silently resolve to the empty string. */
 @theme static {
   /* Fonts. Two families, no more (Bible: TYPOGRAPHY LAW). Self-hosted via @fontsource so the
      strict CSP never has to allow a third-party font origin. */
@@ -35,8 +51,7 @@
      (343px content x 9/16), and the stage has to fit a phase word, this number, a progress bar,
      an info line and a 44px control row inside it. 48px is a lock-screen-clock size and is
      legible from the floor at arm's length, which is the actual requirement — the phone is not
-     in the lifter's hand. A raw `text-[3rem]` at the call site would slip past check-tokens and
-     could never be re-scaled by a theme pack. */
+     in the lifter's hand. A raw `text-[3rem]` at the call site would slip past check-tokens. */
   --text-timer: 3rem;                    /* 48px */
   --text-timer--line-height: 3rem;
   --text-timer--font-weight: 700;
@@ -88,50 +103,47 @@
   /* Three NAMED steps OF that grid — not a second scale. Each is a plain multiple of --spacing
      (2 / 4 / 8) and is named for a RELATIONSHIP rather than a size, which is the part the grid
      could never carry: a grid says which values are legal, it does not say which one means
-     "these two things belong together".
-     Measured before they existed: 87% of every gap in the product was <= 12px and eight gaps in
-     the whole app were >= 20px, so proximity carried no information at all — 16 vs 12 vs 8 at
-     arm's length on a phone is one distance. Spacing is also the only axis with no gate
-     (off-grid-spacing inspects arbitrary values only), which is the structural reason it drifted.
-     WHY 32 for a section: it is the first step at 2x --card-pad, and below a 2:1 ratio a boundary
-     does not read as a boundary without a rule or a divider. */
+     "these two things belong together". They are exactly Pulse's three named distances:
+     label → value 8, rule → eyebrow → content 16, between blocks 32. */
   --spacing-tight: 0.5rem;   /* 8px  = --spacing(2) — inside one group: icon↔text, chip↔chip, label↔value */
-  --spacing-group: 1rem;     /* 16px = --spacing(4) — between peers in one list; equals --card-pad on purpose */
+  --spacing-group: 1rem;     /* 16px = --spacing(4) — between peers in one list; rule → eyebrow → content */
   --spacing-section: 2rem;   /* 32px = --spacing(8) — between two things that are not each other's business */
 
-  /* Radius scale. Themes pick from it structurally; components never name a raw step. */
+  /* Radius scale. The semantic radii of Layer 2 pick from it; components never name a raw step.
+     Pulse uses four of them: 0 (rows, fields, images), 2 px (skeleton, user photos), 28 (sheet
+     top) and full (pill, switch, badge). */
   --radius-0: 0px;
   --radius-1: 2px;
   --radius-2: 4px;
   --radius-3: 8px;
-  --radius-4: 12px;   /* Bible: buttons */
-  --radius-5: 16px;   /* Bible: cards */
+  --radius-4: 12px;
+  --radius-5: 16px;
   --radius-6: 20px;
   --radius-7: 24px;
   --radius-8: 28px;
-  --radius-full: 9999px; /* Bible: chips */
+  --radius-full: 9999px;
+  /* Bars and segments: a 4 px progress bar and a 6 px week segment are square-ended to 1 px. The
+     scale had no such step, and `rounded-[1px]` is refused by check-tokens — hence a name.
+     Declared here, in the theme, so `rounded-bar` exists as a utility. */
+  --radius-bar: 1px;
 
-  /* Motion — Bible: MOTION LAW. UI never exceeds 500ms. */
-  --duration-instant: 100ms;  /* state flips */
-  --duration-fast: 150ms;     /* hover */
+  /* Motion — Pulse System 2.4, the same six numbers and the same curve as before. UI never exceeds
+     500ms; transform and opacity only. */
+  --duration-instant: 100ms;  /* state flips, press */
+  --duration-fast: 150ms;     /* hover, ignite */
   --duration-base: 250ms;     /* most transitions */
-  --duration-slow: 400ms;     /* sheets, large surfaces */
+  --duration-slow: 400ms;     /* sheets, large surfaces, count-up */
 
   /* The LOOP duration, which the four above are not. Those are state-change durations: something
      was one way, now it is another, and the number is how long the eye is given to follow it. A
      skeleton shimmer never arrives anywhere — it repeats until data lands — and running it at
-     250ms is a strobe. Naming it here is what stops each screen from inventing its own: nine of
-     them had already reached for Tailwind's animate-pulse at 2s, which no token declares. */
-  --duration-ambient: 1200ms; /* skeleton shimmer, breathing emphasis — loops, not transitions */
+     250ms is a strobe. Naming it here is what stops each screen from inventing its own. */
+  --duration-ambient: 1200ms; /* skeleton sheen, the resting pulse of the idle pill — loops, not transitions */
 
   /* The toast's DWELL, which is a third kind again: not a state change and not a loop, but how
-     long a notification stays on screen before it takes itself away. It sits outside the 500ms
-     UI ceiling for the same reason --duration-ambient does — that ceiling governs how long the
-     eye is asked to follow a change, and this is how long a sentence is left up to be read.
-     It is a token because two literals had to agree and neither could see the other: the
-     auto-dismiss `setTimeout(…, 4000)` in E12E16 and the `toast-timer 4s` that draws the
-     remaining time as a hairline. A drained bar over a toast that is still there, or a toast
-     that vanishes under a half-full bar, is the timer lying about itself. */
+     long a notification stays on screen before it takes itself away. It is a token because two
+     literals had to agree and neither could see the other: the auto-dismiss `setTimeout(…, 4000)`
+     in E12E16 and the `toast-timer 4s` that draws the remaining time as a hairline. */
   --duration-toast: 4000ms;
 
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
@@ -141,16 +153,17 @@
   --target-min: 44px;
   --icon-sm: 16px;
   --icon-md: 20px;
-  --icon-lg: 24px;   /* Bible: bottom-nav icon size */
+  --icon-lg: 24px;
   --nav-h: 64px;
 
   /* How much room the layout reserves below its content for the bottom nav.
      ONE definition, because two places need to agree exactly: `AppLayout`'s `<main>` pads by it,
      and any full-height screen (the workout player) subtracts it. They did not agree — the layout
      reserved nav + 16px while the player subtracted only the nav, and the page scrolled by exactly
-     16px. On the player that is not cosmetic: the Bible's law is that the page must NOT scroll
-     while sets are being checked, because a check button that moves is a check button that records
-     the wrong set. */
+     16px. On the player that is not cosmetic: the law is that the page must NOT scroll while sets
+     are being checked, because a check button that moves is a check button that records the
+     wrong set. It keeps this name and this meaning under Pulse; what a page pads by is the new
+     `--page-pad-b` below. */
   --content-pad-b: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
 
   /* HOW TALL A FULL-HEIGHT SCREEN ACTUALLY GETS.
@@ -168,8 +181,8 @@
    * always did. */
   --offline-h: 0px;
   --viewport-h: calc(100dvh - var(--offline-h));
-  --content-pad-b-lg: calc(var(--nav-h) + 32px);
-  --nav-dock-offset: 16px;  /* Bible: desktop dock sits 16px above the screen bottom */
+  --content-pad-b-lg: calc(var(--nav-h) + 32px);  /* BRIDGE (layout) — unchanged until its consumer goes */
+  --nav-dock-offset: 16px;                        /* BRIDGE (layout) — the detached bar's air on three sides */
   --col-mobile: 480px;      /* mobile-shaped flows stay in this column on desktop */
   --col-wide: 1120px;       /* admin / dashboards / grids */
 
@@ -184,23 +197,64 @@
 
   /* The admin sidebar. A GRID COLUMN inside the 1120px content column, not a second fixed element:
      BottomNav is already `fixed inset-x-0 bottom-0`, and a second fixed rail would have to know
-     about it, about the safe-area inset and about the toast layer. Three z-index decisions to get
-     wrong instead of none. */
+     about it, about the safe-area inset and about the toast layer. */
   --admin-sidebar-w: 15rem;
 
-  /* Backdrop blur scale (ADR-0015).
-     A SCALE, not a set of assignments — which surface uses which step is a component decision and
-     lives in Layer 3, exactly as --radius-* works. Four steps because a glass system needs to say
-     "barely", "a card", "a floating slab" and "the whole screen behind a modal", and a fifth would
-     be a step nobody could name.
+  /* ── Pulse component metrics (Pulse System 2.3 and 4) ──────────────────────────────────────
+     Plain primitives, consumed as `min-h-[var(--row-h)]` — the spelling `--target-min` already
+     uses. A metric lives here, not at a call site, so two components that must agree (a list row
+     and the skeleton that stands in for it) read one number. Nothing reads them yet: the kit lanes
+     do. `--control-h` (44) stays the default control height; the 56 pt pill is opted into per call
+     site through `--control-h-primary`, so no screen grows behind its own back. */
+  --row-h: 56px;             /* list row, minimum */
+  --row-h-sub: 64px;         /* list row with a sub line */
+  --row-h-ledger: 76px;      /* ledger row: eyebrow | note | numeral on one baseline */
+  --control-h-primary: 56px; /* the lime pill */
+  --switch-w: 48px;
+  --switch-h: 28px;
+  --switch-knob: 22px;
+  --mark-h: 2px;             /* the selection mark under a chip or a segment */
+  --seg-h: 6px;              /* week / segment bar */
+  --bar-h: 4px;              /* progress bar, macro bar, stepper segment */
+  --dot: 6px;                /* status dot, live marker */
+  --thumb: 48px;             /* the lead slot of a list row */
+  --tab-icon: 32px;
+  --tab-icon-dense: 28px;    /* seven tabs */
+  --badge-h: 18px;
+  --mono-sm: 28px;           /* monogram in a row */
+  --mono-md: 64px;           /* monogram in a header */
+  --mono-lg: 176px;          /* the hero monogram */
+  --grabber-w: 36px;         /* the bottom sheet's handle */
 
-     These are the only blur values in the app. `backdrop-blur-[var(--blur-md)]` is the spelling;
-     Tailwind's own `backdrop-blur-xl` is a raw value in disguise and is being removed from the
-     four hand-written call sites that predate this scale. */
-  --blur-sm: 8px;
-  --blur-md: 16px;
-  --blur-lg: 28px;
-  --blur-xl: 40px;
+  /* State, as one grammar: a disabled thing is 40 %, a pressed row or link is 60 %. */
+  --disabled-opacity: 0.4;
+  --pressed-opacity: 0.6;
+
+  /* ── Pulse shell (Pulse System 3) — ADDED BESIDE the old names, which keep their values ─────
+     The frames are drawn with insets 62 / 34. On a device that reports none, the two floors keep
+     content off the glass. Every token below that reaches `env(safe-area-inset-*)` — directly or
+     through `--safe-t` / `--safe-b` — is "inset-carrying": an edge-pinned element that uses one has
+     its safe area covered. `--nav-h` is still 64 here; the shell lane re-values it to 56 in the
+     same commit as the new tab bar, and everything below follows. */
+  --inset-floor-t: 12px;
+  --inset-floor-b: 8px;
+  --safe-t: max(env(safe-area-inset-top), var(--inset-floor-t));
+  --safe-b: max(env(safe-area-inset-bottom), var(--inset-floor-b));
+  --tabbar-offset: calc(var(--safe-b) + 2px);                           /* the bar's distance from the bottom edge */
+  --page-pad-b: calc(var(--nav-h) + var(--tabbar-offset) + 48px);       /* what a scrolling page pads by */
+  --fade-h: calc(var(--nav-h) + var(--tabbar-offset) + 38px);           /* the bottom fade: 130 pt at 56 + 36 */
+  --dock-b: calc(var(--nav-h) + var(--tabbar-offset) + 12px);           /* a docked action above the tab bar */
+  --dock-b-bare: calc(var(--safe-b) + 16px);                            /* a docked action on a screen without tabs */
+  --head-top-root: calc(var(--safe-t) + 10px);                          /* header of a root screen */
+  --head-top-push: calc(var(--safe-t) + 2px);                           /* header of a pushed screen */
+  --band-pad-t: calc(var(--safe-t) + 6px);                              /* the toast band */
+
+  /* Blur scale — BRIDGE (decoration). Pulse has no blur anywhere, so every step is zero and
+     `backdrop-blur-[var(--blur-lg)]` at an unmigrated call site is a filter that does nothing. */
+  --blur-sm: 0px;
+  --blur-md: 0px;
+  --blur-lg: 0px;
+  --blur-xl: 0px;
 
   /* Z-index ladder.
      --z-sticky sits BELOW the nav: a table header that scrolled over the bottom navigation would
@@ -215,369 +269,101 @@
 /* ── Layer 2 — semantics ──────────────────────────────────────────────────────────────── */
 
 /*
- * Surfaces are ELEVATION, never new colors. Text is one ink at three opacities, so it stays
- * legible on every surface — the previous build froze three opaque hexes and broke the moment
- * text sat on anything but surface-0.
- *
- * The :root copy is the pre-paint fallback: a cold, storage-less boot renders Midnight rather
- * than an unstyled flash.
- */
-:root,
-[data-theme='midnight'] {
-  --surface-0: #0B0D10;
-  --surface-1: #12151A;
-  --surface-2: #181C22;
-  --surface-3: #20252D;
-  /* The hairline, at the ~12% the card rule asks for. It ran at 0.07 and measured as an absence:
-     on a dark surface an alpha-white edge at 7% is under half a shade off the card it is meant to
-     bound, so the card separated by its fill alone — and the fill is one 4% step off the page.
-     This is the app's ONLY card separator (F-09: border OR shadow, never both), so it is not a
-     detail, it is the whole boundary. */
-  --surface-border: rgb(255 255 255 / 0.12);
-  /* The hairline, one step stronger. It exists because an interactive surface has to be able to
-     state itself on hover, and its only other options were a raw value or the accent — and the
-     accent on every hoverable row spends the signature color on "the pointer is here", which is
-     the one thing it must not mean. Same alpha-of-ink construction as the hairline, so it works
-     on every surface in every pack; ~2x the base in each, which is the step where an edge is
-     read as *this* card rather than as a heavier line. It moves WITH the base: leaving it at
-     0.14 against a 0.12 hairline would have made hover a two-hundredths change nobody sees. */
-  --surface-border-strong: rgb(255 255 255 / 0.22);
-
-  --ink: 242 245 247;                    /* #F2F5F7 */
-  /* Desaturated one step off the source hue (HSL S 95 → 76, hue and lightness untouched). A
-     fully saturated accent buzzes on an OLED panel in a dark room, which is the only room this
-     app runs in — and this one is a large filled surface on every primary button. Legibility
-     went UP, not down: accent-as-text on surface-0 measures 6.78:1 where it was 6.31:1. */
-  --accent: #7C94ED;
-  --accent-fg: #0B0D10;                  /* recomputed against WCAG by the theme engine */
-
-  --success: #34D399;  --on-success: #04150E;
-  --warning: #FBBF24;  --on-warning: #241703;
-  --danger:  #F87171;  --on-danger:  #2A0A0C;
-  --info:    #60A5FA;  --on-info:    #06152B;
-
-  /* Structural identity of the pack (Bible: themes change size/radius/shadow/border, not
-     just color). Midnight = calm, medium radius, hairline border, shadow on overlays only. */
-  --radius-button: var(--radius-4);
-  --radius-field: var(--radius-4);
-  --radius-card: var(--radius-5);
-  --radius-sheet: var(--radius-7);
-  --radius-chip: var(--radius-full);
-  --border-width: 1px;
-  --control-h: var(--target-min);
-  /* THREE layers, not one. A single `0 8px 24px` is a stamp, not a shadow: it gives one distance
-     cue, so the sheet, the floating rest timer and the command palette all read as sitting at the
-     same height above the page. The stack is the standard one — a tight CONTACT shadow that says
-     the element is touching something, a MID spread that gives it its height, and a wide AMBIENT
-     wash that says the room has light in it. Blur roughly 2 / 12–24 / 32–48 at increasing offset.
-     Alphas drop as blur grows, so the three sum to about the weight the single layer had. */
-  --shadow-overlay:
-    0 1px 2px rgb(0 0 0 / 0.32),
-    0 8px 24px rgb(0 0 0 / 0.30),
-    0 20px 44px rgb(0 0 0 / 0.24);
-  /* The topmost thing on screen — the one element that is above every other floating element,
-     not merely above the page. Same three layers, pushed one step further out, so "on top of the
-     sheet" is a distance the eye can measure rather than a z-index only the code knows about. */
-  --shadow-overlay-strong:
-    0 1px 2px rgb(0 0 0 / 0.40),
-    0 12px 32px rgb(0 0 0 / 0.38),
-    0 32px 64px rgb(0 0 0 / 0.30);
-  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
-     F-09: border OR shadow, never both. */
-  --overlay-border: transparent;
-  --shadow-glow: none;
-
-  /* ─── GLASS (ADR-0015) ──────────────────────────────────────────────────────────────────────
-     Translucency as an ALPHA AXIS OVER THE EXISTING SURFACES, not as new colours.
-
-     DECISION 16 says surfaces are elevation and never new colours, and this keeps that intact:
-     --glass-1 is still surface-1, just admitting some of what is behind it. --nav-bg has been
-     built this exact way since Phase 0 (`color-mix(… 88%, transparent)`), so this generalises an
-     idea already in the file rather than introducing one.
-
-     Alpha RISES with elevation. The higher a sheet floats, the more it owns what is behind it: a
-     card lets the aurora through, a bottom sheet mostly does not, because a sheet is a surface you
-     read a form on and the thing behind it is deliberately dismissable.
-
-     THESE THREE PERCENTAGES ARE A STARTING POINT, NOT A MEASUREMENT. Deriving alpha back out of a
-     rendered mockup needs the backdrop under the card, which the image does not contain — an
-     attempt to sample it returned 0%, 94% and 100% for the same material, which measures the
-     sampling rather than the design. They get settled by holding the running app beside
-     `v4-vegleges/sotet/01-home.png`, which is the comparison that decides it anyway. */
-  --glass-1: color-mix(in srgb, var(--surface-1) 62%, transparent);
-  --glass-2: color-mix(in srgb, var(--surface-2) 70%, transparent);
-  --glass-3: color-mix(in srgb, var(--surface-3) 84%, transparent);
-
-  /* The specular rim: the bright line along a pane's TOP edge where light catches it.
-     Rendered as `box-shadow: inset 0 1px 0 …`, which is why F-09 is not in play — an inset
-     highlight renders inside the element's own box and claims no elevation. See ADR-0016.
-     Same alpha-of-ink construction as --surface-border, so it survives any surface. */
-  --glass-rim: rgb(255 255 255 / 0.20);
-
-  /* ── What makes it read as GLASS rather than as a tinted panel ────────────────────────────
-   *
-   * The first pass had translucency and a rim and still looked like a flat colour, and the reason
-   * is that a real pane of glass is not evenly lit. Light lands on its top edge and falls off; the
-   * bottom edge sits in the shadow of its own thickness. A rim of one uniform alpha all the way
-   * round says "outline". A rim that is bright at the top and gone by the bottom says "object".
-   *
-   * All three of these are `box-shadow` and `background-image`, which cost nothing extra: they
-   * paint in the same pass the element was already painting in. Only `--card-blur` and
-   * `--card-saturate` touch the compositor, and they are declared separately for that reason.
-   */
-
-  /* The lit edge: a hairline inset highlight along the top, and a fainter one carrying round the
-     sides before it dies. Two insets rather than a border, because a border is on all four sides
-     at one strength by construction and that is the flatness being fixed. */
-  --glass-lip:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.22),
-    inset 0 0 0 1px rgb(255 255 255 / 0.06);
-
-  /* The thickness: a soft dark line just inside the bottom edge, which is what a pane's own body
-     does to the light passing through it. Very low alpha — at anything stronger it stops reading
-     as depth and starts reading as a second border. */
-  --glass-underside: inset 0 -1px 0 0 rgb(0 0 0 / 0.28);
-
-  /* The sheen across the face. A single wide highlight from the top-leading corner, at an alpha
-     low enough that it is felt rather than seen — it is what stops a large card looking like a
-     rectangle of paint. `--glass-sheen-angle` is separate so a pack can turn the light source. */
-  --glass-sheen-angle: 145deg;
-  --glass-sheen: linear-gradient(
-    var(--glass-sheen-angle),
-    rgb(255 255 255 / 0.07) 0%,
-    rgb(255 255 255 / 0.02) 38%,
-    transparent 62%
-  );
-
-  /* Saturation of what shows THROUGH. This is the one that surprises people: a plain blur greys
-     the backdrop, because averaging neighbouring pixels averages their chroma too. Pushing
-     saturation back up is what makes the aurora read as colour behind the pane instead of as
-     smoke. It only applies where a backdrop-filter already exists, so it adds no new layer. */
-  --card-saturate: 1.4;
-
-  /* The aurora the whole interface floats over.
-     Grain FIRST, i.e. on top — the same ordering and the same reason as --gradient-brand: three
-     overlapping wide radial gradients is the textbook banding case on a 6-bit phone panel, and
-     --noise-overlay exists to dither exactly that. The stops are soft rather than blurred at
-     runtime: `filter: blur()` on a full-viewport element is a per-frame GPU cost for an effect
-     that can be baked into the gradient for nothing. */
-  --aurora:
-    var(--noise-overlay),
-    radial-gradient(60% 42% at 18% 10%, color-mix(in srgb, var(--accent) 26%, transparent) 0%, transparent 70%),
-    radial-gradient(52% 38% at 84% 34%, color-mix(in srgb, var(--info) 20%, transparent) 0%, transparent 72%),
-    radial-gradient(70% 46% at 38% 88%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 75%);
-
-  /* The tinted holder every icon sits in across all 27 screens — three to six times per screen,
-     which makes it the most repeated NEW element in the redesign, and the reason it is a token on
-     day one rather than an inline class discovered on screen twelve. */
-  --tile-tint: color-mix(in srgb, var(--accent) 14%, transparent);
-  --tile-tint-fg: var(--accent);
-}
-
-[data-theme='solar'] {
-  --surface-0: #12100B;
-  --surface-1: #191510;
-  --surface-2: #201B14;
-  --surface-3: #292219;
-  --surface-border: rgb(255 255 255 / 0.12);
-  --surface-border-strong: rgb(255 255 255 / 0.22);
-
-  --ink: 247 243 236;
-  --accent: #E89D4D;                     /* HSL S 96 → 77; hue and lightness held */
-  --accent-fg: #12100B;
-
-  --success: #34D399;  --on-success: #04150E;
-  --warning: #FBBF24;  --on-warning: #241703;
-  --danger:  #F87171;  --on-danger:  #2A0A0C;
-  --info:    #60A5FA;  --on-info:    #06152B;
-
-  /* Solar = soft: larger radii, deeper shadow, taller controls. */
-  --radius-button: var(--radius-6);
-  --radius-field: var(--radius-5);
-  --radius-card: var(--radius-7);
-  --radius-sheet: var(--radius-8);
-  --radius-chip: var(--radius-full);
-  --border-width: 1px;
-  --control-h: 48px;
-  /* Same three-layer construction as Midnight, thrown further: this pack's declared identity is
-     "soft — larger radii, deeper shadow", and a deeper shadow means a longer mid and ambient, not
-     a darker stamp. */
-  --shadow-overlay:
-    0 1px 2px rgb(0 0 0 / 0.36),
-    0 16px 40px rgb(0 0 0 / 0.38),
-    0 36px 72px rgb(0 0 0 / 0.30);
-  --shadow-overlay-strong:
-    0 1px 2px rgb(0 0 0 / 0.44),
-    0 22px 52px rgb(0 0 0 / 0.46),
-    0 48px 88px rgb(0 0 0 / 0.36);
-  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
-     F-09: border OR shadow, never both. */
-  --overlay-border: transparent;
-  --shadow-glow: none;
-}
-
-[data-theme='forest'] {
-  --surface-0: #0A0F0C;
-  --surface-1: #101711;
-  --surface-2: #161E18;
-  --surface-3: #1D2720;
-  --surface-border: rgb(255 255 255 / 0.12);
-  --surface-border-strong: rgb(255 255 255 / 0.22);
-
-  --ink: 237 245 239;
-  --accent: #4DC18D;                     /* HSL S 60 → 48; hue and lightness held */
-  --accent-fg: #04150E;
-
-  --success: #34D399;  --on-success: #04150E;
-  --warning: #FBBF24;  --on-warning: #241703;
-  --danger:  #F87171;  --on-danger:  #2A0A0C;
-  --info:    #60A5FA;  --on-info:    #06152B;
-
-  --radius-button: var(--radius-4);
-  --radius-field: var(--radius-4);
-  --radius-card: var(--radius-5);
-  --radius-sheet: var(--radius-7);
-  --radius-chip: var(--radius-full);
-  --border-width: 1px;
-  --control-h: var(--target-min);
-  /* Forest shares Midnight's structural identity, so it shares its elevation stack too —
-     contact / mid / ambient. Two packs declared as "calm, medium" must not drift apart here. */
-  --shadow-overlay:
-    0 1px 2px rgb(0 0 0 / 0.32),
-    0 8px 24px rgb(0 0 0 / 0.30),
-    0 20px 44px rgb(0 0 0 / 0.24);
-  --shadow-overlay-strong:
-    0 1px 2px rgb(0 0 0 / 0.40),
-    0 12px 32px rgb(0 0 0 / 0.38),
-    0 32px 64px rgb(0 0 0 / 0.30);
-  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
-     F-09: border OR shadow, never both. */
-  --overlay-border: transparent;
-  --shadow-glow: none;
-}
-
-[data-theme='neon'] {
-  /* Darkest pack, but never #000 — pure black smears on OLED and the Bible bans it. */
-  --surface-0: #06070A;
-  --surface-1: #0B0D12;
-  --surface-2: #11141B;
-  --surface-3: #171B25;
-  /* One step above the base packs, as before: this pack's surfaces are the darkest in the set,
-     so its edges need slightly more ink to read at the same weight. */
-  --surface-border: rgb(255 255 255 / 0.14);
-  --surface-border-strong: rgb(255 255 255 / 0.24);
-
-  --ink: 240 244 255;
-  /* The worst offender in the set at S=100 — a fully saturated cyan on a near-black page is the
-     exact "buzzes and reads as cheap" the dark-mode rule names. HSL S 100 → 80; still cyan, still
-     the pack's glow, no longer vibrating. */
-  --accent: #19CDE6;
-  --accent-fg: #04141A;
-
-  --success: #34D399;  --on-success: #04150E;
-  --warning: #FBBF24;  --on-warning: #241703;
-  --danger:  #F87171;  --on-danger:  #2A0A0C;
-  --info:    #60A5FA;  --on-info:    #06152B;
-
-  /* Neon = pill + glow, no drop shadow. */
-  --radius-button: var(--radius-full);
-  --radius-field: var(--radius-full);
-  --radius-card: var(--radius-6);
-  --radius-sheet: var(--radius-8);
-  --radius-chip: var(--radius-full);
-  --border-width: 1px;
-  --control-h: var(--target-min);
-  /* Three layers here too, but all at ZERO offset: this pack's declared identity is "pill + glow,
-     no drop shadow", and a glow that gains a y-offset is a drop shadow. What the three layers buy
-     is the same thing they buy elsewhere — a tight rim that anchors the edge, a mid halo that
-     gives height, a wide ambient that lights the surface under it. */
-  --shadow-overlay:
-    0 0 2px color-mix(in srgb, var(--accent) 28%, transparent),
-    0 0 12px color-mix(in srgb, var(--accent) 20%, transparent),
-    0 0 32px color-mix(in srgb, var(--accent) 14%, transparent);
-  --shadow-overlay-strong:
-    0 0 3px color-mix(in srgb, var(--accent) 36%, transparent),
-    0 0 20px color-mix(in srgb, var(--accent) 28%, transparent),
-    0 0 48px color-mix(in srgb, var(--accent) 20%, transparent);
-  /* This pack separates a floating element by its shadow, so the edge stays out of the way.
-     F-09: border OR shadow, never both. */
-  --overlay-border: transparent;
-  --shadow-glow: 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent);
-}
-
-[data-theme='mono'] {
-  --surface-0: #0A0A0A;
-  --surface-1: #101010;
-  --surface-2: #171717;
-  --surface-3: #1F1F1F;
-  /* Mono's border is the heaviest in the set — that is the pack's declared identity, so its
-     strong step has to stay above everyone else's or the identity flattens on hover. Both steps
-     moved up when the other four packs came up to ~12%: the ORDER is what carries the identity,
-     not the absolute number. */
-  --surface-border: rgb(255 255 255 / 0.16);
-  --surface-border-strong: rgb(255 255 255 / 0.28);
-
-  --ink: 245 245 245;
-  /* Untouched at S=0. There is no saturation to take out of an achromatic accent — the
-     desaturation step the other four packs took does not apply, and faking one by darkening it
-     would be a different change with a different reason. */
-  --accent: #FAFAFA;
-  --accent-fg: #0A0A0A;
-
-  /* Destructive stays red even in a monochrome pack — color carries meaning here. */
-  --success: #34D399;  --on-success: #04150E;
-  --warning: #FBBF24;  --on-warning: #241703;
-  --danger:  #F87171;  --on-danger:  #2A0A0C;
-  --info:    #60A5FA;  --on-info:    #06152B;
-
-  /* Mono = sharp + flat: no radius, heavier border, no shadow at all. */
-  --radius-button: var(--radius-0);
-  --radius-field: var(--radius-0);
-  --radius-card: var(--radius-1);
-  --radius-sheet: var(--radius-0);
-  --radius-chip: var(--radius-0);
-  --border-width: 2px;
-  --control-h: var(--target-min);
-  --shadow-overlay: none;
-  /* And the strong step is `none` too. Mono's identity is "sharp + flat: no shadow at all", so
-     the elevation stack the other four packs gained deliberately stops at this pack's door —
-     here the topmost element separates by its edge, one step stronger. */
-  --shadow-overlay-strong: none;
-  /* Mono declares no shadow, so a floating element separates by EDGE instead. F-09 asks for
-     one separator per pack, never both — this is that one. */
-  --overlay-border: var(--surface-border);
-  --shadow-glow: none;
-}
-
-/* ── Derived semantics ────────────────────────────────────────────────────────────────── */
-/*
- * Declared once, resolved against whichever --accent / --ink the active pack (or a user's
- * custom accent, written straight onto the element by the theme engine) put in scope.
+ * ONE block. `check:canvas` reads `--surface-0` from here and holds `theme-color` and both manifest
+ * colours to it; `check:assets` holds the canvas and the accent BAKED INTO THE IMAGES to
+ * `--surface-0` and `--accent`. Both need a plain hex in exactly these two declarations.
  */
 :root {
-  /* Text: one ink, three opacities.
-   *
-   * The Bible cites 92 / 62 / 42. The bottom two were measured against this app's own accessibility
-   * constant and failed it: --text-3 at 0.42 is 3.80:1 on surface-0 and 3.67:1 on surface-3, while
-   * `ui/theme/contrast.ts` declares AA_NORMAL = 4.5 and enforces it on the accent. It is not chrome
-   * that fails — text-3 is the MOST used of the three (175 sites) and carries real data: measurement
-   * dates and values, gram and kcal figures, exercise type and difficulty, all at 11–12px, which is
-   * squarely "normal text".
-   *
-   * 92 / 70 / 52 measures 8.59:1 and 5.21:1 (surface-1) / 4.86:1 (surface-3) — clear on every surface
-   * in every pack. BOTH steps move: raising only text-3 would close the gap to text-2 and collapse
-   * two tiers into one, and three distinguishable tiers is the whole reason this is a ramp.
-   */
-  --text-1: rgb(var(--ink) / 0.92);
-  --text-2: rgb(var(--ink) / 0.70);
-  --text-3: rgb(var(--ink) / 0.52);
+  /* The canvas and the three steps above it. Pulse has ONE surface in the whole product — the
+     bottom sheet — so the ladder is nearly unused by design:
+       0  the canvas, everywhere; every image is graded to it
+       1  reserved — do not use (unmigrated screens still paint it; it reads as near-canvas)
+       2  bottom sheet · skeleton block · disabled pill. Nothing else
+       3  the switch track (off) only */
+  --surface-0: #0B0D0A;
+  --surface-1: #141712;
+  --surface-2: #1E2219;
+  --surface-3: #2A2F24;
 
-  /* Accent ramp 50–950, interpolated in OKLab so a custom accent gets the same perceptual
-     spacing as the built-in packs. --accent is step 500. */
+  /* The two rules. Both are decoration (under 3:1 on purpose) and never the only carrier of a
+     state. The names are the old ones — 62 + 12 call sites read them — and the Tailwind names
+     `hair` / `hair-strong` below map onto the same two values:
+       hair    white  8 %   the rule between rows; a disabled field's underline
+       hairS   white 14 %   the rule that opens a section or closes a table; the sheet's edge */
+  --surface-border: rgb(255 255 255 / 0.08);
+  --surface-border-strong: rgb(255 255 255 / 0.14);
+
+  /* Ink. The three text tiers are FIXED HEXES, not alphas of the ink: Pulse draws them that way
+     and their contrast is quoted against them — 17.7 / 8.7 / 5.6 on the canvas, and still 4.6 for
+     the weakest on the sheet. `--ink` (the channels of the first tier) stays for the two values
+     that are honestly an alpha of it: the edge below and the skeleton sheen. */
+  --ink: 242 245 234;                    /* #F2F5EA */
+  --text-1: #F2F5EA;   /* primary text, numerals, glyphs, the neutral selection mark */
+  --text-2: #A9B09D;   /* secondary text, eyebrows, inactive tab labels, utility glyphs */
+  --text-3: #858C79;   /* hints, placeholders, pending numerals, chevrons. Never on surface-3 */
+
+  /* THE LAMP — the one accent, and the ONLY place in the source where the lime is written.
+     Everything lit derives from it: the pressed pill, the glow, the focus ring, the selection
+     wash of the bridge. Its one other copy is `accent` in `assets-src/pulse/assets.json`, baked
+     into the lit rasters; `check:assets` holds the two equal. */
+  --accent: #CBFF2E;
+  --accent-fg: var(--surface-0);         /* text and knob on lime: the canvas itself, 16.6:1 */
+  /* Pressed lime, DERIVED (9 % toward black in OKLab = #B3E127, within 1–8/255 per channel of the
+     drawn #B4E61F) so that it follows the lamp wherever a future pack points it. */
+  --accent-pressed: color-mix(in oklab, var(--accent), black 9%);
+
+  /* The edge of anything you type into or tick: field underline, the empty set-check ring.
+     36 % of the ink over the canvas composites to #5E615B — 3.1:1, the one "line" in the system
+     that has to be seen as a control. */
+  --edge: rgb(var(--ink) / 0.36);
+  /* The "off" level of the light grammar: meter track, blank day, locked segment. */
+  --track: rgb(255 255 255 / 0.10);
+
+  /* Semantic colours — a 6 pt dot, text, a 2 px underline or an over-target value. Never a filled
+     surface, never glowing. The accent is never "success". */
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger:  #F87171;
+
+  /* Under a bottom sheet. One weight. */
+  --scrim: rgb(0 0 0 / 0.60);
+
+  /* THE ONLY SHADOW IN THE PRODUCT: the glow of the idle primary pill. Derived from the lamp. */
+  --shadow-glow:
+    0 0 20px color-mix(in srgb, var(--accent) 38%, transparent),
+    0 4px 10px -2px color-mix(in srgb, var(--accent) 30%, transparent);
+
+  /* Focus is redrawn on the lamp, never removed. */
+  --focus-ring: var(--accent);
+
+  /* Radii — only where a shape exists. Pill, switch and badge are full; the sheet's top is 28;
+     a field has none (it is an underline); a "card" is the 2 px of a skeleton block or a user
+     photo, which is all that is left of it. */
+  --radius-button: var(--radius-full);
+  --radius-chip: var(--radius-full);
+  --radius-sheet: var(--radius-8);
+  --radius-field: var(--radius-0);
+  --radius-card: var(--radius-1);
+
+  /* Rule weight and the default control height. No pack owns them any more. */
+  --border-width: 1px;
+  --control-h: 44px;
+
+  /* ═══ BRIDGE — legacy names that carry STATE: visible, derived from the lamp ═══════════════
+   *
+   * `bg-accent-subtle` draws "selected" at 81 call sites, the `*-subtle` / `*-border` pairs draw
+   * every status chip and toast edge, `text-on-*` is the ink on a filled status. Neutralising any of
+   * them would hide a state on every screen nobody has rebuilt yet, with a green build. They keep
+   * the derivations they always had and simply follow the new sources.
+   */
+
+  /* The 50–950 ramp, interpolated in OKLab. --accent is step 500. On a lime the light half is
+     nearly flat (300 is 1.07:1 against 500), which is why step 300 is NOT a white mix any more —
+     see `--muscle-secondary` in Layer 3. */
   --accent-50:  color-mix(in oklab, var(--accent), white 92%);
   --accent-100: color-mix(in oklab, var(--accent), white 84%);
   --accent-200: color-mix(in oklab, var(--accent), white 68%);
-  --accent-300: color-mix(in oklab, var(--accent), white 50%);
+  --accent-300: var(--muscle-secondary);
   --accent-400: color-mix(in oklab, var(--accent), white 28%);
   --accent-500: var(--accent);
   --accent-600: color-mix(in oklab, var(--accent), black 14%);
@@ -586,38 +372,23 @@
   --accent-900: color-mix(in oklab, var(--accent), black 56%);
   --accent-950: color-mix(in oklab, var(--accent), black 70%);
 
-  /* Interaction states derive from the ramp — never hand-picked per component. */
-  --accent-hover: var(--accent-400);
-  --accent-pressed: var(--accent-600);
+  /* Pulse defines press, not hover: a hovered pill is the pill. */
+  --accent-hover: var(--accent);
 
-  /* The "this one is selected / active / mine" wash. 12% measured 1.15:1 over surface-0 while
-     carrying the active nav tab, "today" in the week strip, the selected moderation row, the
-     command-palette cursor and the user's own chat bubble — at 1.08:1 against the other speaker's
-     bubble, the two people in a conversation were the same box. 20% is 1.30:1: still a wash rather
-     than a fill, and it survives an OLED phone at arm's length in a gym, which is the room this
-     app is used in. */
+  /* The "this one is selected / active / mine" wash, 1.68:1 over the canvas, and its edge. */
   --accent-subtle: color-mix(in srgb, var(--accent) 20%, transparent);
-
-  /* The middle step the accent was missing. success / warning / danger / info each ship a 30%
-     `-border`; the accent jumped from a 12% wash straight to the filled color, so a selected card
-     had to choose between invisible and shouting. Same 30% as every other family, for the same
-     reason: an edge that states the state without spending the fill. */
   --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);
-
-  /* The foreground for text sitting ON that wash — and it is NOT the accent.
-   *
-   * `text-accent` on `bg-accent-subtle` measures 4.82 / 4.42 / 4.08 / 3.67 over surface-0/1/2/3 in
-   * the default pack: three of the four surfaces fail the 4.5 this app declares in
-   * `ui/theme/contrast.ts`, and the badges that use it are 11px `text-micro`. The reason is
-   * structural, not a bad pick — the wash IS the accent at 20%, so accent-on-accent-wash can never
-   * open much of a gap, in any pack, at any hue.
-   *
-   * The ink does: 11.70 / 10.78 / 10.00 / 9.03, and never below 7.10 in the worst pack/surface
-   * pair in the set. Named `on-accent-subtle` to match the four `on-*` foregrounds already here,
-   * so the next person guessing a name guesses this one. */
+  /* The foreground for text sitting ON that wash — the ink (10.5:1), not the accent. */
   --on-accent-subtle: var(--text-1);
 
-  /* Every semantic color carries all four forms the Bible requires. */
+  /* The fourth semantic colour has no Pulse role; seven call sites still say "info". */
+  --info: #60A5FA;
+
+  --on-success: #04150E;
+  --on-warning: #241703;
+  --on-danger:  #2A0A0C;
+  --on-info:    #06152B;
+
   --success-subtle: color-mix(in srgb, var(--success) 12%, transparent);
   --success-border: color-mix(in srgb, var(--success) 30%, transparent);
   --warning-subtle: color-mix(in srgb, var(--warning) 12%, transparent);
@@ -627,298 +398,144 @@
   --info-subtle:    color-mix(in srgb, var(--info) 12%, transparent);
   --info-border:    color-mix(in srgb, var(--info) 30%, transparent);
 
-  --focus-ring: var(--accent);
+  /* The ink of an icon that used to sit in a tinted disc. The disc is gone (below); the icon stays. */
+  --tile-tint-fg: var(--accent);
 
-  /* The scrim behind a modal surface, and the one step stronger a full-height sheet uses.
+  /* A floating layer used to separate from the page by its shadow, with this edge held back
+     ("border OR shadow, never both"). The shadow is gone, so the edge is what separates it now —
+     the stronger rule, which is the sheet's edge in Pulse. */
+  --overlay-border: var(--surface-border-strong);
+
+  /* There is one scrim. */
+  --scrim-strong: var(--scrim);
+
+  /* The brand gradient is gone — and its name cannot simply go dark with the other decoration. At
+     one call site it is the ONLY body of a link: the marketplace's lead post, when it has no cover
+     picture, is this fill and nothing else, with an icon in the canvas colour on top. Neutral, the
+     way in to that post would be an empty stretch of canvas. So it is a flat placeholder block, in
+     the one tone Pulse keeps for "something will be here" — the skeleton's. A plain colour is valid
+     wherever the gradient was written (every consumer sets it as a `background`). */
+  --gradient-brand: var(--surface-2);
+
+  /* ═══ BRIDGE — legacy names that were DECORATION: neutral ══════════════════════════════════
    *
-   * It was `bg-black/50` at four call sites and `bg-black/65` at a fifth — and `black` is not in
-   * the gate's palette list, so five raw values sat outside the token layer while the gate printed
-   * "no raw values outside the token layer". Two names, because the two weights are a real
-   * distinction (a dialog you can still see the page behind vs. a sheet that owns the screen) and
-   * because five call sites free-handing an alpha is how they became two weights by accident. */
-  --scrim: rgb(0 0 0 / 0.50);
-  --scrim-strong: rgb(0 0 0 / 0.65);
-
-  /* 3% grain, tiled. A two-stop gradient across a 400px surface asks a display for ~200 steps of
-     one hue and a 6-bit panel — which is most phones — has 64, so it renders the transition as
-     visible bands. Noise breaks the band edges into dither, which is the whole trick; the rule
-     asks for 2–3% and this is the top of that, because below ~2% it does nothing on the panels
-     that need it. Inline SVG rather than a PNG so it costs no request and the CSP needs no
-     image origin. */
-  --noise-overlay: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-
-  /* Brand gradient. Bible: 2–3 stops, 135°, ONE gradient surface per screen, same hue family,
-     never behind body text — and explicitly never the blue→purple "AI-generic" combination
-     that sank the previous build (F-04). This stays inside the accent's own hue.
-     The grain is the FIRST layer, i.e. on top: it has to sit over the gradient it is dithering.
-     Every consumer already reads this one token, so no call site changes. */
-  --gradient-brand: var(--noise-overlay), linear-gradient(135deg, var(--accent-400) 0%, var(--accent-700) 100%);
+   * Glass, rim, sheen, aurora, grain, tile tint, elevation. A card built from them
+   * is now invisible and still pads its content, which is the intended look of an unmigrated
+   * screen: content on the canvas, in the old layout.
+   *
+   * The shadow names are a zero shadow and NOT `none`. Tailwind writes an arbitrary shadow into a
+   * five-part list (`box-shadow: …, var(--tw-ring-shadow), var(--tw-shadow)`), and `none` inside a
+   * list is invalid — the whole declaration is dropped at computed-value time, any ring on the
+   * same element with it. A zero-size transparent shadow is valid in every position.
+   */
+  --glass-1: transparent;
+  --glass-2: transparent;
+  --glass-3: transparent;
+  --glass-rim: transparent;
+  --glass-lip: 0 0 0 0 transparent;
+  --glass-underside: 0 0 0 0 transparent;
+  --glass-sheen-angle: 0deg;
+  --glass-sheen: none;
+  --card-saturate: 1;
+  --aurora: none;
+  --noise-overlay: none;
+  --tile-tint: transparent;
+  --shadow-overlay: 0 0 0 0 transparent;
+  --shadow-overlay-strong: 0 0 0 0 transparent;
 }
 
 /* ── Layer 3 — component tokens ───────────────────────────────────────────────────────── */
 :root {
+  /* The pill. Declared since the first build and consumed by nothing — `control.ts` writes the
+     utilities — so these follow the lamp and wait for the closing cleanup. BRIDGE. */
   --btn-bg: var(--accent);
   --btn-fg: var(--accent-fg);
   --btn-bg-hover: var(--accent-hover);
   --btn-bg-pressed: var(--accent-pressed);
   --btn-radius: var(--radius-button);
 
-  --field-bg: var(--surface-2);
-  --field-border: var(--surface-border);
+  /* A field is an underline on the canvas: no fill, an `edge` line. Until the field itself is
+     rebuilt the old markup draws that line on all four sides — a square outline, which is still
+     unmistakably "you type here". */
+  --field-bg: transparent;
+  --field-border: var(--edge);
   --field-radius: var(--radius-field);
 
-  /* Cards separate by border OR shadow, never both (Bible; the old build did both — F-09). */
-  /* GLASS (ADR-0015/0016): the card is translucent now, and it carries a rim.
-     --card-finish is the PERFORMANCE decision, not a style one, and it defaults to the cheap
-     option deliberately. `backdrop-filter` forces its element onto its own compositing layer and
-     re-samples the backdrop every frame; a list of a dozen cards on a mid-range Android is where
-     that becomes visible, and this app is used on cheap phones in gyms. A card in a scrolling
-     list gets the alpha fill and NO blur — the aurora behind it is already soft, so blurring a
-     soft gradient buys almost nothing and costs the frame budget. Only surfaces that float over
-     MOVING content (nav, sheets, toasts, the rest timer, the palette, a hero anchor) opt in. */
-  --card-bg: var(--glass-1);
+  /* No card exists. BRIDGE (decoration): invisible, still padding. */
+  --card-bg: transparent;
   --card-blur: 0px;
-  --card-rim: var(--glass-rim);
-  --card-border: var(--surface-border);
+  --card-rim: transparent;
+  --card-border: transparent;
   --card-radius: var(--radius-card);
-  --card-pad: --spacing(4);            /* 16px — Bible allows 16–20, the old build used 24 */
+  --card-pad: --spacing(4);            /* 16px — BRIDGE (layout), unchanged until its consumer goes */
 
-  /* The radius a surface nested INSIDE a card must use: outer radius − the padding between them.
-   *
-   * Concentric corners are not a preference — two curves separated by a constant gap are what the
-   * eye reads as "inside"; two equal radii read as two cards that happen to overlap, which is the
-   * "something is wrong here" the rule names. Nothing in the codebase computed it, so a nested
-   * card carried the SAME 16px as its parent over 16px of padding, where the correct answer is 0.
-   *
-   * Derived, not tabulated, so it stays right in all five packs and through a pack swap:
-   * Midnight/Forest 16−16 = 0 · Solar 24−16 = 8 · Neon 20−16 = 4 · Mono clamps to 0.
-   * The clamp is what makes Mono legal — 2−16 is negative, and a negative radius is invalid,
-   * which would silently take the declaration out and hand the element the browser default. */
+  /* The radius a surface nested INSIDE a card used: outer radius − the padding between them,
+     clamped at 0 (a negative radius is invalid and would hand the element the browser default).
+     With a 2 px card it is 0. BRIDGE (layout). */
   --radius-inset: max(0px, calc(var(--radius-card) - var(--card-pad)));
 
-  --sheet-bg: var(--glass-3);
-  --sheet-blur: var(--blur-lg);
+  /* THE one surface: the bottom sheet. Opaque — a form is read on it. */
+  --sheet-bg: var(--surface-2);
+  --sheet-blur: 0px;                     /* BRIDGE (decoration) */
   --sheet-radius: var(--radius-sheet);
-  --sheet-shadow: var(--shadow-overlay);
+  --sheet-shadow: var(--shadow-overlay); /* BRIDGE (decoration) — a zero shadow */
 
-  /* Was a hand-rolled 88% mix — the token that proved this construction works, now folded into
-     the scale it inspired. It floats over scrolling content, so it is one of the few that blurs. */
-  --nav-bg: var(--glass-2);
-  --nav-blur: var(--blur-lg);
+  /* The tab bar has no surface in Pulse: it stands on the canvas over a fade. Until the bar is
+     rebuilt it is still a fixed slab with content scrolling under it, so its fill is the canvas,
+     OPAQUE — a transparent fixed bar over moving text is unreadable. BRIDGE. */
+  --nav-bg: var(--surface-0);
+  --nav-blur: 0px;                       /* BRIDGE (decoration) */
   --nav-fg-active: var(--accent);
   --nav-fg-idle: var(--text-3);
 
-  --toast-bg: var(--glass-3);
-  --toast-blur: var(--blur-lg);
+  /* The toast is "the page's own black dropping over the header zone". Opaque for the same reason
+     as the bar. */
+  --toast-bg: var(--surface-0);
+  --toast-blur: 0px;                     /* BRIDGE (decoration) */
 
-  /* The skeleton sweep. The sheen was borrowed from --surface-3, which put the two stops of a
-     moving gradient 1.07–1.11:1 apart in every pack — a 1200ms sweep across two colors nobody can
-     tell apart is a loading state that reports nothing. Deriving it from the base plus a little ink
-     (~1.35:1) makes it a step that cannot be flattened again by a future surface re-tune, which is
-     exactly how it got flat the first time. */
-  /* THE FIGURE ITSELF, and why it is not built from the surface ramp.
+  /* The two fades of the shell: the canvas rising from nothing to solid, under the tab bar (solid
+     from 28 % of `--fade-h`) and under a docked action (from 50 %). Written from `transparent`:
+     gradients interpolate premultiplied, so the ramp is the canvas colour at a growing alpha, with
+     no grey band in the middle. */
+  --nav-fade: linear-gradient(to bottom, transparent 0%, var(--surface-0) 28%);
+  --dock-fade: linear-gradient(to bottom, transparent 0%, var(--surface-0) 50%);
+
+  /* THE FIGURE — interim values for the vector muscle map, until the rendered mannequin replaces
+   * its inside.
    *
-   * The body was `--surface-1` and an unworked muscle was `--surface-2` — #12151A on #181C22, two
-   * near-blacks a shade apart, on a near-black page. Measured: the figure was only visible where
-   * something was highlighted, so a screen whose whole job is "these are the muscles this works"
-   * showed two floating blue shapes and no body around them.
+   * Pulse draws the body as a graphite object glowing out of the black, with the worked muscle as
+   * the lamp. So the plate is a graphite tone (22 % of the ink over the canvas, 1.9:1 — a figure,
+   * not a silhouette you have to look for), the line between two bellies is the canvas itself
+   * (the dark groove of the render), and a lit muscle is `--accent` (set by the component).
    *
-   * Both mockups draw the opposite: a LIGHT anatomical plate on the dark glass, with the worked
-   * muscles picked out of it. That is the right way round — the figure is the subject and the
-   * highlight is the annotation, and the surface ramp is for surfaces, not for a drawing.
-   *
-   * Derived from `--ink` rather than declared as a colour, so it follows the pack and cannot fall
-   * out of step with the text beside it.
-   *
-   * ═══ ONE VALUE, NOT TWO — THE LINE DOES THE SEPARATING ════════════════════════════════════
-   *
-   * These were deliberately two steps apart, on the reasoning that an unworked muscle has to stay
-   * legible against the flesh it sits on. Measured against the mockup, that reasoning is backwards.
-   * Sampled from the reference plate:
-   *
-   *     head, no muscle over it   rgb(208, 208, 212)
-   *     thigh, an idle muscle     rgb(211, 208, 214)
-   *     hand, idle                rgb(210, 208, 215)
-   *     neck, idle                rgb(214, 213, 218)
-   *
-   * One grey, within noise. The design draws a LINE DRAWING: a single pale figure with thin dark
-   * lines dividing it, and colour applied only where a muscle is worked.
-   *
-   * It also buys the highlight its full contrast: against one flat field, a worked muscle is the
-   * only thing on the figure carrying colour, which is the whole claim the screen makes.
-   *
-   * ═══ AND IT HAS TO BE OPAQUE, WHICH IS THE PART THAT ACTUALLY BROKE IT ═════════════════════
-   *
-   * Collapsing the two tokens to one value changed nothing on screen, which is how the real cause
-   * turned up. This was `rgb(var(--ink) / 0.86)` — TRANSLUCENT — and the muscle shapes are painted
-   * ON TOP of the silhouette, so every muscle was 0.86 over 0.86 and composited to 0.98 while the
-   * bare torso stayed at 0.86. Measured on the running app: 38 paths, one fill string, two
-   * different values on screen. The plating was alpha stacking, and no amount of agreeing on the
-   * colour could have fixed it while the colour was see-through.
-   *
-   * Mixed rather than faded, so the ratio is applied ONCE to a flat colour instead of once per
-   * overlapping layer. 86% of ink over `--surface-1` lands at rgb(210, 213, 216) in the default
-   * pack — which is the reference plate's rgb(208..214), arrived at from the tokens rather than
-   * copied off a screenshot, and still following the pack wherever `--ink` goes.
+   * Two things carried over from the old plate, because they were measured, not chosen:
+   *   ONE value for body and idle muscle — the line does the separating;
+   *   OPAQUE — the muscle shapes are painted on top of the silhouette, and a translucent fill
+   *   composites twice where they overlap, which plated the figure in two tones.
    */
-  --muscle-body: color-mix(in srgb, rgb(var(--ink)) 86%, var(--surface-1));
+  --muscle-body: color-mix(in srgb, rgb(var(--ink)) 22%, var(--surface-0));
   --muscle-idle: var(--muscle-body);
-  /* The separation between bellies, and now the ONLY thing that separates them — so it carries the
-     drawing rather than trimming it. Dark against the pale figure, which is the inverse of the
-     `--surface-border` this used, and the reason that border was invisible here. */
-  --muscle-edge: rgb(0 0 0 / 0.55);
+  --muscle-edge: var(--surface-0);
 
-  /* THE MUSCLE MAP'S SECONDARY FILL — and it is the LIGHTEST of the three, not a middle step.
+  /* A SUPPORTING muscle: the lamp at 40 % (Pulse System 5: "primary 100 %, secondary 40 %"),
+   * mixed into the plate so it is opaque.
    *
-   * `--accent-subtle` was wrong for a first reason: it is the accent at 20% over TRANSPARENT, and
-   * the map's regions sit on the near-black page, where that composites down to almost the same
-   * value as the idle fill beside it. The two roles the map exists to distinguish had stopped
-   * being distinguishable.
-   *
-   * The first replacement was wrong for the opposite reason. It mixed 45% accent into the idle
-   * fill, reasoning that a supporting muscle should read DIMMER than a primary target. Measured
-   * off `04-gyakorlat-reszletei.webp`, that inverts the drawing:
-   *
-   *     idle abs        rgb(121, 130, 145)   grey
-   *     primary chest   rgb(122, 139, 229)   the accent itself
-   *     secondary delt  rgb(204, 211, 251)   pale, nearly white
-   *
-   * Secondary is the brightest thing on the figure. It reads as a HIGHLIGHT rather than as a
-   * lesser version of the primary — which is the honest picture: a supporting muscle is still
-   * working, and dimming it toward the idle grey says the opposite.
-   *
-   * `--accent-300` and not a new mix, because the exercise detail screen already paints its
-   * `Tricepsz` chip dot with it. Map, legend and chip become one key instead of three colours
-   * that have to be kept in step by hand. */
-  --muscle-secondary: var(--accent-300);
+   * It used to be `--accent-300`, a white mix that was the BRIGHTEST fill on the old periwinkle
+   * figure. On a lime that step is 1.07:1 against the accent itself — primary and secondary would
+   * be one colour, on the map and on the chip dots of the exercise screen, which paint
+   * `--accent-300` so that map, legend and chip are one key. The key is kept and turned round:
+   * `--accent-300` now reads THIS token (Layer 2, bridge), and the distinction is 3.2:1. */
+  --muscle-secondary: color-mix(in srgb, var(--accent) 40%, var(--muscle-body));
 
+  /* Skeleton: `s2` blocks with a sheen on the ambient loop. The sheen is the base plus a little
+     ink (1.5:1), so a later re-tune of the ladder cannot flatten the sweep. */
   --skeleton-base: var(--surface-2);
   --skeleton-sheen: color-mix(in srgb, var(--surface-3), rgb(var(--ink)) 8%);
 }
 
-/* ── The two packs you can buy ────────────────────────────────────────────────────────────────
- *
- * `019_coins.sql` has seeded `aurora` and `ember` as purchasable store items since the coins
- * feature shipped, the settings mockup draws them as two of its three chips, and all three
- * bundles carry their names. Neither existed here, and neither was in the client's `THEME_PACKS`
- * union — so `readStored` fell back to `midnight` on every hydrate for anyone who owned one, and
- * selecting one changed nothing at all. They were purchasable and inert.
- *
- * ═══ WHY THESE BLOCKS ARE SHORT ═══════════════════════════════════════════════════════════════
- *
- * The five original packs each redeclare radii, border width, control height and two shadow
- * stacks — DESIGN rule 24, "a pack has a structural identity". ADR-0015 replaced that: the glass
- * is ONE visual language, and what a theme supplies now is the light it floats in. So these two
- * declare the surface ramp, the accent and the aurora, and inherit every structural token from
- * `:root`. A card in Aurora and a card in Ember are the same object under different weather.
- *
- * `--surface-0` is not invented: `019_coins.sql:780-781` stores `surface_hex` per pack — #080B14
- * and #140A08 — and that column is what the store swatch renders. Two values for one colour is
- * the drift this codebase keeps finding, so the migration's is the one that wins and the ramp is
- * derived up from it.
- */
-[data-theme='aurora'] {
-  --surface-0: #080B14;
-  --surface-1: #0E1320;
-  --surface-2: #141A2A;
-  --surface-3: #1B2338;
-
-  --ink: 236 243 247;
-  /* Green-cyan, which is the one thing the name is not ambiguous about. */
-  --accent: #4FD1C5;
-  --accent-fg: #06131A;
-
-  /* Ribbons rather than the default's soft blooms: the aurora pack is named after a phenomenon
-     with SHAPE, and three round glows would be the same wallpaper in a different hue. Narrower
-     and steeper stops read as curtains of light behind the glass. */
-  --aurora:
-    var(--noise-overlay),
-    radial-gradient(38% 60% at 22% 4%, color-mix(in srgb, var(--accent) 34%, transparent) 0%, transparent 66%),
-    radial-gradient(30% 72% at 62% 0%, color-mix(in srgb, var(--info) 26%, transparent) 0%, transparent 70%),
-    radial-gradient(46% 44% at 88% 40%, color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 72%);
-}
-
-[data-theme='ember'] {
-  --surface-0: #140A08;
-  --surface-1: #1D110D;
-  --surface-2: #251713;
-  --surface-3: #301E18;
-
-  --ink: 247 240 236;
-  --accent: #F0803C;
-  --accent-fg: #1A0A05;
-
-  /* Low and wide, banked at the bottom — light from a fire is under you, not above. The default's
-     top-left bloom would read as a sunrise, which is a different pack. */
-  --aurora:
-    var(--noise-overlay),
-    radial-gradient(76% 44% at 32% 96%, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 74%),
-    radial-gradient(52% 36% at 84% 82%, color-mix(in srgb, var(--warning) 24%, transparent) 0%, transparent 70%),
-    radial-gradient(46% 30% at 12% 22%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 76%);
-}
-
-/* ── Glass, when glass is not available or not wanted ─────────────────────────────────── */
-/*
- * Two ways the translucency has to stop, and both end at the same place: opaque surfaces.
- *
- * A card at 62% alpha over a bright band of the aurora, with no blur behind it to soften what
- * shows through, is a contrast failure — the text is fighting a moving gradient. So where the
- * blur cannot happen or should not happen, the alpha goes away with it. The two are one decision,
- * not two.
- *
- * This is three declarations per block rather than thirty because the translucency lives in Layer
- * 2 as three names. Had it been written at the call sites, this fallback would be unwriteable.
- */
-
-/* No backdrop-filter: Firefox with the pref off, older WebViews, and any browser where the
-   compositor has bailed out. Without this the alpha survives and the blur does not, which is the
-   worst of the two states. */
-@supports not (backdrop-filter: blur(1px)) {
-  :root {
-    --glass-1: var(--surface-1);
-    --glass-2: var(--surface-2);
-    --glass-3: var(--surface-3);
-  }
-}
-
-/* And when the person has asked for less transparency at the OS level. This is an accessibility
-   preference, not a capability check: iOS "Reduce Transparency" exists because translucent chrome
-   is genuinely hard to read for some people, and honouring it is not optional. The rim stays —
-   it is an edge, not a transparency — but the surfaces go solid.
-   ────────────────────────────────────────────────────────────────────────────────────────────
-   THE `:not()` IS NOT A LOOPHOLE, IT IS THE POINT.
-
-   The OS preference is the DEFAULT and stays the default: `data-transparency` is absent for every
-   user who has not opened Settings, so `:not([data-transparency='full'])` matches and the surfaces
-   go solid exactly as before. What it adds is that a person can disagree with their own OS about
-   THIS app — which matters more than it sounds, because the setting is system-wide and someone who
-   turned it on for one hostile app has no other way to say "not here".
-
-   It is also the only reason the design can be reviewed at all. The whole liquid-glass pass was
-   built, shipped and judged on a machine with the preference ON, where `--glass-1` resolves to
-   `--surface-1` and `--card-blur` to `0px` — the material was never once on screen. Every report
-   that the glass "was not accurate" was a report about a fallback. */
-@media (prefers-reduced-transparency: reduce) {
-  :root:not([data-transparency='full']) {
-    --glass-1: var(--surface-1);
-    --glass-2: var(--surface-2);
-    --glass-3: var(--surface-3);
-  }
-}
-
-/* And the other direction: opt out of translucency without touching an OS setting. Higher
-   specificity than the plain `:root` above, so it wins wherever it is set. */
-:root[data-transparency='none'] {
-  --glass-1: var(--surface-1);
-  --glass-2: var(--surface-2);
-  --glass-3: var(--surface-3);
-  --card-blur: 0px;
-  --card-saturate: 1;
-}
-
 /* ── Tailwind mapping ─────────────────────────────────────────────────────────────────── */
-/* `inline` so the utilities resolve the var at use time: switching [data-theme] repaints the
-   whole app without a single component re-render. */
+/* `inline` so a utility resolves the var at use time: `bg-accent` is `background: var(--accent)`,
+   and whatever re-points the lamp one day repaints the app without a component re-render. */
 @theme inline {
   --color-surface-0: var(--surface-0);
   --color-surface-1: var(--surface-1);
@@ -938,9 +555,17 @@
   --color-accent-border: var(--accent-border);
   --color-on-accent-subtle: var(--on-accent-subtle);
 
+  /* The Pulse line and level names: `border-edge`, `border-hair`, `divide-hair`,
+     `bg-hair-strong` (a rule drawn as a 1 px element), `bg-track`. `edge`, `hair` and `track` are
+     stems this project now owns: a `border-hair-x` that resolves to nothing fails the build. */
+  --color-edge: var(--edge);
+  --color-hair: var(--surface-border);
+  --color-hair-strong: var(--surface-border-strong);
+  --color-track: var(--track);
+
   /* `bg-scrim` / `bg-scrim-strong`. Mapped rather than left as `bg-[var(--scrim)]` so the gate's
-     own stem check owns the name: `scrim` is now a stem this project claims, and a `bg-scrim-x`
-     that resolves to nothing becomes a build failure instead of a transparent overlay. */
+     own stem check owns the name: a `bg-scrim-x` that resolves to nothing is a build failure
+     instead of a transparent overlay. */
   --color-scrim: var(--scrim);
   --color-scrim-strong: var(--scrim-strong);
 
@@ -961,18 +586,86 @@
   --color-info-border: var(--info-border);
   --color-on-info: var(--on-info);
 
-  /* These five resolve against the theme-scoped declarations in Layer 2, so a pack swap
-     re-radiuses the whole app. They are safe to self-reference because a real CSS declaration
-     for each exists on [data-theme]. */
+  /* These resolve against the real declarations in Layer 2 and 3. A self-reference is only safe
+     because such a declaration exists, unlayered, and beats this `@layer theme` copy. */
   --radius-button: var(--radius-button);
   --radius-field: var(--radius-field);
   --radius-card: var(--radius-card);
   --radius-sheet: var(--radius-sheet);
   --radius-chip: var(--radius-chip);
-  /* `rounded-inset`, on the same footing as the five above. Its real declaration is the derived
-     one in Layer 3, which is unlayered and therefore beats this `@layer theme` copy. */
   --radius-inset: var(--radius-inset);
 
-  /* --ease-standard is deliberately NOT re-declared here: it is theme-independent, lives in
-     Layer 1, and an inline self-reference with no Layer-2 backing resolves to nothing. */
+  /* `shadow-glow` — the idle primary pill, and nothing else. */
+  --shadow-glow: var(--shadow-glow);
+
+  /* The two loops Pulse allows, as utilities, so no call site writes a duration into
+     `animate-[…]` (check-tokens refuses that):
+       animate-pulse-glow   the resting pulse of the idle pill — its glow breathes 100 → 65 → 100 %.
+                            Opacity only: put it on the layer that carries the glow, not the label.
+       animate-sheen        the skeleton's sweep (the keyframes live in index.css). */
+  --animate-pulse-glow: pulse-glow var(--duration-ambient) var(--ease-standard) infinite alternate;
+  --animate-sheen: skeleton-sweep var(--duration-ambient) var(--ease-linear) infinite;
+
+  @keyframes pulse-glow {
+    from { opacity: 1; }
+    to { opacity: 0.65; }
+  }
+
+  /* --ease-standard is deliberately NOT re-declared here: it lives in Layer 1, and an inline
+     self-reference with no Layer-2 backing resolves to nothing. */
 }
+
+/* ── Lane blocks ──────────────────────────────────────────────────────────────────────────
+ *
+ * One named, EMPTY block per foundation lane. A lane that needs a token does not edit the layers
+ * above: it writes COMPLETE rules between its own two markers —
+ *
+ *     :root { … }           a semantic or component token
+ *     @theme static { … }   a primitive that must survive tree-shaking or become a utility
+ *     @theme inline { … }   a Tailwind name for one of the above
+ *
+ * — and hands the hunk in as `docs/pipeline/pulse/pkg/<id>/shared.patch`. Because every lane writes
+ * inside its own block, and the blocks are three lines apart, two lanes' patches never touch
+ * neighbouring lines and apply in any order. The integrator moves a token that proved itself into
+ * its layer; the emptied markers are deleted in the closing cleanup.
+ */
+
+/* F5 — assets: Pic, UserPhoto */
+/* lane:F5 */
+/* /lane:F5 */
+
+/* F6 — actions: control(), Pressable, TextLink */
+/* lane:F6 */
+/* /lane:F6 */
+
+/* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */
+/* lane:F8 */
+/* /lane:F8 */
+
+/* F9 — structure: SectionHeader, Rule, RowStack, ListRow, EmptyState, Skeleton, NoticeLine, Monogram */
+/* lane:F9 */
+/* /lane:F9 */
+
+/* F10 — data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp, LedgerRow */
+/* lane:F10 */
+/* /lane:F10 */
+
+/* F11 — shell: tab bar, Screen, ScreenHeader, Dock, PublicLayout */
+/* lane:F11 */
+/* /lane:F11 */
+
+/* F12 — inputs and the sheet: Field, SearchField, TextArea, NumberStepper, SelectSheet, Sheet */
+/* lane:F12 */
+/* /lane:F12 */
+
+/* F13 — status zone: toast band, offline line, command palette */
+/* lane:F13 */
+/* /lane:F13 */
+
+/* F14 — charts: TrendChart, Sparkline */
+/* lane:F14 */
+/* /lane:F14 */
+
+/* F15 — mannequin: MuscleMap */
+/* lane:F15 */
+/* /lane:F15 */

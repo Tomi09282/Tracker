@@ -25,7 +25,7 @@
  */
 
 // Bumping this string is what retires every previous cache. It is the only version knob.
-const VERSION = 'tracker-shell-v1';
+const VERSION = 'tracker-shell-v2';
 
 // The navigation fallback and the handful of files needed to paint before any bundle loads.
 // Hashed assets are NOT listed: their names change every build, so they are cached on first use.

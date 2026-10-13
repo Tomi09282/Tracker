@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "branch": "pulse-redesign",
-  "updated": "2026-10-13T21:45:43.991Z",
+  "updated": "2026-10-13T22:08:11.251Z",
   "integrator": {
-    "owner": "integrator (merge-F2a run)",
-    "step": "merge-F2a"
+    "owner": "integrator (F1.3 run)",
+    "step": "F1.3"
   },
   "freeze": {
     "seededOn": null,
@@ -124,7 +124,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           ".gitignore",
           "docs/pipeline/pulse/PLAN.md",
@@ -241,7 +241,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/index.html",
           "frontend/package-lock.json",
@@ -252,7 +252,6 @@
           "frontend/public/icon-192.png",
           "frontend/public/icon-512-maskable.png",
           "frontend/public/icon-512.png",
-          "frontend/public/icons.svg",
           "frontend/public/manifest.webmanifest",
           "frontend/public/sw.js",
           "frontend/scripts/data/elements-dormant.json",
@@ -285,7 +284,7 @@
           "commit": "616a403"
         },
         "F1:3": {
-          "status": "todo",
+          "status": "integrating",
           "commit": null
         },
         "F1:4": {
@@ -316,7 +315,7 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "F1.2 merged (616a403), pulse-redesign fast-forwarded: three font packages installed dormant, glyph check recorded - glyphs pass x3, tabular figures FAIL for the display face (DEV-003); F1.3 is next, F1.4 waits for the ruling",
+      "lastStep": "F1.3: tokens.css is one :root look (Pulse canvas, lime, hairlines, radii) with every legacy name still declared (219 of 219; state visible, decoration neutral, nav/toast/sheet opaque), 44 new tokens, ten named lane blocks in tokens.css and index.css; theme-color and both manifest colours #0B0D0A, sw cache key v2, public/icons.svg deleted; no layout metric changed (--nav-h 64px, --control-h 44px, --content-pad-b unchanged, read from the built app); npm run build green; built app looked at on :5189 at 402x874 (sign-in, home, library + 11 more) - all readable; committing",
       "notes": "F1.2 glyph check (HeadlessChrome 155, scratch page outside src, --dump-dom) - widths in em at 200 px:\n  Big Shoulders Display Variable 700: fonts.check false->true; ő 0.418 ű 0.433 Ő 0.428 Ű 0.419 (all present) GLYPHS PASS; 0-9 tabular-nums: UNEQUAL 0.237-0.448 em, tnum in file: no TABULAR FAIL\n  Big Shoulders Display Variable 900: fonts.check false->true; ő 0.480 ű 0.499 Ő 0.497 Ű 0.487 (all present) GLYPHS PASS; 0-9 tabular-nums: UNEQUAL 0.274-0.515 em, tnum in file: no TABULAR FAIL\n  Geist Variable 400: fonts.check false->true; ő 0.573 ű 0.575 Ő 0.739 Ű 0.689 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.600 em, tnum in file: yes TABULAR PASS\n  Geist Variable 500: fonts.check false->true; ő 0.588 ű 0.586 Ő 0.751 Ű 0.694 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.612 em, tnum in file: yes TABULAR PASS\n  Geist Variable 600: fonts.check false->true; ő 0.603 ű 0.597 Ő 0.763 Ű 0.699 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.624 em, tnum in file: yes TABULAR PASS\n  Geist Mono 500: fonts.check false->true; ő 0.600 ű 0.600 Ő 0.600 Ű 0.600 (all present) GLYPHS PASS; 0-9 tabular-nums: one advance, 0.600 em, tnum in file: no TABULAR PASS\n  successor candidate Big Shoulders Variable 700 (not installed): GLYPHS PASS; 0-9 UNEQUAL 0.272-0.493 em TABULAR FAIL\n  successor candidate Big Shoulders Variable 900 (not installed): GLYPHS PASS; 0-9 UNEQUAL 0.289-0.534 em TABULAR FAIL\n  fonts of a Hungarian session: 127376 bytes (127.4 kB) in 6 files, within 150 KB. Dormant in the built app: yes.\n  F1.4 needs a ruling (DEV-003): Big Shoulders Display has no tabular figures; stand-in = fixed-width digit cells in Numeral.",
       "glyphCheck": {
         "step": "F1.2",
@@ -544,7 +543,7 @@
         "dormantInBuiltApp": true,
         "f14": "needs a ruling: the letters passed (no stand-in exists for those); the display face has no tabular figures - the plan's stand-in is fixed-width digit cells in Numeral (PLAN 10, F10); logged as DEV-003"
       },
-      "updated": "2026-10-13T21:41:21.721Z"
+      "updated": "2026-10-13T22:08:11.251Z"
     },
     "F2": {
       "kind": "foundation",
@@ -556,7 +555,7 @@
       "branch": "pulse/F2",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "docs/pipeline/pulse/pkg/F2/a/.gitattributes",
           "docs/pipeline/pulse/pkg/F2/a/handoff.json",
@@ -583,8 +582,8 @@
       },
       "stages": {
         "F2:a": {
-          "status": "integrating",
-          "commit": null
+          "status": "merged",
+          "commit": "b5f7886"
         },
         "F2:b": {
           "status": "todo",
@@ -610,9 +609,9 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "F2:a: pulse/F2a (bded29d) squashed onto 616a403, shared.patch applied (check:canvas in the build chain after check:type-scale); both gates green, the 23-case probe runner green on the integration tree (19 planted defects red), npm run build green; committing",
+      "lastStep": "F2:a merged (b5f7886), pulse-redesign fast-forwarded (lockfile unchanged, no npm ci): check:canvas is in the build chain after check:type-scale, check:type-scale has the plain-length failure and the dormant family-binding leg; F1.3 may go next. Stages b and c are still in their lanes; their shared.patch must be cut against a build line that already carries check:canvas",
       "notes": "",
-      "updated": "2026-10-13T21:45:43.991Z"
+      "updated": "2026-10-13T21:46:21.325Z"
     },
     "F3": {
       "kind": "foundation",
@@ -624,7 +623,7 @@
       "branch": "pulse/F3",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           ".claude/launch.json"
         ],
@@ -677,7 +676,7 @@
       "branch": "pulse/F4",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [],
         "toCreate": [
           "frontend/scripts/pulse-owns-check.mjs",
@@ -720,7 +719,7 @@
       "branch": "pulse/F5",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [],
         "toCreate": [
           "frontend/assets-src/**",
@@ -765,7 +764,7 @@
       "branch": "pulse/F6",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/primitives/Pressable.tsx",
           "frontend/src/ui/primitives/control.ts"
@@ -807,7 +806,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/playground/PlaygroundPage.tsx",
           "frontend/src/ui/TokenProof.tsx",
@@ -847,7 +846,7 @@
       "branch": "pulse/F8",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
           "frontend/src/ui/feedback/variants/E6Segmented.tsx",
@@ -904,7 +903,7 @@
       "branch": "pulse/F9",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/data/SectionHeader.tsx",
           "frontend/src/ui/feedback/EmptyState.tsx",
@@ -960,7 +959,7 @@
       "branch": "pulse/F10",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/CountUp.tsx"
         ],
@@ -1017,7 +1016,7 @@
       "branch": "pulse/F11",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/app/AppLayout.tsx",
           "frontend/src/app/RequireAuth.tsx",
@@ -1065,7 +1064,7 @@
       "branch": "pulse/F12",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E14E20.tsx",
           "frontend/src/ui/feedback/variants/E7Field.tsx",
@@ -1125,7 +1124,7 @@
       "branch": "pulse/F13",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/app/providers.tsx",
           "frontend/src/ui/feedback/ToastHost.tsx",
@@ -1168,7 +1167,7 @@
       "branch": "pulse/F14",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/ProgressChart.tsx",
           "frontend/src/ui/feedback/TrendChart.tsx",
@@ -1210,7 +1209,7 @@
       "branch": "pulse/F15",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/muscle-map/MuscleMap.tsx",
           "frontend/src/ui/muscle-map/landmarks.ts",
@@ -1262,7 +1261,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/scripts/check-aurora.mjs",
           "frontend/src/ui/shell/AuroraBackdrop.tsx"
@@ -1306,7 +1305,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation-stage1.json"
@@ -1348,7 +1347,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation.json"
@@ -1384,7 +1383,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/DESIGN.md",
           "frontend/src/features/coaching/Monogram.tsx",
@@ -1427,7 +1426,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E10Tabs.tsx",
           "frontend/src/ui/feedback/variants/E17E19.tsx",
@@ -1468,7 +1467,7 @@
       "branch": "pulse/S-home",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationBell.tsx",
           "frontend/src/features/home/HomeNutrition.tsx",
@@ -1513,7 +1512,7 @@
       "branch": "pulse/S-auth",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/auth/AuthPage.tsx"
         ],
@@ -1558,7 +1557,7 @@
       "branch": "pulse/S-settings",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/settings/CueSettings.tsx",
           "frontend/src/features/settings/EquipmentSection.tsx",
@@ -1602,7 +1601,7 @@
       "branch": "pulse/S-workout",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/workout/IntervalStage.tsx",
           "frontend/src/features/workout/RestTimer.tsx",
@@ -1648,7 +1647,7 @@
       "branch": "pulse/S-library",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/library/LibraryPage.tsx"
         ],
@@ -1692,7 +1691,7 @@
       "branch": "pulse/S-plan-editor",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanEditorPage.tsx"
         ],
@@ -1735,7 +1734,7 @@
       "branch": "pulse/S-nutrition",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/nutrition/MacroBars.tsx",
           "frontend/src/features/nutrition/NutritionCard.tsx",
@@ -1779,7 +1778,7 @@
       "branch": "pulse/S-progress",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/progress/ProgressPage.tsx"
         ],
@@ -1822,7 +1821,7 @@
       "branch": "pulse/S-coach-chat",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/chat/ChatPage.tsx",
           "frontend/src/features/chat/ChatPanel.tsx"
@@ -1866,7 +1865,7 @@
       "branch": "pulse/S-client-detail-a",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/coaching/ChatTab.tsx",
           "frontend/src/features/coaching/ClientDetailPage.tsx",
@@ -1911,7 +1910,7 @@
       "branch": "pulse/S-client-detail-b",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/coaching/NutritionTab.tsx",
           "frontend/src/features/coaching/ProgressTab.tsx"
@@ -1954,7 +1953,7 @@
       "branch": "pulse/S-exercise-detail",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/library/ExerciseDetailPage.tsx",
           "frontend/src/features/library/SectionBadge.tsx"
@@ -1997,7 +1996,7 @@
       "branch": "pulse/S-coins",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/coins/CoinBalance.tsx",
           "frontend/src/features/coins/CoinsPage.tsx"
@@ -2041,7 +2040,7 @@
       "branch": "pulse/S-notifications",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationsPage.tsx"
         ],
@@ -2083,7 +2082,7 @@
       "branch": "pulse/S-onboarding",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/onboarding/OnboardingPage.tsx"
         ],
@@ -2126,7 +2125,7 @@
       "branch": "pulse/S-coach-dashboard",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/coaching/CoachDashboard.tsx"
         ],
@@ -2169,7 +2168,7 @@
       "branch": "pulse/S-coach-plans",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanListPage.tsx"
         ],
@@ -2211,7 +2210,7 @@
       "branch": "pulse/S-compose-hub",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/compose/ComposePage.tsx"
         ],
@@ -2253,7 +2252,7 @@
       "branch": "pulse/S-public-pages",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/marketplace/CoachProfilePage.tsx",
           "frontend/src/features/marketplace/DocRenderer.tsx",
@@ -2301,7 +2300,7 @@
       "branch": "pulse/S-admin",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/admin/AdminMetrics.tsx",
           "frontend/src/features/admin/AdminPage.tsx",
@@ -2349,7 +2348,7 @@
       "branch": "pulse/S-compose-post",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/compose/PostEditorPage.tsx"
         ],
@@ -2392,7 +2391,7 @@
       "branch": "pulse/S-compose-profile",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/compose/HandleField.tsx",
           "frontend/src/features/compose/ProfileEditorPage.tsx"
@@ -2436,7 +2435,7 @@
       "branch": "pulse/S-marketplace",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/marketplace/MarketplacePage.tsx"
         ],
@@ -2480,7 +2479,7 @@
       "branch": "pulse/S-style-studio",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "616a403 + staged changes",
+        "listedOn": "b5f7886 + staged changes",
         "existing": [
           "frontend/src/features/admin/StyleStudioPage.tsx"
         ],
