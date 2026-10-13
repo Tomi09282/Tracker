@@ -1,10 +1,10 @@
 {
   "schema": 2,
   "branch": "pulse-redesign",
-  "updated": "2026-10-13T22:55:41.548Z",
+  "updated": "2026-10-13T23:05:01.193Z",
   "integrator": {
-    "owner": "integrator (merge-F5 run)",
-    "step": "F5 integrating: pulse/F5 (0fbd121) squashed onto F1.4 (fd277d8), shared.patch applied, build green"
+    "owner": "integrator (merge-F4 run)",
+    "step": "F4 integrating: pulse/F4 (11112fe) squashed onto F5 (212e1be), no hand-in file to apply, self-test 124 of 124 on the merged tree, build green"
   },
   "freeze": {
     "seededOn": null,
@@ -115,6 +115,56 @@
     "heading-icon": 48,
     "legacy-var": 185
   },
+  "statusFilesNotFolded": {
+    "F0+F1.0": {
+      "status": "done",
+      "step": "F0 (1d42ef3) and F1.0 (aebd701) committed on pulse-int; pulse-redesign fast-forwarded to aebd701",
+      "updated": "2026-10-11T23:37:53Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "F0-geometry": {
+      "status": "done",
+      "step": "all 59 frames + component board exported, built, verified against the 2x PNGs; _index.json and _README.md written",
+      "updated": "2026-10-13T21:32:00.043Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "F1.1+F1.2": {
+      "status": "done",
+      "step": "F1.1 (0f1539f) and F1.2 (616a403) committed on pulse-int, pulse-redesign fast-forwarded",
+      "updated": "2026-10-13T21:41:21.721Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "F1.4+F1.5": {
+      "status": "done",
+      "step": "F1.5 (9cd6ce8) and then F1.4 (fd277d8) are committed on pulse-int; pulse-redesign fast-forwarded to fd277d8; npm ci run in the main checkout; live progress marked merged for both",
+      "updated": "2026-10-13T22:44:04.368Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "merge-F2a": {
+      "status": "done",
+      "step": "F2:a committed on pulse-int as b5f7886, pulse-redesign fast-forwarded to it; live progress marked merged",
+      "updated": "2026-10-13T21:46:21Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "merge-F2b": {
+      "status": "done",
+      "step": "F2:b committed on pulse-int as d582795, pulse-redesign fast-forwarded to it; live progress marked merged",
+      "updated": "2026-10-13T22:16:03Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "merge-F4": {
+      "status": "in_progress",
+      "step": "started: pulse-int clean at 212e1be; ownership of pulse/F4 (11112fe) checked by hand - 10 added files, all in F4's owns; reading the tools before the squash",
+      "updated": "2026-10-14T00:00:00Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    },
+    "merge-F5": {
+      "status": "done",
+      "step": "F5 committed on pulse-int as 212e1be; pulse-redesign fast-forwarded to it (lockfile unchanged, no npm ci); live progress marked merged",
+      "updated": "2026-10-13T22:57:43Z",
+      "reason": "the id is not one package, lane stage or fix round"
+    }
+  },
   "packages": {
     "F0": {
       "kind": "foundation",
@@ -124,7 +174,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           ".gitignore",
           "docs/pipeline/pulse/PLAN.md",
@@ -244,7 +294,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/index.html",
           "frontend/package-lock.json",
@@ -616,7 +666,7 @@
       "branch": "pulse/F2",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "docs/pipeline/pulse/pkg/F2/a/.gitattributes",
           "docs/pipeline/pulse/pkg/F2/a/handoff.json",
@@ -656,8 +706,12 @@
           "commit": "d582795"
         },
         "F2:c": {
-          "status": "todo",
-          "commit": null
+          "status": "in_progress",
+          "commit": null,
+          "lastStep": "started: slot-1 switched to pulse/F2c at pulse-redesign fd277d8; reading the plan",
+          "head": "fd277d8",
+          "branch": "pulse/F2c",
+          "updated": "2026-10-13T22:47:00Z"
         }
       },
       "status": "in_progress",
@@ -689,7 +743,7 @@
       "branch": "pulse/F3",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           ".claude/launch.json"
         ],
@@ -713,7 +767,7 @@
           "commit": null
         }
       },
-      "status": "todo",
+      "status": "in_progress",
       "owner": null,
       "slot": null,
       "worktree": null,
@@ -728,9 +782,24 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "",
+      "lastStep": "M4 committed (probes, geometry, tiles, contact sheet, pulse-verify, pulse-sandbox, dev-stack, README); running the 59-state record + 2 replays into a scratch freeze; then merge pulse-redesign and the final build",
       "notes": "",
-      "updated": "2026-10-11T23:30:58.390Z"
+      "updated": "2026-10-13T22:42:41.194Z",
+      "head": "95d0b43",
+      "done": [
+        "slot-2 worktree on pulse/F3",
+        "npm ci in slot-2/frontend",
+        "M1 pulse-shot live mode (jar login, CDP capture, steps by accessible name, inventory, console/request collection)",
+        "M2 pulse-frames.json: 59 states, 51 reached live on the base build, 8 marked fixture/sandbox",
+        "M3 record / replay / CDP virtual time + pinned wall clock / fixtures as edits / unrecorded failure / write-guard probe / clock self-test",
+        "M4 probes, geometry, tiles, contact sheet, inventory diff, pulse-verify (2-slot lock), pulse-sandbox (read-only tested), dev-stack, launch.json, pkg/F3/README.md"
+      ],
+      "next": [
+        "finish the scratch 59-state record/replay proof",
+        "git merge pulse-redesign",
+        "pulse-verify (build green) on the merged tree",
+        "final commit + status done"
+      ]
     },
     "F4": {
       "kind": "foundation",
@@ -742,21 +811,22 @@
       "branch": "pulse/F4",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
-        "existing": [],
-        "toCreate": [
-          "frontend/scripts/pulse-owns-check.mjs",
-          "frontend/scripts/pulse-merge-check.mjs",
-          "frontend/scripts/pulse-sync.mjs",
-          "frontend/scripts/pulse-i18n.mjs",
-          "frontend/scripts/pulse-variants.mjs",
+        "listedOn": "212e1be + staged changes",
+        "existing": [
+          "docs/pipeline/pulse/pkg/F4/README.md",
+          "docs/pipeline/pulse/pkg/F4/selftest.mjs",
           "frontend/scripts/pulse-fixture-check.mjs",
-          "frontend/scripts/pulse-progress.mjs",
+          "frontend/scripts/pulse-i18n.mjs",
           "frontend/scripts/pulse-ledger.mjs",
-          "docs/pipeline/pulse/pkg/F4/**"
-        ]
+          "frontend/scripts/pulse-merge-check.mjs",
+          "frontend/scripts/pulse-owns-check.mjs",
+          "frontend/scripts/pulse-progress.mjs",
+          "frontend/scripts/pulse-sync.mjs",
+          "frontend/scripts/pulse-variants.mjs"
+        ],
+        "toCreate": []
       },
-      "status": "todo",
+      "status": "integrating",
       "owner": null,
       "slot": null,
       "worktree": null,
@@ -771,9 +841,22 @@
       "copyPending": 0,
       "commit": null,
       "review": null,
-      "lastStep": "",
+      "lastStep": "F4 integrating: pulse/F4 (11112fe) squashed onto F5 (212e1be); 10 added files, all F4's; no i18n / variants / shared patch; self-test 124 of 124 on the merged tree with the real gate exports; pulse-owns-check OK; npm run build exit 0",
       "notes": "",
-      "updated": "2026-10-11T23:30:58.390Z"
+      "updated": "2026-10-13T23:05:01.193Z",
+      "head": "11112fe",
+      "done": [
+        "pulse-owns-check (the validator + the shared expander, id grammar, heavy lock, scratch checkout, gate-export adapter)",
+        "pulse-progress (sync / sync --from-snapshot / claim / mark / snapshot / report)",
+        "pulse-ledger",
+        "pulse-i18n (check / apply / apply --merge / revert)",
+        "pulse-variants (check / apply / apply --merge / revert)",
+        "pulse-fixture-check",
+        "pulse-sync",
+        "pulse-merge-check (step 1 and --squashed; --preflight for a slot)",
+        "docs/pipeline/pulse/pkg/F4/README.md (usage, shapes, what waits for F2:c and F3) and selftest.mjs (124 cases)"
+      ],
+      "next": []
     },
     "F5": {
       "kind": "foundation",
@@ -785,7 +868,7 @@
       "branch": "pulse/F5",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "docs/pipeline/pulse/kit/media.md",
           "docs/pipeline/pulse/pkg/F5/.gitattributes",
@@ -856,7 +939,7 @@
         ],
         "toCreate": []
       },
-      "status": "integrating",
+      "status": "merged",
       "owner": null,
       "slot": 4,
       "worktree": "C:/Users/Petike/Documents/Cursor/tracker-wt/slot-4",
@@ -871,11 +954,11 @@
       },
       "liveWrites": [],
       "copyPending": 0,
-      "commit": null,
+      "commit": "212e1be",
       "review": null,
-      "lastStep": "F5 integrating: squash of pulse/F5 (0fbd121) onto fd277d8 + pkg/F5/shared.patch (git apply --3way, clean). 49 WebP files from 35 sources under src/assets/pulse/img, 840,748 B of the 1,048,576 B cap (80.2 %); baked canvas #0B0D0A = --surface-0 and baked accent #CBFF2E = --accent on pulse-int. check:assets (8 assertions) is in the build chain after check:canvas; its own --probe run on the merged tree: 22 planted defects + 1 control as expected. npm run build exit 0; verify:gates --allow-dirty 50 passed / 0 failed / 4 dormant. No screen imports a Pulse image yet (kit host F7, tab bar F11), so nothing visible changes and the dist grep for data:image cannot fail yet; the no-inline line of vite.config.ts was proven with a scratch build of the image module through the tree's own config: 49 files and 0 data:image with the line, 26 files and 23 inlined without it. assertion 4, second leg (every tab of NAV_TABS names an icon key) is PENDING by data (navTabs.leg in assets.json) until F11 flips it to enforced in its shared.patch.",
+      "lastStep": "F5 merged (212e1be), pulse-redesign fast-forwarded (lockfile unchanged, no npm ci; nothing listened on :5173). 49 WebP files from 35 sources under src/assets/pulse/img, 840,748 B of the 1,048,576 B cap (80.2 %); baked canvas #0B0D0A = --surface-0 and baked accent #CBFF2E = --accent on pulse-int. check:assets (8 assertions) is in the build chain after check:canvas; its own --probe on the merged tree: 22 planted defects + 1 control as expected. pkg/F5/shared.patch applied with git apply --3way (clean on fd277d8). npm run build exit 0; verify:gates on the committed clean tree 50 passed / 0 failed / 4 dormant, --fresh yes. No screen imports a Pulse image yet (kit host F7, tab bar F11): nothing visible changes and the dist grep for data:image cannot fail yet; the no-inline line of vite.config.ts was proven with a scratch build of the image module through the tree's own config (49 files, 0 data:image with the line; 26 files, 23 inlined without). Assertion 4, second leg (every tab of NAV_TABS names an icon key) is PENDING by data (navTabs.leg in assets.json) until F11 flips it to enforced in its shared.patch. R-F5-01 deferred to the F2:c merge (see notes). Not run: preview, hybrid sweep, kit board capture - F3, the freeze and F7 are not merged.",
       "notes": "R-F5-01 (three check:assets probes for verify:gates, target frontend/scripts/verify-gates.mjs) is DEFERRED to the F2:c merge: that file is granted to lane F2 and F2:c is in progress in slot-1, so the integrator did not write into it. The proposed patch was proven on the merged tree (applied, verify-gates --allow-dirty --gate check:assets: 3 passed, reverted byte for byte). It must land before F16 retires check:aurora (R16: the heir carries a probe). Until then the proof is node scripts/check-assets.mjs --probe. FOR THE OWNER: all 49 image files are AI-generated and their usage terms are unchecked - check them before the FIRST push; the 11 MB of PNG masters stay outside the repository.",
-      "updated": "2026-10-13T22:54:36.014Z"
+      "updated": "2026-10-13T22:57:42.948Z"
     },
     "F6": {
       "kind": "foundation",
@@ -890,7 +973,7 @@
       "branch": "pulse/F6",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/primitives/Pressable.tsx",
           "frontend/src/ui/primitives/control.ts"
@@ -932,7 +1015,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/playground/PlaygroundPage.tsx",
           "frontend/src/ui/TokenProof.tsx",
@@ -972,7 +1055,7 @@
       "branch": "pulse/F8",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E2CopyButton.tsx",
           "frontend/src/ui/feedback/variants/E6Segmented.tsx",
@@ -1029,7 +1112,7 @@
       "branch": "pulse/F9",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/data/SectionHeader.tsx",
           "frontend/src/ui/feedback/EmptyState.tsx",
@@ -1085,7 +1168,7 @@
       "branch": "pulse/F10",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/feedback/CountUp.tsx"
         ],
@@ -1142,7 +1225,7 @@
       "branch": "pulse/F11",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/app/AppLayout.tsx",
           "frontend/src/app/RequireAuth.tsx",
@@ -1190,7 +1273,7 @@
       "branch": "pulse/F12",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E14E20.tsx",
           "frontend/src/ui/feedback/variants/E7Field.tsx",
@@ -1250,7 +1333,7 @@
       "branch": "pulse/F13",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/app/providers.tsx",
           "frontend/src/ui/feedback/ToastHost.tsx",
@@ -1293,7 +1376,7 @@
       "branch": "pulse/F14",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/feedback/ProgressChart.tsx",
           "frontend/src/ui/feedback/TrendChart.tsx",
@@ -1335,7 +1418,7 @@
       "branch": "pulse/F15",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/muscle-map/MuscleMap.tsx",
           "frontend/src/ui/muscle-map/landmarks.ts",
@@ -1387,7 +1470,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/scripts/check-aurora.mjs",
           "frontend/src/ui/shell/AuroraBackdrop.tsx"
@@ -1431,7 +1514,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation-stage1.json"
@@ -1473,7 +1556,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [],
         "toCreate": [
           "docs/pipeline/pulse/review/foundation.json"
@@ -1509,7 +1592,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/DESIGN.md",
           "frontend/src/features/coaching/Monogram.tsx",
@@ -1552,7 +1635,7 @@
       "branch": "pulse-int",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/ui/feedback/variants/E10Tabs.tsx",
           "frontend/src/ui/feedback/variants/E17E19.tsx",
@@ -1593,7 +1676,7 @@
       "branch": "pulse/S-home",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationBell.tsx",
           "frontend/src/features/home/HomeNutrition.tsx",
@@ -1638,7 +1721,7 @@
       "branch": "pulse/S-auth",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/auth/AuthPage.tsx"
         ],
@@ -1683,7 +1766,7 @@
       "branch": "pulse/S-settings",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/settings/CueSettings.tsx",
           "frontend/src/features/settings/EquipmentSection.tsx",
@@ -1727,7 +1810,7 @@
       "branch": "pulse/S-workout",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/workout/IntervalStage.tsx",
           "frontend/src/features/workout/RestTimer.tsx",
@@ -1773,7 +1856,7 @@
       "branch": "pulse/S-library",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/library/LibraryPage.tsx"
         ],
@@ -1817,7 +1900,7 @@
       "branch": "pulse/S-plan-editor",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanEditorPage.tsx"
         ],
@@ -1860,7 +1943,7 @@
       "branch": "pulse/S-nutrition",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/nutrition/MacroBars.tsx",
           "frontend/src/features/nutrition/NutritionCard.tsx",
@@ -1904,7 +1987,7 @@
       "branch": "pulse/S-progress",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/progress/ProgressPage.tsx"
         ],
@@ -1947,7 +2030,7 @@
       "branch": "pulse/S-coach-chat",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/chat/ChatPage.tsx",
           "frontend/src/features/chat/ChatPanel.tsx"
@@ -1991,7 +2074,7 @@
       "branch": "pulse/S-client-detail-a",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/coaching/ChatTab.tsx",
           "frontend/src/features/coaching/ClientDetailPage.tsx",
@@ -2036,7 +2119,7 @@
       "branch": "pulse/S-client-detail-b",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/coaching/NutritionTab.tsx",
           "frontend/src/features/coaching/ProgressTab.tsx"
@@ -2079,7 +2162,7 @@
       "branch": "pulse/S-exercise-detail",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/library/ExerciseDetailPage.tsx",
           "frontend/src/features/library/SectionBadge.tsx"
@@ -2122,7 +2205,7 @@
       "branch": "pulse/S-coins",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/coins/CoinBalance.tsx",
           "frontend/src/features/coins/CoinsPage.tsx"
@@ -2166,7 +2249,7 @@
       "branch": "pulse/S-notifications",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/chat/NotificationsPage.tsx"
         ],
@@ -2208,7 +2291,7 @@
       "branch": "pulse/S-onboarding",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/onboarding/OnboardingPage.tsx"
         ],
@@ -2251,7 +2334,7 @@
       "branch": "pulse/S-coach-dashboard",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/coaching/CoachDashboard.tsx"
         ],
@@ -2294,7 +2377,7 @@
       "branch": "pulse/S-coach-plans",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/plans/PlanListPage.tsx"
         ],
@@ -2336,7 +2419,7 @@
       "branch": "pulse/S-compose-hub",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/compose/ComposePage.tsx"
         ],
@@ -2378,7 +2461,7 @@
       "branch": "pulse/S-public-pages",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/marketplace/CoachProfilePage.tsx",
           "frontend/src/features/marketplace/DocRenderer.tsx",
@@ -2426,7 +2509,7 @@
       "branch": "pulse/S-admin",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/admin/AdminMetrics.tsx",
           "frontend/src/features/admin/AdminPage.tsx",
@@ -2474,7 +2557,7 @@
       "branch": "pulse/S-compose-post",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/compose/PostEditorPage.tsx"
         ],
@@ -2517,7 +2600,7 @@
       "branch": "pulse/S-compose-profile",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/compose/HandleField.tsx",
           "frontend/src/features/compose/ProfileEditorPage.tsx"
@@ -2561,7 +2644,7 @@
       "branch": "pulse/S-marketplace",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/marketplace/MarketplacePage.tsx"
         ],
@@ -2605,7 +2688,7 @@
       "branch": "pulse/S-style-studio",
       "files": {
         "generatedFrom": "work-packages.json@13cd5fd3ae5c",
-        "listedOn": "fd277d8 + staged changes",
+        "listedOn": "212e1be + staged changes",
         "existing": [
           "frontend/src/features/admin/StyleStudioPage.tsx"
         ],
