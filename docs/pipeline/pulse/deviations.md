@@ -52,4 +52,7 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
   the family (three ticking sites and eleven still ones pair `tabular-nums` with the display face
   today — listed in the proof).
 - Status: open — the plan's stand-in is in force; the owner may instead rule that changing numbers are
-  set in Geist (which has tabular figures), or choose another display family.
+  set in Geist (which has tabular figures), or choose another display family. **F1.4 is held on this
+  entry (2026-10-14):** the step that switches the typefaces is "not made unless the F1.2 glyph check
+  passed", and the check is on record as failed for the display face. F1.5 (the gutter) was made ahead
+  of it; until this is ruled the app shows Pulse colours over the old two typefaces.

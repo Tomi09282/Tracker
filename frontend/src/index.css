@@ -87,7 +87,9 @@
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
   /*
-   * The screen's horizontal gutter: 16px mobile, 24px from the tablet breakpoint up.
+   * The screen's horizontal gutter: 24px, and 16px on a viewport narrower than 376px (23.5rem) —
+   * the Pulse grid (supported phone widths 360-430). The breakpoint is a literal because a media
+   * query cannot read a custom property; the two gutter values are steps of the spacing grid.
    *
    * ═══ AND THE LANDSCAPE NOTCH, WHICH THIS HAD NEVER ACCOUNTED FOR ═══════════════════════════
    *
@@ -100,15 +102,16 @@
    * an edge case here — it is how somebody reads their next set.
    *
    * `max()` rather than addition: the inset REPLACES the gutter when it is larger, so the safe edge
-   * never gets 16px of padding stacked on top of a 44px cutout. On every device with no inset the
-   * value is unchanged, which is why this costs nothing everywhere else.
+   * never gets the gutter stacked on top of a 44px cutout. On every device with no inset the
+   * value is unchanged, which is why this costs nothing everywhere else. BOTH rules below keep
+   * both `max()` forms — `check-safe-area` reads every `.screen-x` block.
    */
   .screen-x {
-    padding-inline: max(--spacing(4), env(safe-area-inset-left)) max(--spacing(4), env(safe-area-inset-right));
+    padding-inline: max(--spacing(6), env(safe-area-inset-left)) max(--spacing(6), env(safe-area-inset-right));
   }
-  @media (width >= 48rem) {
+  @media (width < 23.5rem) {
     .screen-x {
-      padding-inline: max(--spacing(6), env(safe-area-inset-left)) max(--spacing(6), env(safe-area-inset-right));
+      padding-inline: max(--spacing(4), env(safe-area-inset-left)) max(--spacing(4), env(safe-area-inset-right));
     }
   }
 
