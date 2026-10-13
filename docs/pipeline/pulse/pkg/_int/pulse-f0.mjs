@@ -444,6 +444,8 @@ const buildProgress = (previous) => {
       review: before.review ?? null,
       lastStep: before.lastStep ?? '',
       notes: before.notes ?? '',
+      // F1 only: the recorded glyph and tabular-figure result of step F1.2 (PLAN.md 3.3) — F1.4 reads it.
+      ...(before.glyphCheck ? { glyphCheck: before.glyphCheck } : {}),
       updated: before.updated ?? now,
     };
   }

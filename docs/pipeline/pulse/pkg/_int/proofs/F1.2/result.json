@@ -1,0 +1,760 @@
+{
+  "step": "F1.2",
+  "what": "glyph and tabular-figure check of the three Pulse faces (PLAN.md 3.3, R8)",
+  "subject": "the shipped stylesheet, frontend/src/ui/tokens/fonts.css",
+  "stylesheet": "frontend/src/ui/tokens/fonts.css",
+  "checkedAt": "2026-10-13T21:34:37.019Z",
+  "onCommit": "0f1539f + the F1.2 working tree",
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36",
+    "executable": "chrome.exe",
+    "mode": "headless, --dump-dom, a scratch page in the OS temp directory"
+  },
+  "method": {
+    "sizePx": 200,
+    "fallbacks": [
+      "serif",
+      "monospace"
+    ],
+    "glyph": "canvas measureText in \"<face>, <fallback>\" against \"<fallback>\" alone, over two fallbacks; present = the same width over both fallbacks and not the fallback width",
+    "digits": "DOM box width of each digit under font-variant-numeric: tabular-nums; one advance = spread within 1/64 px at 200 px",
+    "negativeControl": "Ж lies outside every declared unicode-range and must read as missing",
+    "binary": "cmap and the GSUB feature list read from the WOFF2 files (font-tables.mjs)"
+  },
+  "packages": {
+    "@fontsource-variable/big-shoulders-display": {
+      "version": "5.3.0",
+      "license": "OFL-1.1"
+    },
+    "@fontsource-variable/geist": {
+      "version": "5.3.0",
+      "license": "OFL-1.1"
+    },
+    "@fontsource/geist-mono": {
+      "version": "5.3.0",
+      "license": "OFL-1.1"
+    }
+  },
+  "files": [
+    {
+      "role": "display",
+      "family": "Big Shoulders Display Variable",
+      "subset": "latin-ext",
+      "file": "@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-ext-wght-normal.woff2",
+      "bytes": 28688,
+      "sha256": "4671cb6e9e9036e92a4a4e8c9506c6bcfbfb4a10687f0033fae3c2abc37ad916",
+      "fontDisplay": "block",
+      "packageRules": 2,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [
+        "wght 100..900"
+      ],
+      "gsubFeatures": [
+        "locl"
+      ],
+      "mapsHungarian": true,
+      "mapsDigits": false
+    },
+    {
+      "role": "display",
+      "family": "Big Shoulders Display Variable",
+      "subset": "latin",
+      "file": "@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-wght-normal.woff2",
+      "bytes": 35504,
+      "sha256": "075292b13a638821b34726b33e49b3b711c4b9bee9b42f2bb68fa3b6ec888f2b",
+      "fontDisplay": "block",
+      "packageRules": 2,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [
+        "wght 100..900"
+      ],
+      "gsubFeatures": [
+        "ccmp",
+        "dnom",
+        "frac",
+        "liga",
+        "locl",
+        "numr"
+      ],
+      "mapsHungarian": false,
+      "mapsDigits": true
+    },
+    {
+      "role": "text",
+      "family": "Geist Variable",
+      "subset": "latin-ext",
+      "file": "@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2",
+      "bytes": 16512,
+      "sha256": "824f485b5d26e2f2da3c2b236132ece1bc8e4e43373452950bb0e40548b4313f",
+      "fontDisplay": "swap",
+      "packageRules": 2,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [
+        "wght 100..900"
+      ],
+      "gsubFeatures": [
+        "locl"
+      ],
+      "mapsHungarian": true,
+      "mapsDigits": false
+    },
+    {
+      "role": "text",
+      "family": "Geist Variable",
+      "subset": "latin",
+      "file": "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2",
+      "bytes": 29400,
+      "sha256": "19f9c92546aa300c312235e3125af1b81394d8db9a4bc4a425cd5b641d2d54e1",
+      "fontDisplay": "swap",
+      "packageRules": 2,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [
+        "wght 100..900"
+      ],
+      "gsubFeatures": [
+        "ccmp",
+        "dnom",
+        "frac",
+        "liga",
+        "locl",
+        "numr",
+        "pnum",
+        "tnum"
+      ],
+      "mapsHungarian": false,
+      "mapsDigits": true
+    },
+    {
+      "role": "mono",
+      "family": "Geist Mono",
+      "subset": "latin-ext",
+      "file": "@fontsource/geist-mono/files/geist-mono-latin-ext-500-normal.woff2",
+      "bytes": 7156,
+      "sha256": "84c2a01e0e35619e561d46285ccecec68aae76cb96c618b8e047806cb5530741",
+      "fontDisplay": "swap",
+      "packageRules": 3,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [],
+      "gsubFeatures": [
+        "locl"
+      ],
+      "mapsHungarian": true,
+      "mapsDigits": false
+    },
+    {
+      "role": "mono",
+      "family": "Geist Mono",
+      "subset": "latin",
+      "file": "@fontsource/geist-mono/files/geist-mono-latin-500-normal.woff2",
+      "bytes": 10116,
+      "sha256": "72971bd4908d3984fa1b1426bb363730e4957e16a0f58bfbca76993095715488",
+      "fontDisplay": "swap",
+      "packageRules": 3,
+      "familyEqualsPackage": true,
+      "weightEqualsPackage": true,
+      "styleEqualsPackage": true,
+      "unicodeRangeEqualsPackage": true,
+      "axes": [],
+      "gsubFeatures": [
+        "ccmp",
+        "dnom",
+        "frac",
+        "locl",
+        "numr"
+      ],
+      "mapsHungarian": false,
+      "mapsDigits": true
+    }
+  ],
+  "hungarianSession": {
+    "note": "worst case: every declared file of every face (a Hungarian screen needs latin and latin-ext of each face it shows)",
+    "files": 6,
+    "bytes": 127376,
+    "kB": 127.4,
+    "KiB": 124.4,
+    "limitKB": 150,
+    "within": true
+  },
+  "dormantBeforeUse": true,
+  "faces": [
+    {
+      "role": "display",
+      "family": "Big Shoulders Display Variable",
+      "weight": 700,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.418,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.433,
+          "fallbackEm": {
+            "serif": 0.556,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.428,
+          "fallbackEm": {
+            "serif": 0.778,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.419,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": null,
+        "tabularEm": [
+          0.44,
+          0.237,
+          0.424,
+          0.437,
+          0.448,
+          0.446,
+          0.433,
+          0.408,
+          0.433,
+          0.432
+        ],
+        "tabularEqual": false,
+        "tnumFeatureInFile": false,
+        "defaultFigures": "proportional",
+        "defaultEm": [
+          0.44,
+          0.237,
+          0.424,
+          0.437,
+          0.448,
+          0.446,
+          0.433,
+          0.408,
+          0.433,
+          0.432
+        ],
+        "runsOfTenEqual": false,
+        "runsOfTenEm": [
+          4.395,
+          2.365,
+          4.039,
+          3.38,
+          4.136
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "fail"
+      },
+      "reasons": [
+        "under tabular-nums the ten digits are NOT on one advance (0.237-0.448 em) — the file has no tnum feature (GSUB: ccmp dnom frac liga locl numr), so the CSS cannot change its figures"
+      ]
+    },
+    {
+      "role": "display",
+      "family": "Big Shoulders Display Variable",
+      "weight": 900,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.48,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.499,
+          "fallbackEm": {
+            "serif": 0.556,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.497,
+          "fallbackEm": {
+            "serif": 0.778,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.487,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": null,
+        "tabularEm": [
+          0.507,
+          0.274,
+          0.49,
+          0.504,
+          0.511,
+          0.515,
+          0.499,
+          0.485,
+          0.501,
+          0.499
+        ],
+        "tabularEqual": false,
+        "tnumFeatureInFile": false,
+        "defaultFigures": "proportional",
+        "defaultEm": [
+          0.507,
+          0.274,
+          0.49,
+          0.504,
+          0.511,
+          0.515,
+          0.499,
+          0.485,
+          0.501,
+          0.499
+        ],
+        "runsOfTenEqual": false,
+        "runsOfTenEm": [
+          5.07,
+          2.74,
+          4.67,
+          3.905,
+          4.784
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "fail"
+      },
+      "reasons": [
+        "under tabular-nums the ten digits are NOT on one advance (0.274-0.515 em) — the file has no tnum feature (GSUB: ccmp dnom frac liga locl numr), so the CSS cannot change its figures"
+      ]
+    },
+    {
+      "role": "text",
+      "family": "Geist Variable",
+      "weight": 400,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.573,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.575,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.739,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.689,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": 0.6,
+        "tabularEm": [
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6
+        ],
+        "tabularEqual": true,
+        "tnumFeatureInFile": true,
+        "defaultFigures": "proportional",
+        "defaultEm": [
+          0.663,
+          0.384,
+          0.619,
+          0.613,
+          0.615,
+          0.626,
+          0.593,
+          0.524,
+          0.604,
+          0.593
+        ],
+        "runsOfTenEqual": true,
+        "runsOfTenEm": [
+          6,
+          6,
+          6,
+          6,
+          6
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "pass"
+      },
+      "reasons": []
+    },
+    {
+      "role": "text",
+      "family": "Geist Variable",
+      "weight": 500,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.588,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.586,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.751,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.694,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": 0.612,
+        "tabularEm": [
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612,
+          0.612
+        ],
+        "tabularEqual": true,
+        "tnumFeatureInFile": true,
+        "defaultFigures": "proportional",
+        "defaultEm": [
+          0.673,
+          0.406,
+          0.63,
+          0.625,
+          0.629,
+          0.641,
+          0.604,
+          0.531,
+          0.624,
+          0.606
+        ],
+        "runsOfTenEqual": true,
+        "runsOfTenEm": [
+          6.12,
+          6.12,
+          6.12,
+          6.12,
+          6.12
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "pass"
+      },
+      "reasons": []
+    },
+    {
+      "role": "text",
+      "family": "Geist Variable",
+      "weight": 600,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.603,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.597,
+          "fallbackEm": {
+            "serif": 0.556,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.763,
+          "fallbackEm": {
+            "serif": 0.778,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.699,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": 0.624,
+        "tabularEm": [
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624,
+          0.624
+        ],
+        "tabularEqual": true,
+        "tnumFeatureInFile": true,
+        "defaultFigures": "proportional",
+        "defaultEm": [
+          0.683,
+          0.427,
+          0.642,
+          0.637,
+          0.643,
+          0.656,
+          0.615,
+          0.538,
+          0.644,
+          0.618
+        ],
+        "runsOfTenEqual": true,
+        "runsOfTenEm": [
+          6.24,
+          6.24,
+          6.24,
+          6.24,
+          6.24
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "pass"
+      },
+      "reasons": []
+    },
+    {
+      "role": "mono",
+      "family": "Geist Mono",
+      "weight": 500,
+      "fontsCheck": {
+        "beforeLoad": false,
+        "afterLoad": true
+      },
+      "glyphs": {
+        "ő": {
+          "present": true,
+          "em": 0.6,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "ű": {
+          "present": true,
+          "em": 0.6,
+          "fallbackEm": {
+            "serif": 0.5,
+            "monospace": 0.55
+          }
+        },
+        "Ő": {
+          "present": true,
+          "em": 0.6,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        },
+        "Ű": {
+          "present": true,
+          "em": 0.6,
+          "fallbackEm": {
+            "serif": 0.722,
+            "monospace": 0.55
+          }
+        }
+      },
+      "negativeControl": {
+        "character": "Ж",
+        "readsAsMissing": true
+      },
+      "digits": {
+        "fromFace": true,
+        "tabularAdvanceEm": 0.6,
+        "tabularEm": [
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6
+        ],
+        "tabularEqual": true,
+        "tnumFeatureInFile": false,
+        "defaultFigures": "already tabular",
+        "defaultEm": [
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6,
+          0.6
+        ],
+        "runsOfTenEqual": true,
+        "runsOfTenEm": [
+          6,
+          6,
+          6,
+          6,
+          6
+        ]
+      },
+      "verdict": {
+        "glyphs": "pass",
+        "tabular": "pass"
+      },
+      "reasons": []
+    }
+  ],
+  "verdict": {
+    "glyphs": {
+      "display": "pass",
+      "text": "pass",
+      "mono": "pass"
+    },
+    "tabular": {
+      "display": "fail",
+      "text": "pass",
+      "mono": "pass"
+    },
+    "overall": "fail"
+  },
+  "problems": []
+}

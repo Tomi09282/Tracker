@@ -34,3 +34,22 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - What the app does: the figure gives way first, then the secondary meta line. The exercise name, the
   set target, the check control and the rest line never move.
 - Status: open — the default of Q7; an answer in `.pulse/owner-answers.md` replaces it.
+
+## DEV-003 — Numbers that change, set in the display face
+
+- Source: the F1.2 glyph check (`pkg/_int/proofs/F1.2/README.md`); PLAN.md 3.3 "If the glyph check
+  fails" and section 10, row "Big Shoulders Display ships tabular figures"
+- Package: F1 (step F1.4), F10 (`Numeral`, `CountUp`), S-workout (rest and interval clocks), S-coins
+- The frames show: numerals in Big Shoulders Display. A frame is a still, so it cannot show what the
+  check found: this face has no tabular figures ("1" is 0.237 em wide, "0" is 0.440 em at weight 700,
+  and `tabular-nums` changes nothing — the font has no `tnum` feature). The successor family the plan
+  names, `@fontsource-variable/big-shoulders`, is the same and a wider cut; it was checked and not
+  installed. The letters ő ű Ő Ű are present in all three faces.
+- What the app does: keeps Big Shoulders Display (ruling R8, the family of all 59 frames). A number
+  that stays as it is reads exactly as drawn. A number that CHANGES on screen in this face — the rest
+  and interval countdowns, a rolling count — gets fixed-width digit cells from `Numeral` (the stand-in
+  the plan names); until that lands, such a number jumps sideways on a tick once F1.4 has re-pointed
+  the family (three ticking sites and eleven still ones pair `tabular-nums` with the display face
+  today — listed in the proof).
+- Status: open — the plan's stand-in is in force; the owner may instead rule that changing numbers are
+  set in Geist (which has tabular figures), or choose another display family.

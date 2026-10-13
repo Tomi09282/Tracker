@@ -8,6 +8,11 @@
 @import '@fontsource/space-grotesk/600.css';
 @import '@fontsource/space-grotesk/700.css';
 
+/* The three Pulse faces (Big Shoulders Display, Geist, Geist Mono), declared and DORMANT: no family
+   token names them yet, so nothing is downloaded and nothing changes on screen. The type step
+   switches them on and removes the four imports above. */
+@import './ui/tokens/fonts.css';
+
 @import './ui/tokens/tokens.css';
 
 @layer base {
