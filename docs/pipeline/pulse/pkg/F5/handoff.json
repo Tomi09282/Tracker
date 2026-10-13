@@ -1,0 +1,91 @@
+{
+  "package": "F5",
+  "lane": "E - assets and media",
+  "branch": "pulse/F5",
+  "verifiedOn": "pulse/F5 merged with pulse-redesign 9cd6ce8 (F1.3 0dc7daa + F2:b d582795 + F1.5); the merge base is the tip of pulse-redesign. Gate, 22 probes, in-tree probes and the browser measurements were run on d582795; after F1.5 (index.css gutter only) the gate and the full build were run again: both green, shared.patch applies unchanged",
+  "mergeConstraint": "after F1.3 - satisfied: --surface-0 is #0B0D0A and --accent is #CBFF2E on the base",
+  "handIn": ["docs/pipeline/pulse/pkg/F5/shared.patch"],
+  "files": {
+    "frontend/assets-src/pulse/assets.json": "the slot table: canvas #0B0D0A, accent #CBFF2E, knee 32, 27 slots, the equipment still table, the switch of the tab-table leg (navTabs.leg: pending)",
+    "frontend/assets-src/pulse/assets.lock.json": "GENERATED: recipe hash of the manifest, sha256 + bytes of the 49 files and of the 35 masters they came from",
+    "frontend/scripts/build-pulse-assets.mjs": "the authoring script: --src <absolute masters folder> (required), --sharp-from <checkout> (default: the main checkout, from the git common dir); says plainly when either is missing; refuses to write on a missing master, an upscale, a still that does not fade to black at its edge, or a lit master that is not on the ramp of the accent",
+    "frontend/scripts/check-assets.mjs": "the gate (8 assertions) and its probes (--probe); needs no image library",
+    "frontend/src/assets/pulse/img/*.webp": "GENERATED: 49 files, 840,748 B",
+    "frontend/src/assets/pulse/img/.gitattributes": "*.webp binary",
+    "frontend/src/assets/pulse/slots.ts": "GENERATED: PULSE_SLOTS, PulseSlot, PulseLitSlot, TAB_ICON_KEYS, TabIconKey, EQUIPMENT_STILL - pure TypeScript, importable by bare Node",
+    "frontend/src/assets/pulse/urls.ts": "GENERATED: the one file that imports the images",
+    "frontend/src/assets/pulse/index.ts": "hand-written: the folder's API - pulseSrcSet, pulseHeight, tabIconSlot, equipmentStill + re-exports",
+    "frontend/src/ui/media/Pic.tsx": "the one renderer of a bundled raster (data-kit=pic)",
+    "frontend/src/ui/media/UserPhoto.tsx": "the one renderer of user media (data-kit=userPhoto)",
+    "frontend/src/features/playground/kit/media.tsx": "the lane's kit specimen: `specimens` (label + node per board cell) and a default component",
+    "docs/pipeline/pulse/kit/media.md": "the lane's page of the kit reference",
+    "docs/pipeline/pulse/pkg/F5/shared.patch": "hand-in: package.json scripts check:assets + assets:pulse and check:assets in the build chain (after check:canvas); vite.config.ts build.assetsInlineLimit callback (no inlining under assets/pulse)",
+    "docs/pipeline/pulse/pkg/F5/requests/R-F5-01.json": "request to F2 / INT: register three check:assets probes in verify:gates",
+    "docs/pipeline/pulse/pkg/F5/requests/R-F5-01.patch": "its proposed patch for frontend/scripts/verify-gates.mjs (a suggestion; passes git apply --check on d582795)"
+  },
+  "shipped": {
+    "sources": 35,
+    "files": 49,
+    "bytes": 840748,
+    "capBytes": 1048576,
+    "shareOfCap": "80.2 %",
+    "byFamily": {
+      "icon": { "files": 14, "bytes": 43822, "largest": "tab-progress-lit-96.webp 3,526" },
+      "object": { "files": 6, "bytes": 79782, "largest": "coin-512.webp 32,980" },
+      "equipment": { "files": 8, "bytes": 22160, "largest": "equip-machine-144.webp 4,048" },
+      "figure": { "files": 6, "bytes": 204816, "largest": "figure-back-585.webp 59,514" },
+      "hero": { "files": 14, "bytes": 485550, "largest": "hero-kettlebell-652.webp 95,452" },
+      "texture": { "files": 1, "bytes": 4618 }
+    },
+    "notShipped": "the five steel tab-* masters, muscle-figure-front, figure-front-press, figure-front-legs, figure-back-lats, figure-back-pull, cover-gym, cover-bar, cover-track, portrait-coach - the list is written in the gate (EXCLUDED_SOURCES); naming one as a source fails assertion 1",
+    "tool": "sharp 0.35.3 (libvips 8.18.3, libwebp 1.6.0) read from the main checkout's backend/node_modules; no backend file run or touched"
+  },
+  "gate": {
+    "onThisTree": "check-assets: OK - 49 files from 35 sources, 840,748 B of 1,048,576 (80.2 %), 8 assertions",
+    "pendingLeg": "assertion 4, second leg: 18 of 18 tabs of NAV_TABS still carry an icon component. The leg is switched on by navTabs.leg = \"enforced\" in assets.json, in the commit that gives navTabs.ts string keys (F11). The gate FAILS if every tab names a key and the switch is still pending.",
+    "probes": {
+      "runner": "node scripts/check-assets.mjs --probe   (cwd frontend/)",
+      "result": "22 planted defects + 1 control, each in its own copy under the OS temp folder: every defect turned its named assertion red, the control stayed green, the working tree was never touched",
+      "perAssertion": {
+        "1 list": ["a -lit file deleted (also 4)", "an orphan file in img/", "portrait-coach.png given a slot", "knee edited without a re-export", "one byte of an image flipped"],
+        "2 pixels": ["a wrong height in slots.ts", "a file holding the pixels of another width"],
+        "3 budget": ["a hero over 100 kB and the folder over 1.0 MB"],
+        "4 tabs": ["a tab icon without its lit flag (also 1)", "enforced: a tab naming no raster key", "enforced: a tab still carrying a component", "pending left on after every tab took a key"],
+        "5 equipment": ["a slug dropped from the still table", "a slug pointed at a hero", "a new slug in a backend migration"],
+        "6 door": ["a blend utility in a feature file", "an image import in a feature file", "a deep import into assets/pulse/", "Pic importing an image past urls.ts"],
+        "7 canvas": ["--surface-0 changed alone"],
+        "8 accent": ["--accent changed alone", "the baked accent changed alone (also 1)"]
+      },
+      "planCasesInTree": "The three probes PLAN 3.6 names were also planted in the slot tree itself against the real gate, one at a time, and restored byte for byte: tab-home-lit-96.webp deleted -> exit 1, red 1 + 4; the blend utility added to features/playground/kit/media.tsx -> exit 1, red 6; --accent changed alone in tokens.css -> exit 1, red 8. git status identical before and after.",
+      "forVerifyGates": "verify-gates.mjs (F2:b) lists check:assets as a gate and has no probe for it. requests/R-F5-01.patch adds three in that runner's own vocabulary; `--list` shows them armed, and the same mutations + expects were proven against the gate's runChecks() in temp copies. verify:gates itself was NOT run in the slot (PLAN 2.1)."
+    }
+  },
+  "build": "npm run build exit 0 in the slot with shared.patch applied, under a heavy lock: 13 gate scripts incl. check:canvas and check:assets, then tsc -b and vite build",
+  "bundle": {
+    "appDist": "grep data:image dist/assets/*.js -> 0 matches. Honest limit: no screen imports a Pulse image yet (the kit host is F7, the bar is F11), so the app bundle holds 0 of the 49 files and this grep cannot fail today.",
+    "kitBuild": "So the setting was tested where it bites: a scratch Vite build whose entry imports the kit specimen, through the tree's own vite.config.ts. WITH the hand-in line: 49 WebP files emitted (840,748 B), 0 data:image in JS. WITHOUT it: 26 emitted, 23 inlined as base64, JS 91 kB larger.",
+    "tailwind": "Tailwind scans frontend/scripts for class names: a probe that spelled the blend utility as one word put a mix-blend-mode rule into the app stylesheet. Fixed (the word is assembled at run time); dist CSS holds 0 blend rules. The proposed runner patch does the same."
+  },
+  "looked": {
+    "contactSheets": "Pillow, over #0B0D0A: all 14 tab icons at 96 and 32 px, coin, medal pair, 8 stills, both figures, 7 heroes; an 8x contrast-amplified sheet; a sheet over the sheet surface #1E2219; a 4x nearest-neighbour zoom of icon edges. No rectangle, no dark fringe, the lit icons are lime (mean rgb of the opaque pixels about 204 / 249 / 70 against the accent 203 / 255 / 46), the idle ones neutral steel.",
+    "numbers": "28 knee files against the lighten reference max(resized master, canvas): mean difference 0.83 of 255 (worst file 1.30); outer-ring alpha 0 in every file; ring distance from the canvas after compositing 0.0; 4 pixels in total darker than the canvas by one level.",
+    "builtPage": "The kit specimen rendered by headless Chrome through the real Pic and UserPhoto on the Pulse canvas (computed body background rgb(11, 13, 10)), measured in real time at dpr 1 and 2: 68 images loaded; 0 with a blend mode, 0 with a background, 0 Pic with a radius; boxes = width x manifest ratio (hero-grip 216 x 180, figure 95 x 200.7); srcset picks 1x at dpr 1 and 2x at dpr 2; lights-on runs 0 -> 1 (0.93 at about 0.47 s, 1 by about 0.72 s after navigation; the transition is --duration-slow, 400 ms); a lit pair flips [1,0] -> [0,1]; with prefers-reduced-motion the hero is at 1 from the first sample and the pair still flips; UserPhoto radius 2 px, cover / contain, grayscale; no console error.",
+    "limits": "dpr 3 was measured only before the F1.3 merge and in virtual time (figure -> 390, heroes -> 2x, coin at 188 pt -> 512): the real-time run at dpr 3 hung in headless Chrome and was stopped, not repeated. Safari / WKWebView was not available. The bleed hero makes the scratch page scroll sideways by 212 px - expected until the screen scaffold clips (overflow-x: clip, F11)."
+  },
+  "decisions": [
+    "Every file is generated and locked: assets.lock.json carries a recipe hash of the manifest and a sha256 per file, so 'the accent was changed in both places but the lit rasters were not rebuilt' and 'an image was replaced by hand' both fail assertion 1. Without it assertion 8 would hold two strings equal while the pixels stayed in the old colour.",
+    "The lit rasters ship from the approved lit masters (tab2-*-active.png, medal-active.png) and the script VERIFIES each against the ramp of the accent in assets.json, pixel by pixel (all 8 masters: 0 pixels off the ramp; equal alpha to the idle twin). The steel masters are not named in the manifest at all - an excluded name in the manifest fails the gate.",
+    "Variant heights are derived from the largest variant, so the gate's size check is an equality, not a tolerance.",
+    "The equipment roster is written in the gate (16 slugs) and compared with the backend migrations where they are on disk; a frontend-only checkout prints that it could not compare.",
+    "No new token: UserPhoto uses var(--radius-1) (2 px). The lane block /* lane:F5 */ in tokens.css and index.css stays empty."
+  ],
+  "forIntegrator": [
+    "Apply docs/pipeline/pulse/pkg/F5/shared.patch in the merge commit (git apply --3way). It is cut on d582795; it touches the build line of package.json, as F2:c will.",
+    "check:assets belongs after check:canvas in the chain; when F16 retires check:aurora the line simply loses its neighbour.",
+    "requests/R-F5-01.patch is a suggestion for frontend/scripts/verify-gates.mjs (F2's file): three probes for check:assets. Until it lands verify:gates has a gate with no probe.",
+    "F11: navTabs.ts takes `import type { TabIconKey } from '../assets/pulse/slots.ts'` (the one deep path the gate allows, type-only) and its shared.patch sets \"leg\": \"enforced\" in frontend/assets-src/pulse/assets.json. That field is outside the recipe hash: no re-export is needed.",
+    "F7: the kit host can render `specimens` (kit, label, node) of features/playground/kit/media.tsx or its default export; no shared type exists yet, the shape is local to the file.",
+    "Screens import the folder (`…/assets/pulse`), never a file inside it, and draw with <Pic>; a path that reaches in fails the build.",
+    "The owner must be told again: all 49 files are AI-generated and their usage terms are unchecked. Nothing was pushed. The terms must be checked before the FIRST push; the 11 MB of PNG masters stay outside the repository."
+  ]
+}

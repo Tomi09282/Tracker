@@ -1,0 +1,63 @@
+{
+  "about": "Pipeline input of the Pulse images. Read by scripts/build-pulse-assets.mjs (which writes src/assets/pulse/img/*.webp, slots.ts, urls.ts and assets.lock.json) and by scripts/check-assets.mjs (which holds this file, the generated modules, the files on disk and tokens.css to each other). The PNG masters are NOT in the repository: pass their folder with --src. Never edit a generated file; change this one and run `npm run assets:pulse -- --src <masters folder>`.",
+  "canvas": "#0B0D0A",
+  "accent": "#CBFF2E",
+  "knee": 32,
+  "navTabs": {
+    "leg": "pending",
+    "field": "icon",
+    "note": "Second leg of assertion 4 of check:assets: every tab of NAV_TABS names a tab icon key in this field. 'pending' while app/navTabs.ts still carries icon components; the shell lane sets it to 'enforced' in the commit that makes the field a string key. Not part of the build recipe: changing it needs no re-export."
+  },
+  "slots": {
+    "tab-home": { "source": "tab2-home.png", "litSource": "tab2-home-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-training": { "source": "tab2-training.png", "litSource": "tab2-training-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-nutrition": { "source": "tab2-nutrition.png", "litSource": "tab2-nutrition-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-progress": { "source": "tab2-progress.png", "litSource": "tab2-progress-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-coach": { "source": "tab2-coach.png", "litSource": "tab2-coach-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-admin": { "source": "tab2-admin.png", "litSource": "tab2-admin-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+    "tab-profile": { "source": "tab2-profile.png", "litSource": "tab2-profile-active.png", "family": "icon", "alpha": "keep", "widths": [96], "quality": 90 },
+
+    "coin": { "source": "coin.png", "family": "object", "alpha": "keep", "widths": [72, 188, 376, 512], "quality": 90 },
+    "medal": { "source": "medal.png", "litSource": "medal-active.png", "family": "object", "alpha": "keep", "widths": [168], "quality": 90 },
+
+    "equip-barbell": { "source": "equip-barbell.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-bodyweight": { "source": "equip-bodyweight.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-dumbbell": { "source": "equip-dumbbell.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-kettlebell": { "source": "equip-kettlebell.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-machine": { "source": "equip-machine.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-cable": { "source": "equip-cable.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-bench": { "source": "equip-bench.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+    "equip-resistance-band": { "source": "equip-band.png", "family": "equipment", "alpha": "knee", "widths": [144], "quality": 80 },
+
+    "figure-front": { "source": "figure-front-neutral.png", "family": "figure", "alpha": "knee", "widths": [195, 390, 585], "quality": 80 },
+    "figure-back": { "source": "figure-back-neutral.png", "family": "figure", "alpha": "knee", "widths": [195, 390, 585], "quality": 80 },
+
+    "hero-grip": { "source": "hero-grip.png", "family": "hero", "alpha": "knee", "widths": [216, 432], "quality": 80 },
+    "hero-chalk": { "source": "hero-chalk.png", "family": "hero", "alpha": "knee", "widths": [250, 500], "quality": 80 },
+    "hero-plates": { "source": "hero-plates.png", "family": "hero", "alpha": "knee", "widths": [480, 920], "quality": 80 },
+    "hero-kettlebell": { "source": "hero-kettlebell.png", "family": "hero", "alpha": "knee", "widths": [379, 652], "quality": 80 },
+    "hero-bowl": { "source": "hero-bowl.png", "family": "hero", "alpha": "knee", "widths": [267, 534], "quality": 80 },
+    "hero-tape": { "source": "hero-tape.png", "family": "hero", "alpha": "knee", "widths": [200, 400], "quality": 80 },
+    "hero-stopwatch": { "source": "hero-stopwatch.png", "family": "hero", "alpha": "knee", "widths": [239, 478], "quality": 80 },
+
+    "texture-monogram": { "source": "monogram-light.png", "family": "texture", "alpha": "none", "widths": [512], "quality": 70 }
+  },
+  "equipmentStill": {
+    "bodyweight": "equip-bodyweight",
+    "barbell": "equip-barbell",
+    "dumbbell": "equip-dumbbell",
+    "kettlebell": "equip-kettlebell",
+    "machine": "equip-machine",
+    "cable": "equip-cable",
+    "smith-machine": "equip-barbell",
+    "resistance-band": "equip-resistance-band",
+    "ez-bar": "equip-barbell",
+    "pull-up-bar": "equip-bodyweight",
+    "bench": "equip-bench",
+    "medicine-ball": null,
+    "stability-ball": null,
+    "foam-roller": null,
+    "trx": "equip-bodyweight",
+    "other": null
+  }
+}

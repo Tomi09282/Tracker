@@ -1,0 +1,2 @@
+# Generated images are bytes: never let a line-ending setting or a diff tool treat them as text.
+*.webp binary

@@ -69,6 +69,15 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, 'src') },
   },
+  build: {
+    // Vite turns every imported asset under 4 kB into a base64 string INSIDE the JavaScript. 23 of
+    // the 49 Pulse images are that small, and one module the whole app loads imports them all:
+    // left alone, about 68 kB of images would ride in a shared chunk on every screen, where no
+    // request can cache them and the service worker never sees them. So a Pulse image is always a
+    // file; every other asset keeps the default. `check:assets` cannot see the bundle — this line
+    // is the whole guard, and `grep data:image dist/assets/*.js` is how it is checked.
+    assetsInlineLimit: (file) => (/[\\/]assets[\\/]pulse[\\/]/.test(file) ? false : undefined),
+  },
   server: {
     port: 5173,
     strictPort: true,

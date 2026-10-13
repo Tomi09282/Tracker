@@ -417,7 +417,7 @@ const buildProgress = (previous) => {
     const before = previous?.packages?.[p.id] ?? {};
     const own = ownership.get(p.id);
     const roster = (names, old = {}) => Object.fromEntries(names.map((n) => [n, old[n] ?? 'todo']));
-    entries[p.id] = {
+    const entry = {
       // generated — rewritten on every run
       kind: p.kind,
       title: titleOf(p),
@@ -448,6 +448,11 @@ const buildProgress = (previous) => {
       ...(before.glyphCheck ? { glyphCheck: before.glyphCheck } : {}),
       updated: before.updated ?? now,
     };
+    // Whatever else a step recorded in its entry (F1.4 wrote `typeRamp`) is kept, in its old order: a
+    // refresh rewrites the generated fields and must never drop a record it does not know. It did
+    // once — the F5 merge lost `typeRamp` from the live file and had to put it back from git.
+    for (const [key, value] of Object.entries(before)) if (!(key in entry)) entry[key] = value;
+    entries[p.id] = entry;
   }
 
   return {
