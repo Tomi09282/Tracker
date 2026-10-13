@@ -1,0 +1,479 @@
+{
+ "key": "post-detail-3",
+ "frame": {
+  "id": "126:91",
+  "name": "Poszt részletei — szövegelemek (minta)",
+  "width": 402,
+  "height": 542,
+  "page": "70:5",
+  "pageName": "public",
+  "fill": {
+   "hex": "#0b0d0a",
+   "opacity": 1
+  }
+ },
+ "source": {
+  "fileKey": "SkWidL9kDDWhBip7cUCFtr",
+  "method": "get_metadata + use_figma (checksums verified)"
+ },
+ "nodes": [
+  {
+   "id": "126:92",
+   "name": "Body document — the blocks n",
+   "type": "TEXT",
+   "x": 24,
+   "y": 32,
+   "w": 354,
+   "h": 40,
+   "depth": 1,
+   "parentId": "126:91",
+   "opacity": 1,
+   "text": {
+    "characters": "Body document — the blocks no sample post contains",
+    "fontFamily": "Big Shoulders Display",
+    "fontStyle": "Bold",
+    "fontSize": 16,
+    "lineHeightPx": 20,
+    "letterSpacing": 0.96,
+    "letterSpacingPercent": 6,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.6,
+     "y": 35.1,
+     "w": 293.6,
+     "h": 33.1
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:94",
+   "name": "Heading level 3",
+   "type": "FRAME",
+   "x": 24,
+   "y": 104,
+   "w": 354,
+   "h": 66,
+   "depth": 1,
+   "parentId": "126:91",
+   "opacity": 1
+  },
+  {
+   "id": "126:95",
+   "name": "Label",
+   "type": "TEXT",
+   "x": 24,
+   "y": 104,
+   "w": 354,
+   "h": 32,
+   "depth": 2,
+   "parentId": "126:94",
+   "opacity": 1,
+   "text": {
+    "characters": "Heading level 3 · bodyB (level 2 = the eyebrow without a rule, see the frame)",
+    "fontFamily": "Geist Mono",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 16,
+    "letterSpacing": 1.1,
+    "letterSpacingPercent": 10,
+    "color": "#858c79",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.3,
+     "y": 107.8,
+     "w": 352.3,
+     "h": 26
+    }
+   },
+   "fill": {
+    "hex": "#858c79",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:93",
+   "name": "Így működik",
+   "type": "TEXT",
+   "x": 24,
+   "y": 148,
+   "w": 354,
+   "h": 22,
+   "depth": 2,
+   "parentId": "126:94",
+   "opacity": 1,
+   "text": {
+    "characters": "Így működik",
+    "fontFamily": "Geist",
+    "fontStyle": "SemiBold",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 25.3,
+     "y": 150.4,
+     "w": 90.7,
+     "h": 17.2
+    }
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:97",
+   "name": "Bold run",
+   "type": "FRAME",
+   "x": 24,
+   "y": 202,
+   "w": 354,
+   "h": 50,
+   "depth": 1,
+   "parentId": "126:91",
+   "opacity": 1
+  },
+  {
+   "id": "126:98",
+   "name": "Label",
+   "type": "TEXT",
+   "x": 24,
+   "y": 202,
+   "w": 354,
+   "h": 16,
+   "depth": 2,
+   "parentId": "126:97",
+   "opacity": 1,
+   "text": {
+    "characters": "Bold run · SemiBold, text-1",
+    "fontFamily": "Geist Mono",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 16,
+    "letterSpacing": 1.1,
+    "letterSpacingPercent": 10,
+    "color": "#858c79",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.9,
+     "y": 206,
+     "w": 205.2,
+     "h": 9.7
+    }
+   },
+   "fill": {
+    "hex": "#858c79",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:96",
+   "name": "Hozz magaddal edzőcipőt és k",
+   "type": "TEXT",
+   "x": 24,
+   "y": 230,
+   "w": 354,
+   "h": 22,
+   "depth": 2,
+   "parentId": "126:97",
+   "opacity": 1,
+   "text": {
+    "characters": "Hozz magaddal edzőcipőt és kényelmes ruhát.",
+    "fontFamily": "Geist",
+    "fontStyle": "Regular",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 25.5,
+     "y": 235.3,
+     "w": 342.3,
+     "h": 14.3
+    },
+    "segments": [
+     {
+      "start": 0,
+      "end": 14,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     },
+     {
+      "start": 14,
+      "end": 23,
+      "fontFamily": "Geist",
+      "fontStyle": "SemiBold",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     },
+     {
+      "start": 23,
+      "end": 43,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     }
+    ]
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:100",
+   "name": "Italic run",
+   "type": "FRAME",
+   "x": 24,
+   "y": 284,
+   "w": 354,
+   "h": 120,
+   "depth": 1,
+   "parentId": "126:91",
+   "opacity": 1
+  },
+  {
+   "id": "126:101",
+   "name": "Label",
+   "type": "TEXT",
+   "x": 24,
+   "y": 284,
+   "w": 354,
+   "h": 64,
+   "depth": 2,
+   "parentId": "126:100",
+   "opacity": 1,
+   "text": {
+    "characters": "Italic run · PROPOSAL, awaiting the owner’s decision — Geist has no italic cut: the run stays Regular and drops to text-2 (alternative: a browser-slanted oblique)",
+    "fontFamily": "Geist Mono",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 16,
+    "letterSpacing": 1.1,
+    "letterSpacingPercent": 10,
+    "color": "#858c79",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.5,
+     "y": 288,
+     "w": 328.9,
+     "h": 57.2
+    }
+   },
+   "fill": {
+    "hex": "#858c79",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:99",
+   "name": "Háromórás gyakorlati műhely ",
+   "type": "TEXT",
+   "x": 24,
+   "y": 360,
+   "w": 354,
+   "h": 44,
+   "depth": 2,
+   "parentId": "126:100",
+   "opacity": 1,
+   "text": {
+    "characters": "Háromórás gyakorlati műhely a guggolás technikájáról.",
+    "fontFamily": "Geist",
+    "fontStyle": "Regular",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.9,
+     "y": 365.4,
+     "w": 296,
+     "h": 36
+    },
+    "segments": [
+     {
+      "start": 0,
+      "end": 10,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     },
+     {
+      "start": 10,
+      "end": 27,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#a9b09d",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     },
+     {
+      "start": 27,
+      "end": 53,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     }
+    ]
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:103",
+   "name": "Link",
+   "type": "FRAME",
+   "x": 24,
+   "y": 436,
+   "w": 354,
+   "h": 66,
+   "depth": 1,
+   "parentId": "126:91",
+   "opacity": 1
+  },
+  {
+   "id": "126:104",
+   "name": "Label",
+   "type": "TEXT",
+   "x": 24,
+   "y": 436,
+   "w": 354,
+   "h": 32,
+   "depth": 2,
+   "parentId": "126:103",
+   "opacity": 1,
+   "text": {
+    "characters": "Link · ink label underlined + host in cap, text-2 (placeholder copy) — never lime",
+    "fontFamily": "Geist Mono",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 16,
+    "letterSpacing": 1.1,
+    "letterSpacingPercent": 10,
+    "color": "#858c79",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 24.4,
+     "y": 440,
+     "w": 319.1,
+     "h": 25.2
+    }
+   },
+   "fill": {
+    "hex": "#858c79",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "126:102",
+   "name": "jelentkezés itt (forms.gle)",
+   "type": "TEXT",
+   "x": 24,
+   "y": 480,
+   "w": 354,
+   "h": 22,
+   "depth": 2,
+   "parentId": "126:103",
+   "opacity": 1,
+   "text": {
+    "characters": "jelentkezés itt (forms.gle)",
+    "fontFamily": "Geist",
+    "fontStyle": "Regular",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 23.9,
+     "y": 485.4,
+     "w": 167.8,
+     "h": 14.4
+    },
+    "segments": [
+     {
+      "start": 0,
+      "end": 16,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 16,
+      "color": "#f2f5ea",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     },
+     {
+      "start": 16,
+      "end": 27,
+      "fontFamily": "Geist",
+      "fontStyle": "Regular",
+      "fontSize": 13,
+      "color": "#a9b09d",
+      "colorOpacity": 1,
+      "case": "ORIGINAL"
+     }
+    ]
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  }
+ ]
+}

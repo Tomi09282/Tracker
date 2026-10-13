@@ -1,0 +1,547 @@
+{
+ "fileKey": "SkWidL9kDDWhBip7cUCFtr",
+ "frames": {
+  "admin-1": {
+   "id": "131:5",
+   "name": "Admin áttekintés — Moderáció, 3 várakozik",
+   "width": 402,
+   "height": 1138,
+   "nodes": 143,
+   "page": "70:5",
+   "file": "admin-1.json"
+  },
+  "admin-2": {
+   "id": "128:2",
+   "name": "Admin áttekintés — Beküldés megnyitva",
+   "width": 402,
+   "height": 1607,
+   "nodes": 146,
+   "page": "70:5",
+   "file": "admin-2.json"
+  },
+  "admin-3": {
+   "id": "130:2",
+   "name": "Admin áttekintés — Fiókok",
+   "width": 402,
+   "height": 874,
+   "nodes": 155,
+   "page": "70:5",
+   "file": "admin-3.json"
+  },
+  "auth-1": {
+   "id": "122:292",
+   "name": "Belépés",
+   "width": 402,
+   "height": 874,
+   "nodes": 59,
+   "page": "70:5",
+   "file": "auth-1.json"
+  },
+  "auth-2": {
+   "id": "123:453",
+   "name": "Regisztráció",
+   "width": 402,
+   "height": 874,
+   "nodes": 81,
+   "page": "70:5",
+   "file": "auth-2.json"
+  },
+  "client-detail-1": {
+   "id": "117:409",
+   "name": "Kliens adatlap — Terv",
+   "width": 402,
+   "height": 1394,
+   "nodes": 167,
+   "page": "70:4",
+   "file": "client-detail-1.json"
+  },
+  "client-detail-2": {
+   "id": "118:751",
+   "name": "Kliens adatlap — Táplálkozás (rövidítve)",
+   "width": 402,
+   "height": 2091,
+   "nodes": 271,
+   "page": "70:4",
+   "file": "client-detail-2.json"
+  },
+  "client-detail-3": {
+   "id": "120:390",
+   "name": "Kliens adatlap — Haladás (rövidítve)",
+   "width": 402,
+   "height": 1542,
+   "nodes": 167,
+   "page": "70:4",
+   "file": "client-detail-3.json"
+  },
+  "coach-chat-1": {
+   "id": "88:1709",
+   "name": "Csevegés — beszélgetés",
+   "width": 402,
+   "height": 874,
+   "nodes": 94,
+   "page": "70:4",
+   "file": "coach-chat-1.json"
+  },
+  "coach-chat-2": {
+   "id": "88:2736",
+   "name": "Csevegés — üres",
+   "width": 402,
+   "height": 874,
+   "nodes": 75,
+   "page": "70:4",
+   "file": "coach-chat-2.json"
+  },
+  "coach-dashboard-1": {
+   "id": "117:1211",
+   "name": "Edzői kezdőlap — Alap",
+   "width": 402,
+   "height": 1459,
+   "nodes": 228,
+   "page": "70:4",
+   "file": "coach-dashboard-1.json"
+  },
+  "coach-dashboard-2": {
+   "id": "118:489",
+   "name": "Edzői kezdőlap — A kód elkészült (lap)",
+   "width": 402,
+   "height": 874,
+   "nodes": 172,
+   "page": "70:4",
+   "file": "coach-dashboard-2.json"
+  },
+  "coach-dashboard-3": {
+   "id": "119:2",
+   "name": "Edzői kezdőlap — Átadásra váró fiók",
+   "width": 402,
+   "height": 1594,
+   "nodes": 255,
+   "page": "70:4",
+   "file": "coach-dashboard-3.json"
+  },
+  "coach-plans-1": {
+   "id": "88:2057",
+   "name": "Edzéstervek — könyvtár",
+   "width": 402,
+   "height": 1274,
+   "nodes": 153,
+   "page": "70:4",
+   "file": "coach-plans-1.json"
+  },
+  "coach-plans-2": {
+   "id": "88:1424",
+   "name": "Edzéstervek — üres",
+   "width": 402,
+   "height": 874,
+   "nodes": 51,
+   "page": "70:4",
+   "file": "coach-plans-2.json"
+  },
+  "coach-profile-1": {
+   "id": "122:5",
+   "name": "Edzői profil (nyilvános) — ellenőrzött edző",
+   "width": 402,
+   "height": 874,
+   "nodes": 84,
+   "page": "70:5",
+   "file": "coach-profile-1.json"
+  },
+  "coach-profile-2": {
+   "id": "123:109",
+   "name": "Edzői profil (nyilvános) — bio kinyitva",
+   "width": 402,
+   "height": 1376,
+   "nodes": 114,
+   "page": "70:5",
+   "file": "coach-profile-2.json"
+  },
+  "coins-1": {
+   "id": "86:409",
+   "name": "Érmék — Bolt",
+   "width": 402,
+   "height": 874,
+   "nodes": 76,
+   "page": "70:3",
+   "file": "coins-1.json"
+  },
+  "coins-2": {
+   "id": "88:194",
+   "name": "Érmék — Eredmények",
+   "width": 402,
+   "height": 1108,
+   "nodes": 118,
+   "page": "70:3",
+   "file": "coins-2.json"
+  },
+  "coins-3": {
+   "id": "88:1606",
+   "name": "Érmék — Kimutatás",
+   "width": 402,
+   "height": 874,
+   "nodes": 99,
+   "page": "70:3",
+   "file": "coins-3.json"
+  },
+  "compose-hub-1": {
+   "id": "88:2446",
+   "name": "Piactéri pult — alap",
+   "width": 402,
+   "height": 874,
+   "nodes": 144,
+   "page": "70:4",
+   "file": "compose-hub-1.json"
+  },
+  "compose-hub-2": {
+   "id": "88:3051",
+   "name": "Piactéri pult — profil lap",
+   "width": 402,
+   "height": 874,
+   "nodes": 166,
+   "page": "70:4",
+   "file": "compose-hub-2.json"
+  },
+  "compose-post-1": {
+   "id": "95:123",
+   "name": "Poszt szerkesztő — piszkozat borítóval",
+   "width": 402,
+   "height": 1244,
+   "nodes": 94,
+   "page": "70:4",
+   "file": "compose-post-1.json"
+  },
+  "compose-post-2": {
+   "id": "93:1450",
+   "name": "Poszt szerkesztő — új bejegyzés",
+   "width": 402,
+   "height": 874,
+   "nodes": 75,
+   "page": "70:4",
+   "file": "compose-post-2.json"
+  },
+  "compose-profile-1": {
+   "id": "96:5",
+   "name": "Edzői profil szerkesztő — szerkesztés",
+   "width": 402,
+   "height": 1416,
+   "nodes": 125,
+   "page": "70:4",
+   "file": "compose-profile-1.json"
+  },
+  "compose-profile-2": {
+   "id": "96:337",
+   "name": "Edzői profil szerkesztő — név és város",
+   "width": 402,
+   "height": 1089,
+   "nodes": 114,
+   "page": "70:4",
+   "file": "compose-profile-2.json"
+  },
+  "exercise-detail-1": {
+   "id": "88:4152",
+   "name": "Gyakorlat részletei — Alapállapot",
+   "width": 402,
+   "height": 1708,
+   "nodes": 120,
+   "page": "70:3",
+   "file": "exercise-detail-1.json"
+  },
+  "exercise-detail-2": {
+   "id": "88:5228",
+   "name": "Gyakorlat részletei — Hátsó nézet",
+   "width": 402,
+   "height": 1872,
+   "nodes": 117,
+   "page": "70:3",
+   "file": "exercise-detail-2.json"
+  },
+  "home-1": {
+   "id": "86:5",
+   "name": "Kezdőlap — edzésnap",
+   "width": 402,
+   "height": 874,
+   "nodes": 143,
+   "page": "70:3",
+   "file": "home-1.json"
+  },
+  "home-2": {
+   "id": "86:260",
+   "name": "Kezdőlap — edzés folyamatban",
+   "width": 402,
+   "height": 874,
+   "nodes": 143,
+   "page": "70:3",
+   "file": "home-2.json"
+  },
+  "home-3": {
+   "id": "86:486",
+   "name": "Kezdőlap — nincs terv",
+   "width": 402,
+   "height": 874,
+   "nodes": 50,
+   "page": "70:3",
+   "file": "home-3.json"
+  },
+  "library-1": {
+   "id": "92:693",
+   "name": "Gyakorlatok — alapállapot",
+   "width": 402,
+   "height": 874,
+   "nodes": 94,
+   "page": "70:3",
+   "file": "library-1.json"
+  },
+  "library-2": {
+   "id": "93:167",
+   "name": "Gyakorlatok — Elöl · Mell",
+   "width": 402,
+   "height": 874,
+   "nodes": 99,
+   "page": "70:3",
+   "file": "library-2.json"
+  },
+  "library-3": {
+   "id": "93:624",
+   "name": "Gyakorlatok — Hátul · Széles hátizom",
+   "width": 402,
+   "height": 874,
+   "nodes": 99,
+   "page": "70:3",
+   "file": "library-3.json"
+  },
+  "marketplace-1": {
+   "id": "123:5",
+   "name": "Piactér — alap",
+   "width": 402,
+   "height": 1176,
+   "nodes": 98,
+   "page": "70:5",
+   "file": "marketplace-1.json"
+  },
+  "marketplace-2": {
+   "id": "124:2",
+   "name": "Piactér — keresés",
+   "width": 402,
+   "height": 1032,
+   "nodes": 87,
+   "page": "70:5",
+   "file": "marketplace-2.json"
+  },
+  "notifications-1": {
+   "id": "86:155",
+   "name": "Értesítések — érkezés, 2 olvasatlan",
+   "width": 402,
+   "height": 874,
+   "nodes": 103,
+   "page": "70:3",
+   "file": "notifications-1.json"
+  },
+  "notifications-2": {
+   "id": "88:478",
+   "name": "Értesítések — üres",
+   "width": 402,
+   "height": 874,
+   "nodes": 52,
+   "page": "70:3",
+   "file": "notifications-2.json"
+  },
+  "nutrition-1": {
+   "id": "88:5486",
+   "name": "Étkezés — mai nap",
+   "width": 402,
+   "height": 1674,
+   "nodes": 249,
+   "page": "70:3",
+   "file": "nutrition-1.json"
+  },
+  "nutrition-2": {
+   "id": "90:714",
+   "name": "Étkezés — kiválasztott étel",
+   "width": 402,
+   "height": 1204,
+   "nodes": 185,
+   "page": "70:3",
+   "file": "nutrition-2.json"
+  },
+  "onboarding-1": {
+   "id": "90:588",
+   "name": "Onboarding kérdőív — 5/5 · visszatérő tag",
+   "width": 402,
+   "height": 1284,
+   "nodes": 125,
+   "page": "70:3",
+   "file": "onboarding-1.json"
+  },
+  "onboarding-2": {
+   "id": "88:3223",
+   "name": "Onboarding kérdőív — 1/5 · első megnyitás",
+   "width": 402,
+   "height": 1060,
+   "nodes": 116,
+   "page": "70:3",
+   "file": "onboarding-2.json"
+  },
+  "onboarding-3": {
+   "id": "88:5737",
+   "name": "Onboarding kérdőív — 2/5 · hiányzó válasz",
+   "width": 402,
+   "height": 1292,
+   "nodes": 130,
+   "page": "70:3",
+   "file": "onboarding-3.json"
+  },
+  "plan-editor-1": {
+   "id": "117:152",
+   "name": "Tervszerkesztő — alapállapot",
+   "width": 402,
+   "height": 874,
+   "nodes": 233,
+   "page": "70:4",
+   "file": "plan-editor-1.json"
+  },
+  "plan-editor-2": {
+   "id": "117:747",
+   "name": "Tervszerkesztő — nyitott nap",
+   "width": 402,
+   "height": 2078,
+   "nodes": 449,
+   "page": "70:4",
+   "file": "plan-editor-2.json"
+  },
+  "plan-editor-3": {
+   "id": "120:183",
+   "name": "Tervszerkesztő — gyakorlatkereső",
+   "width": 402,
+   "height": 874,
+   "nodes": 184,
+   "page": "70:4",
+   "file": "plan-editor-3.json"
+  },
+  "post-detail-1": {
+   "id": "124:242",
+   "name": "Poszt részletei — esemény",
+   "width": 402,
+   "height": 1166,
+   "nodes": 74,
+   "page": "70:5",
+   "file": "post-detail-1.json"
+  },
+  "post-detail-2": {
+   "id": "126:2",
+   "name": "Poszt részletei — program",
+   "width": 402,
+   "height": 1313,
+   "nodes": 83,
+   "page": "70:5",
+   "file": "post-detail-2.json"
+  },
+  "post-detail-3": {
+   "id": "126:91",
+   "name": "Poszt részletei — szövegelemek (minta)",
+   "width": 402,
+   "height": 542,
+   "nodes": 13,
+   "page": "70:5",
+   "file": "post-detail-3.json"
+  },
+  "progress-1": {
+   "id": "115:5",
+   "name": "Haladás — Test",
+   "width": 402,
+   "height": 1687,
+   "nodes": 271,
+   "page": "70:3",
+   "file": "progress-1.json"
+  },
+  "progress-2": {
+   "id": "88:5368",
+   "name": "Haladás — Megosztás",
+   "width": 402,
+   "height": 1096,
+   "nodes": 114,
+   "page": "70:3",
+   "file": "progress-2.json"
+  },
+  "progress-3": {
+   "id": "114:2",
+   "name": "Haladás — Fotók · üres",
+   "width": 402,
+   "height": 874,
+   "nodes": 69,
+   "page": "70:3",
+   "file": "progress-3.json"
+  },
+  "settings-1": {
+   "id": "88:7",
+   "name": "Profil — első nézet",
+   "width": 402,
+   "height": 874,
+   "nodes": 84,
+   "page": "70:3",
+   "file": "settings-1.json"
+  },
+  "settings-2": {
+   "id": "88:2221",
+   "name": "Profil — teljes görgetés",
+   "width": 402,
+   "height": 2026,
+   "nodes": 216,
+   "page": "70:3",
+   "file": "settings-2.json"
+  },
+  "style-studio-1": {
+   "id": "120:5",
+   "name": "Elem-stílus stúdió — E1 Button, D aktív",
+   "width": 402,
+   "height": 1226,
+   "nodes": 171,
+   "page": "70:5",
+   "file": "style-studio-1.json"
+  },
+  "style-studio-2": {
+   "id": "121:2",
+   "name": "Elem-stílus stúdió — E1 átváltva C-re, mentve",
+   "width": 402,
+   "height": 905,
+   "nodes": 150,
+   "page": "70:5",
+   "file": "style-studio-2.json"
+  },
+  "workout-1": {
+   "id": "124:98",
+   "name": "Edzéslejátszó — futó edzés",
+   "width": 402,
+   "height": 874,
+   "nodes": 121,
+   "page": "70:3",
+   "file": "workout-1.json"
+  },
+  "workout-2": {
+   "id": "125:2",
+   "name": "Edzéslejátszó — rekord és pihenő",
+   "width": 402,
+   "height": 874,
+   "nodes": 155,
+   "page": "70:3",
+   "file": "workout-2.json"
+  },
+  "workout-3": {
+   "id": "93:1411",
+   "name": "Edzéslejátszó — nincs futó edzés",
+   "width": 402,
+   "height": 874,
+   "nodes": 38,
+   "page": "70:3",
+   "file": "workout-3.json"
+  }
+ },
+ "boards": {
+  "_components": {
+   "id": "80:2",
+   "name": "Pulse — Components",
+   "width": 1300,
+   "height": 5094,
+   "nodes": 1003,
+   "page": "70:2",
+   "file": "_components.json"
+  }
+ }
+}

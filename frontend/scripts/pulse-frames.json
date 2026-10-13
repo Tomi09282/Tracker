@@ -1,0 +1,2738 @@
+{
+  "schema": 1,
+  "about": "The 59 frame states of the Pulse redesign: where each one lives, who is signed in, how tall the frame is and the click script that reaches it. Read docs/pipeline/pulse/pkg/F3/README.md before editing.",
+  "accounts": {
+    "M": "user@tracker.local",
+    "C": "coach@tracker.local",
+    "A": "admin@tracker.local",
+    "N": "demo.nagy.balazs@tracker.local",
+    "R": "demo.coach.szilagyi.reka@tracker.local",
+    "K": "demo.kovacs.eszter@tracker.local",
+    "T": "demo.toth.reka@tracker.local"
+  },
+  "defaults": {
+    "width": 402,
+    "height": 874,
+    "scale": 2,
+    "insets": [
+      62,
+      34
+    ],
+    "lang": "hu",
+    "stubs": [
+      {
+        "method": "POST",
+        "path": "/api/v1/notifications/read",
+        "status": 204,
+        "why": "the notifications page marks everything read on opening (NotificationsPage.tsx:273); the page does not read the answer"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/conversations/*/read",
+        "status": 204,
+        "why": "the read receipt a thread with unread messages fires on opening (ChatPanel.tsx:115); the page does not read the answer"
+      }
+    ],
+    "expect": {
+      "requests": [],
+      "console": []
+    },
+    "probes": {
+      "boxedAllow": [
+        "btnPrimary",
+        "uiSwitch",
+        "sheet",
+        "badgeCount",
+        "skel",
+        "segBar",
+        "progressBar",
+        "macroCol",
+        "stepper",
+        "toast",
+        "noticeLine",
+        "pic",
+        "tabBar"
+      ]
+    }
+  },
+  "resolve": {
+    "linkOfMember": {
+      "get": "/api/v1/clients",
+      "as": "C",
+      "list": "/clients",
+      "where": {
+        "email": "user@tracker.local"
+      },
+      "take": "link_id"
+    },
+    "linkOfN": {
+      "get": "/api/v1/clients",
+      "as": "C",
+      "list": "/clients",
+      "where": {
+        "email": "demo.nagy.balazs@tracker.local"
+      },
+      "take": "link_id"
+    },
+    "planOfMember": {
+      "get": "/api/v1/plans",
+      "as": "C",
+      "list": "/plans",
+      "where": {
+        "client_email": "user@tracker.local",
+        "status": "active"
+      },
+      "take": "id"
+    },
+    "exBench": {
+      "get": "/api/v1/exercises?q=Barbell%20Bench%20Press%20-%20Medium%20Grip&lang=en&limit=5",
+      "as": "M",
+      "list": "/exercises",
+      "where": {
+        "name": "Barbell Bench Press - Medium Grip"
+      },
+      "take": "id"
+    },
+    "exPullups": {
+      "get": "/api/v1/exercises?q=Pullups&lang=en&limit=5",
+      "as": "M",
+      "list": "/exercises",
+      "where": {
+        "name": "Pullups"
+      },
+      "take": "id"
+    },
+    "postEvent": {
+      "get": "/api/v1/public/posts",
+      "as": null,
+      "list": "/posts",
+      "where": {
+        "kind": "event",
+        "coachHandle": "kovacs-peter"
+      },
+      "take": "id"
+    },
+    "postProgram": {
+      "get": "/api/v1/public/posts",
+      "as": null,
+      "list": "/posts",
+      "where": {
+        "kind": "program",
+        "city": "online",
+        "coachHandle": "kovacs-peter"
+      },
+      "take": "id"
+    }
+  },
+  "states": {
+    "home-1": {
+      "frame": "home-1",
+      "title": "Kezdőlap — edzésnap",
+      "package": "S-home",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "fixture": "home-1",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "why": "the seed always leaves user@ mid-session, so \"edzésnap, Indítás\" cannot be reached without ending the session (a write) — and only a Friday carries the drawn day",
+      "arrived": {
+        "role": "button",
+        "name": "Indítás"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942), recorded from the live dev backend and replayed with its fixture, 2026-10-14"
+      }
+    },
+    "home-2": {
+      "frame": "home-2",
+      "title": "Kezdőlap — edzés folyamatban",
+      "package": "S-home",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "seed",
+      "drawn": "fixture",
+      "why": "the in-progress state itself is what the seed leaves; the DRAWN session (Friday, \"Felsőtest – húzás\") is only there when the freeze is taken on a Friday — otherwise S-home adds a fixture (frontend/scripts/fixtures/home-2.json) and names it here",
+      "arrived": {
+        "role": "button",
+        "name": "Folytatás"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13",
+        "note": "what was captured is the state the seed leaves, not the drawn data"
+      }
+    },
+    "home-3": {
+      "frame": "home-3",
+      "title": "Kezdőlap — nincs terv",
+      "package": "S-home",
+      "account": "N",
+      "route": "/",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "text": "Ma nincs betervezve edzés"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "workout-1": {
+      "frame": "workout-1",
+      "title": "Edzéslejátszó — futó edzés",
+      "package": "S-workout",
+      "account": "M",
+      "route": "/workout",
+      "height": 874,
+      "reach": "seed",
+      "drawn": "fixture",
+      "why": "a running session exists in the seed, but the drawn one (Friday, set 3 of 4 of the first exercise) only when the freeze is taken on a Friday — otherwise S-workout adds a fixture (frontend/scripts/fixtures/workout-1.json) and names it here",
+      "opened": {
+        "role": [
+          "button",
+          "radio",
+          "tab"
+        ],
+        "name": "Elöl"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "pressed": true
+          }
+        ]
+      },
+      "mustSee": [
+        {
+          "role": "button",
+          "name": "Kész",
+          "nth": 0
+        }
+      ],
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13",
+        "note": "what was captured is the state the seed leaves, not the drawn data"
+      }
+    },
+    "workout-2": {
+      "frame": "workout-2",
+      "title": "Edzéslejátszó — rekord és pihenő",
+      "package": "S-workout",
+      "account": "M",
+      "route": "/workout",
+      "height": 874,
+      "reach": "fixture",
+      "fixture": "workout-2",
+      "why": "checking a set is a write, and the record and the rest timer are its outcome: the POST is answered by the fixture and the countdown is driven by the pinned clock",
+      "opened": {
+        "role": "button",
+        "name": "Kész",
+        "nth": 0
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Kész",
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": "Pihenő átugrása"
+          }
+        },
+        {
+          "advance": 20000,
+          "arrived": {
+            "role": "button",
+            "name": "Pihenő átugrása"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": "Pihenő átugrása"
+      },
+      "mustSee": [
+        {
+          "role": "button",
+          "name": "Kész",
+          "nth": 0
+        }
+      ],
+      "checked": {
+        "live": false,
+        "why": "its fixture is not written yet (S-workout: the answer of the set check and the session after it); the live run stopped exactly there (the write was blocked or the id was missing)"
+      }
+    },
+    "workout-3": {
+      "frame": "workout-3",
+      "title": "Edzéslejátszó — nincs futó edzés",
+      "package": "S-workout",
+      "account": "N",
+      "route": "/workout",
+      "height": 874,
+      "reach": "superseded",
+      "why": "D2: with no session the Edzés tab shows the library. The empty player of this frame is never built; from the D2 redirect on, this state must BE library-1 on this account",
+      "arrived": {
+        "anyOf": [
+          {
+            "url": "/library"
+          },
+          {
+            "text": "Most nincs futó edzés"
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "library-1": {
+      "frame": "library-1",
+      "title": "Gyakorlatok — alapállapot",
+      "package": "S-library",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Keresés"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "library-2": {
+      "frame": "library-2",
+      "title": "Gyakorlatok — Elöl · Mell",
+      "package": "S-library",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Keresés"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Mell",
+            "nth": 0
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Mell",
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Mell",
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Mell",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Mell",
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Mell",
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Mell",
+            "pressed": true
+          }
+        ]
+      },
+      "notes": "the muscle is chosen on the figure (the first \"Mell\" in document order); the chip of the same name lights with it",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "library-3": {
+      "frame": "library-3",
+      "title": "Gyakorlatok — Hátul · Széles hátizom",
+      "package": "S-library",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Keresés"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": "Széles hátizom",
+            "nth": 0
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Széles hátizom",
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Széles hátizom",
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": "Széles hátizom",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Széles hátizom",
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Széles hátizom",
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": "Széles hátizom",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "exercise-detail-1": {
+      "frame": "exercise-detail-1",
+      "title": "Gyakorlat részletei — Alapállapot",
+      "package": "S-exercise-detail",
+      "account": "M",
+      "route": "/library/{exBench}",
+      "height": 1708,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": "Gyakorlatok"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "exercise-detail-2": {
+      "frame": "exercise-detail-2",
+      "title": "Gyakorlat részletei — Hátsó nézet",
+      "package": "S-exercise-detail",
+      "account": "M",
+      "route": "/library/{exPullups}",
+      "height": 1872,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Gyakorlatok"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": "Hátul",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": "Hátul",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "nutrition-1": {
+      "frame": "nutrition-1",
+      "title": "Étkezés — mai nap",
+      "package": "S-nutrition",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 1674,
+      "reach": "seed",
+      "drawn": "fixture",
+      "why": "the seed logs food up to the Sunday before the seed week only, so \"today\" is empty on every seed day: the six logged foods of the frame need a fixture that S-nutrition writes (frontend/scripts/fixtures/nutrition-1.json) and names here",
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Étel keresése…"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13",
+        "note": "what was captured is the state the seed leaves, not the drawn data"
+      }
+    },
+    "nutrition-2": {
+      "frame": "nutrition-2",
+      "title": "Étkezés — kiválasztott étel",
+      "package": "S-nutrition",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 1204,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Étel keresése…"
+      },
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Étel keresése…",
+            "text": "csirke"
+          },
+          "arrived": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "csirke"
+            },
+            "nth": 0
+          }
+        },
+        {
+          "click": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "csirke"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": [
+              "spinbutton",
+              "textbox"
+            ],
+            "name": "Gramm"
+          }
+        }
+      ],
+      "arrived": {
+        "role": [
+          "spinbutton",
+          "textbox"
+        ],
+        "name": "Gramm"
+      },
+      "notes": "nothing is saved: the script stops at the picked food",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "progress-1": {
+      "frame": "progress-1",
+      "title": "Haladás — Test",
+      "package": "S-progress",
+      "account": "M",
+      "route": "/progress",
+      "height": 1687,
+      "reach": "seed",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Test",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Test",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Test",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "progress-2": {
+      "frame": "progress-2",
+      "title": "Haladás — Megosztás",
+      "package": "S-progress",
+      "account": "M",
+      "route": "/progress",
+      "height": 1096,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Test"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Megosztás"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Megosztás",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Megosztás",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Megosztás",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Megosztás",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Megosztás",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Megosztás",
+            "pressed": true
+          }
+        ]
+      },
+      "notes": "the shared state is the demo seed's (a share row the seed writes); a real member cannot create the first share through the UI",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "progress-3": {
+      "frame": "progress-3",
+      "title": "Haladás — Fotók · üres",
+      "package": "S-progress",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Test"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Fotók"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Fotók",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Fotók",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Fotók",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Fotók",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Fotók",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Fotók",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "settings-1": {
+      "frame": "settings-1",
+      "title": "Profil — első nézet",
+      "package": "S-settings",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Kijelentkezés"
+      },
+      "notes": "D1: the pack rows and \"Áttetsző felületek\" of the frame are not built",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "settings-2": {
+      "frame": "settings-2",
+      "title": "Profil — teljes görgetés",
+      "package": "S-settings",
+      "account": "M",
+      "route": "/settings",
+      "height": 2026,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Kijelentkezés"
+      },
+      "notes": "the same state at the full scroll height; D1 as settings-1",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coins-1": {
+      "frame": "coins-1",
+      "title": "Érmék — Bolt",
+      "package": "S-coins",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Bolt",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Bolt",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Bolt",
+            "pressed": true
+          }
+        ]
+      },
+      "notes": "D1 / Q2: the two store rows are theme packs — compared for structure only",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coins-2": {
+      "frame": "coins-2",
+      "title": "Érmék — Eredmények",
+      "package": "S-coins",
+      "account": "M",
+      "route": "/coins",
+      "height": 1108,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Bolt"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Eredmények"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Eredmények",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Eredmények",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Eredmények",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Eredmények",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Eredmények",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Eredmények",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coins-3": {
+      "frame": "coins-3",
+      "title": "Érmék — Kimutatás",
+      "package": "S-coins",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Bolt"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Kimutatás"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Kimutatás",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Kimutatás",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Kimutatás",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Kimutatás",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Kimutatás",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Kimutatás",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "notifications-1": {
+      "frame": "notifications-1",
+      "title": "Értesítések — érkezés, 2 olvasatlan",
+      "package": "S-notifications",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "seed",
+      "why": "single-use on a live server (opening marks everything read); in a capture the mark-read POST is a stub, so the recording keeps its unread rows for ever",
+      "arrived": {
+        "role": [
+          "button",
+          "link"
+        ],
+        "name": "Vissza"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "notifications-2": {
+      "frame": "notifications-2",
+      "title": "Értesítések — üres",
+      "package": "S-notifications",
+      "account": "N",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": [
+          "button",
+          "link"
+        ],
+        "name": "Vissza"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "onboarding-1": {
+      "frame": "onboarding-1",
+      "title": "Onboarding kérdőív — 5/5 · visszatérő tag",
+      "package": "S-onboarding",
+      "account": "C",
+      "route": "/onboarding",
+      "height": 1284,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Kész"
+      },
+      "notes": "coach@ has a finished questionnaire, so the form resumes on 5/5 (user@'s row has step 0). Nothing links here: URL only",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "onboarding-2": {
+      "frame": "onboarding-2",
+      "title": "Onboarding kérdőív — 1/5 · első megnyitás",
+      "package": "S-onboarding",
+      "account": "C",
+      "route": "/onboarding",
+      "height": 1060,
+      "reach": "fixture",
+      "fixture": "onboarding-2",
+      "why": "a first visit exists once per account, and every answer autosaves a draft (a write)",
+      "arrived": {
+        "role": "button",
+        "name": "Tovább"
+      },
+      "checked": {
+        "live": false,
+        "why": "its fixture is not written yet (S-onboarding: a first-visit profile and the autosave answer); the live run stopped exactly there (the write was blocked or the id was missing)"
+      }
+    },
+    "onboarding-3": {
+      "frame": "onboarding-3",
+      "title": "Onboarding kérdőív — 2/5 · hiányzó válasz",
+      "package": "S-onboarding",
+      "account": "C",
+      "route": "/onboarding",
+      "height": 1292,
+      "reach": "fixture",
+      "fixture": "onboarding-3",
+      "why": "the refusal (\"Kész\" with a required answer missing) is a mutation outcome",
+      "arrived": {
+        "role": "button",
+        "name": "Tovább"
+      },
+      "checked": {
+        "live": false,
+        "why": "its fixture is not written yet (S-onboarding: the refused completion); the live run stopped exactly there (the write was blocked or the id was missing)"
+      }
+    },
+    "coach-dashboard-1": {
+      "frame": "coach-dashboard-1",
+      "title": "Edzői kezdőlap — Alap",
+      "package": "S-coach-dashboard",
+      "account": "C",
+      "route": "/coach",
+      "height": 1459,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": "Tervek"
+      },
+      "notes": "the seed always holds two accounts awaiting handover, so the notice of frame 3 is on this state too; the frame is abbreviated (6 clients drawn, 12 seeded)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-dashboard-2": {
+      "frame": "coach-dashboard-2",
+      "title": "Edzői kezdőlap — A kód elkészült (lap)",
+      "package": "S-coach-dashboard",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "fixture",
+      "fixture": "coach-dashboard-2",
+      "why": "minting a join code is a write that the UI cannot undo: the POST is answered by the fixture and nothing is minted",
+      "opened": {
+        "role": "link",
+        "name": "Tervek"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Új kód"
+          },
+          "arrived": {
+            "text": "A kód elkészült"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "A kód elkészült"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942), recorded from the live dev backend and replayed with its fixture, 2026-10-14"
+      }
+    },
+    "coach-dashboard-3": {
+      "frame": "coach-dashboard-3",
+      "title": "Edzői kezdőlap — Átadásra váró fiók",
+      "package": "S-coach-dashboard",
+      "account": "C",
+      "route": "/coach",
+      "height": 1594,
+      "reach": "seed",
+      "arrived": {
+        "text": "ÁTADÁSRA VÁR"
+      },
+      "notes": "two pre-made accounts wait in the seed (the frame draws one)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "client-detail-1": {
+      "frame": "client-detail-1",
+      "title": "Kliens adatlap — Terv",
+      "package": "S-client-detail-a",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "seed",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Terv",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Terv",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Terv",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "client-detail-2": {
+      "frame": "client-detail-2",
+      "title": "Kliens adatlap — Táplálkozás (rövidítve)",
+      "package": "S-client-detail-b",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 2091,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Terv"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Táplálkozás"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Táplálkozás",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Táplálkozás",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Táplálkozás",
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Rekomp étrend"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": "Étkezés hozzáadása"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": "Étkezés hozzáadása"
+      },
+      "notes": "read only: the diet editor writes on every tap, so the script opens the tab and the diet (local state) and touches nothing in it",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "client-detail-3": {
+      "frame": "client-detail-3",
+      "title": "Kliens adatlap — Haladás (rövidítve)",
+      "package": "S-client-detail-b",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1542,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": "Terv"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Haladás"
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Haladás",
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Haladás",
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": "Haladás",
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Haladás",
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Haladás",
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": "Haladás",
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-chat-1": {
+      "frame": "coach-chat-1",
+      "title": "Csevegés — beszélgetés",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "re": "."
+        }
+      },
+      "notes": "the thread is found in the recorded list, so nothing is created; with unread messages the page fires a read receipt, which is a stub",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-chat-2": {
+      "frame": "coach-chat-2",
+      "title": "Csevegés — üres",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfN}/chat",
+      "height": 874,
+      "reach": "sandbox",
+      "why": "opening this route CREATES the thread when there is none (POST /conversations — a write, stopped in a capture). The empty thread with demo.nagy.balazs@ is therefore a sandbox object made once before the freeze: with it in the recorded list the page creates nothing",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "re": "."
+        }
+      },
+      "checked": {
+        "live": false,
+        "why": "needs the sandbox thread; the live run stopped exactly there (the write was blocked or the id was missing)"
+      }
+    },
+    "coach-plans-1": {
+      "frame": "coach-plans-1",
+      "title": "Edzéstervek — könyvtár",
+      "package": "S-coach-plans",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 1274,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Új terv"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-plans-2": {
+      "frame": "coach-plans-2",
+      "title": "Edzéstervek — üres",
+      "package": "S-coach-plans",
+      "account": "R",
+      "route": "/coach/plans",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Új terv"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "plan-editor-1": {
+      "frame": "plan-editor-1",
+      "title": "Tervszerkesztő — alapállapot",
+      "package": "S-plan-editor",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": "Edzéstervek"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "plan-editor-2": {
+      "frame": "plan-editor-2",
+      "title": "Tervszerkesztő — nyitott nap",
+      "package": "S-plan-editor",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 2078,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Edzéstervek"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": "^Felsőtest – húzás 5\\. nap"
+        },
+        "expanded": true
+      },
+      "notes": "opening a day is local state; the member's plan is never written (every mutating state of the editor uses the scratch plan)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "plan-editor-3": {
+      "frame": "plan-editor-3",
+      "title": "Tervszerkesztő — gyakorlatkereső",
+      "package": "S-plan-editor",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Edzéstervek"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Alsótest – erő 1\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Alsótest – erő 1\\. nap"
+            },
+            "expanded": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": "Gyakorlat",
+            "nth": 0
+          },
+          "arrived": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Gyakorlat keresése"
+          }
+        },
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Gyakorlat keresése",
+            "text": "guggolás"
+          },
+          "arrived": {
+            "role": "button",
+            "name": "Mégse"
+          }
+        }
+      ],
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Gyakorlat keresése"
+      },
+      "notes": "the picker is opened and searched, nothing is picked",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "compose-hub-1": {
+      "frame": "compose-hub-1",
+      "title": "Piactéri pult — alap",
+      "package": "S-compose-hub",
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": "Új bejegyzés"
+      },
+      "notes": "URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "compose-hub-2": {
+      "frame": "compose-hub-2",
+      "title": "Piactéri pult — profil lap",
+      "package": "S-compose-hub",
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Új bejegyzés"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Élő",
+            "nth": 0
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "re": "."
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog",
+        "name": {
+          "re": "."
+        }
+      },
+      "notes": "URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "compose-profile-1": {
+      "frame": "compose-profile-1",
+      "title": "Edzői profil szerkesztő — szerkesztés",
+      "package": "S-compose-profile",
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1416,
+      "reach": "seed",
+      "arrived": {
+        "role": "textbox",
+        "name": "Megjelenített név"
+      },
+      "notes": "URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "compose-profile-2": {
+      "frame": "compose-profile-2",
+      "title": "Edzői profil szerkesztő — név és város",
+      "package": "S-compose-profile",
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1089,
+      "reach": "seed",
+      "opened": {
+        "role": "textbox",
+        "name": "Megjelenített név"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": "Felhasználónév"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": "Felhasználónév",
+            "text": "kovacs-peter-edzo"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": "Felhasználónév"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": "Felhasználónév"
+      },
+      "notes": "typing a handle asks GET /compose/handle (a read); the save button is not pressed. URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "compose-post-1": {
+      "frame": "compose-post-1",
+      "title": "Poszt szerkesztő — piszkozat borítóval",
+      "package": "S-compose-post",
+      "account": "C",
+      "route": "/compose/posts/{draftPost}",
+      "height": 1244,
+      "reach": "sandbox",
+      "why": "the seeded draft has no cover; the scratch draft post of the sandbox carries one of the three sample covers",
+      "arrived": {
+        "role": "textbox",
+        "name": "Cím"
+      },
+      "notes": "URL only on a phone (Q5)",
+      "checked": {
+        "live": false,
+        "why": "needs the sandbox draft post; the live run stopped exactly there (the write was blocked or the id was missing)"
+      }
+    },
+    "compose-post-2": {
+      "frame": "compose-post-2",
+      "title": "Poszt szerkesztő — új bejegyzés",
+      "package": "S-compose-post",
+      "account": "C",
+      "route": "/compose/posts/new",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Piszkozat létrehozása"
+      },
+      "notes": "nothing is created: the script stops on the empty form. URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "auth-1": {
+      "frame": "auth-1",
+      "title": "Belépés",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.login"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "auth-2": {
+      "frame": "auth-2",
+      "title": "Regisztráció",
+      "package": "S-auth",
+      "account": null,
+      "route": "/register",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.register"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "marketplace-1": {
+      "frame": "marketplace-1",
+      "title": "Piactér — alap",
+      "package": "S-marketplace",
+      "account": null,
+      "route": "/m",
+      "height": 1176,
+      "reach": "seed",
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Programok, események, edzők…"
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "mask": [
+        "^(Cover|Image/cover)"
+      ],
+      "notes": "URL only on a phone (Q5); seeded covers are 320 x 180 placeholders — the cover area is masked",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "marketplace-2": {
+      "frame": "marketplace-2",
+      "title": "Piactér — keresés",
+      "package": "S-marketplace",
+      "account": null,
+      "route": "/m",
+      "height": 1032,
+      "reach": "seed",
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Programok, események, edzők…"
+      },
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Programok, események, edzők…",
+            "text": "guggolás"
+          },
+          "arrived": {
+            "role": "link",
+            "name": {
+              "re": "Guggolás-technika"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "Guggolás-technika"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "mask": [
+        "^(Cover|Image/cover)"
+      ],
+      "notes": "URL only on a phone (Q5)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "post-detail-1": {
+      "frame": "post-detail-1",
+      "title": "Poszt részletei — esemény",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/{postEvent}",
+      "height": 1166,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "mask": [
+        "^(Cover|Image/cover)"
+      ],
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "post-detail-2": {
+      "frame": "post-detail-2",
+      "title": "Poszt részletei — program",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/{postProgram}",
+      "height": 1313,
+      "reach": "seed",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "mask": [
+        "^(Cover|Image/cover)"
+      ],
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "post-detail-3": {
+      "frame": "post-detail-3",
+      "title": "Poszt részletei — szövegelemek (minta)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/{postProgram}",
+      "height": 542,
+      "reach": "specimen",
+      "why": "the frame is a 402 x 542 type specimen of the document renderer, not a screen: only the body typography is compared, on the program post (heading, numbered list, quote)",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "mask": [
+        "^(Cover|Image/cover)"
+      ],
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-profile-1": {
+      "frame": "coach-profile-1",
+      "title": "Edzői profil (nyilvános) — ellenőrzött edző",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": "Több"
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "coach-profile-2": {
+      "frame": "coach-profile-2",
+      "title": "Edzői profil (nyilvános) — bio kinyitva",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 1376,
+      "reach": "seed",
+      "opened": {
+        "role": "button",
+        "name": "Több"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Több"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^(Kevesebb|Több)$"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": "^(Kevesebb|Több)$"
+        },
+        "expanded": true
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "admin-1": {
+      "frame": "admin-1",
+      "title": "Admin áttekintés — Moderáció, 3 várakozik",
+      "package": "S-admin",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Stílus stúdió"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "notes": "the counts are the dev database's (49 users with the leftover smoke accounts), not the 19 of the frame",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "admin-2": {
+      "frame": "admin-2",
+      "title": "Admin áttekintés — Beküldés megnyitva",
+      "package": "S-admin",
+      "account": "A",
+      "route": "/admin",
+      "height": 1607,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Stílus stúdió"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": "Jóváhagyás"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": "Jóváhagyás"
+      },
+      "notes": "a submission is OPENED, never approved or rejected (the audit log is append-only)",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "admin-3": {
+      "frame": "admin-3",
+      "title": "Admin áttekintés — Fiókok",
+      "package": "S-admin",
+      "account": "A",
+      "route": "/admin",
+      "height": 874,
+      "reach": "seed",
+      "opened": {
+        "role": "link",
+        "name": "Stílus stúdió"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "style-studio-1": {
+      "frame": "style-studio-1",
+      "title": "Elem-stílus stúdió — E1 Button, D aktív",
+      "package": "S-style-studio",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 1226,
+      "reach": "seed",
+      "arrived": {
+        "text": "Változatok"
+      },
+      "notes": "Q3: under one Pulse look per element the live E1 of the frame gets the verdict \"structure\"",
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942) against the live dev backend, 2026-10-13"
+      }
+    },
+    "style-studio-2": {
+      "frame": "style-studio-2",
+      "title": "Elem-stílus stúdió — E1 átváltva C-re, mentve",
+      "package": "S-style-studio",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 905,
+      "reach": "fixture",
+      "fixture": "style-studio-2",
+      "why": "saving a variant rewrites the look of that element for EVERY user: the save is answered by the fixture and nothing is saved",
+      "opened": {
+        "text": "Változatok"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Legyen ez",
+            "nth": 2
+          },
+          "arrived": {
+            "text": "E1 mostantól C változatot használ"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "E1 mostantól C változatot használ"
+      },
+      "checked": {
+        "live": true,
+        "on": "the base build (0860942), recorded from the live dev backend and replayed with its fixture, 2026-10-14"
+      }
+    }
+  }
+}

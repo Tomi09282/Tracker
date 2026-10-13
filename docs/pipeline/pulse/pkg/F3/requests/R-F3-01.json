@@ -1,0 +1,14 @@
+{
+  "id": "R-F3-01",
+  "from": "F3",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-fixture-check.mjs",
+  "need": "Two rulings on what a fixture may be. (1) A mutation outcome that MUST carry a 2xx body: the frame coach-dashboard-2 is the sheet that shows a freshly minted join code, the plan forbids minting one live (4.7), and pulse-fixture-check refuses any 2xx body for an endpoint that was never recorded. Today that fixture (frontend/scripts/fixtures/coach-dashboard-2.json, POST /api/v1/invite-codes -> 201 { id, code }) is the one problem `pulse-fixture-check --all` reports. (2) The capture tool can build a fixture value from recorded data instead of typed data — { \"$from\": { \"path\", \"pointer\" } }, { \"$now\": ms }, { \"$today\": days }, pointer parts [field=value], *, -, and \"insert\": true — but the checker judges such a value as a literal object and refuses it, so the three shipped fixtures were rewritten with plain pointers and literal values to pass.",
+  "evidence": "node scripts/pulse-fixture-check.mjs --all --rec <scratch freeze>: 1 problem in 8 fixtures (the mint body). The response shape is backend/src/coaching/routes.js:250 (res.status(201).json({ id, code })). docs/pipeline/pulse/pkg/F3/README.md section 4 lists the value forms.",
+  "proposedApi": "(1) accept a 2xx body of a never-recorded endpoint only in frontend/scripts/fixtures/** and only with a \"source\" field naming the route line that produces that shape; packages' states.json stay under the strict rule. (2) in checkEdits / judge: resolve a { \"$from\" } value from the recordings before judging it, treat { \"$now\" } as a string (number with \"as\": \"epoch\") and { \"$today\" } as a string, and read [field=value] and - as an array element.",
+  "proposedPatch": null,
+  "interim": "coach-dashboard-2 runs on its fixture and is reported matched-fixture; the list behind the sheet is the recorded one (the frame's new first row is not added). The other fixtures use only what the checker accepts today.",
+  "status": "open",
+  "resolution": null
+}

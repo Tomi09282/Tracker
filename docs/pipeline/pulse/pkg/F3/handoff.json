@@ -1,0 +1,51 @@
+{
+  "id": "F3",
+  "stage": "F3:1 (stages A-C of the run: the tool). Stage D — the freeze and the baseline — is NOT done: it needs a seed, sandbox writes and a stopped backend, and belongs to the integrator.",
+  "handIn": {
+    "files": [],
+    "note": "No shared.patch, i18n.patch.json or variants.json: the lane needs no line in a file it does not own. The commands are plain `node scripts/…` and every output goes under .pulse/ (already git-ignored)."
+  },
+  "delivered": [
+    "frontend/scripts/pulse-shot.mjs",
+    "frontend/scripts/pulse-verify.mjs",
+    "frontend/scripts/pulse-frames.json",
+    "frontend/scripts/fixtures/home-1.json",
+    "frontend/scripts/fixtures/coach-dashboard-2.json",
+    "frontend/scripts/fixtures/style-studio-2.json",
+    "frontend/scripts/pulse-sandbox.mjs",
+    "scripts/dev-stack.mjs",
+    ".claude/launch.json",
+    "docs/pipeline/pulse/pkg/F3/README.md",
+    "docs/pipeline/pulse/pkg/F3/requests/R-F3-01.json"
+  ],
+  "proof": {
+    "where": "a scratch freeze outside the repository and outside .pulse/rec (the real freeze is stage D); the base build 0860942 served on :5180 / :5181; the live dev backend on :3000 with its limiters on; the dev database is the stale seed of 2026-08-24",
+    "live": "all 59 states run live: 51 reached their state; the 8 others stopped exactly at the blocked write or the missing sandbox id (POST /sets/:id/check, POST /invite-codes, PUT /ui/element-styles/E1, POST /conversations)",
+    "record": "--record --all: 53 of 59 captured, every /api GET stored (92 answers, 6 accounts, 554 KB, binary cover included); 5 failed by design (3 fixtures not written, 2 sandbox objects not made), 1 by a rendering stall that is fixed since",
+    "replay": "--all, no backend involved: 54 of 59 captured every time (5 by design: 3 fixtures not written, 2 sandbox objects not made), 0 unrecorded, about 150 s for the sweep without tiles. First pair of sweeps: 54 of 54 pictures byte-identical, and 53 of 53 byte-identical with the pictures taken while recording. Final pair (with probes, geometry, tiles and contact sheets): 53 of 54 byte-identical — the one that differs, coach-dashboard-2, had its fixture file rewritten between the two sweeps and is byte-identical in two replays of the final file. Inventories: 53 of 53 equal to the record-time inventories",
+    "fixtures": "home-1 (the page says \"Péntek, október 9.\" and \"Indítás\" on its own clock), coach-dashboard-2 (the mint POST answered) and style-studio-2 (the save PUT answered, the read after it edited) replayed twice, byte-identical; verdictCap = matched-fixture. pulse-fixture-check --all against the scratch freeze: 8 fixtures, 1 problem (the 201 body of the minted code — request R-F3-01)",
+    "clock": "--self-test: virtual and shim, every check true (set; waiting does not move the wall clock; advance 25 s then 10 s; a 30 s timer fires after 35 s and not after 27 s)",
+    "writeGuard": "--probe-write on 6 replayed states: held on each",
+    "pulseVerify": "on the merged tree (pulse/F3 7a7a90e with pulse-redesign b82e875 merged in): `pulse-verify --package F3` took slot 2, build green in 16 s, the clock self-test passed on both clocks, the signed-out live capture passed with the write guard held, the preview was stopped and the lock released. Earlier on fd277d8: it waited for two hand-taken locks, then 7 of 7 states replayed with inventory = baseline. `--clean` reaped a planted dead lock. `pulse-merge-check F3`: may merge (all 12 touched paths are F3's)",
+    "chrome": "Chrome 155.0.8059.41 (it updated itself from 154 during the work)",
+    "variants": "in replay on the base build: --width 360, 430, --insets 0, --lang en and de (auth-1, auth-2), --reduced-motion, --scroll-end, --width 1280 --height 900, --width 360 --height 640 (the player law probe reports the check control below the bar on the old player)"
+  },
+  "notProven": [
+    "pulse-sandbox --create (no write was allowed in this run); its read-only mode resolved the links and found nothing yet",
+    "a live state with a writes list (needs .pulse/sandbox.json)",
+    "probes and geometry on a migrated Pulse screen: they were run on the old look and on the F1.4 hybrid, where pill / boxed / geometry rightly do not pass",
+    "the 1300 px kit board tiled against _components-1..4.png (captures work at any width; board tiling is not built)",
+    "click scripts under --lang en / de (the names in pulse-frames.json are Hungarian; an override may use { key })"
+  ],
+  "fixturesStillToWrite": {
+    "workout-2": "S-workout: the answer of POST /sets/:id/check with a record, and the session read after it; the rest countdown through an advance step",
+    "onboarding-2": "S-onboarding: a first-visit profile and the answer of the autosave PATCH",
+    "onboarding-3": "S-onboarding: the refused POST /onboarding/complete",
+    "home-2": "S-home: only if the freeze is not taken on a Friday",
+    "workout-1": "S-workout: only if the freeze is not taken on a Friday",
+    "nutrition-1": "S-nutrition: six foods logged today"
+  },
+  "requests": {
+    "R-F3-01": "open — what pulse-fixture-check should accept (a 2xx mutation body with a source; values built from recordings)"
+  }
+}
