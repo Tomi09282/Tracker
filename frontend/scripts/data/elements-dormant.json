@@ -1,8 +1,22 @@
 {
-  "about": "Feedback elements that exist in the catalogue and that no component reads. Read by scripts/check-element-roster.mjs as DORMANT; written by scripts/pulse-variants.mjs, never by hand. One reason per element: it tells a reviewer whether the entry is a gap to close or a row to delete, and it is a promise that the studio labels the element as inert. The gate fails on an unread element that is not listed here, and on an entry whose element has a reader.",
+  "about": "Feedback elements that exist in the catalogue and that no component of the PRODUCT reads: nothing reads them at all, or only a component that /playground mounts does (\"playground only\"). Read by scripts/check-element-roster.mjs as DORMANT; written by scripts/pulse-variants.mjs, never by hand. One reason per element: it tells a reviewer whether the entry is a gap to close or a row to delete, and it is a promise that the studio labels the element as inert. The gate fails on such an element that is not listed here, and on an entry whose element a product component reads.",
   "entries": {
     "E23": "Like / reaction — reactions were CUT from Phase 6, so nothing renders one to style",
     "E24": "Follow button — following exists in the schema and has no screen; the button is unbuilt",
-    "E27": "Interval stage — added by migration 012 for the interval player, which does not read it"
+    "E27": "Interval stage — added by migration 012 for the interval player, which does not read it",
+    "E1": "playground only — FeedbackButton (variants/E1Button.tsx) is mounted by /playground and by no product screen",
+    "E3": "playground only — IconButton (variants/E3IconButton.tsx) is mounted by /playground and by no product screen",
+    "E4": "playground only — Toggle (variants/E4Toggle.tsx) is mounted by /playground and by no product screen",
+    "E5": "playground only — Checkbox (variants/E5Checkbox.tsx) is mounted by /playground and by no product screen",
+    "E8": "playground only — Select (variants/E8E9.tsx) is mounted by /playground and by no product screen",
+    "E9": "playground only — DatePicker (variants/E8E9.tsx) is mounted by /playground and by no product screen",
+    "E10": "playground only — Tabs (variants/E10Tabs.tsx) is mounted by /playground and by no product screen",
+    "E12": "playground only — InteractiveCard (variants/E12E16.tsx) is mounted by /playground and by no product screen; the Toast beside it (E15) is the product's",
+    "E13": "playground only — SwipeItem (variants/E14E20.tsx) is mounted by /playground and by no product screen; the Sheet beside it (E14) is the product's",
+    "E16": "playground only — Progress (variants/E12E16.tsx) is mounted by /playground and by no product screen",
+    "E17": "playground only — Slider (variants/E17E19.tsx) is mounted by /playground and by no product screen",
+    "E18": "playground only — SkeletonBlock (variants/E17E19.tsx) is mounted by /playground and by no product screen",
+    "E19": "playground only — PullToRefresh (variants/E17E19.tsx) is mounted by /playground and by no product screen",
+    "E20": "playground only — Fab (variants/E14E20.tsx) is mounted by /playground and by no product screen"
   }
 }

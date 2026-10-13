@@ -121,14 +121,14 @@ export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
     // `end` stops `/` prefix-matching every route below it, which is right — and it also stops
     // onboarding from lighting anything, so the one screen a brand-new member sees first had a bar
     // with nothing on it. `owns` is the exception list `end` cannot express.
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   coach: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
@@ -138,7 +138,7 @@ export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   admin: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
+    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },

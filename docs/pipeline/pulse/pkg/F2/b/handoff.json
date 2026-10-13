@@ -1,0 +1,82 @@
+{
+  "package": "F2",
+  "stage": "b",
+  "branch": "pulse/F2b",
+  "verifiedOn": "pulse-redesign b5f7886 (F1.1, F1.2, F2:a) merged into the branch; hand-ins applied locally",
+  "mergeConstraint": "any time (PLAN 3.3); F11 starts after it",
+  "files": {
+    "frontend/scripts/check-safe-area.mjs": "rewritten: judges ELEMENTS (class groups), fixed or sticky with top-0 / bottom-0 / inset-0 / inset-y-0 / top-[…] / bottom-[…]; inset tokens read from tokens.css transitively over var(), in EVERY declaration; exemption keys <file>:<edge>[@<class>], a dead or file-wide-on-a-crowded-file exemption fails; scaffold leg arms itself when src/ui/shell/Screen.tsx exists; --explain, --tokens <file>; exports insetCarryingTokens, scanEdgePinned",
+    "frontend/scripts/check-nav.mjs": "door rule: a link to exactly that route from OUTSIDE its subtree (page files from router.tsx imports); /compose and /m carry open:true and are printed on every run [Q5]; an open exemption fails when its route gets a door; REQUIRED_DOORS (exported, empty until F16); comment-stripped clamp and inset tests; routeMeta leg arms itself when src/app/routeMeta.ts exists",
+    "frontend/scripts/check-nav-active.mjs": "completeness against the router (every signed-in route has a row per role that can own it, or a reason in NO_TAB_BY_DESIGN); /notifications -> Kezdőlap for the three roles [Q6]; routeMeta leg (a pushed screen lights its parent's tab) arms itself with the file",
+    "frontend/scripts/check-element-roster.mjs": "live = the exported component holding the read is imported outside features/playground (export granular, re-exports and lazy imports followed); exports scanElementReads (R31); --explain",
+    "frontend/scripts/check-i18n.mjs": "no rule change, output byte-identical; the gate body is wrapped in main() and the consumer scan is exported: scanKeyConsumers, SERVER_RESOLVED (R31)",
+    "frontend/scripts/verify-gates.mjs": "NEW: 54 probes over 12 gates; one defect at a time, named failure expected, byte-exact restore from a backup in the worktree's git dir; lock; --allow-dirty, --restore, --list, --list-anchors, --list-gates, --fresh, --gate, --only",
+    "frontend/scripts/verify-nav-gate.mjs": "now runs `verify-gates --gate check:nav`: the six old cases live once, re-anchored on patterns (the dead fourth is nav/tab-to-missing-route)"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/F2/b/shared.patch",
+    "docs/pipeline/pulse/pkg/F2/b/variants.json"
+  ],
+  "handInContents": {
+    "shared.patch": {
+      "frontend/package.json": "+ \"verify:gates\": \"node scripts/verify-gates.mjs\" (after verify:outbox; the build line is not touched)",
+      "frontend/src/app/navTabs.ts": "owns: ['/onboarding', '/notifications'] on the Kezdőlap tab of the three role lists (Q6)",
+      "frontend/scripts/data/safe-area-exempt.json": "the two dead entries out, twelve written ones in (scrims, the centring wrapper, the backdrop, the palette scrim, the sticky table head, the offline strip's wrapper); the about text says the new key forms",
+      "frontend/scripts/data/elements-dormant.json": "the about text only (what dormant means now) — the 14 entries come from variants.json",
+      "frontend/src/ui/feedback/catalog.ts": "the doc comment of `live` only — the 14 flags come from variants.json"
+    },
+    "variants.json": "E1 E3 E4 E5 E8 E9 E10 E12 E13 E16 E17 E18 E19 E20 -> live:false, reason \"playground only — …\"",
+    "applies": "checked on a temporary index of pulse-redesign b5f7886: plain `git apply --cached --check` on the bare tip; after the 14 variant deltas were applied first it applies with --3way (entries inserted in numeric order) and plainly (entries appended). Either order of the two hand-in files works."
+  },
+  "gatesOnThisTree": {
+    "check:safe-area": "24 edge-pinned element(s) in 9 file(s), 12 exemption(s); tokens that carry the inset — top: none · bottom: --content-pad-b; scaffold leg waiting for src/ui/shell/Screen.tsx; OK",
+    "check:nav": "26 routes, 7 distinct tab targets, 12 exempt, 2 of them OPEN, 0 required door(s); routeMeta leg waiting; OK",
+    "check:nav-active": "180 assertions, 21 signed-in route(s), 1 lights nothing by design (/playground); routeMeta leg waiting; OK",
+    "check:elements": "27 in the catalogue — 10 live in the product, 14 read by the playground only, 3 read by nothing, 20 previewable, 17 declared dormant; OK",
+    "check:i18n": "OK — 843 keys each (byte-identical output before and after the refactor, on aebd701 and on the merged tree)"
+  },
+  "probes": {
+    "runner": "node scripts/verify-gates.mjs --allow-dirty   (cwd frontend/; the slot tree is dirty by design: hand-ins applied)",
+    "result": "48 passed, 0 failed, 6 dormant; `git status` identical to the start, 25 file hashes identical, 12 gates green again — full output in verify-gates.run.txt",
+    "planCases": {
+      "check:safe-area — the bottom inset removed from the bar": "safe-area/bar-bottom-inset",
+      "check:safe-area — --safe-b re-declared without env()": ["safe-area/token-redeclared", "safe-area/token-loses-env"],
+      "check:safe-area — pb-[var(--card-pad)] on a fixed bottom-0": "safe-area/any-token-is-not-an-inset",
+      "check:nav-active — a route added with no row": "nav-active/route-without-row",
+      "check:nav — the existing cases (the fourth re-anchored)": ["nav/no-door", "nav/clamp", "nav/tab-count", "nav/tab-to-missing-route", "nav/label-key", "nav/horizontal-inset"],
+      "check:nav — the Navigate deleted": "nav/required-door-deleted (dormant until F16 fills REQUIRED_DOORS; until then nav/required-door-entry proves the mechanism)",
+      "check:elements — E1 marked live": "elements/playground-only-marked-live",
+      "check:elements — a product read marked dormant": ["elements/product-read-marked-not-live", "elements/product-read-declared-dormant"],
+      "check:i18n, check:interval, check:autosave, verify:outbox — one existing-behaviour probe each": ["i18n/key-missing-from-a-bundle", "interval/segment-boundary", "autosave/mirrored-line", "outbox/allowlist"],
+      "stage G-a cases (lane F2:a asked for a permanent home)": ["canvas/manifest-background", "canvas/manifest-theme", "canvas/meta", "canvas/token-alone", "type-scale/step-not-listed", "type-scale/entry-not-declared", "type-scale/step-not-a-plain-length", "type-scale/binding-dropped", "type-scale/binding-deleted"]
+    },
+    "dormantToday": {
+      "nav/required-door-deleted": "REQUIRED_DOORS is empty until the D2 redirect lands (F16)",
+      "nav/route-meta-parent, nav-active/route-meta-owner": "src/app/routeMeta.ts has not landed (F11); their planted twins run today",
+      "safe-area/scaffold": "src/ui/shell/Screen.tsx has not landed (F11); its planted twin runs today",
+      "type-scale/binding-dropped, type-scale/binding-deleted": "no type-binding block before F1.4"
+    },
+    "dormantProbesShownWorking": "The slot tree was put into the later states for one run and restored byte for byte (git status and git diff equal before and after): shell tokens of plan-safe 2.3 with --content-pad-b: calc(var(--nav-h) + var(--tabbar-offset)), a Screen.tsx padding by var(--head-top-root), a ten-row routeMeta.ts, the F1.4 ramp + binding as lane F2:a stages it, the D2 Navigate and its REQUIRED_DOORS line. On it the four gates were green with every leg armed (10 routeMeta parents, scaffold pads by var(--head-top-root), 26 steps bound 5/3/4, ToastHost green through --content-pad-b -> --tabbar-offset -> --safe-b) and all six dormant probes passed (31 passed, 0 failed, 4 dormant = the planted twins).",
+    "killed run": "verify-gates was killed (SIGKILL) while nav/no-door had its defect in SettingsPage.tsx: git status showed the planted file, --list-anchors refused (exit 2), --restore put the file back, git status and raw hashes equal to before, a second --restore said there was nothing to restore.",
+    "dryRunF11Tokens": "check-safe-area --tokens <copy of tokens.css with F11's planned values> is green; ToastHost.tsx:149 stays accounted through var(--content-pad-b)"
+  },
+  "build": "npm run build exit 0 in the slot under heavy-1, hand-ins applied, after npm ci for the F1.2 lockfile (12 gate scripts, tsc -b, vite build: 2541 modules)",
+  "forIntegrator": [
+    "Apply both hand-in files in the merge commit: `git apply --3way docs/pipeline/pulse/pkg/F2/b/shared.patch` and the 14 deltas of variants.json (pulse-variants apply). check:nav-active is red without the navTabs line, check:elements without the 14, check:safe-area without the exemption file — all three are in the hand-ins, none in the branch.",
+    "pulse-variants check must let F2 hand in these 14 although F2 owns none of the reads (work-packages.json variantNote: the gate RULE changed). The reads stay where they are.",
+    "PLAN 6.2 step 7 runs verify:gates on a tree that holds the uncommitted squash, and verify:gates refuses a dirty tree. Run it there as `npm run verify:gates -- --allow-dirty` (or `node scripts/verify-gates.mjs --allow-dirty`): every byte is still restored and the run proves it against the state it started from. On a committed tree (6.3) no flag is needed.",
+    "`node scripts/verify-gates.mjs --fresh` is the one question pulse-merge-check needs: exit 0 when a full green run is on record (in .pulse/verify-gates/green.json) for the current content of every gate script, gate data file and anchored file.",
+    "F16 (D2 redirect): add the one line that is written out in the comment above REQUIRED_DOORS in check-nav.mjs, in the same commit as the Navigate. verify:gates then switches by itself from nav/required-door-entry to nav/required-door-deleted.",
+    "F16 (aurora out): the two AuroraBackdrop.tsx entries of safe-area-exempt.json become dead and fail the build — delete them in that commit. The aurora probe goes dormant by itself; delete its entry in verify-gates.mjs with the gate.",
+    "F11: the routeMeta legs and the scaffold leg arm themselves when the files exist. They expect `export const ROUTE_META: Record<routerPathPattern, { parent: routerPath, parentLabelKey: i18nKey }>` in src/app/routeMeta.ts (importable by bare Node, like navTabs.ts) and a src/ui/shell/Screen.tsx that pads its top through var(--X) with X a top-inset token of tokens.css, never a literal env(). If F11 chooses another shape, the two constants at the top of each leg are the only edit.",
+    "F11, F12, F13: an element that changes what it pins to changes scripts/data/safe-area-exempt.json in the lane's shared.patch (key forms are in the file's about text). OfflineIndicator.tsx:top is exempt today because the inset sits on a child of the sticky wrapper; once the notice line pads itself the entry is dead and must go.",
+    "Stage G-c: check:pulse probes go into PROBES in verify-gates.mjs (GATES already names scripts/check-pulse.mjs). check:assets is in GATES too; lane F5 carries its own --probe mode — either fold its three cases into PROBES or chain the two commands in the npm script.",
+    "docs/pipeline/pulse/pkg/F2/a/probe.mjs said it stays until verify:gates covers its plan cases: it does now (canvas x4, type-scale x5)."
+  ],
+  "limits": [
+    "check-safe-area sees one class group at a time: an inset on a CHILD does not count for its pinned parent (written exemption), two branches of one ternary are one group, and offsets on the spacing scale (bottom-1, top-4) are not edge-pinned by this definition.",
+    "check:elements finds the holding export without a parser: declarations must start in column 0 (they do, by the formatter). The fallback named in PLAN 10 (an explicit export list) was not needed: the scan yields exactly the plan's 14.",
+    "The exemptions /library/:id, /coach/clients/:id … in NO_INBOUND_BY_DESIGN were not re-examined: only an OPEN entry fails when its route has a door.",
+    "The probes for routeMeta, the scaffold, the binding block and the D2 door were proven on a staged tree that is this lane's reading of the plan, not on the other lanes' real files."
+  ]
+}

@@ -19,16 +19,10 @@
 // Usage: node scripts/check-i18n.mjs
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { readGateData } from './data/gate-data.mjs';
 
-const DIR = path.resolve('src/i18n');
 const REFERENCE = 'hu'; // The product's first language, so it is the one that defines the key set.
-
-const files = (await fs.readdir(DIR)).filter((f) => f.endsWith('.json'));
-if (!files.includes(`${REFERENCE}.json`)) {
-  console.error(`check-i18n: the reference bundle ${REFERENCE}.json is missing`);
-  process.exit(1);
-}
 
 const flatten = (obj, prefix = '') =>
   Object.entries(obj).flatMap(([k, v]) =>
@@ -36,6 +30,118 @@ const flatten = (obj, prefix = '') =>
       ? flatten(v, `${prefix}${k}.`)
       : [[`${prefix}${k}`, String(v)]],
   );
+
+/*
+ * KEYS THE SERVER NAMES, which no scan of this repo can see.
+ *
+ * The marketplace taxonomy ships each specialty with its own `i18nKey`, and the chip renders
+ * `t(s.i18nKey, { defaultValue: s.key })`. The key path exists only in a database row, so there
+ * is no literal and no interpolated prefix in any source file — the dead-key rule reads all
+ * fourteen as unused and would have them deleted, which is exactly the wrong action: the day
+ * after, every specialty chip falls back to its raw slug in all three languages.
+ *
+ * A prefix rather than a key list, because the taxonomy is DATA. A specialty added in the admin
+ * screen must not require an edit here, and a rule that needed one would be wrong within a week.
+ */
+export const SERVER_RESOLVED = new Map([
+  [
+    'public.specialty.',
+    'named by marketplace_taxonomy rows, rendered via `t(s.i18nKey)` — see ProfileEditorPage',
+  ],
+]);
+
+/**
+ * Who uses which key: every key of the reference bundle, with the source files that reference it.
+ *
+ * The one implementation of "is this key used, and by whom". The dead-key rule below fails on a
+ * key with no consumer; `pulse-i18n` decides with the same list whether a package may change or
+ * remove a key (only when every consumer is a file it owns). Two tools with two scans would
+ * disagree about exactly the keys that matter.
+ *
+ * A file consumes a key when it holds the key as a quoted literal — or builds it: template keys,
+ * `t(\`workout.record.${kind}\`)`, are resolved by checking whether any PREFIX of the key appears
+ * before an interpolation. Without that, every dynamic key would read as dead.
+ *
+ * A key under a `SERVER_RESOLVED` prefix has consumers this scan cannot see; its list is empty
+ * and means nothing.
+ *
+ * @param {{ root?: string }} [options] `root` is the frontend directory (default: the cwd)
+ * @returns {Promise<Map<string, string[]>>} key → files relative to the frontend root
+ *   (`src/features/home/HomePage.tsx`), sorted; every key of `hu.json` is present
+ */
+export async function scanKeyConsumers({ root = '.' } = {}) {
+  const src = path.resolve(root, 'src');
+  const reference = new Map(flatten(JSON.parse(await fs.readFile(path.join(src, 'i18n', `${REFERENCE}.json`), 'utf8'))));
+
+  const srcFiles = [];
+  const walk = async (dir) => {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full);
+      else if (/\.(ts|tsx)$/.test(entry.name)) srcFiles.push(full);
+    }
+  };
+  await walk(src);
+  srcFiles.sort();
+  const sources = await Promise.all(
+    srcFiles.map(async (f) => ({
+      file: path.relative(path.resolve(root), f).split(path.sep).join('/'),
+      text: await fs.readFile(f, 'utf8'),
+    })),
+  );
+  /*
+   * The rule is "the file CONTAINS the key between two identical quotes" and "the file contains a
+   * prefix of the key right before `${` or a backtick" — plain substring tests. Asking them key by
+   * key and file by file is 876 x 145 searches, so each file is read once instead, into the two
+   * things those tests can hit:
+   *
+   *   literals   everything that sits between two identical quotes with no space in it
+   *   stems      the unbroken text right before every `${` and every backtick
+   *
+   * A key is quoted in a file exactly when it is one of the file's literals, and built in it
+   * exactly when a stem ENDS with one of the key's prefixes. (Both hold because a key holds no
+   * space and no quote; the one key that ever does falls back to the substring test.)
+   */
+  const index = sources.map(({ file, text }) => ({
+    file,
+    text,
+    literals: new Set([...text.matchAll(/(?=(['"`])([^\s'"`]+)\1)/g)].map((m) => m[2])),
+    stems: [...new Set([...text.matchAll(/(?<=(\S+))(?:\$\{|`)/g)].map((m) => m[1]).filter((stem) => stem.endsWith('.')))],
+  }));
+
+  const consumers = new Map();
+  for (const key of reference.keys()) {
+    const parts = key.split('.');
+    // A dynamic key: some prefix of it is built by interpolation.
+    const prefixes = [];
+    for (let i = parts.length - 1; i > 0; i -= 1) prefixes.push(`${parts.slice(0, i).join('.')}.`);
+    const plain = !/[\s'"`]/.test(key);
+    consumers.set(
+      key,
+      index
+        .filter((s) =>
+          plain
+            ? s.literals.has(key) || s.stems.some((stem) => prefixes.some((prefix) => stem.endsWith(prefix)))
+            : [`'${key}'`, `"${key}"`, `\`${key}\``, ...prefixes.flatMap((p) => [`${p}\${`, `${p}\``])].some((needle) =>
+                s.text.includes(needle),
+              ),
+        )
+        .map((s) => s.file),
+    );
+  }
+  return consumers;
+}
+
+/* The gate. Its body is not re-indented under `main` on purpose: every line below is where it
+   was before the scan above became importable, so the history of each rule stays readable. */
+async function main() {
+const DIR = path.resolve('src/i18n');
+
+const files = (await fs.readdir(DIR)).filter((f) => f.endsWith('.json'));
+if (!files.includes(`${REFERENCE}.json`)) {
+  console.error(`check-i18n: the reference bundle ${REFERENCE}.json is missing`);
+  process.exit(1);
+}
 
 const bundles = {};
 for (const f of files) {
@@ -187,48 +293,12 @@ for (const [code, bundle] of Object.entries(bundles)) {
  * the key appears before an interpolation. Without that, every dynamic key would read as dead.
  */
 {
-  const srcFiles = [];
-  const walk = async (dir) => {
-    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) await walk(full);
-      else if (/\.(ts|tsx)$/.test(entry.name)) srcFiles.push(full);
-    }
-  };
-  await walk(path.resolve('src'));
-  const code = (await Promise.all(srcFiles.map((f) => fs.readFile(f, 'utf8')))).join('\n');
-
-  /*
-   * KEYS THE SERVER NAMES, which no scan of this repo can see.
-   *
-   * The marketplace taxonomy ships each specialty with its own `i18nKey`, and the chip renders
-   * `t(s.i18nKey, { defaultValue: s.key })`. The key path exists only in a database row, so there
-   * is no literal and no interpolated prefix in any source file — the dead-key rule reads all
-   * fourteen as unused and would have them deleted, which is exactly the wrong action: the day
-   * after, every specialty chip falls back to its raw slug in all three languages.
-   *
-   * A prefix rather than a key list, because the taxonomy is DATA. A specialty added in the admin
-   * screen must not require an edit here, and a rule that needed one would be wrong within a week.
-   */
-  const SERVER_RESOLVED = new Map([
-    [
-      'public.specialty.',
-      'named by marketplace_taxonomy rows, rendered via `t(s.i18nKey)` — see ProfileEditorPage',
-    ],
-  ]);
-
-  const reference = bundles[REFERENCE];
-  for (const key of reference.keys()) {
+  // The scan is `scanKeyConsumers` above — one implementation, shared with the tool that decides
+  // who may change a key. `SERVER_RESOLVED` (also above) names the keys no scan can see.
+  const consumers = await scanKeyConsumers();
+  for (const [key, usedBy] of consumers) {
     if ([...SERVER_RESOLVED.keys()].some((p) => key.startsWith(p))) continue;
-    if (code.includes(`'${key}'`) || code.includes(`"${key}"`) || code.includes(`\`${key}\``)) continue;
-    // A dynamic key: some prefix of it is built by interpolation.
-    const parts = key.split('.');
-    let dynamic = false;
-    for (let i = parts.length - 1; i > 0 && !dynamic; i -= 1) {
-      const prefix = `${parts.slice(0, i).join('.')}.`;
-      if (code.includes(`${prefix}\${`) || code.includes(`${prefix}\``)) dynamic = true;
-    }
-    if (!dynamic) problems.push(`${key} is in every bundle and referenced by no code — delete it or use it`);
+    if (usedBy.length === 0) problems.push(`${key} is in every bundle and referenced by no code — delete it or use it`);
   }
 }
 
@@ -447,3 +517,7 @@ if (problems.length) {
 console.log(
   `check-i18n: OK — ${registered.length} language(s) (${registered.join(', ')}), ${ref.size} keys each`,
 );
+}
+
+// Importing this file (`pulse-i18n` uses the consumer scan) must not run the gate.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();

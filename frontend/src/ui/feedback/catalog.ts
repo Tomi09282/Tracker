@@ -16,13 +16,16 @@ export interface CatalogEntry {
   /** Which phase implements the component this element belongs to. */
   phase: number;
   /**
-   * Does any component actually READ this variant?
+   * Does a component the PRODUCT renders actually read this variant?
    *
-   * Three entries are false. They have rows in `element_style_config`, labels here, and a settable
-   * endpoint — and nothing anywhere consults them, so an admin can pick a variant, watch it save
-   * and see it audited while the product does not change by a pixel. The studio labels those inert
-   * rather than pretending, and `scripts/check-element-roster.mjs` holds this field to the measured
-   * `useElementVariant` call sites so it cannot quietly become a lie in either direction.
+   * False for an element nothing reads — a row in `element_style_config`, a label here, a settable
+   * endpoint, and no consumer — and false for an element only `/playground` mounts: there a read
+   * exists, and no user ever sees what it steers. Either way an admin could pick a variant, watch
+   * it save and see it audited while the product does not change by a pixel. The studio labels
+   * those inert rather than pretending, and `scripts/check-element-roster.mjs` holds this field to
+   * the measured `useElementVariant` call sites whose component is imported outside the playground,
+   * so it cannot quietly become a lie in either direction. The flag is flipped by `pulse-variants`,
+   * together with the entry in `scripts/data/elements-dormant.json`; never by hand.
    */
   live: boolean;
   variants: Record<Variant, string>;
@@ -33,7 +36,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E1',
     name: 'Button',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Press-spring',
       B: 'Ripple',
@@ -59,7 +62,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E3',
     name: 'Icon button',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Micro-bounce',
       B: 'Ink-dot',
@@ -72,7 +75,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E4',
     name: 'Toggle',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Squash-thumb',
       B: 'Icon-in-thumb',
@@ -85,7 +88,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E5',
     name: 'Checkbox',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Draw-on',
       B: 'Bounce-in',
@@ -120,19 +123,19 @@ export const CATALOG: CatalogEntry[] = [
       E: 'Gradient-border',
     },
   },
-  { id: 'E8', name: 'Select', phase: 1, live: true, variants: { A: 'Spring-open', B: 'Check-slide', C: 'Highlight-trail', D: 'Sheet-up', E: 'Live-search' } },
-  { id: 'E9', name: 'Date picker', phase: 1, live: true, variants: { A: 'Pop-select', B: 'Range-paint', C: 'Today-pulse', D: 'Quick-chips', E: 'Swipe-month' } },
-  { id: 'E10', name: 'Tabs', phase: 1, live: true, variants: { A: 'Motion-highlight', B: 'Underline-grow', C: 'Icon-colorize', D: 'Badge-flush', E: 'Content-swap' } },
+  { id: 'E8', name: 'Select', phase: 1, live: false, variants: { A: 'Spring-open', B: 'Check-slide', C: 'Highlight-trail', D: 'Sheet-up', E: 'Live-search' } },
+  { id: 'E9', name: 'Date picker', phase: 1, live: false, variants: { A: 'Pop-select', B: 'Range-paint', C: 'Today-pulse', D: 'Quick-chips', E: 'Swipe-month' } },
+  { id: 'E10', name: 'Tabs', phase: 1, live: false, variants: { A: 'Motion-highlight', B: 'Underline-grow', C: 'Icon-colorize', D: 'Badge-flush', E: 'Content-swap' } },
   { id: 'E11', name: 'Bottom nav item', phase: 1, live: true, variants: { A: 'Active-pill', B: 'Bounce-dot', C: 'Icon-morph', D: 'Badge-bubble', E: 'Center-FAB' } },
-  { id: 'E12', name: 'Card', phase: 1, live: true, variants: { A: 'Lift-press', B: 'Tilt-glare', C: 'Border-beam', D: 'Hero-expand', E: 'Select-mode' } },
-  { id: 'E13', name: 'List item + swipe', phase: 1, live: true, variants: { A: 'Swipe-reveal', B: 'Check-swipe', C: 'Long-press menu', D: 'Reorder-drag', E: 'Tap-ripple' } },
+  { id: 'E12', name: 'Card', phase: 1, live: false, variants: { A: 'Lift-press', B: 'Tilt-glare', C: 'Border-beam', D: 'Hero-expand', E: 'Select-mode' } },
+  { id: 'E13', name: 'List item + swipe', phase: 1, live: false, variants: { A: 'Swipe-reveal', B: 'Check-swipe', C: 'Long-press menu', D: 'Reorder-drag', E: 'Tap-ripple' } },
   { id: 'E14', name: 'Modal / sheet', phase: 1, live: true, variants: { A: 'Spring-sheet', B: 'Scale-dialog', C: 'Morph-from-trigger', D: 'Stacked-sheets', E: 'Success-close' } },
   { id: 'E15', name: 'Toast', phase: 1, live: true, variants: { A: 'Slide-stack', B: 'Progress-line', C: 'Typed-icon', D: 'Undo-flip', E: 'Coin-toast' } },
-  { id: 'E16', name: 'Progress / ring', phase: 1, live: true, variants: { A: 'Spring-fill', B: 'Striped-flow', C: 'Milestone-pop', D: 'Ring-odometer', E: 'Color-ramp' } },
-  { id: 'E17', name: 'Slider', phase: 1, live: true, variants: { A: 'Thumb-grow', B: 'Tick-snap', C: 'Fill-gradient', D: 'Dual-range', E: 'Icon-ends' } },
-  { id: 'E18', name: 'Skeleton', phase: 1, live: true, variants: { A: 'Shimmer-sweep', B: 'Pulse-soft', C: 'Stagger-reveal', D: 'Shape-morph', E: 'Exact-ghost' } },
-  { id: 'E19', name: 'Pull to refresh', phase: 1, live: true, variants: { A: 'Spinner-grow', B: 'Logo-flip', C: 'Rubber-band', D: 'Status-morph', E: 'Surprise-drop' } },
-  { id: 'E20', name: 'FAB', phase: 1, live: true, variants: { A: 'Speed-dial', B: 'Morph-sheet', C: 'Hide-on-scroll', D: 'Drag-dock', E: 'Progress-halo' } },
+  { id: 'E16', name: 'Progress / ring', phase: 1, live: false, variants: { A: 'Spring-fill', B: 'Striped-flow', C: 'Milestone-pop', D: 'Ring-odometer', E: 'Color-ramp' } },
+  { id: 'E17', name: 'Slider', phase: 1, live: false, variants: { A: 'Thumb-grow', B: 'Tick-snap', C: 'Fill-gradient', D: 'Dual-range', E: 'Icon-ends' } },
+  { id: 'E18', name: 'Skeleton', phase: 1, live: false, variants: { A: 'Shimmer-sweep', B: 'Pulse-soft', C: 'Stagger-reveal', D: 'Shape-morph', E: 'Exact-ghost' } },
+  { id: 'E19', name: 'Pull to refresh', phase: 1, live: false, variants: { A: 'Spinner-grow', B: 'Logo-flip', C: 'Rubber-band', D: 'Status-morph', E: 'Surprise-drop' } },
+  { id: 'E20', name: 'FAB', phase: 1, live: false, variants: { A: 'Speed-dial', B: 'Morph-sheet', C: 'Hide-on-scroll', D: 'Drag-dock', E: 'Progress-halo' } },
   // E21–E26 belong to components that arrive in later phases. Their rows exist in the database
   // and their labels exist here, so the admin studio is complete from day one; only the
   // implementations are missing, and the playground marks them as such rather than pretending.
