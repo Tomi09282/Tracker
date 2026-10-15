@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { Share2 } from 'lucide-react';
+import type { KitLayout } from './PulseKit';
 import { CATALOG, VARIANTS, type Variant } from '../../ui/feedback/catalog';
 import { VariantOverride, useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
@@ -41,6 +42,28 @@ export const PREVIEWABLE = new Set([
   'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
   'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20',
 ]);
+
+/*
+ * The Pulse kit specimen host, the first section of this page. Its own chunk: the style studio
+ * imports `Demo` from this file and must not carry every lane's specimens with it.
+ */
+const PulseKit = lazy(() => import('./PulseKit'));
+
+/*
+ * The kit layout is remembered on this device, never put in the URL (PLAN.md 0.1 ruling 25). It is
+ * also what lets the capture tool open the board directly (`localStorage` of the `kit-board` state):
+ * the feedback matrix below runs JavaScript loops that never let the list page settle, while the
+ * board, which replaces the page, does.
+ */
+const KIT_LAYOUT_KEY = 'tracker.playground.kit-layout';
+
+function readKitLayout(): KitLayout {
+  try {
+    return localStorage.getItem(KIT_LAYOUT_KEY) === 'board' ? 'board' : 'list';
+  } catch {
+    return 'list';
+  }
+}
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -330,6 +353,17 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
  */
 export function PlaygroundPage() {
   const motionSafe = useMotionSafe();
+  // List or board. The board replaces the whole page: it is drawn at the document's origin, 1300
+  // wide, so a capture of it lines up with the Figma component board pixel for pixel.
+  const [kitLayout, setKitLayoutState] = useState<KitLayout>(readKitLayout);
+  const setKitLayout = (next: KitLayout) => {
+    setKitLayoutState(next);
+    try {
+      localStorage.setItem(KIT_LAYOUT_KEY, next);
+    } catch {
+      /* storage refused (a private window): the choice lasts for this visit only */
+    }
+  };
   /*
    * ═══ THREE GROUPS, BECAUSE THERE ARE THREE ANSWERS ════════════════════════════════════════════
    *
@@ -346,8 +380,19 @@ export function PlaygroundPage() {
   const liveNoDemo = CATALOG.filter((e) => e.live && !PREVIEWABLE.has(e.id));
   const inert = CATALOG.filter((e) => !e.live && !PREVIEWABLE.has(e.id));
 
+  if (kitLayout === 'board') {
+    return (
+      <Suspense fallback={null}>
+        <PulseKit layout="board" onLayoutChange={setKitLayout} />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="col-wide screen-x py-6">
+      <Suspense fallback={null}>
+        <PulseKit layout="list" onLayoutChange={setKitLayout} />
+      </Suspense>
       <p className="text-micro-legacy uppercase text-accent">QA matrix</p>
       <h1 className="text-title-1 mt-1 text-text-1">Feedback playground</h1>
       <p className="text-body-legacy measure mt-2 text-text-2">

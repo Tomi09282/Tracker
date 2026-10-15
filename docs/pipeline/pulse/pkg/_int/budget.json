@@ -18,17 +18,6 @@
     "frontend/src/index.css": {
       "legacy-var": 3
     },
-    "frontend/src/ui/TokenProof.tsx": {
-      "legacy-type": 32,
-      "font-display-class": 3,
-      "legacy-radius": 5,
-      "wash": 1,
-      "legacy-variant": 3,
-      "pill-size": 2,
-      "pressable-no-variant": 5,
-      "reserved-surface-1": 2,
-      "legacy-var": 1
-    },
     "frontend/src/ui/data/DataTable.tsx": {
       "legacy-type": 2,
       "legacy-radius": 1,

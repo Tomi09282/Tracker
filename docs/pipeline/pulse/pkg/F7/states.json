@@ -1,0 +1,20 @@
+{
+  "about": "The kit board capture of F7 (PLAN.md 3.4, 5.2 row 2): /playground in the board layout, 1300 x 5094 at scale 1 (the size of the Figma component board, node 80:2), tiled against _components-1..4.png by docs/pipeline/pulse/pkg/_int/kit-board-tiles.mjs. The layout is opened through the device's remembered choice (localStorage), not by a click: the list layout carries the legacy feedback matrix, whose JavaScript loops never let a page settle. The playground sits behind RequireAuth, so a signed-in account is needed; it reads nothing the account owns.",
+  "states": {
+    "kit-board": {
+      "title": "Pulse kit — board layout",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "the component board is a specimen sheet, not a screen: the host lays every lane's specimens out where the Figma board draws them",
+      "localStorage": { "tracker.playground.kit-layout": "board" },
+      "arrived": [
+        { "role": "button", "name": "Board", "pressed": true },
+        { "role": "heading", "name": "Pulse · Open Field" }
+      ]
+    }
+  }
+}

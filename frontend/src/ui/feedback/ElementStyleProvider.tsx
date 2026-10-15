@@ -20,12 +20,12 @@ const OverrideContext = createContext<StyleMap>({});
  * ten elements — E1, E8, E12, E13, E15, E16, E19, E20, E25 — rendered one variant on first paint
  * and swapped to a different one the moment the query resolved, on every cold load.
  *
- * E21 is the one entry that intentionally LEADS the seed rather than mirroring it: both workout
- * mockups draw the active row's `Tartsd nyomva a rögzítéshez` instruction, which only renders
- * under B (Hold-to-confirm), so hold-to-confirm is the design of record for the set-check row. The
- * seed still says A and the server therefore still serves A — that row has to change with it, and
- * until it does this only fixes the first paint. The instruction stays gated on the variant either
- * way: printing "hold to record" on a row that records on a tap is a false instruction.
+ * E21 (the set-check row) is absent, so it falls back to A, tap-to-record — the letter the seed
+ * serves and the gesture the Pulse workout frames draw (PLAN.md R11). It used to be B here, leading
+ * the seed on the strength of one row of an older mockup, so the first paint of the player offered
+ * hold-to-confirm and the server's answer then swapped it for a tap. The hold instruction stays
+ * gated on the variant: printing "hold to record" on a row that records on a tap is a false
+ * instruction.
  */
 const CURATED: Record<string, Variant> = {
   E1: 'D',
@@ -36,7 +36,6 @@ const CURATED: Record<string, Variant> = {
   E16: 'D',
   E19: 'C',
   E20: 'B',
-  E21: 'B',
   E25: 'B',
 };
 
