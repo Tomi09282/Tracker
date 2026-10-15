@@ -9,13 +9,13 @@ skeleton's 2 px excepted) or a shadow.
 Source of the rules: `docs/brain/58-Pulse/Pulse System.md` §2.3 (rhythm), §3 (section), §4 (rows
 "List row", "Empty / error state", "Skeleton", "Status line / toast"). Construction:
 `figma-build/app-kit.js` — `rule`, `secHead`, `sect`, `rowStack`, `listRow`, `emptyState`, `skel`,
-`noticeLine`. Measured boxes: `.pulse/geometry/_components.json`, cells `sect`, `listRow`,
-`emptyState`, `skel`, `noticeLine`; and the frames `home-1`, `settings-1`, `notifications-1`,
+`noticeLine`, `monogramMark`. Measured boxes: `.pulse/geometry/_components.json`, cells `sect`, `listRow`,
+`emptyState`, `skel`, `noticeLine`, `monogramMark`; and the frames `home-1`, `settings-1`, `notifications-1`,
 `coach-dashboard-1/3`, `compose-profile-2`, `onboarding-3`, `workout-2`. Specimen:
 `frontend/src/features/playground/kit/structure.tsx`.
 
 The API below is final. Changes after this page are additive only (R6). Stage 2 of this lane
-(`Monogram` 28 / 64 / 176) is not published yet.
+(`Monogram`, `MonogramSkeleton`) is published below.
 
 ## What a screen writes (keys illustrative)
 
@@ -27,6 +27,7 @@ import { Rule } from '../../ui/data/Rule';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
 
 // a section: strong rule -> 16 -> eyebrow (+ ONE trailing node on its baseline) -> 16 -> content
 <Section title={t('home.todayTitle')} trailing={<span className="text-data text-text-2">{meta}</span>}>
@@ -51,6 +52,13 @@ import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 // a status line: dot + words (+ one action)
 <NoticeLine tone="danger" role="alert" action={<TextLink onClick={retry}>{t('common.retry')}</TextLink>}>{t('…saveFailed')}</NoticeLine>
+
+// a person: the letters ARE the picture (no photo exists anywhere in the product)
+<ListRow title={personLabel(c)} sub={t('coaching.sessions28d', { count })} leadSlot lead={<Monogram person={c} />} to={…} chevron />
+<Monogram person={me} size={176} dot />                                // the Profile hero "TD." (light by default from 96)
+<Monogram person={client} size={124} dot={owns ? true : 'warn'} dotLabel={t('…')} />   // a dot that carries a state is named
+<Monogram initials="3" tone={set ? 'ink' : 'pending'} />                 // plan-editor day number
+{isPending ? <MonogramSkeleton size={176} /> : <Monogram … />}
 
 // loading: blocks where the text lines will be — never a spinner
 {isPending ? <RowStack as="div">{[0, 1, 2].map((i) => <ListRowSkeleton key={i} sub index={i} />)}</RowStack> : …}
@@ -236,11 +244,49 @@ height. A radius passed at a call site is the old tile's shape and is counted by
 (strong rule, eyebrow block, three title + caption rows with a hairline between two), `role="status"`
 with `common.loading` for screen readers.
 
+## `Monogram`, `MonogramSkeleton` — `frontend/src/ui/data/Monogram.tsx` · `data-kit="monogramMark"`
+
+```
+TD.        Big Shoulders Display Black, upper, line height = size, tracking -1 %
+           the box IS the ink of the letters (KP 28 = 25 x 22, TD 176 = 152 x 141)
+           dot: diameter round(size / 8), round(d / 2.75) after the ink, bottom on the ink's bottom
+```
+
+The person is drawn as type: no disc, no tile, no ring, no photo. The element is trimmed to the
+INK of its letters (as `Numeral` is to its digits): a 28 pt monogram in a row's 48 x 44 lead slot
+stands with its ink on the text edge and centred in the slot, and a hero's ink starts exactly on the
+gutter. From 96 up the letters are filled with the light stone texture (`texture-monogram`) over an
+ink `background-color`, so a late or failed image leaves ink letters — never invisible initials.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `person` | `Person` | — | the letters come from `personInitials` (display name, else the e-mail local part). `person` OR `initials` |
+| `initials` | `string` | — | the letters as given ("KP", a day number "3"), upper-cased. Nothing is derived |
+| `size` | `28 \| 64 \| 96 \| 124 \| 176` | `28` | 28 a row lead (`coach-dashboard`, `coach-plans`, `compose-hub`, `post-detail`, `plan-editor`), 64 the board's mid size, 96 the chat anchor (`coach-chat`), 124 the client anchor (`client-detail`), 176 a hero (`settings`, `compose-profile`, `coach-profile`) |
+| `dot` | `boolean \| 'accent' \| 'warn'` | — | the full stop after the letters: `true` / `'accent'` = the lamp, `'warn'` = a state that waits (handover pending). Never a presence light (`coach-chat`: no dot) |
+| `dotLabel` | `string` | — | the dot's accessible name when its colour carries a state (`role="img"`); without it the dot is `aria-hidden` |
+| `light` | `boolean` | on from 96 | the texture fill. Every frame that draws 96 or more draws it; 28 and 64 are ink |
+| `tone` | `'ink' \| 'pending'` | `'ink'` | `text-1` / `text-3` (a day that is not set). Ignored under the texture |
+| `label` | `string` | — | what a screen reader reads (`sr-only`). Default nothing: the name is printed beside the monogram. Give it where it is not (`coach-plans` client rows) |
+| `className` | `string` | — | placement only |
+| `data-force` | `'fallback'` | — | kit specimen and captures only: the textured letters as if the image never arrived |
+
+It is not a control and has no states of its own: inside a row action it takes the row's pressed
+(60 %), disabled (40 %) and busy (60 %) opacity, and the focus ring is the row's.
+
+`MonogramSkeleton` — `{ size?, className? }`: one `Skeleton` block of two letters' ink at that size
+(0.9 x 0.8 of it: 25 x 22 at 28, 158 x 141 at 176), radius 2. Never a circle, never a spinner.
+
+`features/coaching/Monogram.tsx` (the old `rounded-chip` disc) is replaced by this one in the
+coach screens and deleted in closing (PLAN R18). `lib/person.ts` `personInitials` / `initialsOf`
+stay the one source of the letters.
+
 ## Tokens it reads (none added)
 
 `--spacing-group` (16), `--spacing-section` (32), `--row-h` (56), `--row-h-sub` (64), `--thumb` (48),
 `--surface-border` / `--surface-border-strong` (as `hair` / `hair-strong`), `--text-1/2/3`, `--danger`,
 `--warning`, `--success`, `--pressed-opacity`, `--disabled-opacity`, `--focus-ring`,
 `--duration-instant`, `--ease-standard`, `--skeleton-base`, `--skeleton-sheen`, `--animate-sheen`,
-`--radius-1` (2), and the type steps `eyebrow`, `display`, `body`, `body-m`, `cap`, `cap-m`, `data`,
+`--radius-1` (2), `--font-display`, `--accent` (as `bg-accent`), `--trim-display-t` / `-b` (F10,
+the no-`text-box` fallback), and the type steps `eyebrow`, `display`, `body`, `body-m`, `cap`, `cap-m`, `data`,
 `micro`.

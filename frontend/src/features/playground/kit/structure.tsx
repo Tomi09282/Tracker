@@ -1,6 +1,7 @@
 import { Bell, ChevronRight, Plus, Trophy, X } from 'lucide-react';
 import { useId, useState, type ReactNode } from 'react';
 import { ListRow, ListRowSkeleton } from '../../../ui/data/ListRow';
+import { Monogram, MonogramSkeleton } from '../../../ui/data/Monogram';
 import { RowStack } from '../../../ui/data/RowStack';
 import { Rule } from '../../../ui/data/Rule';
 import { Section, SectionHeader } from '../../../ui/data/SectionHeader';
@@ -34,7 +35,10 @@ import { TextLink } from '../../../ui/primitives/TextLink';
  * busy are the real props. The pill, the text links and the icon button in these cells are the
  * actions lane's (`Pressable`, `TextLink`), placed the way a screen places them.
  *
- * The monogram row keeps its 48 pt lead slot EMPTY: `Monogram` is the second stage of this lane.
+ * Stage 2 adds the monogram: the board's `monogramMark` cell (28 / 64 + dot / hero 176 + light +
+ * dot), the 28 pt monogram in the list row's lead slot, and the sizes and states the frames draw
+ * beyond the board (the chat and client anchors, a day number, a dot that carries a state, a row
+ * action holding a monogram in every state, the texture's ink fallback, the loading block).
  */
 
 export interface KitSpecimen {
@@ -124,7 +128,7 @@ export const specimens: KitSpecimen[] = [
           onClick={noop}
         />
         <ListRow title="Fekvenyomás" sub="Erő" lead={<Pic slot="equip-barbell" width={48} />} chevron onClick={noop} />
-        <ListRow title="Kovács Péter" sub="Erőemelő csapat" leadSlot value="5 perce" />
+        <ListRow title="Kovács Péter" sub="Erőemelő csapat" leadSlot lead={<Monogram initials="KP" />} value="5 perce" />
         <ListRow title="Közepes fogású fekvenyomás rúddal" sub="Kezdő · Erő" lines={2} chevron onClick={noop} />
         <ListRow title="Kijelentkezés" tone="danger" onClick={noop} />
       </RowStack>
@@ -174,6 +178,60 @@ export const specimens: KitSpecimen[] = [
       <div className="flex flex-col gap-group">
         <Rule strong />
         <Rule />
+      </div>
+    ),
+  },
+  {
+    kit: 'monogramMark',
+    label: 'monogramMark · 28 / 64 + dot / hero 176 + light + dot',
+    node: (
+      <div className="flex items-end gap-4">
+        <Monogram initials="KP" />
+        <Monogram initials="KP" size={64} dot />
+        <Monogram initials="TD" size={176} light dot />
+      </div>
+    ),
+  },
+  {
+    kit: 'monogramMark',
+    label: 'monogramMark · chat anchor 96 / client anchor 124 (light) / day numbers, set and pending / a dot that carries a state',
+    node: (
+      <div className="flex flex-col items-start gap-6">
+        <div className="flex items-end gap-4">
+          <Monogram initials="KA" size={96} />
+          <Monogram person={{ email: 'takacs.daniel@pelda.hu', display_name: 'Takács Dániel' }} size={124} />
+        </div>
+        <div className="flex items-end gap-4">
+          <Monogram initials="1" />
+          <Monogram initials="2" tone="pending" />
+          <Monogram initials="3" />
+          <Monogram initials="HG" dot="warn" dotLabel="Átadásra vár" />
+          <Monogram initials="ŐÁ" />
+        </div>
+      </div>
+    ),
+  },
+  {
+    kit: 'monogramMark',
+    label: 'monogramMark · in a row action: rest / pressed / keyboard focus / disabled / busy',
+    node: (
+      <RowStack>
+        <ListRow title="Takács Dániel" sub="15 edzés / 28 nap" leadSlot lead={<Monogram initials="TD" />} chevron onClick={noop} />
+        <ListRow title="Takács Dániel" sub="15 edzés / 28 nap" leadSlot lead={<Monogram initials="TD" />} chevron onClick={noop} data-force="pressed" />
+        <ListRow title="Takács Dániel" sub="15 edzés / 28 nap" leadSlot lead={<Monogram initials="TD" />} chevron onClick={noop} data-force="focus" />
+        <ListRow title="Takács Dániel" sub="15 edzés / 28 nap" leadSlot lead={<Monogram initials="TD" />} chevron onClick={noop} disabled />
+        <ListRow title="Takács Dániel" sub="15 edzés / 28 nap" leadSlot lead={<Monogram initials="TD" />} chevron onClick={noop} busy />
+      </RowStack>
+    ),
+  },
+  {
+    kit: 'monogramMark',
+    label: 'monogramMark · the texture never arrived (ink fallback) / loading blocks 28 and 176',
+    node: (
+      <div className="flex flex-wrap items-end gap-4">
+        <Monogram initials="TD" size={176} dot data-force="fallback" />
+        <MonogramSkeleton />
+        <MonogramSkeleton size={176} />
       </div>
     ),
   },
