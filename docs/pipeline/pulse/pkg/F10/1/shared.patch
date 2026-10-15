@@ -1,0 +1,26 @@
+diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
+index f9f2bec..3decdcc 100644
+--- a/frontend/src/ui/tokens/tokens.css
++++ b/frontend/src/ui/tokens/tokens.css
+@@ -772,6 +772,21 @@
+ 
+ /* F10 — data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp, LedgerRow */
+ /* lane:F10 */
++:root {
++  /* The display face's vertical metrics, in em — Big Shoulders Display as the shipped woff2 lays
++     out in Chrome (ascent / descent of the line, OS/2 cap height; F10 proofs/face-metrics.json).
++     An ink-tight figure (`Numeral`, `Fraction`) is trimmed with `text-box: trim-both cap
++     alphabetic`; where a browser has no `text-box` the same box comes from these two margins:
++     the half-leading plus what lies above the cap line, and the half-leading plus the descent.
++     `1lh` is the figure's own line height, so the fluid giant (108 line, 111.6 – 124 type) trims
++     right at every width. The side bearings are per glyph and live with the glyph table in
++     `ui/data/Numeral.tsx`. */
++  --face-display-ascent: 0.984em;
++  --face-display-descent: 0.213em;
++  --face-display-cap: 0.8em;
++  --trim-display-t: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-ascent) + var(--face-display-cap));
++  --trim-display-b: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-descent));
++}
+ /* /lane:F10 */
+ 
+ /* F11 — shell: tab bar, Screen, ScreenHeader, Dock, PublicLayout */

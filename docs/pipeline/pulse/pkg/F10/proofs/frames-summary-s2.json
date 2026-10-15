@@ -1,0 +1,1508 @@
+{
+  "generated": "2026-10-15T19:47:42.861Z",
+  "chrome": "Chrome/155.0.8059.41",
+  "frames": {
+    "settings-1": {
+      "pairs": [
+        {
+          "layer": "Ledger",
+          "file": "settings-1.ledger.pair.png",
+          "pixelsDifferent": "0.49 %"
+        }
+      ],
+      "ink": [
+        {
+          "what": "glyph/chev",
+          "figma": {
+            "x": 372.5,
+            "y": 369.5,
+            "w": 5,
+            "h": 9
+          },
+          "app": {
+            "x": 372.5,
+            "y": 369.5,
+            "w": 5,
+            "h": 9
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Érmék",
+          "figma": {
+            "x": 24.5,
+            "y": 377.5,
+            "w": 38,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24.5,
+            "y": 377.5,
+            "w": 38,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Egyenleged",
+          "figma": {
+            "x": 137,
+            "y": 383.5,
+            "w": 67.5,
+            "h": 11.5
+          },
+          "app": {
+            "x": 137,
+            "y": 383.5,
+            "w": 67.5,
+            "h": 11.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "190",
+          "figma": {
+            "x": 300,
+            "y": 354,
+            "w": 58,
+            "h": 39.5
+          },
+          "app": {
+            "x": 299.5,
+            "y": 354,
+            "w": 59,
+            "h": 39.5
+          },
+          "delta": {
+            "dx": -0.5,
+            "dy": 0,
+            "dw": 1,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Image/coin",
+          "figma": {
+            "x": 73.5,
+            "y": 378,
+            "w": 17.5,
+            "h": 18
+          },
+          "app": {
+            "x": 74.5,
+            "y": 378,
+            "w": 17.5,
+            "h": 18
+          },
+          "delta": {
+            "dx": 1,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "glyph/chev",
+          "figma": {
+            "x": 372.5,
+            "y": 446.5,
+            "w": 5,
+            "h": 9
+          },
+          "app": {
+            "x": 372.5,
+            "y": 446.5,
+            "w": 5,
+            "h": 9
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Eredmények",
+          "figma": {
+            "x": 24.5,
+            "y": 454.5,
+            "w": 75,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24.5,
+            "y": 454.5,
+            "w": 75,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "feloldva",
+          "figma": {
+            "x": 136.5,
+            "y": 460.5,
+            "w": 46.5,
+            "h": 9.5
+          },
+          "app": {
+            "x": 136.5,
+            "y": 460.5,
+            "w": 47,
+            "h": 10
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0.5
+          }
+        },
+        {
+          "what": "4",
+          "figma": {
+            "x": 289,
+            "y": 432,
+            "w": 23,
+            "h": 38.5
+          },
+          "app": {
+            "x": 289,
+            "y": 431.5,
+            "w": 23,
+            "h": 38.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "/",
+          "figma": {
+            "x": 317.5,
+            "y": 432,
+            "w": 13.5,
+            "h": 38
+          },
+          "app": {
+            "x": 318,
+            "y": 431.5,
+            "w": 13,
+            "h": 38
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": -0.5,
+            "dw": -0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "7",
+          "figma": {
+            "x": 337,
+            "y": 432,
+            "w": 21,
+            "h": 38.5
+          },
+          "app": {
+            "x": 337,
+            "y": 431.5,
+            "w": 21,
+            "h": 38.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "glyph/chev",
+          "figma": {
+            "x": 372.5,
+            "y": 523.5,
+            "w": 5,
+            "h": 9
+          },
+          "app": {
+            "x": 372.5,
+            "y": 523.5,
+            "w": 5,
+            "h": 9
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Testsúly",
+          "figma": {
+            "x": 24,
+            "y": 531.5,
+            "w": 53.5,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24,
+            "y": 531.5,
+            "w": 54,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "kg",
+          "figma": {
+            "x": 345,
+            "y": 537.5,
+            "w": 13,
+            "h": 11.5
+          },
+          "app": {
+            "x": 345,
+            "y": 537.5,
+            "w": 13,
+            "h": 11.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "83,1",
+          "figma": {
+            "x": 269.5,
+            "y": 508,
+            "w": 70,
+            "h": 46
+          },
+          "app": {
+            "x": 269,
+            "y": 508,
+            "w": 70.5,
+            "h": 46
+          },
+          "delta": {
+            "dx": -0.5,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Sparkline",
+          "figma": {
+            "x": 138,
+            "y": 522,
+            "w": 116,
+            "h": 26
+          },
+          "app": {
+            "x": 138.5,
+            "y": 522,
+            "w": 115.5,
+            "h": 26
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": -0.5,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 31,
+        "chrome": 0,
+        "structural": 2,
+        "vectors": 6,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 23,
+        "matched": 23,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": []
+    },
+    "coach-dashboard-1": {
+      "pairs": [
+        {
+          "layer": "Counts",
+          "file": "coach-dashboard-1.counts.pair.png",
+          "pixelsDifferent": "0.20 %"
+        }
+      ],
+      "ink": [
+        {
+          "what": "glyph/chev",
+          "figma": {
+            "x": 372.5,
+            "y": 952.5,
+            "w": 5,
+            "h": 9
+          },
+          "app": {
+            "x": 372.5,
+            "y": 952.5,
+            "w": 5,
+            "h": 9
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Csapatok",
+          "figma": {
+            "x": 24.5,
+            "y": 963,
+            "w": 57,
+            "h": 13
+          },
+          "app": {
+            "x": 24.5,
+            "y": 963,
+            "w": 57,
+            "h": 13
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "3",
+          "figma": {
+            "x": 337,
+            "y": 937.5,
+            "w": 21,
+            "h": 39
+          },
+          "app": {
+            "x": 337,
+            "y": 937.5,
+            "w": 21.5,
+            "h": 39
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Élő kódok",
+          "figma": {
+            "x": 24.5,
+            "y": 1037.5,
+            "w": 62,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24.5,
+            "y": 1037.5,
+            "w": 62.5,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "2",
+          "figma": {
+            "x": 337.5,
+            "y": 1014,
+            "w": 20.5,
+            "h": 39
+          },
+          "app": {
+            "x": 337.5,
+            "y": 1014,
+            "w": 21,
+            "h": 39
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 12,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 1,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 10,
+        "matched": 10,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": []
+    },
+    "client-detail-2": {
+      "pairs": [
+        {
+          "layer": "Ledger row/Reggeli",
+          "file": "client-detail-2.ledger-row-reggeli.pair.png",
+          "pixelsDifferent": "1.10 %"
+        },
+        {
+          "layer": "Ledger row/Ebéd",
+          "file": "client-detail-2.ledger-row-eb-d.pair.png",
+          "pixelsDifferent": "0.93 %"
+        },
+        {
+          "layer": "Ledger row/Edzés utáni",
+          "file": "client-detail-2.ledger-row-edz-s-ut-ni.pair.png",
+          "pixelsDifferent": "1.00 %"
+        },
+        {
+          "layer": "Ledger row/Vacsora",
+          "file": "client-detail-2.ledger-row-vacsora.pair.png",
+          "pixelsDifferent": "0.90 %"
+        }
+      ],
+      "ink": [
+        {
+          "what": "Reggeli",
+          "figma": {
+            "x": 24.5,
+            "y": 555,
+            "w": 45,
+            "h": 13
+          },
+          "app": {
+            "x": 24.5,
+            "y": 555,
+            "w": 45,
+            "h": 13
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "kcal",
+          "figma": {
+            "x": 354.5,
+            "y": 558.5,
+            "w": 23.5,
+            "h": 9.5
+          },
+          "app": {
+            "x": 355,
+            "y": 558.5,
+            "w": 24,
+            "h": 10
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0.5
+          }
+        },
+        {
+          "what": "443",
+          "figma": {
+            "x": 278.5,
+            "y": 529.5,
+            "w": 70.5,
+            "h": 39
+          },
+          "app": {
+            "x": 279,
+            "y": 529.5,
+            "w": 70.5,
+            "h": 39
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Ebéd",
+          "figma": {
+            "x": 24.5,
+            "y": 900.5,
+            "w": 26.5,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24.5,
+            "y": 900.5,
+            "w": 26.5,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "kcal",
+          "figma": {
+            "x": 354.5,
+            "y": 906.5,
+            "w": 23.5,
+            "h": 9.5
+          },
+          "app": {
+            "x": 355,
+            "y": 906.5,
+            "w": 24,
+            "h": 10
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0.5
+          }
+        },
+        {
+          "what": "537",
+          "figma": {
+            "x": 279.5,
+            "y": 877.5,
+            "w": 69.5,
+            "h": 39
+          },
+          "app": {
+            "x": 280,
+            "y": 877.5,
+            "w": 69.5,
+            "h": 39
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Edzés utáni",
+          "figma": {
+            "x": 24.5,
+            "y": 1248.5,
+            "w": 71,
+            "h": 15.5
+          },
+          "app": {
+            "x": 24.5,
+            "y": 1248.5,
+            "w": 71.5,
+            "h": 15.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "what": "kcal",
+          "figma": {
+            "x": 354.5,
+            "y": 1254.5,
+            "w": 23.5,
+            "h": 9.5
+          },
+          "app": {
+            "x": 355,
+            "y": 1254.5,
+            "w": 24,
+            "h": 10
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0.5
+          }
+        },
+        {
+          "what": "327",
+          "figma": {
+            "x": 280.5,
+            "y": 1225,
+            "w": 68.5,
+            "h": 39.5
+          },
+          "app": {
+            "x": 281,
+            "y": 1225,
+            "w": 68.5,
+            "h": 39.5
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Vacsora",
+          "figma": {
+            "x": 24,
+            "y": 1534,
+            "w": 51.5,
+            "h": 13
+          },
+          "app": {
+            "x": 24,
+            "y": 1534,
+            "w": 51.5,
+            "h": 13
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "kcal",
+          "figma": {
+            "x": 354.5,
+            "y": 1537.5,
+            "w": 23.5,
+            "h": 9.5
+          },
+          "app": {
+            "x": 355,
+            "y": 1537.5,
+            "w": 24,
+            "h": 10
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0.5
+          }
+        },
+        {
+          "what": "373",
+          "figma": {
+            "x": 280,
+            "y": 1508.5,
+            "w": 69,
+            "h": 39
+          },
+          "app": {
+            "x": 280.5,
+            "y": 1508.5,
+            "w": 69,
+            "h": 39
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 16,
+        "chrome": 0,
+        "structural": 0,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 16,
+        "matched": 16,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": []
+    },
+    "onboarding-3": {
+      "pairs": [
+        {
+          "layer": "Step bar",
+          "file": "onboarding-3.step-bar.pair.png",
+          "pixelsDifferent": "0.06 %"
+        }
+      ],
+      "ink": [
+        {
+          "what": "Segment/on",
+          "figma": {
+            "x": 24,
+            "y": 220,
+            "w": 68,
+            "h": 4
+          },
+          "app": {
+            "x": 24,
+            "y": 220,
+            "w": 68,
+            "h": 4
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Segment/on",
+          "figma": {
+            "x": 95.5,
+            "y": 220,
+            "w": 68,
+            "h": 4
+          },
+          "app": {
+            "x": 96,
+            "y": 220,
+            "w": 67,
+            "h": 4
+          },
+          "delta": {
+            "dx": 0.5,
+            "dy": 0,
+            "dw": -1,
+            "dh": 0
+          }
+        },
+        {
+          "what": "Segment/off",
+          "figma": null,
+          "app": null,
+          "delta": null
+        },
+        {
+          "what": "Segment/off",
+          "figma": null,
+          "app": null,
+          "delta": null
+        },
+        {
+          "what": "Segment/off",
+          "figma": null,
+          "app": null,
+          "delta": null
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 11,
+        "chrome": 0,
+        "structural": 6,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 5,
+        "matched": 5,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": []
+    }
+  },
+  "board": {
+    "pairs": [
+      {
+        "cell": "segBar",
+        "file": "board.segbar-cell.pair.png",
+        "pixelsDifferent": "0.32 %"
+      },
+      {
+        "cell": "ledgerRow",
+        "file": "board.ledgerrow-cell.pair.png",
+        "pixelsDifferent": "0.75 %"
+      }
+    ],
+    "ink": [
+      {
+        "what": "segBar · count 4 / 7 — stepper(2, 5)",
+        "figma": {
+          "x": 907,
+          "y": 33,
+          "w": 273,
+          "h": 10
+        },
+        "app": {
+          "x": 906,
+          "y": 33,
+          "w": 275,
+          "h": 10
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 0,
+          "dw": 2,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 906,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "app": {
+          "x": 906,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 957,
+          "y": 65,
+          "w": 45,
+          "h": 6
+        },
+        "app": {
+          "x": 958,
+          "y": 65,
+          "w": 43,
+          "h": 6
+        },
+        "delta": {
+          "dx": 1,
+          "dy": 0,
+          "dw": -2,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 1009,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "app": {
+          "x": 1009,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 1061,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "app": {
+          "x": 1061,
+          "y": 65,
+          "w": 44,
+          "h": 6
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 906,
+          "y": 98,
+          "w": 57,
+          "h": 4
+        },
+        "app": {
+          "x": 906,
+          "y": 98,
+          "w": 57,
+          "h": 4
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/on",
+        "figma": {
+          "x": 966,
+          "y": 98,
+          "w": 58,
+          "h": 4
+        },
+        "app": {
+          "x": 967,
+          "y": 98,
+          "w": 56,
+          "h": 4
+        },
+        "delta": {
+          "dx": 1,
+          "dy": 0,
+          "dw": -2,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "Segment/off",
+        "figma": null,
+        "app": null,
+        "delta": null
+      },
+      {
+        "what": "2 / 5",
+        "figma": {
+          "x": 1221,
+          "y": 95,
+          "w": 38,
+          "h": 12
+        },
+        "app": {
+          "x": 1221,
+          "y": 94,
+          "w": 39,
+          "h": 12
+        },
+        "delta": {
+          "dx": 0,
+          "dy": -1,
+          "dw": 1,
+          "dh": 0
+        }
+      },
+      {
+        "what": "ledgerRow · label | note | numeral on one baseline",
+        "figma": {
+          "x": 474,
+          "y": 1372,
+          "w": 313,
+          "h": 24
+        },
+        "app": {
+          "x": 474,
+          "y": 1372,
+          "w": 313,
+          "h": 24
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "glyph/chev",
+        "figma": {
+          "x": 822,
+          "y": 1447,
+          "w": 4,
+          "h": 8
+        },
+        "app": {
+          "x": 821,
+          "y": 1446,
+          "w": 5,
+          "h": 9
+        },
+        "delta": {
+          "dx": -1,
+          "dy": -1,
+          "dw": 1,
+          "dh": 1
+        }
+      },
+      {
+        "what": "Érmék",
+        "figma": {
+          "x": 474,
+          "y": 1454,
+          "w": 38,
+          "h": 16
+        },
+        "app": {
+          "x": 473,
+          "y": 1455,
+          "w": 39,
+          "h": 15
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 1,
+          "dw": 1,
+          "dh": -1
+        }
+      },
+      {
+        "what": "Egyenleged",
+        "figma": {
+          "x": 586,
+          "y": 1461,
+          "w": 67,
+          "h": 11
+        },
+        "app": {
+          "x": 586,
+          "y": 1461,
+          "w": 68,
+          "h": 11
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 1,
+          "dh": 0
+        }
+      },
+      {
+        "what": "190",
+        "figma": {
+          "x": 749,
+          "y": 1431,
+          "w": 58,
+          "h": 40
+        },
+        "app": {
+          "x": 748,
+          "y": 1431,
+          "w": 60,
+          "h": 40
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 0,
+          "dw": 2,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Image/coin",
+        "figma": {
+          "x": 522,
+          "y": 1455,
+          "w": 18,
+          "h": 18
+        },
+        "app": {
+          "x": 523,
+          "y": 1455,
+          "w": 18,
+          "h": 18
+        },
+        "delta": {
+          "dx": 1,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "glyph/chev",
+        "figma": {
+          "x": 822,
+          "y": 1524,
+          "w": 4,
+          "h": 8
+        },
+        "app": {
+          "x": 821,
+          "y": 1523,
+          "w": 5,
+          "h": 9
+        },
+        "delta": {
+          "dx": -1,
+          "dy": -1,
+          "dw": 1,
+          "dh": 1
+        }
+      },
+      {
+        "what": "Eredmények",
+        "figma": {
+          "x": 474,
+          "y": 1531,
+          "w": 74,
+          "h": 16
+        },
+        "app": {
+          "x": 473,
+          "y": 1532,
+          "w": 76,
+          "h": 15
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 1,
+          "dw": 2,
+          "dh": -1
+        }
+      },
+      {
+        "what": "feloldva",
+        "figma": {
+          "x": 586,
+          "y": 1538,
+          "w": 46,
+          "h": 9
+        },
+        "app": {
+          "x": 585,
+          "y": 1538,
+          "w": 48,
+          "h": 9
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 0,
+          "dw": 2,
+          "dh": 0
+        }
+      },
+      {
+        "what": "4",
+        "figma": {
+          "x": 738,
+          "y": 1509,
+          "w": 23,
+          "h": 39
+        },
+        "app": {
+          "x": 738,
+          "y": 1508,
+          "w": 24,
+          "h": 39
+        },
+        "delta": {
+          "dx": 0,
+          "dy": -1,
+          "dw": 1,
+          "dh": 0
+        }
+      },
+      {
+        "what": "/",
+        "figma": {
+          "x": 767,
+          "y": 1509,
+          "w": 13,
+          "h": 38
+        },
+        "app": {
+          "x": 767,
+          "y": 1508,
+          "w": 13,
+          "h": 39
+        },
+        "delta": {
+          "dx": 0,
+          "dy": -1,
+          "dw": 0,
+          "dh": 1
+        }
+      },
+      {
+        "what": "7",
+        "figma": {
+          "x": 786,
+          "y": 1509,
+          "w": 21,
+          "h": 38
+        },
+        "app": {
+          "x": 786,
+          "y": 1508,
+          "w": 21,
+          "h": 39
+        },
+        "delta": {
+          "dx": 0,
+          "dy": -1,
+          "dw": 0,
+          "dh": 1
+        }
+      },
+      {
+        "what": "glyph/chev",
+        "figma": {
+          "x": 822,
+          "y": 1601,
+          "w": 4,
+          "h": 8
+        },
+        "app": {
+          "x": 821,
+          "y": 1600,
+          "w": 5,
+          "h": 9
+        },
+        "delta": {
+          "dx": -1,
+          "dy": -1,
+          "dw": 1,
+          "dh": 1
+        }
+      },
+      {
+        "what": "Testsúly",
+        "figma": {
+          "x": 473,
+          "y": 1608,
+          "w": 54,
+          "h": 16
+        },
+        "app": {
+          "x": 473,
+          "y": 1609,
+          "w": 54,
+          "h": 15
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 1,
+          "dw": 0,
+          "dh": -1
+        }
+      },
+      {
+        "what": "kg",
+        "figma": {
+          "x": 794,
+          "y": 1615,
+          "w": 13,
+          "h": 11
+        },
+        "app": {
+          "x": 794,
+          "y": 1615,
+          "w": 13,
+          "h": 11
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "83,1",
+        "figma": {
+          "x": 718,
+          "y": 1585,
+          "w": 71,
+          "h": 46
+        },
+        "app": {
+          "x": 718,
+          "y": 1585,
+          "w": 71,
+          "h": 46
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "what": "Sparkline",
+        "figma": {
+          "x": 587,
+          "y": 1599,
+          "w": 118,
+          "h": 26
+        },
+        "app": {
+          "x": 587,
+          "y": 1599,
+          "w": 118,
+          "h": 26
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      }
+    ],
+    "pass": false,
+    "counts": {
+      "layers": 63,
+      "chrome": 0,
+      "structural": 16,
+      "vectors": 6,
+      "clipped": 0,
+      "masked": 0,
+      "compared": 41,
+      "matched": 39,
+      "sameSlotOtherString": 0,
+      "deviating": 2,
+      "styleMismatches": 0,
+      "unmatched": 0
+    },
+    "deviating": [
+      {
+        "name": "Label",
+        "text": "segBar · count 4 / 7 — stepper(2, 5)",
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": -76.8,
+          "dh": 0
+        },
+        "measured": "line box"
+      },
+      {
+        "name": "Label",
+        "text": "ledgerRow · label | note | numeral on one baseline",
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": -38.3,
+          "dh": 0
+        },
+        "measured": "line box"
+      }
+    ],
+    "style": [],
+    "unmatched": []
+  }
+}

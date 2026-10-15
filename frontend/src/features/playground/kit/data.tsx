@@ -1,12 +1,17 @@
 import { useEffect, useId, useState } from 'react';
 import type { ReactNode } from 'react';
+import { LedgerRow } from '../../../ui/data/LedgerRow';
 import { MacroColumns } from '../../../ui/data/MacroColumns';
+import { RowStack } from '../../../ui/data/RowStack';
 import { Fraction, Numeral } from '../../../ui/data/Numeral';
 import { ProgressBar } from '../../../ui/data/ProgressBar';
-import { SegmentBar } from '../../../ui/data/SegmentBar';
+import { SegmentBar, Stepper } from '../../../ui/data/SegmentBar';
 import type { Segment } from '../../../ui/data/SegmentBar';
 import { StatBlock } from '../../../ui/data/StatBlock';
 import { CountUp } from '../../../ui/feedback/CountUp';
+import { Sparkline } from '../../../ui/feedback/Sparkline';
+import type { TrendPoint } from '../../../ui/feedback/TrendChart';
+import { Pic } from '../../../ui/media/Pic';
 import { Switch } from '../../../ui/primitives/Switch';
 
 /*
@@ -24,11 +29,16 @@ import { Switch } from '../../../ui/primitives/Switch';
  * tones and units, and the same components while their value CHANGES (behind a switch, so a
  * capture of the board never catches a figure mid-roll).
  *
- * Nothing in this lane is interactive — a figure, a bar and a block take no focus and no pointer —
- * so there is no pressed, disabled, busy or keyboard-focus state to show. The states a figure HAS
- * are shown instead: ink, pending and warn; on target, over and without one; lit, planned and off;
- * standing, ticking and rolling. (The one control on the page, the switch of the last cell, is the
- * selection lane's.)
+ * The ledger rows (stage 2) fill the board's `ledgerRow` cell of column 2, in a `RowStack` with
+ * the board's section rule above and below (`rowStack(…, { open, close })` — 232 pt), and the stepper
+ * takes its place in the count cell.
+ *
+ * The one interactive piece of the lane is a ledger row that opens something: its cell shows rest,
+ * pressed, keyboard focus, disabled and busy (the read under way: the dash), plus the failed read
+ * (the dash, never a 0) and the row that opens nothing (no chevron). Everything else takes no focus
+ * and no pointer, so the states a figure HAS are shown instead: ink, pending and warn; on target,
+ * over and without one; lit, planned and off; standing, ticking and rolling. (The switch of the
+ * "changing" cell is the selection lane's.)
  */
 
 export interface KitSpecimen {
@@ -53,13 +63,18 @@ const Stack = ({ gap, children }: { gap: 'gap-5' | 'gap-6' | 'gap-8' | 'gap-12';
   <div className={`flex w-full flex-col items-start ${gap}`}>{children}</div>
 );
 
-/** The board's `stepper(2, 5)` — the lane's stage-2 component, drawn here from the bar it is made of. */
-const StepperSketch = () => (
-  <div className="flex w-full items-center gap-4">
-    <SegmentBar thin label="2 / 5" value={2} total={5} className="flex-1" />
-    <span className="text-data text-text-2">2 / 5</span>
-  </div>
-);
+const DAY = 86400000;
+/** The board's index series (null = no reading) as dated readings `step` days apart — as the charts page dates it. */
+const dated = (start: string, step: number, values: (number | null)[]): TrendPoint[] =>
+  values.flatMap((value, i) => (value == null ? [] : [{ date: new Date(Date.parse(`${start}T00:00:00Z`) + i * step * DAY).toISOString().slice(0, 10), value }]));
+
+/** `app-components.body.js` 73 — the Profil weight row's series, a six-reading pause in the middle. */
+const WEIGHT = dated('2026-07-17', 3, [
+  88.4, 88.1, 87.9, 87.5, 87.6, 87.2, 87, null, null, null, null, null, null, 85.6, 85.3, 85.4, 84.9, 84.7, 84.8, 84.3, 84, 84.1,
+  83.6, 83.4, 83.1,
+]);
+
+const noop = () => undefined;
 
 /** Steps through `values` while `on`; stands on the first one otherwise. */
 function useCycle<T>(values: readonly T[], everyMs: number, on: boolean): T {
@@ -140,8 +155,36 @@ export const specimens: KitSpecimen[] = [
     node: (
       <Stack gap="gap-5">
         <SegmentBar label="4 / 7" value={4} total={7} />
-        <StepperSketch />
+        <Stepper label="Kérdőív" value={2} total={5} />
       </Stack>
+    ),
+  },
+  {
+    kit: 'ledgerRow',
+    label: 'ledgerRow · label | note | numeral on one baseline',
+    node: (
+      <RowStack open close>
+        <LedgerRow key="coins" label="Érmék" labelTrail={<Pic slot="coin" width={22} />} note="Egyenleged" value="190" onClick={noop} />
+        <LedgerRow key="achievements" label="Eredmények" note="feloldva" value={<Fraction value="4" of="7" />} onClick={noop} />
+        <LedgerRow key="weight" label="Testsúly" note={<Sparkline series={WEIGHT} width={120} height={28} />} value="83,1" unit="kg" onClick={noop} />
+      </RowStack>
+    ),
+  },
+  {
+    kit: 'ledgerRow',
+    label:
+      'ledgerRow · rest / opens nothing, same column / pressed / keyboard focus / disabled / busy (the dash) / failed read (the dash, never 0) / opens nothing, on the edge (kcal)',
+    node: (
+      <RowStack open close>
+        <LedgerRow key="rest" label="Csapatok" value={3} onClick={noop} />
+        <LedgerRow key="aligned" label="Élő kódok" value={2} chevronSpace />
+        <LedgerRow key="pressed" label="Csapatok" value={3} onClick={noop} force="pressed" />
+        <LedgerRow key="focus" label="Élő kódok" value={2} onClick={noop} force="focus" />
+        <LedgerRow key="disabled" label="Élő kódok" value={2} onClick={noop} disabled />
+        <LedgerRow key="busy" label="Csapatok" value={undefined} onClick={noop} busy />
+        <LedgerRow key="failed" label="Testsúly" value={83.1} unit="kg" onClick={noop} failed />
+        <LedgerRow key="static" label="Reggeli" value={443} unit="kcal" />
+      </RowStack>
     ),
   },
   {

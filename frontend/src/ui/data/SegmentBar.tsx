@@ -80,3 +80,35 @@ export function SegmentBar(props: SegmentBarProps) {
     </div>
   );
 }
+
+export interface StepperProps {
+  /** The steps done or under way, lit from the left (kit `stepper(cur, n)`: the first `cur`). */
+  value: number;
+  /** All steps. */
+  total: number;
+  /** The accessible name of the progress ("Kérdőív"). */
+  label?: string;
+  /** Placement and width only. The stepper fills the width it is given. */
+  className?: string;
+}
+
+/**
+ * THE FLOW STEPPER (kit `stepper`, `app-kit.js` 285; Pulse System 4 "Flow progress"): the thin
+ * segment bar — 4 pt segments 4 apart, the first `value` lit — and, 16 after it, the count in mono
+ * `data` 13 / 18 `text-2` ("2 / 5"). 18 high, the bar centred on the count's line. On the board:
+ * 354 wide, the bar 299, five segments of 56.6.
+ *
+ * One `progressbar` (the bar's own, with `aria-valuetext` "2 / 5"); the drawn count is its picture.
+ */
+export function Stepper({ value, total, label, className }: StepperProps) {
+  const n = Math.max(0, Math.floor(total));
+  const now = Math.min(Math.max(Math.round(value), 0), n);
+  return (
+    <div data-kit="stepper" className={cn('flex w-full items-center gap-4', className)}>
+      <SegmentBar thin value={now} total={n} label={label} className="min-w-0 flex-1" />
+      <span aria-hidden className="shrink-0 whitespace-nowrap text-data text-text-2">
+        {now} / {n}
+      </span>
+    </div>
+  );
+}

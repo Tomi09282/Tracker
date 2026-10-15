@@ -1,26 +1,21 @@
-diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
-index f9f2bec..3decdcc 100644
---- a/frontend/src/ui/tokens/tokens.css
-+++ b/frontend/src/ui/tokens/tokens.css
-@@ -772,6 +772,21 @@
- 
- /* F10 — data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp, LedgerRow */
- /* lane:F10 */
-+:root {
-+  /* The display face's vertical metrics, in em — Big Shoulders Display as the shipped woff2 lays
-+     out in Chrome (ascent / descent of the line, OS/2 cap height; F10 proofs/face-metrics.json).
-+     An ink-tight figure (`Numeral`, `Fraction`) is trimmed with `text-box: trim-both cap
-+     alphabetic`; where a browser has no `text-box` the same box comes from these two margins:
-+     the half-leading plus what lies above the cap line, and the half-leading plus the descent.
-+     `1lh` is the figure's own line height, so the fluid giant (108 line, 111.6 – 124 type) trims
-+     right at every width. The side bearings are per glyph and live with the glyph table in
-+     `ui/data/Numeral.tsx`. */
-+  --face-display-ascent: 0.984em;
-+  --face-display-descent: 0.213em;
-+  --face-display-cap: 0.8em;
-+  --trim-display-t: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-ascent) + var(--face-display-cap));
-+  --trim-display-b: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-descent));
-+}
- /* /lane:F10 */
- 
- /* F11 — shell: tab bar, Screen, ScreenHeader, Dock, PublicLayout */
+diff --git a/frontend/src/features/playground/kit/shell.tsx b/frontend/src/features/playground/kit/shell.tsx
+index 955efc3..f1159d4 100644
+--- a/frontend/src/features/playground/kit/shell.tsx
++++ b/frontend/src/features/playground/kit/shell.tsx
+@@ -1,5 +1,6 @@
+ import { Ban, Bell, ChevronRight, Palette, Search } from 'lucide-react';
+ import type { ReactNode } from 'react';
++import { Stepper } from '../../../ui/data/SegmentBar';
+ import { BottomNav } from '../../../ui/nav/BottomNav';
+ import type { NavTab } from '../../../ui/nav/BottomNav';
+ import { Pressable } from '../../../ui/primitives/Pressable';
+@@ -192,8 +193,7 @@ export const specimens: KitSpecimen[] = [
+     node: (
+       <Phone tabs={false}>
+         <Screen top="push" gap="tight">
+-          {/* The stepper's 18 pt row (the data lane's `stepper`, not in the kit yet): its room only. */}
+-          <div aria-hidden className="h-[18px]" />
++          <Stepper label="Kérdőív" value={2} total={5} />
+           <ScreenHeader kind="push" title="Tapasztalat" back={{ to: '/onboarding', label: 'Kérdőív' }} />
+         </Screen>
+         <Dock inline>

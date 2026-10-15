@@ -1,13 +1,13 @@
 # Kit reference — data (lane DA, package F10)
 
 The figures, bars and meters of Pulse: `Numeral`, `Fraction`, `StatBlock`, `SegmentBar`,
-`MacroColumns`, `ProgressBar`, and `CountUp` / `DigitRoller` (the digit roller). Stage 2 of the
-lane (`LedgerRow`, `Stepper`) is not in this page yet.
+`MacroColumns`, `ProgressBar`, and `CountUp` / `DigitRoller` (the digit roller) — stage 1 — and
+`LedgerRow` and `Stepper` — stage 2.
 
 Source of the rules: `docs/brain/58-Pulse/Pulse System.md` §2.1 (light levels), §2.2 (type ramp),
 §2.4 (count-up), §4 (rows "Big numeral", "Week / segment bar", "Macro columns", "Progress bar").
 Construction: `figma-build/app-kit.js` (`numeral`, `fraction`, `statBlock`, `segBar`,
-`progressBar`, `macroCol`). Measured boxes: `.pulse/geometry/_components.json` (column 3) and the
+`progressBar`, `macroCol`, `ledgerRow`, `stepper`). Measured boxes: `.pulse/geometry/_components.json` (column 3) and the
 frames `home-1`, `coins-1`, `progress-1`, `nutrition-1`, `workout-2`. Specimen:
 `frontend/src/features/playground/kit/data.tsx`.
 
@@ -49,6 +49,21 @@ import { ProgressBar } from '../../ui/data/ProgressBar';
 
 // nutrition-1: the same instrument one size up — eyebrow, num numeral + unit, bar, target
 <MacroColumns size="num" columns={[{ name: proteinLabel, value: 128, unit: 'g', ratio: 128 / 180, caption: targetLine }, /* … */]} />
+
+// settings-1 (Profil): the ledger — a stat is a line, never a tile. Rows sit between the list's hairlines.
+import { LedgerRow } from '../../ui/data/LedgerRow';
+<LedgerRow to="/coins" label={coinsLabel} labelTrail={<Pic slot="coin" width={22} />} note={balanceLabel} value={coins?.balance} />
+<LedgerRow to="/coins" label={achievementsLabel} note={unlockedLabel} value={<Fraction value={unlocked} of={total} />} />
+<LedgerRow to="/progress" label={weightLabel} note={<Sparkline series={weight} width={118} height={28} />} value={latest?.kg} format={{ maximumFractionDigits: 1 }} unit="kg" />
+// coach-dashboard-1: a count that opens its list
+<LedgerRow to={teamsRoute} label={teamsLabel} value={teams?.length} failed={teamsQuery.isError} busy={teamsQuery.isPending} />
+<LedgerRow label={liveCodesLabel} value={liveCodes?.length} chevronSpace />   // not a button: no chevron, the same figure column
+// client-detail-2: a figure that opens nothing — no chevron
+<LedgerRow label={mealName} value={kcal} unit="kcal" />
+
+// a flow (the board's flow screen): where the member is
+import { Stepper } from '../../ui/data/SegmentBar';
+<Stepper value={step} total={5} label={flowLabel} />
 ```
 
 Rules that are not negotiable:
@@ -214,6 +229,68 @@ While rolling (and always with `cells`) the drawn digits are `aria-hidden` and a
 says the final figure. A timer one roll later removes the outgoing layer even if no frame ran: a
 figure never keeps showing its old value. Reduced motion: no roll, the figure just changes.
 
+## `LedgerRow` — `ui/data/LedgerRow.tsx` · `data-kit="ledgerRow"`
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `label` | `ReactNode` | — | the eyebrow on the edge (`eyebrow` 16 / 20 Bold, upper case, `text-2`); the row's name |
+| `labelTrail` | `ReactNode` | — | a small node 8 after the label's box, centred on its caps (the Profil row's 22 pt coin) |
+| `note` | `ReactNode` | — | from x 112: a string is `cap` 13 / 18 `text-2` on the baseline, one line, ellipsis; a node (a `Sparkline` 118 × 28) stands with its bottom 1 pt under the baseline |
+| `value` | `ReactNode` | — | a string / number is a `num` `Numeral`; a node (a `Fraction`) is drawn as given; `null` / `undefined` prints the dash |
+| `unit` | `string` | — | `cap` `text-2`, ink 6 after the figure's ink, on the baseline ("kg", "kcal"); not drawn with the dash |
+| `format` | `Intl.NumberFormatOptions` | — | for a numeric `value` |
+| `mode` | `'static' \| 'tick' \| 'roll'` | `'static'` | the figure's `mode` (`roll` for a balance that changes on screen) |
+| `srText` | `string` | — | what a screen reader says for the figure |
+| `failed` | `boolean` | `false` | the read failed: the dash, whatever `value` holds |
+| `busy` | `boolean` | `false` | the read is under way: the dash, and `aria-busy` |
+| `to` / `onClick` | `string` / `() => void` | — | the whole row is the link (router `Link`) / the button |
+| `chevron` | `boolean` | when `to` or `onClick` | the 16 pt chevron, `text-3` |
+| `chevronSpace` | `boolean` | as `chevron` | keep the chevron's column (figure ink ends on x 334) without drawing it — a row that opens nothing under one that does (coach-dashboard-1 "Élő kódok") |
+| `disabled` | `boolean` | `false` | an interactive row that cannot be used now: 40 %, `aria-disabled`, still focusable |
+| `force` | `'pressed' \| 'focus'` | — | specimen only: draws the state for the kit board |
+| `className` | `string` | — | placement only; the row fills the width it is given |
+
+Geometry (`app-kit.js` `ledgerRow`; board column 2, settings-1, coach-dashboard-1, client-detail-2):
+76 high, ONE baseline at y 57 — the eyebrow on x 0, the note from x 112, the `num` figure ending by
+its INK on x 334 with the chevron (x 354 without), the unit's ink 6 after the figure's ink and ending
+on that edge; the chevron's 16 pt box at x 343, y 30 (it hangs 5 past the row's right edge, as in
+every frame). The one baseline is the flex container's: a 57 pt strut opens the row and every column
+aligns its baseline to the strut's bottom edge, so faces and sizes cannot drift apart.
+
+**A failed read prints the dash, never a 0** (Pulse System 4): `—` as a `num` figure in `text-3`
+(the pending tone), ink-tight like any figure, with no unit. The same dash stands while the read is
+under way (`busy`; the client-detail note: "—" while loading). Pass the query's value as it is —
+`value={data?.count}` — and an absent value is the dash by itself; `?? 0` is the defect this row
+exists to prevent.
+
+States (interactive rows only — a `ListRow`'s, lane F9): pressed 60 % in `--duration-instant`;
+disabled 40 % with `aria-disabled`, the press refused, still focusable (a row that turns disabled
+while it has the focus keeps it); keyboard focus = the 2 px lime ring 2 px off the row, radius 4;
+busy = the dash + `aria-busy` (here busy is the READ under way, not an action in flight). A row
+that opens nothing is a `role="group"` named by its label, without the chevron. The row draws no
+rule: the `RowStack` that holds the rows draws the hairlines (`<RowStack open close>`: section
+rule, row rules, section rule — the board's ledger cell).
+
+Not covered by `LedgerRow`: admin-1 sets TWO label → figure pairs on one ledger line (the second
+ending on the right edge, no chevron) — a screen composition, not a kit row.
+
+## `Stepper` — `ui/data/SegmentBar.tsx` · `data-kit="stepper"`
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `value` | `number` | — | the steps lit from the left (`stepper(cur, n)`: the first `cur`) |
+| `total` | `number` | — | all steps |
+| `label` | `string` | — | the accessible name of the progress ("Kérdőív") |
+| `className` | `string` | — | placement and width; it fills the width it is given |
+
+The thin `SegmentBar` (4 pt segments 4 apart, lime / `track`), 16 apart from the count in mono
+`data` 13 / 18 `text-2` ("2 / 5"); 18 high, the bar centred on the count's line (board: 354 wide,
+the bar 299, five segments of 56.6). One `progressbar` (the bar's, `aria-valuetext` "2 / 5"); the
+drawn count is `aria-hidden`. It lives in `SegmentBar.tsx` because it IS the segment bar plus a
+count (the lane owns no separate file for it). The onboarding frames draw the thin bar alone under
+their giant step numeral: that is `<SegmentBar thin value={step} total={5} />`, not a `Stepper`.
+The workout header's "1 / 5" is a plain mono counter, not a stepper either.
+
 ## When the value changes (`mode`)
 
 Big Shoulders Display has no tabular figures ("1" is 0.274 em wide, "5" 0.515 em; DEV-003).
@@ -230,8 +307,8 @@ matched by string: each digit is its own text node.
 
 ## Not interactive
 
-None of these takes focus or a pointer, so they have no pressed, disabled, busy or focus state.
-A row that opens something (a ledger row, a macro row that links to Táplálkozás) is a `ListRow` /
+None of the figures, bars and meters takes focus or a pointer, so they have no pressed, disabled,
+busy or focus state. A row that opens something (a ledger row, a macro row that links to Táplálkozás) is a `ListRow` /
 `LedgerRow` around them; the press state is the row's (60 % opacity).
 
 ## Measured (F10 stage 1, `.pulse/pairs/F10/`)
