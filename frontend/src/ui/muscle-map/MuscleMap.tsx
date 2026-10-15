@@ -5,12 +5,35 @@ import { cn } from '../../lib/cn';
 import { Pressable } from '../primitives/Pressable';
 import { Segmented } from '../feedback/variants/E6Segmented';
 import { useMotionSafe } from '../feedback/useMotionSafe';
-import { DETAIL, MUSCLES_BY_SIDE, SILHOUETTE, STRIATIONS, VIEW, type BodySide } from './shapes';
+import { DETAIL, MUSCLES_BY_SIDE, SILHOUETTE, STRIATIONS, VIEW } from './shapes';
+import { CX, Y } from './landmarks';
+import { FIGURE_BOX, type MuscleSide } from './figure';
 
 export type MuscleRole = 'primary' | 'secondary';
+export type { MuscleSide } from './figure';
 
 /** Declared once: both renderings of the side control read the same two values in the same order. */
 const SIDES = ['front', 'back'] as const;
+
+/**
+ * THE VECTOR FIGURE ON THE RENDER CANVAS (`sideControl="none"`).
+ *
+ * The box is 597 : 1261 because every Pulse figure still is (`figure.ts`). The vector drawing has
+ * its own 260 x 560 canvas with the body in a different place on it, so it is not stretched into
+ * the box: the viewBox below is chosen so that its skull lands on `FIGURE_BOX.headTop` and its
+ * soles on `FIGURE_BOX.soles` — the two lines the frames hang the figure on (the stage top, the
+ * table's rule) — centred across. The arms of the vector body reach further out than the render's
+ * (it spans ~88 % of the box width, the render 75 %); the box, not the drawing, is the contract.
+ *
+ * Soles = `Y.foot + 1`: the toe line of the foot runs one unit under the landmark (`shapes.ts`).
+ */
+const CANVAS_VIEWBOX = (() => {
+  const top = Y.skull;
+  const soles = Y.foot + 1;
+  const h = (soles - top) / (FIGURE_BOX.soles - FIGURE_BOX.headTop);
+  const w = (h * FIGURE_BOX.width) / FIGURE_BOX.height;
+  return [CX - w / 2, top - FIGURE_BOX.headTop * h, w, h].map((n) => Number(n.toFixed(2))).join(' ');
+})();
 
 export interface MuscleMapProps {
   /** slug → role. Anything absent renders idle. */
@@ -49,8 +72,28 @@ export interface MuscleMapProps {
    *
    * Defaults to the chips because two of the three want them, and because the read-only
    * exercise-detail screen wants the control that is left-aligned in a section, not a hero.
+   *
+   * `'none'` (Pulse, F15 stage 0): the SCREEN draws the `Elöl` / `Hátul` switch, the legend and
+   * the "also on the other side" note where its frame puts them, and owns the side through
+   * `side` / `onSideChange`. The map then renders the figure alone, in the fixed 597 : 1261 box
+   * (`FIGURE_BOX`): the root element IS that box, so `className` places it and sizes it by ONE
+   * dimension (`w-[195px]`, or `h-[221px]`) — the other follows from the ratio. `fill` and `legend`
+   * do not apply in this mode. The box carries `data-kit="pic"`: the Figma kit draws the mannequin
+   * as a `pic`, and the geometry probe maps the frames' `Image/figure-…` layers to it.
    */
-  sideControl?: 'chips' | 'segmented';
+  sideControl?: 'chips' | 'segmented' | 'none';
+  /**
+   * THE SIDE, CONTROLLED. Omitted (every call site before Pulse): the map keeps the side itself
+   * and starts on the front, as it always has. Given: the map shows exactly this side and never
+   * changes it on its own — its own control, if it draws one, asks through `onSideChange`.
+   */
+  side?: MuscleSide;
+  /**
+   * Called with the side the map's own control asks for (`chips` / `segmented`), controlled or
+   * not; not called for a tap on the side already shown. With `sideControl="none"` the map has no
+   * control, so the screen's own switch sets `side` directly.
+   */
+  onSideChange?: (side: MuscleSide) => void;
   className?: string;
 }
 
@@ -86,11 +129,21 @@ export function MuscleMap({
   fill = false,
   legend = true,
   sideControl = 'chips',
+  side: sideProp,
+  onSideChange,
   className,
 }: MuscleMapProps) {
   const { t } = useTranslation();
   const motionSafe = useMotionSafe();
-  const [side, setSide] = useState<BodySide>('front');
+  // Uncontrolled unless the screen passes `side` — the state is still created either way, so a
+  // screen that starts or stops controlling never changes the hook order.
+  const [ownSide, setOwnSide] = useState<MuscleSide>('front');
+  const side = sideProp ?? ownSide;
+  const setSide = (next: MuscleSide) => {
+    if (next === side) return;
+    if (sideProp === undefined) setOwnSide(next);
+    onSideChange?.(next);
+  };
 
   const box = { x: 0, y: 0, ...VIEW };
   const titleId = useId();
@@ -111,6 +164,154 @@ export function MuscleMap({
     if (role === 'secondary') return 'var(--muscle-secondary)';
     return 'var(--muscle-idle)';
   };
+
+  /* The figure itself, shared by both frames below: the same nodes in the same order, so the
+     legacy column renders exactly what it did before the fixed box existed. */
+  const drawing = (
+    <>
+      <title id={titleId}>{t(`muscleMap.${side}Title`)}</title>
+
+      {/* The body under everything, so unhighlighted regions still read as a figure rather than
+          as a scatter of disconnected blobs. Drawn as separate anatomical parts — head, neck,
+          torso, arms, legs — because one continuous outline is what made the head render as a
+          martini glass in the previous version. */}
+      <g
+        fill="var(--muscle-body)"
+        stroke="var(--muscle-edge)"
+        strokeWidth={1.25}
+        strokeLinejoin="round"
+      >
+        {SILHOUETTE[side].map((d, i) => (
+          <path key={`silhouette-${i}`} d={d} />
+        ))}
+      </g>
+
+      {shapes.map((shape) =>
+        shape.d.map((d, i) => {
+          // The fill is set as a plain style with a CSS transition rather than animated by
+          // Motion. The highlight IS the information here — which muscles an exercise works —
+          // so it must be correct even when no animation frame ever runs: a background tab, a
+          // hidden pane, a webview that is not compositing. A JS-driven value would sit at its
+          // starting colour in all three, showing the wrong muscles rather than merely a
+          // missing transition. CSS transitions also survive interruption better, which is
+          // what emil-design-eng recommends for exactly this kind of rapidly-toggled state.
+          const common = {
+            d,
+            style: {
+              fill: fillFor(shape.slug),
+              transition: motionSafe
+                ? 'fill var(--duration-base) var(--ease-standard)'
+                : 'none',
+            },
+            stroke: 'var(--muscle-edge)',
+            strokeWidth: 1,
+          };
+
+          if (!interactive) {
+            return <path key={`${shape.slug}-${i}`} {...common} />;
+          }
+
+          return (
+            <path
+              key={`${shape.slug}-${i}`}
+              {...common}
+              // Every region is a real button: focusable, Enter/Space activated, and named.
+              // An SVG shape with an onClick and nothing else is unreachable by keyboard.
+              role="button"
+              tabIndex={0}
+              aria-pressed={selected === shape.slug}
+              aria-label={t(`muscle.${shape.slug}`, { defaultValue: shape.slug })}
+              className={cn(
+                'cursor-pointer outline-none',
+                'focus-visible:stroke-[var(--focus-ring)] focus-visible:[stroke-width:3]',
+                'hover:[fill:var(--surface-3)]',
+                // Hover must not fight a highlighted muscle: a lit target stays lit.
+                (highlights[shape.slug] || selected === shape.slug) && 'hover:[fill:var(--accent)]',
+              )}
+              onClick={() => onSelect?.(shape.slug)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect?.(shape.slug);
+                }
+              }}
+            />
+          );
+        }),
+      )}
+
+      {/* THE TEXTURE, LAST AND UNTOUCHABLE.
+          Fibre lines over the fills, so a highlighted muscle keeps its grain instead of becoming
+          a flat coloured shape — which is the single thing that made the drawing read as regions
+          rather than as a body, and what both mockups draw.
+
+          `pointerEvents: none` is not decoration of the comment: these lines cross regions that
+          are already below the 44px floor, and a stray stroke stealing a tap from the muscle
+          under it would turn the map's one accessibility compromise into a real failure.
+          `aria-hidden` for the same reason in the other direction — a texture is not a target and
+          must not appear in the tree beside twelve real ones. */}
+      {/* THE TISSUE BETWEEN THE REGIONS, and then the grain inside them.
+          Two passes because they are different weights: the detail is anatomy the taxonomy has
+          no slug for — serratus, sartorius, the kneecap, fingers — and it carries the same line
+          as a muscle edge, because it IS an edge. The striations are texture and sit lighter, so
+          they read as grain rather than as more boundaries.
+
+          Both are `aria-hidden` and `pointerEvents: none`. These lines cross regions that are
+          already below the 44px floor, and a stray stroke stealing a tap from the muscle under it
+          would turn the map's one accessibility compromise into a real failure. */}
+      <g
+        aria-hidden
+        fill="none"
+        stroke="var(--muscle-edge)"
+        strokeWidth={0.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity={0.8}
+        style={{ pointerEvents: 'none' }}
+      >
+        {DETAIL[side].map((d, i) => (
+          <path key={`detail-${i}`} d={d} />
+        ))}
+      </g>
+
+      <g
+        aria-hidden
+        fill="none"
+        stroke="var(--muscle-edge)"
+        strokeWidth={0.6}
+        strokeLinecap="round"
+        opacity={0.45}
+        style={{ pointerEvents: 'none' }}
+      >
+        {STRIATIONS[side].map((d, i) => (
+          <path key={`fibre-${i}`} d={d} />
+        ))}
+      </g>
+    </>
+  );
+
+  if (sideControl === 'none') {
+    // The fixed box (R17). Nothing but the figure: no control, no note, no legend — the screen
+    // draws those where its frame puts them, and the box never changes shape when the inside
+    // does (stage 1 swaps the vector drawing for the render on the same 597 : 1261 canvas).
+    return (
+      <div
+        data-kit="pic"
+        data-side={side}
+        className={cn('relative shrink-0', className)}
+        style={{ aspectRatio: `${FIGURE_BOX.width} / ${FIGURE_BOX.height}` }}
+      >
+        <svg
+          viewBox={CANVAS_VIEWBOX}
+          role="img"
+          aria-labelledby={titleId}
+          className="absolute inset-0 size-full"
+        >
+          {drawing}
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -182,124 +383,7 @@ export function MuscleMap({
           fill ? 'h-0 min-h-0 w-auto max-w-full flex-1' : 'mt-3',
         )}
       >
-        <title id={titleId}>{t(`muscleMap.${side}Title`)}</title>
-
-        {/* The body under everything, so unhighlighted regions still read as a figure rather than
-            as a scatter of disconnected blobs. Drawn as separate anatomical parts — head, neck,
-            torso, arms, legs — because one continuous outline is what made the head render as a
-            martini glass in the previous version. */}
-        <g
-          fill="var(--muscle-body)"
-          stroke="var(--muscle-edge)"
-          strokeWidth={1.25}
-          strokeLinejoin="round"
-        >
-          {SILHOUETTE[side].map((d, i) => (
-            <path key={`silhouette-${i}`} d={d} />
-          ))}
-        </g>
-
-        {shapes.map((shape) =>
-          shape.d.map((d, i) => {
-            // The fill is set as a plain style with a CSS transition rather than animated by
-            // Motion. The highlight IS the information here — which muscles an exercise works —
-            // so it must be correct even when no animation frame ever runs: a background tab, a
-            // hidden pane, a webview that is not compositing. A JS-driven value would sit at its
-            // starting colour in all three, showing the wrong muscles rather than merely a
-            // missing transition. CSS transitions also survive interruption better, which is
-            // what emil-design-eng recommends for exactly this kind of rapidly-toggled state.
-            const common = {
-              d,
-              style: {
-                fill: fillFor(shape.slug),
-                transition: motionSafe
-                  ? 'fill var(--duration-base) var(--ease-standard)'
-                  : 'none',
-              },
-              stroke: 'var(--muscle-edge)',
-              strokeWidth: 1,
-            };
-
-            if (!interactive) {
-              return <path key={`${shape.slug}-${i}`} {...common} />;
-            }
-
-            return (
-              <path
-                key={`${shape.slug}-${i}`}
-                {...common}
-                // Every region is a real button: focusable, Enter/Space activated, and named.
-                // An SVG shape with an onClick and nothing else is unreachable by keyboard.
-                role="button"
-                tabIndex={0}
-                aria-pressed={selected === shape.slug}
-                aria-label={t(`muscle.${shape.slug}`, { defaultValue: shape.slug })}
-                className={cn(
-                  'cursor-pointer outline-none',
-                  'focus-visible:stroke-[var(--focus-ring)] focus-visible:[stroke-width:3]',
-                  'hover:[fill:var(--surface-3)]',
-                  // Hover must not fight a highlighted muscle: a lit target stays lit.
-                  (highlights[shape.slug] || selected === shape.slug) && 'hover:[fill:var(--accent)]',
-                )}
-                onClick={() => onSelect?.(shape.slug)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelect?.(shape.slug);
-                  }
-                }}
-              />
-            );
-          }),
-        )}
-
-        {/* THE TEXTURE, LAST AND UNTOUCHABLE.
-            Fibre lines over the fills, so a highlighted muscle keeps its grain instead of becoming
-            a flat coloured shape — which is the single thing that made the drawing read as regions
-            rather than as a body, and what both mockups draw.
-
-            `pointerEvents: none` is not decoration of the comment: these lines cross regions that
-            are already below the 44px floor, and a stray stroke stealing a tap from the muscle
-            under it would turn the map's one accessibility compromise into a real failure.
-            `aria-hidden` for the same reason in the other direction — a texture is not a target and
-            must not appear in the tree beside twelve real ones. */}
-        {/* THE TISSUE BETWEEN THE REGIONS, and then the grain inside them.
-            Two passes because they are different weights: the detail is anatomy the taxonomy has
-            no slug for — serratus, sartorius, the kneecap, fingers — and it carries the same line
-            as a muscle edge, because it IS an edge. The striations are texture and sit lighter, so
-            they read as grain rather than as more boundaries.
-
-            Both are `aria-hidden` and `pointerEvents: none`. These lines cross regions that are
-            already below the 44px floor, and a stray stroke stealing a tap from the muscle under it
-            would turn the map's one accessibility compromise into a real failure. */}
-        <g
-          aria-hidden
-          fill="none"
-          stroke="var(--muscle-edge)"
-          strokeWidth={0.9}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.8}
-          style={{ pointerEvents: 'none' }}
-        >
-          {DETAIL[side].map((d, i) => (
-            <path key={`detail-${i}`} d={d} />
-          ))}
-        </g>
-
-        <g
-          aria-hidden
-          fill="none"
-          stroke="var(--muscle-edge)"
-          strokeWidth={0.6}
-          strokeLinecap="round"
-          opacity={0.45}
-          style={{ pointerEvents: 'none' }}
-        >
-          {STRIATIONS[side].map((d, i) => (
-            <path key={`fibre-${i}`} d={d} />
-          ))}
-        </g>
+        {drawing}
       </svg>
 
       {!fill && hiddenHighlights.length > 0 ? (

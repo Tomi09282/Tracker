@@ -1,0 +1,37 @@
+{
+  "id": "F15",
+  "stage": "0",
+  "branch": "pulse/F15s0 (= pulse/F15; pulse-sync F15 works on pulse/F15)",
+  "base": "pulse-redesign 862d745",
+  "what": "MuscleMap: additive props side / onSideChange (controlled; uncontrolled stays the default), sideControl=\"none\" (the figure alone, the root element is a fixed 597:1261 box carrying data-kit=\"pic\"); figure.ts exports MuscleSide, FIGURE_BOX and musclesOnSide(side); specimens.tsx; kit page docs/pipeline/pulse/kit/mannequin.md",
+  "acceptance": {
+    "propsAdditive": "every existing prop, default and code path unchanged; the three call sites (LibraryPage, ExerciseDetailPage, WorkoutPlayer) pass none of the new props",
+    "pixelEqual": {
+      "verdict": "byte-identical",
+      "how": "pulse-verify (build + replay capture, 402 x H @2x, insets 62/34) on 862d745 before the change and on the final tree; pulse-shot --compare per state",
+      "states": {
+        "library-1": "identical, controls identical",
+        "library-2": "identical, controls identical",
+        "library-3": "identical, controls identical",
+        "exercise-detail-1": "identical, controls identical",
+        "exercise-detail-2": "identical, controls identical",
+        "workout-1": "identical, controls identical",
+        "workout-2": "not capturable before or after: its fixture frontend/scripts/fixtures/workout-2.json is S-workout's and does not exist yet"
+      },
+      "captures": [".pulse/shots/F15s0-before", ".pulse/shots/F15s0-final"]
+    },
+    "fixedBox": "measured on the built app (specimens, scale 2): figure ink = 88.5 % of the box height at 200 / 411 / 400 / 221 pt (353/354, 726/727.5, 707/708, 391/391.2 device px), head on the 5.9 % line, centred"
+  },
+  "specimens": {
+    "file": "frontend/src/ui/muscle-map/specimens.tsx",
+    "captures": ".pulse/shots/F15s0-kit (kit-mannequin, kit-mannequin-focus, kit-mannequin-side; pkg/F15/kit-frames.json, temporary playground view of commit 029c894)",
+    "states": "rest, selected (aria-pressed), keyboard focus (Tab onto a region: --focus-ring stroke); no disabled and no busy state exists in the code or in the Figma kit",
+    "probes": "boxed: the legacy Segmented of the controlled-side demo and the desktop dock (not this lane's); targets: muscle regions under 44 pt with no chip row on the QA page (the documented exception)"
+  },
+  "pairs": ".pulse/pairs/F15/ (board-mannequin.pair.png, library-1.figure.pair.png, exercise-detail-1.figure.pair.png, workout-1.figure.pair.png, selector-states.png, controlled-side.png, screens-before-after.png)",
+  "requests": ["R-F15-01: features/playground/kit/mannequin.tsx (one-line re-export, proposed patch attached) or the path added to F15's owns"],
+  "handIn": [],
+  "budget": "pkg/F15/budget.json unchanged (MuscleMap.tsx legacy-type 3, legacy-variant 1, pill-size 1 - the legacy column the screens still mount); no new count",
+  "copy": "no new string; no i18n patch",
+  "lastBuild": "pulse-verify: build green in 16 s · 6 of 6 captured (replay) · .pulse/shots/F15s0-final"
+}
