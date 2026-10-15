@@ -12,7 +12,6 @@ import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ApiError } from '../../lib/api';
 import { useLogin, useRegister } from './useSession';
 import { useAppName } from '../../lib/useAppName';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 
 const schema = z.object({
   email: z.string().trim().min(1).pipe(z.email()),
@@ -98,8 +97,6 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     // `relative` so the back control can be pinned to the column's own top-left without joining
     // the flow — the column has to stay vertically centred whether or not that control is there.
     <main className="screen-x relative flex min-h-dvh flex-col items-center justify-center py-8">
-      <AuroraBackdrop />
-
       {mode === 'register' ? (
         /* The one control above the hero, and the only way back that is not the switch link at
            the bottom. `left-0` is the inner edge of the screen gutter (an absolute box resolves

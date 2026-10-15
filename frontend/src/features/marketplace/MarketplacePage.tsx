@@ -9,7 +9,6 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { useFeed, useSearch, useTaxonomy, usePost, usePriceFormatter } from './usePublic';
 import type { PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 import { PublicTopBar, KindTile, VerifiedBadge, kindIcon, metaLine, postDate } from './PublicChrome';
 
 /**
@@ -99,7 +98,6 @@ export function MarketplacePage() {
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-4">
-      <AuroraBackdrop />
       <PublicTopBar />
 
       <header className="flex flex-col gap-group">

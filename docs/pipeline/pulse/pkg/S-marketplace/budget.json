@@ -4,7 +4,6 @@
   "files": {
     "frontend/src/features/marketplace/MarketplacePage.tsx": {
       "surface": 2,
-      "aurora": 1,
       "legacy-type": 6,
       "legacy-radius": 2,
       "wash": 2,

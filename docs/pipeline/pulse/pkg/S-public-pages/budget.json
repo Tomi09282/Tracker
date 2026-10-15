@@ -4,7 +4,6 @@
   "files": {
     "frontend/src/features/marketplace/CoachProfilePage.tsx": {
       "surface": 2,
-      "aurora": 3,
       "legacy-type": 10,
       "legacy-radius": 2,
       "legacy-variant": 1,
@@ -18,7 +17,6 @@
     },
     "frontend/src/features/marketplace/PostPage.tsx": {
       "surface": 2,
-      "aurora": 3,
       "legacy-type": 8,
       "font-display-class": 1,
       "legacy-radius": 4,

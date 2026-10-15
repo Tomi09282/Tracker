@@ -8,8 +8,6 @@
     "ui/feedback/variants/E14E20.tsx:bottom@place-items-center": "the same centring wrapper, at the bottom edge",
     "ui/feedback/variants/E8E9.tsx:top@bg-scrim": "the scrim behind the select sheet covers the whole screen on purpose; it holds no content",
     "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
-    "ui/shell/AuroraBackdrop.tsx:top": "a backdrop paints under the notch on purpose; it holds no content",
-    "ui/shell/AuroraBackdrop.tsx:bottom": "the same backdrop, under the home indicator",
     "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",
     "ui/shell/CommandPalette.tsx:bottom": "the same scrim; the dialog is anchored to the top and never reaches the bottom edge",
     "ui/shell/OfflineIndicator.tsx:top": "the sticky wrapper is a grid row that opens from 0fr and must not pad; the row inside it pads by env(safe-area-inset-top)"

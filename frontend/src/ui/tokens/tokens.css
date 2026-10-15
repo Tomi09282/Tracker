@@ -16,7 +16,7 @@
  * `undeclared-token` rule while screens are rebuilt one by one — and the VALUES are Pulse:
  *
  *   a name that carries STATE      (selected, error, focus, a role)   keeps a visible, derived value
- *   a name that was DECORATION     (glass, blur, shadow, aurora, tint) is neutral: transparent / none / 0
+ *   a name that was DECORATION     (glass, blur, shadow, tint) is neutral: transparent / none / 0
  *   a fixed bar or a floating layer (nav, toast, sheet)               stays OPAQUE — text scrolls under it
  *
  * Each such declaration is marked BRIDGE. They are deleted together in the closing cleanup, when the
@@ -554,7 +554,7 @@
 
   /* ═══ BRIDGE — legacy names that were DECORATION: neutral ══════════════════════════════════
    *
-   * Glass, rim, sheen, aurora, grain, tile tint, elevation. A card built from them
+   * Glass, rim, sheen, grain, tile tint, elevation. A card built from them
    * is now invisible and still pads its content, which is the intended look of an unmigrated
    * screen: content on the canvas, in the old layout.
    *
@@ -572,7 +572,6 @@
   --glass-sheen-angle: 0deg;
   --glass-sheen: none;
   --card-saturate: 1;
-  --aurora: none;
   --noise-overlay: none;
   --tile-tint: transparent;
   --shadow-overlay: 0 0 0 0 transparent;

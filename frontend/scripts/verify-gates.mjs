@@ -98,7 +98,6 @@ const GATES = {
   'check:autosave': 'scripts/verify-autosave.mjs',
   'check:type-scale': 'scripts/check-type-scale.mjs',
   'check:canvas': 'scripts/check-canvas.mjs',
-  'check:aurora': 'scripts/check-aurora.mjs',
   'check:assets': 'scripts/check-assets.mjs',
   'check:safe-area': 'scripts/check-safe-area.mjs',
   'verify:outbox': 'scripts/verify-outbox.mjs',
@@ -561,17 +560,6 @@ const PROBES = [
     file: 'src/lib/outbox.ts',
     mutate: swap(/const QUEUEABLE = \[/, 'const QUEUEABLE = [/^\\/coins\\/transfer$/, '),
     expect: /FAIL\s+a coin transfer is NOT/,
-  },
-  {
-    id: 'aurora/ancestor-paints',
-    gate: 'check:aurora',
-    label: 'a wrapper that paints over the backdrop is caught',
-    file: 'src/app/AppLayout.tsx',
-    when: () =>
-      (exists('src/app/AppLayout.tsx') && readText('src/app/AppLayout.tsx').includes('<AuroraBackdrop')) ||
-      'AppLayout no longer mounts the backdrop (the gate retires with its last mount, F16)',
-    mutate: swap(/className="min-h-dvh/, 'className="bg-surface-1 min-h-dvh'),
-    expect: /wraps the AuroraBackdrop[\s\S]*?paints `bg-surface-1`/,
   },
 
   /* ── stage G-a gates (lane F2:a owns the scripts; their probes live here with the rest) ─────── */

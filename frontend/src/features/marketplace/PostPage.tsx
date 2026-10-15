@@ -6,7 +6,6 @@ import { Surface } from '../../ui/primitives/Surface';
 import { DocRenderer } from './DocRenderer';
 import { usePost, usePriceFormatter } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 import { PublicTopBar, InitialsAvatar, VerifiedBadge, metaRow } from './PublicChrome';
 
 /**
@@ -59,7 +58,6 @@ export function PostPage() {
     // server. A "this was removed" message would be an oracle for the existence of removed content.
     return (
       <div className="col-mobile screen-x flex flex-col gap-section py-4">
-        <AuroraBackdrop />
         <PublicTopBar backTo="/m" cta="secondary" />
         <EmptyState
           icon={FileQuestion}
@@ -86,7 +84,6 @@ export function PostPage() {
 
   return (
     <article className="col-mobile screen-x flex flex-col gap-section py-4">
-      <AuroraBackdrop />
       <PublicTopBar backTo="/m" cta="secondary" />
 
       <header className="flex flex-col gap-group">
@@ -225,7 +222,6 @@ function PostSkeleton() {
       role="status"
       aria-busy="true"
     >
-      <AuroraBackdrop />
       <span className="sr-only">{t('common.loading')}</span>
       <PublicTopBar backTo="/m" cta="secondary" />
 

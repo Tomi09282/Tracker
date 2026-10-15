@@ -4,7 +4,6 @@
   "files": {
     "frontend/src/features/auth/AuthPage.tsx": {
       "surface": 1,
-      "aurora": 1,
       "legacy-type": 5,
       "legacy-radius": 1,
       "wash": 1,

@@ -9,7 +9,6 @@ import { DocRenderer } from './DocRenderer';
 import { useCoach, useTaxonomy } from './usePublic';
 import type { PublicCoach, PublicPost } from './usePublic';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 import { PublicTopBar, KindTile, TileHolder, InitialsAvatar, metaLine, postDate } from './PublicChrome';
 
 /**
@@ -68,7 +67,6 @@ export function CoachProfilePage() {
     // same rule the server follows, so the page cannot become an oracle the API refused to be.
     return (
       <div className="col-mobile screen-x flex flex-col gap-section py-4">
-        <AuroraBackdrop />
         <PublicTopBar backTo="/m" cta="secondary" />
         <EmptyState
           icon={UserX}
@@ -117,7 +115,6 @@ function CoachProfileView({
 
   return (
     <div className="col-mobile screen-x flex flex-col gap-section py-4">
-      <AuroraBackdrop />
       <PublicTopBar backTo="/m" cta="secondary" />
 
       <header className="flex flex-col items-center gap-group text-center">
@@ -310,7 +307,6 @@ function CoachProfileSkeleton() {
       role="status"
       aria-busy="true"
     >
-      <AuroraBackdrop />
       <span className="sr-only">{t('common.loading')}</span>
       <PublicTopBar backTo="/m" cta="secondary" />
 
