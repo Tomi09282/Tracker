@@ -1,0 +1,1247 @@
+{
+  "generated": "2026-10-15T15:33:33.549Z",
+  "chrome": "Chrome/155.0.8059.41",
+  "frames": {
+    "home-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Heti edzés",
+          "file": "home-1.stat-heti-edz-s.pair.png",
+          "pixelsDifferent": "0.47 %"
+        },
+        {
+          "layer": "Week bar",
+          "file": "home-1.week-bar.pair.png",
+          "pixelsDifferent": "1.46 %"
+        },
+        {
+          "layer": "Macro row",
+          "file": "home-1.macro-row.pair.png",
+          "pixelsDifferent": "5.08 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "2",
+          "figmaExport": {
+            "x": 24,
+            "y": 178.8,
+            "w": 52.2,
+            "h": 100.4
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 178.5,
+            "w": 52.5,
+            "h": 101
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 178.5,
+            "w": 52.5,
+            "h": 100.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": -0.5
+          }
+        },
+        {
+          "text": "/",
+          "figmaExport": {
+            "x": 88.2,
+            "y": 180.1,
+            "w": 34.7,
+            "h": 99
+          },
+          "figmaPixels": {
+            "x": 88.5,
+            "y": 180,
+            "w": 34.5,
+            "h": 99
+          },
+          "appPixels": {
+            "x": 88.5,
+            "y": 180,
+            "w": 34,
+            "h": 99
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": -0.5,
+            "dh": 0
+          }
+        },
+        {
+          "text": "4",
+          "figmaExport": {
+            "x": 134.9,
+            "y": 180,
+            "w": 58.4,
+            "h": 99.2
+          },
+          "figmaPixels": {
+            "x": 135,
+            "y": 180,
+            "w": 58.5,
+            "h": 99
+          },
+          "appPixels": {
+            "x": 135,
+            "y": 180,
+            "w": 58.5,
+            "h": 99
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 78,
+        "chrome": 0,
+        "structural": 24,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 54,
+        "matched": 48,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 6
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        },
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        },
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        },
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        },
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        },
+        {
+          "name": "Today dot",
+          "kit": null,
+          "inside": "segBar"
+        }
+      ],
+      "numerals": [
+        {
+          "text": "2",
+          "delta": {
+            "dx": -0.9,
+            "dy": -0.6,
+            "dw": 1.8,
+            "dh": 0.6
+          }
+        },
+        {
+          "text": "/",
+          "delta": {
+            "dx": -0.9,
+            "dy": -0.9,
+            "dw": 1.3,
+            "dh": 1
+          }
+        },
+        {
+          "text": "4",
+          "delta": {
+            "dx": -0.7,
+            "dy": -0.8,
+            "dw": 1.6,
+            "dh": 0.8
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Heti edzés2 / 42/4"
+        },
+        {
+          "kit": "fraction",
+          "family": "Big Shoulders Display Variable",
+          "text": "2 / 42/4"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "fraction",
+          "text": "2 / 42/4",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-start text-giant gap-3"
+        }
+      ]
+    },
+    "coins-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Egyenleged",
+          "file": "coins-1.stat-egyenleged.pair.png",
+          "pixelsDifferent": "1.36 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "190",
+          "figmaExport": {
+            "x": 24,
+            "y": 206,
+            "w": 147.6,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 206,
+            "w": 147.5,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 205.5,
+            "w": 148,
+            "h": 102
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0.5,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 4,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 3,
+        "matched": 3,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "190",
+          "delta": {
+            "dx": -0.7,
+            "dy": -0.6,
+            "dw": 1.8,
+            "dh": 1.3
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Egyenleged190"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "190"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "190",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "progress-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Testsúly",
+          "file": "progress-1.stat-tests-ly.pair.png",
+          "pixelsDifferent": "2.63 %"
+        },
+        {
+          "layer": "Metric row",
+          "file": "progress-1.metric-row.pair.png",
+          "pixelsDifferent": "7.19 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "83,1",
+          "figmaExport": {
+            "x": 24,
+            "y": 232,
+            "w": 176.4,
+            "h": 118
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 232,
+            "w": 176.5,
+            "h": 118
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 231.5,
+            "w": 176.5,
+            "h": 118
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 34,
+        "chrome": 0,
+        "structural": 10,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 24,
+        "matched": 24,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "83,1",
+          "delta": {
+            "dx": -0.7,
+            "dy": -0.6,
+            "dw": 1.6,
+            "dh": 1
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Testsúly83,1kg"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "83,1kg"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "83,1kg",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "nutrition-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Kalória",
+          "file": "nutrition-1.stat-kal-ria.pair.png",
+          "pixelsDifferent": "1.51 %"
+        },
+        {
+          "layer": "Progress",
+          "file": "nutrition-1.progress.pair.png",
+          "pixelsDifferent": "0.00 %"
+        },
+        {
+          "layer": "Macro row",
+          "file": "nutrition-1.macro-row.pair.png",
+          "pixelsDifferent": "1.95 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "1840",
+          "figmaExport": {
+            "x": 24,
+            "y": 194,
+            "w": 209.9,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 194,
+            "w": 210,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 193.5,
+            "w": 210,
+            "h": 102
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        },
+        {
+          "text": "128",
+          "figmaExport": {
+            "x": 24,
+            "y": 425,
+            "w": 57.5,
+            "h": 39.4
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 425,
+            "w": 57.5,
+            "h": 39.5
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 425,
+            "w": 58,
+            "h": 39.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "text": "210",
+          "figmaExport": {
+            "x": 147.3,
+            "y": 425,
+            "w": 57.2,
+            "h": 39.4
+          },
+          "figmaPixels": {
+            "x": 147,
+            "y": 425,
+            "w": 57.5,
+            "h": 39.5
+          },
+          "appPixels": {
+            "x": 147,
+            "y": 425,
+            "w": 58,
+            "h": 39.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        },
+        {
+          "text": "52",
+          "figmaExport": {
+            "x": 270.7,
+            "y": 425,
+            "w": 44.9,
+            "h": 39.4
+          },
+          "figmaPixels": {
+            "x": 270.5,
+            "y": 425,
+            "w": 45,
+            "h": 39.5
+          },
+          "appPixels": {
+            "x": 270.5,
+            "y": 425,
+            "w": 45.5,
+            "h": 39.5
+          },
+          "delta": {
+            "dx": 0,
+            "dy": 0,
+            "dw": 0.5,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 43,
+        "chrome": 0,
+        "structural": 14,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 29,
+        "matched": 29,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "1840",
+          "delta": {
+            "dx": -0.7,
+            "dy": -0.6,
+            "dw": 1.8,
+            "dh": 1.3
+          }
+        },
+        {
+          "text": "128",
+          "delta": {
+            "dx": -0.4,
+            "dy": -0.1,
+            "dw": 1.2,
+            "dh": 0.6
+          }
+        },
+        {
+          "text": "210",
+          "delta": {
+            "dx": -0.9,
+            "dy": -0.1,
+            "dw": 1.5,
+            "dh": 0.6
+          }
+        },
+        {
+          "text": "52",
+          "delta": {
+            "dx": -0.9,
+            "dy": -0.1,
+            "dw": 1.8,
+            "dh": 0.6
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Kalória1840"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "1840"
+        },
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Fehérje128g"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "128g"
+        },
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Szénhidrát210g"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "210g"
+        },
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Zsír52g"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "52g"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "1840",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "workout-2": {
+      "pairs": [
+        {
+          "layer": "Clock",
+          "file": "workout-2.clock.pair.png",
+          "pixelsDifferent": "20.23 %"
+        },
+        {
+          "layer": "Progress/rest remaining",
+          "file": "workout-2.progress-rest-remaining.pair.png",
+          "pixelsDifferent": "0.00 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "2:59",
+          "figmaExport": {
+            "x": 24,
+            "y": 632,
+            "w": 203.8,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 632,
+            "w": 204,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 27,
+            "y": 631.5,
+            "w": 205,
+            "h": 102
+          },
+          "delta": {
+            "dx": 3,
+            "dy": -0.5,
+            "dw": 1,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 4,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 3,
+        "matched": 3,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "2:59",
+          "delta": {
+            "dx": -0.9,
+            "dy": -1.6,
+            "dw": 2.1,
+            "dh": 1.3
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "2:592:59"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "2:592:59",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "coach-dashboard-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Kliensek",
+          "file": "coach-dashboard-1.stat-kliensek.pair.png",
+          "pixelsDifferent": "1.47 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "6",
+          "figmaExport": {
+            "x": 24,
+            "y": 228,
+            "w": 52.8,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 228,
+            "w": 53,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 227.5,
+            "w": 53,
+            "h": 102
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 4,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 3,
+        "matched": 3,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "6",
+          "delta": {
+            "dx": -0.9,
+            "dy": -0.6,
+            "dw": 2.2,
+            "dh": 1.3
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Kliensek6"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "6"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "6",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "admin-1": {
+      "pairs": [
+        {
+          "layer": "Stat/Felhasználó",
+          "file": "admin-1.stat-felhaszn-l.pair.png",
+          "pixelsDifferent": "1.28 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "19",
+          "figmaExport": {
+            "x": 24,
+            "y": 206,
+            "w": 86,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 206,
+            "w": 86,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 205.5,
+            "w": 86,
+            "h": 102
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "pass": true,
+      "counts": {
+        "layers": 4,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 3,
+        "matched": 3,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "deviating": [],
+      "style": [],
+      "unmatched": [],
+      "numerals": [
+        {
+          "text": "19",
+          "delta": {
+            "dx": -0.7,
+            "dy": -0.6,
+            "dw": 1.7,
+            "dh": 1.3
+          }
+        }
+      ],
+      "fontsProbe": [
+        {
+          "kit": "statBlock",
+          "family": "Big Shoulders Display Variable",
+          "text": "Felhasználó19"
+        },
+        {
+          "kit": "numeral",
+          "family": "Big Shoulders Display Variable",
+          "text": "19"
+        }
+      ],
+      "giant": [
+        {
+          "kit": "numeral",
+          "text": "19",
+          "family": "\"Big Shoulders Display Variable\"",
+          "weight": "900",
+          "lineHeight": "108px",
+          "fontSize": "124px",
+          "letterSpacing": "-1.24px",
+          "inlineFontSize": "var(--giant-fluid)",
+          "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+        }
+      ]
+    },
+    "workout-2-static": {
+      "pass": true,
+      "counts": {
+        "layers": 2,
+        "chrome": 0,
+        "structural": 1,
+        "vectors": 0,
+        "clipped": 0,
+        "masked": 0,
+        "compared": 1,
+        "matched": 1,
+        "sameSlotOtherString": 0,
+        "deviating": 0,
+        "styleMismatches": 0,
+        "unmatched": 0
+      },
+      "pairs": [
+        {
+          "layer": "Clock",
+          "file": "workout-2-static.clock.pair.png",
+          "pixelsDifferent": "2.12 %"
+        }
+      ],
+      "pixels": [
+        {
+          "text": "2:59",
+          "figmaExport": {
+            "x": 24,
+            "y": 632,
+            "w": 203.8,
+            "h": 101.7
+          },
+          "figmaPixels": {
+            "x": 24,
+            "y": 632,
+            "w": 204,
+            "h": 102
+          },
+          "appPixels": {
+            "x": 24,
+            "y": 631.5,
+            "w": 204,
+            "h": 102
+          },
+          "delta": {
+            "dx": 0,
+            "dy": -0.5,
+            "dw": 0,
+            "dh": 0
+          }
+        }
+      ],
+      "deviating": []
+    }
+  },
+  "board": {
+    "region": {
+      "x": 894,
+      "y": 360,
+      "w": 378,
+      "h": 772
+    },
+    "pass": false,
+    "counts": {
+      "layers": 114,
+      "chrome": 0,
+      "structural": 37,
+      "vectors": 0,
+      "clipped": 0,
+      "masked": 0,
+      "compared": 77,
+      "matched": 66,
+      "sameSlotOtherString": 0,
+      "deviating": 5,
+      "styleMismatches": 0,
+      "unmatched": 6
+    },
+    "deviating": [
+      {
+        "name": "Label",
+        "text": "statBlock · fraction (giant) / numeral (num) + caption",
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": -15.2,
+          "dh": 0
+        },
+        "measured": "line box"
+      },
+      {
+        "name": "Label",
+        "text": "segBar · week: on / half / off + today dot",
+        "delta": {
+          "dx": 0,
+          "dy": 0.5,
+          "dw": -30.6,
+          "dh": 0
+        },
+        "measured": "line box"
+      },
+      {
+        "name": "Label",
+        "text": "segBar · count 4 / 7 — stepper(2, 5)",
+        "delta": {
+          "dx": 0,
+          "dy": 0.5,
+          "dw": -76.8,
+          "dh": 0
+        },
+        "measured": "line box"
+      },
+      {
+        "name": "Stepper",
+        "delta": {
+          "dx": 0,
+          "dy": -25.5,
+          "dw": 0,
+          "dh": -12
+        },
+        "kit": "segBar"
+      },
+      {
+        "name": "Label",
+        "text": "macroCol · on target / over (warn) / no target — progressBar",
+        "delta": {
+          "dx": 0,
+          "dy": 0.5,
+          "dw": -53.7,
+          "dh": 0
+        },
+        "measured": "line box"
+      }
+    ],
+    "style": [],
+    "unmatched": [
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      },
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      },
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      },
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      },
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      },
+      {
+        "name": "Today dot",
+        "kit": null,
+        "inside": "segBar"
+      }
+    ],
+    "pixelsDifferent": "5202 of 291816 (1.78 %)",
+    "pixels": [
+      {
+        "text": "2",
+        "figmaExport": {
+          "x": 906,
+          "y": 454.79999999999995,
+          "w": 52.2,
+          "h": 100.4
+        },
+        "figmaPixels": {
+          "x": 906,
+          "y": 455,
+          "w": 52,
+          "h": 100
+        },
+        "appPixels": {
+          "x": 905,
+          "y": 454,
+          "w": 54,
+          "h": 101
+        },
+        "delta": {
+          "dx": -1,
+          "dy": -1,
+          "dw": 2,
+          "dh": 1
+        }
+      },
+      {
+        "text": "/",
+        "figmaExport": {
+          "x": 970.2,
+          "y": 456.0999999999999,
+          "w": 34.7,
+          "h": 99
+        },
+        "figmaPixels": {
+          "x": 970,
+          "y": 456,
+          "w": 35,
+          "h": 99
+        },
+        "appPixels": {
+          "x": 970,
+          "y": 456,
+          "w": 35,
+          "h": 99
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 0,
+          "dh": 0
+        }
+      },
+      {
+        "text": "4",
+        "figmaExport": {
+          "x": 1016.9,
+          "y": 456,
+          "w": 58.4,
+          "h": 99.2
+        },
+        "figmaPixels": {
+          "x": 1017,
+          "y": 456,
+          "w": 58,
+          "h": 99
+        },
+        "appPixels": {
+          "x": 1017,
+          "y": 456,
+          "w": 59,
+          "h": 99
+        },
+        "delta": {
+          "dx": 0,
+          "dy": 0,
+          "dw": 1,
+          "dh": 0
+        }
+      },
+      {
+        "text": "190",
+        "figmaExport": {
+          "x": 906,
+          "y": 607,
+          "w": 58.1,
+          "h": 39.4
+        },
+        "figmaPixels": {
+          "x": 906,
+          "y": 607,
+          "w": 58,
+          "h": 40
+        },
+        "appPixels": {
+          "x": 905,
+          "y": 607,
+          "w": 60,
+          "h": 40
+        },
+        "delta": {
+          "dx": -1,
+          "dy": 0,
+          "dw": 2,
+          "dh": 0
+        }
+      }
+    ]
+  },
+  "widths": {
+    "coins-1@360": [
+      {
+        "kit": "numeral",
+        "text": "190",
+        "family": "\"Big Shoulders Display Variable\"",
+        "weight": "900",
+        "lineHeight": "108px",
+        "fontSize": "111.6px",
+        "letterSpacing": "-1.116px",
+        "inlineFontSize": "var(--giant-fluid)",
+        "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+      }
+    ],
+    "home-1@360": [
+      {
+        "kit": "fraction",
+        "text": "2 / 42/4",
+        "family": "\"Big Shoulders Display Variable\"",
+        "weight": "900",
+        "lineHeight": "108px",
+        "fontSize": "111.6px",
+        "letterSpacing": "-1.116px",
+        "inlineFontSize": "var(--giant-fluid)",
+        "classes": "inline-flex items-start text-giant gap-3"
+      }
+    ],
+    "coins-1@402": [
+      {
+        "kit": "numeral",
+        "text": "190",
+        "family": "\"Big Shoulders Display Variable\"",
+        "weight": "900",
+        "lineHeight": "108px",
+        "fontSize": "124px",
+        "letterSpacing": "-1.24px",
+        "inlineFontSize": "var(--giant-fluid)",
+        "classes": "inline-flex items-baseline text-giant text-text-1 gap-1.5"
+      }
+    ],
+    "home-1@402": [
+      {
+        "kit": "fraction",
+        "text": "2 / 42/4",
+        "family": "\"Big Shoulders Display Variable\"",
+        "weight": "900",
+        "lineHeight": "108px",
+        "fontSize": "124px",
+        "letterSpacing": "-1.24px",
+        "inlineFontSize": "var(--giant-fluid)",
+        "classes": "inline-flex items-start text-giant gap-3"
+      }
+    ]
+  }
+}

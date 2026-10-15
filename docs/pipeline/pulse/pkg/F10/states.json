@@ -1,0 +1,20 @@
+{
+  "about": "F10's capture of the kit board (the same specimen state as pkg/F7/states.json \"kit-board\"): /playground in the board layout, 1300 x 5094 at scale 1, so the data lane's four cells of column 3 (statBlock, segBar week, segBar count, macroCol) can be laid over _components-2.png by docs/pipeline/pulse/pkg/_int/kit-board-tiles.mjs. Taken in the lane's own shots folder so the integrator's F7 captures are not touched.",
+  "states": {
+    "kit-board-data": {
+      "title": "Pulse kit — board layout (data lane)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "the component board is a specimen sheet, not a screen: the host lays every lane's specimens out where the Figma board draws them",
+      "localStorage": { "tracker.playground.kit-layout": "board" },
+      "arrived": [
+        { "role": "button", "name": "Board", "pressed": true },
+        { "role": "heading", "name": "Pulse · Open Field" }
+      ]
+    }
+  }
+}
