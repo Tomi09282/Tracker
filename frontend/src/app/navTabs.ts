@@ -1,27 +1,15 @@
-// `UsersRound` and not a whistle: the mockups draw a whistle for the coach tab, but lucide has no
-// whistle glyph — the nearest matches are sirens. A round group of people says "my clients" at
-// 24 px more plainly than a siren says "coach", and the tab leads to the client roster.
 /*
- * THE HALADÁS ICON IS A DECISION, NOT A DEVIATION, because the mockups do not agree with each other.
+ * THE TAB TABLE — pure data, on purpose.
  *
- * A review reported that "every mockup draws HALADÁS as a three-bar column chart". Cropped and
- * enlarged four of them to check before changing it, and found three different icons:
+ * Two build gates import this file straight into bare Node (`check-nav-active.mjs`,
+ * `check-assets.mjs`) and a third reads it as text (`check-nav.mjs`). So it may hold package
+ * imports and TYPE-ONLY imports, erasable syntax, and nothing else: no image, no component, no
+ * extension-less relative runtime import. The one import below is erased before Node resolves it.
  *
- *   01-home.webp        three rising bars
- *   01b-home-empty.webp three rising bars
- *   05-haladas.webp     a bare zig-zag line, no axes
- *   03-nutrition.webp   a line inside axes, with an arrowhead
- *
- * Two to two, so the images cannot settle it and the plurality is not an argument — the model drew
- * whatever it drew on each pass. What settles it is the destination: the tab opens a screen whose
- * anchor is a LINE chart over time, and an icon should predict what it leads to. Bars would promise
- * a comparison of categories, which is the one thing that screen never shows.
- *
- * Left as `TrendingUp`. Recorded here so the next reviewer meets the reasoning rather than the
- * report, and so the same change is not made and unmade a third time.
+ * A tab names its icon by KEY. The two rasters of a key (idle and lit) are resolved by the bar
+ * (`ui/nav/BottomNav.tsx`) through `assets/pulse`; `check:assets` holds every key to a pair on disk.
  */
-import { Home, Dumbbell, Salad, TrendingUp, UsersRound, Shield, User } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import type { TabIconKey } from '../assets/pulse/slots.ts';
 
 export type NavRole = 'user' | 'coach' | 'admin';
 
@@ -35,7 +23,8 @@ export type NavRole = 'user' | 'coach' | 'admin';
  */
 export interface NavTabSpec {
   to: string;
-  icon: LucideIcon;
+  /** Which raster pair the bar draws: `tab-<key>` and its lit twin in `assets/pulse`. */
+  icon: TabIconKey;
   labelKey: string;
   /** Only the index route needs it: without `end`, `/` matches every path below it. */
   end?: boolean;
@@ -43,7 +32,7 @@ export interface NavTabSpec {
    * Other route prefixes this tab OWNS, for the active state only.
    *
    * `NavLink` decides `isActive` from its own `to`, which is right for navigation and wrong for
-   * belonging. Two measured consequences, both from the mockups:
+   * belonging. Two measured consequences:
    *
    *   `/library/:id`  — an exercise detail page lit NO tab at all. Six cells, all idle, on a
    *                     screen the user reached by tapping one of them.
@@ -52,34 +41,11 @@ export interface NavTabSpec {
    *
    * A bar with nothing active is a bar that has stopped answering "where am I", which is the only
    * question it exists to answer. Declared here beside the tab rather than computed in the bar,
-   * so `check-nav` can read the ownership as data — the same reason `labelKey` lives here.
+   * so the gates can read the ownership as data — the same reason `labelKey` lives here.
    */
   owns?: readonly string[];
 }
 
-/**
- * THE BOTTOM BAR, PER ROLE.
- *
- * Five tabs for a member, six for a coach, seven for an admin — the shape the approved mockups
- * specify (`v4-vegleges/sotet/01-home.png`, `.../06-coach-dashboard.png`, `.../11-admin-attekintes.png`).
- *
- * The previous build declared three for a member and five for staff, and clamped with
- * `slice(0, 5)`. That clamp is gone: with the count declared here and asserted by a gate, a
- * runtime clamp would only hide the failure it was written to catch.
- *
- * SERIAL POSITION, carried forward. Recall across an ordered list is U-shaped — the first and last
- * slots are the two people remember. The sequence opens on Home and closes on Profil in all three
- * roles, and the role-specific tabs sit in the middle where a daily-loop destination must not.
- *
- * WHAT IS NOT HERE, AND WHY IT STILL HAS A DOOR.
- * Two destinations that used to hold a tab lost it to make room, and neither may become
- * unreachable — that is the defect this whole change exists to fix, and re-creating it one route
- * over would be worse than leaving the bar alone:
- *   · `/library` — reached from the workout screen's empty state and from Home's.
- *   · `/coach/plans` — reached from the coach dashboard.
- * `check-nav.mjs` asserts both links exist. If you remove one, the build fails rather than the
- * feature silently disappearing on a phone.
- */
 /**
  * Is this tab the one the user is currently inside?
  *
@@ -92,7 +58,8 @@ export interface NavTabSpec {
  * lit nothing for a brand-new member.
  *
  * The bar is a renderer. What "active" means is a fact about routes and tabs, and facts belong
- * where they can be checked.
+ * where they can be checked. The bar reads this ONE result for both the lit raster and
+ * `aria-current`.
  *
  * ═══ THE TWO RULES ═════════════════════════════════════════════════════════════════════════════
  *
@@ -116,48 +83,56 @@ export function isTabActive(
   return (tab.end ? pathname === tab.to : owns(tab.to)) || (tab.owns?.some(owns) ?? false);
 }
 
+/**
+ * THE BOTTOM BAR, PER ROLE.
+ *
+ * Five tabs for a member, six for a coach, seven for an admin — the counts the Pulse frames draw
+ * (`home-1`, `coach-dashboard-1`, `admin-1`) and `check-nav.mjs` asserts. The bar renders whatever
+ * it is given: there is no runtime clamp, because a clamp hides the failure it was written to
+ * catch.
+ *
+ * SERIAL POSITION. Recall across an ordered list is U-shaped — the first and last slots are the
+ * two people remember. The sequence opens on Home and closes on Profil in all three roles, and
+ * the role-specific tabs sit in the middle where a daily-loop destination must not.
+ *
+ * WHAT IS NOT HERE STILL HAS A DOOR. `/library` is the Edzés tab's idle state and a row on Home
+ * (owner decision D2); `/coach/plans` is reached from the coach dashboard. `/notifications` is
+ * owned by Kezdőlap (owner answer Q6: the bell lives in Home's header).
+ *
+ * The public marketplace (`/m…`) is owned by nobody: those routes render in `PublicLayout`, which
+ * draws no bar.
+ */
 export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
   user: [
     // `end` stops `/` prefix-matching every route below it, which is right — and it also stops
     // onboarding from lighting anything, so the one screen a brand-new member sees first had a bar
     // with nothing on it. `owns` is the exception list `end` cannot express.
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+    { to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+    { to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+    { to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+    { to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+    { to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   coach: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
+    { to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+    { to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+    { to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+    { to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
     // The marketplace desk and the plan library are the coach's work, reached from here and
-    // belonging here. `/compose` is the one the mockup names outright.
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+    // belonging here.
+    { to: '/coach', icon: 'coach', labelKey: 'nav.coach', owns: ['/compose'] },
+    { to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
   ],
   admin: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
-    { to: '/admin', icon: Shield, labelKey: 'nav.admin' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+    { to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+    { to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+    { to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+    { to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+    { to: '/coach', icon: 'coach', labelKey: 'nav.coach', owns: ['/compose'] },
+    { to: '/admin', icon: 'admin', labelKey: 'nav.admin' },
+    { to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
   ],
 };
-
-/**
- * Where the bar stops being a floating pill and becomes a full-width slab.
- *
- * Both approved mockups are right, for different roles: `02-workout-player.png` shows a member's
- * five-tab bar as an inset pill, and `11-admin-attekintes.png` shows an admin's seven-tab bar
- * running edge to edge with its longest labels truncated. Seven pill-shaped cells do not fit a
- * 320 px phone with margins on both sides; seven full-width cells do, at 44 px each with room to
- * spare. So the shape follows the count.
- */
-export const PILL_MAX_TABS = 5;
 
 /** The nav is a convenience, never a permission — every route and endpoint re-checks the role. */
 export function tabsForRole(role: string | undefined): readonly NavTabSpec[] {

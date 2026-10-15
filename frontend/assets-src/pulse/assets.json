@@ -4,7 +4,7 @@
   "accent": "#CBFF2E",
   "knee": 32,
   "navTabs": {
-    "leg": "pending",
+    "leg": "enforced",
     "field": "icon",
     "note": "Second leg of assertion 4 of check:assets: every tab of NAV_TABS names a tab icon key in this field. 'pending' while app/navTabs.ts still carries icon components; the shell lane sets it to 'enforced' in the commit that makes the field a string key. Not part of the build recipe: changing it needs no re-export."
   },

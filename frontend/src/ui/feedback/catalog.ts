@@ -126,7 +126,7 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'E8', name: 'Select', phase: 1, live: false, variants: { A: 'Spring-open', B: 'Check-slide', C: 'Highlight-trail', D: 'Sheet-up', E: 'Live-search' } },
   { id: 'E9', name: 'Date picker', phase: 1, live: false, variants: { A: 'Pop-select', B: 'Range-paint', C: 'Today-pulse', D: 'Quick-chips', E: 'Swipe-month' } },
   { id: 'E10', name: 'Tabs', phase: 1, live: false, variants: { A: 'Motion-highlight', B: 'Underline-grow', C: 'Icon-colorize', D: 'Badge-flush', E: 'Content-swap' } },
-  { id: 'E11', name: 'Bottom nav item', phase: 1, live: true, variants: { A: 'Active-pill', B: 'Bounce-dot', C: 'Icon-morph', D: 'Badge-bubble', E: 'Center-FAB' } },
+  { id: 'E11', name: 'Bottom nav item', phase: 1, live: false, variants: { A: 'Active-pill', B: 'Bounce-dot', C: 'Icon-morph', D: 'Badge-bubble', E: 'Center-FAB' } },
   { id: 'E12', name: 'Card', phase: 1, live: false, variants: { A: 'Lift-press', B: 'Tilt-glare', C: 'Border-beam', D: 'Hero-expand', E: 'Select-mode' } },
   { id: 'E13', name: 'List item + swipe', phase: 1, live: false, variants: { A: 'Swipe-reveal', B: 'Check-swipe', C: 'Long-press menu', D: 'Reorder-drag', E: 'Tap-ripple' } },
   { id: 'E14', name: 'Modal / sheet', phase: 1, live: true, variants: { A: 'Spring-sheet', B: 'Scale-dialog', C: 'Morph-from-trigger', D: 'Stacked-sheets', E: 'Success-close' } },

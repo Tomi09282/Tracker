@@ -278,7 +278,7 @@
   --icon-sm: 16px;
   --icon-md: 20px;
   --icon-lg: 24px;
-  --nav-h: 64px;
+  --nav-h: 56px;            /* the tab bar (kit `tabBar`): 56 high, y 782-838 on the frames */
 
   /* How much room the layout reserves below its content for the bottom nav.
      ONE definition, because two places need to agree exactly: `AppLayout`'s `<main>` pads by it,
@@ -287,8 +287,9 @@
      16px. On the player that is not cosmetic: the law is that the page must NOT scroll while sets
      are being checked, because a check button that moves is a check button that records the
      wrong set. It keeps this name and this meaning under Pulse; what a page pads by is the new
-     `--page-pad-b` below. */
-  --content-pad-b: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+     `--page-pad-b` below. Under Pulse a full-height screen ends at the TOP OF THE TAB BAR: the bar
+     and its distance from the bottom edge, 56 + 36 = 92 on the frames. */
+  --content-pad-b: calc(var(--nav-h) + var(--tabbar-offset));
 
   /* HOW TALL A FULL-HEIGHT SCREEN ACTUALLY GETS.
    *
@@ -373,6 +374,15 @@
   --head-top-push: calc(var(--safe-t) + 2px);                           /* header of a pushed screen */
   --band-pad-t: calc(var(--safe-t) + 6px);                              /* the toast band */
 
+  /* lane:F11 — the shell (ui/nav/BottomNav, ui/shell/Screen · ScreenHeader · Dock). */
+  --tabbar-inset-5: 10px;    /* the bar's side inset by tab count: cells 76.4 / 63 / 55.1 on 402 */
+  --tabbar-inset-6: 12px;
+  --tabbar-inset-7: 8px;
+  --screen-max: 430px;       /* above 430 a screen with no desktop layout is a centred 430 column (R21) */
+  --status-bar-h: env(safe-area-inset-top);                             /* the status-bar mask: the bare inset, no floor */
+  --page-pad-b-bare: calc(var(--safe-b) + 32px);                        /* what a scrolling page without tabs pads by */
+  --dock-reserve: 0px;       /* published at run time by a mounted Dock: its height + the air above it */
+
   /* Blur scale — BRIDGE (decoration). Pulse has no blur anywhere, so every step is zero and
      `backdrop-blur-[var(--blur-lg)]` at an unmigrated call site is a filter that does nothing. */
   --blur-sm: 0px;
@@ -385,6 +395,7 @@
      be a header covering the way out of the screen. */
   --z-sticky: 20;
   --z-nav: 40;
+  --z-dock: 45;      /* a docked action stands over the tab bar's fade, under every sheet */
   --z-sheet: 50;
   --z-toast: 60;
   --z-tooltip: 70;

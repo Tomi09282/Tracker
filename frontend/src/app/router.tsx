@@ -1,13 +1,19 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from './AppLayout';
+import { PublicLayout } from './PublicLayout';
 import { RequireAuth } from './RequireAuth';
 import { ScreenSkeleton } from '../ui/feedback/ScreenSkeleton';
-import { AuthPage } from '../features/auth/AuthPage';
-import { HomePage } from '../features/home/HomePage';
 
-// Route-level splitting from day one. The library screen pulls in the muscle-map SVG and the
-// search UI, none of which the auth screens or the home screen need.
+// Route-level splitting from day one, and for EVERY screen: the sign-in screen no longer ships
+// inside the first bundle of a member who is already signed in, and Home no longer ships inside
+// the first bundle of a visitor who has only come to sign in. The two were the last eager pages.
+const AuthPage = lazy(() =>
+  import('../features/auth/AuthPage').then((m) => ({ default: m.AuthPage })),
+);
+const HomePage = lazy(() =>
+  import('../features/home/HomePage').then((m) => ({ default: m.HomePage })),
+);
 const LibraryPage = lazy(() =>
   import('../features/library/LibraryPage').then((m) => ({ default: m.LibraryPage })),
 );
@@ -81,26 +87,36 @@ const SettingsPage = lazy(() =>
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <AuthPage mode="login" /> },
-  { path: '/register', element: <AuthPage mode="register" /> },
+  // ── THE SCREENS OF A VISITOR: ONE LAYOUT, NO SESSION ────────────────────────────────────────
+  //
+  // `PublicLayout` draws the shell these screens share (the status-bar mask, a Dock that stands
+  // above the home indicator) and reads no session. It is a layout route with no path: the URLs
+  // are exactly what they were.
+  {
+    element: <PublicLayout />,
+    children: [
+      { path: '/login', element: suspended(<AuthPage mode="login" />) },
+      { path: '/register', element: suspended(<AuthPage mode="register" />) },
 
-  // ── THE PUBLIC MARKETPLACE, OUTSIDE RequireAuth ─────────────────────────────────────────────
-  //
-  // These were first written as children of the authenticated layout, and the whole surface was
-  // defeated at the client: the server served `/api/v1/public/*` to anybody, and the app bounced
-  // every visitor to /login before a request was ever made. Measured — a browser with its cookies
-  // cleared landed on the login screen.
-  //
-  // That is worth stating rather than quietly fixing, because it is the shape of the mistake: the
-  // BACKEND had six allowlisted public routes, a gate forbidding `req.user`, and sixteen assertions
-  // proving anonymous access — and one line of routing made all of it unreachable. A guarantee is
-  // only as public as its least public layer.
-  //
-  // No AppLayout either: the nav is for people with an account, and a bottom bar full of tabs that
-  // demand a login is a worse first impression than no bar at all.
-  { path: '/m', element: suspended(<MarketplacePage />) },
-  { path: '/m/p/:publicId', element: suspended(<PostPage />) },
-  { path: '/m/c/:handle', element: suspended(<CoachProfilePage />) },
+      // ── THE PUBLIC MARKETPLACE, OUTSIDE RequireAuth ─────────────────────────────────────────────
+      //
+      // These were first written as children of the authenticated layout, and the whole surface was
+      // defeated at the client: the server served `/api/v1/public/*` to anybody, and the app bounced
+      // every visitor to /login before a request was ever made. Measured — a browser with its cookies
+      // cleared landed on the login screen.
+      //
+      // That is worth stating rather than quietly fixing, because it is the shape of the mistake: the
+      // BACKEND had six allowlisted public routes, a gate forbidding `req.user`, and sixteen assertions
+      // proving anonymous access — and one line of routing made all of it unreachable. A guarantee is
+      // only as public as its least public layer.
+      //
+      // No AppLayout either: the nav is for people with an account, and a bottom bar full of tabs that
+      // demand a login is a worse first impression than no bar at all.
+      { path: '/m', element: suspended(<MarketplacePage />) },
+      { path: '/m/p/:publicId', element: suspended(<PostPage />) },
+      { path: '/m/c/:handle', element: suspended(<CoachProfilePage />) },
+    ],
+  },
   {
     path: '/',
     element: (
@@ -109,7 +125,7 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: suspended(<HomePage />) },
       { path: 'notifications', element: suspended(<NotificationsPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },

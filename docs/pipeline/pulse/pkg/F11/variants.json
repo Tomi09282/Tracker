@@ -1,0 +1,3 @@
+[
+  { "element": "E11", "live": false, "reason": "one Pulse look — the raster tab bar (lit icon, ink label) reads no letter; BottomNav no longer calls useElementVariant('E11')" }
+]

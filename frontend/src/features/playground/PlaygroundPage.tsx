@@ -283,11 +283,13 @@ export function Demo({ id }: { id: string }) {
     case 'E11':
       return (
         // Rendered inline rather than fixed, so five copies do not stack on the viewport edge.
+        // One Pulse look: E11 reads no letter any more, so the five columns are the same bar.
         <div className="relative h-20 w-full overflow-hidden rounded-field">
           <BottomNav
+            inline
             tabs={[
-              { to: '/playground', icon: Flame, label: 'One', end: true },
-              { to: '/library', icon: Dumbbell, label: 'Two', badge: 2 },
+              { to: '/playground', icon: 'home', label: 'One', end: true },
+              { to: '/library', icon: 'training', label: 'Two' },
             ]}
           />
         </div>

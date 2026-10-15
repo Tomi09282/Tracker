@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "about": "F11 (shell lane): the capture state of the shell specimens on the kit board. The kit host (F7) lays every lane's specimens out where the Figma component board draws them (/playground, board layout); this is the same state as kit-board of pkg/F7/states.json, in replay, with the header of frontend/scripts/pulse-frames.json so pulse-verify can run it from a slot. The pairs (pkg/F11/pairs.mjs) cut the shell's cells out of it.",
+  "accounts": {
+    "M": "user@tracker.local",
+    "C": "coach@tracker.local",
+    "A": "admin@tracker.local",
+    "N": "demo.nagy.balazs@tracker.local",
+    "R": "demo.coach.szilagyi.reka@tracker.local",
+    "K": "demo.kovacs.eszter@tracker.local",
+    "T": "demo.toth.reka@tracker.local"
+  },
+  "defaults": {
+    "width": 402,
+    "height": 874,
+    "scale": 2,
+    "insets": [
+      62,
+      34
+    ],
+    "lang": "hu",
+    "stubs": [
+      {
+        "method": "POST",
+        "path": "/api/v1/notifications/read",
+        "status": 204,
+        "why": "the notifications page marks everything read on opening (NotificationsPage.tsx:273); the page does not read the answer"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/conversations/*/read",
+        "status": 204,
+        "why": "the read receipt a thread with unread messages fires on opening (ChatPanel.tsx:115); the page does not read the answer"
+      }
+    ],
+    "expect": {
+      "requests": [],
+      "console": []
+    },
+    "probes": {
+      "boxedAllow": [
+        "btnPrimary",
+        "uiSwitch",
+        "sheet",
+        "badgeCount",
+        "skel",
+        "segBar",
+        "progressBar",
+        "macroCol",
+        "stepper",
+        "toast",
+        "noticeLine",
+        "pic",
+        "tabBar"
+      ]
+    }
+  },
+  "resolve": {},
+  "states": {
+    "kit-board": {
+      "frame": null,
+      "title": "Pulse kit — board layout (F11 shell cells)",
+      "package": "F11",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "insets": [
+        0,
+        0
+      ],
+      "reach": "seed",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "package": "F11",
+  "lane": "SH1 - the shell",
+  "branch": "pulse/F11",
+  "verifiedOn": "pulse/F11 merged with pulse-redesign dc61624 (F6) / 8f0846a (F7); hand-ins applied by pulse-sync (shared.patch, variants.json)",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/F11/shared.patch",
+    "docs/pipeline/pulse/pkg/F11/variants.json"
+  ],
+  "sharedPatch": {
+    "frontend/src/ui/tokens/tokens.css": "--nav-h 64 -> 56; --content-pad-b = --nav-h + --tabbar-offset (92 on the frames, meaning unchanged: what the layout pads and a full-height screen subtracts); block lane:F11: --tabbar-inset-5/6/7 (10/12/8), --screen-max 430, --status-bar-h env(safe-area-inset-top), --page-pad-b-bare, --dock-reserve 0px; --z-dock 45",
+    "frontend/assets-src/pulse/assets.json": "navTabs.leg pending -> enforced (check:assets assertion 4, second leg: every tab names an icon key)",
+    "frontend/src/features/playground/PlaygroundPage.tsx": "the E11 demo case: icon keys instead of lucide components, no badge, inline"
+  },
+  "gates": "no gate script changes needed: the routeMeta legs of check-nav / check-nav-active, the scaffold leg of check-safe-area and the F11 probes of verify-gates were pre-wired by F2 and arm themselves on the files of this lane; the anchors of the nav / nav-active / safe-area probes were checked statically against the new files (all found). aurora/ancestor-paints goes dormant (AppLayout no longer mounts the backdrop; check:aurora retires in F16).",
+  "files": {
+    "frontend/src/app/navTabs.ts": "icon is a TabIconKey (type-only import from assets/pulse/slots.ts, bare-Node importable); PILL_MAX_TABS and the lucide imports gone; /m dropped from the coach/admin owns (dead: no bar on /m); /notifications stays Home (Q6)",
+    "frontend/src/app/routeMeta.ts": "NEW: ROUTE_META (10 rows) + routeMetaFor()",
+    "frontend/src/app/AppLayout.tsx": "no backdrop; ShellProvider tabs; main pads --content-pad-b at every width",
+    "frontend/src/app/PublicLayout.tsx": "NEW: layout route of /login, /register, /m, /m/p/:publicId, /m/c/:handle; ShellProvider tabs=false; reads no session",
+    "frontend/src/app/router.tsx": "PublicLayout as a pathless layout route; HomePage and AuthPage lazy; error handling unchanged",
+    "frontend/src/ui/nav/BottomNav.tsx": "the raster tab bar: no surface, equal cells, inset and icon by count, fade as a sibling layer, one isTabActive answer for lit raster / label weight / aria-current, desktop dock from lg, inline / at / force for specimens",
+    "frontend/src/ui/shell/Screen.tsx": "NEW: Screen (top / gap / width / fill / as), ShellProvider, useShell, StatusBarMask (mounted by Screen)",
+    "frontend/src/ui/shell/ScreenHeader.tsx": "NEW: greet / root / push (parent from routeMeta) / section (+tight)",
+    "frontend/src/ui/shell/Dock.tsx": "NEW: the docked action with its fade; publishes --dock-reserve",
+    "frontend/src/features/playground/kit/shell.tsx": "the specimens: the three tab strips, screenHead, the three demo screens (board labels verbatim) + tab states, header forms and back states, the dock with tabs",
+    "docs/pipeline/pulse/kit/shell.md": "the lane page of the kit reference",
+    "docs/pipeline/pulse/pkg/F11/kit-frames.json": "the kit-board capture state, replay, runnable from a slot",
+    "docs/pipeline/pulse/pkg/F11/pairs.mjs": "the pair maker: Figma | app | difference"
+  },
+  "measured": {
+    "tab bar geometry (pulse-shot geometry probe, 2 pt)": "home-1, settings-1 (5 tabs, inset 10), coach-dashboard-1 (6, inset 12), admin-1 (7, inset 8, icon 28): Tab bar box, Bottom fade box and every icon box delta 0; every label line box within 0.3 pt; no style deviation on any tab label except notifications-1 (Kezdőlap lit by Q6)",
+    "player": "workout-1 at 402 x 874: scrollHeight 874 = the viewport, with insets 62/34 and with insets 0",
+    "widths": "home-1, coach-dashboard-1, admin-1 at 360, 430 (bar intact, 7 labels untruncated at 360) and 1280 (centred dock, icon beside label)",
+    "zero insets": "bar bottom 10 pt above the edge (floor 8 + 2)"
+  },
+  "sweep": "pulse-verify --all (replay): build green, 55 of 59 captured; the 4 others are not F11 (workout-2, onboarding-2, onboarding-3: frame fixtures not written yet; style-studio-2: the studio cannot arrive, Q3). Inventories equal the baseline except settings-1/-2 (theme picker, F1.1) and style-studio-1 (dormant elements labelled nem használt, E11 among them by this lane's variants.json - intended)",
+  "pairs": {
+    "tabbar-5-home-1": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/home-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\home-1.png",
+      "differOver8": 0.0753,
+      "box": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      }
+    },
+    "tabbar-5-settings-1": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/settings-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\settings-1.png",
+      "differOver8": 0.0989,
+      "box": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      }
+    },
+    "tabbar-6-coach-dashboard-1": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 1321,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/coach-dashboard-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\coach-dashboard-1.png",
+      "differOver8": 0.0916,
+      "box": {
+        "x": 0,
+        "y": 1328,
+        "w": 402,
+        "h": 131
+      }
+    },
+    "tabbar-7-admin-1": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 1000,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/admin-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\admin-1.png",
+      "differOver8": 0.059,
+      "box": {
+        "x": 0,
+        "y": 1054,
+        "w": 402,
+        "h": 84
+      }
+    },
+    "tabbar-5-exercise-detail-1": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 1570,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/exercise-detail-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\exercise-detail-1.png",
+      "differOver8": 0.1037,
+      "box": {
+        "x": 0,
+        "y": 1570,
+        "w": 402,
+        "h": 138
+      }
+    },
+    "tabbar-notifications-1-q6": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      },
+      "figma": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x/notifications-1@2x.png",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-all\\notifications-1.png",
+      "differOver8": 0.0954,
+      "box": {
+        "x": 0,
+        "y": 736,
+        "w": 402,
+        "h": 138
+      }
+    },
+    "kit-tabstrips-5-6-7": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 40,
+        "y": 4177,
+        "w": 1220,
+        "h": 92
+      },
+      "figma": "kepernyok-2x/_components-1..4.png (1x, doubled)",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-kit\\kit-board.png",
+      "differOver8": 0.0554,
+      "box": {
+        "x": 63,
+        "y": 4183,
+        "w": 1175,
+        "h": 45
+      }
+    },
+    "kit-screenhead-greet-root-push": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 473,
+        "y": 2403,
+        "w": 354,
+        "h": 226
+      },
+      "figma": "kepernyok-2x/_components-1..4.png (1x, doubled)",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-kit\\kit-board.png",
+      "differOver8": 0.0605,
+      "box": {
+        "x": 473,
+        "y": 2405,
+        "w": 354,
+        "h": 220
+      }
+    },
+    "kit-screen-root-7-tabs": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 40,
+        "y": 4438,
+        "w": 402,
+        "h": 600
+      },
+      "figma": "kepernyok-2x/_components-1..4.png (1x, doubled)",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-kit\\kit-board.png",
+      "differOver8": 0.0857,
+      "box": {
+        "x": 52,
+        "y": 4449,
+        "w": 390,
+        "h": 581
+      }
+    },
+    "kit-screen-pushed-5-tabs": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 449,
+        "y": 4454,
+        "w": 402,
+        "h": 600
+      },
+      "figma": "kepernyok-2x/_components-1..4.png (1x, doubled)",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-kit\\kit-board.png",
+      "differOver8": 0.4565,
+      "box": {
+        "x": 449,
+        "y": 4465,
+        "w": 402,
+        "h": 589
+      }
+    },
+    "kit-screen-flow-dock": {
+      "panels": "Figma | app | difference",
+      "region": {
+        "x": 858,
+        "y": 4454,
+        "w": 402,
+        "h": 600
+      },
+      "figma": "kepernyok-2x/_components-1..4.png (1x, doubled)",
+      "app": "C:\\Users\\Petike\\Documents\\Cursor\\tracker\\.pulse\\shots\\F11-kit\\kit-board.png",
+      "differOver8": 0.0576,
+      "box": {
+        "x": 881,
+        "y": 4465,
+        "w": 357,
+        "h": 581
+      }
+    }
+  },
+  "requests": [],
+  "lastGreenBuild": "pulse-verify --all on bc63a32 + hand-ins: build green in 16 s"
+}
