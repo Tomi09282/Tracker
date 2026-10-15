@@ -30,24 +30,16 @@ export function Providers({ children }: { children: ReactNode }) {
         {/* Mounted above every route, public and authenticated alike — the marketplace screens
             sit OUTSIDE AppLayout, so anything hung off the app shell would have missed them. */}
         <LoadingAnnouncer />
-        {/* E15 shipped with five variants, an undo affordance and a polite live region, and the
-            only file that ever rendered one was the variant playground. Every mutation in the
-            product finished in silence — and a save that works and says nothing is
-            indistinguishable from a save that did nothing. */}
+        {/* The status zone (PLAN R14): the toast band drops over the header zone from here, for
+            every route, public and authenticated alike. */}
         <ToastHost>
-          {/* HOISTED OUT OF AppLayout, for the reason two comments up.
-              It hung off the app shell, so the three public marketplace routes — the feed, a
-              post, a coach's profile — had no offline notice at all. Those are the screens most
-              likely to be opened on a phone with one bar, by somebody who has never signed in
-              and has no reason to guess that the blank list means the network and not the shop.
+          {/* The offline line, and the drain loop of the outbox. Hoisted out of AppLayout so the
+              public marketplace routes get it too; for a signed-out visitor the outbox is empty and
+              the line only ever reports the connection itself.
 
-              It is also the outbox's drain loop, and that half was already correct here: the
-              outbox is per-user and empty for a signed-out visitor, so on a public route the
-              strip only ever reports the connection itself.
-
-              FIRST CHILD, deliberately. The strip is `sticky top-0` and takes up space rather
-              than overlaying — that is what makes it push a page header down instead of covering
-              it — so it has to sit ahead of the routes in the flow, not beside them. */}
+              FIRST CHILD, deliberately. The line is `sticky top-0` and takes up space rather
+              than overlaying, so it pushes a page header down instead of covering it; the toast
+              band reads its height (`--offline-h`) and stands under it. */}
           <OfflineIndicator />
           {children}
         </ToastHost>

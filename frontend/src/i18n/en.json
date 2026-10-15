@@ -18,7 +18,6 @@
     "add": "Add",
     "delete": "Delete",
     "undo": "Undo",
-    "undone": "Undone",
     "copy": "Copy"
   },
   "auth": {

@@ -20,6 +20,7 @@
     "E20": "playground only — Fab (variants/E14E20.tsx) is mounted by /playground and by no product screen",
     "E11": "one Pulse look — the raster tab bar (lit icon, ink label) reads no letter; BottomNav no longer calls useElementVariant('E11')",
     "E6": "one Pulse look — Segmented (variants/E6Segmented.tsx) is the kit's segSwitch (words, an ink mark, hug or equal cells) and no longer reads its letter",
-    "E2": "one Pulse look — CopyButton (variants/E2CopyButton.tsx) is the kit's iconBtn('copy') (a bare glyph; the tick in lime when done, the warning in danger when refused) and no longer reads its letter"
+    "E2": "one Pulse look — CopyButton (variants/E2CopyButton.tsx) is the kit's iconBtn('copy') (a bare glyph; the tick in lime when done, the warning in danger when refused) and no longer reads its letter",
+    "E15": "one Pulse look — Toast (variants/E12E16.tsx) is a line of the kit's toast band (noticeLine + rule + countdown) and no longer reads its letter; the behaviour is the frozen letter C's: Undo undoes and closes the line"
   }
 }

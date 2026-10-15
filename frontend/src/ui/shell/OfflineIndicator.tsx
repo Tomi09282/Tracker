@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { CloudOff, UploadCloud } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
 import { flushOutbox, subscribeOutbox, type OutboxEntry } from '../../lib/outbox';
 import { useSession } from '../../features/auth/useSession';
+import { Rule } from '../data/Rule';
+import { NoticeLine } from '../feedback/NoticeLine';
 
 /**
  * Offline indicator, and the thing that drains the outbox.
@@ -32,7 +33,6 @@ import { useSession } from '../../features/auth/useSession';
  * alone passes on a network that goes nowhere.
  */
 export function OfflineIndicator() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   const { data: user } = useSession();
   const [offline, setOffline] = useState(() => typeof navigator !== 'undefined' && !navigator.onLine);
@@ -135,19 +135,6 @@ export function OfflineIndicator() {
   }, []);
 
   const showing = offline || mine.length > 0;
-  const count = mine.length;
-
-  // BOTH LINES AT ONCE, which is what the mockup draws and what the situation deserves.
-  // `Nincs internetkapcsolat` says what happened; `3 művelet vár feltöltésre` says what it cost.
-  // This used to be a ternary that picked one or the other, so an offline user WITH a queue was
-  // told only the number and never told why, and an offline user WITHOUT one was left to guess
-  // whether anything had been lost.
-  //
-  // When the connection is back and the outbox is draining, `offline` is false and the count
-  // becomes the strong line on its own — saying "no connection" while uploading over that
-  // connection is a lie the user can watch being told.
-  const strong = offline ? t('offline.title') : t('offline.queued', { count });
-  const detail = offline && count > 0 ? t('offline.queued', { count }) : null;
 
   return (
     <div
@@ -158,58 +145,63 @@ export function OfflineIndicator() {
         // IN FLOW, NOT OVER IT. `fixed` laid this across the page header, so going offline on Home
         // replaced the greeting with a warning instead of sitting above it. Sticky inside the
         // layout column keeps it pinned while the page scrolls AND makes it occupy space, which is
-        // what pushes the header down the way the mockup shows. The 0fr→1fr grid is what lets that
-        // space animate open from nothing — a plain height transition needs a number to animate to,
-        // and the strip is one line tall or two depending on the queue.
+        // what pushes the header down. The 0fr→1fr grid is what lets that space animate open from
+        // nothing — a plain height transition needs a number to animate to.
         'sticky top-0 z-[var(--z-toast)] grid overflow-hidden',
         'transition-[grid-template-rows] duration-[var(--duration-base)] ease-[var(--ease-standard)]',
         showing ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
       )}
     >
-      <div className="min-h-0 ps-[env(safe-area-inset-left)] pe-[env(safe-area-inset-right)]">
-        <div
-          className={cn(
-            // AN ACCENT RAIL ON A NEUTRAL CARD, NOT AN AMBER-TINTED ONE.
-            //
-            // The strip used to be a warning surface end to end: amber fill, amber border, amber
-            // glyph. 01b-home-empty.webp draws it the other way round — a dark neutral body with a
-            // hairline border and one purple rail down the leading edge (sampled off the mockup:
-            // rail rgb(144,155,234) ≈ --accent, body rgb(37,36,44), glyph rgb(224,223,228)).
-            //
-            // The difference is what the strip CLAIMS. An amber field is the same alarm colour a
-            // macro tile uses for "you are over target" — a state the user has to weigh. Being
-            // offline is not that: the writes are safe in the outbox and will go up on their own.
-            // The rail marks the strip as system chrome speaking, which is what it is.
-            'flex items-center gap-3 border-b border-[var(--surface-border)]',
-            // The rail runs down the LEADING edge, so it follows the writing direction rather than
-            // sitting on the left of a right-to-left layout.
-            'border-s-4 border-s-accent',
-            // The nav's surface pair, not the card's: this is `sticky`, so page content slides
-            // UNDER it. --card-bg is a 62% fill with no blur (see the token's own note — blur is a
-            // performance opt-in reserved for surfaces over MOVING content), and text scrolling
-            // through the strip is exactly what that buys you here. --nav-bg/--nav-blur is the pair
-            // already declared for a bar in this situation.
-            'bg-[var(--nav-bg)] backdrop-blur-[var(--nav-blur)]',
-            'px-4 pb-3 pt-[calc(env(safe-area-inset-top)+--spacing(3))]',
-          )}
-        >
-          {/* The glyph goes neutral with the card. Amber on a neutral body would be the one loud
-              thing in the strip and would re-assert the alarm the fill just gave up; the mockup
-              draws it at text-1, the same weight as the strong line it sits beside. */}
-          {sending ? (
-            <UploadCloud size={20} strokeWidth={2} aria-hidden className="shrink-0 text-text-1" />
-          ) : (
-            <CloudOff size={20} strokeWidth={2} aria-hidden className="shrink-0 text-text-1" />
-          )}
-          {/* Rendered only while showing: an `aria-live` region whose text changes as the strip
-              collapses announces the message a second time, to nobody. */}
-          {showing ? (
-            <span className="flex min-w-0 flex-col text-start">
-              <span className="text-body-s font-medium text-text-1">{strong}</span>
-              {detail ? <span className="text-caption text-text-2">{detail}</span> : null}
-            </span>
-          ) : null}
-        </div>
+      <div className="min-h-0">
+        {/* Rendered only while showing: an `aria-live` region whose text changes as the strip
+            collapses announces the message a second time, to nobody. */}
+        <OfflineLine offline={offline} count={mine.length} sending={sending} showing={showing} />
+      </div>
+    </div>
+  );
+}
+
+export interface OfflineLineProps {
+  /** No connection (the probe failed or the interface is down). */
+  offline: boolean;
+  /** Writes of this user waiting in the outbox. */
+  count: number;
+  /** The outbox is being drained right now. */
+  sending?: boolean;
+  /** Whether the words are rendered (the strip is open). Default `true`. */
+  showing?: boolean;
+}
+
+/**
+ * The offline line — kit `noticeLine('Nincs internetkapcsolat · 3 művelet vár feltöltésre', 'warn')`
+ * on the page's own black, closed by the strong rule: the same band a toast drops in, held in the
+ * flow instead of over it.
+ *
+ *     ●  Nincs internetkapcsolat · 3 művelet vár feltöltésre
+ *     ─────────────────────────────────────────────────────────
+ *
+ * BOTH FACTS ON ONE LINE, as the component board draws it: what happened and what it cost. Offline
+ * with an empty outbox says only the first; back online with writes still going up says only the
+ * count, with the ink dot instead of the warn one — saying "no connection" while uploading over
+ * that connection is a lie the user can watch being told.
+ *
+ * No glyph, no tinted surface, no rail: Pulse puts the colour in the 6 pt dot (Pulse System 2.1).
+ * The background is the canvas, opaque, because the page scrolls under the sticky strip.
+ */
+export function OfflineLine({ offline, count, sending = false, showing = true }: OfflineLineProps) {
+  const { t } = useTranslation();
+  const queued = t('offline.queued', { count });
+  return (
+    <div
+      data-kit="offlineLine"
+      data-sending={sending ? '' : undefined}
+      className="screen-x bg-surface-0 pb-1.75 pt-[var(--band-pad-t)]"
+    >
+      <div className="mx-auto w-full max-w-[var(--screen-max)]">
+        <NoticeLine tone={offline ? 'warn' : 'info'}>
+          {showing ? (offline ? (count > 0 ? `${t('offline.title')} · ${queued}` : t('offline.title')) : queued) : null}
+        </NoticeLine>
+        <Rule strong />
       </div>
     </div>
   );

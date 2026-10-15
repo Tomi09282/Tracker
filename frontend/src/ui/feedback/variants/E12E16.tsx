@@ -1,9 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, Info, Loader2, Maximize2, Minimize2, TriangleAlert, Trophy, X } from 'lucide-react';
+import { Check, Loader2, Maximize2, Minimize2, TriangleAlert, Trophy, X } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { surface } from '../../primitives/surfaceRecipe';
+import { Pressable } from '../../primitives/Pressable';
+import { TextLink } from '../../primitives/TextLink';
+import { Rule } from '../../data/Rule';
+import { NoticeLine, type NoticeTone } from '../NoticeLine';
 import { CountUp } from '../CountUp';
 import { useElementVariant } from '../ElementStyleProvider';
 import { useMotionSafe, EASE_STANDARD, SPRING } from '../useMotionSafe';
@@ -20,7 +24,7 @@ import { useMotionSafe, EASE_STANDARD, SPRING } from '../useMotionSafe';
  * shared and this file is not the place to change it. Values are the tokens verbatim; `secs()`
  * exists because Motion takes seconds and `0.4 * 1000` is not 400.
  */
-const DUR_MS = {
+export const DUR_MS = {
   instant: 100,
   fast: 150,
   base: 250,
@@ -29,7 +33,7 @@ const DUR_MS = {
   /** How long a confirmation stays readable — the same window a toast gets. */
   toast: 4000,
 } as const;
-const secs = (ms: number) => ms / 1000;
+export const secs = (ms: number) => ms / 1000;
 
 /* ══ E12 — Interactive card ═════════════════════════════════════════════════════════════════ */
 
@@ -402,13 +406,9 @@ export function InteractiveCard({
  * `record` is a fourth KIND, not a fourth colour of success.
  *
  * A personal record and a saved form are both "it worked", but they are not the same news, and the
- * workout mockup draws the difference: a trophy on a neutral mark, no tone border, and an accent
- * rail down the leading edge. Folding it into `success` would have put a green check on the one
- * event in the product the lifter actually came for.
- *
- * A kind rather than a per-toast icon override, because an override is a prop every caller can
- * spell differently: the tone table below stays the single place that decides what a toast looks
- * like, which is the whole reason it exists.
+ * workout frame draws the difference (`workout-2`, layer `Notice/info`): the record line carries a
+ * 16 pt trophy in ink where every other line carries its 6 pt dot. A kind rather than a per-toast
+ * icon override, because an override is a prop every caller can spell differently.
  */
 export type ToastKind = 'success' | 'error' | 'info' | 'record';
 
@@ -416,191 +416,154 @@ export interface ToastData {
   id: number;
   kind: ToastKind;
   message: string;
-  /** Renders an Undo affordance; variant D morphs the toast when it is used. */
+  /** Renders the Undo link; using it undoes and closes the line. */
   onUndo?: () => void;
 }
 
-const TOAST_ICON: Record<ToastKind, typeof Check> = {
-  success: Check,
-  error: TriangleAlert,
-  info: Info,
-  record: Trophy,
+/** The kind's dot (kit `noticeLine(msg, kind)`): ok, danger, ink. `record` is ink with a trophy. */
+const TOAST_TONE: Record<ToastKind, NoticeTone> = {
+  success: 'ok',
+  error: 'danger',
+  info: 'info',
+  record: 'info',
 };
 
+/** How long a line stays, and the countdown drawn on its rule. The 4 s of the contract (R14). */
+const TOAST_MS = DUR_MS.toast;
+
+export interface ToastProps {
+  toast: ToastData;
+  onDismiss: (id: number) => void;
+  /**
+   * The line closes the band: its rule is the strong one (white 14 %). A line with another line
+   * under it gets the row rule (white 8 %), as rows of one list do. Default `true`, so a line on
+   * its own is the band the frames draw.
+   */
+  last?: boolean;
+  /**
+   * Kit specimens and captures only: the countdown frozen at this share of the 4 s left (0-1) and
+   * no timer running, so the line neither shrinks nor leaves while it is photographed.
+   */
+  still?: number;
+  /** Kit specimens only: hold the Undo link or the close button in a finger / keyboard state. */
+  force?: { undo?: 'pressed' | 'focus'; dismiss?: 'pressed' | 'focus' };
+}
+
 /**
- * TONE, not just a glyph colour.
+ * One line of the toast band — kit `showToast(root, msg, kind, action)`, which is `noticeLine` with
+ * a rule under it, dropped over the header zone (`style-studio-2`, `workout-2`):
  *
- * All three kinds used to render the identical `--toast-bg` box behind the identical hairline, so
- * an error and a success were the same object with a different 20px icon — on the app's ONLY
- * mutation feedback channel. `--info-subtle` and `--info-border` had zero uses in the product and
- * `--danger-subtle` almost none, while the eight `-subtle`/`-border` tokens exist for exactly this.
+ *     ●  Felszerelés mentve                         Visszavonás   ✕
+ *     ────────────────────────── (the countdown, text-2, on the rule) ─────
  *
- * The SURFACE stays `--toast-bg`, deliberately: a toast floats over arbitrary content, and a 12%
- * wash over an unknown background is a toast whose own message cannot be read. The tone is carried
- * by the border and by the icon chip — which is the pattern the offline banner and the copy button
- * already use, rather than a third way of saying "this went wrong".
+ * No capsule, no fill of its own, no border, no shadow, no icon disc: the band behind it is the
+ * page's own black (`ToastBand`), the colour lives in the dot, the words are `cap-m` in ink. The
+ * trailing actions are the kit's own — `TextLink` for Undo, the bare `iconBtn` ✕ for close.
  *
- * `rail` is the fourth carrier and only `record` uses it. It is not a decoration the other three
- * were missing: a rail and a tone border are two edges saying one thing, and `record` is precisely
- * the kind that has NO tone border to say it with — the mockup draws a neutral box, so the accent
- * stripe is the whole signal, not a second one.
+ * ═══ THE COUNTDOWN IS THE UNDO WINDOW ══════════════════════════════════════════════════════════
+ *
+ * The line is also the undo window, so the time left is drawn: a 1 pt `text-2` line on the rule,
+ * from the leading edge, shrinking over the same 4 s the dismiss timer runs (`style-studio-2`
+ * layer `Countdown`, 232 of 354 at the moment it was drawn). Hover or keyboard focus pauses both.
+ *
+ * NOT RENDERED UNDER REDUCED MOTION. A countdown that cannot move would read as permanently full —
+ * the one thing it must never say. The line still dismisses on the same timer.
+ *
+ * ═══ ONE LOOK, THE LETTER'S BEHAVIOUR ══════════════════════════════════════════════════════════
+ *
+ * E15 no longer reads its style letter (handed in as `live: false`, PLAN R11). The letter the
+ * database served at the freeze is C, whose Undo closes the line — so Undo undoes and closes.
  */
-const TOAST_TONE: Record<ToastKind, { border: string; chip: string; icon: string; rail?: string }> =
-  {
-    success: {
-      border: 'border-[var(--success-border)]',
-      chip: 'bg-[var(--success-subtle)]',
-      icon: 'text-success',
-    },
-    error: {
-      border: 'border-[var(--danger-border)]',
-      chip: 'bg-[var(--danger-subtle)]',
-      icon: 'text-danger',
-    },
-    info: {
-      border: 'border-[var(--info-border)]',
-      chip: 'bg-[var(--info-subtle)]',
-      icon: 'text-info',
-    },
-    // Neutral box, neutral mark, accent rail — the mockup verbatim. The mark is `surface-2` rather
-    // than the near-white circle drawn there because the only near-white in the system is
-    // `rgb(var(--ink))`, an INK channel with no surface counterpart; an inverse-surface token pair
-    // is an open request against `tokens.css`, and this tone is the second caller for it.
-    record: {
-      border: 'border-[var(--surface-border)]',
-      chip: 'bg-surface-2',
-      icon: 'text-text-1',
-      rail: 'bg-accent',
-    },
-  };
-
-export function Toast({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number) => void }) {
+export function Toast({ toast, onDismiss, last = true, still, force }: ToastProps) {
   const { t } = useTranslation();
-  const variant = useElementVariant('E15');
   const motionSafe = useMotionSafe();
-  const [undone, setUndone] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const Icon = TOAST_ICON[toast.kind];
-  const tone = TOAST_TONE[toast.kind];
+  // Paused while the pointer rests on the line OR keyboard focus is inside it: a keyboard user
+  // tabbing to Undo must not have the line leave under them (WCAG 2.2.1, timing adjustable).
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const paused = hovered || focused;
+  const frozen = still !== undefined;
 
+  // A PAUSE, NOT A RESTART: the time left is kept while the pointer rests on the line, so the
+  // line leaves when its countdown (which pauses with it) reaches the end — the two never disagree.
+  const left = useRef<number>(TOAST_MS);
   useEffect(() => {
-    if (paused) return;
-    const t = setTimeout(() => onDismiss(toast.id), 4000);
-    return () => clearTimeout(t);
-  }, [toast.id, onDismiss, paused]);
+    if (paused || frozen) return;
+    const startedAt = Date.now();
+    const timer = setTimeout(() => onDismiss(toast.id), left.current);
+    return () => {
+      clearTimeout(timer);
+      left.current = Math.max(0, left.current - (Date.now() - startedAt));
+    };
+  }, [toast.id, onDismiss, paused, frozen]);
 
   return (
     <motion.div
-      layout
+      layout={motionSafe ? 'position' : false}
       role="status"
       // polite, never assertive: a toast must not interrupt what a screen reader is saying.
       aria-live="polite"
-      initial={motionSafe ? { y: 24, opacity: 0, scale: 0.96 } : false}
-      animate={{ y: 0, opacity: 1, scale: 1 }}
-      exit={motionSafe ? { y: 8, opacity: 0, scale: 0.98 } : undefined}
-      transition={motionSafe ? SPRING.base : { duration: 0 }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      className={cn(
-        'relative w-full overflow-hidden rounded-card border bg-[var(--toast-bg)] p-3',
-        'shadow-[var(--shadow-overlay)]',
-        tone.border,
-      )}
+      data-kit="toast"
+      data-kind={toast.kind}
+      // Drops in from the status zone in `base`, leaves in `fast` (Pulse System 2.6, "Toast").
+      initial={motionSafe ? { opacity: 0, y: -8 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      exit={motionSafe ? { opacity: 0, transition: { duration: secs(DUR_MS.fast), ease: EASE_STANDARD } } : undefined}
+      transition={motionSafe ? { duration: secs(DUR_MS.base), ease: EASE_STANDARD } : { duration: 0 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        // Focus moving between Undo and close stays inside the line: still paused.
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
+      }}
+      className="relative w-full"
     >
-      {/* The leading accent rail. `start-0`, not `left-0`: it is the reading edge, and the app
-          already writes its insets logically (`ps-`), so it follows the text direction rather than
-          jumping to the wrong side of the message in an RTL locale.
-          It sits inside the existing `overflow-hidden`, so the card radius clips it — no second
-          radius to keep in sync. `w-1` is the 4px grid step, and the toast's own `p-3` leaves 8px
-          of clearance, so nothing has to move to make room for it. */}
-      {tone.rail ? (
+      <NoticeLine
+        tone={TOAST_TONE[toast.kind]}
+        lead={toast.kind === 'record' ? <Trophy aria-hidden /> : undefined}
+        action={
+          <span className="flex items-center gap-2">
+            {toast.onUndo ? (
+              <TextLink
+                data-force={force?.undo}
+                onClick={() => {
+                  toast.onUndo?.();
+                  onDismiss(toast.id);
+                }}
+              >
+                {t('common.undo')}
+              </TextLink>
+            ) : null}
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('common.dismiss')}
+              data-force={force?.dismiss}
+              onClick={() => onDismiss(toast.id)}
+            >
+              <X aria-hidden />
+            </Pressable>
+          </span>
+        }
+      >
+        {toast.message}
+      </NoticeLine>
+      <Rule strong={last} />
+      {motionSafe || frozen ? (
         <span
           aria-hidden
-          className={cn('pointer-events-none absolute inset-y-0 start-0 w-1', tone.rail)}
-        />
-      ) : null}
-
-      <div className="flex items-center gap-3">
-        <motion.span
-          className={cn(
-            'inline-flex size-8 shrink-0 items-center justify-center rounded-chip',
-            tone.chip,
-            tone.icon,
-          )}
-          // C — the icon itself carries the kind: a drawn check, a shaken warning, a popped info.
-          animate={
-            motionSafe && variant === 'C'
-              ? toast.kind === 'error'
-                ? { x: [0, -4, 4, -3, 0] }
-                : { scale: [0.6, 1.1, 1] }
-              : undefined
+          data-kit="toastCountdown"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left bg-text-2"
+          style={
+            frozen
+              ? { transform: `scaleX(${Math.min(Math.max(still, 0), 1)})` }
+              : // `infinite`, not `forwards`: the end of the line is the removal of the toast (the timer
+                // above fires at the same instant), so the animation needs no end state — and a still
+                // capture holds a loop at its first frame instead of letting the clock run 4 s to
+                // finish it, which would dismiss every toast before it could be photographed.
+                { animation: `toast-timer ${TOAST_MS}ms linear infinite`, animationPlayState: paused ? 'paused' : 'running' }
           }
-          transition={{ duration: 0.35 }}
-        >
-          <Icon size={20} strokeWidth={2.5} aria-hidden />
-        </motion.span>
-
-        {/* `text-body-legacy`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
-            secondary lines. This is the sentence the user has four seconds to read, and it is the
-            only place the app reports what a mutation did. The Undo beside it stays at 13 — that
-            one is a control label. */}
-        <span className="text-body-legacy flex-1 text-text-1">
-          {undone ? t('common.undone') : toast.message}
-        </span>
-
-        {toast.onUndo && !undone ? (
-          <button
-            type="button"
-            onClick={() => {
-              toast.onUndo?.();
-              // D — the toast morphs into its own confirmation instead of vanishing and
-              // leaving the user unsure the undo landed.
-              if (variant === 'D') setUndone(true);
-              else onDismiss(toast.id);
-            }}
-            className="text-body-s min-h-[var(--target-min)] cursor-pointer px-2 text-accent outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-          >
-            {t('common.undo')}
-          </button>
-        ) : null}
-
-        <button
-          type="button"
-          aria-label={t('common.dismiss')}
-          onClick={() => onDismiss(toast.id)}
-          className="inline-flex size-[var(--target-min)] shrink-0 cursor-pointer items-center justify-center rounded-chip text-text-3 outline-none hover:text-text-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-        >
-          <X size={20} strokeWidth={2} aria-hidden />
-        </button>
-      </div>
-
-      {/* The hairline shows the remaining time, and pauses on hover so a toast cannot vanish
-          from under a cursor that is reading it.
-          It used to be the B variant's decoration. It is not decoration: the toast is also the
-          undo window, the dismiss timer above runs at the same 4s in every variant, and an undo
-          offer with no visible countdown is an offer the user cannot judge. The other four
-          variants shipped that window blind, so the countdown is now unconditional — the
-          variants differ in how the toast ENTERS and how the icon behaves, not in whether the
-          user can see how long they have. */}
-      {/*
-        ═══ NOT RENDERED AT ALL UNDER REDUCED MOTION ══════════════════════════════════════════
-        `animation: 'none'` leaves the bar at its start state — full width, static, forever — so a
-        countdown reads as permanently 100%: the one thing it must never say. DESIGN §7 #41 is
-        explicit that reduced motion COLLAPSES a duration and does not remove the state change,
-        and a frozen progress bar removes it while looking like it did not.
-
-        This defect reached one style variant before; making the bar unconditional would have
-        taken it to all five. A countdown nobody can see is better than one that lies, and the
-        toast still dismisses on the same timer either way.
-      */}
-      {motionSafe ? (
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-accent"
-          style={{
-            animation: 'toast-timer 4s linear forwards',
-            animationPlayState: paused ? 'paused' : 'running',
-          }}
         />
       ) : null}
     </motion.div>
