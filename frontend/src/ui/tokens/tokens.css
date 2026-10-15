@@ -798,6 +798,13 @@
 
 /* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */
 /* lane:F8 */
+:root {
+  /* The count badge (`BadgeCount`, kit `badgeCount`): 18 high and at least 18 wide, the figure 5
+     from either edge. 5 is off the 4 pt grid on purpose: it is what centres one digit of `tab-on`
+     in an 18 pt circle, and the kit draws it so (app-kit.js `badgeCount`, pad [0, 5]). */
+  --badge-h: 18px;
+  --badge-pad-x: 5px;
+}
 /* /lane:F8 */
 
 /* F9 — structure: SectionHeader, Rule, RowStack, ListRow, EmptyState, Skeleton, NoticeLine, Monogram */

@@ -1,0 +1,48 @@
+{
+  "package": "F8",
+  "lane": "SEL - selection, stage 1 (BadgeCount, Segmented in its two Pulse forms, LanguageToggle)",
+  "branch": "pulse/F8",
+  "verifiedOn": "pulse/F8 b0f535a = pulse-redesign fb3c004 (F2:c, F3, F7, F6, F14) + the F8 commits; variants.json and shared.patch applied by pulse-sync",
+  "handIn": ["docs/pipeline/pulse/pkg/F8/shared.patch", "docs/pipeline/pulse/pkg/F8/variants.json"],
+  "files": {
+    "frontend/src/ui/feedback/variants/E6Segmented.tsx": "Segmented restyled in place to the kit's segSwitch: words in body-m, text-1 / text-2, a 2 pt INK mark; layout hug (24 apart, mark y 37) or cells (equal shares on a 1 pt white-8 % hairline, mark on the line y 42); rule seats a hug control on a full-width hairline; radiogroup + roving tabindex kept, arrows now move focus with the selection and are ignored when read-only / disabled; async layer kept (busy = ControlBody's three dots, done = the mark ignites, failed = danger word for 2.4 s, one polite status region); E6 no longer read; additive: layout, rule, disabled, className, option.count, option.lang; option.icon is BRIDGE (not rendered, R5); Segment exported as the shared face (44 pt box, hug box = word + 8 either side given back in negative margins, ::after floor, focus ring with outline-solid)",
+    "frontend/src/ui/nav/LanguageToggle.tsx": "the hug segSwitch on Segment: Magyar / English / Deutsch (native, from LOCALES), aria-pressed + lang kept, role=group named common.language, data-kit=segSwitch; additive prop className",
+    "frontend/src/ui/primitives/BadgeCount.tsx": "NEW: kit badgeCount - 18 high, min 18 wide, 5 side padding, accent fill, tab-on figure in accent-fg, 2 pt canvas outline outside, hidden at 0, 99+ when capped or > 99, corner placement at x 26 / y 0 of a 44 pt icon button (grows right, as drawn) or inline; aria-hidden",
+    "frontend/src/features/playground/kit/selection.tsx": "the lane's specimens: the two segSwitch board cells verbatim (they take their cells on the /playground board), plus badge, pressed / keyboard focus (data-force), busy / failed / live async, read-only / disabled, cells + count, hug on a hairline, LanguageToggle; default component",
+    "docs/pipeline/pulse/kit/selection.md": "the lane's page of the kit reference",
+    "docs/pipeline/pulse/pkg/F8/shared.patch": "tokens.css block lane:F8 (--badge-h 18px, --badge-pad-x 5px) + features/playground/kit/actions.tsx (the actions lane's file): BadgeCount 2 and 99+ in the two bells of the board cell 'iconBtn · badgeCount 2 / 99+ · bare glyphs · btnPrimary sm'",
+    "docs/pipeline/pulse/pkg/F8/variants.json": "E6 live:false - one Pulse look, the letter is not read",
+    "docs/pipeline/pulse/pkg/F8/budget.json": "lowered by --fix-down F8: E6Segmented.tsx (10) and LanguageToggle.tsx (3) are at zero and gone; E2CopyButton, Switch, Toggle are stage 2",
+    "docs/pipeline/pulse/pkg/F8/.gitattributes": "*.patch -text (a patch is applied byte for byte)"
+  },
+  "build": "pulse-verify (11 states, replay): build green in 14 s · 11 of 11 captured · .pulse/shots/F8; the gates in the chain all OK (check-tokens, check-pulse 1690 in 80 files, check-i18n 843 keys, check-element-roster, check-type-scale, check-canvas, check-assets, check-safe-area, verify-outbox, tsc -b, vite build)",
+  "sweep": {
+    "all59": "earlier on 65ae300 (= fb3c004 minus F14): pulse-verify --all, 55 of 59 captured (.pulse/shots/F8-all); not captured: workout-2, onboarding-2, onboarding-3 (their fixtures do not exist yet), style-studio-2 (its click target is disabled since F2:b) - the same four as F6",
+    "inventoryDiffs": {
+      "settings-1, settings-2": "-11: the theme picker removed by F1.1 (the baseline is the base build)",
+      "style-studio-1": "-19 +19: F2:b's 'nem használt' labels (18) and E6 'Segmented control — nem használt' (this lane's variants.json)",
+      "auth-1, auth-2, library-1, exercise-detail-1, workout-1, home-1, admin-1, coins-1, every other state": "= baseline (the language buttons stay aria-pressed buttons, the side switch stays a radiogroup)"
+    },
+    "intendedDifferences": [
+      "every Segmented (workout player side switch, MuscleMap hero, new-post kind, playground E6 demo) is words + an ink mark instead of a capsule with a sliding lime thumb; an icon passed in an option is no longer drawn",
+      "the language switch (auth, Profil) is three words with an ink mark under the chosen one instead of a bordered capsule of chips with a check",
+      "under keyboard focus a segment shows its 2 px lime ring (Tailwind 4 outline-none had zeroed it)"
+    ]
+  },
+  "kitBoard": {
+    "how": "/playground board (F7 host, live, user@ via --account; the F7 states file has no accounts map) captured at 1300 x 5094, scale 1 (.pulse/shots/F8/kit-board.live.png), tiled by pkg/_int/kit-board-tiles.mjs into .pulse/pairs/F8/board/, cells paired in .pulse/pairs/F8/board-*.pair.png",
+    "segSwitch": "both cells land on the board cells: hug 'Elöl / Hátul' at board (40, 2645), marks 2 pt at y 37; cells 354 x 44 at (40, 2765), cells 118, mark 118 x 2 at y 42, hairline 354 x 1 at y 43 - measured in the scratch host too (plates@1x.facts.json): every word's left edge within 0.4 pt, the marks and hairline exact",
+    "badgeCount": "in the actions lane's iconBtn cell (through the hand-in): badge 18 x 18 at x 26 / y 0 of the 44 pt button, '99+' 30.2 x 18 (board 31); against home-1 the badge pixels match but the anti-aliased ring (267 px of the 120 x 120 crop differ by > 20/255)",
+    "targets": "the board's target probe passes (0 small); before the hug box fix it flagged 'Elöl' 28 and 'Hátul' 40",
+    "states": "real interaction on the built specimen (.pulse/pairs/F8/shots/statetest.json): held press 0.6 opacity on :active; mark ignite 0.15 s, 1e-05 s under reduced motion; async busy (aria-busy, dots, status 'Betöltés') -> resolve (checked, mark 1, 'Kész') -> refuse (danger word, value unchanged, 'Újra', back to text-2 after 2.4 s); read-only click changes nothing and stays tab-focusable; disabled: every option disabled, group 0.4; real Tab + arrows: solid 2 px lime ring, focus follows the selection and wraps"
+  },
+  "budget": { "before": 36, "after": 23, "file": "docs/pipeline/pulse/pkg/F8/budget.json (the 23 left are stage 2: E2CopyButton 17, Switch 4, Toggle 2)" },
+  "copy": "no visible string added; aria-label of the language group reuses common.language; the playground specimens use the board's sample words",
+  "requests": [
+    "INT: shared.patch edits features/playground/kit/actions.tsx (owned by F6, merged) - two BadgeCount lines and the import, so the board's bells carry 2 and 99+",
+    "S-home / S-coach-dashboard: NotificationBell can wear Pressable variant=link shape=icon + <BadgeCount count={unread} capped={capped} /> (kit/selection.md)",
+    "S-admin: the 'Moderáció 3' count is SegmentedOption.count on a cells Segmented",
+    "S-compose-post: the kind choice is a chipRow in the frames (ChipRow, stage 2); until then the Segmented there draws no icons"
+  ],
+  "status": "handoff"
+}

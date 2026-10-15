@@ -101,7 +101,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E6',
     name: 'Segmented control',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Sliding-thumb',
       B: 'Underline-sweep',

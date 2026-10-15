@@ -8,19 +8,6 @@
       "wash": 9,
       "pressable-no-variant": 5
     },
-    "frontend/src/ui/feedback/variants/E6Segmented.tsx": {
-      "legacy-type": 1,
-      "wash": 3,
-      "blur-shadow": 1,
-      "reserved-surface-1": 1,
-      "reserved-surface-2-3": 3,
-      "legacy-var": 1
-    },
-    "frontend/src/ui/nav/LanguageToggle.tsx": {
-      "legacy-variant": 1,
-      "pill-size": 1,
-      "reserved-surface-1": 1
-    },
     "frontend/src/ui/primitives/Switch.tsx": {
       "legacy-radius": 1,
       "blur-shadow": 1,

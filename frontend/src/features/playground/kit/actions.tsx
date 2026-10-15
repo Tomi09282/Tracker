@@ -1,5 +1,6 @@
 import { Bell, ChevronRight, Plus, X } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { BadgeCount } from '../../../ui/primitives/BadgeCount';
 import { Pressable } from '../../../ui/primitives/Pressable';
 import { TextLink } from '../../../ui/primitives/TextLink';
 
@@ -24,8 +25,8 @@ import { TextLink } from '../../../ui/primitives/TextLink';
  * a keyboard — the recipe answers to them with the same declarations as the real `:active` and
  * `:focus-visible` (see `control.ts`). Disabled and busy are the real props.
  *
- * The words are the board's sample data, as drawn. The two bells carry no count here: the badge
- * is `BadgeCount`, the selection lane's component.
+ * The words are the board's sample data, as drawn. The two bells carry the board's counts, 2 and
+ * 99+, through `BadgeCount`, the selection lane's component (handed in by F8).
  */
 
 export interface KitSpecimen {
@@ -91,9 +92,11 @@ export const specimens: KitSpecimen[] = [
       <Row gap="gap-4">
         <Pressable variant="link" shape="icon" aria-label="Értesítések">
           <Bell aria-hidden />
+          <BadgeCount count={2} />
         </Pressable>
         <Pressable variant="link" shape="icon" aria-label="Értesítések">
           <Bell aria-hidden />
+          <BadgeCount count={120} capped />
         </Pressable>
         <Pressable variant="link" shape="icon" aria-label="Bezárás">
           <X aria-hidden />

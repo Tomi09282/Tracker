@@ -18,6 +18,7 @@
     "E18": "playground only — SkeletonBlock (variants/E17E19.tsx) is mounted by /playground and by no product screen",
     "E19": "playground only — PullToRefresh (variants/E17E19.tsx) is mounted by /playground and by no product screen",
     "E20": "playground only — Fab (variants/E14E20.tsx) is mounted by /playground and by no product screen",
-    "E11": "one Pulse look — the raster tab bar (lit icon, ink label) reads no letter; BottomNav no longer calls useElementVariant('E11')"
+    "E11": "one Pulse look — the raster tab bar (lit icon, ink label) reads no letter; BottomNav no longer calls useElementVariant('E11')",
+    "E6": "one Pulse look — Segmented (variants/E6Segmented.tsx) is the kit's segSwitch (words, an ink mark, hug or equal cells) and no longer reads its letter"
   }
 }
