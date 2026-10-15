@@ -49,7 +49,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E2',
     name: 'Copy button',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Copy→check morph',
       B: 'Check + tooltip pop',

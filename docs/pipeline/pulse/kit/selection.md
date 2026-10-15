@@ -1,7 +1,8 @@
 # Kit reference — selection (lane SEL, package F8)
 
-Stage 1 (this page): `BadgeCount`, `Segmented` in its two Pulse forms, `LanguageToggle`.
-Stage 2 (a later merge, additive): `ChipRow`, `Toggle`, `Switch`, `CheckMark`, the `CopyButton` skin.
+Stage 1: `BadgeCount`, `Segmented` in its two Pulse forms, `LanguageToggle`.
+Stage 2 (additive, section "Stage 2" at the end): `ChipRow` / `Chip`, `Toggle`, `Switch`, `CheckMark`,
+the `CopyButton` skin, and one additive prop on `Segment` (`mark`).
 
 Source of the rules: `docs/brain/58-Pulse/Pulse System.md` §1 rule 3, §2.2, §2.4 ("Ignite"), §4 (rows
 "Segmented switch", "Badge / tag", "Icon button"). Construction: `figma-build/app-kit.js` line 208
@@ -12,7 +13,7 @@ Source of the rules: `docs/brain/58-Pulse/Pulse System.md` §1 rule 3, §2.2, §
 Specimen: `frontend/src/features/playground/kit/selection.tsx`. On the `/playground` board its two
 cells "segSwitch · hug — ink mark = neutral selection" and "segSwitch · equal cells on a hairline"
 take the board's own cells; the badge appears in the actions lane's "iconBtn · badgeCount 2 / 99+ …"
-cell (hand-in `pkg/F8/shared.patch`, `kit/actions.tsx`); every other state cell (pressed, keyboard
+cell (stage-1 hand-in `pkg/F8/1/shared.patch`, `kit/actions.tsx`, merged); every other state cell (pressed, keyboard
 focus, busy, failed, read-only, disabled, the live count, the ruled hug, the language switch) is
 listed after the board.
 
@@ -162,7 +163,7 @@ prop: `className` (placement).
 `aria-hidden`: the count goes into the host's accessible name (`notifications.withUnread`). It is not
 interactive (`pointer-events: none`), has no pressed, focus or busy state, and is never focusable.
 
-## Tokens this lane added (`tokens.css`, block `lane:F8`, handed in as `pkg/F8/shared.patch`)
+## Tokens this lane added (`tokens.css`, block `lane:F8`, handed in as `pkg/F8/1/shared.patch`, merged)
 
 | Token | Value | Used by |
 |---|---|---|
@@ -176,10 +177,174 @@ Tokens it reads: `--text-1`, `--text-2`, `--accent`, `--accent-fg`, `--surface-0
 ## Variant elements
 
 E6 (Segmented control) is one Pulse look: the letter is not read any more, and the element is handed
-in as `live: false` (`pkg/F8/variants.json`). E2 (CopyButton) follows in stage 2.
+in as `live: false` (stage 1, `pkg/F8/1/variants.json`, merged). E2 (CopyButton) is one Pulse look
+since stage 2 (`pkg/F8/2/variants.json`).
 
 ## For the kit specimen and for captures only
 
 `data-force="pressed"` and `data-force="focus"` on a segment show the pressed look and the focus ring
 without a finger or a keyboard — the segment answers with the same declarations as `:active` and
 `:focus-visible`. Nothing in the product sets the attribute.
+
+---
+
+# Stage 2
+
+Construction: `figma-build/app-kit.js` line 211 (`chipRow`), 238 (`uiSwitch`), 239 (`setCheck`), 209
+(`iconBtn`, for the copy button). Measured boxes: `_components.json`, cells "chipRow · filter",
+"chipRow · multi-select, wrap", "uiSwitch · on / off / disabled — as a listRow trail", "setCheck ·
+done (lime tick) / to do (ring)"; the copy button in `coach-dashboard-1.body.js` lines 142-148 (the
+code sheet of `coach-dashboard-2`). Specimens: `kit/selection.tsx` — the four board cells take the
+board's own cells on `/playground`; pressed, keyboard focus, busy, failed and disabled are listed
+after the board.
+
+## What a screen writes
+
+```tsx
+import { ChipRow, Chip } from '../../ui/primitives/ChipRow';
+import { Toggle } from '../../ui/primitives/Toggle';
+import { Switch } from '../../ui/primitives/Switch';
+import { CheckMark } from '../../ui/primitives/CheckMark';
+import { CopyButton } from '../../ui/feedback/variants/E2CopyButton';
+
+// a filter you can switch off again (library muscle, marketplace kind) — one line, scrolls sideways
+<ChipRow label={t('library.muscle')} className="-mr-6 pr-6">   {/* bleed past the right gutter */}
+  {muscles.map((m) => (
+    <Chip key={m.slug} selected={muscle === m.slug} onClick={() => setMuscle(muscle === m.slug ? undefined : m.slug)}>
+      {nameOf(m)}
+    </Chip>
+  ))}
+</ChipRow>
+
+// multi-select (equipment): wraps inside the content width
+<ChipRow wrap label={t('settings.equipment')}>
+  {options.map((eq) => <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />)}
+</ChipRow>
+
+// a setting row: the switch in the ListRow's control slot, labelled by the row's title
+<ListRow title={t('cues.voice')} titleId="cue-voice" control={<Switch labelledBy="cue-voice" checked={on} onChange={setOn} />} />
+
+// the set check / the radio mark of a single-choice list — a picture inside the host
+<ListRow role="radio" aria-checked={level === 'pro'} title={…} control={<CheckMark done={level === 'pro'} />} onClick={…} />
+
+// the join code: unchanged call site
+<CopyButton value={code} label={t('common.copy')} />
+```
+
+Rules (Pulse System §1, §2.4, §4):
+
+1. **A chip is a word.** No fill, no outline, no capsule, no check glyph. Selected = `text-1` + the
+   2 pt LIME mark; idle = `text-2`. Lime because a filter changes the subject; the segmented
+   switch's mark is ink.
+2. **Selection never changes weight** (`body-m` in both states).
+3. **Nothing slides.** Chip mark, switch fill and knob, check tick, copy glyph: each change is an
+   ignite — the new state fades in over `--duration-fast` where it lands, the old one fades out.
+   Reduced motion: instant.
+4. **`className` is placement only.** The bleed of a one-line chip row past the right gutter is
+   placement (`-mr-6 pr-6`; `-mr-4 pr-4` under 376), the screen's to write.
+
+## `ChipRow` — `frontend/src/ui/primitives/ChipRow.tsx` · `data-kit="chipRow"`
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `label` | `string` | — | the group's accessible name |
+| `wrap` | `boolean` | `false` | multi-select: wrap inside the container (lines 44 apart). Without it: one line that scrolls sideways inside itself |
+| `role` | `'group' \| 'radiogroup'` | `'group'` | `radiogroup` when the chips are `role="radio"` |
+| `disabled` | `boolean` | `false` | the whole row at 40 %, inert |
+| `className` | `string` | — | placement only |
+| `children` | `ReactNode` | — | `Chip`s or `Toggle`s |
+
+## `Chip` — same file
+
+A chip inside a row carries no `data-kit` of its own; a chip used alone wraps itself in a
+`data-kit="chipRow"` row of one.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `selected` | `boolean` | — | `text-1` + the lime mark |
+| `busy` | `boolean` | `false` | three dots over the word, which keeps its width; `aria-busy` |
+| `failed` | `boolean` | `false` | the word in `danger` (the caller times it) |
+| `role` | `'checkbox' \| 'radio' \| …` | — | with `checkbox` / `radio` the chip writes `aria-checked`; otherwise `aria-pressed` (a toggle button) |
+| … | every `<button>` attribute | | `onClick`, `disabled` (40 %), `lang`, `tabIndex`, `data-force` |
+| `children` | `ReactNode` | — | the word |
+
+### In numbers
+
+| | |
+|---|---|
+| Chip | 44 high; the layout is the word (`body-m` 16 / 22 Medium, line box at y 11); the BOX reaches 8 past the word on either side (the target, the focus ring), given back in negative margins inside a row |
+| Spacing | words 24 apart; wrapped lines 44 apart (no row gap) |
+| Mark | 2 pt `accent`, the width of the word, at y 37 (4 under the line box) |
+| Alone | outside a `ChipRow` the 8 either side stays as padding: in a `gap-tight` (8) row the words stand 24 apart, and the first word stands 8 in from the row's edge — a screen with a row of chips uses `ChipRow` |
+
+### States
+
+| State | Look |
+|---|---|
+| Rest | idle `text-2`, selected `text-1` + lime mark |
+| Ignite | the mark fades in `--duration-fast` where it lands, the old one fades out; nothing slides |
+| Pressed | 60 % (`--pressed-opacity`) in `--duration-fast`; no scale |
+| Keyboard focus | 2 px `--focus-ring` outline, 2 off the chip's box (the word + 8 either side) |
+| Busy | three 6 pt dots in the word's ink at 100 / 60 / 30 %, over the word |
+| Failed | the word in `danger` |
+| Disabled | 40 % (`--disabled-opacity`), `cursor: not-allowed` |
+
+## `Toggle` — `frontend/src/ui/primitives/Toggle.tsx` (a `Chip`)
+
+`{ on: boolean; label: string; onToggle: () => void; disabled?: boolean; busy?: boolean }` — the
+three existing props kept, two added. A `Chip` with `role="checkbox"` + `aria-checked`. Its old look
+(a `primary` / `secondary` chip pill with a check glyph) is gone everywhere it is used, at once.
+
+## `Switch` — `frontend/src/ui/primitives/Switch.tsx` · `data-kit="uiSwitch"` (on the track)
+
+| Prop | Type | Meaning |
+|---|---|---|
+| `checked` | `boolean` | |
+| `onChange` | `(next: boolean) => void` | |
+| `labelledBy` / `label` | `string` | the id of a visible label (the row's title), or an `aria-label` |
+| `describedBy` | `string` | e.g. the row's sub line that says why it is disabled |
+| `disabled` | `boolean` | 40 % on the track |
+| `id`, `className` | `string` | `className`: placement only |
+| `data-force` | `'pressed' \| 'focus'` | kit specimen and captures only |
+
+| | Number |
+|---|---|
+| Track | 48 × 28, fully round (14); on `accent`, off `surface-3` |
+| Knob | 22, 3 in from the edge; on: `accent-fg` (the canvas) on the right; off: `text-2` on the left; no shadow |
+| Target | the button is 48 × 44, the track centred in it, the 16 above and below given back in negative margins: the layout is the 48 × 28 track (a row with a switch stays 56) and a switch in a row ends on the row's right edge |
+| Focus | 2 px `--focus-ring`, 2 off the TRACK |
+| Change | the track colour and the two knobs cross-fade in `--duration-fast`; the knob does not travel |
+| Pressed / disabled | 60 % / 40 % |
+
+`role="switch"` + `aria-checked` kept. No busy state: a setting takes effect at once, and the kit
+draws none, so none is invented.
+
+## `CheckMark` — `frontend/src/ui/primitives/CheckMark.tsx` · `data-kit="setCheck"`
+
+`{ done: boolean; className?: string }`. A 44 × 44 frame, `aria-hidden`: to do = a 24 ring, 1.5
+`edge`; done = the bare tick (Lucide `check`) at 24, stroke 2.5, `accent`. The two cross-fade in
+`--duration-fast`. A picture, not a control: role, state, pressed, focus and target belong to the
+host (the set row's check button, a radio row).
+
+## `CopyButton` — `frontend/src/ui/feedback/variants/E2CopyButton.tsx` · `data-kit="iconBtn"`
+
+`{ value: string; label: string; disabled?: boolean; demo?: 'busy' | 'done' | 'error'; 'data-force'? }`
+— `value` and `label` unchanged; the rest added (`demo` and `data-force` for the kit specimen and
+captures only).
+
+The actions lane's bare icon button with the Lucide `copy` glyph (24, stroke 1.75, `text-1`).
+After a tap: busy (only if the write takes longer than 120 ms) = the three dots; done = the tick in
+`accent` for 2 s; refused = the warning glyph in `danger` for 3.2 s. Each glyph change is an ignite
+(opacity, `--duration-fast`); the old flip, bubble, confetti, wipe, badge and shake are gone. A
+polite live region says the label after a copy; an `alert` says `common.retry` after a refusal.
+
+## `Segment` (stage 1) — one additive prop
+
+`mark?: 'ink' | 'accent'` (default `ink`): the colour of the 2 pt mark. `accent` is the chip; a
+chip is also dimmed on its own when `disabled` (a segment is dimmed by its group).
+
+## Tokens
+
+Stage 2 adds none. It reads `--accent`, `--accent-fg`, `--surface-3`, `--text-1`, `--text-2`,
+`--edge`, `--danger`, `--focus-ring`, `--pressed-opacity`, `--disabled-opacity`, `--duration-fast`,
+`--ease-standard`.

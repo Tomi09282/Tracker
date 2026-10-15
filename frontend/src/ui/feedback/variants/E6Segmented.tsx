@@ -117,6 +117,12 @@ export interface SegmentProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
   failed?: boolean;
   /** A live count after the word (mono `data`, lime, 6 after it). Not rendered at 0 or below. */
   count?: number;
+  /**
+   * The colour of the 2 pt mark. `ink` (default): a segmented switch — it changes the VIEW. `accent`:
+   * a filter chip (`ChipRow` / `Chip`) — it changes the SUBJECT, so the mark is lime (Pulse System
+   * §4 "Filter chips"). A chip is dimmed on its own when `disabled`; a segment is dimmed by its group.
+   */
+  mark?: 'ink' | 'accent';
   /** The word. */
   children: ReactNode;
 }
@@ -143,7 +149,7 @@ const FORCED = [
  * a word shorter than that — the target, not the layout.
  */
 export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segment(
-  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, children, type, disabled, ...rest },
+  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, mark = 'ink', children, type, disabled, ...rest },
   ref,
 ) {
   const inert = rest['aria-disabled'] === true || rest['aria-disabled'] === 'true';
@@ -169,6 +175,8 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
         // Pressed is 60 %, as for rows and links; no scale — only the pill moves.
         !inert && !disabled && 'cursor-pointer active:opacity-[var(--pressed-opacity)]',
         'aria-busy:cursor-progress',
+        // A chip stands alone (no group dims it): 40 %, as every Pulse control that is off.
+        mark === 'accent' && 'disabled:cursor-not-allowed disabled:opacity-[var(--disabled-opacity)]',
         // Focus is redrawn on the lamp, around the 44 pt frame of the segment. NO `outline-none` at
         // rest and an explicit `outline-solid`: in Tailwind 4 `outline-none` sets
         // `--tw-outline-style: none` on the element, and `outline-2` reads that variable — so the
@@ -203,7 +211,8 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
         aria-hidden
         data-kit-part="mark"
         className={cn(
-          'pointer-events-none absolute h-0.5 bg-text-1',
+          'pointer-events-none absolute h-0.5',
+          mark === 'accent' ? 'bg-accent' : 'bg-text-1',
           layout === 'cells' ? 'inset-x-0' : 'inset-x-2',
           onRule ? 'bottom-0' : 'bottom-[5px]',
           'transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
