@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Dumbbell, PersonStanding, Play, PlayCircle } from 'lucide-react';
+import { Navigate } from 'react-router';
+import { Check, Dumbbell, PersonStanding, Play } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Surface } from '../../ui/primitives/Surface';
-import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { MuscleMap, type MuscleRole } from '../../ui/muscle-map/MuscleMap';
@@ -86,7 +88,7 @@ const HERO = 'relative h-[34dvh] w-full shrink-0 overflow-hidden';
  */
 export function WorkoutPlayer() {
   const { t, i18n } = useTranslation();
-  const { data, isPending } = useCurrentWorkout();
+  const { data, isPending, isError, refetch } = useCurrentWorkout();
   const check = useCheckSet();
   const undo = useUndoSet();
   const { toast } = useToast();
@@ -252,15 +254,33 @@ export function WorkoutPlayer() {
     );
   }
 
-  if (!data?.log) {
+  if (isError && !data) {
     return (
-      // NO ACTION HERE, DELIBERATELY. Starting a session lives on Home; a second start path is a
-      // second thing the server has to reconcile, and the library keeps its door from Home's own
-      // empty state (`check-nav` reads that one).
-      <div className="col-mobile screen-x flex h-[calc(var(--viewport-h)-var(--content-pad-b))] items-center justify-center py-4 lg:h-[calc(var(--viewport-h)-var(--content-pad-b-lg))]">
-        <EmptyState icon={PlayCircle} heading="h1" title={t('workout.noneTitle')} body={t('workout.noneBody')} />
+      // A FAILED READ IS NOT "NO SESSION". Redirecting here would send a lifter whose session IS
+      // running to the library on a network blip, so the failure says so and offers the one way
+      // forward: ask again. A refetch that fails while the last answer is still cached keeps the
+      // player on screen instead (`data` is still there), which is the right thing mid-set.
+      <div className="col-mobile screen-x py-4">
+        <h1 className="sr-only">{t('nav.workout')}</h1>
+        <NoticeLine
+          tone="danger"
+          role="alert"
+          action={
+            <TextLink onClick={() => void refetch()}>{t('common.retry')}</TextLink>
+          }
+        >
+          {t('workout.loadFailed')}
+        </NoticeLine>
       </div>
     );
+  }
+
+  if (!data?.log) {
+    // NO SESSION: THE EDZÉS TAB OPENS THE LIBRARY (owner decision D2). The empty player is never
+    // drawn (frame `workout-3` is not built). `replace`, so Back does not return to a URL that
+    // would only redirect again. Keep this element literal: `check-nav` names it as a required
+    // door (REQUIRED_DOORS), and `verify-gates` probes that deleting it is caught.
+    return <Navigate to="/library" replace />;
   }
 
   const onCheck = async (

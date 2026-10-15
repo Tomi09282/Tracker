@@ -463,8 +463,7 @@
     "sessionsPerWeekHint": "We spread the weekly load across this many days."
   },
   "workout": {
-    "noneTitle": "No workout running",
-    "noneBody": "Start today's session, or do a freestyle workout.",
+    "loadFailed": "That didn't work. Please try again.",
     "freestyle": "Freestyle",
     "sets": "Sets",
     "exercises": "Exercises",

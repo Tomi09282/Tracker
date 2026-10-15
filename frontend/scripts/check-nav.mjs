@@ -106,12 +106,12 @@ const NO_INBOUND_BY_DESIGN = new Map([
  *
  *   route → { from: '<file under src>', reason }
  *
- * Empty until the idle Edzés tab redirects to the library (owner decision D2, step F16). That
- * commit adds the redirect and this line together:
- *
- *   ['/library', { from: 'features/workout/WorkoutPlayer.tsx', reason: 'the Edzés tab lands here when no session runs (D2)' }],
+ * The idle Edzés tab redirects to the library (owner decision D2, step F16): that redirect is the
+ * door the tab bar gives the library, and it must not be refactored away.
  */
-export const REQUIRED_DOORS = new Map([]);
+export const REQUIRED_DOORS = new Map([
+  ['/library', { from: 'features/workout/WorkoutPlayer.tsx', reason: 'the Edzés tab lands here when no session runs (D2)' }],
+]);
 
 async function main() {
   const problems = [];

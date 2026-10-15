@@ -463,8 +463,7 @@
     "sessionsPerWeekHint": "Auf so viele Tage verteilen wir die Wochenlast."
   },
   "workout": {
-    "noneTitle": "Kein Training aktiv",
-    "noneBody": "Starte die heutige Einheit oder ein freies Training.",
+    "loadFailed": "Das hat nicht geklappt. Bitte versuche es erneut.",
     "freestyle": "Freies Training",
     "sets": "Sätze",
     "exercises": "Übungen",

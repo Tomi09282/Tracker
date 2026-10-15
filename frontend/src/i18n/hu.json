@@ -463,8 +463,7 @@
     "sessionsPerWeekHint": "Ennyi napra osztjuk szét a heti terhelést."
   },
   "workout": {
-    "noneTitle": "Most nincs futó edzés",
-    "noneBody": "Indíts egyet a mai napból, vagy csinálj szabad edzést.",
+    "loadFailed": "Nem sikerült a művelet. Próbáld újra.",
     "freestyle": "Szabad edzés",
     "sets": "Sorozatok",
     "exercises": "Gyakorlatok",
