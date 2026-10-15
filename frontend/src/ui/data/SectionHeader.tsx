@@ -1,89 +1,172 @@
 import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { isValidElement, useId, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
+import { Rule } from './Rule';
 
 /**
- * A section heading with a mark — [[55-Screens/01 Home]], blocks 3 and 6.
+ * The head of a section — kit `secHead` / `sect`: a strong rule, 16 below it the eyebrow, and at
+ * most ONE trailing node on the eyebrow's baseline.
  *
- * The tiny uppercase eyebrow this replaces was a LABEL: it named the region and then asked the eye
- * to find the region's edges by itself. A tinted icon tile plus a real heading gives the boundary
- * mass, which is what lets the sections below it be separated by air instead of by rules.
+ *     ──────────────────────────────────────────────   Rule/section, white 14 %
+ *                                                       16
+ *     MAI EDZÉS                    18:00 · 5 gyakorlat   Section/<title>, 354 × 20
+ *                                                       16 (the parent's gap, `gap-group`)
+ *     content
  *
- * The tile is NOT an action and carries no accent text: the accent still means "act here" in
- * exactly one place per screen.
+ * It replaces the 44 px tinted icon tile beside a title. Pulse draws no icon in a heading: the rule
+ * gives the boundary its mass and the eyebrow names it, in the display face, upper-case, `text-2`.
  *
- * ═══ THE FOUR COPIES ARE ONE COMPONENT ═════════════════════════════════════════════════════════
+ * ═══ THE TRAILING NODE SITS ON THE BASELINE, NOT ON THE CENTRE LINE ═════════════════════════════
  *
- * `CoachDashboard`'s `SectionHead` and `SettingsPage`'s `SectionHeader` are gone and import this;
- * `features/library/SectionBadge` is a two-line shim over it for the one file that still spells it
- * that way. What made them four was never four opinions — it was three files each having to decide
- * a fill, a radius and a heading, and no two of them deciding the same three.
+ * The head row is exactly one eyebrow line tall (20 px) whatever trails it: a count, a status, a
+ * 44 px text link, a hug segmented switch. The tall ones overhang the row above and below instead
+ * of stretching it — otherwise a section with a link would start 12 px lower than a section
+ * without one, and the 16 / 16 rhythm would depend on what happens to sit on the right.
  *
- * FILL: `--tile-tint` / `--tile-tint-fg`, which is not a new pick. tokens.css declares that pair as
- * "the tinted holder every icon sits in across all 27 screens" — the token layer had already named
- * this exact element — and the file promoted into here simply carried home's `bg-accent-subtle`
- * (accent at 20%) up with it. Obeying the token drops the wash to 14% on the four screens that read
- * this component (home, nutrition, coins, coach dashboard) and, through `SummaryTile`'s puck, on
- * three more that only ever showed the tile form (progress, admin, client detail).
+ * So the trailing node lives in a 20 px box of its own that centres it, and the row aligns that
+ * box with the eyebrow by BASELINE. A centred flex box hands its first child's baseline upward,
+ * which makes this the kit's own arithmetic (`secHead`: text centred in its node, its baseline on
+ * the eyebrow's) without a single measured offset in the source.
  *
- * RADIUS: `rounded-field`. The badge corner measures 18 of 69px in `05-haladas.webp`, 26% of the
- * side; `rounded-field` is 12/44 = 27%, `rounded-card` 16/44 = 36% and visibly rounder than the
- * image. The coaching copy's `rounded-card` was an argument against `rounded-chip` — a 44px circle
- * is the shape this design reserves for things standing in for a PERSON, the monogram and the bell
- * — and `rounded-field` keeps that distinction just as well.
+ * The one exception is drawn in `coach-dashboard-1` ("Csatlakozási kódok" + the small pill "Új
+ * kód"): a 44 pt control the head makes ROOM for. `trailingInFlow` grows the row to 44 and centres
+ * the eyebrow on it.
+ *
+ * A trailing node whose last part is a glyph — a `TextLink` / `Pressable` with a `trail`, i.e.
+ * "Megnyitás ›" — is pulled 5 px past the right edge, as the kit does it (`secHead`: dx = 5 when
+ * the last child is a glyph): the chevron's box is 16 wide and its ink ends 6 px short of it, so
+ * the TIP lands on the content edge instead of the empty box.
+ *
+ * ═══ WHAT STAYED FOR THE CALL SITES THAT ARE NOT REBUILT YET (PLAN R5) ══════════════════════════
+ *
+ * `icon` is accepted and not rendered; `action` is the old name of `trailing`. Both leave at the
+ * call sites with each screen's own package — `check:pulse` counts every `icon=` that is left.
+ * `title` OR `children`, never both: `children` is the slot of the two screens that still write
+ * their own heading element, and a rebuilt screen has no reason to use it.
  */
 
-/**
- * `title` OR `children`, never both.
- *
- * Most call sites want the default heading: an `h2` at `text-title-2`, truncating so a trailing
- * action cannot be pushed off the row. Two do not — settings names its blocks with an 11px caps
- * eyebrow and the library's filter strip does the same — and that is the argument
- * `features/library/SectionBadge` wrote down and was right about. A `size` prop or a boolean would
- * move that decision in here as a list of every heading anyone has needed so far; a slot leaves the
- * heading at the call site and keeps in here the part that is genuinely shared — the holder, the
- * gap, and the trailing slot beside it.
- *
- * `children?: never` on the titled branch is what stops both being passed at once, which would
- * render one and silently drop the other.
- */
-type SectionHeaderProps = {
-  icon: LucideIcon;
-  /** A trailing link, at most one. */
+type HeadingTag = 'h2' | 'h3';
+
+interface SectionHeaderBase {
+  /**
+   * @deprecated Pulse draws no icon in a section head. Accepted so the existing call sites compile,
+   * never rendered; delete it at the call site.
+   */
+  icon?: LucideIcon;
+  /**
+   * ONE node on the eyebrow's baseline, ending on the right edge: a count or meta
+   * (`<span className="text-data text-text-2">6</span>`), a status, a text link, a hug segmented
+   * switch. Never a second one, never a lime pill (but see `trailingInFlow`).
+   */
+  trailing?: ReactNode;
+  /** @deprecated The old name of `trailing`. Used only when `trailing` is not given. */
   action?: ReactNode;
+  /**
+   * The trailing node is a 44 pt control the head makes room for (the small pill of
+   * `coach-dashboard-1`): the row grows to 44 and the eyebrow is centred on it.
+   */
+  trailingInFlow?: boolean;
+  /**
+   * The strong rule above the eyebrow. `false` for the block directly under a screen header (the
+   * hero has no rule) and for a head inside a group that already opened with one.
+   */
+  rule?: boolean;
+  /** The heading level of the eyebrow. `h2` unless the section sits inside another section. */
+  heading?: HeadingTag;
+  /** Placement only. */
   className?: string;
-} & (
-  | {
-      title: string;
-      /** Set it when a `section` names itself with `aria-labelledby`. */
-      titleId?: string;
-      children?: never;
-    }
-  | { children: ReactNode; title?: never; titleId?: never }
-);
+}
 
-export function SectionHeader({
-  icon: Icon,
-  title,
-  titleId,
-  action,
-  children,
-  className,
-}: SectionHeaderProps) {
+export type SectionHeaderProps = SectionHeaderBase &
+  (
+    | {
+        title: string;
+        /** Set it when a `section` names itself with `aria-labelledby`. */
+        titleId?: string;
+        children?: never;
+      }
+    | { children: ReactNode; title?: never; titleId?: never }
+  );
+
+const present = (node: ReactNode) => node !== undefined && node !== null && node !== false;
+
+/** The kit's `dx = 5`: the trailing node ends in a glyph (a link or button with a `trail`). */
+const endsInGlyph = (node: ReactNode) => isValidElement<{ trail?: ReactNode }>(node) && present(node.props.trail);
+
+export function SectionHeader(props: SectionHeaderProps) {
+  const {
+    title,
+    titleId,
+    children,
+    trailing,
+    action,
+    trailingInFlow = false,
+    rule = true,
+    heading: Heading = 'h2',
+    className,
+  } = props;
+  const tail = present(trailing) ? trailing : action;
   return (
-    <div className={cn('flex items-center gap-tight', className)}>
-      <span
-        aria-hidden
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
+    <div className={cn('flex w-full flex-col gap-group', className)}>
+      {rule ? <Rule strong /> : null}
+      <div
+        data-kit="sect"
+        className={cn(
+          'flex w-full justify-between gap-group',
+          // A call site's own heading (the `children` bridge) may be taller than an eyebrow line:
+          // the row grows with it instead of letting it run into the content below.
+          trailingInFlow ? 'min-h-11 items-center' : children !== undefined ? 'min-h-5 items-baseline' : 'h-5 items-baseline',
+        )}
       >
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
-      {children ?? (
-        <h2 id={titleId} className="text-title-2 min-w-0 flex-1 truncate text-text-1">
-          {title}
-        </h2>
-      )}
-      {action}
+        {children ?? (
+          <Heading id={titleId} className="text-eyebrow min-w-0 flex-1 truncate text-text-2">
+            {title}
+          </Heading>
+        )}
+        {present(tail) ? (
+          <div className={cn('flex shrink-0 items-center', !trailingInFlow && 'h-5', endsInGlyph(tail) && '-me-1.25')}>
+            {tail}
+          </div>
+        ) : null}
+      </div>
     </div>
+  );
+}
+
+/**
+ * A whole section — kit `sect`: the head above, then the content 16 below it, in a `<section>` that
+ * is named by its own eyebrow. Sections stand 32 apart; that distance belongs to whatever stacks
+ * them (`gap-section` on the page column), not to this component.
+ */
+export interface SectionProps {
+  title: string;
+  /** See `SectionHeader.trailing`. */
+  trailing?: ReactNode;
+  /** See `SectionHeader.trailingInFlow`. */
+  trailingInFlow?: boolean;
+  /** See `SectionHeader.rule`. */
+  rule?: boolean;
+  /** See `SectionHeader.heading`. */
+  heading?: HeadingTag;
+  children?: ReactNode;
+  id?: string;
+  /** Placement, or another gap between head and content (`gap-3` where a frame draws 12). */
+  className?: string;
+}
+
+export function Section({ title, trailing, trailingInFlow, rule, heading, children, id, className }: SectionProps) {
+  const titleId = useId();
+  return (
+    <section id={id} aria-labelledby={titleId} className={cn('flex w-full flex-col gap-group', className)}>
+      <SectionHeader
+        title={title}
+        titleId={titleId}
+        trailing={trailing}
+        trailingInFlow={trailingInFlow}
+        rule={rule}
+        heading={heading}
+      />
+      {children}
+    </section>
   );
 }
