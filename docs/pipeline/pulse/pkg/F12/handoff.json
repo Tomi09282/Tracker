@@ -1,0 +1,50 @@
+{
+  "package": "F12",
+  "stage": 1,
+  "what": "the underline Field (kit inputField), restyled in place with its public API intact",
+  "branch": "pulse/F12",
+  "base": "pulse-redesign 8f0846a (F7 kit host merged into the slot by pulse-sync)",
+  "files": {
+    "frontend/src/ui/primitives/Field.tsx": "the underline field: cap-m label, 44 pt line, 1 px edge / 2 px lime focus + lime caret / 2 px danger error / hairline disabled, body 16 value, hint or error 8 under the line (cap), marker micro on the label baseline, masked value as 6 pt discs; data-kit=inputField",
+    "frontend/src/features/playground/kit/inputs.tsx": "the specimen: cell 1 = the board's inputField cell (idle+hint, focus, error, disabled, empty), cell 2 = the field as the frames use it (marker required / optional, rule hint plain, trailing tick and reveal, leading glyph)",
+    "docs/pipeline/pulse/kit/inputs.md": "the kit reference page (final API, numbers, focus rule, tokens)",
+    "docs/pipeline/pulse/pkg/F12/shared.patch": "tokens.css lane:F12 block: --field-mask-size 24px, --field-mask-tracking 3.5px, --field-mask-lift 3px",
+    "docs/pipeline/pulse/pkg/F12/states.json": "extra live states on the signed-out auth screen: F12-login-focus, F12-login-error, F12-register-filled (nothing submitted)",
+    "docs/pipeline/pulse/pkg/F12/evidence/": "the capture harness: f12-shot.mjs (scratch Vite build of the real Field + specimen with the tree's vite.config.ts, headless Chrome through pulse-shot's own launchChrome/openPage, under a heavy lock), compare.mjs (DOM boxes vs Figma geometry), pairs.py (Figma | app | difference pictures)"
+  },
+  "api": {
+    "kept": [
+      "label",
+      "hint",
+      "error",
+      "className",
+      "leading",
+      "trailing",
+      "marker",
+      "labelHidden",
+      "every <input> attribute",
+      "forwardRef to the <input>",
+      "aria-describedby = marker + shown hint + error",
+      "aria-invalid",
+      "role=alert error"
+    ],
+    "added": [
+      "hintTone?: 'quiet' | 'plain' (default quiet = text-3)",
+      "markerTone?: 'plain' | 'quiet' (default plain = text-2)",
+      "export type FieldTone"
+    ]
+  },
+  "measured": {
+    "auth-1": "both fields at the frame coordinates: Field box, label, placeholder line box, underline, reveal frame — 0.0 pt on every edge (pairs/F12/geometry-compare.txt)",
+    "auth-2": "Field boxes (62 and 88), label, value line box, underline, format-tick frame, reveal frame, rule hint — 0.0 pt; masked value: 14 discs, pitch 11.0 (frame 11.0), disc 5.5 (frame 6), first x 25 (frame 24), ink rows 569-574 (frame 569-575)",
+    "board": "the five fields of the inputField cell (idle+hint, focus, error, disabled, empty): Field box, label, value / placeholder line box, underline (1 px edge, 2 px lime, 2 px danger, 1 px white 8 %), hint / error — 0.0 pt; colours: label #a9b09d (disabled #858c79), value #f2f5ea (disabled #858c79), placeholder #858c79, hint #858c79, error #f87171",
+    "probes (pulse-verify --live --focus-walk, 10 states)": "focus walk pass on all 10 (every Field stop visibly changes its line), targets pass on all 10, no Field counted as a boxed surface, no horizontal overflow",
+    "kit board (/playground, board layout)": "state F12-kit-board (1300 x 5094, scale 1, live as M): the host puts cell 1 into the board cell \"inputField · idle / focus / error / disabled / empty\"; tiled against the stitched _components-1..4 by pkg/_int/kit-board-tiles.mjs into .pulse/pairs/F12/board/, the cell itself in pairs/F12/inputField.kit-board.pair.png; focus walk 11 stops, all visible; targets pass"
+  },
+  "pictures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/F12/",
+  "verdicts": {
+    "inputField (board cell)": "matched — boxes 0.0 pt; caret 1 px native vs 1.5 pt drawn; two specimen strings differ (not in hu.json)",
+    "auth-1 / auth-2 fields": "matched at the frame coordinates (component); the screens themselves stay hybrid until S-auth"
+  },
+  "lastGreenBuild": "pulse-verify --package F12 --live --focus-walk: build green in 15 s · 4 of 4 captured (live), on pulse-redesign 8f0846a + the F12 hand-in"
+}

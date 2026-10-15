@@ -1,0 +1,22 @@
+diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
+index f9f2bec..0a28e32 100644
+--- a/frontend/src/ui/tokens/tokens.css
++++ b/frontend/src/ui/tokens/tokens.css
+@@ -780,6 +780,17 @@
+ 
+ /* F12 — inputs and the sheet: Field, SearchField, TextArea, NumberStepper, SelectSheet, Sheet */
+ /* lane:F12 */
++:root {
++  /* A masked value (a password) is drawn as 6 pt discs on an 11 pt pitch, centred on the field's
++     line (frame auth-2). Geist's own bullet at the 16 pt body size is a 4 pt dot on a 5 pt pitch,
++     so a password field sets its masked value 1.5 x larger (a 6 pt dot on a 7.5 pt advance) and
++     tracks it out by the difference. The placeholder and a revealed value keep the body size. */
++  --field-mask-size: 24px;
++  --field-mask-tracking: 3.5px;
++  /* The larger bullet sits 1.5 pt under the line's centre; a 3 pt bottom padding on the masked input
++     lifts it back onto the centre (an optical correction of one glyph, not a layout step). */
++  --field-mask-lift: 3px;
++}
+ /* /lane:F12 */
+ 
+ /* F13 — status zone: toast band, offline line, command palette */
