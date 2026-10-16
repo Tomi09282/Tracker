@@ -30,6 +30,12 @@ export interface RowStackProps {
   /** A strong rule under the last row. */
   close?: boolean;
   /**
+   * Take the top padding off the first row and the bottom padding off the last one (a `ListRow`
+   * or a `ListRowSkeleton`): the list's text then stands where a section's content stands
+   * (coach-plans-1, 16 under the section head). Additive, kit gap G-data 4.
+   */
+  trim?: boolean;
+  /**
    * `ul` (the default), `ol` when the order is the content, `div` when the rows are not list items —
    * the options of a radio group, a set of switches under a `fieldset`.
    */
@@ -62,7 +68,7 @@ function rowsOf(children: ReactNode, prefix = ''): Row[] {
   return rows;
 }
 
-export function RowStack({ open = false, close = false, as: Tag = 'ul', role, className, children, ...rest }: RowStackProps) {
+export function RowStack({ open = false, close = false, trim = false, as: Tag = 'ul', role, className, children, ...rest }: RowStackProps) {
   const rows = rowsOf(children);
   if (rows.length === 0) return null;
   const Item = Tag === 'div' ? 'div' : 'li';
@@ -79,7 +85,16 @@ export function RowStack({ open = false, close = false, as: Tag = 'ul', role, cl
       {...rest}
     >
       {rows.map((row, index) => (
-        <Item key={row.key} className={index > 0 ? 'border-t border-hair' : undefined}>
+        <Item
+          key={row.key}
+          className={
+            cn(
+              index > 0 && 'border-t border-hair',
+              trim && index === 0 && '[&_[data-row-pad]]:pt-0',
+              trim && index === rows.length - 1 && '[&_[data-row-pad]]:pb-0',
+            ) || undefined
+          }
+        >
           {row.node}
         </Item>
       ))}

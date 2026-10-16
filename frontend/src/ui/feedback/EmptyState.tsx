@@ -62,6 +62,12 @@ export interface EmptyStateProps {
    * render nothing but this.
    */
   heading?: 'h1' | 'h2';
+  /**
+   * The body's measure. `column` (default): the whole content width. `narrow`: 312 — the kit's
+   * body measure where a frame breaks the line earlier than the column would (notifications-2:
+   * "itt" opens line 2). Kit gap G-data 13, additive.
+   */
+  measure?: 'column' | 'narrow';
   /** Placement only. */
   className?: string;
 }
@@ -70,12 +76,12 @@ export interface EmptyStateProps {
 const isPill = (node: ReactNode) => isValidElement<{ variant?: unknown }>(node) && node.props.variant === 'primary';
 
 export function EmptyState(props: EmptyStateProps) {
-  const { title, body, action, heading: Heading = 'h2', className } = props;
+  const { title, body, action, heading: Heading = 'h2', measure = 'column', className } = props;
   return (
     <div data-kit="emptyState" className={cn('flex w-full flex-col items-start gap-5 text-start', className)}>
       <div className="flex w-full flex-col gap-2">
         <Heading className="text-display break-words text-text-1">{title}</Heading>
-        {body ? <p className="text-body text-text-2">{body}</p> : null}
+        {body ? <p className={cn('text-body text-text-2', measure === 'narrow' && 'max-w-78')}>{body}</p> : null}
       </div>
       {action ? (
         <div

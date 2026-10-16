@@ -9,6 +9,17 @@ import type { NumeralMode } from './Numeral';
 /** What the row stands for when it cannot show a figure: a failed or a pending read. Never a 0. */
 export const LEDGER_DASH = '—';
 
+/** The second label + figure of a two-pair ledger line (admin-1 "GYAKORLAT 1656 · MÉDIAFÁJL 3"). */
+export interface LedgerPair {
+  /** The eyebrow before the figure. */
+  label: ReactNode;
+  /** As `LedgerRow value`: a figure, a node, or `null` / `undefined` for the dash. */
+  value: ReactNode;
+  unit?: string;
+  format?: Intl.NumberFormatOptions;
+  srText?: string;
+}
+
 export interface LedgerRowProps {
   /** The eyebrow on the left ("Érmék") — `eyebrow` 16 / 20 Bold, upper case, `text-2`. Also the row's name. */
   label: ReactNode;
@@ -57,6 +68,12 @@ export interface LedgerRowProps {
   force?: 'pressed' | 'focus';
   /** Placement only. The row fills the width it is given. */
   className?: string;
+  /**
+   * A SECOND label + figure on the same baseline (kit gap G-data 10, admin-1): the row then reads
+   * `label · figure` from the left edge (the figure's ink 12 after the label's) and `pair.label ·
+   * pair.value` ending on the right edge by ink. `note` is not drawn in this form.
+   */
+  pair?: LedgerPair;
 }
 
 /**
@@ -113,6 +130,7 @@ export function LedgerRow({
   disabled = false,
   force,
   className,
+  pair,
 }: LedgerRowProps) {
   const labelId = useId();
   const interactive = to !== undefined || onClick !== undefined;
@@ -127,7 +145,39 @@ export function LedgerRow({
     value
   );
 
-  const body = (
+  const pairDash = pair ? isAbsent(pair.value) || failed || busy : false;
+  const pairFigure = !pair ? null : pairDash ? (
+    <Numeral value={LEDGER_DASH} tone="pending" />
+  ) : isFigure(pair.value) ? (
+    <Numeral value={pair.value} format={pair.format} srText={pair.srText} />
+  ) : (
+    pair.value
+  );
+
+  const body = pair ? (
+    <>
+      <span aria-hidden className="h-[57px] w-0 shrink-0" />
+      <span className="flex min-w-0 items-baseline gap-3">
+        <span id={labelId} className="text-eyebrow text-text-2">
+          {label}
+        </span>
+        <span className="flex shrink-0 items-baseline">
+          {figure}
+          {unit && !dash ? <span className={UNIT}>{unit}</span> : null}
+        </span>
+      </span>
+      <span className="ml-auto flex min-w-0 items-baseline gap-3 pl-3">
+        <span className="text-eyebrow text-text-2">{pair.label}</span>
+        <span className="flex shrink-0 items-baseline">
+          {pairFigure}
+          {pair.unit && !pairDash ? <span className={UNIT}>{pair.unit}</span> : null}
+        </span>
+      </span>
+      {showChevron ? (
+        <ChevronRight aria-hidden size={16} strokeWidth={1.75} className="absolute -right-[5px] top-[30px] text-text-3" />
+      ) : null}
+    </>
+  ) : (
     <>
       <span aria-hidden className="h-[57px] w-0 shrink-0" />
       <span className="flex min-w-28 shrink-0 items-center gap-2 pr-3">

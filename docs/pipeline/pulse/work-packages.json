@@ -1029,6 +1029,78 @@
         "node scripts/pulse-verify.mjs capture of auth-1 / auth-2"
       ],
       "notes": "Added by the integrator at merge (merge-G-shell): the lane was cut from _kit-gaps.md and never had an entry. Its owns are only its own files; the kit files it extends stay owned by their closed lanes (F6, F8, F11) and are listed under extends, so ownership keeps one owner per file. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
+    },
+    {
+      "id": "G-data",
+      "title": "Kit gaps of data and structure (.pulse/prep/_kit-gaps.md section A items 1, 2, 4, 5, 10, 11 and the ui/data + ui/feedback rows of 13)",
+      "owns": [
+        "frontend/src/ui/data/Dot.tsx",
+        "frontend/src/ui/data/RoleKey.tsx",
+        "frontend/src/ui/data/StatusLine.tsx",
+        "frontend/src/ui/data/SplitBar.tsx",
+        "frontend/src/ui/data/FigureUnit.tsx",
+        "frontend/src/features/playground/kit/gap-data.tsx",
+        "docs/pipeline/pulse/kit/gap-data.md",
+        "docs/pipeline/pulse/pkg/G-data/**"
+      ],
+      "extends": [
+        {
+          "file": "frontend/src/ui/data/ListRow.tsx",
+          "owner": "F9",
+          "what": "kicker, kickerLead, titleSize, subFace, subLead, subInk, valueOn, valueUnit, valueStep, pad; ListRowSkeleton kicker"
+        },
+        {
+          "file": "frontend/src/ui/data/RowStack.tsx",
+          "owner": "F9",
+          "what": "trim"
+        },
+        {
+          "file": "frontend/src/ui/data/LedgerRow.tsx",
+          "owner": "F10",
+          "what": "pair (second label and figure)"
+        },
+        {
+          "file": "frontend/src/ui/data/SegmentBar.tsx",
+          "owner": "F10",
+          "what": "interactive slots mode (plan-editor cycle strip)"
+        },
+        {
+          "file": "frontend/src/ui/data/MacroColumns.tsx",
+          "owner": "F10",
+          "what": "tracks"
+        },
+        {
+          "file": "frontend/src/ui/data/Numeral.tsx",
+          "owner": "F10",
+          "what": "dot, dotLabel, capitals A-H"
+        },
+        {
+          "file": "frontend/src/ui/feedback/EmptyState.tsx",
+          "owner": "F9",
+          "what": "measure=\"narrow\" (312 wide)"
+        },
+        {
+          "file": "frontend/src/ui/media/UserPhoto.tsx",
+          "owner": "F5",
+          "what": "feather, bleed"
+        }
+      ],
+      "dependsOn": [
+        "F5",
+        "F9",
+        "F10"
+      ],
+      "parallelGroup": "kit-gap lane (after F17, parallel with the screens)",
+      "size": "M",
+      "acceptance": [
+        "every addition is additive: no existing call site changes its look",
+        "kit page docs/pipeline/pulse/kit/gap-data.md and specimens in features/playground/kit/gap-data.tsx; Figma | app | diff pairs in .pulse/pairs/G-data"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-G-data): the lane was cut from _kit-gaps.md and never had an entry. Its owns are only its own files; the kit files it extends stay owned by their closed lanes and are listed under extends, so ownership keeps one owner per file. Item 5 (Monogram 96 / 124, dot) was already shipped by F9 stage 2. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
     }
   ],
   "screens": [

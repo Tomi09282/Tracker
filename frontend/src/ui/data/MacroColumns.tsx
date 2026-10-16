@@ -26,6 +26,12 @@ export interface MacroColumnsProps {
    * `num` numeral (a `StatBlock`), then the bar and the caption.
    */
   size?: 'data' | 'num';
+  /**
+   * The number of equal tracks the width is cut into. Default `columns.length`. A row with FEWER
+   * columns than tracks keeps the full rows' column width (progress-1: a short last row stays
+   * 76.5 pt per column) — kit gap G-data 13, additive.
+   */
+  tracks?: number;
   /** Placement only. The row fills the width it is given. */
   className?: string;
 }
@@ -42,10 +48,11 @@ export interface MacroColumnsProps {
  * over its target draws its figure and its bar in `warn`. Columns stand at the top of the row and
  * hug their own content — one without a bar is shorter, as on the board.
  */
-export function MacroColumns({ columns, size = 'data', className }: MacroColumnsProps) {
+export function MacroColumns({ columns, size = 'data', tracks, className }: MacroColumnsProps) {
   const { i18n } = useTranslation();
+  const n = Math.max(1, Math.floor(tracks ?? columns.length));
   return (
-    <div data-kit="macroColumns" className={cn('grid w-full items-start gap-4', className)} style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}>
+    <div data-kit="macroColumns" className={cn('grid w-full items-start gap-4', className)} style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
       {columns.map((column) => {
         const over = typeof column.ratio === 'number' && column.ratio > 1;
         const figure = typeof column.value === 'number' ? column.value.toLocaleString(i18n.language) : column.value;

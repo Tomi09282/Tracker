@@ -75,6 +75,15 @@ export interface NumeralProps {
   srText?: string;
   /** Placement only — never a `text-…` class. */
   className?: string;
+  /**
+   * A full stop in the lamp colour after the ink, as `Monogram` draws it (kit gap G-data 13,
+   * style-studio-1/2: the live variant's letter): diameter round(size / 8) — 16 at the giant, 6 at
+   * `num` — round(d / 2.75) after the ink, its bottom on the baseline. `warn` for a state that waits.
+   * Not drawn after a unit.
+   */
+  dot?: boolean | 'accent' | 'warn';
+  /** The dot's accessible name, when its colour carries a state. Without it the dot is decoration. */
+  dotLabel?: string;
 }
 
 export interface FractionProps {
@@ -119,6 +128,16 @@ const GLYPH: Record<string, readonly [number, number, number, number, number]> =
   '−': [0.516, 0.04, 0.04, 0.423, 0],
   '-': [0.446, 0.03, 0.03, 0.42, 0],
   '–': [0.546, 0.03, 0.03, 0.42, 0],
+  // Capitals, for a numeral that is a letter (style-studio: the variant "D" with its dot) — the
+  // same face measurement as `Monogram`'s table (docs/pipeline/pulse/pkg/F9/proofs/monogram-metrics.json).
+  A: [0.478, 0.01, 0.01, 0.8, 0],
+  B: [0.4725, 0.04, 0.0315, 0.8, 0],
+  C: [0.49, 0.035, 0.03, 0.81, 0.01],
+  D: [0.495, 0.04, 0.035, 0.8, 0],
+  E: [0.408, 0.04, 0.022, 0.8, 0],
+  F: [0.406, 0.04, 0.02, 0.8, 0],
+  G: [0.493, 0.035, 0.031, 0.81, 0.01],
+  H: [0.485, 0.04, 0.04, 0.8, 0],
 };
 /** A glyph the table does not hold (a space, the em dash of a failed read): average bearings, cap high (0.8 em). */
 const OTHER = [0.5, 0.035, 0.035, 0.8, 0] as const;
@@ -211,7 +230,21 @@ function Figure({ text, size, mode, from, direction, overshoot, hidden, classNam
  * A big figure on its ink (kit `numeral`). It hugs its content and stands on the edge it is given:
  * a giant's ink starts exactly on the gutter. With `unit` the unit stands on the digits' baseline.
  */
-export function Numeral({ value, size = 'num', tone = 'ink', mode = 'static', from, format, unit, srText, className }: NumeralProps) {
+/**
+ * The dot's diameter and its distance from the ink, in the numeral's own em so that the fluid
+ * giant scales them: round(size / 8) and round(d / 2.75), as `monogramMark` does (`app-kit.js`).
+ * 124 → 16 and 6; 48 → 6 and 2. `round()` falls back to the unrounded em where unsupported.
+ */
+const DOT_D = 'round(nearest, 0.125em, 1px)';
+const DOT_STYLE: CSSProperties = {
+  width: DOT_D,
+  height: DOT_D,
+  marginLeft: `round(nearest, calc(${DOT_D} / 2.75), 1px)`,
+};
+const DOT_FALLBACK: CSSProperties = { width: '0.125em', height: '0.125em', marginLeft: '0.0455em' };
+const ROUNDS = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('width', 'round(nearest, 0.125em, 1px)');
+
+export function Numeral({ value, size = 'num', tone = 'ink', mode = 'static', from, format, unit, srText, className, dot, dotLabel }: NumeralProps) {
   const figure = useFigure(value, format);
   const start = useFigure(from ?? '', format);
   const direction = useDirection(value);
@@ -225,6 +258,16 @@ export function Numeral({ value, size = 'num', tone = 'ink', mode = 'static', fr
     >
       {srText ? <span className="sr-only">{srText}</span> : null}
       <Figure text={figure} size={size} mode={mode} from={from === undefined ? undefined : start} direction={direction} overshoot hidden={!!srText} />
+      {dot && !unit ? (
+        <span
+          data-tone={dot === 'warn' ? 'warn' : 'accent'}
+          role={dotLabel ? 'img' : undefined}
+          aria-label={dotLabel}
+          aria-hidden={dotLabel ? undefined : true}
+          className={cn('inline-block shrink-0 self-baseline rounded-full', dot === 'warn' ? 'bg-warning' : 'bg-accent')}
+          style={ROUNDS ? DOT_STYLE : DOT_FALLBACK}
+        />
+      ) : null}
       {unit ? (
         <span aria-hidden={srText ? true : undefined} className={cn('font-body text-cap tracking-normal normal-case text-text-2', TRIM_CLASS)}>
           {unit}
