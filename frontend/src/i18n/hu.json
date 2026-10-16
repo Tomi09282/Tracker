@@ -108,6 +108,7 @@
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
     "displayNamePlaceholder": "Ahogy mások látnak",
+    "unlockedNote": "feloldva",
     "role": {
       "user": "Tag",
       "coach": "Edző",

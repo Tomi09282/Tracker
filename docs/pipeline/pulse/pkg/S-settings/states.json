@@ -1,0 +1,336 @@
+{
+  "about": "S-settings - the undrawn states of Profil (/settings, PLAN 4.1 rule 7) and the frame data of settings-1 / settings-2. Every fixture is a list of edits over the recording of the same endpoint, or a mutation outcome with an empty body (R26). Every state is replay. Accounts: M = user@ (the member of both frames), A = admin@ (the admin row). Nothing is written live by this package.",
+  "overrides": {
+    "settings-1": {
+      "why": "The frame is drawn for Takács Dániel (takacs.daniel@pelda.hu, 83,1 kg); the recording of M is Teszt Elek (user@tracker.local, last weight 83,436 kg on 2026-10-14). The edits set only the drawn name, address and the last weight, so the monogram, the name line and the figure can be compared box for box; balance (190) and 4 / 7 are M's recorded values. The state on the plain recording is settings-recorded. Verdict matched-fixture.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/measurements",
+          "edits": [
+            {
+              "pointer": "/measurements/41/value",
+              "value": 83.1
+            }
+          ]
+        }
+      ]
+    },
+    "settings-2": {
+      "why": "The same frame data as settings-1, and the frame draws the equipment status 'Felszerelés mentve' in the section head - a state that exists only after a tap. The script taps Rúd twice (the selection ends where the recording has it), lets the 700 ms autosave run, and the PATCH /onboarding is answered 200 by a fixture: nothing reaches the server. Verdict matched-fixture.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/measurements",
+          "edits": [
+            {
+              "pointer": "/measurements/41/value",
+              "value": 83.1
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/onboarding",
+          "status": 200,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Rúd"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Rúd",
+            "checked": false
+          }
+        },
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Rúd"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Rúd",
+            "checked": true
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "settings.equipmentSaved"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "states": {
+    "settings-recorded": {
+      "title": "Profil — a felvett adatokkal",
+      "account": "M",
+      "route": "/settings",
+      "height": 2026,
+      "reach": "seed",
+      "why": "both frames' state on M's recording exactly as it is (Teszt Elek, 190, 4 / 7, 83,4 kg) - the proof that the three new reads draw real data",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.logout"
+        }
+      }
+    },
+    "settings-reads-failed": {
+      "title": "Profil — az érme, eredmény és mérés olvasás nem sikerült",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the three new reads fail: each ledger figure prints the em dash, never 0, and the rest of the screen stands",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "status": 500,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/achievements",
+          "status": 500,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/measurements",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/coins/wallet",
+            "status": 500
+          },
+          {
+            "path": "/api/v1/coins/achievements",
+            "status": 500
+          },
+          {
+            "path": "/api/v1/measurements",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "text": "—"
+        }
+      ]
+    },
+    "settings-equipment-error": {
+      "title": "Profil — a felszerelés mentése nem sikerült",
+      "account": "M",
+      "route": "/settings",
+      "height": 2026,
+      "reach": "fixture",
+      "why": "an equipment tap whose autosave is refused: the danger line with the questionnaire's own message, the chip stays as the user left it",
+      "fixtures": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/onboarding",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Rúd"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Rúd",
+            "checked": false
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "onboarding.saveError"
+        }
+      }
+    },
+    "settings-name-dirty": {
+      "title": "Profil — a név megváltozott, mentés látszik",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "replay",
+      "why": "the save control appears only once the text differs from the saved name; it is not pressed (PATCH /auth/me is never fired)",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "text": "Teszt Elek Jr"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        }
+      }
+    },
+    "settings-name-invalid": {
+      "title": "Profil — túl rövid név, a mentés tiltva",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "replay",
+      "why": "one character is under the server's 2-character floor: the save control is there and disabled",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "text": "T"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        },
+        "disabled": true
+      }
+    },
+    "settings-admin": {
+      "title": "Profil — admin fiók, az admin sor",
+      "account": "A",
+      "route": "/settings",
+      "height": 2026,
+      "reach": "seed",
+      "why": "the admin row (the second door to /admin, owner Q4: it stays) is drawn for admins only",
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "role": "link",
+          "name": {
+            "key": "settings.openAdmin"
+          }
+        }
+      ]
+    },
+    "settings-stale-theme": {
+      "title": "Profil — régi témacsomag a böngészőben",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "seed",
+      "why": "dev-verify 7: a browser that still holds an old tracker.theme (a paid pack, a custom accent, transparency) renders plain Pulse",
+      "localStorage": {
+        "tracker.theme": {
+          "pack": "aurora",
+          "accent": "#ff3366",
+          "gradient": null,
+          "transparency": "full"
+        }
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.logout"
+        }
+      }
+    }
+  }
+}

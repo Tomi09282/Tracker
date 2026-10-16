@@ -1,0 +1,19 @@
+{
+  "package": "S-settings",
+  "base": "ba1fa062c1c69483721aeb0b811f202dfbda4274",
+  "namespaces": ["settings"],
+  "set": [
+    {
+      "key": "settings.unlockedNote",
+      "hu": "feloldva",
+      "en": "unlocked",
+      "de": "freigeschaltet",
+      "after": "settings.displayNamePlaceholder",
+      "copy": "inventory",
+      "source": "frame settings-1, Ledger row/Eredmények note 'feloldva' (the word of coins.unlockedCount '{{done}} / {{total}} feloldva'); understand/screens.md #7: one new key in 3 bundles"
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}

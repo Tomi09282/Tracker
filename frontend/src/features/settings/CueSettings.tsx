@@ -1,7 +1,5 @@
-import { useSyncExternalStore } from 'react';
+import { useId, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LucideIcon } from 'lucide-react';
-import { Bell, Speech, Vibrate } from 'lucide-react';
 import {
   cueSnapshot,
   setCueEnabled,
@@ -14,12 +12,14 @@ import {
   hapticsAvailable,
   type CueChannel,
 } from '../../features/workout/cues';
+import { Section } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
 import { Switch } from '../../ui/primitives/Switch';
-import { Surface } from '../../ui/primitives/Surface';
-import { cn } from '../../lib/cn';
 
 /**
- * Which cues the workout player is allowed to emit on THIS device.
+ * Which cues the workout player is allowed to emit on THIS device — the "Hangok és rezgés"
+ * section of `settings-2`: three rows on the gutter, a switch at the end of each.
  *
  * Three switches rather than one, because they fail differently. The synthetic voice is the one
  * people actually want gone — it is grating in a gym, and on a device with no voice installed for
@@ -37,108 +37,87 @@ function useCues() {
   return useSyncExternalStore(subscribeCues, cueSnapshot, cueSnapshot);
 }
 
-function Row({
+function CueRow({
   channel,
-  icon: Icon,
   label,
   hint,
   available,
   onPreview,
 }: {
   channel: CueChannel;
-  icon: LucideIcon;
   label: string;
   hint: string;
   available: boolean;
   onPreview: () => void;
 }) {
   const cues = useCues();
-  const on = cues[channel];
-  const id = `cue-${channel}`;
+  const id = useId();
+  const titleId = `${id}-title`;
+  const hintId = `${id}-hint`;
 
   return (
-    <div className="flex items-center gap-tight px-[var(--card-pad)] py-2">
-      {/* The dim lands on the icon and the words, NOT on the whole row — the Switch already
-          carries the disabled opacity from `control.ts`, and stacking the two would sink an
-          unavailable channel to 20% and read as broken rather than as absent. */}
-      <div className={cn('flex min-w-0 flex-1 items-center gap-tight', !available && 'opacity-45')}>
-        <span
-          aria-hidden
-          // `rounded-field`, like every other 44px glyph square on this screen. `--radius-card`
-          // and `--radius-field` diverge sharply per pack (Neon: radius-6 vs radius-full), so the
-          // same holder rendered as a box in the section headers and a pill here.
-          className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-2"
-        >
-          <Icon className="size-icon-m" strokeWidth={2} />
-        </span>
-        <div className="min-w-0">
-          <span id={id} className="text-body-legacy block text-text-1">
-            {label}
-          </span>
-          <p id={`${id}-hint`} className="text-caption mt-0.5 text-text-3">
-            {hint}
-          </p>
-        </div>
-      </div>
-
-      <Switch
-        checked={on}
-        labelledBy={id}
-        describedBy={`${id}-hint`}
-        // A toggle for something that cannot happen would be a lie. Disabled and dimmed rather
-        // than hidden, so the absence is explained rather than mysterious.
-        disabled={!available}
-        onChange={(next) => {
-          setCueEnabled(channel, next);
-          // Turning something ON demonstrates it immediately, inside the tap so iOS counts it as a
-          // gesture. Nobody should have to start a Tabata to find out what they just enabled.
-          if (next) onPreview();
-        }}
-      />
-    </div>
+    // A row that only holds a control is not dimmed: the switch carries its own disabled state and
+    // the words stay readable (the frame's "Rezgés": switch at 40 %, title in ink).
+    <ListRow
+      title={label}
+      titleId={titleId}
+      sub={<span id={hintId}>{hint}</span>}
+      subLines={3}
+      control={
+        <Switch
+          checked={cues[channel]}
+          labelledBy={titleId}
+          describedBy={hintId}
+          // A switch for something that cannot happen would be a lie. Disabled rather than hidden,
+          // so the absence is explained rather than mysterious.
+          disabled={!available}
+          onChange={(next) => {
+            setCueEnabled(channel, next);
+            // Turning something ON demonstrates it immediately, inside the tap so iOS counts it as a
+            // gesture. Nobody should have to start a Tabata to find out what they just enabled.
+            if (next) onPreview();
+          }}
+        />
+      }
+    />
   );
 }
 
 export function CueSettings() {
   const { t, i18n } = useTranslation();
 
-  // Read once, and read by BOTH props. The row already rendered dimmed and inert without a motor,
-  // but its hint never said why — and the iPhone fact ("no vibration, so the beep is the only
-  // non-visual cue left") was welded into the SÍPSZÓ hint, on a row it is not about. The spec's
-  // [!important] moves that sentence here rather than copying it, so it lives in one place.
+  // Read once, and read by BOTH props: without a motor the row is disabled AND its hint says why
+  // (the iPhone fact lives on the vibration row, the row it is about).
   const haptics = hapticsAvailable();
 
   return (
-    // One card, three rows, hairlines between them — `pad="none"` because the rows own their
-    // own padding so a divider runs the full width of the card instead of floating inside it.
-    <Surface pad="none" className="divide-y divide-[var(--surface-border)] overflow-hidden">
-      <Row
-        channel="speech"
-        icon={Speech}
-        label={t('settings.cues.speech')}
-        hint={t('settings.cues.speechHint')}
-        available={speechAvailable()}
-        onPreview={() => speak(t('workout.interval.spokenWork', { round: 1, total: 8 }), i18n.language)}
-      />
-      <Row
-        channel="tone"
-        icon={Bell}
-        label={t('settings.cues.tone')}
-        hint={t('settings.cues.toneHint')}
-        available
-        onPreview={() => {
-          unlockAudio();
-          tone(1320, 260);
-        }}
-      />
-      <Row
-        channel="haptics"
-        icon={Vibrate}
-        label={t('settings.cues.haptics')}
-        hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
-        available={haptics}
-        onPreview={() => vibrate('intervalWork')}
-      />
-    </Surface>
+    <Section title={t('settings.cues.title')}>
+      <RowStack as="div" role="group" aria-label={t('settings.cues.title')}>
+        <CueRow
+          channel="speech"
+          label={t('settings.cues.speech')}
+          hint={t('settings.cues.speechHint')}
+          available={speechAvailable()}
+          onPreview={() => speak(t('workout.interval.spokenWork', { round: 1, total: 8 }), i18n.language)}
+        />
+        <CueRow
+          channel="tone"
+          label={t('settings.cues.tone')}
+          hint={t('settings.cues.toneHint')}
+          available
+          onPreview={() => {
+            unlockAudio();
+            tone(1320, 260);
+          }}
+        />
+        <CueRow
+          channel="haptics"
+          label={t('settings.cues.haptics')}
+          hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
+          available={haptics}
+          onPreview={() => vibrate('intervalWork')}
+        />
+      </RowStack>
+    </Section>
   );
 }

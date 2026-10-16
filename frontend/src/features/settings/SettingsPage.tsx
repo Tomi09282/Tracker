@@ -1,28 +1,25 @@
-import type { LucideIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Coins,
-  Globe,
-  LogOut,
-  ShieldCheck,
-  User,
-  Volume2,
-  Wrench,
-} from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { Screen } from '../../ui/shell/Screen';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
+import { LedgerRow } from '../../ui/data/LedgerRow';
+import { Fraction } from '../../ui/data/Numeral';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
+import { SectionHeader } from '../../ui/data/SectionHeader';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Sparkline } from '../../ui/feedback/Sparkline';
+import type { TrendPoint } from '../../ui/feedback/TrendChart';
+import { Pic } from '../../ui/media/Pic';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { CueSettings } from './CueSettings';
 import { EquipmentSection } from './EquipmentSection';
 import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
-import { isValidDisplayName, personInitials, personLabel } from '../../lib/person';
+import { toCoins, useAchievements, useWallet } from '../coins/useCoins';
+import { useMeasurements } from '../progress/useProgress';
+import { isValidDisplayName, personLabel } from '../../lib/person';
 
 /**
  * The role, in the user's own language. `SettingsPage` used to print `user.role` raw, so a
@@ -31,9 +28,8 @@ import { isValidDisplayName, personInitials, personLabel } from '../../lib/perso
  * here instead of a raw key rendered on screen.
  *
  * Settings-owned keys, not `adminUsers.role.*`: that group is the ADMIN TABLE's vocabulary, where
- * `user` is the row's role column and reads `Felhasználó`. On your own account chip the word is
- * `Tag` — you are a member of the product, not a row in a staff table — and borrowing the admin
- * string put the table's word on the one line of the screen that is about you.
+ * `user` is the row's role column and reads `Felhasználó`. On your own account the word is `Tag` —
+ * you are a member of the product, not a row in a staff table.
  */
 const ROLE_LABEL: Record<SessionUser['role'], string> = {
   user: 'settings.role.user',
@@ -41,246 +37,186 @@ const ROLE_LABEL: Record<SessionUser['role'], string> = {
   admin: 'settings.role.admin',
 };
 
-/**
- * A section's title, with its glyph in a tinted holder.
- *
- * The holder is the repeated element of this redesign: a 20px glyph on its own has too little
- * visual mass to open a section, and the 44px tinted square is what makes four sections scan as
- * four objects rather than as four lines of small caps.
- *
- * It draws itself from `--tile-tint` / `--tile-tint-fg` at `rounded-field`, which is exactly what
- * `features/library/SectionBadge.tsx` renders — the same element on the screen next door. The two
- * disagreed (card radius and `accent-subtle` here, field radius and the tile tokens there), so
- * one section header looked different depending on which screen you were on. This is still a
- * second copy of one component; see the handover note for promoting SectionBadge into `src/ui/`.
- */
-function SectionHeader({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
-  return (
-    <div className="flex items-center gap-tight">
-      <span
-        aria-hidden
-        className="grid size-11 shrink-0 place-items-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
-      >
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
-      <h2 className="text-micro-legacy uppercase text-text-3">{title}</h2>
-    </div>
-  );
-}
+/** The metric the ledger's third row shows — the one the Haladás tab opens on for most people. */
+const WEIGHT = 'weight';
 
 /**
- * Settings — [[55-Screens/settings]].
+ * The trend in the weight row lands its end dot 16 pt before the figure (`settings-1.body.js`:
+ * `sw = clamp(70, 120, figureInk.left - 16 - 112)`). The figure's ink cannot be measured before it
+ * is drawn, so it is estimated from the glyphs of a 48 pt Big Shoulders `num` figure (no tabular
+ * figures: "1" is about 13 wide, "," 10, every other digit 24). With the unit after it the figure
+ * ends on x 315 of the row, so the frame's "83,1" (71) leaves 118.
+ */
+const GLYPH_W: Record<string, number> = { '1': 13, ',': 10, '.': 10 };
+const sparkWidth = (figure: string) => {
+  const ink = [...figure].reduce((sum, ch) => sum + (GLYPH_W[ch] ?? 24), 0);
+  return Math.max(70, Math.min(118, 189 - ink));
+};
+
+/**
+ * Profil — frames `settings-1` (the first view) and `settings-2` (the whole page).
  *
- * Almost every visit is one of two errands: sign out, silence the voice. The screen is ordered so
- * both are reachable without a decision.
+ * The page is a person first and settings second: the monogram is the screen's one hero, the
+ * three facts about you are a ledger (balance, achievements, weight — every row a door), and
+ * "Beállítások" is a heading half-way down, where the settings begin. Nothing is enclosed: the
+ * grouping is the rules, the eyebrows and the 32 between blocks.
  *
  * There is no appearance section. Pulse is the only look (owner decision D1): the theme picker,
  * the transparency choice and the client theme engine behind them are gone, and nothing here reads
- * a stored theme or asks the server for one.
+ * a stored theme or asks the server for one. The admin row stays for admins (owner answer Q4).
  *
- * THE ANCHOR IS A PERSON, not a chart. This screen is about an account and a device, and the
- * identity is the one thing that has to be unambiguous before anything below it is touched:
- * signing out of the wrong account is the only irreversible act here.
+ * A tab root: no back control and no top title — the monogram starts where the frame puts it.
  */
 export function SettingsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: user, isPending, isError } = useSession();
   const logout = useLogout();
 
-  // THE BADGE HAS TO MEAN SOMETHING. A check permanently drawn on an avatar is a claim the
+  // The three facts of the ledger. Each read is on its own: a failed one prints the dash in ITS
+  // row (never a 0) and the other two still stand.
+  const wallet = useWallet();
+  const achievements = useAchievements();
+  const measurements = useMeasurements();
+
+  // THE DOT HAS TO MEAN SOMETHING. A mark permanently drawn on the monogram is a claim the
   // product makes about the account with nothing behind it. There is no `email_verified` on the
   // session, so the only true statement available is "this session is live and healthy" — which
-  // is exactly what a resolved, non-null /auth/me is. A failed session read drops the badge with
-  // the email, rather than decorating an account we could not confirm.
+  // is exactly what a resolved, non-null /auth/me is. A failed session read drops the dot.
   const sessionHealthy = !isPending && !isError && user != null;
-  // Initials of the NAME, not the first letter of the address. `personInitials` is the same
-  // function the coach's roster uses, so your monogram there and here cannot disagree.
-  const monogram = user ? personInitials(user) : '';
+
+  const unlocked = useMemo(() => {
+    const list = achievements.data?.achievements;
+    if (!list) return undefined;
+    return { done: list.filter((a) => a.unlockedAt != null).length, total: list.length };
+  }, [achievements.data]);
+
+  // Weight readings, oldest first (x is time: an out-of-order row would draw the line doubling back).
+  const weight = useMemo(() => {
+    const rows = (measurements.data?.measurements ?? []).filter((m) => m.metric_key === WEIGHT);
+    if (!rows.length) return undefined;
+    const sorted = [...rows].sort((a, b) => (a.measured_on < b.measured_on ? -1 : a.measured_on > b.measured_on ? 1 : 0));
+    const series: TrendPoint[] = sorted.map((m) => ({ date: m.measured_on, value: m.value }));
+    const last = sorted[sorted.length - 1];
+    return { series, value: last.value, unit: last.unit === 'pct' ? '%' : last.unit };
+  }, [measurements.data]);
+
+  const weightFigure = weight ? weight.value.toLocaleString(i18n.language, { maximumFractionDigits: 1 }) : '';
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      <div className="flex flex-col gap-group">
-        <header className="relative flex min-h-[var(--target-min)] items-center justify-center">
-          <Pressable
-            shape="icon"
-            variant="ghost"
-            aria-label={t('common.back')}
-            onClick={() => history.back()}
-            className="absolute left-0"
-          >
-            <ChevronLeft className="size-icon-l" strokeWidth={2} aria-hidden />
-          </Pressable>
-          <h1 className="text-title-1 text-text-1">{t('settings.title')}</h1>
-        </header>
-
-        {/* The account block lost its visible `Fiók` heading in the redesign — the identity IS
-            the heading now. It keeps the word as an ACCESSIBLE name, because a screen-reader user
-            otherwise meets an unlabelled cluster of three controls between the h1 and the first
-            section, and `Fiók` is exactly what that cluster is. */}
-        <section aria-label={t('settings.account')} className="flex flex-col gap-group">
-          <div className="flex flex-col items-center gap-tight">
+    <Screen top="root">
+      {/* The person and the settings' first field are one block: 36 between the two halves
+          (`settings-1.body.js` "Profile" gap), 32 between every section after it (the screen's). */}
+      <div className="mt-4 flex flex-col gap-9">
+        <div className="flex flex-col gap-6">
+          {/* The account block keeps `Fiók` as an ACCESSIBLE name: the identity is its visible
+              heading, and a screen-reader user otherwise meets an unnamed cluster. */}
+          <section aria-label={t('settings.account')} className="flex flex-col gap-7">
             {isPending ? (
-              // The skeleton carries the REAL geometry — 80px ring, one body line, one chip — so
-              // the swap when the session lands moves nothing.
               <>
-                <Skeleton className="size-20 rounded-full" />
-                <Skeleton className="h-[22px] w-52" />
-                <Skeleton className="h-7 w-16 rounded-chip" />
+                <MonogramSkeleton size={176} className="self-start" />
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-56" />
+                </div>
               </>
             ) : (
               <>
-                <div className="relative">
-                  {/* `rounded-full`, not `rounded-chip`: a pack is allowed to re-shape CONTROLS,
-                      and Mono squares every chip. An avatar is not a control, and a square
-                      monogram is not the same element. */}
-                  <div className="grid size-20 place-items-center rounded-full border-4 border-accent bg-surface-2">
-                    <span aria-hidden className="font-display text-title-1 text-text-1">
-                      {monogram}
-                    </span>
-                  </div>
-                  {sessionHealthy ? (
-                    <span
-                      aria-hidden
-                      className="absolute -bottom-1 -right-1 grid size-7 place-items-center rounded-full border-2 border-surface-0 bg-success text-on-success"
-                    >
-                      <Check className="size-icon-s" strokeWidth={3} />
-                    </span>
-                  ) : null}
-                </div>
-
-                {/* On a failed session read both slots stay EMPTY rather than showing a
+                {user ? <Monogram person={user} size={176} dot={sessionHealthy} className="self-start" /> : null}
+                {/* On a failed session read the lines stay EMPTY rather than showing a
                     placeholder account — a wrong identity here is worse than a missing one.
-
-                    The NAME is the identity and the address is a fact about the account, so they
-                    are two lines and not one. This is also the one screen in the app that still
-                    prints the address in full, and it should: it is your own, it is under a
-                    heading that says `Fiók`, and you need to know which account you are signed
-                    into. Everywhere ELSE it was a leak — see lib/person.ts. */}
-                <p className="text-body-legacy text-text-1">{user ? personLabel(user) : ''}</p>
-                <p className="text-caption text-text-3">{user?.email}</p>
-
-                {user ? (
-                  <span className="text-caption rounded-chip border border-[var(--surface-border)] px-3 py-1 text-text-2">
-                    {t(ROLE_LABEL[user.role])}
-                  </span>
-                ) : null}
+                    This is the one screen that prints the address in full: it is your own. */}
+                <div className="flex flex-col gap-1">
+                  <p className="text-title text-text-1">{user ? personLabel(user) : ''}</p>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="min-w-0 truncate text-body text-text-2">{user?.email}</p>
+                    {user ? <span className="shrink-0 text-micro text-text-2">{t(ROLE_LABEL[user.role])}</span> : null}
+                  </div>
+                </div>
               </>
             )}
-          </div>
+          </section>
 
-          {/* No section card around it, and no confirmation dialog: one tap, busy while it runs.
-              It renders even while the session is still loading, because it depends on there
-              BEING a session, not on the session's contents. */}
-          <Pressable
-            variant="secondary"
-            className="w-full"
-            busy={logout.isPending}
-            icon={<LogOut className="size-icon-m" strokeWidth={2} aria-hidden />}
-            onClick={() => logout.mutate()}
-          >
-            {t('auth.logout')}
-          </Pressable>
+          {/* THE WALLET'S ONLY DOOR ON A PHONE is the first ledger row: /coins has no tab, and
+              the command palette that lists it is desktop-only. check-nav asserts the link and
+              verify-nav-gate anchors on the literal attribute below. */}
+          <RowStack open close>
+            <LedgerRow
+              to="/coins"
+              label={t('nav.coins')}
+              labelTrail={<Pic slot="coin" width={22} />}
+              note={t('coins.balanceCaption')}
+              value={wallet.data ? toCoins(wallet.data.balanceMinor) : undefined}
+              failed={wallet.isError}
+              busy={wallet.isPending}
+            />
+            <LedgerRow
+              to="/coins"
+              label={t('coins.tab.achievements')}
+              note={t('settings.unlockedNote')}
+              // No srText: the row's note already says "feloldva", so the link reads
+              // "Eredmények feloldva 4 / 7" instead of naming the word twice.
+              value={unlocked ? <Fraction value={unlocked.done} of={unlocked.total} /> : undefined}
+              failed={achievements.isError}
+              busy={achievements.isPending}
+            />
+            <LedgerRow
+              to="/progress"
+              label={t('progress.metricName.weight')}
+              note={
+                weight && weight.series.length >= 3 ? (
+                  <Sparkline series={weight.series} width={sparkWidth(weightFigure)} height={28} />
+                ) : undefined
+              }
+              value={weight ? weightFigure : undefined}
+              unit={weight?.unit}
+              failed={measurements.isError}
+              busy={measurements.isPending}
+            />
+          </RowStack>
+        </div>
 
-          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET.
-              `users.display_name` is NULL for everybody until somebody types here, so an endpoint
-              without this control would be a column nothing can ever fill. It sits in the account
-              block because that is what it is a fact about, and BELOW the sign-out, because the
-              screen spec anchors `Kijelentkezés` directly under the identity cluster with nothing
-              between them — same reason the coins row sits there. A card of label, hint, input and
-              a conditional Save wedged above it pushed the sign-out a full card down and took
-              HANGOK ÉS REZGÉS below the fold with it. */}
-          {user ? <DisplayNameRow user={user} /> : null}
-
-          {/* THE WALLET'S ONLY DOOR ON A PHONE.
-              /coins was found by the Phase 8 audit with no inbound link at all — wallet, ledger,
-              store and achievements, all finished, all unreachable below 1024px because the
-              command palette that listed them is `hidden lg:flex`. It has no bottom-bar tab in
-              the approved design either, so this row IS the path. It stays inside the account
-              block rather than getting its own section because a balance is an account fact, not
-              a setting — and it sits AFTER the sign-out because the screen spec anchors the
-              sign-out directly under the identity.
-              check-nav.mjs asserts this link exists. */}
-          <Surface
-            as={Link}
-            to="/coins"
-            interactive
-            className="flex min-h-[var(--target-min)] items-center gap-tight"
-          >
-            {/* Same holder as the section headers above — one radius and one tint for every
-                44px glyph square on the screen, rather than two that differ by four pixels. */}
-            <span
-              aria-hidden
-              className="grid size-11 shrink-0 place-items-center rounded-field bg-[var(--tile-tint)] text-[var(--tile-tint-fg)]"
-            >
-              <Coins className="size-icon-m" strokeWidth={2} />
-            </span>
-            <span className="text-body-legacy flex-1 text-text-1">{t('nav.coins')}</span>
-            <ChevronRight className="size-icon-m shrink-0 text-text-3" strokeWidth={2} aria-hidden />
-          </Surface>
-        </section>
+        <div className="flex flex-col gap-4">
+          <h1 className="text-display text-text-1">{t('settings.title')}</h1>
+          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET: `users.display_name` is NULL
+              for everybody until somebody types here. */}
+          {user ? <DisplayNameField user={user} /> : null}
+        </div>
       </div>
 
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={Volume2} title={t('settings.cues.title')} />
-        <CueSettings />
-      </section>
+      <EquipmentSection />
 
-      {/* NYELV before ADMIN, which is the spec's block order (7 then 8) and what the mockup shows
-          beginning right at the fold. Language is a setting every account has; the admin section
-          exists for one role and is the rarest errand on the screen, so it goes last. */}
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={Globe} title={t('common.language')} />
-        <LanguageToggle />
-      </section>
+      <CueSettings />
 
-      {/* The client's own door onto the equipment answer given once on step three of onboarding.
-          Same endpoint, same control — see EquipmentSection's own note. It sits with the personal
-          settings, after language and before the role-gated admin block, not inside it. */}
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={Wrench} title={t('settings.equipment')} />
-        <EquipmentSection />
-      </section>
+      {/* Applies at once and lives on this device: the choice sits in the section head. */}
+      <SectionHeader title={t('common.language')} trailing={<LanguageToggle />} />
 
-      {/* Admin lives HERE, not in the bottom bar. A coach already fills all five nav slots, so
-          pushing an admin tab made six and the bar silently clamped the sixth away — an admin
-          could not reach /admin from the navigation at all. It belongs in Settings on its own
-          merits anyway: it is role-specific and infrequent, which is the definition of secondary
-          navigation. The link is a convenience; the route and every endpoint behind it enforce the
-          role on the server regardless. */}
-      {user?.role === 'admin' ? (
-        <section className="flex flex-col gap-group">
-          <SectionHeader icon={ShieldCheck} title={t('nav.admin')} />
-          <Surface
-            as={Link}
-            to="/admin"
-            interactive
-            className="text-body-legacy flex min-h-[var(--target-min)] items-center gap-tight text-accent"
-          >
-            <span className="flex-1">{t('settings.openAdmin')}</span>
-            <ChevronRight className="size-icon-m shrink-0" strokeWidth={2} aria-hidden />
-          </Surface>
-        </section>
-      ) : null}
-    </div>
+      {/* Admin lives HERE as well as in the bar: role-specific and infrequent, which is secondary
+          navigation. The route and every endpoint behind it enforce the role on the server.
+          Sign-out: one tap, no confirmation, busy while it runs. It renders even while the
+          session loads, because it depends on there BEING a session, not on its contents. */}
+      <RowStack open>
+        {user?.role === 'admin' ? <ListRow to="/admin" title={t('settings.openAdmin')} chevron /> : null}
+        <ListRow title={t('auth.logout')} tone="danger" busy={logout.isPending} onClick={() => logout.mutate()} />
+      </RowStack>
+    </Screen>
   );
 }
 
 /**
- * The name editor.
+ * The name editor — an underline field.
  *
- * Its own component rather than four more `useState` calls in a screen that already has eleven:
- * this is the only part of Settings that owns unsaved text, and unsaved text is the one kind of
- * state that must not be lost to an unrelated re-render.
+ * Its own component: this is the only part of the screen that owns unsaved text, and unsaved text
+ * must not be lost to an unrelated re-render.
  *
- * ═══ WHY A SAVE BUTTON AND NOT AN AUTOSAVE ═════════════════════════════════════════════════════
+ * ═══ WHY A SAVE AND NOT AN AUTOSAVE ════════════════════════════════════════════════════════════
  *
- * The project has `useAutosave` and uses it for the plan editor, where losing a draft is
- * expensive and the field count is high. A single 120-character field is the opposite case: the
- * server rejects anything under two characters, so an autosave would fire a failing request on
- * the first keystroke of every name and turn a normal edit into a red field. The save is explicit,
- * and it only appears once something has actually changed.
+ * A single 120-character field is not the plan editor: the server rejects anything under two
+ * characters, so an autosave would fire a failing request on the first keystroke of every name.
+ * The save is explicit, and it only appears once something has actually changed — as a text link
+ * on the field's line (the frame draws the idle field; Pulse has one pill per screen and a link is
+ * the second action's look).
  */
-function DisplayNameRow({ user }: { user: SessionUser }) {
+function DisplayNameField({ user }: { user: SessionUser }) {
   const { t } = useTranslation();
   const save = useSetDisplayName();
   const [draft, setDraft] = useState(user.display_name ?? '');
@@ -288,35 +224,32 @@ function DisplayNameRow({ user }: { user: SessionUser }) {
   const trimmed = draft.trim();
   const current = user.display_name ?? '';
   const dirty = trimmed !== current;
-  // The server's rule, so the button is disabled instead of the request being refused. It lives in
-  // `lib/person.ts` rather than here because it was written here first, as `trimmed.length`, and
-  // that counts UTF-16 units where the database counts code points — a single emoji looked valid,
-  // enabled the button, and came back as an unexplained 400.
+  // The server's rule (code points, not UTF-16 units), so the save is disabled instead of refused.
   const valid = isValidDisplayName(draft);
 
   return (
-    <Surface className="flex flex-col gap-tight">
-      <Field
-        label={t('settings.displayName')}
-        hint={t('settings.displayNameHint')}
-        placeholder={t('settings.displayNamePlaceholder')}
-        value={draft}
-        maxLength={120}
-        autoComplete="name"
-        leading={<User className="size-icon-m" strokeWidth={2} aria-hidden />}
-        onChange={(e) => setDraft(e.target.value)}
-      />
-      {dirty ? (
-        <Pressable
-          variant="primary"
-          className="w-full"
-          disabled={!valid}
-          busy={save.isPending}
-          onClick={() => save.mutate(trimmed.length ? trimmed : null)}
-        >
-          {t('common.save')}
-        </Pressable>
-      ) : null}
-    </Surface>
+    <Field
+      label={t('settings.displayName')}
+      hint={t('settings.displayNameHint')}
+      placeholder={t('settings.displayNamePlaceholder')}
+      value={draft}
+      maxLength={120}
+      autoComplete="name"
+      onChange={(e) => setDraft(e.target.value)}
+      trailing={
+        dirty ? (
+          // min-w-11: "Save" (en) is 30 pt of ink; the target still has to be 44 wide, and the
+          // word stays on the field's end.
+          <TextLink
+            className="min-w-11 justify-end"
+            disabled={!valid}
+            busy={save.isPending}
+            onClick={() => save.mutate(trimmed.length ? trimmed : null)}
+          >
+            {t('common.save')}
+          </TextLink>
+        ) : undefined
+      }
+    />
   );
 }

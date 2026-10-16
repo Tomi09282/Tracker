@@ -1,27 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Section } from '../../ui/data/SectionHeader';
+import { ChipRow } from '../../ui/primitives/ChipRow';
 import { Toggle } from '../../ui/primitives/Toggle';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { cn } from '../../lib/cn';
 import { useOnboarding, useDraftSave } from '../onboarding/useOnboarding';
 import { sameSet } from '../../lib/equipment';
 
+/** Widths of the loading words: one block per chip line, three lines — the shape of the list, not of a tile. */
+const LOADING_WORDS = [['w-24', 'w-8', 'w-20'], ['w-16', 'w-8', 'w-12', 'w-16'], ['w-20', 'w-12', 'w-28']];
+
 /**
- * The client's own equipment list, after onboarding.
+ * The client's own equipment list, after onboarding — the "Felszerelés" section of `settings-2`.
  *
  * The route `/onboarding` was always live and unguarded once complete, and `PATCH /onboarding`
  * always took `equipment`. What was missing was a door, so the answer given once on step three
  * could never be revised. Same endpoint, same control, reachable.
  *
  * NO SAVE BUTTON. `useDraftSave` is the questionnaire's own autosave — debounced, merging two
- * answers inside one window, flushed on `pagehide` and on unmount. A second save mechanism next
- * to it would be a second set of those three bugs to get right.
+ * answers inside one window, flushed on `pagehide` and on unmount. The status it reports sits in
+ * the section head, where the frame draws "● Felszerelés mentve"; a refusal is a danger line under
+ * the words, because its sentence does not fit beside an eyebrow.
  */
 export function EquipmentSection() {
   const { t } = useTranslation();
   const { data, dataUpdatedAt, isPending } = useOnboarding();
   const { save, state } = useDraftSave();
   // Overlay, because the cache only moves when the debounce fires: without this the chip would
-  // sit unticked for 700ms after the tap. Mirrored into a ref alongside the state for the same
+  // sit unmarked for 700ms after the tap. Mirrored into a ref alongside the state for the same
   // reason `OnboardingPage`'s `draftRef`/`live()` exists — see the note above its
   // `toggleEquipment`: two taps landing before React repaints must not both read the same
   // render-closure snapshot.
@@ -54,8 +62,6 @@ export function EquipmentSection() {
     }
   }, [serverEquipment, dataUpdatedAt]);
 
-  if (isPending) return <Skeleton className="h-28 w-full rounded-card" />;
-
   const options = data?.options?.equipment ?? [];
   const current = sel ?? serverEquipment ?? [];
 
@@ -67,26 +73,54 @@ export function EquipmentSection() {
     save({ equipment: next });
   };
 
+  // The head's status: a 6 pt dot and the words, `cap` `text-2` (Pulse: a semantic colour is a
+  // dot or text, never a strip). `saving` is the ink dot, `saved` the success dot. Polite, so the
+  // change is announced without taking the focus.
+  const status =
+    state === 'saving' ? t('common.saving') : state === 'saved' ? t('settings.equipmentSaved') : null;
+
   return (
-    <div className="flex flex-col gap-group">
-      <p className="text-body-s text-text-2">{t('settings.equipmentHint')}</p>
-      <div className="flex flex-wrap gap-tight">
-        {options.map((eq) => (
-          <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
-        ))}
+    <Section
+      title={t('settings.equipment')}
+      trailing={
+        <span role="status" aria-live="polite" className="inline-flex items-baseline gap-1.5 text-cap text-text-2">
+          {status ? (
+            <>
+              <span aria-hidden className={cn('size-1.5 self-center rounded-full', state === 'saved' ? 'bg-success' : 'bg-text-2')} />
+              {status}
+            </>
+          ) : null}
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-1">
+        <p className="text-cap text-text-3">{t('settings.equipmentHint')}</p>
+        {isPending ? (
+          <div role="status" aria-label={t('common.loading')}>
+            {LOADING_WORDS.map((line, i) => (
+              <div key={i} aria-hidden className="flex h-11 items-center gap-6">
+                {line.map((w, j) => (
+                  <Skeleton key={j} className={cn('h-4', w)} />
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <ChipRow wrap label={t('settings.equipment')}>
+            {options.map((eq) => (
+              <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
+            ))}
+          </ChipRow>
+        )}
       </div>
-      {/* `error` is not silent: a failed save that renders nothing reads as a successful one. The
-          key is the questionnaire's own — `onboarding.saveError` — reused rather than duplicated,
-          since it says the same true thing here: the answer is kept and will be retried. */}
-      <p aria-live="polite" className={state === 'error' ? 'text-caption text-danger' : 'text-caption text-text-3'}>
-        {state === 'saving'
-          ? t('common.saving')
-          : state === 'saved'
-            ? t('settings.equipmentSaved')
-            : state === 'error'
-              ? t('onboarding.saveError')
-              : ''}
-      </p>
-    </div>
+      {/* A failed save is not silent: a refusal that renders nothing reads as a success. The key is
+          the questionnaire's own, since it says the same true thing here: the answer is kept and
+          will be retried. */}
+      {state === 'error' ? (
+        <NoticeLine tone="danger" role="alert">
+          {t('onboarding.saveError')}
+        </NoticeLine>
+      ) : null}
+    </Section>
   );
 }

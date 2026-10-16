@@ -108,6 +108,7 @@
     "displayName": "Anzeigename",
     "displayNameHint": "Dein Coach sieht das anstelle deiner E-Mail-Adresse.",
     "displayNamePlaceholder": "Wie andere dich sehen",
+    "unlockedNote": "freigeschaltet",
     "role": {
       "user": "Mitglied",
       "coach": "Coach",

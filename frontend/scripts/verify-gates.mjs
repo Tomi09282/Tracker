@@ -156,7 +156,9 @@ const PROBES = [
     gate: 'check:nav',
     label: 'a screen that loses its only link is caught',
     file: 'src/features/settings/SettingsPage.tsx',
-    mutate: swap(/\bto\s*=\s*"\/coins"/, 'to="/settings"'),
+    // Every door in the file: the profile's ledger opens /coins from two rows (ÉRMÉK and
+    // EREDMÉNYEK), and the screen only loses its way in when both are gone.
+    mutate: swap(/\bto\s*=\s*"\/coins"/g, 'to="/settings"'),
     expect: /"\/coins" is a route nobody links to/,
   },
   {
