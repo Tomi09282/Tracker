@@ -36,6 +36,13 @@ export interface NumberStepperProps {
   /** The − / + names. Default `common.less` ("Kevesebb") / `common.more` ("Több"), as the frame names them. */
   decreaseLabel?: string;
   increaseLabel?: string;
+  /**
+   * Draw − and + on the line's trailing edge. Default `true`. `false` keeps the typed figure, the
+   * keyboard steps (ArrowUp / ArrowDown, PageUp / PageDown, Home / End), the tick, the hint and the
+   * error, and leaves the line empty after them (gap lane G-inputs). A figure on a row's rule with
+   * no label row of its own is `NumeralField`.
+   */
+  controls?: boolean;
   id?: string;
   name?: string;
   /** Placement only. */
@@ -81,6 +88,7 @@ export const NumberStepper = forwardRef<HTMLInputElement, NumberStepperProps>(fu
     disabled,
     decreaseLabel,
     increaseLabel,
+    controls = true,
     id,
     name,
     className,
@@ -198,6 +206,7 @@ export const NumberStepper = forwardRef<HTMLInputElement, NumberStepperProps>(fu
           ) : null}
         </div>
         {/* `Stepper`: 92 × 44, 8 under the line's top, the two icon buttons 4 apart. */}
+        {controls ? (
         <div className="mt-2 flex shrink-0 gap-1">
           <Pressable
             variant="link"
@@ -222,6 +231,7 @@ export const NumberStepper = forwardRef<HTMLInputElement, NumberStepperProps>(fu
             <Plus aria-hidden />
           </Pressable>
         </div>
+        ) : null}
       </div>
     </FieldFrame>
   );

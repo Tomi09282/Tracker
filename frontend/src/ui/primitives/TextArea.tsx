@@ -6,6 +6,8 @@ import {
   useLayoutEffect,
   useRef,
   type ChangeEvent,
+  type KeyboardEvent,
+  type ReactNode,
   type TextareaHTMLAttributes,
 } from 'react';
 import { cn } from '../../lib/cn';
@@ -32,6 +34,21 @@ export interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
   minRows?: number;
   /** The rows it grows to before it scrolls. Default: no limit. */
   maxRows?: number;
+  /**
+   * Any node at the trailing end of the label row, on the label's baseline, set in `cap` `text-3`
+   * unless the node colours itself — the counter of `compose-post` that turns `warning` near the
+   * cap and `danger` past it is the screen's own `<span className="text-warning">` (gap lane
+   * G-inputs). Read out with the field (`aria-describedby`). Takes the place of `counter` and of
+   * the marker.
+   */
+  labelTrailing?: ReactNode;
+  /**
+   * One logical line that wraps (gap lane G-inputs): the headline of `compose-profile-1 / -2`, whose
+   * 54 characters wrap to a second row with the underline under it (66). Enter does not break the
+   * line (it is the keyboard's "done"), and a line break that arrives by paste or dictation becomes
+   * a space before `onChange` sees it. Grows like any `TextArea`; `aria-multiline="false"`.
+   */
+  singleLine?: boolean;
   /** Placement only. */
   className?: string;
 }
@@ -71,11 +88,14 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     counter,
     minRows = 1,
     maxRows,
+    labelTrailing,
+    singleLine = false,
     className,
     id,
     disabled,
     value,
     onChange,
+    onKeyDown,
     style,
     ...rest
   },
@@ -84,6 +104,9 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   const autoId = useId();
   const areaId = id ?? autoId;
   const counterId = `${areaId}-counter`;
+  const trailingId = `${areaId}-trailing`;
+  const hasTrailing = labelTrailing !== undefined && labelTrailing !== null && labelTrailing !== false;
+  const asideId = hasTrailing ? trailingId : counter ? counterId : undefined;
   const area = useRef<HTMLTextAreaElement>(null);
   useImperativeHandle(ref, () => area.current as HTMLTextAreaElement);
 
@@ -103,6 +126,13 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   useLayoutEffect(fit, [fit, value]);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (singleLine && /[\r\n]/.test(e.target.value)) {
+      // A pasted or dictated break becomes a space; the caret stays where the text ended.
+      const el = e.target;
+      const at = el.selectionStart;
+      el.value = el.value.replace(/\r\n|[\r\n]/g, ' ');
+      if (at !== null) el.setSelectionRange(at, at);
+    }
     onChange?.(e);
     if (value === undefined) fit();
   };
@@ -120,7 +150,11 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
       labelHidden={labelHidden}
       disabled={disabled}
       aside={
-        counter ? (
+        hasTrailing ? (
+          <span id={trailingId} className="text-cap shrink-0 text-text-3">
+            {labelTrailing}
+          </span>
+        ) : counter ? (
           <span id={counterId} className="text-cap shrink-0 text-text-3">
             {counter}
           </span>
@@ -148,8 +182,15 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
           disabled={disabled}
           value={value}
           onChange={handleChange}
+          onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>) => {
+            // Enter ends a single line; an IME composition keeps its own Enter.
+            if (singleLine && e.key === 'Enter' && !e.nativeEvent.isComposing) e.preventDefault();
+            onKeyDown?.(e);
+          }}
+          enterKeyHint={singleLine ? 'done' : rest.enterKeyHint}
+          aria-multiline={singleLine ? false : undefined}
           aria-invalid={error ? true : undefined}
-          aria-describedby={fieldDescribedBy(areaId, { marker: counter ? undefined : marker, hint, error, extra: counter ? counterId : undefined })}
+          aria-describedby={fieldDescribedBy(areaId, { marker: asideId ? undefined : marker, hint, error, extra: asideId })}
           style={{ minHeight: min, maxHeight: max, ...style }}
           className={cn(
             'block w-full resize-none overflow-hidden bg-transparent px-0 py-2.75',

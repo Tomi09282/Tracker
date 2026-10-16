@@ -1101,6 +1101,48 @@
         "npm run verify:gates (integration worktree, clean tree)"
       ],
       "notes": "Added by the integrator at merge (merge-G-data): the lane was cut from _kit-gaps.md and never had an entry. Its owns are only its own files; the kit files it extends stay owned by their closed lanes and are listed under extends, so ownership keeps one owner per file. Item 5 (Monogram 96 / 124, dot) was already shipped by F9 stage 2. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
+    },
+    {
+      "id": "G-inputs",
+      "title": "Kit gaps of inputs (.pulse/prep/_kit-gaps.md section A items 8 and 9 and the Field rows of 13: TextArea props, the numeral field, Field unit, title-style Field)",
+      "owns": [
+        "frontend/src/ui/primitives/NumeralField.tsx",
+        "frontend/src/features/playground/kit/G-inputs.tsx",
+        "docs/pipeline/pulse/kit/G-inputs.md",
+        "docs/pipeline/pulse/pkg/G-inputs/**"
+      ],
+      "extends": [
+        {
+          "file": "frontend/src/ui/primitives/Field.tsx",
+          "owner": "F12",
+          "what": "unit (drawn after a content-sized value), variant=\"title\" (22/28 SemiBold, no rest line, lime focus line)"
+        },
+        {
+          "file": "frontend/src/ui/primitives/TextArea.tsx",
+          "owner": "F12",
+          "what": "labelTrailing, singleLine"
+        },
+        {
+          "file": "frontend/src/ui/primitives/NumberStepper.tsx",
+          "owner": "F12",
+          "what": "controls={false}"
+        }
+      ],
+      "dependsOn": [
+        "F12"
+      ],
+      "parallelGroup": "kit-gap lane (after F17, parallel with the screens)",
+      "size": "M",
+      "acceptance": [
+        "every addition is additive: no existing call site changes its look",
+        "kit page docs/pipeline/pulse/kit/G-inputs.md and specimens in features/playground/kit/G-inputs.tsx; Figma | app pairs against workout-1, nutrition-2, plan-editor-1, compose-post-1, compose-profile-1"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "node scripts/pulse-verify.mjs capture of auth-1 / auth-2"
+      ],
+      "notes": "Added by the integrator at merge (merge-G-inputs): the lane was cut from _kit-gaps.md and never had an entry. The lane listed Field / TextArea / NumberStepper under its own owns.json; here they stay owned by F12 (closed) and are listed under extends, so ownership keeps one owner per file. minRows, maxRows and labelHidden of item 8 were already shipped by F12 stage 2. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
     }
   ],
   "screens": [

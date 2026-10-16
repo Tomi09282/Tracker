@@ -1,0 +1,15 @@
+{
+  "id": "G-inputs",
+  "kind": "kit-gap lane (not a package of work-packages.json)",
+  "scope": ".pulse/prep/_kit-gaps.md section A: items 8 (TextArea), 9 (numeral field), 13 (Field unit, title-style Field)",
+  "owns": [
+    "frontend/src/ui/primitives/Field.tsx",
+    "frontend/src/ui/primitives/TextArea.tsx",
+    "frontend/src/ui/primitives/NumberStepper.tsx",
+    "frontend/src/ui/primitives/NumeralField.tsx",
+    "frontend/src/features/playground/kit/G-inputs.tsx",
+    "docs/pipeline/pulse/kit/G-inputs.md",
+    "docs/pipeline/pulse/pkg/G-inputs/**"
+  ],
+  "handIn": {}
+}

@@ -1,4 +1,4 @@
-import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useCallback, useId, useLayoutEffect, useRef, type InputHTMLAttributes, type ReactNode, type Ref } from 'react';
 import { cn } from '../../lib/cn';
 
 /**
@@ -62,7 +62,26 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    * set their own (`SearchField` -> `searchField`, `MaskedField` -> `maskedField`). Not for screens.
    */
   kit?: string;
+  /**
+   * A unit drawn right after the typed value — "180 g" of `nutrition-2` (gap lane G-inputs). The
+   * value stays the bare number (never put the unit into the value); the input is sized to its
+   * content and the unit follows it 4 pt after, in `body` `text-2`, before `trailing`. Read out with
+   * the field (`aria-describedby`). A tap on the rest of the line still focuses the input.
+   */
+  unit?: string;
+  /**
+   * `line` (the default) is the underline field. `title` is the plan name of `plan-editor-1 / -2`
+   * (gap lane G-inputs): one line in the `title` step (22 / 28 SemiBold, `text-1`), ellipsis when it
+   * does not fit, no label on screen (it is `sr-only`, still bound), NO underline at rest; focus
+   * draws the same 2 px lime line (and the lime caret) right under the 28 pt line box, an error the
+   * 2 px `danger` line. Its layout box is the 28 pt line; the input is a 44 pt target that overhangs
+   * it by 8 above and below. `leading`, `trailing`, `unit` and `marker` are not drawn.
+   */
+  variant?: FieldVariant;
 }
+
+/** The two drawings of `Field`: the underline field, or the heading-like title input. */
+export type FieldVariant = 'line' | 'title';
 
 const TONE: Record<FieldTone, string> = { plain: 'text-text-2', quiet: 'text-text-3' };
 
@@ -102,6 +121,27 @@ export function fieldLine({ disabled, error }: { disabled?: boolean; error?: boo
         ? 'border-b-2 border-danger focus-within:border-accent'
         : 'border-b border-edge focus-within:border-b-2 focus-within:border-accent',
   );
+}
+
+/** Whether the engine sizes an input to its content by itself (`field-sizing: content`). */
+const FIELD_SIZING = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('field-sizing', 'content');
+
+/**
+ * Sizes an `<input>` to its value (or its placeholder while empty): `field-sizing: content` where the
+ * engine has it — the class `[field-sizing:content]` is the caller's — and a width in `ch` written
+ * here everywhere else. Call it after every render and on every input event. For the siblings of
+ * the field (`Field unit`, `NumeralField`); not for screens.
+ */
+export function fitInputToContent(el: HTMLInputElement | null) {
+  if (!el || FIELD_SIZING) return;
+  const chars = Math.max(1, (el.value || el.placeholder || '').length);
+  el.style.width = `${chars + 0.25}ch`;
+}
+
+/** Hands one element to a forwarded ref (function or object). For the field's siblings. */
+export function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (typeof ref === 'function') ref(value);
+  else if (ref) (ref as { current: T | null }).current = value;
 }
 
 export interface FieldFrameProps {
@@ -255,14 +295,81 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     markerTone = 'plain',
     labelHidden = false,
     kit = 'inputField',
+    unit,
+    variant = 'line',
     id,
     disabled,
+    onInput,
     ...rest
   },
   ref,
 ) {
   const autoId = useId();
   const inputId = id ?? autoId;
+  const unitId = `${inputId}-unit`;
+  const input = useRef<HTMLInputElement | null>(null);
+  const setInput = useCallback(
+    (el: HTMLInputElement | null) => {
+      input.current = el;
+      assignRef(ref, el);
+    },
+    [ref],
+  );
+  // A unit follows the value's ink, so the input hugs its content — re-measured after every
+  // render: a controlled value can change from outside, and react-hook-form writes it uncontrolled.
+  useLayoutEffect(() => {
+    if (unit && variant === 'line') fitInputToContent(input.current);
+  });
+
+  if (variant === 'title') {
+    return (
+      <FieldFrame
+        kit={kit}
+        controlId={inputId}
+        label={label}
+        hint={hint}
+        hintTone={hintTone}
+        error={error}
+        labelHidden
+        disabled={disabled}
+        className={className}
+      >
+        {/* The frames draw the plan name as a bare 22 / 28 line. The 44 pt target overhangs that
+            line by 8 above and below (`-my-2`), and the focus / error line is drawn on the 2 pt right
+            under the line box (6 pt above the target's bottom), so the layout box is the frame's 28. */}
+        <div
+          data-field-line="title"
+          className={cn(
+            'relative -my-2 flex h-11 items-center',
+            'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-1.5 after:h-0.5',
+            'after:transition-colors after:duration-[var(--duration-fast)] after:ease-[var(--ease-standard)]',
+            disabled
+              ? 'after:bg-transparent'
+              : error
+                ? 'after:bg-danger focus-within:after:bg-accent'
+                : 'after:bg-transparent focus-within:after:bg-accent',
+          )}
+        >
+          <input
+            ref={setInput}
+            id={inputId}
+            disabled={disabled}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={fieldDescribedBy(inputId, { hint, error })}
+            onInput={onInput}
+            className={cn(
+              'h-11 min-w-0 flex-1 truncate bg-transparent p-0',
+              'text-title text-text-1 caret-accent placeholder:text-text-3',
+              'rounded-none outline-none focus-visible:outline-none',
+              'disabled:text-text-3',
+              'autofill:[transition:background-color_0s_calc(infinity*1s)] autofill:[-webkit-text-fill-color:var(--text-1)]',
+            )}
+            {...rest}
+          />
+        </div>
+      </FieldFrame>
+    );
+  }
 
   return (
     <FieldFrame
@@ -279,20 +386,38 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
       className={className}
     >
       {/* The kit's `Input/underline`: 44 high, glyph · 10 · value · 10 · trailing, and the line. */}
-      <div className={cn('flex h-11 items-start gap-2.5', fieldLine({ disabled, error: !!error }))}>
+      <div
+        className={cn('flex h-11 items-start gap-2.5', fieldLine({ disabled, error: !!error }))}
+        // With a unit the input hugs its value; a tap on the rest of the line still focuses it.
+        onPointerDown={
+          unit
+            ? (e) => {
+                if ((e.target as HTMLElement).dataset.fieldRest !== undefined) {
+                  e.preventDefault();
+                  input.current?.focus();
+                }
+              }
+            : undefined
+        }
+      >
         {leading ? (
           <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-5 [&_svg]:stroke-[1.75]">
             {leading}
           </span>
         ) : null}
         <input
-          ref={ref}
+          ref={setInput}
           id={inputId}
           disabled={disabled}
           aria-invalid={error ? true : undefined}
-          aria-describedby={fieldDescribedBy(inputId, { marker, hint, error })}
+          aria-describedby={fieldDescribedBy(inputId, { marker, hint, error, extra: unit ? unitId : undefined })}
+          onInput={(e) => {
+            if (unit) fitInputToContent(e.currentTarget);
+            onInput?.(e);
+          }}
           className={cn(
-            'h-11 min-w-0 flex-1 bg-transparent p-0',
+            'h-11 min-w-0 bg-transparent p-0',
+            unit ? 'max-w-full shrink [field-sizing:content]' : 'flex-1',
             'text-body text-text-1 caret-accent placeholder:text-text-3',
             // The line is the focus indicator (see the docblock); the global ring would draw a box
             // around a field that has none, and its radius would bend the ends of the line.
@@ -316,6 +441,16 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
           )}
           {...rest}
         />
+        {unit ? (
+          <>
+            {/* "180 g": the unit 4 after the digits (the row's 10 gap less 6), in the value's step,
+                one tier down; then the rest of the line, which focuses the input on a tap. */}
+            <span id={unitId} className={cn('-ml-1.5 flex h-11 shrink-0 items-center text-body', disabled ? 'text-text-3' : 'text-text-2')}>
+              {unit}
+            </span>
+            <span aria-hidden data-field-rest="" className="h-11 min-w-0 flex-1" />
+          </>
+        ) : null}
         {trailing ? <span className="flex h-11 shrink-0 items-center">{trailing}</span> : null}
       </div>
     </FieldFrame>
