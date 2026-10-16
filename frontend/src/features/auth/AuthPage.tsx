@@ -227,6 +227,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             <Pressable
               variant="link"
               shape="icon"
+              glyph="field"
               aria-pressed={revealed}
               aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
               onClick={() => setRevealed((v) => !v)}

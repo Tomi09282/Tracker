@@ -1,0 +1,12 @@
+diff --git a/frontend/src/features/auth/AuthPage.tsx b/frontend/src/features/auth/AuthPage.tsx
+index 5c4732d..efa2b83 100644
+--- a/frontend/src/features/auth/AuthPage.tsx
++++ b/frontend/src/features/auth/AuthPage.tsx
+@@ -227,6 +227,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
+             <Pressable
+               variant="link"
+               shape="icon"
++              glyph="field"
+               aria-pressed={revealed}
+               aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
+               onClick={() => setRevealed((v) => !v)}

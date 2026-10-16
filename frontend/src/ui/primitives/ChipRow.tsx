@@ -1,4 +1,4 @@
-import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { createContext, forwardRef, useContext, useLayoutEffect, useRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Segment } from '../feedback/variants/E6Segmented';
 
@@ -49,6 +49,21 @@ export interface ChipRowProps {
    * line that scrolls sideways inside itself.
    */
   wrap?: boolean;
+  /**
+   * G-shell — the RAIL: a one-line row that is a single-select strip (library-1 / -2 / -3).
+   *
+   *   `true`     the line snaps a chip's word to the left gutter (`scroll-snap-type: x proximity`),
+   *              and it FOLLOWS the selection: when the chosen chip changes (a tap, or the muscle
+   *              map choosing one) the line scrolls just enough that the chosen word ends inside
+   *              the gutter, rounded up to the next chip boundary, so a word stands on the gutter
+   *              (library-3: "Széles hátizom" chosen, the line scrolled 135, "Tricepsz" on the
+   *              gutter). A chosen chip that is already in view scrolls nothing.
+   *   `'bleed'`  the same, and the line runs past the right gutter to the screen edge (the frames'
+   *              cut last word, the scroll cue); the end of the line keeps a gutter of air.
+   *
+   * Ignored with `wrap`. The scroll is smooth (instant under reduced motion, and on the first render).
+   */
+  scroll?: boolean | 'bleed';
   /** `group` (default) or `radiogroup` when the chips are radios. */
   role?: 'group' | 'radiogroup';
   /** The whole row is unavailable: 40 %. */
@@ -59,10 +74,62 @@ export interface ChipRowProps {
   children: ReactNode;
 }
 
-export function ChipRow({ label, wrap = false, role = 'group', disabled = false, className, children }: ChipRowProps) {
+/** The chip whose state says "chosen". */
+const CHOSEN = ':scope > [aria-pressed="true"], :scope > [aria-checked="true"]';
+
+/**
+ * The rail's follow rule (see `scroll`). Positions are in the scroller's content coordinates; a
+ * chip's box reaches 8 past its word (`Segment` hug), and the scroller has 12 of room on the left.
+ */
+function followChosen(scroller: HTMLElement, chosen: HTMLElement, bleed: boolean, instant: boolean) {
+  const PAD_L = 12;
+  const WORD_INSET = 8;
+  const box = scroller.getBoundingClientRect();
+  const wordLeft = (el: Element) => el.getBoundingClientRect().left - box.left + scroller.scrollLeft + WORD_INSET;
+  const left = wordLeft(chosen);
+  const right = chosen.getBoundingClientRect().right - box.left + scroller.scrollLeft - WORD_INSET;
+  // The right edge the rule reads: the gutter. A bleeding line runs past it by its own end padding.
+  const limit = scroller.clientWidth - (bleed ? Number.parseFloat(getComputedStyle(scroller).paddingRight) || 0 : 0);
+  const now = scroller.scrollLeft;
+  if (left - now >= PAD_L - 0.5 && right - now <= limit + 0.5) return;
+  let target: number;
+  if (left - now < PAD_L) {
+    target = left - PAD_L;
+  } else {
+    const boundaries = Array.from(scroller.children)
+      .map((el) => wordLeft(el) - PAD_L)
+      .filter((b) => b >= 0 && right - b <= limit + 0.5)
+      .sort((a, b) => a - b);
+    target = boundaries[0] ?? left - PAD_L;
+  }
+  const reduce = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  scroller.scrollTo({ left: Math.max(0, Math.round(target)), behavior: reduce || instant ? 'auto' : 'smooth' });
+}
+
+export function ChipRow({ label, wrap = false, scroll = false, role = 'group', disabled = false, className, children }: ChipRowProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const last = useRef<{ el: Element | null; word: string | null }>({ el: null, word: null });
+  const painted = useRef(false);
+  const rail = !wrap && scroll !== false;
+  // No dependency list on purpose: the chosen chip is a fact of the children, which change by
+  // identity on every render. The ref keeps it to one scroll per change of the chosen chip.
+  useLayoutEffect(() => {
+    const scroller = ref.current;
+    if (!rail || !scroller) return;
+    const chosen = scroller.querySelector<HTMLElement>(CHOSEN);
+    const word = chosen?.textContent ?? null;
+    if (chosen === last.current.el && word === last.current.word) return;
+    // The first follow (the screen opening on a chosen chip) is instant: nothing moved, so nothing
+    // should be seen to move.
+    const first = !painted.current;
+    painted.current = true;
+    last.current = { el: chosen, word };
+    if (chosen) followChosen(scroller, chosen, scroll === 'bleed', first);
+  });
   return (
     <InRow.Provider value>
       <div
+        ref={ref}
         role={role}
         aria-label={label}
         aria-disabled={disabled || undefined}
@@ -77,6 +144,12 @@ export function ChipRow({ label, wrap = false, role = 'group', disabled = false,
               // `self-stretch`: a one-line row is as wide as its container even in an `items-start`
               // column, or it would grow to its words and never scroll.
               '-my-1 -ml-3 flex-nowrap self-stretch overflow-x-auto py-1 pl-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          // The rail: a chip's BOX snaps 4 in from the scroller's edge, which puts its word on the
+          // gutter (12 of room, the box 8 before the word).
+          rail && 'snap-x snap-proximity scroll-pl-1 [&>*]:snap-start',
+          // Bleeding: the line reaches the screen edge (the gutter is 24, 16 under 376 pt) and keeps
+          // that gutter as air at its end.
+          rail && scroll === 'bleed' && '-mr-6 pr-6 max-[23.5rem]:-mr-4 max-[23.5rem]:pr-4',
           disabled && 'pointer-events-none opacity-[var(--disabled-opacity)]',
           className,
         )}

@@ -78,8 +78,24 @@ export interface ScreenProps extends Omit<ComponentPropsWithoutRef<'div'>, 'chil
   /**
    * At least one viewport tall, as a flex column, so a block can take the free height (`flex-1`):
    * sign-in, the conversation, the player. The screen may still grow past it and scroll.
+   *
+   * G-shell: `'fixed'` = EXACTLY one viewport tall (the viewport minus the bar, or minus nothing
+   * without tabs) and it never grows: the overflow is clipped and every child may shrink below its
+   * content (`min-h-0`), so ONE inner block scrolls (`min-h-0 flex-1 overflow-y-auto`) and the page
+   * does not. The one-viewport screens: the workout player (the column never scrolls), the
+   * conversation (the header stands, the thread scrolls inside, the newest message on the composer).
    */
-  fill?: boolean;
+  fill?: boolean | 'fixed';
+  /**
+   * G-shell — the air under the last block, ABOVE the tab bar (or the home indicator):
+   *
+   *   `page`  48 (default) — what lets a scrolled page's last block clear the bar's fade
+   *   `near`  28 — a fixed screen whose last block stands on the bar (workout-1 / -2: the rest band
+   *           and the exercise switcher end at y 754, 28 above the bar at 782)
+   *
+   * A mounted `Dock` adds its reserve to either.
+   */
+  bottom?: 'page' | 'near';
   /** The element to render. `main` on a public screen, whose layout draws no landmark. */
   as?: ScreenElement;
   children?: ReactNode;
@@ -124,6 +140,7 @@ export function Screen({
   gap = 'block',
   width = 'mobile',
   fill = false,
+  bottom = 'page',
   as = 'div',
   className,
   children,
@@ -142,10 +159,18 @@ export function Screen({
           width === 'wide' ? 'max-w-[var(--col-wide)]' : 'max-w-[var(--screen-max)]',
           TOP[top],
           GAP[gap],
-          tabs
-            ? 'pb-[calc(var(--page-pad-b)_-_var(--content-pad-b)_+_var(--dock-reserve))]'
-            : 'pb-[calc(var(--page-pad-b-bare)_+_var(--dock-reserve))]',
-          fill && (tabs ? 'min-h-[calc(var(--viewport-h)_-_var(--content-pad-b))]' : 'min-h-[var(--viewport-h)]'),
+          bottom === 'near'
+            ? tabs
+              ? 'pb-[calc(var(--spacing)_*_7_+_var(--dock-reserve))]'
+              : 'pb-[calc(var(--safe-b)_+_var(--spacing)_*_7_+_var(--dock-reserve))]'
+            : tabs
+              ? 'pb-[calc(var(--page-pad-b)_-_var(--content-pad-b)_+_var(--dock-reserve))]'
+              : 'pb-[calc(var(--page-pad-b-bare)_+_var(--dock-reserve))]',
+          fill === true && (tabs ? 'min-h-[calc(var(--viewport-h)_-_var(--content-pad-b))]' : 'min-h-[var(--viewport-h)]'),
+          fill === 'fixed' && [
+            tabs ? 'h-[calc(var(--viewport-h)_-_var(--content-pad-b))]' : 'h-[var(--viewport-h)]',
+            'overflow-y-clip [&>*]:min-h-0',
+          ],
           className,
         )}
         {...rest}

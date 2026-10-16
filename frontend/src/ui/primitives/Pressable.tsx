@@ -1,6 +1,23 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type MouseEvent, type ReactNode } from 'react';
+import { Link, type LinkProps } from 'react-router';
 import { cn } from '../../lib/cn';
-import { control, kitName, type ControlVariants } from './control';
+import { ANCHOR_DISABLED_PILL, control, kitName, type ControlVariants } from './control';
+
+/**
+ * G-shell. Whether a lime pill is LIT (glow + resting pulse) when its own `lit` prop says nothing:
+ * `true` everywhere except inside `UnlitPills`.
+ */
+const PillLit = createContext(true);
+
+/**
+ * G-shell. Every lime pill inside it is drawn at rest WITHOUT its glow and resting pulse, unless the
+ * pill itself says `lit`. For specimens rendered by components the page does not write — the
+ * style studio's row stages draw a variant's own demo pill (`Demo` -> `FeedbackButton` ->
+ * `Pressable`) where the frame sets `effects = []`. Never around a screen's one real action.
+ */
+export function UnlitPills({ children }: { children: ReactNode }) {
+  return <PillLit.Provider value={false}>{children}</PillLit.Provider>;
+}
 
 export interface PressableProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'>,
@@ -14,6 +31,24 @@ export interface PressableProps
    */
   icon?: ReactNode;
   /** Trailing glyph — the chevron of an inline link. 16 px, `text-2`, also on a danger link. */
+  trail?: ReactNode;
+  children?: ReactNode;
+}
+
+/**
+ * G-shell. A control that NAVIGATES with the look of any `Pressable` — the lime pill that is a
+ * route ("Belépés" on marketplace-1 / -2), an icon button that opens a screen. It is the router's
+ * `<Link>`, so middle-click, long-press and "open in new tab" work, which an `onClick` navigate
+ * loses.
+ *
+ * An anchor cannot be disabled: `disabled` renders it inert (`aria-disabled`, out of the tab
+ * order, the click swallowed) in the look of the disabled control. There is no busy link.
+ */
+export interface PressableLinkProps extends Omit<LinkProps, 'className' | 'children'>, ControlVariants {
+  /** PLACEMENT only, as on `Pressable`. */
+  className?: string;
+  disabled?: boolean;
+  icon?: ReactNode;
   trail?: ReactNode;
   children?: ReactNode;
 }
@@ -45,7 +80,7 @@ export function ControlBody({ variant, shape, tone, busy = false, icon, trail, c
   // A glyph beside the words of a link is `text-2`; the words carry the action. On a danger link
   // the LEAD glyph belongs to the words and takes their colour, the trail chevron does not.
   const textLink = variant === 'link' && shape !== 'icon';
-  const lead = textLink && icon != null ? <span className={cn('contents', tone !== 'danger' && 'text-text-2')}>{icon}</span> : icon;
+  const lead = textLink && icon != null ? <span className={cn('contents', tone !== 'danger' && tone !== 'dangerQuiet' && 'text-text-2')}>{icon}</span> : icon;
   const tail = textLink && trail != null ? <span className="contents text-text-2">{trail}</span> : trail;
 
   return (
@@ -84,9 +119,10 @@ export function ControlBody({ variant, shape, tone, busy = false, icon, trail, c
  * second path. Reference: docs/pipeline/pulse/kit/actions.md.
  */
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function Pressable(
-  { className, variant, shape, density, selected, size, tone, text, busy = false, icon, trail, children, disabled, type, ...rest },
+  { className, variant, shape, density, selected, size, tone, text, weight, glyph, lit, busy = false, icon, trail, children, disabled, type, ...rest },
   ref,
 ) {
+  const ambientLit = useContext(PillLit);
   return (
     <button
       ref={ref}
@@ -100,12 +136,48 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
       // `rest`, so a composite that IS another kit component (the header's back button) can
       // name itself.
       data-kit={kitName({ variant, shape, size })}
-      className={cn(control({ variant, shape, density, selected, size, tone, text }), 'relative', className)}
+      className={cn(
+        control({ variant, shape, density, selected, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        'relative',
+        className,
+      )}
       {...rest}
     >
       <ControlBody variant={variant} shape={shape} tone={tone} busy={busy} icon={icon} trail={trail}>
         {children}
       </ControlBody>
     </button>
+  );
+});
+
+
+/** See `PressableLinkProps`. Reference: docs/pipeline/pulse/kit/G-shell.md. */
+export const PressableLink = forwardRef<HTMLAnchorElement, PressableLinkProps>(function PressableLink(
+  { className, variant, shape, density, selected, size, tone, text, weight, glyph, lit, disabled = false, icon, trail, children, onClick, tabIndex, ...rest },
+  ref,
+) {
+  const ambientLit = useContext(PillLit);
+  return (
+    <Link
+      ref={ref}
+      data-kit={kitName({ variant, shape, size })}
+      className={cn(
+        control({ variant, shape, density, selected, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        'relative',
+        variant === 'primary' && ANCHOR_DISABLED_PILL,
+        className,
+      )}
+      {...rest}
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : tabIndex}
+      onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+        if (disabled) event.preventDefault();
+        else onClick?.(event);
+      }}
+    >
+      <ControlBody variant={variant} shape={shape} tone={tone} icon={icon} trail={trail}>
+        {children}
+      </ControlBody>
+    </Link>
   );
 });

@@ -79,6 +79,22 @@ export type ScreenHeaderProps =
        * (`coach-plans-1`): a control needs the 44 pt row.
        */
       tight?: boolean;
+    })
+  | (HeaderCommon & {
+      /**
+       * G-shell. A desk that belongs to a PERSON (compose-hub-1 / -2, "Piactéri pult"): the 44 pt top
+       * row is who it is — a 28 pt monogram, the name, the handle — on ONE baseline, the trailing
+       * control at the right edge; 4 under it the display title. A tab root with no way back, on the
+       * grid of a pushed header (`Screen top="push"`: the row at y 64, the title at y 112).
+       */
+      kind: 'identity';
+      /** The person's mark: `<Monogram size={28} … />` (ink-tight, its bottom on the baseline). 12 before the name. */
+      lead?: ReactNode;
+      /** The person's name, `body-m` `text-1`. */
+      name: ReactNode;
+      /** The handle ("@kovacs-peter"), `cap` `text-2`, 8 after the name; it is the part that truncates. */
+      handle?: ReactNode;
+      title: ReactNode;
     });
 
 const TITLE_DISPLAY = 'text-display min-w-0 text-text-1';
@@ -148,6 +164,7 @@ function BackControl({ back }: { back: ScreenHeaderBack }) {
  *   root     row 48: ONE display line 32 / 34; trailing icon button            Screen top="root"
  *   push     row 44: chevron + parent eyebrow, trailing node; 4; display title Screen top="push"
  *   section  row 44: category eyebrow, trailing link; 4; display title         Screen top="push"
+ *   identity row 44: monogram + name + handle on a baseline, trailing; 4; title   Screen top="push"  (G-shell)
  *
  * It is the screen's `h1`. There is no top app bar, no centred title and no surface: the header
  * is ordinary content on the gutter, and it scrolls away with the page.
@@ -195,6 +212,31 @@ export function ScreenHeader(props: ScreenHeaderProps) {
         <div className={cn('flex items-center justify-between gap-4', props.tight ? 'min-h-5' : 'h-11')}>
           <p className={cn(EYEBROW, 'min-w-0 truncate')}>{props.eyebrow}</p>
           {trailing != null ? <div className="flex shrink-0 items-center">{trailing}</div> : null}
+        </div>
+        <h1 id={titleId} className={TITLE_DISPLAY}>
+          {props.title}
+        </h1>
+        {children}
+      </header>
+    );
+  }
+
+  if (props.kind === 'identity') {
+    // compose-hub-1: Identity 24,64 354 x 44 · Monogram/KP ink 24,70 25 x 22 · name 61,75 (body-m
+    // 16 / 22) · handle 168,78 (cap 13 / 18, text-2) · status control 331,65 47 x 44 · title 24,112.
+    // The three share the baseline at y 92: the name's line box ends 5 under it, at 97, which is
+    // 11 above the row's bottom — so the group stands on the row's bottom edge with 11 under it and
+    // aligns its items on the baseline (the monogram is trimmed to cap height and baseline, so its
+    // bottom IS the baseline).
+    return (
+      <header data-kit="screenHead" data-kind="identity" className={cn('flex flex-col gap-1', className)}>
+        <div className="flex h-11 items-end justify-between gap-4">
+          <div data-part="identity" className="flex min-w-0 items-baseline pb-2.75">
+            {props.lead != null ? <span className="mr-3 flex shrink-0 items-baseline">{props.lead}</span> : null}
+            <span className="text-body-m shrink-0 text-text-1">{props.name}</span>
+            {props.handle != null ? <span className="text-cap ml-2 min-w-0 truncate text-text-2">{props.handle}</span> : null}
+          </div>
+          {trailing != null ? <div className="flex shrink-0 items-center self-center">{trailing}</div> : null}
         </div>
         <h1 id={titleId} className={TITLE_DISPLAY}>
           {props.title}

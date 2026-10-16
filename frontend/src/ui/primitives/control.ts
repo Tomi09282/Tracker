@@ -214,10 +214,21 @@ const recipe = cva(
         lg: 'min-h-[var(--control-h-primary)]',
         sm: 'min-h-[var(--control-h)]',
       },
-      /** `link` only. `danger` = danger TEXT — never a red fill. A destructive action is confirmed in a sheet. */
+      /**
+       * `link` only. `danger` = danger TEXT — never a red fill. A destructive action is confirmed in a sheet.
+       *
+       * Added by the G-shell gap lane (additive, ruling R6):
+       *   `quiet`       `text-2` — the closed identity trigger of compose-profile-1, a quiet glyph
+       *   `faint`       `text-3` — the 16 pt disclosure / reorder glyphs of plan-editor-2
+       *   `dangerQuiet` the danger ink with the GLYPH at 60 % — plan-editor's "Gyakorlat
+       *                 eltávolítása" beside the full-strength "Blokk törlése"
+       */
       tone: {
         default: '',
         danger: '',
+        quiet: '',
+        faint: '',
+        dangerQuiet: '',
       },
       /**
        * `link` only — the type role of the words. `cap` (13 / 18 Medium) is the inline link: in a
@@ -227,6 +238,47 @@ const recipe = cva(
       text: {
         cap: '',
         body: '',
+        /**
+         * G-shell. `data-l` (Geist Mono Medium 16 / 20): a figure that is the action — coins-1's
+         * "250" beside its 20 pt coin, 6 apart. The lead may be an image (`Pic`); it is never
+         * recoloured.
+         */
+        data: '',
+      },
+      /**
+       * G-shell, `link` only — the weight of the words, by type role. `medium` is today's
+       * (`cap-m` / `body-m`). `regular` is `cap` / `body` (the identity line of compose-profile-1,
+       * Geist Regular 16 / 22). `strong` is `body-b` (SemiBold 16 / 22, "Név módosítása" of
+       * compose-profile-2); on a `cap` link it is the SemiBold of the same 13 / 18 step.
+       */
+      weight: {
+        medium: '',
+        regular: '',
+        strong: '',
+      },
+      /**
+       * G-shell, `link` + `shape: 'icon'` only — the glyph of the bare icon button.
+       *
+       *   `m`      24 pt at stroke 1.75, centred in the 44 frame (today's, the default)
+       *   `sm`     16 pt (stroke 1.75 of the 24 grid = 1.17 drawn), centred — plan-editor's glyph
+       *            cluster: reorder arrows, disclosure, the day / exercise trash
+       *   `field`  20 pt in `text-2`, its box against the RIGHT edge of the 44 frame — a field's or a
+       *            row's trailing control: the password reveal of auth-1 / auth-2 (frame 334-378,
+       *            glyph 359-379), the delete / clear cross of nutrition-1 / -2 and client-detail-2
+       */
+      glyph: {
+        m: '',
+        sm: '',
+        field: '',
+      },
+      /**
+       * G-shell, `primary` only. `false` = the pill at rest WITHOUT its glow layer and the resting
+       * pulse: a specimen of a pill that is not the screen's one live action (style-studio's row
+       * stages, whose frames set `effects = []`). Pressed, disabled and busy are unchanged.
+       */
+      lit: {
+        true: '',
+        false: 'before:hidden',
       },
     },
     compoundVariants: [
@@ -269,8 +321,44 @@ const recipe = cva(
       // The bare glyph: 24 px at stroke 1.75 in a 44 × 44 frame. Size and stroke are the frame's
       // word, not the call site's — an icon button cannot be handed a 20 px glyph by accident.
       { variant: 'link', shape: 'icon', class: '[&_svg]:size-6 [&_svg]:stroke-[1.75]' },
+
+      // ── G-shell additions (additive: no existing combination changes) ──────────────────────
+      // The figure link: mono 16 / 20, 6 between the lead and the figure (coins-1 "Button/price").
+      // `font-mono` replaces the base `font-body` (one family group in the merger).
+      { variant: 'link', text: 'data', class: 'gap-1.5 font-mono text-data-l' },
+      // The weights, as type roles of the same size — the role carries the weight, so the merger
+      // keeps exactly one size class.
+      { variant: 'link', text: 'body', weight: 'regular', class: 'text-body' },
+      { variant: 'link', text: 'body', weight: 'strong', class: 'text-body-b' },
+      { variant: 'link', text: 'cap', weight: 'regular', class: 'text-cap' },
+      { variant: 'link', text: 'cap', weight: 'strong', class: 'font-semibold' },
+      // The quieter inks. On a text link the lead / trail glyphs are `text-2` already; the words
+      // take the tone.
+      { variant: 'link', tone: 'quiet', class: 'text-text-2' },
+      { variant: 'link', tone: 'faint', class: 'text-text-3' },
+      { variant: 'link', tone: 'dangerQuiet', class: 'text-danger [&_svg]:opacity-60' },
+      // The glyph sizes of the bare icon button. `field`: the box stands 1 past the frame's right
+      // edge, as the frames place it (eyeOff 359-379 in 334-378), so the ink ends on the edge.
+      { variant: 'link', shape: 'icon', glyph: 'sm', class: '[&_svg]:size-4' },
+      // The cross draws its ink 4 in from its box on each side (an eye 1.7), so the frames hang its
+      // box 4 past the edge (nutrition-1 / -2, client-detail-2: glyph/x 362-382 in 334-378): ink on
+      // the edge for both. Lucide names every glyph on its `<svg>` (`lucide-x`).
+      { variant: 'link', shape: 'icon', glyph: 'field', class: 'justify-end text-text-2 [&_svg]:-mr-px [&_svg]:size-5 [&_svg.lucide-x]:-mr-1' },
+      // A `field` glyph keeps a danger ink when one is asked for (a destructive row cross).
+      { variant: 'link', shape: 'icon', glyph: 'field', tone: ['danger', 'dangerQuiet'], class: 'text-danger' },
+      // The icon pill: the small lime pill around ONE glyph — 56 x 44, the 24 pt glyph at stroke
+      // 2.5, the glow and the resting pulse (workout-1 "Button/primary · Kész" 322,497 56 x 44,
+      // r 28, glyph 338,507). `lg` is the same at 56 high.
+      {
+        variant: 'primary',
+        shape: 'icon',
+        size: ['sm', 'lg'],
+        class: 'w-14 rounded-button px-0 [&_svg]:size-6 [&_svg]:stroke-[2.5] before:animate-pulse-rest motion-reduce:before:animate-none',
+      },
     ],
-    defaultVariants: { variant: 'secondary', shape: 'button', density: 'default', size: 'md' },
+    // `text: 'cap'` names the link's default role so that the weight rules can match it; it adds
+    // no class to any look.
+    defaultVariants: { variant: 'secondary', shape: 'button', density: 'default', size: 'md', text: 'cap' },
   },
 );
 
@@ -300,7 +388,9 @@ export function control(props?: ControlProps): string {
  */
 export function kitName({ variant, shape, size }: Pick<ControlVariants, 'variant' | 'shape' | 'size'>): 'btnPrimary' | 'textLink' | 'iconBtn' | undefined {
   if (variant === 'link') return shape === 'icon' ? 'iconBtn' : 'textLink';
-  if (variant === 'primary' && (shape ?? 'button') === 'button' && (size === 'lg' || size === 'sm')) return 'btnPrimary';
+  // The icon pill (G-shell) is the pill too: the same fill, glow and states around one glyph.
+  const s = shape ?? 'button';
+  if (variant === 'primary' && (s === 'button' || s === 'icon') && (size === 'lg' || size === 'sm')) return 'btnPrimary';
   return undefined;
 }
 
@@ -342,3 +432,12 @@ export const chip = cva(['inline-flex items-center gap-1 whitespace-nowrap', 'ro
 });
 
 export type ChipVariants = VariantProps<typeof chip>;
+
+/**
+ * G-shell — the disabled pill on an ANCHOR (`PressableLink`): what `disabled:` draws on a button,
+ * keyed on `aria-disabled`, because an anchor cannot be disabled. The link look answers to
+ * `aria-disabled` in the recipe already; the pill does not, and must not for a button (a busy pill
+ * is `aria-busy` + `disabled`, never `aria-disabled`), so it is applied by `PressableLink` only.
+ */
+export const ANCHOR_DISABLED_PILL =
+  'aria-disabled:pointer-events-none aria-disabled:bg-surface-2 aria-disabled:text-text-3 aria-disabled:before:hidden';
