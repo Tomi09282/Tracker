@@ -1,33 +1,34 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { ChevronRight, Droplet, Egg, Flame, Salad, Wheat } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { SectionHeader } from '../../ui/data/SectionHeader';
-import { SummaryTile } from '../../ui/data/SummaryTile';
+import { ChevronRight } from 'lucide-react';
+import { MacroColumns, type MacroColumn } from '../../ui/data/MacroColumns';
+import { Section } from '../../ui/data/SectionHeader';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { useNutritionDay } from '../nutrition/useNutrition';
 
 /**
- * Today's nutrition, on Home — [[55-Screens/01 Home]] block 6.
+ * Today's nutrition, on Home — frames `home-1` / `home-2` ("Táplálkozás").
  *
- * ═══ TILES, NOT A TABLE ════════════════════════════════════════════════════════════════════════
+ * ═══ THE COMPOSITION OF THE FRAME ══════════════════════════════════════════════════════════════
  *
- * Four rows of `label / value / bar` is the purest form of "the whole UI is data fields": sixteen
- * values at one size, none of them the answer to anything. As tiles each macro is ONE object you
- * read at a glance, and the fourth (`Zsír`) wrapping below the fold is honest about the order
- * people actually check them in.
+ * A ruled section, quiet: strong rule -> "TÁPLÁLKOZÁS" eyebrow with "Megnyitás ›" on its baseline
+ * (the chevron's tip on the right edge) -> the macro row: four columns 16 apart, each the macro's
+ * name, the figure in mono with its unit, a 4 pt bar of logged / target, and "cél …" under it.
+ * No tiles, no glyphs, no lime: the screen's lamp is the session's pill.
  *
  * ═══ THE SAME HOOK, THE SAME QUERY KEY, THE SAME NUMBERS ═══════════════════════════════════════
  *
  * `useNutritionDay` — not a second endpoint and not a second sum. Home and `/nutrition` cannot
- * disagree about a total unless a tile starts doing its own arithmetic, which is precisely the bug
- * `NutritionCard` was built to prevent. The rounding below mirrors `MacroBars` for the same
- * reason: `128` here and `128,4` there is the same disagreement in a smaller font.
+ * disagree about a total unless this block starts doing its own arithmetic. The display rounding
+ * below mirrors the nutrition screen's for the same reason.
  *
- * ═══ AND IT RENDERS NOTHING UNTIL THERE IS SOMETHING TO SAY ════════════════════════════════════
+ * ═══ STATES ════════════════════════════════════════════════════════════════════════════════════
  *
- * No logged items and no target for today means no block at all, rather than four zeroed tiles.
- * Home is the screen a client opens twenty times a day; a permanent `0` on it is not a prompt.
+ *   no target for the day   the name and the figure only: no bar, no "cél" line
+ *   over target             `MacroColumns` turns that figure and its bar to the warning colour
+ *   nothing logged, no target   the block is not rendered at all — a permanent row of zeros on the
+ *                               screen opened twenty times a day is not a prompt
+ *   loading                 blocks where the eyebrow and the columns' lines will be
  */
 export function HomeNutrition({ date }: { date: string }) {
   const { t } = useTranslation();
@@ -35,9 +36,17 @@ export function HomeNutrition({ date }: { date: string }) {
 
   if (day.isLoading) {
     return (
-      <div className="flex flex-col gap-group">
-        <Skeleton className="h-11 w-40 rounded-field" />
-        <Skeleton className="h-36 w-full rounded-card" />
+      <div role="status" aria-busy="true" className="flex flex-col gap-4">
+        <span className="sr-only">{t('common.loading')}</span>
+        <Skeleton className="h-4 w-28" />
+        <div className="grid grid-cols-4 gap-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <Skeleton className="h-3 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -47,61 +56,40 @@ export function HomeNutrition({ date }: { date: string }) {
   const data = day.data;
   if (!data || (data.items.length === 0 && data.targets == null)) return null;
 
-  const macros: { key: string; icon: LucideIcon; value: number; unit: string; target: number | null }[] = [
-    { key: 'kcal', icon: Flame, value: round(data.totals.kcal), unit: '', target: data.targets?.kcal_target ?? null },
-    { key: 'protein', icon: Egg, value: round(data.totals.protein_g), unit: 'g', target: data.targets?.protein_g_target ?? null },
-    { key: 'carb', icon: Wheat, value: round(data.totals.carb_g), unit: 'g', target: data.targets?.carb_g_target ?? null },
-    { key: 'fat', icon: Droplet, value: round(data.totals.fat_g), unit: 'g', target: data.targets?.fat_g_target ?? null },
+  const macros: { key: string; value: number; unit: string; target: number | null }[] = [
+    { key: 'kcal', value: round(data.totals.kcal), unit: '', target: data.targets?.kcal_target ?? null },
+    { key: 'protein', value: round(data.totals.protein_g), unit: 'g', target: data.targets?.protein_g_target ?? null },
+    { key: 'carb', value: round(data.totals.carb_g), unit: 'g', target: data.targets?.carb_g_target ?? null },
+    { key: 'fat', value: round(data.totals.fat_g), unit: 'g', target: data.targets?.fat_g_target ?? null },
   ];
 
-  return (
-    <section aria-labelledby="nutrition-heading" className="flex flex-col gap-group">
-      <SectionHeader
-        icon={Salad}
-        title={t('nutrition.card.title')}
-        titleId="nutrition-heading"
-        action={
-          <Link
-            to="/nutrition"
-            className="text-caption inline-flex min-h-[var(--target-min)] shrink-0 items-center gap-1 text-accent"
-          >
-            {t('nutrition.card.open')}
-            <ChevronRight className="size-icon-s" aria-hidden />
-          </Link>
-        }
-      />
+  const columns: MacroColumn[] = macros.map((m) => ({
+    name: t(`nutrition.macro.${m.key}`),
+    value: m.value,
+    unit: m.unit || undefined,
+    // logged / target; over 1 is the warning state. No target, no bar.
+    ratio: m.target != null && m.target > 0 ? m.value / m.target : null,
+    caption:
+      m.target != null
+        ? t('nutrition.card.targetCaption', {
+            value: m.unit ? `${round(m.target)} ${m.unit}` : round(m.target),
+          })
+        : undefined,
+  }));
 
-      {/* Three across; the fourth wraps. Deliberate: `Kalória` is what people check, `Zsír` is what
-          they check afterwards, and pretending otherwise costs a row of vertical space here. */}
-      <div className="grid grid-cols-3 gap-tight">
-        {macros.map((m) => (
-          <SummaryTile
-            key={m.key}
-            className="min-w-0"
-            icon={m.icon}
-            // A number animates through CountUp; `128 g` carries a unit and simply renders.
-            value={m.unit ? `${m.value} ${m.unit}` : m.value}
-            // The TARGET, not the macro name — the glyph is what says which macro this is, so
-            // the caption line is spent on the denominator the figure is missing. `round()` for
-            // display only: `m.target` stays raw below so `progress` and `over` keep their
-            // precision. No target means no `cél` clause, matching MacroBars on /nutrition.
-            caption={
-              m.target != null
-                ? t('nutrition.card.targetCaption', {
-                    value: m.unit ? `${round(m.target)} ${m.unit}` : round(m.target),
-                  })
-                : t(`nutrition.macro.${m.key}`)
-            }
-            progress={m.target != null && m.target > 0 ? m.value / m.target : undefined}
-            // Warning, never danger, and the copy never scolds: somebody three hundred calories
-            // past their target has had a normal Tuesday. `SummaryTile` owns that colour rule.
-            over={m.target != null && m.value > m.target}
-          />
-        ))}
-      </div>
-    </section>
+  return (
+    <Section
+      title={t('nutrition.card.title')}
+      trailing={
+        <TextLink to="/nutrition" trail={<ChevronRight />}>
+          {t('nutrition.card.open')}
+        </TextLink>
+      }
+    >
+      <MacroColumns columns={columns} />
+    </Section>
   );
 }
 
-/** The display rounding `MacroBars` uses, so the two screens never print a different figure. */
+/** The display rounding the nutrition screen uses, so the two screens never print a different figure. */
 const round = (v: number) => (Math.abs(v) >= 10 ? Math.round(v) : Math.round(v * 10) / 10);

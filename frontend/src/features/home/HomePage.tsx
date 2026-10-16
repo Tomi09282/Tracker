@@ -1,40 +1,54 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { CalendarDays, CheckCircle2, Clock, Dumbbell, Moon, PlayCircle } from 'lucide-react';
 import { NotificationBell } from '../chat/NotificationBell';
-import { cn } from '../../lib/cn';
-import { SectionHeader } from '../../ui/data/SectionHeader';
+import { ListRow } from '../../ui/data/ListRow';
+import { RowStack } from '../../ui/data/RowStack';
+import { Section } from '../../ui/data/SectionHeader';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Pic } from '../../ui/media/Pic';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { useStartWorkout, useCurrentWorkout } from '../workout/useWorkout';
 import { useToday, type TodayDay } from './useToday';
 import { WeekStrip } from './WeekStrip';
 import { HomeNutrition } from './HomeNutrition';
 
 /**
- * Home — [[55-Screens/01 Home]] and [[55-Screens/01b Home empty]].
+ * Home — frames `home-1` (training day), `home-2` (session running), `home-3` (nothing today).
  *
  * The screen a client opens twenty times a day and reads in about two seconds: am I on track this
  * week, and is there a session waiting for me right now. Everything on it is either that answer or
  * a way to act on it.
  *
- * ═══ WHAT LEFT THIS SCREEN, AND WHY ════════════════════════════════════════════════════════════
+ * ═══ THE COMPOSITION OF THE FRAMES (`figma-build/app/home-*.body.js`) ══════════════════════════
  *
- * · The signed-in e-mail. It was rendered on the busiest screen in the product and answered a
- *   question nobody asks twenty times a day; it belongs on `Profil`. Dropping it is also what let
- *   the header be two lines instead of a four-item baseline scramble that truncated the date on
- *   narrow phones.
- * · The week pager and the day numbers — see `WeekStrip`.
- * · The uppercase eyebrow, which became a heading with a mark (`SectionHeader`). It earns the
- *   weight because it introduces the only actionable region on the page.
+ *   Screen top="root"          the scaffold: header at y 72, blocks 32 apart
+ *   ScreenHeader greet         "Szia!" + the date, the bell on the right edge
+ *   WeekStrip                  the hero: "HETI EDZÉS", the giant "2 / 4", the week bar, the fist
+ *                              glowing behind on the right
+ *   Section "Mai edzés"        rule, eyebrow + ONE trailing (the meta "18:00 · 5 gyakorlat", or the
+ *                              live dot + "Edzés folyamatban"), the day's name in display-XL, the
+ *                              plan in body, then the screen's ONE lime pill (Indítás / Folytatás)
+ *   HomeNutrition              rule, "TÁPLÁLKOZÁS" + "Megnyitás ›", four macro columns
  *
- * ═══ ONE FILLED BUTTON, AND IT MOVES ═══════════════════════════════════════════════════════════
+ * With nothing scheduled (`home-3`) the week and the section give way to ONE still (the plates,
+ * 480 pt, bleeding past both edges) and the empty state, whose pill is the door to the library.
  *
- * With a session running the accent is spent on `Folytatás`; with nothing scheduled it is spent on
- * the empty state's action. The day list is never filled — three untrained days used to emit three
- * filled primaries, which is the same as emitting none.
+ * ═══ WHAT THE FRAMES DO NOT DRAW, BUILT IN THE SAME LANGUAGE (owner answer Q4) ═════════════════
+ *
+ * · The library row (D2): a `ListRow` "Gyakorlatok ›" under the today block, 20 under the pill —
+ *   the permanent way to the exercise library on a day that has a session. Not in the empty state:
+ *   there the pill already is that door.
+ * · A rest day: the day's name and the plan, "Pihenőnap" as the section's status, no action.
+ * · Already trained: the same, with a lit dot and "Kész" as the status, no action.
+ * · Several sessions today: the first one still to do is the subject (display-XL + the pill); the
+ *   others are rows under it, each with its own "Indítás" as a text link — one pill per screen.
+ * · Starting: every Indítás is busy together (one shared mutation). A failed start is silent.
+ * · Loading: blocks where the hero's lines and the session's lines will be; never a spinner.
  */
 export function HomePage() {
   const { t, i18n } = useTranslation();
@@ -62,180 +76,173 @@ export function HomePage() {
     void navigate('/workout');
   };
 
+  // The session the hero shows: the first one still to do, else the first one of the day.
+  const subject = days.find((d) => !d.is_rest && d.log_id == null) ?? days[0] ?? null;
+  const others = days.filter((d) => d !== subject);
+
+  // "18:00 · 5 gyakorlat": the time in ink, the rest quiet (the frame's two fills of one line).
+  const meta = (day: TodayDay): ReactNode => (
+    <span className="text-data text-text-1">
+      {day.start_time ? day.start_time : null}
+      <span className="text-text-2">
+        {day.start_time ? ' · ' : null}
+        {t('home.exerciseCount', { count: day.exercise_count })}
+      </span>
+    </span>
+  );
+
+  // The section's ONE trailing node: what the subject IS right now.
+  const status = (day: TodayDay | null): ReactNode => {
+    if (live) return <LiveStatus>{t('home.inProgress')}</LiveStatus>;
+    if (!day) return null;
+    if (day.is_rest) {
+      return (
+        <span className="text-cap text-text-2">
+          {day.start_time ? <span className="text-data text-text-1">{day.start_time} · </span> : null}
+          {t('home.restDay')}
+        </span>
+      );
+    }
+    if (day.log_id != null) return <LiveStatus>{t('home.done')}</LiveStatus>;
+    return meta(day);
+  };
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      {/* No page title and no breadcrumb: the active nav tab already says where you are. */}
-      <header className="flex items-start justify-between gap-group">
-        <div className="min-w-0">
-          <h1 className="text-display-legacy text-text-1">{t('home.greeting')}</h1>
-          <p className="text-body-s truncate text-text-2 first-letter:uppercase">{dateLabel}</p>
-        </div>
-        <NotificationBell className="-mr-2 shrink-0" />
-      </header>
+    <Screen top="root">
+      {/* No page title and no breadcrumb: the active tab already says where you are. */}
+      <ScreenHeader
+        kind="greet"
+        title={t('home.greeting')}
+        sub={<span className="block truncate first-letter:uppercase">{dateLabel}</span>}
+        trailing={<NotificationBell />}
+      />
 
       {today.isPending ? (
-        // ONE SHAPE, BOTH BRANCHES. Which one arrives is precisely what this cannot know yet: the
-        // week panel over a day list, or the empty panel that replaces the two of them. Both open
-        // with a card in the anchor slot and put one card under it, so that is all this draws. The
-        // section-heading pill it used to draw had no counterpart on the empty branch and vanished
-        // the moment `days` came back empty, and the lower block is sized between the two real
-        // heights rather than matching either, so neither swap drags the nutrition block far.
-        <div className="flex flex-col gap-section" role="status" aria-busy="true">
+        // Blocks where the hero's lines and the session's lines will be. Which of the two branches
+        // arrives (the week + today, or the empty state) is exactly what this cannot know yet.
+        <div role="status" aria-busy="true" className="flex flex-col gap-8">
           <span className="sr-only">{t('common.loading')}</span>
-          <Skeleton className="h-72 w-full rounded-card" />
-          <Skeleton className="h-28 w-full rounded-card" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-[99px] w-[170px]" />
+          </div>
+          <div className="flex flex-col gap-4">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
         </div>
       ) : (
         <>
-          {/* No plan day today means no denominator, so the ring — and the evidence under it —
-              is replaced entirely by the empty anchor rather than rendered at zero. */}
+          {/* No plan day today means no denominator: the week is replaced entirely by the empty
+              state rather than rendered at zero. */}
           {todayDate && days.length > 0 ? <WeekStrip today={todayDate} /> : null}
 
-          {live || days.length > 0 ? (
-            <section aria-labelledby="today-heading" className="flex flex-col gap-group">
-              <SectionHeader
-                icon={PlayCircle}
-                title={t('home.todayTitle')}
-                titleId="today-heading"
-              />
-
-              {live ? (
-                /* A session already running outranks the schedule. It is the one thing the user is
-                   in the middle of, and it takes the screen's only filled button. */
-                <Surface className="flex flex-col gap-group border-[var(--accent)] bg-accent-subtle">
-                  <div className="min-w-0">
-                    <p className="text-title-3 text-text-1">{t('home.inProgress')}</p>
-                    <p className="text-body-s truncate text-text-2">
-                      {live.title ?? t('workout.freestyle')}
-                    </p>
-                  </div>
-                  <Pressable
-                    variant="primary"
-                    className="w-full"
-                    onClick={() => void navigate('/workout')}
-                  >
-                    {t('home.resume')}
-                  </Pressable>
-                </Surface>
-              ) : (
-                <ul className="flex flex-col gap-group">
-                  {days.map((day) => {
-                    const trained = day.log_id != null;
-                    return (
-                      <Surface
-                        as="li"
-                        key={`${day.plan_id}-${day.day_id}-${day.slot}`}
-                        className={cn('flex items-center gap-tight', trained && 'bg-success-subtle')}
+          {live || subject ? (
+            <Section title={t('home.todayTitle')} trailing={status(subject)}>
+              <div className="flex flex-col gap-5">
+                {live ? (
+                  /* A session already running outranks the schedule. It replaces the whole day
+                     list and takes the screen's only pill. */
+                  <>
+                    <p className="text-display-xl break-words text-text-1">{live.title ?? t('workout.freestyle')}</p>
+                    <Pressable variant="primary" size="lg" className="w-full" onClick={() => void navigate('/workout')}>
+                      {t('home.resume')}
+                    </Pressable>
+                  </>
+                ) : subject ? (
+                  <>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-display-xl break-words text-text-1">{subject.day_name}</p>
+                      <p className="text-body text-text-2">{subject.plan_name}</p>
+                    </div>
+                    {/* A rest day and a trained day are information, not an action. */}
+                    {!subject.is_rest && subject.log_id == null ? (
+                      <Pressable
+                        variant="primary"
+                        size="lg"
+                        className="w-full"
+                        busy={start.isPending}
+                        // A session already running would be RESUMED by the server rather than
+                        // replaced, so "start" would be a lie about what the tap does.
+                        disabled={live != null}
+                        onClick={() => void begin(subject)}
                       >
-                        {/* A rest day is information, not an absence. Hiding it looks like a bug
-                            and leaves the client wondering whether their plan broke. */}
-                        {day.is_rest ? (
-                          <Moon className="size-icon-l shrink-0 text-text-3" aria-hidden />
-                        ) : trained ? (
-                          <CheckCircle2 className="size-icon-l shrink-0 text-success" aria-hidden />
-                        ) : (
-                          <Dumbbell className="size-icon-l shrink-0 text-text-2" aria-hidden />
-                        )}
+                        {t('home.start')}
+                      </Pressable>
+                    ) : null}
+                    {others.length > 0 ? (
+                      <RowStack>
+                        {others.map((day) => (
+                          <ListRow
+                            key={`${day.plan_id}-${day.day_id}-${day.slot}`}
+                            title={day.day_name}
+                            sub={day.plan_name}
+                            value={day.is_rest || day.log_id != null ? undefined : meta(day)}
+                            trailing={
+                              day.is_rest ? (
+                                <span className="text-cap text-text-2">{t('home.restDay')}</span>
+                              ) : day.log_id != null ? (
+                                <LiveStatus>{t('home.done')}</LiveStatus>
+                              ) : undefined
+                            }
+                            control={
+                              !day.is_rest && day.log_id == null ? (
+                                <TextLink busy={start.isPending} disabled={live != null} onClick={() => void begin(day)}>
+                                  {t('home.start')}
+                                </TextLink>
+                              ) : undefined
+                            }
+                          />
+                        ))}
+                      </RowStack>
+                    ) : null}
+                  </>
+                ) : null}
 
-                        <div className="min-w-0 flex-1">
-                          <p className="text-body-strong truncate text-text-1">{day.day_name}</p>
-                          {/* Three facts, one sentence: `5 napos program · 18:00 · 5 gyakorlat`.
-                              Parted by air alone they read as three unrelated labels, so each
-                              trailing fact brings its own middle dot — `aria-hidden`, because a
-                              screen reader already pauses between the spans and would otherwise
-                              announce the punctuation. The plan name always renders first, which
-                              is what makes a leading dot correct for every fact after it. */}
-                          <p className="text-caption flex items-center gap-1 text-text-3">
-                            <span className="truncate">{day.plan_name}</span>
-                            {day.start_time ? (
-                              <>
-                                <span aria-hidden className="shrink-0">
-                                  ·
-                                </span>
-                                <span className="inline-flex shrink-0 items-center gap-1 tabular-nums">
-                                  <Clock className="size-icon-s" aria-hidden />
-                                  {day.start_time}
-                                </span>
-                              </>
-                            ) : null}
-                            {!day.is_rest ? (
-                              <>
-                                <span aria-hidden className="shrink-0">
-                                  ·
-                                </span>
-                                <span className="shrink-0 tabular-nums">
-                                  {t('home.exerciseCount', { count: day.exercise_count })}
-                                </span>
-                              </>
-                            ) : null}
-                          </p>
-                        </div>
-
-                        {day.is_rest ? (
-                          <span className="text-caption shrink-0 text-text-3">
-                            {t('home.restDay')}
-                          </span>
-                        ) : trained ? (
-                          <span className="text-caption shrink-0 text-success">
-                            {t('home.done')}
-                          </span>
-                        ) : (
-                          <Pressable
-                            // Outlined, and the whole list stays outlined: one filled accent per
-                            // screen, and on this screen it belongs to `Folytatás` or to the
-                            // empty state's action.
-                            variant="secondary"
-                            busy={start.isPending}
-                            // A session already running would be RESUMED rather than replaced by
-                            // the server, so offering "start" here would be a lie about what the
-                            // tap does.
-                            disabled={live != null}
-                            onClick={() => void begin(day)}
-                          >
-                            {t('home.start')}
-                          </Pressable>
-                        )}
-                      </Surface>
-                    );
-                  })}
-                </ul>
-              )}
-            </section>
+                {/* D2: the permanent way to the exercise library on a day that has a session. */}
+                <RowStack>
+                  <ListRow title={t('nav.library')} to="/library" chevron />
+                </RowStack>
+              </div>
+            </Section>
           ) : (
-            /* Empty AND error: a failed `today` query renders this panel rather than a red card,
-               because a client who cannot be told what is scheduled needs the same escape hatch as
-               one with nothing scheduled. The failure itself is a server-log concern. */
-            <Surface pad="none">
+            /* Empty AND error: a failed `today` read renders this state rather than an error,
+               because a client who cannot be told what is scheduled needs the same way out as one
+               with nothing scheduled. The failure itself is a server-log concern. */
+            <>
+              {/* The still of the frame: 480 pt, its dim left end on the gutter, the lit right end
+                  past the screen edge. The stage is as tall as the stack's ink plus 20 above it. */}
+              <div aria-hidden className="relative h-[310px]">
+                <Pic slot="hero-plates" width={480} bleed className="absolute -left-[31px] -top-[14px]" />
+              </div>
               <EmptyState
-                icon={CalendarDays}
-                // The moon is the part that carries the meaning: a bare calendar is "no data",
-                // calendar-plus-moon is "nothing is scheduled, and that is fine".
-                badge={Moon}
-                // The mark carries the top third here the way the ring does on the populated
-                // screen, so the page's rhythm is the same on both days. The instinct to make an
-                // empty card small and apologetic is backwards: on this route the emptiness IS
-                // the content.
-                size="anchor"
                 title={t('home.emptyTitle')}
                 body={t('home.emptyBody')}
                 action={
-                  <Pressable
-                    variant="primary"
-                    icon={<Dumbbell className="size-icon-m" aria-hidden />}
-                    onClick={() => void navigate('/library')}
-                  >
+                  <Pressable variant="primary" size="lg" onClick={() => void navigate('/library')}>
                     {t('home.browseLibrary')}
                   </Pressable>
                 }
               />
-            </Surface>
+            </>
           )}
         </>
       )}
 
       {/* Below the session, because training is what this screen is for and food is context. */}
       <HomeNutrition date={todayLocal()} />
-    </div>
+    </Screen>
+  );
+}
+
+/** A status that is lit: the 6 pt lime dot and the words in ink (kit: "Status/live"). */
+function LiveStatus({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 text-cap-m text-text-1">
+      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />
+      {children}
+    </span>
   );
 }
 

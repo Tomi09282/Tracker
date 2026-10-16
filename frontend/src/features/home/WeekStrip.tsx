@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Dumbbell } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
-import { cn } from '../../lib/cn';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
-import { Gauge } from '../../ui/feedback/Gauge';
-import { CountUp } from '../../ui/feedback/CountUp';
+import { Fraction, Numeral } from '../../ui/data/Numeral';
+import { SegmentBar, type Segment } from '../../ui/data/SegmentBar';
+import { StatBlock } from '../../ui/data/StatBlock';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Pic } from '../../ui/media/Pic';
+import { TextLink } from '../../ui/primitives/TextLink';
 
 interface Occurrence {
   date: string;
@@ -35,30 +34,39 @@ const addDays = (iso: string, n: number) =>
   new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86400000).toISOString().slice(0, 10);
 
 /**
- * The week panel — Home's anchor ([[55-Screens/01 Home]]).
+ * The week, as Home's hero — frames `home-1` / `home-2` ("Hero stage").
  *
- * ═══ ONE OBJECT, NOT TWO STACKED SECTIONS ══════════════════════════════════════════════════════
+ * ═══ THE COMPOSITION OF THE FRAME ══════════════════════════════════════════════════════════════
  *
- * The ring and the seven-cell row live inside the SAME panel: the ring is the claim ("two of five
- * this week") and the row is the evidence for it. Stacked as two sections they read as two
- * unrelated readouts, which is what the previous layout did.
+ * One column, 20 between its two parts, exactly as `home-1.body.js` builds it:
  *
- * ═══ WHAT THIS LOST, AND WHY ═══════════════════════════════════════════════════════════════════
+ *   StatBlock   "HETI EDZÉS" eyebrow -> 8 -> the giant fraction "2 / 4" on the gutter (ink-tight)
+ *   SegmentBar  seven 6 pt segments 8 apart, the mono weekday under each, today's dot
  *
- * The `‹ ›` pager, the date range sub-header and the day NUMBERS are gone. The strip is *this
- * week*, full stop — a client standing in the gym does not browse to March, and the history screen
- * owns that journey properly. Losing the numbers is what let seven cells fit inside the panel
- * instead of needing a section of their own.
+ * and the fist (`hero-grip`, 216 pt) glowing out of the black behind them: absolute, pinned to the
+ * column's right end and its top, 24 above the eyebrow and 41 past the right gutter — so it runs
+ * 17 pt off the screen edge and is cut there by the scaffold's clip. The numerals end at x 194 and
+ * the image's lit part starts at 203: no text sits on it. The two text parts are `relative` so they
+ * paint above the picture, as the frame paints them (the image is its first layer).
+ *
+ * ═══ WHAT EACH SEGMENT SAYS ════════════════════════════════════════════════════════════════════
+ *
+ * The light levels of Pulse, one per day in strict priority: trained = lit (`on`), scheduled and
+ * not yet trained = pending (`half`), a rest day or a free day = off. Today carries the ink label
+ * and the dot. Display-only — no pager, no day numbers, nothing to tap.
  *
  * ═══ THE DENOMINATOR IS NOT A CONSTANT ═════════════════════════════════════════════════════════
  *
  * It is the number of days this week the plan actually prescribes a session for, counted from the
- * SERVER's window response. A client on a three-day plan sees `2 / 3`. Hardcoding five would be a
- * ring that lies to two thirds of the userbase.
+ * SERVER's window response. A client on a three-day plan sees `2 / 3`. The dates come from the
+ * server too: the schedule is `starts_on + k*cycle_days + day_index` with skip and move exceptions
+ * layered on it, and a second implementation of that in the browser would disagree with it.
  *
- * The dates still come from the server rather than being generated here. The schedule is
- * `starts_on + k*cycle_days + day_index` with skip and move exceptions layered on it, and a second
- * implementation of that in the browser is a second implementation that will disagree.
+ * ═══ A FAILED READ PRINTS A DASH, NEVER A ZERO ═════════════════════════════════════════════════
+ *
+ * "0 / 4" would be a claim about the week; the week is unknown. The figure becomes "—" in the
+ * pending ink and "Újra" takes the bar's place. The today list under it does not depend on this
+ * query and stays.
  */
 export function WeekStrip({ today }: { today: string }) {
   const { t, i18n } = useTranslation();
@@ -83,98 +91,59 @@ export function WeekStrip({ today }: { today: string }) {
     [weekStart],
   );
 
-  // A day counts once, however many occurrences sit on it: the ring counts SESSIONS DONE against
+  // A day counts once, however many occurrences sit on it: the figure counts SESSIONS DONE against
   // sessions prescribed, and a day with two blocks on it is still one training day.
   const planned = dates.filter((d) => (byDate.get(d) ?? []).some((o) => !o.is_rest)).length;
   const trainedCount = dates.filter((d) => (byDate.get(d) ?? []).some((o) => o.log_id != null)).length;
 
   const dayLabel = new Intl.DateTimeFormat(i18n.language, { weekday: 'short' });
+  const dayName = new Intl.DateTimeFormat(i18n.language, { weekday: 'long' });
+
+  const weekLabel = t('home.weeklyWorkouts');
+
+  const segments: Segment[] = dates.map((date) => {
+    const items = byDate.get(date) ?? [];
+    const when = new Date(`${date}T00:00:00Z`);
+    const trained = items.some((o) => o.log_id != null);
+    const scheduled = items.some((o) => !o.is_rest);
+    return {
+      state: trained ? 'on' : scheduled ? 'half' : 'off',
+      label: dayLabel.format(when),
+      today: date === today,
+      // The letter alone says nothing to a screen reader; the day and what it holds do.
+      srText: `${dayName.format(when)}: ${
+        items.length ? items.map((o) => o.day_name).join(', ') : t('home.nothingScheduled')
+      }`,
+    };
+  });
 
   return (
-    <Surface as="section" aria-labelledby="week-heading" className="flex flex-col gap-group">
-      <div className="flex flex-col items-center gap-tight">
-        {week.isPending ? (
-          <Skeleton className="size-40 rounded-chip" />
-        ) : week.isError ? (
-          // The frame stays and the ring is simply absent. A client who cannot be told how their
-          // week is going needs a way to ask again, not a red card where the number should be.
-          <div className="grid size-40 place-items-center">
-            <Pressable onClick={() => void week.refetch()}>{t('common.retry')}</Pressable>
-          </div>
-        ) : (
-          <Gauge
-            className="size-40"
-            label={t('home.weeklyWorkouts')}
-            value={planned > 0 ? trainedCount / planned : 0}
-          >
-            <p className="text-display-legacy font-display text-text-1">
-              <CountUp to={trainedCount} />
-              <span className="text-title-2 tabular-nums text-text-3"> / {planned}</span>
-            </p>
-          </Gauge>
-        )}
+    <div className="relative flex flex-col gap-5">
+      {/* The hero image is withheld while the week loads: a skeleton never draws a picture. */}
+      {week.isPending ? null : (
+        <Pic slot="hero-grip" width={216} priority bleed className="absolute -right-[41px] -top-6" />
+      )}
 
-        {/* A caption, and the panel's accessible name. It renders in every state so the section
-            never loses its heading while the numbers are in flight. "Heti edzés" rather than
-            "Edzés": the caption is what says the `2 / 5` counts sessions across the WEEK — bare
-            "Edzés" reads as if the ring were about one workout. The Gauge above carries the same
-            string, so the ring announces the same claim it draws. */}
-        <h2 id="week-heading" className="text-micro-legacy font-body uppercase text-text-3">
-          {t('home.weeklyWorkouts')}
-        </h2>
-      </div>
+      <StatBlock label={weekLabel} className="relative">
+        {week.isPending ? (
+          // One block at the numeral's cap height, as wide as "2 / 4" — never a spinner.
+          <Skeleton className="h-[99px] w-[170px]" />
+        ) : week.isError ? (
+          <Numeral size="giant" tone="pending" value="—" />
+        ) : (
+          <Fraction size="giant" value={trainedCount} of={planned} mode="roll" />
+        )}
+      </StatBlock>
 
       {week.isPending ? (
-        <Skeleton className="h-14 w-full rounded-field" />
+        <Skeleton className="relative h-1.5 w-full" />
       ) : week.isError ? (
-        // Seven empty bordered cells read as a rendering failure, which is exactly what this is —
-        // so the evidence row is absent rather than blank, and the retry above speaks for both.
-        null
+        <TextLink text="body" className="relative self-start" onClick={() => void week.refetch()}>
+          {t('common.retry')}
+        </TextLink>
       ) : (
-        // Display-only: these cells are EVIDENCE, not navigation. Making them tappable would put
-        // seven 44px targets under the anchor for a journey the history screen already owns.
-        <ol className="grid grid-cols-7 gap-1">
-          {dates.map((date) => {
-            const items = byDate.get(date) ?? [];
-            const isToday = date === today;
-            const trained = items.some((o) => o.log_id != null);
-            const scheduled = items.some((o) => !o.is_rest);
-            return (
-              <li key={date}>
-                <div
-                  className={cn(
-                    'flex min-h-14 flex-col items-center justify-center gap-tight p-1',
-                    'rounded-field border-[length:var(--border-width)]',
-                    isToday
-                      ? 'border-[var(--accent)] bg-accent-subtle'
-                      : 'border-[var(--surface-border)]',
-                    trained && !isToday && 'bg-success-subtle',
-                  )}
-                >
-                  <span className="text-micro-legacy uppercase text-text-3">
-                    {dayLabel.format(new Date(`${date}T00:00:00Z`))}
-                  </span>
-                  {/* ONE glyph, in strict priority: done beats scheduled beats blank. A rest day
-                      and a free day both read as blank here — the cell says whether training
-                      happened, and a moon in a seven-cell row at this size is noise. */}
-                  {trained ? (
-                    <CheckCircle2 className="size-icon-s text-success" aria-hidden />
-                  ) : scheduled ? (
-                    <Dumbbell className="size-icon-s text-accent" aria-hidden />
-                  ) : (
-                    <span className="size-icon-s" aria-hidden />
-                  )}
-                  <span className="sr-only">
-                    {items.length
-                      ? items.map((o) => o.day_name).join(', ')
-                      : t('home.nothingScheduled')}
-                  </span>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+        <SegmentBar label={weekLabel} segments={segments} className="relative" />
       )}
-    </Surface>
+    </div>
   );
 }

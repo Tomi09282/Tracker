@@ -1,0 +1,14 @@
+{
+  "id": "R-S-home-01",
+  "from": "S-home",
+  "kind": "fixture",
+  "blocking": false,
+  "target": "frontend/scripts/fixtures/home-2.json + frontend/scripts/pulse-frames.json (home-2: \"fixture\": \"home-2\", \"clock\": \"2026-10-09T15:00:00+02:00\")",
+  "need": "home-2 is drawn on a Friday with the session 'Felsőtest – húzás' running; the freeze is a Thursday. pulse-frames.json says S-home adds scripts/fixtures/home-2.json, a path S-home may not write.",
+  "evidence": "docs/pipeline/pulse/pkg/S-home/states.json overrides.home-2 (clock + four edit lists); capture .pulse/shots/S-home/home-2.tile-1.png (3 / 4, Friday lit, live dot, Folytatás)",
+  "proposedApi": "copy overrides.home-2.fixtures of states.json verbatim into scripts/fixtures/home-2.json { state, what, why, fixtures } and name it in pulse-frames.json with the clock",
+  "proposedPatch": null,
+  "interim": "the package override in states.json feeds every S-home run; reviewers who capture home-2 without --package S-home see the recorded Thursday (2 / 4, Szabad edzés)",
+  "status": "open",
+  "resolution": null
+}

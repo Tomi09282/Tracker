@@ -1,0 +1,548 @@
+{
+  "about": "S-home - the undrawn states of Home (PLAN 4.1 rule 7) and the drawn data of the two fixture frames. Every fixture is a list of edits over the recording of the same endpoint (R26); every state is replay unless it says live. Accounts: M = user@, N = demo.nagy.balazs@, K = demo.kovacs.eszter@ (live check only).",
+  "overrides": {
+    "home-1": {
+      "why": "home-1 keeps INT's fixture (scripts/fixtures/home-1.json: the Friday row, no session). The inline edits only set the day's nutrition totals to the frame's figures (1840 / 128 / 210 / 52 against the recorded Friday targets 2600 / 180 / 290 / 70) so the macro bars can be compared bar for bar; the verdict is matched-fixture either way.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            }
+          ]
+        }
+      ]
+    },
+    "home-2": {
+      "why": "home-2 is drawn on a Friday with the session 'Felsőtest – húzás' running; the freeze was taken on a Thursday (rest day, the seed's freestyle session). The page clock is the frame's day, today's row is the recorded Friday row, the running log keeps its recorded shape and only takes the drawn title (the banner prints nothing else of it), and Friday's occurrence in the week points at that log. Proposed to INT as scripts/fixtures/home-2.json (request R-S-home-01); until then it lives here.",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log/title",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/log/local_date",
+              "value": "2026-10-09"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/day_id",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/week",
+          "edits": [
+            {
+              "pointer": "/occurrences/4/log_id",
+              "value": 46
+            },
+            {
+              "pointer": "/occurrences/4/log_status",
+              "value": "in_progress"
+            },
+            {
+              "pointer": "/occurrences/5/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/occurrences/5/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "states": {
+    "home-live-rest": {
+      "title": "Kezdőlap — futó szabad edzés pihenőnapon (the recording as it is)",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "seed",
+      "why": "what user@ really shows on the freeze day (a Thursday rest day, the seed's freestyle session running): the banner replaces the day list, the week still shows",
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Folytatás"
+        },
+        {
+          "text": "Szabad edzés"
+        }
+      ]
+    },
+    "home-live-noplan": {
+      "title": "Kezdőlap — futó edzés, ma nincs terv",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a session running on a day with no plan occurrence: the banner stands alone, no week block",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/days/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Folytatás"
+        },
+        {
+          "noText": "Heti edzés"
+        }
+      ]
+    },
+    "home-rest": {
+      "title": "Kezdőlap — pihenőnap",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the recorded Thursday is a prescribed rest day; only the seed's freestyle session hides it, so the session is taken away",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "text": "Pihenőnap"
+        },
+        {
+          "absent": {
+            "role": "button",
+            "name": "Indítás"
+          }
+        }
+      ]
+    },
+    "home-several": {
+      "title": "Kezdőlap — két edzés ma",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "why": "two plan occurrences today (two slots): one row each, ordered by slot. The second row is the recorded Saturday day of the same plan moved into slot 1",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/day_id",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/-",
+              "value": {
+                "date": "2026-10-09",
+                "day_id": 6,
+                "day_name": "Alsótest – volumen",
+                "slot": 1,
+                "is_rest": 0,
+                "est_minutes": null,
+                "start_time": null,
+                "exercise_count": 4,
+                "plan_id": 1,
+                "plan_name": "Felső/alsó szplit – 12 hetes blokk",
+                "log_id": null,
+                "log_status": null
+              }
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/week",
+          "edits": [
+            {
+              "pointer": "/occurrences/4/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/occurrences/4/log_status",
+              "value": null
+            },
+            {
+              "pointer": "/occurrences/5/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/occurrences/5/log_status",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "text": "Alsótest – volumen"
+        },
+        {
+          "text": "Felsőtest – húzás"
+        }
+      ]
+    },
+    "home-week-error": {
+      "title": "Kezdőlap — a heti adat nem jött meg",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "why": "the week read fails on its own: the figure prints an em dash and Újra, never 0; the day list still stands",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-09"
+            },
+            {
+              "pointer": "/days/0/day_id",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/week",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/my-plans/week",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Újra"
+        },
+        {
+          "role": "button",
+          "name": "Indítás"
+        }
+      ]
+    },
+    "home-today-error": {
+      "title": "Kezdőlap — a mai adat nem jött meg",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a failed today read shows the empty panel (inventory 1.4: no error copy exists), with nothing running",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/my-plans/today",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": [
+        {
+          "text": "Ma nincs betervezve edzés"
+        }
+      ]
+    },
+    "home-nutrition-over": {
+      "title": "Kezdőlap — étkezés cél felett",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixture": "home-1",
+      "why": "over target on one macro: that value and its bar in the warning colour, nothing else",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 305
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Indítás"
+        },
+        {
+          "text": "305"
+        }
+      ]
+    },
+    "home-badge-capped": {
+      "title": "Kezdőlap — 99+ olvasatlan",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixture": "home-1",
+      "why": "the server caps the unread count and says so",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications/unread-count",
+          "edits": [
+            {
+              "pointer": "/unread",
+              "value": 99
+            },
+            {
+              "pointer": "/capped",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "text": "99+"
+        }
+      ]
+    },
+    "home-k": {
+      "title": "Kezdőlap — K (demo.kovacs.eszter@): a második fiók a saját valós adatán",
+      "account": "demo.kovacs.eszter@tracker.local",
+      "route": "/",
+      "height": 874,
+      "reach": "seed",
+      "why": "Gate A live check: Home on a second account with an active plan and no running session. Her plan trains Mon / Wed / Fri (seed-demo.mjs, cycle 7 from a Monday): on a training day this is a real Indítás, on the other days a real rest day. Recorded once with --record --only-missing, smoke-tested live.",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": "button",
+            "name": "Indítás"
+          },
+          {
+            "text": "Pihenőnap"
+          }
+        ]
+      }
+    }
+  }
+}

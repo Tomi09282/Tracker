@@ -1,0 +1,14 @@
+{
+  "id": "R-S-home-02",
+  "from": "S-home",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-fixture-check.mjs",
+  "need": "The checker refuses a value whose type no recording of THAT endpoint shows, but the freeze was taken on a rest day: every recorded GET /my-plans/today row has est_minutes / start_time / log_id / log_status null, so any training-day fixture is refused - INT's own scripts/fixtures/home-1.json fails the same way (2 problems). Also a date path segment (/nutrition-log/2026-10-09) is not treated as an id, so the endpoint of each date has its own shape and targets: null (recorded for N on 10-15) is refused on 10-09.",
+  "evidence": "node scripts/pulse-fixture-check.mjs S-home -> 12 problems, all of the two kinds above; node scripts/pulse-fixture-check.mjs --file scripts/fixtures/home-1.json -> the same 2 type problems",
+  "proposedApi": "(a) ID_LIKE also matches a YYYY-MM-DD path segment; (b) a nullable key accepts the type the same key has in a row of the same name in another endpoint's recording (the today row and the week occurrence are one shape), or a re-record of M's today on a training day",
+  "proposedPatch": null,
+  "interim": "the edits the checker refuses were taken out (est_minutes / start_time stay null on today rows); home-done and home-nutrition-notarget left states.json and are reported as structure with a picture from the unchecked fixture. INT home-1.json still fails the same 2 type checks",
+  "status": "open",
+  "resolution": null
+}
