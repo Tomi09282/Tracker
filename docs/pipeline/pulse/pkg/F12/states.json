@@ -1,5 +1,5 @@
 {
-  "about": "F12's extra states (PLAN 4.4 item 6): the underline Field on the signed-out auth screen in the states the two frames and the component board draw but the seed cannot show on arrival - a typed value with the line focused, the refusal of an empty submit, the register form filled and at rest. Signed out, nothing is submitted: no request leaves the page except the GETs of arrival (an empty submit is refused by the form itself). F12-kit-board is the kit board (F7) with this lane's cell in it.",
+  "about": "F12's extra states (PLAN 4.4 item 6): the underline Field on the signed-out auth screen in the states the two frames and the component board draw but the seed cannot show on arrival - a typed value with the line focused, the refusal of an empty submit, the register form filled and at rest. Signed out, nothing is submitted: no request leaves the page except the GETs of arrival (an empty submit is refused by the form itself). F12-kit-board is the kit board (F7) with this lane's cell in it. F12s2-kit-board (stage 2) is the same board with the search line focused.",
   "states": {
     "F12-login-focus": {
       "title": "Belépés — e-mail typed, the line focused (lime underline + caret)",
@@ -187,6 +187,49 @@
             "role": "textbox",
             "name": {
               "key": "settings.displayName"
+            },
+            "focused": true
+          }
+        }
+      ]
+    },
+    "F12s2-kit-board": {
+      "title": "Pulse kit — board layout, for the searchField cell (board 473, 2187, 354 x 128) and the pushed-screen bottomSheet cell (board 449, 4410, 402 x 644)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "Stage 2: the board host lays this lane's searchField and bottomSheet specimens into the board cells that carry their labels. The one step types into the board's second search line (the \"focus + clear\" specimen), as the board draws it: value \"fekveny\", lime line, lime caret, the clear x",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            },
+            "nth": 1,
+            "text": "fekveny"
+          },
+          "arrived": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
             },
             "focused": true
           }

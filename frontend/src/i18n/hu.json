@@ -18,7 +18,10 @@
     "delete": "Törlés",
     "add": "Hozzáadás",
     "undo": "Visszavonás",
-    "copy": "Másolás"
+    "copy": "Másolás",
+    "clearSearch": "Keresés törlése",
+    "showPassword": "Jelszó megjelenítése",
+    "hidePassword": "Jelszó elrejtése"
   },
   "auth": {
     "emailValid": "Az e-mail cím formátuma helyes",

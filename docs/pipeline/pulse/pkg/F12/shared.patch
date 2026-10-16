@@ -1,22 +1,40 @@
+diff --git a/frontend/scripts/data/safe-area-exempt.json b/frontend/scripts/data/safe-area-exempt.json
+index c297f57..3af5a9a 100644
+--- a/frontend/scripts/data/safe-area-exempt.json
++++ b/frontend/scripts/data/safe-area-exempt.json
+@@ -4,8 +4,6 @@
+     "ui/data/DataTable.tsx:top": "a table head, sticky inside the table's own scroll container: it sticks to that box and never reaches the screen edge",
+     "ui/feedback/variants/E14E20.tsx:top@bg-scrim": "the scrims behind the sheet and behind the open FAB cover the whole screen, unsafe areas included, on purpose; they hold no content",
+     "ui/feedback/variants/E14E20.tsx:bottom@bg-scrim": "the same two scrims, at the bottom edge",
+-    "ui/feedback/variants/E14E20.tsx:top@place-items-center": "the wrapper that centres the dialog variant: the panel sits in the middle with 16 px of padding around it and never touches an edge",
+-    "ui/feedback/variants/E14E20.tsx:bottom@place-items-center": "the same centring wrapper, at the bottom edge",
+     "ui/feedback/variants/E8E9.tsx:top@bg-scrim": "the scrim behind the select sheet covers the whole screen on purpose; it holds no content",
+     "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
+     "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",
+diff --git a/frontend/scripts/pulse-frames.json b/frontend/scripts/pulse-frames.json
+index 3e4570f..8642625 100644
+--- a/frontend/scripts/pulse-frames.json
++++ b/frontend/scripts/pulse-frames.json
+@@ -42,6 +42,7 @@
+         "btnPrimary",
+         "uiSwitch",
+         "sheet",
++        "bottomSheet",
+         "badgeCount",
+         "skel",
+         "segBar",
 diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
-index f9f2bec..0a28e32 100644
+index 6278402..ff93d39 100644
 --- a/frontend/src/ui/tokens/tokens.css
 +++ b/frontend/src/ui/tokens/tokens.css
-@@ -780,6 +780,17 @@
- 
- /* F12 — inputs and the sheet: Field, SearchField, TextArea, NumberStepper, SelectSheet, Sheet */
- /* lane:F12 */
-+:root {
-+  /* A masked value (a password) is drawn as 6 pt discs on an 11 pt pitch, centred on the field's
-+     line (frame auth-2). Geist's own bullet at the 16 pt body size is a 4 pt dot on a 5 pt pitch,
-+     so a password field sets its masked value 1.5 x larger (a 6 pt dot on a 7.5 pt advance) and
-+     tracks it out by the difference. The placeholder and a revealed value keep the body size. */
-+  --field-mask-size: 24px;
-+  --field-mask-tracking: 3.5px;
-+  /* The larger bullet sits 1.5 pt under the line's centre; a 3 pt bottom padding on the masked input
-+     lifts it back onto the centre (an optical correction of one glyph, not a layout step). */
-+  --field-mask-lift: 3px;
-+}
+@@ -845,6 +845,10 @@
+   /* The larger bullet sits 1.5 pt under the line's centre; a 3 pt bottom padding on the masked input
+      lifts it back onto the centre (an optical correction of one glyph, not a layout step). */
+   --field-mask-lift: 3px;
++  /* The bottom sheet's grabber: 36 x 4 (--grabber-w, Layer 1), white 24 % (app-kit.js bottomSheet,
++     coach-dashboard-2 'Grabber'). Between the row rule (8 %) and the field edge (36 %): seen, never
++     a control's edge — the drag it offers is a convenience; the close button is the way out. */
++  --grabber: rgb(255 255 255 / 0.24);
+ }
  /* /lane:F12 */
  
- /* F13 — status zone: toast band, offline line, command palette */

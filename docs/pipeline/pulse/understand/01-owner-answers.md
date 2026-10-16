@@ -21,3 +21,10 @@ EXACTLY like the frames library-1..3, workout-1/2 and exercise-detail-1/2: the g
 figure-back), and a selected muscle as a solid, glowing lime panel that follows the render's own panel grooves, with the
 soft bloom of the frames. Not a diagram, not the old vector drawing, not an approximate blob. Checked by side-by-side
 pictures against those frames before it is merged.
+
+## Owner, 2026-10-17 — the library row on Home
+
+Asked after the independent review of S-home (blocking finding 1: the D2 library row pushed TÁPLÁLKOZÁS under the tab
+bar). Answer: **the "Gyakorlatok" row goes BELOW the nutrition section.** The first screen of Home stays exactly the
+approved home-1 / home-2 (header, week, today's workout, pill, nutrition); the library row is one scroll further down,
+after TÁPLÁLKOZÁS. No empty band under it.

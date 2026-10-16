@@ -845,6 +845,10 @@
   /* The larger bullet sits 1.5 pt under the line's centre; a 3 pt bottom padding on the masked input
      lifts it back onto the centre (an optical correction of one glyph, not a layout step). */
   --field-mask-lift: 3px;
+  /* The bottom sheet's grabber: 36 x 4 (--grabber-w, Layer 1), white 24 % (app-kit.js bottomSheet,
+     coach-dashboard-2 'Grabber'). Between the row rule (8 %) and the field edge (36 %): seen, never
+     a control's edge — the drag it offers is a convenience; the close button is the way out. */
+  --grabber: rgb(255 255 255 / 0.24);
 }
 /* /lane:F12 */
 

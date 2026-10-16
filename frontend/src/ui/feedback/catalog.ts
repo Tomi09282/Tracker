@@ -114,7 +114,7 @@ export const CATALOG: CatalogEntry[] = [
     id: 'E7',
     name: 'Text input',
     phase: 1,
-    live: true,
+    live: false,
     variants: {
       A: 'Focus-glow',
       B: 'Shake-on-error',
@@ -129,7 +129,7 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'E11', name: 'Bottom nav item', phase: 1, live: false, variants: { A: 'Active-pill', B: 'Bounce-dot', C: 'Icon-morph', D: 'Badge-bubble', E: 'Center-FAB' } },
   { id: 'E12', name: 'Card', phase: 1, live: false, variants: { A: 'Lift-press', B: 'Tilt-glare', C: 'Border-beam', D: 'Hero-expand', E: 'Select-mode' } },
   { id: 'E13', name: 'List item + swipe', phase: 1, live: false, variants: { A: 'Swipe-reveal', B: 'Check-swipe', C: 'Long-press menu', D: 'Reorder-drag', E: 'Tap-ripple' } },
-  { id: 'E14', name: 'Modal / sheet', phase: 1, live: true, variants: { A: 'Spring-sheet', B: 'Scale-dialog', C: 'Morph-from-trigger', D: 'Stacked-sheets', E: 'Success-close' } },
+  { id: 'E14', name: 'Modal / sheet', phase: 1, live: false, variants: { A: 'Spring-sheet', B: 'Scale-dialog', C: 'Morph-from-trigger', D: 'Stacked-sheets', E: 'Success-close' } },
   { id: 'E15', name: 'Toast', phase: 1, live: false, variants: { A: 'Slide-stack', B: 'Progress-line', C: 'Typed-icon', D: 'Undo-flip', E: 'Coin-toast' } },
   { id: 'E16', name: 'Progress / ring', phase: 1, live: false, variants: { A: 'Spring-fill', B: 'Striped-flow', C: 'Milestone-pop', D: 'Ring-odometer', E: 'Color-ramp' } },
   { id: 'E17', name: 'Slider', phase: 1, live: false, variants: { A: 'Thumb-grow', B: 'Tick-snap', C: 'Fill-gradient', D: 'Dual-range', E: 'Icon-ends' } },

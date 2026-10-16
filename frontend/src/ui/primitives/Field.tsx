@@ -57,9 +57,159 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    * placeholder-only labelling with extra steps.
    */
   labelHidden?: boolean;
+  /**
+   * The `data-kit` name of the outer element. Default `inputField`; the siblings built on this field
+   * set their own (`SearchField` -> `searchField`, `MaskedField` -> `maskedField`). Not for screens.
+   */
+  kit?: string;
 }
 
 const TONE: Record<FieldTone, string> = { plain: 'text-text-2', quiet: 'text-text-3' };
+
+/* ═══ The frame every underline input shares (stage 2) ═══════════════════════════════════════════
+ *
+ * `Field`, `TextArea`, `NumberStepper`, `SelectSheet` and `DateTrigger` are the SAME kit drawing —
+ * `inputField`: a `cap-m` label row, a line, a `cap` message 8 pt under it — with a different thing
+ * on the line. The frame is written once, here, and the five fill the line. It is exported for
+ * those siblings; a screen writes one of the five, never the frame.
+ */
+
+/** The ids a field wires together, from the control's id. */
+export function fieldIds(id: string) {
+  return { markerId: `${id}-marker`, hintId: `${id}-hint`, errorId: `${id}-error`, labelId: `${id}-label` };
+}
+
+/** `aria-describedby` of a field's control: marker + hint (only while it is shown) + error + extra. */
+export function fieldDescribedBy(
+  id: string,
+  { marker, hint, error, extra }: { marker?: string; hint?: string; error?: string; extra?: string },
+) {
+  const ids = fieldIds(id);
+  return cn(marker && ids.markerId, hint && !error && ids.hintId, error && ids.errorId, extra) || undefined;
+}
+
+/**
+ * The line's border in each state: 1 px `edge` at rest, 2 px lime while anything inside has focus,
+ * 2 px `danger` on an error (focus still wins), a hairline when disabled. For a row that has a
+ * fixed height and aligns its children to the TOP, so a thicker line never moves the content.
+ */
+export function fieldLine({ disabled, error }: { disabled?: boolean; error?: boolean }) {
+  return cn(
+    'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
+    disabled
+      ? 'border-b border-hair'
+      : error
+        ? 'border-b-2 border-danger focus-within:border-accent'
+        : 'border-b border-edge focus-within:border-b-2 focus-within:border-accent',
+  );
+}
+
+export interface FieldFrameProps {
+  /** The `data-kit` name of the whole field. */
+  kit: string;
+  /** The control's id — the label's `htmlFor` and the stem of every other id. */
+  controlId: string;
+  label: string;
+  hint?: string;
+  hintTone?: FieldTone;
+  error?: string;
+  marker?: string;
+  markerTone?: FieldTone;
+  labelHidden?: boolean;
+  disabled?: boolean;
+  /**
+   * A node at the trailing end of the label row, on the label's baseline: the character counter of
+   * `compose-post` ("19897 karakter maradt", `cap` `text-3`). Takes the marker's place.
+   */
+  aside?: ReactNode;
+  /**
+   * `label` (the default) binds the label with `htmlFor`. `span` draws the same words for a control
+   * that names itself with `aria-labelledby` (a trigger whose name is label + value).
+   */
+  labelAs?: 'label' | 'span';
+  /** Space between the label row and the line: 0 (the kit) or 4 (`onboarding-3`'s 60 pt number line). */
+  lineGap?: 0 | 4;
+  className?: string;
+  /** The line. */
+  children: ReactNode;
+}
+
+/** The kit's `Field/<label>`: label row, the line, then the hint or the error 8 under it. */
+export function FieldFrame({
+  kit,
+  controlId,
+  label,
+  hint,
+  hintTone = 'quiet',
+  error,
+  marker,
+  markerTone = 'plain',
+  labelHidden = false,
+  disabled,
+  aside,
+  labelAs = 'label',
+  lineGap = 0,
+  className,
+  children,
+}: FieldFrameProps) {
+  const { markerId, hintId, errorId, labelId } = fieldIds(controlId);
+  const showHint = !!hint && !error;
+  const labelClass = cn('text-cap-m', disabled ? 'text-text-3' : 'text-text-2', labelHidden && 'sr-only');
+  const labelEl =
+    labelAs === 'label' ? (
+      <label id={labelId} htmlFor={controlId} className={labelClass}>
+        {label}
+      </label>
+    ) : (
+      <span id={labelId} className={labelClass}>
+        {label}
+      </span>
+    );
+  const trailingNode =
+    aside ??
+    (marker ? (
+      <span id={markerId} className={cn('text-micro shrink-0', TONE[markerTone])}>
+        {marker}
+      </span>
+    ) : null);
+
+  return (
+    // The kit's `Field/<label>`: the labelled line, then the hint 8 under it (`gap-tight`).
+    <div data-kit={kit} className={cn('flex flex-col gap-tight', className)}>
+      {/* The kit's `Labelled input`: label row and line touch — the 18 pt label line box is the gap. */}
+      <div className={cn('flex flex-col', lineGap === 4 && 'gap-1')}>
+        {/* A ROW, not just a label, whenever there is a marker: `justify-between` parks the marker
+            against the trailing edge at any width, `items-baseline` sets the mono tag on the label's
+            baseline, `gap-2` lets a long label wrap before it collides.
+            With no marker AND a hidden label there is nothing to lay out and the row is skipped:
+            `sr-only` is `position: absolute`, so an empty row would still open 18 pt of nothing. */}
+        {labelHidden && !trailingNode ? (
+          labelEl
+        ) : (
+          <div className={cn('flex items-baseline gap-2', labelHidden ? 'justify-end' : 'justify-between')}>
+            {labelEl}
+            {trailingNode}
+          </div>
+        )}
+        {children}
+      </div>
+
+      {showHint ? (
+        <p id={hintId} className={cn('text-cap', TONE[hintTone])}>
+          {hint}
+        </p>
+      ) : null}
+
+      {/* Errors sit directly under the field they belong to, never collected at the top. The 2 px
+          line says it by shape as well as by colour (1 px at rest), the words say what to do. */}
+      {error ? (
+        <p id={errorId} role="alert" className="text-cap text-danger">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * The underline field — kit `inputField` (`app-kit.js` 223-236, Pulse System §4 "Underline field").
@@ -104,6 +254,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     marker,
     markerTone = 'plain',
     labelHidden = false,
+    kit = 'inputField',
     id,
     disabled,
     ...rest
@@ -112,102 +263,61 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
 ) {
   const autoId = useId();
   const inputId = id ?? autoId;
-  const markerId = `${inputId}-marker`;
-  const hintId = `${inputId}-hint`;
-  const errorId = `${inputId}-error`;
-  const showHint = !!hint && !error;
-
-  const labelEl = (
-    <label htmlFor={inputId} className={cn('text-cap-m', disabled ? 'text-text-3' : 'text-text-2', labelHidden && 'sr-only')}>
-      {label}
-    </label>
-  );
 
   return (
-    // The kit's `Field/<label>`: the labelled line, then the hint 8 under it (`gap-tight`).
-    <div data-kit="inputField" className={cn('flex flex-col gap-tight', className)}>
-      {/* The kit's `Labelled input`: label row and line touch — the 18 pt label line box is the gap. */}
-      <div className="flex flex-col">
-        {/* A ROW, not just a label, whenever there is a marker: `justify-between` parks the marker
-            against the trailing edge at any width, `items-baseline` sets the mono tag on the label's
-            baseline, `gap-2` lets a long label wrap before it collides.
-            With no marker AND a hidden label there is nothing to lay out and the row is skipped:
-            `sr-only` is `position: absolute`, so an empty row would still open 18 pt of nothing. */}
-        {labelHidden && !marker ? (
-          labelEl
-        ) : (
-          <div className={cn('flex items-baseline gap-2', labelHidden ? 'justify-end' : 'justify-between')}>
-            {labelEl}
-            {marker ? (
-              <span id={markerId} className={cn('text-micro shrink-0', TONE[markerTone])}>
-                {marker}
-              </span>
-            ) : null}
-          </div>
-        )}
-
-        {/* The kit's `Input/underline`: 44 high, glyph · 10 · value · 10 · trailing, and the line. */}
-        <div
+    <FieldFrame
+      kit={kit}
+      controlId={inputId}
+      label={label}
+      hint={hint}
+      hintTone={hintTone}
+      error={error}
+      marker={marker}
+      markerTone={markerTone}
+      labelHidden={labelHidden}
+      disabled={disabled}
+      className={className}
+    >
+      {/* The kit's `Input/underline`: 44 high, glyph · 10 · value · 10 · trailing, and the line. */}
+      <div className={cn('flex h-11 items-start gap-2.5', fieldLine({ disabled, error: !!error }))}>
+        {leading ? (
+          <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-5 [&_svg]:stroke-[1.75]">
+            {leading}
+          </span>
+        ) : null}
+        <input
+          ref={ref}
+          id={inputId}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={fieldDescribedBy(inputId, { marker, hint, error })}
           className={cn(
-            'flex h-11 items-start gap-2.5',
-            'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-            disabled
-              ? 'border-b border-hair'
-              : error
-                ? 'border-b-2 border-danger focus-within:border-accent'
-                : 'border-b border-edge focus-within:border-b-2 focus-within:border-accent',
+            'h-11 min-w-0 flex-1 bg-transparent p-0',
+            'text-body text-text-1 caret-accent placeholder:text-text-3',
+            // The line is the focus indicator (see the docblock); the global ring would draw a box
+            // around a field that has none, and its radius would bend the ends of the line.
+            'rounded-none outline-none focus-visible:outline-none',
+            'disabled:text-text-3',
+            // A masked value is drawn as 6 pt discs on an 11 pt pitch (auth-2): Geist's bullet at 16
+            // is a 4 pt dot, so the masked characters are set larger and tracked out (tokens of the
+            // F12 lane block). Only while there is a value — the placeholder keeps the body size —
+            // and only while it is masked: a revealed value (`type="text"`) is ordinary text.
+            '[&[type=password]:not(:placeholder-shown)]:text-[length:var(--field-mask-size)]',
+            '[&[type=password]:not(:placeholder-shown)]:tracking-[var(--field-mask-tracking)]',
+            '[&[type=password]:not(:placeholder-shown)]:pb-[var(--field-mask-lift)]',
+            // Chrome paints an autofilled input with a tinted fill (`!important` in its own sheet):
+            // an input box on the one screen that is never allowed one. The fill is held back for
+            // ever with a transition delay — the standard, script-free way — and the value keeps
+            // the ink of a typed one.
+            'autofill:[transition:background-color_0s_calc(infinity*1s)] autofill:[-webkit-text-fill-color:var(--text-1)]',
+            // `type="search"`: the engine's own cancel glyph and decoration go — `SearchField` draws
+            // the kit's clear control on the trailing edge instead.
+            '[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none',
           )}
-        >
-          {leading ? (
-            <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-5 [&_svg]:stroke-[1.75]">
-              {leading}
-            </span>
-          ) : null}
-          <input
-            ref={ref}
-            id={inputId}
-            disabled={disabled}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={cn(marker && markerId, showHint && hintId, error && errorId) || undefined}
-            className={cn(
-              'h-11 min-w-0 flex-1 bg-transparent p-0',
-              'text-body text-text-1 caret-accent placeholder:text-text-3',
-              // The line is the focus indicator (see the docblock); the global ring would draw a box
-              // around a field that has none, and its radius would bend the ends of the line.
-              'rounded-none outline-none focus-visible:outline-none',
-              'disabled:text-text-3',
-              // A masked value is drawn as 6 pt discs on an 11 pt pitch (auth-2): Geist's bullet at 16
-              // is a 4 pt dot, so the masked characters are set larger and tracked out (tokens of the
-              // F12 lane block). Only while there is a value — the placeholder keeps the body size —
-              // and only while it is masked: a revealed value (`type="text"`) is ordinary text.
-              '[&[type=password]:not(:placeholder-shown)]:text-[length:var(--field-mask-size)]',
-              '[&[type=password]:not(:placeholder-shown)]:tracking-[var(--field-mask-tracking)]',
-              '[&[type=password]:not(:placeholder-shown)]:pb-[var(--field-mask-lift)]',
-              // Chrome paints an autofilled input with a tinted fill (`!important` in its own sheet):
-              // an input box on the one screen that is never allowed one. The fill is held back for
-              // ever with a transition delay — the standard, script-free way — and the value keeps
-              // the ink of a typed one.
-              'autofill:[transition:background-color_0s_calc(infinity*1s)] autofill:[-webkit-text-fill-color:var(--text-1)]',
-            )}
-            {...rest}
-          />
-          {trailing ? <span className="flex h-11 shrink-0 items-center">{trailing}</span> : null}
-        </div>
+          {...rest}
+        />
+        {trailing ? <span className="flex h-11 shrink-0 items-center">{trailing}</span> : null}
       </div>
-
-      {showHint ? (
-        <p id={hintId} className={cn('text-cap', TONE[hintTone])}>
-          {hint}
-        </p>
-      ) : null}
-
-      {/* Errors sit directly under the field they belong to, never collected at the top. The 2 px
-          line says it by shape as well as by colour (1 px at rest), the words say what to do. */}
-      {error ? (
-        <p id={errorId} role="alert" className="text-cap text-danger">
-          {error}
-        </p>
-      ) : null}
-    </div>
+    </FieldFrame>
   );
 });

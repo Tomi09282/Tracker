@@ -1,0 +1,36 @@
+{
+  "package": "F12",
+  "base": "98ee50465136c8af51a91701b7247650e06d8833",
+  "namespaces": [
+    "common"
+  ],
+  "set": [
+    {
+      "key": "common.clearSearch",
+      "hu": "Keresés törlése",
+      "en": "Clear search",
+      "de": "Suche löschen",
+      "after": "common.copy",
+      "copy": "existing-literal",
+      "source": "hu.json library.clearSearch — the same words, now the default name of SearchField's clear control (an aria-label)"
+    },
+    {
+      "key": "common.showPassword",
+      "hu": "Jelszó megjelenítése",
+      "en": "Show password",
+      "de": "Passwort anzeigen",
+      "after": "common.clearSearch",
+      "copy": "existing-literal",
+      "source": "hu.json auth.showPassword; auth-2 'Button/reveal · masked (Jelszó megjelenítése)' — MaskedField's reveal control (an aria-label)"
+    },
+    {
+      "key": "common.hidePassword",
+      "hu": "Jelszó elrejtése",
+      "en": "Hide password",
+      "de": "Passwort verbergen",
+      "after": "common.showPassword",
+      "copy": "existing-literal",
+      "source": "hu.json auth.hidePassword — MaskedField's reveal control while revealed (an aria-label)"
+    }
+  ]
+}

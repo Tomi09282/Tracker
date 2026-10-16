@@ -4,8 +4,6 @@
     "ui/data/DataTable.tsx:top": "a table head, sticky inside the table's own scroll container: it sticks to that box and never reaches the screen edge",
     "ui/feedback/variants/E14E20.tsx:top@bg-scrim": "the scrims behind the sheet and behind the open FAB cover the whole screen, unsafe areas included, on purpose; they hold no content",
     "ui/feedback/variants/E14E20.tsx:bottom@bg-scrim": "the same two scrims, at the bottom edge",
-    "ui/feedback/variants/E14E20.tsx:top@place-items-center": "the wrapper that centres the dialog variant: the panel sits in the middle with 16 px of padding around it and never touches an edge",
-    "ui/feedback/variants/E14E20.tsx:bottom@place-items-center": "the same centring wrapper, at the bottom edge",
     "ui/feedback/variants/E8E9.tsx:top@bg-scrim": "the scrim behind the select sheet covers the whole screen on purpose; it holds no content",
     "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
     "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",

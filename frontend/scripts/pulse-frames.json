@@ -42,6 +42,7 @@
         "btnPrimary",
         "uiSwitch",
         "sheet",
+        "bottomSheet",
         "badgeCount",
         "skel",
         "segBar",

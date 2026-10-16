@@ -46,5 +46,25 @@
     "inputField (board cell)": "matched — boxes 0.0 pt; caret 1 px native vs 1.5 pt drawn; two specimen strings differ (not in hu.json)",
     "auth-1 / auth-2 fields": "matched at the frame coordinates (component); the screens themselves stay hybrid until S-auth"
   },
-  "lastGreenBuild": "pulse-verify --package F12 --live --focus-walk: build green in 15 s · 4 of 4 captured (live), on pulse-redesign 8f0846a + the F12 hand-in"
+  "lastGreenBuild": "pulse-verify --package F12 --live --focus-walk: build green in 15 s · 4 of 4 captured (live), on pulse-redesign 8f0846a + the F12 hand-in",
+  "stage2": {
+    "what": "SearchField, TextArea (auto-grow), NumberStepper, MaskedField, DateTrigger (field / inline over the native picker), SelectSheet (pickers are sheets), FilePick (heir of the two raw type=file inputs), the FeedbackField skin (E7), the Pulse bottom Sheet (E14, restyled in place, contract kept) + SheetStatic, ConfirmSheet; one shared field frame (FieldFrame) in Field.tsx",
+    "branch": "pulse/F12s2 (same commit as pulse/F12 — the sync tool resolves F12 to pulse/F12)",
+    "base": "pulse-redesign 521d143",
+    "handIn": [
+      "docs/pipeline/pulse/pkg/F12/i18n.patch.json (common.clearSearch / showPassword / hidePassword — existing strings)",
+      "docs/pipeline/pulse/pkg/F12/variants.json (E7, E14 live:false)",
+      "docs/pipeline/pulse/pkg/F12/shared.patch (tokens.css lane:F12 --grabber; safe-area-exempt.json drops the two dead place-items-center entries; pulse-frames.json boxedAllow + bottomSheet)",
+      "docs/pipeline/pulse/pkg/F12/budget.json lowered by check-pulse --fix-down F12 (E7Field entry deleted, E14E20 72 -> 22)"
+    ],
+    "states": [
+      "F12s2-kit-board (pkg/F12/states.json): /playground board layout with the searchField focus+clear specimen typed"
+    ],
+    "measured": {
+      "Sheet vs coach-dashboard-2": "panel y 629 (frame 630), h 245 (244); grabber 183,642 36x4 white 24 % = frame; title 25,662 (frame 24,662) Geist 600 22/28; padding 12 / 24 / 50 = frame; fill #1E2219, edge white 14 %, radius 28, no shadow, no backdrop filter; scrim black 60 %",
+      "behaviour (live Sheet)": "role=dialog aria-modal, named by its title; focus in the panel on open; 3 Tabs cycle close -> copy -> close (trap); html overflow hidden while open; SelectSheet opens on Enter, rows are radios",
+      "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/F12/s2/*.pair.png — differences are 0.5-1 pt text baselines, see the report"
+    },
+    "lastGreenBuild": "pulse-verify --package F12 --focus-walk: build green, 5 of 5 captured (replay); F12s2-kit-board focus walk 61 stops pass, overflow pass; boxed/targets/pill failures are other lanes' specimens (palette swatches, F9 'Újra' link, the board's pills)"
+  }
 }

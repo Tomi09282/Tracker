@@ -18,7 +18,10 @@
     "add": "Hinzufügen",
     "delete": "Löschen",
     "undo": "Rückgängig",
-    "copy": "Kopieren"
+    "copy": "Kopieren",
+    "clearSearch": "Suche löschen",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
   },
   "auth": {
     "emailValid": "Die E-Mail-Adresse ist gültig",

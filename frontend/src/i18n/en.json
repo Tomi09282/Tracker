@@ -18,7 +18,10 @@
     "add": "Add",
     "delete": "Delete",
     "undo": "Undo",
-    "copy": "Copy"
+    "copy": "Copy",
+    "clearSearch": "Clear search",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "auth": {
     "emailValid": "The e-mail address looks valid",
