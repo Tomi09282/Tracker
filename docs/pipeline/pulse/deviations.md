@@ -370,3 +370,43 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: "További célizmok a elöl nézetben." (frame 2).
 - What the app does: printed exactly as the product prints it (the muscleMap.alsoOnOtherSide key of the mannequin lane); the grammar ("a elöl") is a copy question, not fixed here.
 - Status: open — needs a ruling.
+
+## DEV-043 — S-compose-post: the save control and the create pill
+
+- Source: docs/pipeline/pulse/pkg/S-compose-post/handoff.json (PLAN.md Q4: behaviour wins)
+- Package: S-compose-post
+- The frames show: compose-post-1 a quiet trailing save word on the push row; compose-post-2 the end pill Piszkozat létrehozása, the h1 alone on its line.
+- What the app does: the save stays a real control - on an existing post the row's trailing word (Mentés dirty / Mentve disabled, busy while saving), on a new post the end pill Piszkozat létrehozása (the old header pill beside the h1 is gone). Piszkozat létrehozása is enabled on an empty form as today; the server refuses it. Esemény is drawn and selectable with no date field (PLAN 4.3).
+- Status: open — needs a ruling.
+
+## DEV-044 — S-compose-post: the cover is feathered
+
+- Source: docs/pipeline/pulse/pkg/S-compose-post/handoff.json (decision; kit gap G-data 11)
+- Package: S-compose-post
+- The frames show: compose-post-1 draws the 4:3 sample still whole (320 x 240) glowing out of the black inside the 16:9 slot; the body script's note says a real upload fills the slot as a plain rectangle.
+- What the app does: the cover is UserPhoto feather, the honest 16:9 crop of the upload with soft edges, as on the post page and the feed (the lamp cap is cut about 33 px at the top of the sample). The slot is masked in the geometry comparison (R2). Without a cover: Field Képleírás + a FilePick TEXT LINK (Kép választása / Feltöltés…), not a pill, so Közzététel stays the one lime pill.
+- Status: open — needs a ruling.
+
+## DEV-045 — S-compose-post: the kind choice is a lime-marked radiogroup
+
+- Source: docs/pipeline/pulse/pkg/S-compose-post/handoff.json
+- Package: S-compose-post
+- The frames show: compose-post-2 three kind words with a lime mark.
+- What the app does: ChipRow role=radiogroup with Chip radios, roving tabindex and arrow keys (the old Segmented's keyboard behaviour); Segmented draws only an ink mark, so it is not used. The kind glyphs, the Pencil / image tiles, the Globe / EyeOff / RotateCcw lifecycle glyphs, the gone state's Trash2 icon and its second back link are dropped (kindIcons.ts stays for ComposePage).
+- Status: open — needs a ruling.
+
+## DEV-046 — S-compose-post: undrawn states
+
+- Source: docs/pipeline/pulse/pkg/S-compose-post/handoff.json (PLAN.md Q4)
+- Package: S-compose-post
+- The frames show: not drawn.
+- What the app does: the stale Sheet's action is a strong TextLink, not a lime pill (Közzététel stays visible under the scrim); removed = danger NoticeLine under the header + disabled fields, no cover block, no lifecycle; taken down = only the Visszaállítás row; refusals = warn NoticeLine between the text and the autosave row; markdown refusal = compact danger NoticeLine. Loading, the stale sheet, refusals, taken down, removed, cover upload and counter tones are not capturable yet (request R-S-compose-post-01) and are reported as structure.
+- Status: open — needs a ruling.
+
+## DEV-047 — S-compose-post: offline autosave reads "Mentés…"
+
+- Source: docs/pipeline/pulse/pkg/S-compose-post/handoff.json (behaviour unchanged from the base build)
+- Package: S-compose-post
+- The frames show: not drawn; the prep expected the failed line.
+- What the app does: TanStack Query holds the PUT while offline (networkMode online), so the autosave row reads Mentés… and the header save word shows busy dots until the network returns, exactly as the base build behaves.
+- Status: open — needs a ruling.

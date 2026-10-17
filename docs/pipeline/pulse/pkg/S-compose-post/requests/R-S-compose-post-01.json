@@ -1,0 +1,14 @@
+{
+  "id": "R-S-compose-post-01",
+  "from": "S-compose-post",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-fixture-check.mjs (mutation-outcome fixtures; same need as R-S-compose-hub-01)",
+  "need": "Let a state answer PUT /api/v1/compose/posts/:id with 409 { reason: 'stale', post: <the recorded GET's post> } and POST /api/v1/compose/posts/:id/publish with 409 { reason: 'quota' | 'profile_not_published' | 'needs_guidelines' | 'too_new' | 'kind_shape', used, max, nextSlotAt, activeVersion, eligibleAt, field }, schema-checked against ComposeConflict (useCompose.ts) as the orchestrator ruling of 2026-10-17 allows. Today the checker refuses any key outside the recorded error envelope (error, code, requestId), and publishing is never fired live.",
+  "evidence": "states.json notCapturable.post-stale-sheet / post-refusals",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the stale Sheet (server title + the A szerveren lévő átvétele text link) and the warn refusal NoticeLine are checked in code only and reported as structure",
+  "status": "open",
+  "resolution": null
+}
