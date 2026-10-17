@@ -1,100 +1,61 @@
 #!/usr/bin/env node
 /**
- * check-pulse — the ratchet: what is left of the old look, counted per file, and only ever going down.
+ * check-pulse — the ban: no construct of the old look comes back.
  *
  * ═══ WHY ═══════════════════════════════════════════════════════════════════════════════════════
  *
- * The switch to Pulse changed VALUES and kept every legacy NAME declared, so that 140 files written
- * against the old look still build. That bridge hides leftovers by construction: a card whose fill,
- * border and shadow are now transparent is invisible, not gone. It still pads its content, it still
- * sits in the layout, and nothing on screen says so. A screen can be "rebuilt" with half its old
- * boxes still in it and look fine on the day it is reviewed.
- *
- * So the leftovers are counted. Every legacy construct is a RULE with an id; every file's count per
- * rule is held against a BUDGET; a budget may only go down; a file with no budget entry must count
- * zero. A package is finished when its budget file is gone, and the bridge can be deleted when the
- * last budget file is.
+ * The switch to Pulse first changed VALUES and kept every legacy NAME declared, so that the files
+ * written against the old look still built. That bridge hid leftovers by construction: a card whose
+ * fill, border and shadow are transparent is invisible, not gone. So the leftovers were counted per
+ * file and held against budgets that could only go down. The closing cleanup (PLAN.md 7.3) deleted
+ * the bridge, the last legacy construct and, with them, the budgets (row 5): every rule is now an
+ * unconditional ban — one counted site anywhere under `src` fails the build.
  *
  * ═══ THE RULES ═════════════════════════════════════════════════════════════════════════════════
  *
  * `node scripts/check-pulse.mjs --list-rules` prints them; RULES below is the list. Each rule carries
- * the defect it exists for (`probe`), and three things hold a rule to it:
+ * the defect it exists for (`probe`), and two things hold a rule to it:
  *
  *   * every run starts by counting each rule's own probe and its controls in memory — a rule that no
  *     longer counts its construct, or that started counting a legal one, fails the build at once;
  *   * `verify:gates` plants each probe as a real file, runs the real gate and expects the failure
- *     that names the rule (one planted defect per rule id);
- *   * at stage G-c the totals were compared with an independent `git grep` count of the same tree
- *     (docs/pipeline/pulse/pkg/F2/c/counts.md explains every difference).
+ *     that names the rule (one planted defect per rule id).
  *
- * What is read: `.ts`, `.tsx` and `.css` under `src`, except `ui/tokens/tokens.css` (it DECLARES the
- * bridge). Comments are blanked first. A class name counts only inside a string or template literal
+ * What is read: `.ts`, `.tsx` and `.css` under `src`, except `ui/tokens/tokens.css` (it declares the
+ * tokens). Comments are blanked first. A class name counts only inside a string or template literal
  * — a variable called `rounded` is not a radius.
  *
  * What a text scan cannot follow, and therefore does not claim: a variant that travels through a
  * prop of ANOTHER file (`<PublicTopBar cta="secondary">`), a class name assembled at run time, a
  * `size` that arrives through a spread. The first is caught where the prop is declared (the alias
- * rule below), the others by the type checker when the legacy variants are deleted.
- *
- * ═══ THE BUDGETS ═══════════════════════════════════════════════════════════════════════════════
- *
- *   docs/pipeline/pulse/pkg/<id>/budget.json     one per lane and package: exactly the files it owns
- *   docs/pipeline/pulse/pkg/_int/budget.json     everything the integrator keeps
- *
- *   { "about": "…", "id": "S-home", "files": { "frontend/src/…/HomePage.tsx": { "surface": 3, … } } }
- *
- * They are GENERATED from docs/pipeline/pulse/work-packages.json (`--init`, the integrator, once,
- * on the merged tree) and after that only lowered (`--fix-down <id>`), by whoever owns the file.
- *
- *   count > budget                     fails — a legacy construct was added
- *   count < budget                     fails until the budget is lowered: that is the done signal
- *   a counted file in no budget file   fails — new code is written without legacy constructs
- *   an entry for a file that is gone, an all-zero entry, an empty budget file
- *                                      fail until deleted (`--fix-down` deletes them)
- *   a file in two budget files, an entry in the budget of an id that does not own the file
- *                                      fail
- *
- * With no budget file left and nothing counted, every rule is simply a ban.
- *
- * Ownership is read through the glob expander of `pulse-owns-check.mjs` (PLAN.md R31: one expander
- * for every tool). In a tree that does not hold that script yet the ownership leg says so and is
- * skipped, and `--init` refuses.
+ * rule below), the others by the type checker, since the legacy variants no longer exist.
  *
  * ═══ THE KEPT RULES ════════════════════════════════════════════════════════════════════════════
  *
- * Two things the redesign must not lose while it deletes: `src/index.css` still holds the global
- * `:focus-visible` ring and the reduced-motion backstop. Pulse defines no focus state of its own,
- * so the ring is the only one there is.
+ * Two things the redesign must not lose: `src/index.css` still holds the global `:focus-visible`
+ * ring and the reduced-motion backstop. Pulse defines no focus state of its own, so the ring is the
+ * only one there is.
  *
  * ═══ USAGE (cwd anywhere) ══════════════════════════════════════════════════════════════════════
  *
  *   node scripts/check-pulse.mjs                     the gate (wired into `npm run build`)
- *   node scripts/check-pulse.mjs --report [--json]   totals per rule and per budget; never fails on a budget
- *   node scripts/check-pulse.mjs --where <id|path>   every counted site of a budget id or a file, by line
- *   node scripts/check-pulse.mjs --fix-down <id>     lower the budget of <id> to what is counted (never raises)
- *   node scripts/check-pulse.mjs --init [--force]    generate every budget file from the ownership file
+ *   node scripts/check-pulse.mjs --report [--json]   totals per rule; never fails
+ *   node scripts/check-pulse.mjs --where <path>      every counted site of a file, by line
  *   node scripts/check-pulse.mjs --list-rules        the rule ids
  *   node scripts/check-pulse.mjs --self-test         only the in-memory proof of the rules
  *   --root <frontend dir>   count another checkout (with --report / --where)
- *   --budgets <dir>         another folder than docs/pipeline/pulse/pkg (a dry run)
  *
- * Exit: 0 holds · 1 a rule, a budget or a kept rule fails · 2 usage.
+ * Exit: 0 holds · 1 a rule or a kept rule fails · 2 usage.
  *
  * Exports, for the tools (PLAN.md R31 — a tool imports the gate's counter, it never repeats it):
  *   countRules(source, relPath) -> { ruleId: n }   pure; relPath is relative to `frontend/`
- *   scanSource, scanTree, readBudgets, judge, keptRuleProblems, RULES, verifyGatesProbes
+ *   scanSource, scanTree, judge, keptRuleProblems, RULES, verifyGatesProbes
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const FRONT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const REPO = path.dirname(FRONT);
-const DOCS = path.join(REPO, 'docs', 'pipeline', 'pulse');
-const WORK_PACKAGES = path.join(DOCS, 'work-packages.json');
-const DEFAULT_BUDGETS = path.join(DOCS, 'pkg');
-const OWNS_TOOL = path.join(FRONT, 'scripts', 'pulse-owns-check.mjs');
-const INT_ID = '_int';
 const LF = String.fromCharCode(10);
 const TOKEN_FILE = 'src/ui/tokens/tokens.css';
 const INDEX_CSS = 'src/index.css';
@@ -811,231 +772,45 @@ export function scanTree({ root = FRONT } = {}) {
   return { files, totals, scanned };
 }
 
-/* ═══ the budgets ══════════════════════════════════════════════════════════════════════════════ */
+/* ═══ the ban ══════════════════════════════════════════════════════════════════════════════════ */
 
-const budgetName = (id) => `pkg/${id}/budget.json`;
-const repoPath = (rel) => `frontend/${rel}`;
 const sum = (counts) => Object.values(counts).reduce((a, b) => a + b, 0);
 
 /**
- * Every `<dir>/<id>/budget.json`.
- * `{ byId: Map<id, { file, entries: Map<repoPath, { ruleId: n }> }>, where: Map<repoPath, id[]>, problems: string[] }`.
+ * The counts against the ban: every counted site is a problem. `{ problems: string[] }`.
+ * (Until the closing cleanup, PLAN.md 7.3 row 5, the counts were held against per-package budget
+ * files that could only go down; the last of them went with the last legacy construct.)
  */
-export function readBudgets(dir = DEFAULT_BUDGETS) {
-  const byId = new Map();
-  const where = new Map();
+export function judge(tree) {
   const problems = [];
-  if (!fs.existsSync(dir)) return { byId, where, problems };
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
-    const file = path.join(dir, entry.name, 'budget.json');
-    if (!entry.isDirectory() || !fs.existsSync(file)) continue;
-    const id = entry.name;
-    let doc;
-    try {
-      doc = JSON.parse(fs.readFileSync(file, 'utf8'));
-    } catch (err) {
-      problems.push(`  ${budgetName(id)} is not valid JSON — ${err.message}`);
-      continue;
-    }
-    if (doc.id !== id) problems.push(`  ${budgetName(id)} says it is the budget of "${doc.id}" — a budget file lives in the folder of its own id`);
-    const entries = new Map();
-    if (!doc.files || typeof doc.files !== 'object' || Array.isArray(doc.files)) {
-      problems.push(`  ${budgetName(id)} has no \`files\` object`);
-      doc.files = {};
-    }
-    for (const [name, rules] of Object.entries(doc.files)) {
-      const clean = {};
-      for (const [rule, n] of Object.entries(rules ?? {})) {
-        if (!RULE.has(rule)) problems.push(`  ${budgetName(id)}: ${name} names the rule "${rule}", which does not exist (see --list-rules)`);
-        else if (!Number.isInteger(n) || n < 0) problems.push(`  ${budgetName(id)}: ${name} / ${rule} is ${JSON.stringify(n)} — a budget is a whole number of sites`);
-        else clean[rule] = n;
-      }
-      entries.set(name, clean);
-      where.set(name, [...(where.get(name) ?? []), id]);
-    }
-    byId.set(id, { file, entries });
-  }
-  return { byId, where, problems };
-}
-
-/**
- * Who a counted file is budgeted with: the one lane or package that owns it, else the integrator
- * (`_int`) — its own packages, the frozen files, and whatever no package claims.
- * `null` in a tree without `pulse-owns-check.mjs` (the ownership leg is then skipped, and said so).
- */
-export async function loadOwnership() {
-  if (!fs.existsSync(OWNS_TOOL) || !fs.existsSync(WORK_PACKAGES)) return null;
-  const owns = await import(pathToFileURL(OWNS_TOOL).href);
-  const model = owns.loadModel({ file: WORK_PACKAGES });
-  const lanes = model.packages.filter((p) => !owns.isIntegratorPackage(p));
-  return {
-    ids: new Set([INT_ID, ...lanes.map((p) => p.id)]),
-    /** The budget id of a repo-relative path, or the list of ids when two packages claim it. */
-    budgetIdOf(file) {
-      const ids = lanes.filter((p) => owns.matchesAny(file, p.owns ?? [])).map((p) => p.id);
-      return ids.length === 0 ? INT_ID : ids.length === 1 ? ids[0] : ids;
-    },
-  };
-}
-
-/**
- * The counts against the budgets. `{ problems: string[], lowerable: Set<id> }` — `lowerable` holds
- * the ids whose only fault is a budget above its count (`--fix-down` settles it).
- */
-export function judge(tree, budgets, { ownership = null, root = FRONT } = {}) {
-  const problems = [...budgets.problems];
-  const lowerable = new Set();
-  const line = (rule, rel, text) => `  [${rule}] ${rel} — ${text}`;
-  const why = (rule) => `      ${RULE.get(rule).what} — ${RULE.get(rule).instead}.`;
-
-  for (const [name, ids] of budgets.where) {
-    if (ids.length > 1) problems.push(`  ${name} is listed in ${ids.length} budget files (${ids.map(budgetName).join(', ')}) — a file has one owner and one budget`);
-  }
-
-  const counted = new Map([...tree.files].map(([rel, counts]) => [repoPath(rel), { rel, counts }]));
-  for (const [name, { rel, counts }] of counted) {
-    const ids = budgets.where.get(name);
-    if (!ids) {
-      for (const [rule, n] of Object.entries(counts)) {
-        problems.push(line(rule, rel, `${n} counted, and the file is in no budget file`) + LF + why(rule) + LF + '      New code is written without it; nothing is ever added to a budget.');
-      }
-      continue;
-    }
-    const id = ids[0];
-    const budget = budgets.byId.get(id).entries.get(name);
+  for (const [rel, counts] of tree.files) {
     for (const rule of RULE_IDS) {
       const n = counts[rule] ?? 0;
-      const allowed = budget[rule] ?? 0;
-      if (n > allowed) {
-        problems.push(line(rule, rel, `${n} counted, budget ${allowed} (${budgetName(id)}) — ${n - allowed} more than there were`) + LF + why(rule));
-      } else if (n < allowed) {
-        problems.push(
-          line(rule, rel, `${n} counted, budget ${allowed} (${budgetName(id)}) — a budget is never above the count`) +
-            LF +
-            `      If you removed them, that is your done signal: lower it with \`node scripts/check-pulse.mjs --fix-down ${id}\`. A budget is never raised.`,
-        );
-        lowerable.add(id);
-      }
+      if (n === 0) continue;
+      problems.push(`  [${rule}] ${rel} — ${n} counted, and the rule is a ban` + LF + `      ${RULE.get(rule).what} — ${RULE.get(rule).instead}.`);
     }
   }
-
-  for (const [id, { entries }] of budgets.byId) {
-    if (entries.size === 0) {
-      problems.push(`  ${budgetName(id)} holds no file — delete it (\`--fix-down ${id}\` does): an empty budget is the done signal, and it must not linger`);
-      lowerable.add(id);
-    }
-    for (const [name, budget] of entries) {
-      if (counted.has(name)) continue;
-      const gone = !fs.existsSync(path.join(root, name.replace(/^frontend\//, '')));
-      const left = sum(budget);
-      problems.push(
-        `  ${budgetName(id)} still lists ${name}, ${gone ? 'which no longer exists' : left ? `which counts nothing any more (budget ${left})` : 'with nothing in it'} — delete the entry (\`--fix-down ${id}\` does)`,
-      );
-      lowerable.add(id);
-    }
-  }
-
-  if (ownership) {
-    for (const [id, { entries }] of budgets.byId) {
-      if (!ownership.ids.has(id)) {
-        problems.push(`  ${budgetName(id)} is the budget of "${id}", which is no lane or package of work-packages.json (and not ${INT_ID})`);
-        continue;
-      }
-      for (const name of entries.keys()) {
-        const owner = ownership.budgetIdOf(name);
-        if (Array.isArray(owner)) problems.push(`  ${name} is owned by ${owner.join(' and ')} in work-packages.json — it cannot be budgeted until it has one owner`);
-        else if (owner !== id) problems.push(`  ${budgetName(id)} lists ${name}, which ${owner === INT_ID ? 'the integrator keeps' : `${owner} owns`} — it belongs in ${budgetName(owner)}`);
-      }
-    }
-  }
-  return { problems, lowerable };
+  return { problems };
 }
-
-const writeBudget = (dir, id, entries) => {
-  const file = path.join(dir, id, 'budget.json');
-  if (entries.size === 0) {
-    fs.rmSync(file, { force: true });
-    return null;
-  }
-  const doc = {
-    about:
-      `check:pulse budget of ${id} — the legacy constructs left in its files, per file and rule. Generated by ` +
-      `\`node scripts/check-pulse.mjs --init\` (the integrator); lowered with \`--fix-down ${id}\`; never raised, never ` +
-      `extended by hand. It is deleted when it is empty: that is the done signal.`,
-    id,
-    files: Object.fromEntries([...entries].sort(([a], [b]) => (a < b ? -1 : 1)).map(([name, counts]) => [name, Object.fromEntries(RULE_IDS.filter((r) => counts[r]).map((r) => [r, counts[r]]))])),
-  };
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `${JSON.stringify(doc, null, 2)}${LF}`);
-  return file;
-};
 
 /* ═══ verify:gates ═════════════════════════════════════════════════════════════════════════════ */
 
 /**
- * The probes of this gate, in the vocabulary of `verify-gates.mjs`: one planted defect per rule id,
- * the two kept rules, and the three ways a budget can lie. The runner imports this list — a rule
- * added above arrives there with its probe, and a rule cannot exist without one.
+ * The probes of this gate, in the vocabulary of `verify-gates.mjs`: one planted defect per rule id
+ * and the two kept rules. The runner imports this list — a rule added above arrives there with its
+ * probe, and a rule cannot exist without one.
  */
 export function verifyGatesProbes({ plant = PLANT_REL } = {}) {
-  const intBudget = posix(path.relative(FRONT, path.join(DEFAULT_BUDGETS, INT_ID, 'budget.json')));
-  const hasIntBudget = () => fs.existsSync(path.join(FRONT, intBudget)) || `${budgetName(INT_ID)} does not exist (budgets are generated by check-pulse --init; after the closing cleanup there are none)`;
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const asJson = (edit) => (text) => {
-    const doc = JSON.parse(text);
-    return edit(doc) === false ? null : `${JSON.stringify(doc, null, 2)}${LF}`;
-  };
-  const firstEntry = (doc) => Object.entries(doc.files ?? {}).find(([, rules]) => Object.keys(rules).length > 0);
   return [
     ...RULES.map((rule) => ({
       id: `pulse/rule/${rule.id}`,
       gate: 'check:pulse',
-      label: `${rule.what} in a file with no budget is caught (rule ${rule.id})`,
+      label: `${rule.what} is caught (rule ${rule.id})`,
       file: plant,
       create: () => rule.probe,
-      expect: new RegExp(`\\[${esc(rule.id)}\\] ${esc(plant)} — ${rule.n ?? 1} counted, and the file is in no budget file`),
+      expect: new RegExp(`\\[${esc(rule.id)}\\] ${esc(plant)} — ${rule.n ?? 1} counted, and the rule is a ban`),
     })),
-    {
-      id: 'pulse/budget-raised',
-      gate: 'check:pulse',
-      label: 'a budget raised by hand is caught',
-      file: intBudget,
-      when: hasIntBudget,
-      mutate: asJson((doc) => {
-        const entry = firstEntry(doc);
-        if (!entry) return false;
-        const rule = Object.keys(entry[1])[0];
-        entry[1][rule] += 1;
-        return true;
-      }),
-      expect: /— \d+ counted, budget \d+ \(pkg\/_int\/budget\.json\) — a budget is never above the count/,
-    },
-    {
-      id: 'pulse/file-out-of-its-budget',
-      gate: 'check:pulse',
-      label: 'a counted file removed from its budget is caught',
-      file: intBudget,
-      when: hasIntBudget,
-      mutate: asJson((doc) => {
-        const entry = firstEntry(doc);
-        if (!entry) return false;
-        delete doc.files[entry[0]];
-        return true;
-      }),
-      expect: /— \d+ counted, and the file is in no budget file/,
-    },
-    {
-      id: 'pulse/dead-budget-entry',
-      gate: 'check:pulse',
-      label: 'a budget entry for a file that does not exist is caught',
-      file: intBudget,
-      when: hasIntBudget,
-      mutate: asJson((doc) => {
-        doc.files = { ...doc.files, 'frontend/src/verify-gates-gone.tsx': { surface: 1 } };
-        return true;
-      }),
-      expect: /still lists frontend\/src\/verify-gates-gone\.tsx, which no longer exists/,
-    },
     {
       id: 'pulse/focus-ring-deleted',
       gate: 'check:pulse',
@@ -1072,8 +847,8 @@ const isMain = () => {
 
 async function main() {
   const argv = process.argv.slice(2);
-  const VALUE_FLAGS = ['--root', '--budgets', '--fix-down', '--where'];
-  const KNOWN = new Set([...VALUE_FLAGS, '--report', '--json', '--init', '--force', '--list-rules', '--self-test', '--help', '-h']);
+  const VALUE_FLAGS = ['--root', '--where'];
+  const KNOWN = new Set([...VALUE_FLAGS, '--report', '--json', '--list-rules', '--self-test', '--help', '-h']);
   const flag = (name) => argv.includes(name);
   const value = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined);
   const usage = (message) => {
@@ -1095,7 +870,7 @@ async function main() {
     return 0;
   }
 
-  // A rule that has stopped counting its own construct would turn every number below into a lie.
+  // A rule that has stopped counting its own construct would make the ban blind.
   const broken = selfTest();
   if (broken.length) {
     console.error(`check-pulse: ${broken.length} rule(s) fail their own proof — the counts below cannot be trusted` + LF);
@@ -1110,17 +885,13 @@ async function main() {
 
   const root = value('--root') ? path.resolve(value('--root')) : FRONT;
   if (!fs.existsSync(path.join(root, 'src'))) usage(`${root} has no src folder`);
-  const budgetDir = value('--budgets') ? path.resolve(value('--budgets')) : DEFAULT_BUDGETS;
   const tree = scanTree({ root });
   const total = sum(tree.totals);
   const totalsLine = RULE_IDS.map((id) => `${id} ${tree.totals[id]}`).join(' · ');
 
   if (flag('--where')) {
     const target = value('--where');
-    const budgets = readBudgets(budgetDir);
-    const names = budgets.byId.has(target)
-      ? [...budgets.byId.get(target).entries.keys()].map((n) => n.replace(/^frontend\//, ''))
-      : [normalise(path.isAbsolute(target) ? path.relative(root, target) : target)].map((n) => (n.startsWith('src/') ? n : `src/${n}`));
+    const names = [normalise(path.isAbsolute(target) ? path.relative(root, target) : target)].map((n) => (n.startsWith('src/') ? n : `src/${n}`));
     let shown = 0;
     for (const rel of names) {
       const full = path.join(root, rel);
@@ -1139,152 +910,36 @@ async function main() {
     return 0;
   }
 
-  if (flag('--init')) {
-    if (root !== FRONT) usage('--init writes the budgets of THIS tree; it takes no --root');
-    const ownership = await loadOwnership();
-    if (!ownership) {
-      console.error(
-        'check-pulse: --init needs the ownership file and its glob expander —' +
-          LF +
-          `  ${posix(path.relative(REPO, WORK_PACKAGES))} ${fs.existsSync(WORK_PACKAGES) ? 'is here' : 'IS MISSING'}, ` +
-          `${posix(path.relative(REPO, OWNS_TOOL))} ${fs.existsSync(OWNS_TOOL) ? 'is here' : 'IS MISSING (it arrives with lane F4)'}.` +
-          LF +
-          '  The budgets are generated on the merged tree, after both are in it.',
-      );
-      return 1;
-    }
-    const existing = readBudgets(budgetDir);
-    if (existing.byId.size && !flag('--force')) {
-      console.error(
-        `check-pulse: ${existing.byId.size} budget file(s) exist already (${[...existing.byId.keys()].slice(0, 6).map(budgetName).join(', ')}…).` +
-          LF +
-          '  --init runs once; after it a budget is only lowered (--fix-down <id>). --force regenerates ALL of them from' +
-          LF +
-          '  what is counted now — which raises every budget that was beaten. Only the integrator does that, knowingly.',
-      );
-      return 1;
-    }
-    const perId = new Map();
-    const unowned = [];
-    for (const [rel, counts] of tree.files) {
-      const owner = ownership.budgetIdOf(repoPath(rel));
-      if (Array.isArray(owner)) unowned.push(`  ${repoPath(rel)} is owned by ${owner.join(' and ')}`);
-      else perId.set(owner, (perId.get(owner) ?? new Map()).set(repoPath(rel), counts));
-    }
-    if (unowned.length) {
-      console.error(`check-pulse: --init cannot place ${unowned.length} file(s) — work-packages.json gives them two owners:` + LF + unowned.join(LF));
-      return 1;
-    }
-    for (const id of existing.byId.keys()) if (!perId.has(id)) writeBudget(budgetDir, id, new Map());
-    const rows = [...perId].sort(([a], [b]) => (a < b ? -1 : 1));
-    for (const [id, entries] of rows) writeBudget(budgetDir, id, entries);
-    console.log(`check-pulse: --init wrote ${rows.length} budget file(s) for ${total} counted site(s) in ${tree.files.size} file(s)` + LF);
-    for (const [id, entries] of rows) console.log(`  ${budgetName(id).padEnd(38)} ${String(entries.size).padStart(3)} file(s)  ${String([...entries.values()].reduce((n, c) => n + sum(c), 0)).padStart(5)} site(s)`);
-    console.log(LF + `  ${totalsLine}`);
-    return 0;
-  }
-
-  if (flag('--fix-down')) {
-    if (root !== FRONT) usage('--fix-down lowers the budgets of THIS tree; it takes no --root');
-    const id = value('--fix-down');
-    const budgets = readBudgets(budgetDir);
-    if (!budgets.byId.has(id)) {
-      console.log(`check-pulse: ${budgetName(id)} does not exist — there is nothing to lower (a package without a budget file counts zero everywhere)`);
-      return 0;
-    }
-    const before = budgets.byId.get(id).entries;
-    const after = new Map();
-    const notes = [];
-    let raised = 0;
-    for (const [name, budget] of before) {
-      const counts = tree.files.get(name.replace(/^frontend\//, '')) ?? {};
-      const next = {};
-      for (const rule of RULE_IDS) {
-        const allowed = budget[rule] ?? 0;
-        const n = counts[rule] ?? 0;
-        if (n > allowed) {
-          raised += 1;
-          notes.push(`  NOT TOUCHED  ${name} / ${rule}: ${n} counted, budget ${allowed} — a budget is never raised; remove the ${n - allowed} added`);
-          if (allowed) next[rule] = allowed;
-        } else {
-          if (n < allowed) notes.push(`  lowered      ${name} / ${rule}: ${allowed} -> ${n}`);
-          if (n) next[rule] = n;
-        }
-      }
-      if (Object.keys(next).length) after.set(name, next);
-      else notes.push(`  deleted      ${name}: nothing is left in it`);
-    }
-    const file = writeBudget(budgetDir, id, after);
-    const left = [...after.values()].reduce((n, c) => n + sum(c), 0);
-    const was = [...before.values()].reduce((n, c) => n + sum(c), 0);
-    for (const note of notes) console.log(note);
-    console.log(
-      file
-        ? `check-pulse: ${budgetName(id)} ${was} -> ${left} site(s) in ${after.size} file(s)${notes.length ? '' : ' — nothing to lower'}`
-        : `check-pulse: ${budgetName(id)} is empty and was deleted (${was} -> 0) — that is the done signal`,
-    );
-    return raised ? 1 : 0;
-  }
-
-  const budgets = readBudgets(budgetDir);
-  const perBudget = [...budgets.byId].map(([id, { entries }]) => ({
-    id,
-    files: entries.size,
-    budget: [...entries.values()].reduce((n, c) => n + sum(c), 0),
-    counted: [...entries.keys()].reduce((n, name) => n + sum(tree.files.get(name.replace(/^frontend\//, '')) ?? {}), 0),
-  }));
-
   if (flag('--report')) {
     if (flag('--json')) {
-      console.log(JSON.stringify({ root: posix(root), scanned: tree.scanned, total, totals: tree.totals, budgets: perBudget, files: Object.fromEntries(tree.files) }, null, 2));
+      console.log(JSON.stringify({ root: posix(root), scanned: tree.scanned, total, totals: tree.totals, files: Object.fromEntries(tree.files) }, null, 2));
       return 0;
     }
-    console.log(`check-pulse: ${total} legacy construct(s) in ${tree.files.size} of ${tree.scanned} file(s) under ${posix(path.relative(REPO, root)) || '.'}/src` + LF);
+    console.log(`check-pulse: ${total} legacy construct(s) in ${tree.files.size} of ${tree.scanned} file(s) under ${posix(path.relative(path.dirname(FRONT), root)) || '.'}/src` + LF);
     for (const id of RULE_IDS) console.log(`  ${id.padEnd(22)} ${String(tree.totals[id]).padStart(5)}   ${RULE.get(id).what}`);
-    if (perBudget.length) {
-      console.log(LF + `  ${'budget'.padEnd(38)} files  budget  counted`);
-      for (const b of perBudget) console.log(`  ${budgetName(b.id).padEnd(38)} ${String(b.files).padStart(5)}  ${String(b.budget).padStart(6)}  ${String(b.counted).padStart(7)}`);
-    } else console.log(LF + '  no budget file exists (they are generated by --init)');
     return 0;
   }
 
   if (root !== FRONT) usage('--root counts another checkout: use it with --report or --where (the gate judges this tree)');
-  const ownership = await loadOwnership();
   const kept = fs.existsSync(path.join(root, INDEX_CSS))
     ? keptRuleProblems(fs.readFileSync(path.join(root, INDEX_CSS), 'utf8'))
     : [{ id: 'kept/focus-ring', message: `${INDEX_CSS} does not exist` }];
-  const verdict = judge(tree, budgets, { ownership, root });
+  const verdict = judge(tree);
   const problems = [...kept.map((k) => `  [${k.id}] ${k.message}`), ...verdict.problems];
 
   if (problems.length) {
-    // Before --init every counted file is "in no budget file": say that once, not five hundred times.
-    const unborn = budgets.byId.size === 0 && total > 0;
-    const SHOWN = unborn ? kept.length + 3 : 40;
+    const SHOWN = 40;
     console.error(`check-pulse: ${problems.length} problem(s)` + LF);
     for (const p of problems.slice(0, SHOWN)) console.error(p);
     if (problems.length > SHOWN) console.error(LF + `  … and ${problems.length - SHOWN} more.`);
-    if (unborn) {
-      console.error(
-        LF +
-          `  No budget file exists, and ${total} legacy construct(s) are counted in ${tree.files.size} file(s):` +
-          LF +
-          `  ${totalsLine}` +
-          LF +
-          '  The integrator generates the budgets once, on the merged tree: node scripts/check-pulse.mjs --init',
-      );
-    } else if (verdict.lowerable.size) {
-      console.error(LF + `  Budgets to lower: ${[...verdict.lowerable].map((id) => `--fix-down ${id}`).join(' · ')}`);
-    }
-    console.error(LF + `  Where exactly: node scripts/check-pulse.mjs --where <file or budget id>` + LF);
+    console.error(LF + `  Where exactly: node scripts/check-pulse.mjs --where <file>` + LF);
     return 1;
   }
 
   console.log(
-    `check-pulse: OK — ${RULES.length} rules hold their budgets: ${total} legacy construct(s) left in ${tree.files.size} file(s), ` +
-      `${budgets.byId.size} budget file(s); the focus ring and the reduced-motion backstop are in ${INDEX_CSS}`,
+    `check-pulse: OK — ${RULES.length} rules hold as bans: no legacy construct in ${tree.scanned} file(s); ` +
+      `the focus ring and the reduced-motion backstop are in ${INDEX_CSS}`,
   );
-  console.log(`  ${totalsLine}`);
-  if (!ownership) console.log(`  note — the ownership leg is skipped: ${posix(path.relative(REPO, OWNS_TOOL))} is not in this tree (it arrives with lane F4)`);
   return 0;
 }
 

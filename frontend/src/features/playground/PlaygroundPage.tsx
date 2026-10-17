@@ -163,7 +163,7 @@ export function Demo({ id }: { id: string }) {
       return (
         // Rendered inline rather than fixed, so five copies do not stack on the viewport edge.
         // One Pulse look: E11 reads no letter any more, so the five columns are the same bar.
-        <div className="relative h-20 w-full overflow-hidden rounded-field">
+        <div className="relative h-20 w-full overflow-hidden">
           <BottomNav
             inline
             tabs={[
@@ -260,7 +260,7 @@ export function PlaygroundPage() {
             {VARIANTS.map((v) => (
               <div
                 key={v}
-                className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
+                className="border border-hair p-4"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-micro text-text-3">
@@ -294,7 +294,7 @@ export function PlaygroundPage() {
             {liveNoDemo.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
+                className="flex items-center justify-between gap-2 border border-hair px-3 py-2"
               >
                 <span className="text-cap text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
@@ -318,7 +318,7 @@ export function PlaygroundPage() {
           {inert.map((e) => (
             <li
               key={e.id}
-              className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
+              className="flex items-center justify-between gap-2 border border-hair px-3 py-2"
             >
               <span className="text-cap text-text-2">
                 <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}

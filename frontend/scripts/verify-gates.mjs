@@ -912,10 +912,10 @@ const readRecords = () => {
 };
 
 /* ── check:pulse: its probes come from the gate itself ────────────────────────────────────────────
- * The ratchet has one rule per legacy construct, and every rule carries the defect it exists for.
- * So the list is not typed here a second time: one planted file per rule id, the two kept rules and
- * the ways a budget can lie are read from `check-pulse.mjs` — a rule added there arrives here with
- * its probe, and a rule cannot exist without one. */
+ * The ban has one rule per legacy construct, and every rule carries the defect it exists for.
+ * So the list is not typed here a second time: one planted file per rule id and the two kept rules
+ * are read from `check-pulse.mjs` — a rule added there arrives here with its probe, and a rule
+ * cannot exist without one. */
 if (exists(GATES['check:pulse'])) {
   const pulse = await import(pathToFileURL(abs(GATES['check:pulse'])).href);
   PROBES.push(...pulse.verifyGatesProbes({ plant: PLANT }));
