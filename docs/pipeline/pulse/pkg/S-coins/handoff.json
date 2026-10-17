@@ -1,0 +1,141 @@
+{
+  "id": "S-coins",
+  "branch": "pulse/S-coins",
+  "screen": "/coins (Érmék)",
+  "summary": "CoinsPage.tsx and CoinBalance.tsx are rewritten on the Pulse kit against coins-1 / -2 / -3; everything above the returns is kept (hooks, the purchase single-flight, the key minting, the delta timer). Composition as the frames' body scripts: Screen top=push > ScreenHeader push (‹ PROFIL, ÉRMÉK) > the balance stage (StatBlock eyebrow + giant Numeral roll + the 188 coin Pic pinned 20 past the right gutter) > Segmented layout=cells > the view: store = SectionHeader + RowStack close of ListRows (owned: lime check + Megvan; price: TextLink text=data with the coin lead, or the small pill when affordable), achievements = counter + RowStack close of ListRows with the medal Pic (lit / idle 45 %) in a 48 slot and the lock, + the footnote; statement = RowStack of ListRows with the mono signed amount (credit lit, debit ink). Q2 display filter applied. Budget emptied and deleted (51 -> 0). Gap lanes used: TextLink text=data + image lead (G-shell), RowStack close, ListRowSkeleton.",
+  "frames": {
+    "coins-1": {
+      "verdict": "structure",
+      "reason": "Q2: the display filter hides the unowned theme pack, so the recorded store (Aurora owned, Ember not) lists Aurora alone; the frame's second row (Ember, the quiet 250 price) is unreachable for every account. Everything that IS reachable matches: header, balance, coin, switch, eyebrow and the Aurora row (geometry: 39 compared, 30 matched, 3 deviating width-only - fill-width text boxes vs hugging runs, dy -0.8; Row/Ember and Image/coin matched by the probe to the Aurora row and to the bar's raster because the Ember row is absent; 4 unmatched = the Ember row's texts, the 250 and the closing rule at y 565, which the one-row list draws at y 500). The Ember row itself is shown 1:1 on the coins-store-priced fixture (pair coins-1.priced-fixture.pair.png).",
+      "capture": ".pulse/shots/S-coins/coins-1.png",
+      "tiles": [
+        ".pulse/shots/S-coins/coins-1.tile-1.png"
+      ],
+      "pair": ".pulse/pairs/S-coins/coins-1.pair.png",
+      "pairFixture": ".pulse/pairs/S-coins/coins-1.priced-fixture.pair.png",
+      "geometry": ".pulse/pairs/S-coins/coins-1.geometry.json"
+    },
+    "coins-2": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-coins/coins-2.png",
+      "tiles": [
+        ".pulse/shots/S-coins/coins-2.tile-1.png",
+        ".pulse/shots/S-coins/coins-2.tile-2.png"
+      ],
+      "pair": ".pulse/pairs/S-coins/coins-2.pair.png",
+      "geometry": "59 compared, 43 matched, 16 deviating (all width-only: the frame's fill-width title / sub / footnote boxes vs the hugging rendered runs; dy -0.8 inside the 2 pt tolerance), 1 style: the counter '4 / 7 feloldva' is one ink (text-2) - the frame inks '4 / 7' in text-1 (SectionHeader.title is a string; R3 of the prep), 0 unmatched. File .pulse/pairs/S-coins/coins-2.geometry.json"
+    },
+    "coins-3": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-coins/coins-3.png",
+      "tiles": [
+        ".pulse/shots/S-coins/coins-3.tile-1.png"
+      ],
+      "pair": ".pulse/pairs/S-coins/coins-3.pair.png",
+      "geometry": "53 compared, 36 matched, 7 same slot other string (the recording's dates: 2026. 10. 03. / 09. 10. / 09. 05. / 08. 21. / 07. 27. / 08. 14. vs the frame's 09. 27. / 09. 04. / 08. 30. / 08. 15. / 08. 08. / 07. 21. - the seed moved after the frame was drawn, and the server orders by id, so rows 5 / 6 are +25 / +50 where the frame draws +50 / +25), 10 deviating (8 width-only text runs, 2 amounts matched by string to the row below for the reason just named), 0 unmatched. File .pulse/pairs/S-coins/coins-3.geometry.json"
+    }
+  },
+  "extraStates": {
+    "coins-achievements-recorded": {
+      "verdict": "matched",
+      "note": "coins-2 reached by the tab's i18n key: the en / de captures of the achievements view"
+    },
+    "coins-statement-recorded": {
+      "verdict": "matched",
+      "note": "coins-3 reached by the tab's i18n key: the en / de captures of the statement view"
+    },
+    "coins-store-empty": {
+      "verdict": "matched-fixture",
+      "note": "both packs unowned (an account that owns nothing): the Q2 filter lists nothing -> A BOLT ÜRES + body, left aligned, no mark. Not reachable on the base (no filter there)"
+    },
+    "coins-store-error": {
+      "verdict": "matched-fixture",
+      "note": "GET /coins/store 500 (body {}): the empty copy, as today"
+    },
+    "coins-store-priced": {
+      "verdict": "matched-fixture",
+      "note": "the 2nd recorded item with a non-theme sku: the quiet price (coin 20 + mono 250) exactly where coins-1 draws it. Hypothetical catalogue data (no non-theme item exists today)"
+    },
+    "coins-store-affordable": {
+      "verdict": "matched-fixture",
+      "note": "balance 300: the price is the small lime pill with the coin - the one pill on the screen (probe: 1)"
+    },
+    "coins-purchase-refused": {
+      "verdict": "matched-fixture",
+      "note": "POST 409: the warning NoticeLine under the list (role=alert)"
+    },
+    "coins-purchase-success": {
+      "verdict": "matched-fixture",
+      "note": "POST 200 (status only, body empty - pulse-fixture-check refuses a free-hand 200 body); the wallet / store refetch after the POST: 300 -> 50, the eyebrow shows -250, the row turns Megvan"
+    },
+    "coins-wallet-error": {
+      "verdict": "matched-fixture",
+      "note": "GET /coins/wallet 500, clock advanced past the two retries: the em dash in the pending tone in a slot of the figure's cap height; eyebrow and coin stay"
+    },
+    "coins-achievements-error": {
+      "verdict": "matched-fixture",
+      "note": "GET 500: 0 / 0 feloldva, no rows, the footnote - as today"
+    },
+    "coins-statement-empty": {
+      "verdict": "matched-fixture",
+      "note": "entries []: MÉG NINCS MOZGÁS + body"
+    },
+    "coins-statement-error": {
+      "verdict": "matched-fixture",
+      "note": "GET 500: the empty copy, as today"
+    },
+    "coins-offline": {
+      "verdict": "matched",
+      "note": "network dropped after the screen is drawn: the shell's offline line above the header; data stays"
+    },
+    "loading": {
+      "verdict": "structure",
+      "note": "pulse-shot answers a recorded GET at once; the skeletons are checked in the code only"
+    },
+    "purchase-busy": {
+      "verdict": "structure",
+      "note": "the stubbed answer arrives at once; single-flight logic unchanged from the base"
+    },
+    "purchase-replayed": {
+      "verdict": "structure",
+      "note": "needs a 200 PurchaseResult with replayed: true; POST was never recorded (no live writes) and a free-hand 200 body is refused by pulse-fixture-check; composed as NoticeLine info role=status, code path unchanged"
+    }
+  },
+  "probes": "every captured state: fonts loaded and the numeral in the display face; pills 0 (1 on coins-store-affordable, the price pill); boxed surfaces 0; no overflow at 360 / 402 / 430; targets >= 44; focus walk passes (5-8 stops, every stop visible); no undeclared console error or request. Geometry fails only for the reasons listed per frame.",
+  "inventory": {
+    "coins-1": "removed button 'Vissza' -> added button 'PROFIL' (the back control is the kit's push header: the visible parent name is its accessible name; Chrome reports the CSS upper case); tab Bolt / Eredmények / Kimutatás -> radio (Segmented is a radiogroup with roving tabindex and arrows); button '250' removed = the Ember row hidden by the Q2 filter (the control itself is in coins-store-priced)",
+    "coins-2": "the same back / tab -> radio change",
+    "coins-3": "the same back / tab -> radio change"
+  },
+  "ledger": {
+    "useElementVariant 2 -> 0": "E25 / E26 retired by variants.json (one Pulse look, Q3)",
+    "useMotionSafe 2 -> 0": "the roll is Numeral mode=roll, which honours reduced motion itself; the E26 flicker it gated is gone",
+    "door to={coins} 1 -> 0": "not a door: it was CountUp's prop `to={coins}` in the old CoinBalance; the balance is now a Numeral",
+    "role tab / tablist / tabpanel, aria-selected, aria-controls, aria-labelledby, tabIndex": "the hand-built tablist is the kit's Segmented (radiogroup, aria-checked, roving tabindex, arrow keys); the one view under it is not a tabpanel any more",
+    "aria-label on the balance": "the balance's accessible text is now Numeral srText ('190 érme') inside the StatBlock group labelled by its eyebrow; aria-live=polite stays on the stage"
+  },
+  "budget": {
+    "before": 51,
+    "after": 0,
+    "file": "deleted by check-pulse --fix-down S-coins"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-coins/i18n.patch.json (remove coins.weekCaption, coins.spentCaption; one copy question)",
+    "docs/pipeline/pulse/pkg/S-coins/variants.json (E25, E26 live: false)",
+    "docs/pipeline/pulse/pkg/S-coins/deviations.md (for docs/pipeline/pulse/deviations.md)"
+  ],
+  "requests": [],
+  "proposedCopy": [],
+  "liveSmoke": "pulse-verify --package S-coins --live --smoke (user@ cookie jar): 5 of 5 captured live (coins-1 and the four fixture-only store states over the live answers), no undeclared console error or request, no write made (the package has no liveWrites). Contact sheet .pulse/pairs/S-coins/_contact.live-1.png",
+  "lastGreenBuild": "pulse-verify --package S-coins --focus-walk after the last pulse-sync (pulse-redesign d96b6e8): the 13 gates OK (check-tokens, check-pulse, check-i18n 849 keys, check-nav, check-nav-active, check-interval, check-element-roster, check-type-scale, check-canvas, check-assets, check-safe-area ...), vite build green, 16 of 16 captured (replay) at 2026-10-17T05:26Z; tsc -p tsconfig.app.json --noEmit clean",
+  "variants": {
+    "en": "13 of 16 captured: the three frame states fail only their opening assertion, which pulse-frames.json writes as the Hungarian word \"Bolt\" (INT file); the same views are captured in en through coins-achievements-recorded / coins-statement-recorded / coins-offline, no overflow, no truncated label, no key path",
+    "de": "same as en",
+    "w360": "16 of 16, probes green (no overflow, targets >= 44)",
+    "w430": "16 of 16, probes green",
+    "reducedMotion": "16 of 16, no running infinite animation; the purchase delta still shows",
+    "scrollEnd": "16 of 16; coins-2 at 402 x 874 scrolled to the end: the footnote clears the bar (.pulse/pairs/S-coins/coins-2.end.png)",
+    "focusWalk": "every state passes (5-8 stops, all visible)"
+  },
+  "mergedBase": "d96b6e8"
+}

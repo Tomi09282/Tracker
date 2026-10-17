@@ -25,6 +25,8 @@
     "E7": "one Pulse look — FeedbackField (variants/E7Field.tsx) is the underline Field with a busy / valid mark on the line's end and no longer reads its letter",
     "E14": "one Pulse look — Sheet (variants/E14E20.tsx) is the kit's bottomSheet (surface-2, top radius 28, hairline edge, 60 % scrim, no blur, no shadow; grabber drag kept from letter A) and no longer reads its letter",
     "E21": "one Pulse look: the scoreboard set row, tap to check, as the database serves (A); SetRow no longer calls useElementVariant('E21') - hold-to-confirm (B), swipe-weight (C) and the undo pill (E) are gone, logged in deviations",
-    "E22": "one Pulse look: the in-flow rest band of frame workout-2 (A); RestTimer no longer calls useElementVariant('E22') - the chip (B) and the top bar (C) are gone"
+    "E22": "one Pulse look: the in-flow rest band of frame workout-2 (A); RestTimer no longer calls useElementVariant('E22') - the chip (B) and the top bar (C) are gone",
+    "E25": "one Pulse look: the balance is the giant Numeral that rolls from the previous value (A, odometer roll); CoinBalance no longer calls useElementVariant('E25') - fly-to-wallet (B), balance-pulse (C), breakdown-sheet (D) and milestone (E) are gone",
+    "E26": "one Pulse look: an earned achievement is the lit medal, no flicker; CoinsPage no longer calls useElementVariant('E26')"
   }
 }

@@ -143,8 +143,8 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'E22', name: 'Rest timer', phase: 2, live: false, variants: { A: 'Ring-shrink', B: 'Time-chip', C: 'Top-bar', D: 'Next-up', E: 'Auto-advance' } },
   { id: 'E23', name: 'Like / reaction', phase: 6, live: false, variants: { A: 'Heart-burst', B: 'Double-tap', C: 'Reaction-bar', D: 'Liked-pulse', E: 'Count-roll' } },
   { id: 'E24', name: 'Follow button', phase: 6, live: false, variants: { A: 'Morph-pill', B: 'Bell-offer', C: 'Avatar-slide', D: 'First-of-day', E: 'Unfollow-guard' } },
-  { id: 'E25', name: 'Coin balance', phase: 5, live: true, variants: { A: 'Odometer-roll', B: 'Fly-to-wallet', C: 'Balance-pulse', D: 'Breakdown-sheet', E: 'Milestone-banner' } },
-  { id: 'E26', name: 'Streak / achievement', phase: 5, live: true, variants: { A: 'Flame-flicker', B: 'Unlock-overlay', C: 'Next-tease', D: 'Streak-freeze', E: 'Confetti-finale' } },
+  { id: 'E25', name: 'Coin balance', phase: 5, live: false, variants: { A: 'Odometer-roll', B: 'Fly-to-wallet', C: 'Balance-pulse', D: 'Breakdown-sheet', E: 'Milestone-banner' } },
+  { id: 'E26', name: 'Streak / achievement', phase: 5, live: false, variants: { A: 'Flame-flicker', B: 'Unlock-overlay', C: 'Next-tease', D: 'Streak-freeze', E: 'Confetti-finale' } },
   { id: 'E27', name: 'Interval stage', phase: 2, live: false, variants: { A: 'Bar-count', B: 'Ring-count', C: 'Full-bleed', D: 'Round-dots', E: 'Coach-voice' } },
 ];
 

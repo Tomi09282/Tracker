@@ -1,0 +1,579 @@
+{
+  "about": "S-coins - the undrawn states of Érmék (/coins, PLAN 4.1 rule 7). Account M (user@) in replay only: every state is the recording of GET /api/v1/coins/wallet, /store, /achievements and /ledger, or an edit list over it, or a stubbed answer of POST /api/v1/coins/store/:id/purchase (orchestrator ruling 2026-10-17: a mutation answer is allowed when it is checked against the real response type - PurchaseResult in useCoins.ts, the 409 envelope of backend/src/coins/routes.js - and such a state is matched-fixture, never matched). Nothing is written live by this package. Q2: the recorded store holds two theme packs (Aurora owned, Ember not); the display filter hides the unowned theme pack, so the frame's second row (Ember, the quiet price control) is not reachable on the product. The coins-store-* states that show a price give the second recorded item a non-theme sku (and the frame's Hungarian words through the title / description the page falls back to) - a hypothetical catalogue item, not product data of today; they prove the price control, the single-flight purchase and its outcomes and are reported matched-fixture with that caveat.",
+  "overrides": {},
+  "states": {
+    "coins-achievements-recorded": {
+      "title": "Érmék - Eredmények, a felvett adatok (nyelvfüggetlen lépésekkel)",
+      "account": "M",
+      "route": "/coins",
+      "height": 1108,
+      "reach": "seed",
+      "why": "coins-2 reached by the i18n key of the tab instead of the Hungarian word, so the en / de captures (5.1 row 7) reach it too; the recording as it is (4 / 7)",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.achievements"
+            }
+          },
+          "arrived": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.achievements"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.awardedNote"
+        }
+      }
+    },
+    "coins-statement-recorded": {
+      "title": "Érmék - Kimutatás, a felvett adatok (nyelvfüggetlen lépésekkel)",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "seed",
+      "why": "coins-3 reached by the i18n key of the tab, for the en / de captures; the recording as it is (seven entries, newest first)",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            }
+          },
+          "arrived": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "coins.tab.statement"
+        },
+        "checked": true
+      }
+    },
+    "coins-store-empty": {
+      "title": "Érmék - Bolt, nincs listázható tétel",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a member who owns no pack (K, a coach, every new member): both theme packs are unowned, the Q2 filter lists nothing, the store empty state stands under the switch (not reachable on the base build: the Q2 filter is new, so its baseline is the two-row store)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items/0/owned",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.storeEmptyTitle"
+        }
+      }
+    },
+    "coins-store-error": {
+      "title": "Érmék - Bolt, a lista nem töltődött be",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /coins/store fails: kept as today - the empty copy (no error copy exists, R22)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/coins/store",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "coins.storeEmptyTitle"
+        }
+      }
+    },
+    "coins-store-priced": {
+      "title": "Érmék - Bolt, ár a sorban (nem fizethető ki)",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "coins-1's second row: a listed item the member cannot afford (250 > 190) - the quiet price control (coin 20 + mono 250), still live. The second recorded item gets a non-theme sku so the Q2 filter lists it; its title / description carry the frame's words",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items/1/sku",
+              "value": "feature.ember"
+            },
+            {
+              "pointer": "/items/1/description",
+              "value": "Egyetlen meleg kiemelés."
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": "250"
+      }
+    },
+    "coins-store-affordable": {
+      "title": "Érmék - Bolt, kifizethető ár",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "balance 300 >= 250: the price is the small lime pill with the coin and the figure (the one pill of the screen)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 30000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items/1/sku",
+              "value": "feature.ember"
+            },
+            {
+              "pointer": "/items/1/description",
+              "value": "Egyetlen meleg kiemelés."
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": "250"
+      }
+    },
+    "coins-purchase-refused": {
+      "title": "Érmék - Bolt, a vásárlás nem ment át (409)",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "tap on the quiet price: the server refuses (409 insufficient balance) - the warning notice line under the list; nothing else changes",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items/1/sku",
+              "value": "feature.ember"
+            },
+            {
+              "pointer": "/items/1/description",
+              "value": "Egyetlen meleg kiemelés."
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/coins/store/*/purchase",
+          "status": 409,
+          "body": {
+            "error": "Insufficient balance",
+            "code": "INSUFFICIENT_BALANCE",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/v1/coins/store/*/purchase",
+            "status": 409
+          }
+        ],
+        "console": [
+          "409",
+          "Insufficient balance"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "250"
+          },
+          "arrived": {
+            "role": "alert"
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.purchaseRefused"
+        }
+      }
+    },
+    "coins-purchase-success": {
+      "title": "Érmék - Bolt, sikeres vásárlás: a delta az egyenleg felett",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a purchase lands: the hooks refetch, the balance rolls 300 -> 50 from the previous value, the eyebrow shows the signed delta -250 for 2.6 s, the row turns Megvan",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "after": "purchase",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 5000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "after": "purchase",
+          "edits": [
+            {
+              "pointer": "/items/1/sku",
+              "value": "feature.ember"
+            },
+            {
+              "pointer": "/items/1/description",
+              "value": "Egyetlen meleg kiemelés."
+            },
+            {
+              "pointer": "/items/1/owned",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 30000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items/1/sku",
+              "value": "feature.ember"
+            },
+            {
+              "pointer": "/items/1/description",
+              "value": "Egyetlen meleg kiemelés."
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/coins/store/*/purchase",
+          "label": "purchase",
+          "status": 200
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/v1/coins/store/*/purchase",
+            "status": 200
+          }
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "250"
+          },
+          "arrived": {
+            "text": "-250"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "-250"
+      }
+    },
+    "coins-wallet-error": {
+      "title": "Érmék - az egyenleg nem töltődött be",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /coins/wallet fails: no figure, never 0 - the giant is an em dash in the pending tone; the eyebrow and the coin stay (the query client retries a 5xx twice, 1 s + 2 s: the step advances the clock past them)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/coins/wallet",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": "—"
+      },
+      "steps": [
+        {
+          "advance": 4000,
+          "arrived": {
+            "text": "—"
+          }
+        }
+      ]
+    },
+    "coins-achievements-error": {
+      "title": "Érmék - Eredmények, a lista nem töltődött be",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /coins/achievements fails: kept as today - 0 / 0 feloldva, no rows, the footnote",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/achievements",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/coins/achievements",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.achievements"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "coins.awardedNote"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.awardedNote"
+        }
+      }
+    },
+    "coins-statement-empty": {
+      "title": "Érmék - Kimutatás, még nincs mozgás",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a ledger with no entries (a new member): the statement empty state under the switch",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/ledger",
+          "edits": [
+            {
+              "pointer": "/entries",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "coins.noHistoryTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.noHistoryTitle"
+        }
+      }
+    },
+    "coins-statement-error": {
+      "title": "Érmék - Kimutatás, a lista nem töltődött be",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /coins/ledger fails: kept as today - the empty copy (no error copy exists, R22)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/ledger",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/coins/ledger",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "coins.noHistoryTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.noHistoryTitle"
+        }
+      }
+    },
+    "coins-offline": {
+      "title": "Érmék - offline",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "seed",
+      "why": "the network drops after the screen is drawn: the shell's offline line; the last data stays",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "text": {
+              "key": "coins.storeSection"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coins.storeSection"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "loading": "wallet / store / achievements / ledger isLoading: pulse-shot answers a recorded GET at once and has no delayed answer, so the skeletons (a block at the giant's ink box under the eyebrow; 3 / 4 / 5 ListRowSkeletons under role=status 'Betöltés') are checked in the code only",
+    "purchase-busy": "the tapped price while the POST is in flight (busy dots, every other price inert): the stubbed answer arrives at once; checked in the code only (the single-flight logic is unchanged from the base)",
+    "purchase-replayed": "the info line \"Ez a vásárlás már megtörtént...\" needs a 200 PurchaseResult with replayed: true; POST /coins/store/:id/purchase was never recorded (no live writes for this package) and pulse-fixture-check refuses a free-hand 200 body (R26). The code path is unchanged from the base and is composed as <NoticeLine tone=\"info\" role=\"status\">; checked in the code only"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "package": "S-coins",
+  "base": "0f1a869d64a4f1cb95503314819945172566134a",
+  "namespaces": ["coins", "achievement"],
+  "set": [],
+  "change": [],
+  "remove": [
+    {
+      "key": "coins.weekCaption",
+      "reason": "'Ezen a héten' captioned the week-earned SummaryTile under the old ring; coins-1 / -2 / -3 draw no tiles (no honest server figure, brief), so after the rewrite of CoinsPage no code reads it (check-i18n: referenced by no code)"
+    },
+    {
+      "key": "coins.spentCaption",
+      "reason": "'Elköltve' captioned the spent SummaryTile under the old ring; the tiles are not drawn in any coins frame, so after the rewrite of CoinsPage no code reads it (check-i18n: referenced by no code)"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "Bolt, Eredmények, Kimutatás - a failed GET of the store / achievements / statement",
+      "note": "Kept as today (Q4): a failed store or statement shows its empty copy, failed achievements show '0 / 0 feloldva' and the footnote. No error copy exists and none is drawn; a message would be new copy."
+    }
+  ]
+}

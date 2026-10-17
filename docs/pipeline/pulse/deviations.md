@@ -194,3 +194,51 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: none of it.
 - What the app does: the kind glyph tiles, the section glyph tile, the gate glyphs, the globe / eye-off glyphs, the success wash of live rows and the Gauge donut are gone; the filter is ChipRow + Segment with the ink mark (as the frame and kit chipRow({ink:true}) draw), Több is a non-selecting Segment; the four-state split is local to the page.
 - Status: open — needs a ruling.
+
+## DEV-021 — S-coins: the way back and the view switch semantics
+
+- Source: docs/pipeline/pulse/pkg/S-coins/deviations.md #1, #3 (PLAN.md Q4: behaviour wins)
+- Package: S-coins
+- The frames show: the "‹ PROFIL" eyebrow and a three-cell switch; no semantics.
+- What the app does: the back control keeps `history.back()` (the page is also opened from the command palette) and its accessible name is now the visible "Profil" instead of "Vissza"; the three views are the kit's Segmented radiogroup (role radio, roving tabindex, arrow keys) instead of tablist / tab.
+- Status: open — needs a ruling.
+
+## DEV-022 — S-coins: the balance-change feedback
+
+- Source: docs/pipeline/pulse/pkg/S-coins/deviations.md #2, #9, #10
+- Package: S-coins
+- The frames show: the EGYENLEGED eyebrow over a still giant figure.
+- What the app does: for 2.6 s after a change the signed delta takes the eyebrow slot (lit for an earning, eyebrow ink for a spend, never danger) and the giant rolls from the previous value (instant under reduced motion); a failed wallet read shows an em dash in the pending tone, never 0; loading is a block at the giant's ink box and ListRowSkeletons for the lists.
+- Status: open — needs a ruling.
+
+## DEV-023 — S-coins: the affordable price (one-pill rule)
+
+- Source: docs/pipeline/pulse/pkg/S-coins/deviations.md #5, #6
+- Package: S-coins
+- The frames show: only the quiet price (coin + mono figure) and the owned "Megvan" row.
+- What the app does: an unaffordable price stays a live quiet TextLink (it answers 409 with the real numbers); an affordable price is the small lime pill. Two affordable items would show two pills. Unreachable today (after Q2 no purchasable item is listed for any account); proven only on the coins-store-affordable fixture.
+- Status: open — needs a ruling.
+
+## DEV-024 — S-coins: Q2 hides the frame's second store row
+
+- Source: docs/pipeline/pulse/pkg/S-coins/deviations.md (Q2 section), owner-answers Q2
+- Package: S-coins
+- The frames show: coins-1 with two store rows (Aurora owned, Ember at 250 with the quiet price).
+- What the app does: theme packs the member does not own are not listed, so user@ sees Aurora alone and the closing rule sits at y 500; coins-1 is "structure" on live data. The Ember row is shown 1:1 only on the coins-store-priced fixture, which gives the second recorded item a hypothetical non-theme sku (feature.ember). Whether R26 accepts that hypothetical catalogue data is open.
+- Status: open — needs a ruling.
+
+## DEV-025 — S-coins: old decoration removed
+
+- Source: docs/pipeline/pulse/pkg/S-coins/deviations.md (removed on purpose)
+- Package: S-coins
+- The frames show: none of it.
+- What the app does: the Gauge arc round the balance, the two SummaryTiles (keys coins.weekCaption / coins.spentCaption removed), the per-item store glyphs and the trophy glyph are gone; achievements carry the medal raster (lit = earned, idle at 45 % = locked); E25 B-E and E26 A are retired (variants.json).
+- Status: open — needs a ruling.
+
+## DEV-026 — S-coins: Bolt, Eredmények, Kimutatás - a failed GET of the store / achievements / statement
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-coins/i18n.patch.json`
+- Package: S-coins
+- The frames show: no string is drawn at this place.
+- What the app does: Kept as today (Q4): a failed store or statement shows its empty copy, failed achievements show '0 / 0 feloldva' and the footnote. No error copy exists and none is drawn; a message would be new copy.
+- Status: open — a copy question; nothing was invented.
