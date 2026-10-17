@@ -1,0 +1,799 @@
+{
+  "about": "S-coach-dashboard - the frame data of coach-dashboard-1 / -2 / -3 and the undrawn states of the coach dashboard (/coach, PLAN 4.1 rule 7). Every fixture is a list of edits over a recording of the coach account (GET /clients, /teams, /invite-codes, /notifications/unread-count), or a stub with an empty body for an error status (R26). Every state is replay. Accounts: C = coach@ (frames and every state but one), M = user@ (forbidden). Nothing is written live by this package: minting is the INT fixture coach-dashboard-2 (POST /invite-codes 201), no other mutation is ever fired.",
+  "overrides": {
+    "coach-dashboard-1": {
+      "why": "The recording of C holds 14 clients (two awaiting handover), 4 teams, 4 live codes and 2 unread notifications; the frame draws 6 clients, nobody pending, 3 teams, 2 live codes (3 / 20, 0 / 20) and a bell count of 1. The edits keep six recorded rows (two of Erőemelő csapat, one of Online kliensek, two of Reggeli csoport, one without a team - the drawn 2 / 2 / 1 / 1 split), give them the drawn names and 28-day counts, drop the others, drop the fourth team, keep two live codes and set the bell count to 1. The screen sorts them into the drawn order itself (team, then name).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "edits": [
+            {
+              "pointer": "/clients/0/display_name",
+              "value": "Szabó Bence"
+            },
+            {
+              "pointer": "/clients/0/sessions_28d",
+              "value": 11
+            },
+            {
+              "pointer": "/clients/1/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/clients/1/sessions_28d",
+              "value": 15
+            },
+            {
+              "pointer": "/clients/6/display_name",
+              "value": "Kiss Anna"
+            },
+            {
+              "pointer": "/clients/6/sessions_28d",
+              "value": 0
+            },
+            {
+              "pointer": "/clients/7/display_name",
+              "value": "Nagy Eszter"
+            },
+            {
+              "pointer": "/clients/7/sessions_28d",
+              "value": 9
+            },
+            {
+              "pointer": "/clients/8/display_name",
+              "value": "Tóth Lilla"
+            },
+            {
+              "pointer": "/clients/8/sessions_28d",
+              "value": 6
+            },
+            {
+              "pointer": "/clients/12/display_name",
+              "value": "Varga Márk"
+            },
+            {
+              "pointer": "/clients/12/sessions_28d",
+              "value": 4
+            },
+            {
+              "pointer": "/clients/13",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/11",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/10",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/9",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/5",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/4",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/3",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/2",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/teams",
+          "edits": [
+            {
+              "pointer": "/teams/1",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/invite-codes",
+          "edits": [
+            {
+              "pointer": "/codes/5/max_uses",
+              "value": 20
+            },
+            {
+              "pointer": "/codes/4",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications/unread-count",
+          "edits": [
+            {
+              "pointer": "/unread",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "nav.plans"
+        }
+      }
+    },
+    "coach-dashboard-2": {
+      "why": "The same page data as coach-dashboard-1, but the code list as it is after the mint: the newest code (0 / 20) first, then 3 / 20 and 0 / 20, so the ledger reads 3 live codes as drawn. The new head row is a recorded code re-valued (uses 0, max 20), not an inserted row. The page is scrolled to its end before Új kód is pressed, as the frame draws it; the POST is answered by the INT fixture coach-dashboard-2.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "edits": [
+            {
+              "pointer": "/clients/0/display_name",
+              "value": "Szabó Bence"
+            },
+            {
+              "pointer": "/clients/0/sessions_28d",
+              "value": 11
+            },
+            {
+              "pointer": "/clients/1/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/clients/1/sessions_28d",
+              "value": 15
+            },
+            {
+              "pointer": "/clients/6/display_name",
+              "value": "Kiss Anna"
+            },
+            {
+              "pointer": "/clients/6/sessions_28d",
+              "value": 0
+            },
+            {
+              "pointer": "/clients/7/display_name",
+              "value": "Nagy Eszter"
+            },
+            {
+              "pointer": "/clients/7/sessions_28d",
+              "value": 9
+            },
+            {
+              "pointer": "/clients/8/display_name",
+              "value": "Tóth Lilla"
+            },
+            {
+              "pointer": "/clients/8/sessions_28d",
+              "value": 6
+            },
+            {
+              "pointer": "/clients/12/display_name",
+              "value": "Varga Márk"
+            },
+            {
+              "pointer": "/clients/12/sessions_28d",
+              "value": 4
+            },
+            {
+              "pointer": "/clients/13",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/11",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/10",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/9",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/5",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/4",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/3",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/2",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/teams",
+          "edits": [
+            {
+              "pointer": "/teams/1",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/invite-codes",
+          "edits": [
+            {
+              "pointer": "/codes/0/uses",
+              "value": 0
+            },
+            {
+              "pointer": "/codes/0/max_uses",
+              "value": 20
+            },
+            {
+              "pointer": "/codes/5/max_uses",
+              "value": 20
+            },
+            {
+              "pointer": "/codes/4",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications/unread-count",
+          "edits": [
+            {
+              "pointer": "/unread",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "opened": {
+        "role": "link",
+        "name": {
+          "key": "nav.plans"
+        }
+      },
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "coaching.mintCode"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "coaching.mintCode"
+            }
+          },
+          "arrived": {
+            "role": "heading",
+            "name": {
+              "key": "coaching.codeReady"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.codeReady"
+        }
+      }
+    },
+    "coach-dashboard-3": {
+      "why": "As coach-dashboard-1, plus the seventh row: the recorded pre-made account without a team (display name empty, must_change_credentials 1, no session in 28 days) with the drawn e-mail horvath.gabor@ - so the notice says \"1 fiók átadásra vár\", the split is 2 / 2 / 1 / 2 and the row carries the tag.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "edits": [
+            {
+              "pointer": "/clients/0/display_name",
+              "value": "Szabó Bence"
+            },
+            {
+              "pointer": "/clients/0/sessions_28d",
+              "value": 11
+            },
+            {
+              "pointer": "/clients/1/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/clients/1/sessions_28d",
+              "value": 15
+            },
+            {
+              "pointer": "/clients/6/display_name",
+              "value": "Kiss Anna"
+            },
+            {
+              "pointer": "/clients/6/sessions_28d",
+              "value": 0
+            },
+            {
+              "pointer": "/clients/7/display_name",
+              "value": "Nagy Eszter"
+            },
+            {
+              "pointer": "/clients/7/sessions_28d",
+              "value": 9
+            },
+            {
+              "pointer": "/clients/8/display_name",
+              "value": "Tóth Lilla"
+            },
+            {
+              "pointer": "/clients/8/sessions_28d",
+              "value": 6
+            },
+            {
+              "pointer": "/clients/12/display_name",
+              "value": "Varga Márk"
+            },
+            {
+              "pointer": "/clients/12/sessions_28d",
+              "value": 4
+            },
+            {
+              "pointer": "/clients/13/email",
+              "value": "horvath.gabor@tracker.local"
+            },
+            {
+              "pointer": "/clients/11",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/10",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/9",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/5",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/4",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/3",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/2",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/teams",
+          "edits": [
+            {
+              "pointer": "/teams/1",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/invite-codes",
+          "edits": [
+            {
+              "pointer": "/codes/5/max_uses",
+              "value": 20
+            },
+            {
+              "pointer": "/codes/4",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications/unread-count",
+          "edits": [
+            {
+              "pointer": "/unread",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coaching.pending"
+        }
+      }
+    }
+  },
+  "states": {
+    "coach-dashboard-recorded": {
+      "title": "Edzői kezdőlap — a felvett adatok (14 kliens, 2 átadásra vár)",
+      "account": "C",
+      "route": "/coach",
+      "height": 1900,
+      "reach": "seed",
+      "why": "the recording exactly as it is: 14 clients, two awaiting handover (notice plural), four teams so the split folds into three named parts + Egyéb csapatok + Csapat nélkül (five tone steps), four live codes, the bell at 2",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "nav.plans"
+        }
+      }
+    },
+    "coach-dashboard-empty": {
+      "title": "Edzői kezdőlap — üres névsor",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a coach with no clients: no hero numeral and no split (a bar of nothing is decoration), the Névsor section with the left-aligned empty state, the ledger and the codes as recorded",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "edits": [
+            {
+              "pointer": "/clients/13",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/12",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/11",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/10",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/9",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/8",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/7",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/6",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/5",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/4",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/3",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/2",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/1",
+              "remove": true
+            },
+            {
+              "pointer": "/clients/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.emptyTitle"
+        }
+      }
+    },
+    "coach-dashboard-error": {
+      "title": "Edzői kezdőlap — a névsor nem töltődött be",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /clients fails: only the roster says so, with Újra; header, ledger and codes still render from what resolved",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/clients",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "coach-dashboard-no-codes": {
+      "title": "Edzői kezdőlap — nincs élő kód",
+      "account": "C",
+      "route": "/coach",
+      "height": 1900,
+      "reach": "fixture",
+      "why": "no join code at all: the heading, the Új kód pill and the pre-made door stay, no code row, no empty copy; the ledger reads 0 live codes (a real zero, the read succeeded)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/invite-codes",
+          "edits": [
+            {
+              "pointer": "/codes/6",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/5",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/4",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/3",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/2",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/1",
+              "remove": true
+            },
+            {
+              "pointer": "/codes/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "coaching.mintCode"
+        }
+      }
+    },
+    "coach-dashboard-offline": {
+      "title": "Edzői kezdőlap — offline",
+      "account": "C",
+      "route": "/coach",
+      "height": 1900,
+      "reach": "seed",
+      "why": "the network drops after the page is drawn: the shell offline line; Új kód in the disabled pill look, every Visszavonás and every archive glyph disabled; rows, Tervek, the bell, Csapatok and the pre-made door stay live",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "coaching.mintCode"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "coaching.mintCode"
+        },
+        "disabled": true
+      }
+    },
+    "coach-dashboard-teams-sheet": {
+      "title": "Edzői kezdőlap — Csapatok lap",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "seed",
+      "why": "the Csapatok ledger row opens the team sheet: the underline name field and the Létrehozás link (disabled while the field is empty); open only, nothing is created",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^(csapatok|teams)( |$)"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "coaching.teamName"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "coaching.teamName"
+        }
+      }
+    },
+    "coach-dashboard-pregen-sheet": {
+      "title": "Edzői kezdőlap — Előre létrehozott fiókok lap",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "seed",
+      "why": "the pre-made accounts door opens its sheet: the e-mail field with its hint and the Fiókok létrehozása link; open only, no account is created",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "coaching.pregenTitle"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "coaching.pregenEmails"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "coaching.pregenEmails"
+        }
+      }
+    },
+    "coach-dashboard-archive-sheet": {
+      "title": "Edzői kezdőlap — archiválás megerősítése",
+      "account": "C",
+      "route": "/coach",
+      "height": 874,
+      "reach": "seed",
+      "why": "the first row archive glyph opens the confirmation: the monogram and the sentence with the name, Archiválás in danger and Mégse; open only, the confirm is never pressed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "coaching.archive"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "heading",
+            "name": {
+              "key": "coaching.archiveConfirmTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.archiveConfirmTitle"
+        }
+      }
+    },
+    "coach-dashboard-forbidden": {
+      "title": "Edzői kezdőlap — tag nyitja meg",
+      "account": "M",
+      "route": "/coach",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a member opens the route: the forbidden empty state is the page (its h1), no header, no pill; the three coach reads answer 403 (stubs: the member recording has none of them)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "status": 403,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/teams",
+          "status": 403,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/invite-codes",
+          "status": 403,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/clients",
+            "status": 403
+          },
+          {
+            "path": "/api/v1/teams",
+            "status": 403
+          },
+          {
+            "path": "/api/v1/invite-codes",
+            "status": 403
+          }
+        ],
+        "console": [
+          "403"
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.forbiddenTitle"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "loading": "clients / teams / codes isPending: pulse-shot answers a recorded GET at once and has no delayed answer, so the skeletons (numeral block, legend block, ledger dashes with aria-busy, three row skeletons with role=status) are checked in the code only - the same gap as R-S-coach-plans-02",
+    "busy": "Új kód / Visszavonás / Létrehozás / Fiókok létrehozása / Archiválás in flight: the stubbed answers settle at once; the three dots are the kit Pressable busy state",
+    "pregen-secrets": "the panel of temporary passwords needs the POST /clients/pregenerate answer, a 2xx body for an endpoint never recorded (refused by pulse-fixture-check, as R-F3-01); checked in the code only",
+    "copy-feedback": "CopyButton is used as is (E2 belongs to F8); its tick and retry states are F8 specimens",
+    "admin": "admin@ at /coach: the same component, only the shell differs (7-tab bar, F11); the admin recording holds none of the coach reads and recording them would need a live login - not captured"
+  }
+}

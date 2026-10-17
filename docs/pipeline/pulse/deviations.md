@@ -242,3 +242,51 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: no string is drawn at this place.
 - What the app does: Kept as today (Q4): a failed store or statement shows its empty copy, failed achievements show '0 / 0 feloldva' and the footnote. No error copy exists and none is drawn; a message would be new copy.
 - Status: open — a copy question; nothing was invented.
+
+## DEV-027 — S-coach-dashboard: the teams sheet (Csapatok row)
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #1 (PLAN.md Q4: behaviour wins)
+- Package: S-coach-dashboard
+- The frames show: the CSAPATOK ledger row with a chevron; the sheet behind it is not drawn.
+- What the app does: the row opens the Pulse Sheet "Csapatok" with the underline field "Csapat neve" and "Létrehozás"; submitting empties the field and keeps the sheet open (as before). "Létrehozás" is a strong text link, not a lime pill, because the page's Új kód pill stays on screen under the scrim (one lime pill). Disabled while the field is empty or offline.
+- Status: open — needs a ruling.
+
+## DEV-028 — S-coach-dashboard: the pre-made accounts sheet
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #2
+- Package: S-coach-dashboard
+- The frames show: the "Előre létrehozott fiókok" row with a chevron; the sheet is not drawn.
+- What the app does: the row opens the Pulse Sheet with the e-mail field, its hint and "Fiókok létrehozása" (a strong text link, same reason as DEV-027). After success the temporary passwords are listed and the sheet refuses to close by scrim, Escape, drag or the close glyph until "Bezárás" is pressed; the copied text is still "e-mail / password" while the row shows the name.
+- Status: open — needs a ruling.
+
+## DEV-029 — S-coach-dashboard: the archive confirmation
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #3
+- Package: S-coach-dashboard
+- The frames show: the archive glyph on every roster row; the confirmation is not drawn.
+- What the app does: the glyph opens the Pulse Sheet "Biztosan archiválod?" with the 28 pt monogram, the sentence with the name, "Archiválás" as a danger text link (busy in flight, disabled offline) and "Mégse"; never fires from the row. Composed as Sheet + TextLinks, not ConfirmSheet (no disabled state, no monogram). The archive glyph is 24 pt at stroke 1.75 where the frame draws 20 pt at 1.5 (R-S-coach-dashboard-01 open); the German sheet title is cut with an ellipsis by the one-line kit Sheet header.
+- Status: open — needs a ruling.
+
+## DEV-030 — S-coach-dashboard: the forbidden page
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #4
+- Package: S-coach-dashboard
+- The frames show: not drawn.
+- What the app does: a member at /coach gets the kit EmptyState as the page's h1 (left-aligned, no icon, no action) on Screen top="root"; the old Users disc is gone.
+- Status: open — needs a ruling.
+
+## DEV-031 — S-coach-dashboard: undrawn data states
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #5
+- Package: S-coach-dashboard
+- The frames show: only the filled dashboard and the code-ready sheet.
+- What the app does: loading = a block at the numeral's cap height and one for the bar, ledger dashes with aria-busy, three row skeletons; empty roster = no hero, the left-aligned empty state; a failed roster read = auth.errors.generic + Újra; failed teams / codes reads print the dash, never 0 (before: 0); no live code = no code row and no empty copy; offline = Új kód disabled, every Visszavonás and archive glyph disabled, navigation live.
+- Status: open — needs a ruling.
+
+## DEV-032 — S-coach-dashboard: kept quirks
+
+- Source: docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md #6
+- Package: S-coach-dashboard
+- The frames show: none of it.
+- What the app does: unchanged behaviour, listed so nobody reads it as new - the roster is ordered by team then name; expired codes still count as live; revoke is one tap without confirmation and all Visszavonás links go busy together; failed mint / revoke / archive / team create / account creation show nothing (no copy, R22); "átadásra vár" stays until the client changes the password.
+- Status: open — needs a ruling.
