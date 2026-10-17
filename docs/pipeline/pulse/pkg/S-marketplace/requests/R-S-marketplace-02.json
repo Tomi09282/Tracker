@@ -1,0 +1,11 @@
+{
+  "id": "R-S-marketplace-02",
+  "from": "S-marketplace",
+  "kind": "kit",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/ChipRow.tsx (Chip)",
+  "what": "A Chip whose word is shorter than 44 pt fails the targets probe: in English the first kind word 'All' is 35.5 x 44 (marketplace-*.en, every state). Hungarian 'Minden' (56) and German 'Alle' pass. Chip takes no className, so the screen cannot widen it.",
+  "how": "Give Chip a min-width of the target size (min-w-11, the word left-aligned so the mark still spans the word) - additive, no layout change for any word of 44 pt or more.",
+  "interim": "None; the en captures report 'probes not passing: targets' for that one chip.",
+  "then": "Re-run marketplace-1 --lang en; the targets probe passes."
+}

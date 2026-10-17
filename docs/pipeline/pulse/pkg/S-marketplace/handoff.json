@@ -1,0 +1,43 @@
+{
+  "package": "S-marketplace",
+  "branch": "pulse/S-marketplace",
+  "verifiedOn": "pulse/S-marketplace = pulse-redesign b09a468 + the S-marketplace commits; no hand-in file (no i18n, variants or shared change)",
+  "door": "URL only on a phone (owner answer Q5): /m has no new door",
+  "handIn": [],
+  "files": {
+    "frontend/src/features/marketplace/MarketplacePage.tsx": "render rewritten on the kit: Screen push; ScreenHeader push with the bare history-back chevron, the display title PIACTÉR and the one lime pill (PressableLink /login, never reads the session); the lead cover as a feathered, bleeding, desaturated UserPhoto (402:192) inside one Link named by the post title, or a 192 skeleton, or - with no cover - the lead as the list's first row; the underline search line (Field kit=searchField, glass leading, sr-only label, plain text input: no clear cross); ChipRow scroll=bleed of Chips (Minden + the taxonomy kinds, aria-pressed, a second tap returns to Minden); RowStack close of ListRow pad=loose (kind kicker lead + native city + date, title 2 lines, coach + 14 pt ink tick, price on the sub line); loading = three kicker row skeletons in a status region; error / empty / no hits = EmptyState (Újra a 44 pt TextLink); the one-page caption. Hooks, queries, state and the lead / rest slicing unchanged; PostCard, FeedHero, SELECTED_CHIP and the lucide / Surface / Pressable / KindTile imports removed.",
+    "docs/pipeline/pulse/pkg/S-marketplace/budget.json": "deleted by check-pulse --fix-down (23 -> 0)",
+    "docs/pipeline/pulse/pkg/S-marketplace/states.json": "overrides marketplace-1 / -2 (fixture: the drawn titles, dates, prices and hit order; marketplace-2 types 'budapest' as drawn and rests the field; language-neutral arrivals) + 8 undrawn states + unreachable",
+    "docs/pipeline/pulse/pkg/S-marketplace/deviations.md": "11 rows for docs/pipeline/pulse/deviations.md (row 1 needs the owner)",
+    "docs/pipeline/pulse/pkg/S-marketplace/lead-caption.option.patch": "NOT to apply unless the owner rules for the frames' lead caption (R-S-marketplace-01); a git diff of MarketplacePage.tsx",
+    "docs/pipeline/pulse/pkg/S-marketplace/requests/": "R-S-marketplace-01 (owner: lead caption), R-S-marketplace-02 (kit: Chip min width 44)"
+  },
+  "recordings": "added once with --record --only-missing (anonymous, 3 public GETs): /public/search?q=budapest, /public/posts?kind=program&sort=recent, /public/posts?kind=event&sort=soonest",
+  "verdicts": {
+    "marketplace-1": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-marketplace/marketplace-1.png",
+      "pair": ".pulse/pairs/S-marketplace/pair-marketplace-1.overview.png",
+      "fixture": "states.json overrides.marketplace-1 (pulse-fixture-check OK)",
+      "geometry": "36 compared, 2 matched, 24 deviating, 10 unmatched: every node under the cover is off by exactly dy -126 (the lead caption the plan leaves out) with x and size within 2 pt; the unmatched are the lead price (not built) and line / mark / rule boxes the shift moved beyond the match radius. With the option patch: 31 matched, 5 width-only, 0 unmatched (option-lead-caption-marketplace-1.geometry.json) = matched-fixture",
+      "note": "structure only because of the plan's cover-only rule (R-S-marketplace-01); the cover is masked"
+    },
+    "marketplace-2": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-marketplace/marketplace-2.png",
+      "pair": ".pulse/pairs/S-marketplace/pair-marketplace-2.overview.png",
+      "fixture": "states.json overrides.marketplace-2",
+      "geometry": "28 compared, 2 matched, 18 deviating (the same dy -126), 8 unmatched; with the option patch 24 matched, 4 width-only, 0 unmatched = matched-fixture"
+    },
+    "marketplace-1-360": { "verdict": "structure", "note": "the kind words scroll inside their line at 360; the placeholder fits beside the glass" },
+    "marketplace-error": { "verdict": "structure", "note": "bodiless 500 (the R-S-public-pages-01 interim): EmptyState + Újra under the kind words, no lead" },
+    "marketplace-empty": { "verdict": "structure", "note": "no lead, EmptyState Még nincs itt semmi" },
+    "marketplace-no-hits": { "verdict": "structure", "note": "lead stays, Nincs találat + the one-page caption" },
+    "marketplace-kind-program": { "verdict": "structure", "note": "recorded feed (seed prices x100)" },
+    "marketplace-kind-event": { "verdict": "structure", "note": "one post: the cover alone, nothing under the kind words" },
+    "marketplace-no-cover": { "verdict": "structure", "note": "the lead heads the list as its first row" },
+    "marketplace-taxonomy-failed": { "verdict": "structure", "note": "only Minden, raw city keys, no prices" },
+    "loading / search in flight / offline": { "verdict": "unreachable", "note": "replay answers instantly / cannot go offline; code only" }
+  },
+  "variants": "hu (10 of 10), en (10 of 10; the 'All' chip fails targets, R-S-marketplace-02), de (10 of 10); focus walk on marketplace-1: 13 stops, every one with visible focus"
+}

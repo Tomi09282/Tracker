@@ -1,0 +1,723 @@
+{
+  "about": "S-marketplace - /m signed out (GET /auth/me answers 401), frames marketplace-1 / marketplace-2 and the states they do not draw (PLAN 4.1 rule 7). Every GET is replay from the anonymous recordings (.pulse/rec/anon); the GETs the freeze lacked (search 'budapest', the Program and Esemény feeds) were recorded once with --record --only-missing. Every fixture is an edit list over the recording of the same endpoint (the PublicPost shape of features/marketplace/usePublic.ts) or a status answer - no new key, no write. The frame overrides set the drawn titles, dates and prices (the seed stores 100x prices - _subcheck.dataNotDrawn.prices - and titles / dates relative to its run day), so both frames are matched-fixture, never matched.",
+  "overrides": {
+    "marketplace-1": {
+      "reach": "fixture",
+      "why": "frame data: the seed feed reads 'Szeptembertől két új időpont', 'Guggolás-technika műhely – szeptember 14.', dates relative to the seed run and 100x prices (4 500 000 Ft for 45 000 Ft). The edits set the drawn titles, dates and prices; order, kinds, cities and coaches are the recording's. The arrival names the search line by its key, so the en / de variants arrive too.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts",
+          "query": {
+            "sort": "recent"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/0/priceMinor",
+              "value": 45000
+            },
+            {
+              "pointer": "/posts/1/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/1/publishedAt",
+              "value": 1791194400
+            },
+            {
+              "pointer": "/posts/2/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/2/eventAt",
+              "value": 1793354400
+            },
+            {
+              "pointer": "/posts/2/priceMinor",
+              "value": 12000
+            },
+            {
+              "pointer": "/posts/3/publishedAt",
+              "value": 1789725600
+            },
+            {
+              "pointer": "/posts/3/priceMinor",
+              "value": 69000
+            },
+            {
+              "pointer": "/posts/4/publishedAt",
+              "value": 1788948000
+            },
+            {
+              "pointer": "/posts/4/priceMinor",
+              "value": 32000
+            },
+            {
+              "pointer": "/posts/5/publishedAt",
+              "value": 1787652000
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": {
+          "key": "marketplace.searchPlaceholder"
+        }
+      }
+    },
+    "marketplace-2": {
+      "reach": "fixture",
+      "why": "wrong item fixed (_subcheck.wrongItem): the frame and Screens/marketplace.md search 'budapest' (3 hits), the freeze typed 'guggolás'. The feed edit is marketplace-1's lead price (the lead stands above the hits); the search edits set the drawn titles, dates, prices and hit order. The recorded relevance order (műhely, közlemény, erőblokk) is re-ordered to the drawn one (erőblokk, műhely, közlemény): the three objects are the recording's own, with the drawn title / date / price. A click on the title after typing takes the focus off the line, so it rests at 1 pt edge as drawn.",
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": {
+              "key": "marketplace.searchPlaceholder"
+            },
+            "text": "budapest"
+          },
+          "arrived": {
+            "role": "link",
+            "name": {
+              "re": "Őszi erőblokk"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "key": "marketplace.title"
+            }
+          },
+          "arrived": {
+            "role": "link",
+            "name": {
+              "re": "Őszi erőblokk"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "Őszi erőblokk"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts",
+          "query": {
+            "sort": "recent"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/0/priceMinor",
+              "value": 45000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/public/search",
+          "query": {
+            "q": "budapest"
+          },
+          "edits": [
+            {
+              "pointer": "/posts",
+              "value": [
+                {
+                  "id": "pxnIEqPCqqz2",
+                  "kind": "program",
+                  "title": "Őszi erőblokk – 8 hetes csoportos program",
+                  "excerpt": "Nyolc hét, heti három edzés, kis csoportban. Mit tartalmaz heti három vezetett edzés egyéni terhelés a felmérés alapján havi mérés és fotó A létszám tizenkét fő, hogy mindenkire jusson idő.",
+                  "docVersion": 1,
+                  "city": "budapest",
+                  "eventAt": null,
+                  "eventTz": null,
+                  "capacity": null,
+                  "priceMinor": 69000,
+                  "priceCurrency": "HUF",
+                  "publishedAt": 1789725600,
+                  "coachHandle": "kovacs-peter",
+                  "coachName": "Kovács Péter",
+                  "coachHeadline": "Erőnléti edző · 12 év tapasztalat · Budapest és online",
+                  "coachVerified": 1,
+                  "doc": [
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "Nyolc hét, heti három edzés, kis csoportban."
+                        }
+                      ]
+                    },
+                    {
+                      "k": "h",
+                      "level": 2,
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "Mit tartalmaz"
+                        }
+                      ]
+                    },
+                    {
+                      "k": "ul",
+                      "c": [
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "heti három vezetett edzés"
+                            }
+                          ]
+                        },
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "egyéni terhelés a felmérés alapján"
+                            }
+                          ]
+                        },
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "havi mérés és fotó"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "A létszám tizenkét fő, hogy mindenkire jusson idő."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "4ouWWlOOy7Ho",
+                  "kind": "event",
+                  "title": "Guggolás-technika műhely – október 30.",
+                  "excerpt": "Háromórás gyakorlati műhely a guggolás technikájáról. állásszélesség és lábfejállás törzsfeszítés és légzés gyakori hibák videóelemzéssel Hozz magaddal edzőcipőt és kényelmes ruhát.",
+                  "docVersion": 1,
+                  "city": "budapest",
+                  "eventAt": 1793354400,
+                  "eventTz": "Europe/Budapest",
+                  "capacity": 16,
+                  "priceMinor": 12000,
+                  "priceCurrency": "HUF",
+                  "publishedAt": 1791212820,
+                  "coachHandle": "kovacs-peter",
+                  "coachName": "Kovács Péter",
+                  "coachHeadline": "Erőnléti edző · 12 év tapasztalat · Budapest és online",
+                  "coachVerified": 1,
+                  "doc": [
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "Háromórás gyakorlati műhely a guggolás technikájáról."
+                        }
+                      ]
+                    },
+                    {
+                      "k": "ul",
+                      "c": [
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "állásszélesség és lábfejállás"
+                            }
+                          ]
+                        },
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "törzsfeszítés és légzés"
+                            }
+                          ]
+                        },
+                        {
+                          "k": "li",
+                          "c": [
+                            {
+                              "k": "text",
+                              "v": "gyakori hibák videóelemzéssel"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "Hozz magaddal edzőcipőt és kényelmes ruhát."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "Pyc1JUPJw_Ke",
+                  "kind": "announcement",
+                  "title": "Novembertől két új időpont",
+                  "excerpt": "Szeptembertől kedden és csütörtökön 6:30-kor is indul csoport. A jelentkezés a szokásos módon, üzenetben megy. Az online kliensek időpontja nem változik.",
+                  "docVersion": 1,
+                  "city": "budapest",
+                  "eventAt": null,
+                  "eventTz": null,
+                  "capacity": null,
+                  "priceMinor": null,
+                  "priceCurrency": null,
+                  "publishedAt": 1791194400,
+                  "coachHandle": "kovacs-peter",
+                  "coachName": "Kovács Péter",
+                  "coachHeadline": "Erőnléti edző · 12 év tapasztalat · Budapest és online",
+                  "coachVerified": 1,
+                  "doc": [
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "Szeptembertől kedden és csütörtökön 6:30-kor is indul csoport."
+                        }
+                      ]
+                    },
+                    {
+                      "k": "p",
+                      "c": [
+                        {
+                          "k": "text",
+                          "v": "A jelentkezés a szokásos módon, üzenetben megy. Az online kliensek időpontja nem változik."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": {
+          "key": "marketplace.searchPlaceholder"
+        }
+      }
+    }
+  },
+  "states": {
+    "marketplace-1-360": {
+      "title": "Piactér — alap, 360 pt",
+      "account": null,
+      "route": "/m",
+      "width": 360,
+      "height": 1176,
+      "reach": "fixture",
+      "why": "the narrow phone: the kind words overflow 312 pt and scroll inside their line; the placeholder fits beside the glass",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts",
+          "query": {
+            "sort": "recent"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/0/priceMinor",
+              "value": 45000
+            },
+            {
+              "pointer": "/posts/2/priceMinor",
+              "value": 12000
+            },
+            {
+              "pointer": "/posts/3/priceMinor",
+              "value": 69000
+            },
+            {
+              "pointer": "/posts/4/priceMinor",
+              "value": 32000
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": {
+          "key": "marketplace.searchPlaceholder"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-error": {
+      "title": "Piactér — a hírfolyam nem töltődött be",
+      "account": null,
+      "route": "/m",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /public/posts fails (after the two silent retries): the error block with Újra under the search line and the kind words; no lead (the answer carries no body: publicGet never reads the body of a refused response, and an unread body keeps the request open in the capture tool)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts",
+          "status": 500,
+          "body": null
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "path": "/api/v1/public/posts",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "marketplace-empty": {
+      "title": "Piactér — üres",
+      "account": null,
+      "route": "/m",
+      "height": 874,
+      "reach": "fixture",
+      "why": "no post is published: no lead, the empty block under the kind words",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts",
+          "query": {
+            "sort": "recent"
+          },
+          "edits": [
+            {
+              "pointer": "/posts",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "marketplace.emptyTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-no-hits": {
+      "title": "Piactér — nincs találat",
+      "account": null,
+      "route": "/m",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a search with no hit: the lead stays, the no-results block and the one-page caption under it (the recorded 'budapest' answer with its hits removed)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/search",
+          "edits": [
+            {
+              "pointer": "/posts",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": {
+              "key": "marketplace.searchPlaceholder"
+            },
+            "text": "budapest"
+          },
+          "arrived": {
+            "role": "heading",
+            "name": {
+              "key": "marketplace.noResultsTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "marketplace.noResultsTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-kind-program": {
+      "title": "Piactér — Program",
+      "account": null,
+      "route": "/m",
+      "height": 874,
+      "reach": "seed",
+      "why": "the Program word chosen: the lime mark moves, the lead and rows are that kind's feed (seed prices, 100x)",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "marketplace.kind.program"
+            }
+          },
+          "arrived": [
+            {
+              "role": "link",
+              "name": {
+                "re": "Félmaraton"
+              }
+            },
+            {
+              "absent": {
+                "role": "link",
+                "name": {
+                  "re": "Ingyenes kalisztenika"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "link",
+          "name": {
+            "re": "Félmaraton"
+          }
+        },
+        {
+          "absent": {
+            "role": "link",
+            "name": {
+              "re": "Ingyenes kalisztenika"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-kind-event": {
+      "title": "Piactér — Esemény (egy bejegyzés)",
+      "account": null,
+      "route": "/m",
+      "height": 874,
+      "reach": "seed",
+      "why": "Esemény is ONE upcoming post: its cover is the lead and nothing stands under the kind words",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "marketplace.kind.event"
+            }
+          },
+          "arrived": [
+            {
+              "role": "link",
+              "name": {
+                "re": "Guggolás"
+              }
+            },
+            {
+              "absent": {
+                "role": "link",
+                "name": {
+                  "re": "Online edzésterv"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "link",
+          "name": {
+            "re": "Guggolás"
+          }
+        },
+        {
+          "absent": {
+            "role": "link",
+            "name": {
+              "re": "Online edzésterv"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-no-cover": {
+      "title": "Piactér — a vezető bejegyzésnek nincs borítója",
+      "account": null,
+      "route": "/m",
+      "height": 1176,
+      "reach": "fixture",
+      "why": "the lead post has no media: nothing is drawn at hero size and the lead heads the list as its first row",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/XfuX879dQ9-Y",
+          "edits": [
+            {
+              "pointer": "/media",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "Online edzésterv"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "marketplace-taxonomy-failed": {
+      "title": "Piactér — a taxonómia nem töltődött be",
+      "account": null,
+      "route": "/m",
+      "height": 1176,
+      "reach": "fixture",
+      "why": "GET /public/taxonomy fails: only Minden in the kind line, raw city keys, no prices (silent, as today) (the answer carries no body: publicGet never reads the body of a refused response, and an unread body keeps the request open in the capture tool)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/taxonomy",
+          "status": 500,
+          "body": null
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "path": "/api/v1/public/taxonomy",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "Félmaraton"
+        }
+      }
+    }
+  },
+  "unreachable": {
+    "marketplace-loading / search in flight": "replay answers instantly; the skeleton (192 cover block, three kicker row skeletons) is code only - structure",
+    "offline": "replay cannot emulate offline; the strip is Providers' (OfflineIndicator), not this file - structure",
+    "a real 12-row feed page": "the seed holds 6 posts - structure"
+  }
+}
