@@ -3083,6 +3083,7 @@ export function parseArgs(argv) {
       case '--strict': opts.strict = true; break;
       case '--all': case '--sweep': opts.all = true; break;
       case '--package': opts.pkg = need(i, a); i++; break;
+      case '--overrides': opts.overrides = true; break;
       case '--base': opts.base = need(i, a).replace(/\/$/, ''); i++; break;
       case '--serve': opts.serve = path.resolve(need(i, a)); i++; break;
       case '--port': opts.port = Number(need(i, a)); i++; break;
@@ -3123,6 +3124,8 @@ Feed      --replay (default) | --live | --record [--only-missing | --rerecord]
           --rec <dir>                the freeze (default .pulse/rec)
           --clock virtual|shim|real  default: virtual when the feed is replay or record, real when live
           --no-fixtures              ignore the fixture of a state (its stubs still answer)
+          --overrides                apply every package's frame overrides (states.json) to the frame states:
+                                     the final sweep of the new build; never for the base build
           --probe-write              prove the write guard: a POST fired by the tool must be stopped
           --smoke                    only states with no click script and no fixture (the live smoke)
 Where     --base <origin>            the app (default http://localhost:<port>)
@@ -3167,6 +3170,7 @@ function suffixOf(opts) {
 export function planRun(opts) {
   const frames = loadFrames(opts.framesFile);
   if (opts.pkg) mergePackageStates(frames, opts.pkg);
+  if (opts.overrides) mergeAllOverrides(frames, opts.pkg);
   let keys = opts.states.slice();
   if (opts.all) keys = Object.keys(frames.states).filter((k) => frames.states[k].frame);
   if (opts.pkg) keys.push(...Object.keys(frames.states).filter((k) => frames.states[k].package === opts.pkg && !keys.includes(k)));
@@ -3195,6 +3199,27 @@ function mergePackageStates(frames, pkg) {
     if (!frames.states[key]) throw new Error(`${path.relative(REPO_DIR, file)}: override of unknown state "${key}"`);
     if (frames.states[key].package !== pkg) throw new Error(`${path.relative(REPO_DIR, file)}: "${key}" belongs to ${frames.states[key].package}, not to ${pkg}`);
     frames.states[key] = { ...frames.states[key], ...patch };
+  }
+}
+
+/**
+ * Every package's overrides of its own frame states, without the packages' extra states: what the
+ * final sweep (PLAN 7.2 row 2) captures, since each frame is reached on the rebuilt markup only
+ * through its package's override. The package named by --package was merged already.
+ */
+function mergeAllOverrides(frames, except) {
+  const dir = path.join(REPO_DIR, 'docs', 'pipeline', 'pulse', 'pkg');
+  if (!fs.existsSync(dir)) return;
+  for (const pkg of fs.readdirSync(dir)) {
+    if (pkg === except) continue;
+    const file = path.join(dir, pkg, 'states.json');
+    if (!fs.existsSync(file)) continue;
+    const doc = readJson(file);
+    for (const [key, patch] of Object.entries(doc.overrides || {})) {
+      if (!frames.states[key]) throw new Error(`${path.relative(REPO_DIR, file)}: override of unknown state "${key}"`);
+      if (frames.states[key].package !== pkg) throw new Error(`${path.relative(REPO_DIR, file)}: "${key}" belongs to ${frames.states[key].package}, not to ${pkg}`);
+      frames.states[key] = { ...frames.states[key], ...patch };
+    }
   }
 }
 
