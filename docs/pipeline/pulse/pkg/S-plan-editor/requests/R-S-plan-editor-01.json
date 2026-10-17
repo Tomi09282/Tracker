@@ -1,0 +1,14 @@
+{
+  "id": "R-S-plan-editor-01",
+  "from": "S-plan-editor",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs",
+  "need": "A click-script step that scrolls the page by a number of points ({ \"scroll\": 240 } or { \"scrollY\": 240 }). plan-editor-3 is the editor scrolled by 240 pt (the day-1 rule at frame y 100; the built app puts it at y 340 with day 1 open), and `scroll` takes only \"end\", \"top\" or a target that DOM.scrollIntoViewIfNeeded centres - no target lands on 240. Until then the frame-state capture of plan-editor-3 is 240 pt off and its geometry probe cannot pass.",
+  "evidence": "pulse-shot.mjs:982-991 (the scroll step); .pulse/shots/S-plan-editor/plan-editor-3.geometry.json (every box dy +240..+243); .pulse/pairs/S-plan-editor/plan-editor-3.pair.png (the pair from the tall capture, rows 240..1114)",
+  "proposedApi": "step { \"scroll\": <number> } -> window.scrollTo({ top: n, behavior: 'instant' }) under `pumped`",
+  "proposedPatch": null,
+  "interim": "states.json has plan-editor-3-tall (the same steps and fixture at 402 x 1114); the package cuts rows 240..1114 out of it and pairs them with the frame (.pulse/pairs/S-plan-editor/plan-editor-3.*). With the step, the override of plan-editor-3 only needs { \"scroll\": 240, \"arrived\": … } appended to its steps.",
+  "status": "open",
+  "resolution": null
+}

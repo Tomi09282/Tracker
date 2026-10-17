@@ -564,6 +564,7 @@
     "findExercise": "Gyakorlat keresése",
     "removeExercise": "Gyakorlat eltávolítása",
     "deleteBlock": "Blokk törlése",
+    "addBlock": "Blokk hozzáadása",
     "moveUp": "Feljebb",
     "moveDown": "Lejjebb",
     "rounds": "{{n}} kör",

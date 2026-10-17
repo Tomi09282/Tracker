@@ -564,6 +564,7 @@
     "findExercise": "Find an exercise",
     "removeExercise": "Remove exercise",
     "deleteBlock": "Delete block",
+    "addBlock": "Add block",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "rounds": "{{n}} rounds",

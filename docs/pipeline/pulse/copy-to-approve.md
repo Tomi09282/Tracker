@@ -11,3 +11,4 @@ by hand.
 
 | Key | hu | en | de | Visible | Package | Where (frame, source) | Approved |
 |---|---|---|---|---|---|---|---|
+| `plans.addBlock` | Blokk hozzáadása | Add block | Block hinzufügen | no | S-plan-editor | aria-label of the add-block group of the open day (the three '+ Egyszerű / + Szuperszett / + Kör' links); the frame layer of plan-editor-2 is named 'Blokk hozzáadása' | [ ] |

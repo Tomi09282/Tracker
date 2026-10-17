@@ -1,0 +1,20 @@
+{
+  "package": "S-plan-editor",
+  "base": "0f6123a",
+  "namespaces": ["plans"],
+  "set": [
+    {
+      "key": "plans.addBlock",
+      "hu": "Blokk hozzáadása",
+      "en": "Add block",
+      "de": "Block hinzufügen",
+      "after": "plans.deleteBlock",
+      "copy": "proposed",
+      "visible": false,
+      "source": "aria-label of the add-block group of the open day (the three '+ Egyszerű / + Szuperszett / + Kör' links); the frame layer of plan-editor-2 is named 'Blokk hozzáadása'"
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}
