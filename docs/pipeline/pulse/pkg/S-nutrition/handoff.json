@@ -1,0 +1,45 @@
+{
+  "id": "S-nutrition",
+  "branch": "pulse/S-nutrition",
+  "mergedBase": "550567a",
+  "screen": "/nutrition (Étkezés)",
+  "summary": "NutritionPage.tsx's render is rewritten on the Pulse kit against nutrition-1 / nutrition-2 (everything above the return kept; only the lucide icon fields of the macros list dropped). NutritionCard.tsx and MacroBars.tsx (no importer) are deleted; budget.json reached zero and is deleted. The gap lanes are used: Field unit (G-inputs) for '180 g', Pressable glyph=field (G-shell) for the delete cross.",
+  "frames": {
+    "nutrition-1": { "verdict": "matched-fixture", "capture": ".pulse/shots/S-nutrition/nutrition-1.png", "tiles": [".pulse/shots/S-nutrition/nutrition-1.tile-1.png", ".pulse/shots/S-nutrition/nutrition-1.tile-2.png"], "pair": ".pulse/pairs/S-nutrition/nutrition-1.pair.png", "geometry": "125 compared, 101 matched, 24 deviating (all width-only: the frame's fill-width text boxes vs the hugging rendered text runs, and the bowl's box that runs past the screen edge), 1 style (the '/ 2600' run: the frame records the colour of its first character, the slash in text-3; 2600 is text-1 in both), 0 unmatched", "fixture": "states.json overrides.nutrition-1 (clock 2026-10-09T15:00+02:00; edit list over the recorded GET /api/v1/nutrition-log/2026-10-09)" },
+    "nutrition-2": { "verdict": "matched-fixture", "capture": ".pulse/shots/S-nutrition/nutrition-2.png", "tiles": [".pulse/shots/S-nutrition/nutrition-2.tile-1.png", ".pulse/shots/S-nutrition/nutrition-2.tile-2.png"], "pair": ".pulse/pairs/S-nutrition/nutrition-2.pair.png", "geometry": "95 compared, 82 matched, 12 deviating (width-only text runs, bowl), 2 style ('/ 2600' as above; 'Value 180 g' is matched by the probe to a row caption because the field value is an <input>, not a text run), 1 unmatched (glyph/x of SearchField's own clear button: kit-owned, drawn where the frame draws it)", "fixture": "states.json overrides.nutrition-2 (same day; steps: type csirke, click ^Csirkemell, bőr nélkül, type 180 into gramm)" }
+  },
+  "extraStates": {
+    "nutrition-morning": { "verdict": "matched-fixture", "note": "target, nothing logged: 0, 0 g macros, the empty state" },
+    "nutrition-over": { "verdict": "matched-fixture", "note": "3200 / 2600 and carb 305 / 290: figure and bar warning, never danger; bar clamps, figure does not" },
+    "nutrition-no-target": { "verdict": "matched", "note": "N (demo.nagy.balazs) on the recorded freeze day: targets null -> '0 kcal', no bar, 'A mai nap', the no-target notice line" },
+    "nutrition-error": { "verdict": "matched-fixture", "note": "GET 500: kept as today - 0 kcal, A mai nap, empty log, no retry (PLAN 4.3: no new error state)" },
+    "nutrition-results": { "verdict": "matched-fixture", "note": "the undrawn result list: ListRows, title + 'kcal · g P /100 g' meta, whole row picks" },
+    "nutrition-picked-invalid": { "verdict": "matched-fixture", "note": "grams 0: 0 kcal, no tick, the pill disabled (quiet grey)" },
+    "loading": { "verdict": "structure", "note": "the capture tool cannot hold a response; built from the kit (Skeleton at the giant's ink box, a 0 bar, three ListRowSkeletons with an sr-only 'Betöltés'), not captured" },
+    "partial target": { "verdict": "structure", "note": "no recording of the endpoint carries a null *_target, so pulse-fixture-check refuses the edit; the code path (a missing target loses ratio and caption per macro) is unchanged from today" },
+    "search no match": { "verdict": "structure", "note": "'Nincs találat' NoticeLine when the fetched list is empty; the q=zzzz GET is not recorded and was not added" },
+    "add / delete mutations": { "verdict": "structure", "note": "behaviour unchanged (submit and remove.mutate untouched); not exercised live: no write was made on any account" }
+  },
+  "probes": "every captured state: fonts ok, one pill at most, 0 boxed surfaces, no overflow at 360 / 402 / 430, reduced-motion ok, scroll-end ok, focus walk ok. targets FAILS on nutrition-2 and picked-invalid only: the G-inputs Field 'unit' sizes the <input> to its content (26 x 44 for '180'); the kit page says a tap on the rest of the line focuses it - a probe exemption for data-kit=inputField with a unit is the kit lane's / INT's call",
+  "languages": "base states captured in hu / en / de with no overflow and no key path (v-langen, v-langde); the three search-step states are hu-only because the food names are localized data ('csirke' finds Hungarian names only)",
+  "inventory": "frames: removed textbox 'Étel keresése…' -> added searchbox 'Étel keresése…' (SearchField is type=search, same name); +11 'Törlés' buttons = the fixture day's rows (the baseline day was empty)",
+  "ledger": {
+    "useNutritionDay 2->1, useTranslation 3->1, door to=/nutrition": "lived in the deleted, unimported NutritionCard.tsx",
+    "role progressbar, aria-valuemin/max/now, aria-labelledby": "came from the deleted MacroBars / Gauge composition; the kit ProgressBar renders role=progressbar with aria-value* (calorie bar with valueText '1840 / 2600 kcal'; macro bars inside MacroColumns)",
+    "to={Math.round(totals.kcal)}": "the CountUp prop (not a door); the count-up is Numeral mode=roll from 0",
+    "aria-label 6->1": "date input -> DateTrigger label; search input -> SearchField label (same name); clear button -> SearchField clearLabel common.close (same name); grams input -> Field's visible bound label 'gramm'; delete keeps aria-label common.delete",
+    "focus-visible: 4->0": "the hand-built focus rings moved into the kit (DateTrigger ring, SearchField/Field underline, Pressable ring); focus walk passes"
+  },
+  "deviations": [
+    "Over-target macro warning glyph dropped (Pulse: no glyphs on the instrument); value and bar turn warning.",
+    "Calorie bar omitted when the date has no target (the kit bar would draw a 1 pt sliver = 0 % of nothing); unit joins the figure.",
+    "Valid tick is the frame's bare ink check, not the old green disc.",
+    "Gram unit spacing follows the frames ('60 g', 'cél 180 g', 'g P /100 g'); live wrote '60g'."
+  ],
+  "requests": { "R-S-nutrition-01": "Field unit - resolved by G-inputs (merged 2660fb8), adopted", "R-S-nutrition-02": "open, non-blocking: frame fixture overrides live in states.json; INT may move them to pulse-frames.json / scripts/fixtures" },
+  "proposedCopy": [],
+  "handIn": ["docs/pipeline/pulse/pkg/S-nutrition/i18n.patch.json"],
+  "liveSmoke": "pulse-verify --live --smoke --no-fixtures: nutrition-1 (M, today) and nutrition-morning / no-target opened against the live backend with no undeclared error; the over / error states need their fixtures by definition. No write on any account (logging food on T was not exercised).",
+  "build": "pulse-verify: build green in 18 s · 8 of 8 captured (replay)",
+  "head": "b9419bd"
+}

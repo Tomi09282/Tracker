@@ -718,7 +718,11 @@
       "open": "Open",
       "targetCaption": "target {{value}}"
     },
-    "macroTargetShort": "target"
+    "macroTargetShort": "target",
+    "unitKcal": "kcal",
+    "unitG": "g",
+    "slash": "/",
+    "resultMeta": "{{kcal}} kcal · {{protein}} g P /100 g"
   },
   "coins": {
     "title": "Coins",

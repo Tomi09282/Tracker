@@ -718,7 +718,11 @@
       "open": "Öffnen",
       "targetCaption": "Ziel {{value}}"
     },
-    "macroTargetShort": "Ziel"
+    "macroTargetShort": "Ziel",
+    "unitKcal": "kcal",
+    "unitG": "g",
+    "slash": "/",
+    "resultMeta": "{{kcal}} kcal · {{protein}} g P /100 g"
   },
   "coins": {
     "title": "Münzen",

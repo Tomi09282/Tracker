@@ -718,7 +718,11 @@
       "open": "Megnyitás",
       "targetCaption": "cél {{value}}"
     },
-    "macroTargetShort": "cél"
+    "macroTargetShort": "cél",
+    "unitKcal": "kcal",
+    "unitG": "g",
+    "slash": "/",
+    "resultMeta": "{{kcal}} kcal · {{protein}} g P /100 g"
   },
   "coins": {
     "title": "Érmék",

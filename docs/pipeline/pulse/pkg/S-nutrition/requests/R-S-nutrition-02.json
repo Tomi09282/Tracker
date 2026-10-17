@@ -1,0 +1,14 @@
+{
+  "id": "R-S-nutrition-02",
+  "from": "S-nutrition",
+  "kind": "fixture",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-frames.json",
+  "need": "nutrition-2 is a fixture frame too (the header, hero and log read the Friday 1840 / 2600 day of nutrition-1, which the seed never holds), and its click must take 'Csirkemell, bőr nélkül, nyers' at 180 g (the _subcheck wrongItem). Both are carried as overrides in pkg/S-nutrition/states.json (clock 2026-10-09T15:00:00+02:00, an edit list over the recorded GET /api/v1/nutrition-log/2026-10-09, steps by name). Please either keep them as package overrides or move them into pulse-frames.json (reach/drawn 'fixture' for nutrition-2) and scripts/fixtures/nutrition-1.json, as the nutrition-1 entry's 'why' names; and note that the 'arrived' names of both frame entries are Hungarian literals, so --lang en / de cannot open them (the overrides use { key: 'nutrition.searchPlaceholder' } / { key: 'nutrition.grams' }).",
+  "evidence": "docs/pipeline/pulse/pkg/S-nutrition/states.json overrides; .pulse/baseline/_subcheck.json wrongItem.nutrition-2 and dataNotDrawn.nutrition-1; pulse-fixture-check S-nutrition: OK",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the overrides in the package's states.json drive every capture; verdict matched-fixture for both frames",
+  "status": "open",
+  "resolution": null
+}

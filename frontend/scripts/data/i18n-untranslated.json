@@ -12,6 +12,10 @@
     "adminUsers.role.admin": "a borrowed word in all three",
     "settings.role.admin": "the same borrowed word, on your own account chip",
     "coins.item.theme.aurora.title": "the same product name, in the store",
-    "coins.item.theme.ember.title": "the same product name, in the store"
+    "coins.item.theme.ember.title": "the same product name, in the store",
+    "nutrition.unitKcal": "unit symbol",
+    "nutrition.unitG": "unit symbol",
+    "nutrition.slash": "punctuation",
+    "nutrition.resultMeta": "unit symbols and the protein abbreviation, no words"
   }
 }

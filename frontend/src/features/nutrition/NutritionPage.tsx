@@ -1,67 +1,58 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Apple,
-  Beef,
-  CalendarDays,
-  Check,
-  Droplet,
-  Flame,
-  NotebookPen,
-  Plus,
-  Search,
-  Trash2,
-  Utensils,
-  Wheat,
-  X,
-} from 'lucide-react';
-import { cn } from '../../lib/cn';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
-import { SectionHeader } from '../../ui/data/SectionHeader';
-import { SummaryTile } from '../../ui/data/SummaryTile';
-import { Gauge } from '../../ui/feedback/Gauge';
-import { CountUp } from '../../ui/feedback/CountUp';
+import { Check, X } from 'lucide-react';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { MacroColumns } from '../../ui/data/MacroColumns';
+import { Numeral } from '../../ui/data/Numeral';
+import { ProgressBar } from '../../ui/data/ProgressBar';
+import { RowStack } from '../../ui/data/RowStack';
+import { Rule } from '../../ui/data/Rule';
+import { Section } from '../../ui/data/SectionHeader';
+import { StatBlock } from '../../ui/data/StatBlock';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Pic } from '../../ui/media/Pic';
+import { DateTrigger } from '../../ui/primitives/DateTrigger';
+import { Field } from '../../ui/primitives/Field';
+import { Pressable } from '../../ui/primitives/Pressable';
+import { SearchField } from '../../ui/primitives/SearchField';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { useFoodSearch, useNutritionDay, useLogFood, useDeleteLogItem } from './useNutrition';
 import type { FoodRow, LogItem } from './useNutrition';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
- * The client's food day — [[55-Screens/nutrition]].
+ * The client's food day — frames `nutrition-1` (the day) and `nutrition-2` (a food picked).
  *
- * ═══ ONE RING, THREE TILES — AND NO TABLE ══════════════════════════════════════════════════════
+ * ═══ THE COMPOSITION OF THE FRAMES (`figma-build/app/nutrition-*.body.js`) ═════════════════════
  *
- * They arrive with one question ("am I over or under") and one task ("log this thing"). The four
- * stacked label-plus-number-plus-bar rows this screen used to open with answered the question only
- * after you had read four lines in order, which is a table — the exact verdict that killed the
- * previous pass. Calories are the one COUNTABLE GOAL WITH A KNOWN DENOMINATOR here, so they get
- * the ring: the sweep of the arc *is* the quantity, read before any digit. The other three macros
- * are supporting figures and get `SummaryTile`s, told apart by an icon rather than by their
- * position in a list.
+ *   Screen top="root"        header at y 72, blocks 32 apart
+ *   ScreenHeader root        "TÁPLÁLKOZÁS", the day under it as a control ("Péntek, október 9. ⌄",
+ *                            the inline DateTrigger over the platform's picker)
+ *   hero stage               "KALÓRIA" + the giant calorie figure, the bowl glowing beside it and cut
+ *                            by the right screen edge, then the lime meter with the plan day on the
+ *                            left and "/ 2600 kcal" on the right, one baseline
+ *   macros                   strong rule, the trio at the `num` step: name, figure + g, ink bar, "cél"
+ *   Section "Hozzáadás"      the search line; the results (undrawn) or the picked food: its name, the
+ *                            gram field with the live kcal on its baseline, the screen's ONE lime pill
+ *   Section "Naplózva"       meal groups in the order first logged: a mono label, then rows of
+ *                            name + grams, kcal on the right edge and the one-tap delete cross
  *
- * `MacroBars` is retired ON THIS SCREEN, and it no longer draws the Home card either — `HomeNutrition`
- * took that over, which leaves `MacroBars` and the `NutritionCard` that wraps it with no caller at
- * all. They are dead weight awaiting deletion, not a live second rendering. Its two rules moved here
- * rather than dying with it:
- *   - the fill CLAMPS at a full sweep, the figure never does. 3200 against 2400 must not draw the
- *     same picture as exactly 2400 — the arc goes full, the number tells the truth.
- *   - overshoot is WARNING, never DANGER. Someone 14 g over on fat has had a normal Tuesday, and
- *     the tone of a colour is part of what the app says to them.
+ * ═══ RULES CARRIED OVER ════════════════════════════════════════════════════════════════════════
  *
- * ═══ THE DATE IS THE CLIENT'S, NOT THE SERVER'S ════════════════════════════════════════════════
+ * - The fill CLAMPS, the figure never does (3200 against 2400: a full bar and "3200").
+ * - Over target is WARNING, never danger — on the calorie figure and bar and on each macro.
+ * - The date is the client's local calendar day (`todayLocal`), never the server's.
+ * - No "remaining calories", no streak, no undo toast on delete: the feedback of a delete is the
+ *   figure rolling down. Delete is one tap and final, as it always was.
  *
- * `todayLocal()` reads the browser's calendar day, and the write sends the IANA zone alongside it.
- * A meal logged at 00:30 in Budapest is today's, and a server in another zone must not decide
- * otherwise. The same rule the workout log follows, for the same reason.
+ * ═══ WHAT THE FRAMES DO NOT DRAW, BUILT IN THE SAME LANGUAGE (owner answer Q4) ═════════════════
  *
- * ═══ WHAT IS DELIBERATELY ABSENT ═══════════════════════════════════════════════════════════════
- *
- * No "remaining calories" figure, no streak, and no undo toast on delete. Remaining invites the
- * arithmetic that turns a food log into a budget to be spent down; a streak on eating punishes the
- * day someone did not feel like recording it; and the toast would have been the only floating layer
- * on the screen, advertising reversibility for an action that is instant everywhere else in this
- * product. The feedback for a delete is the ring shrinking.
+ * Loading (blocks where the figures and rows will be), a day with nothing logged (the empty state),
+ * no target for the date (the unit joins the figure, no bar, the no-target sentence), the search
+ * results and "Nincs találat", an invalid gram amount (0 kcal, no tick, the pill disabled). A failed
+ * day read keeps today's behaviour: the zero day, no retry.
  */
 export function NutritionPage() {
   const { t, i18n } = useTranslation();
@@ -93,15 +84,15 @@ export function NutritionPage() {
 
   const kcalTarget = targets?.kcal_target ?? null;
   const kcalOver = kcalTarget != null && totals.kcal > kcalTarget;
-  // Clamped by `Gauge` itself; the figure below it is the unclamped truth.
+  // Clamped by the bar itself; the figure above it is the unclamped truth.
   const kcalFill = kcalTarget != null && kcalTarget > 0 ? totals.kcal / kcalTarget : 0;
-  // A missing target is a fact about the PLAN's schedule, not a zero. Said out loud below the ring.
+  // A missing target is a fact about the PLAN's schedule, not a zero. Said out loud under the meter.
   const noTarget = !day.isLoading && day.data != null && targets == null;
 
   const macros = [
-    { key: 'protein', icon: Beef, value: totals.protein_g, target: targets?.protein_g_target ?? null },
-    { key: 'carb', icon: Wheat, value: totals.carb_g, target: targets?.carb_g_target ?? null },
-    { key: 'fat', icon: Droplet, value: totals.fat_g, target: targets?.fat_g_target ?? null },
+    { key: 'protein', value: totals.protein_g, target: targets?.protein_g_target ?? null },
+    { key: 'carb', value: totals.carb_g, target: targets?.carb_g_target ?? null },
+    { key: 'fat', value: totals.fat_g, target: targets?.fat_g_target ?? null },
   ];
 
   const gramsNumber = Number(grams.replace(',', '.'));
@@ -117,323 +108,238 @@ export function NutritionPage() {
     setGrams('100');
   };
 
+  const unitG = t('nutrition.unitG');
+  const unitKcal = t('nutrition.unitKcal');
+  const foods = (search.data?.foods ?? []).slice(0, 8);
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      <header className="flex items-center justify-between gap-tight">
-        <h1 className="text-title-1 text-text-1">{t('nutrition.title')}</h1>
-
-        {/* The date control is a pill with our own glyph, not a bare native input: the native
-            picker indicator is stretched invisibly across the whole control instead, so the
-            entire 44px pill opens the OS picker rather than a 20px corner of it. */}
-        <label className="relative flex min-h-[var(--target-min)] shrink-0 items-center gap-tight rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--focus-ring)]">
-          <CalendarDays className="size-icon-s shrink-0 text-accent" aria-hidden />
-          <input
-            type="date"
+    <Screen top="root">
+      <ScreenHeader kind="root" title={t('nutrition.title')}>
+        {/* The frame lays the 44 pt control over the title bar's lower edge (its words 3 under the
+            title, y 116-134) and ends the header 13 above the control's own end (y 134): the row
+            keeps that 10 pt and the control hangs from it. */}
+        <div className="relative h-2.5">
+          <DateTrigger
+            variant="inline"
+            label={t('nutrition.date')}
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            aria-label={t('nutrition.date')}
-            className="text-body-s relative bg-transparent tabular-nums text-text-1 outline-none [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+            onChange={setDate}
+            className="absolute -top-[21px] left-0"
           />
-        </label>
-      </header>
-
-      {/* ── THE ANCHOR ───────────────────────────────────────────────────────────────────────
-          The loudest thing in the frame, and the day's own name sits INSIDE it rather than as a
-          heading above it — the label attached to the thing it labels, one horizontal rule fewer. */}
-      <section className="flex flex-col gap-group">
-        <div className="flex justify-center">
-          <Gauge
-            label={t('nutrition.macro.kcal')}
-            /* `segments` rather than `value` for one arc, because a single segment is the only way
-               to colour the sweep: overshoot has to read amber, not accent. */
-            segments={[{ value: kcalFill, color: kcalOver ? 'var(--warning)' : 'var(--accent)' }]}
-            /* A CLOSED track, against Gauge's 36° default. 03-nutrition.webp draws 1840 as a
-               fraction of a FULL circle — with the default hole the same figure would be a
-               fraction of 324°, so the arc would read fuller than the day actually is. */
-            gap={0}
-            className="aspect-square w-full max-w-[220px]"
-          >
-            {day.isLoading ? (
-              // The track still draws; only the figure is a placeholder, so nothing moves on swap.
-              <div className="flex flex-col items-center gap-tight">
-                <Skeleton className="h-9 w-28" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <Flame
-                  className={cn('size-icon-m', kcalOver ? 'text-[var(--warning)]' : 'text-accent')}
-                  aria-hidden
-                />
-                <p
-                  className={cn(
-                    'text-display-legacy font-display tabular-nums',
-                    kcalOver ? 'text-[var(--warning)]' : 'text-text-1',
-                  )}
-                >
-                  <CountUp to={Math.round(totals.kcal)} />
-                  {/* With no denominator to draw, the unit joins the figure instead. */}
-                  {kcalTarget == null ? ' kcal' : null}
-                </p>
-                {kcalTarget != null ? (
-                  <p className="text-body-s tabular-nums text-text-3">/ {round(kcalTarget)} kcal</p>
-                ) : null}
-                <p className="text-body-s mt-1 text-text-2">
-                  {targets?.day_name ?? t('nutrition.totals')}
-                </p>
-              </div>
-            )}
-          </Gauge>
         </div>
+      </ScreenHeader>
 
-        {noTarget ? (
-          <p className="text-caption text-center text-text-3">{t('nutrition.noTargetToday')}</p>
-        ) : null}
+      {/* ── THE HERO: the day's calories ─────────────────────────────────────────────────────── */}
+      <div className="relative flex flex-col gap-5">
+        {/* The bowl glows out of the black beside the figure, cut by the right screen edge
+            (frame box 231,51 267 x 272, the stage starts at 24,166). */}
+        <Pic slot="hero-bowl" width={267} priority bleed className="pointer-events-none absolute left-[207px] -top-[115px]" />
 
-        <div className="grid grid-cols-3 gap-tight">
-          {day.isLoading
-            ? [0, 1, 2].map((i) => (
-                // Built from the tile's own parts rather than one block of a guessed height, so
-                // the footprint is the real one and the row cannot jump when the data lands.
-                // `items-center` because the tiles below are `align="center"`: a skeleton that
-                // matches the height but not the axis still moves everything sideways on swap.
-                <Surface key={i} className="flex flex-col items-center gap-tight">
-                  <Skeleton className="size-11 rounded-chip" />
-                  <Skeleton className="h-8 w-16" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="mt-1 h-1.5 w-full rounded-chip" />
-                </Surface>
-              ))
-            : macros.map((m) => {
-                const over = m.target != null && m.value > m.target;
-                const label = t(`nutrition.macro.${m.key}`);
-                return (
-                  <SummaryTile
-                    key={m.key}
-                    icon={m.icon}
-                    // 03-nutrition.webp draws these centred under the ring — puck, figure and
-                    // caption on one axis. Home keeps the left-aligned default its own mockup shows.
-                    align="center"
-                    value={`${round(m.value)}g`}
-                    // No target means no `· cél` clause and no bar — the same rule the ring obeys.
-                    // The word is what makes the second number a TARGET rather than a second
-                    // quantity (DESIGN.md §6.6); it had been dropped and left two bare grams.
-                    caption={
-                      m.target != null
-                        ? `${label} · ${t('nutrition.macroTargetShort')} ${round(m.target)}g`
-                        : label
-                    }
-                    progress={
-                      m.target != null && m.target > 0 ? m.value / m.target : undefined
-                    }
-                    /* The tinted card, the warning border, the amber number, the amber bar and the
-                       alert glyph all hang off this one prop now — they used to be half here and
-                       half in the component, which is how Home ended up drawing a different card
-                       for the same fact. */
-                    over={over}
-                  />
-                );
-              })}
-        </div>
-      </section>
+        <StatBlock label={t('nutrition.macro.kcal')} className="relative">
+          {day.isLoading ? (
+            // A numeral is one block at its cap height (the four-digit ink box of the frame).
+            <Skeleton className="h-[102px] w-[210px]" />
+          ) : (
+            <Numeral
+              size="giant"
+              value={Math.round(totals.kcal)}
+              mode="roll"
+              from={0}
+              tone={kcalOver ? 'warn' : 'ink'}
+              // With no denominator to draw, the unit joins the figure instead.
+              unit={kcalTarget == null ? unitKcal : undefined}
+            />
+          )}
+        </StatBlock>
 
-      {/* ── ADD ──────────────────────────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-group">
-        {/* The real fix the hand-built copy here was waiting for: `SectionHeader` now lives in
-            `src/ui/data/`, and its markup is class-for-class what this block spelled out — same
-            `size-11 rounded-field bg-accent-subtle` mark, same `text-title-2` heading. Nothing
-            moves; what goes away is a third file deciding on its own that a section mark is a
-            rounded square and not a disc. */}
-        <SectionHeader icon={Plus} title={t('nutrition.add')} />
-
-        {/* Hand-composed rather than `Field`: `Field` always renders a visible label, and a search
-            box that sits directly under its own section heading would then say the same words
-            twice. Every class below is `Field`'s, so the two cannot drift apart visually. */}
-        <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-icon-s -translate-y-1/2 text-text-3"
-            aria-hidden
-          />
-          <input
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPicked(null);
-            }}
-            placeholder={t('nutrition.searchPlaceholder')}
-            aria-label={t('nutrition.searchPlaceholder')}
-            className="text-body-legacy min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] ps-[var(--target-min)] pe-12 text-text-1 outline-none placeholder:text-text-3 focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-          />
-          {q ? (
-            <Pressable
-              variant="ghost"
-              shape="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
-              onClick={() => {
-                setQ('');
-                setPicked(null);
-              }}
-              aria-label={t('common.close')}
-            >
-              <X className="size-icon-s" aria-hidden />
-            </Pressable>
+        <div className="relative flex flex-col gap-2">
+          {kcalTarget != null || day.isLoading ? (
+            <ProgressBar
+              tone="accent"
+              value={day.isLoading ? 0 : kcalFill}
+              label={t('nutrition.macro.kcal')}
+              valueText={
+                kcalTarget != null
+                  ? `${Math.round(totals.kcal)} ${t('nutrition.slash')} ${round(kcalTarget)} ${unitKcal}`
+                  : undefined
+              }
+            />
           ) : null}
+          <div className="flex items-baseline gap-1">
+            {day.isLoading ? (
+              <Skeleton className="h-3 w-28" />
+            ) : (
+              <>
+                <span className="min-w-0 flex-1 truncate text-cap text-text-2">
+                  {targets?.day_name ?? t('nutrition.totals')}
+                </span>
+                {kcalTarget != null ? (
+                  <>
+                    <span className="text-data-l text-text-1">
+                      <span className="text-text-3">{t('nutrition.slash')}</span> {round(kcalTarget)}
+                    </span>
+                    <span className="text-cap text-text-2">{unitKcal}</span>
+                  </>
+                ) : null}
+              </>
+            )}
+          </div>
+          {noTarget ? <NoticeLine tone="info">{t('nutrition.noTargetToday')}</NoticeLine> : null}
         </div>
+      </div>
+
+      {/* ── THE MACROS: the same instrument one size down ────────────────────────────────────── */}
+      <div className="flex flex-col gap-4">
+        <Rule strong />
+        {day.isLoading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {macros.map((m) => (
+              <StatBlock key={m.key} label={t(`nutrition.macro.${m.key}`)}>
+                <Skeleton className="h-[39px] w-14" />
+              </StatBlock>
+            ))}
+          </div>
+        ) : (
+          <MacroColumns
+            size="num"
+            columns={macros.map((m) => ({
+              name: t(`nutrition.macro.${m.key}`),
+              value: round(m.value),
+              unit: unitG,
+              ratio: m.target != null && m.target > 0 ? m.value / m.target : undefined,
+              caption: m.target != null ? `${t('nutrition.macroTargetShort')} ${round(m.target)} ${unitG}` : undefined,
+            }))}
+          />
+        )}
+      </div>
+
+      {/* ── ADD: the standing way in is the search line ──────────────────────────────────────── */}
+      <Section title={t('nutrition.add')}>
+        <SearchField
+          label={t('nutrition.searchPlaceholder')}
+          placeholder={t('nutrition.searchPlaceholder')}
+          clearLabel={t('common.close')}
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPicked(null);
+          }}
+        />
 
         {q && !picked ? (
-          <ul className="flex flex-col">
-            {(search.data?.foods ?? []).slice(0, 8).map((f) => (
-              <li key={f.id}>
-                <Pressable
-                  variant="ghost"
-                  className="w-full justify-start gap-tight px-2 text-left"
+          foods.length > 0 ? (
+            <RowStack>
+              {foods.map((f) => (
+                <ListRow
+                  key={f.id}
+                  title={f.name}
+                  sub={
+                    t('nutrition.resultMeta', { kcal: round(f.kcal_per_100g), protein: round(f.protein_g_per_100g) }) +
+                    (f.brand ? ` · ${f.brand}` : '')
+                  }
                   onClick={() => {
                     setPicked(f);
                     setGrams(String(f.serving_g ?? 100));
                   }}
-                >
-                  <span
-                    aria-hidden
-                    className="inline-flex size-9 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-                  >
-                    <Utensils className="size-icon-s" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="text-body-strong block truncate text-text-1">{f.name}</span>
-                    <span className="text-caption block truncate text-text-3">
-                      {round(f.kcal_per_100g)} kcal · {round(f.protein_g_per_100g)}g P /100g
-                      {f.brand ? ` · ${f.brand}` : ''}
-                    </span>
-                  </span>
-                  <Plus className="size-icon-m shrink-0 text-accent" aria-hidden />
-                </Pressable>
-              </li>
-            ))}
-            {search.isFetched && (search.data?.foods ?? []).length === 0 ? (
-              <li className="text-caption px-3 py-3 text-text-3">{t('nutrition.noResults')}</li>
-            ) : null}
-          </ul>
+                />
+              ))}
+            </RowStack>
+          ) : search.isFetched ? (
+            <NoticeLine tone="info" role="status">
+              {t('nutrition.noResults')}
+            </NoticeLine>
+          ) : null
         ) : null}
 
         {picked ? (
-          <Surface className="flex flex-wrap items-center gap-tight">
-            <span className="min-w-0 flex-1">
-              <span className="text-body-strong block truncate text-text-1">{picked.name}</span>
-              {/* The consequence of the grams, recomputed as they type — from the food's own
-                  per-100g figures, which is the same arithmetic the server will do. It is shown
-                  so the number is not a surprise after saving, NOT sent. */}
-              <span className="text-caption block tabular-nums text-text-3">
-                {round((picked.kcal_per_100g * (gramsValid ? gramsNumber : 0)) / 100)} kcal
-              </span>
-            </span>
-
-            {/* The ring goes on the wrapper, not the input: the input is `outline-none` so the
-                native ring cannot cut through the pill, and `focus-within` puts it back around
-                the whole control. Same construction as the date pill in the header — without it
-                this field took focus and showed nothing for it. */}
-            <span className="flex min-h-[var(--control-h)] shrink-0 items-center gap-tight rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--focus-ring)]">
-              <input
-                inputMode="decimal"
-                value={grams}
-                onChange={(e) => setGrams(e.target.value)}
-                aria-label={t('nutrition.grams')}
-                className="text-body-legacy w-12 bg-transparent text-right tabular-nums text-text-1 outline-none"
-              />
-              <span className="text-body-s text-text-3" aria-hidden>
-                g
-              </span>
-              {/* A FORMAT check and nothing more: it says the number is usable, not that the
-                  amount is right. Hidden rather than crossed out when it is not. */}
-              {gramsValid ? (
-                /* A filled disc with the tick knocked out of it, as the mockup draws it — and the
-                   same mark the onboarding number fields and the set row already use, so one
-                   "this is valid" signal has one shape across the app. */
-                <span
-                  aria-hidden
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-chip bg-success text-on-success"
-                >
-                  <Check className="size-icon-s" strokeWidth={3} />
-                </span>
-              ) : null}
-            </span>
-
+          <div className="flex flex-col gap-6 pt-1">
+            <div className="flex flex-col gap-4">
+              <p className="line-clamp-2 text-title text-text-1">{picked.name}</p>
+              <div className="flex items-end justify-between gap-4">
+                <Field
+                  label={t('nutrition.grams')}
+                  inputMode="decimal"
+                  value={grams}
+                  onChange={(e) => setGrams(e.target.value)}
+                  className="w-40"
+                  unit={unitG}
+                  // A FORMAT check and nothing more: the number is usable, not right.
+                  trailing={gramsValid ? <Check aria-hidden className="-mr-1 size-5 text-text-1" strokeWidth={2} /> : undefined}
+                />
+                {/* What the grams come to, recomputed as they type from the food's own per-100 g
+                    figures — the same arithmetic the server does. Shown, NOT sent. Its baseline
+                    is the typed value's (16 above the field's end). */}
+                <Numeral
+                  value={round((picked.kcal_per_100g * (gramsValid ? gramsNumber : 0)) / 100)}
+                  unit={unitKcal}
+                  className="mb-4"
+                />
+              </div>
+            </div>
             <Pressable
               variant="primary"
+              size="lg"
+              className="w-full"
               busy={log.isPending}
               disabled={!gramsValid}
               onClick={submit}
             >
               {t('common.add')}
             </Pressable>
-          </Surface>
+          </div>
         ) : null}
-      </section>
+      </Section>
 
       {/* ── THE DAY ──────────────────────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-group">
-        <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-          {/* Same badge as `Hozzáadás` above, down to the glyph size — the two section marks on
-              one screen must not be two sizes. */}
-          <span
-            aria-hidden
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-accent-subtle text-accent"
-          >
-            <NotebookPen className="size-icon-m" strokeWidth={2} />
-          </span>
-          {t('nutrition.logged')}
-        </h2>
-
+      <Section title={t('nutrition.logged')}>
         {day.isLoading ? (
-          <div className="flex flex-col gap-tight">
+          <RowStack as="div" role="status">
+            <span className="sr-only">{t('common.loading')}</span>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-16 rounded-card" />
+              <ListRowSkeleton key={i} sub index={i} />
             ))}
-          </div>
+          </RowStack>
         ) : groups.length === 0 ? (
-          // No button: the search field above is the action, and a second one would compete with it.
-          <EmptyState icon={Apple} title={t('nutrition.emptyTitle')} body={t('nutrition.emptyBody')} />
+          // No button: the search line above is the action, and a second one would compete with it.
+          <EmptyState title={t('nutrition.emptyTitle')} body={t('nutrition.emptyBody')} />
         ) : (
-          <div className="flex flex-col gap-group">
+          <div className="flex flex-col gap-6">
             {groups.map(([label, items]) => (
-              <div key={label} className="flex flex-col gap-tight">
-                <h3 className="text-micro-legacy uppercase text-text-3">{label}</h3>
-                {/* ONE card per group, hairline-divided inside — not one card per row. Six bordered
-                    boxes is six times the edge for the same six meals. */}
-                <Surface as="ul" pad="none" className="overflow-hidden">
+              <div key={label} className="flex flex-col gap-0.5">
+                <h3 className="text-micro text-text-2">{label}</h3>
+                <RowStack>
                   {items.map((item) => (
-                    <li
+                    <ListRow
                       key={item.id}
-                      /* The hairline goes on the SIBLING rather than on every row, so the first
-                         row has no rule above it and the card's own top edge is the only line. */
-                      className="flex items-center gap-tight border-[var(--card-border)] px-4 [&+li]:border-t-[length:var(--border-width)]"
-                    >
-                      {/* Nothing here is tappable except the trash, so a 44px icon control at the
-                          far edge cannot be hit by accident: delete has no confirm and no undo. */}
-                      <span className="min-w-0 flex-1 py-2">
-                        <span className="text-body-strong block truncate text-text-1">
-                          {item.name}
+                      title={item.name}
+                      sub={`${round(item.grams)} ${unitG}`}
+                      // Nothing in the row is tappable but the cross, so the 44 pt target at the far
+                      // edge cannot be hit by accident: delete has no confirm and no undo.
+                      control={
+                        <span className="flex items-center">
+                          <span className="whitespace-nowrap text-data text-text-1">
+                            {round(item.kcal)} <span className="text-text-2">{unitKcal}</span>
+                          </span>
+                          <Pressable
+                            variant="link"
+                            shape="icon"
+                            glyph="field"
+                            onClick={() => remove.mutate(item.id)}
+                            aria-label={t('common.delete')}
+                          >
+                            <X aria-hidden />
+                          </Pressable>
                         </span>
-                        <span className="text-caption block tabular-nums text-text-3">
-                          {round(item.grams)}g · {round(item.kcal)} kcal
-                        </span>
-                      </span>
-                      <Pressable
-                        variant="ghost"
-                        shape="icon"
-                        onClick={() => remove.mutate(item.id)}
-                        aria-label={t('common.delete')}
-                      >
-                        <Trash2 className="size-icon-s" aria-hidden />
-                      </Pressable>
-                    </li>
+                      }
+                    />
                   ))}
-                </Surface>
+                </RowStack>
               </div>
             ))}
           </div>
         )}
-      </section>
-    </div>
+      </Section>
+    </Screen>
   );
 }
 

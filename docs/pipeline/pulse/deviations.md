@@ -58,3 +58,27 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
   check counts as passed for "F1.4 is made only if the glyph check passed". F1.4 was made on that
   ruling, one commit after F1.5 (whose message still says it was held). Undoing it is one
   `git revert` of the F1.4 commit and an `npm ci`.
+
+## DEV-004 — S-nutrition: every gram figure
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-nutrition/i18n.patch.json`
+- Package: S-nutrition
+- The frames show: `nutrition-1` — no string is drawn at this place.
+- What the app does: the frames write the unit with a space ('60 g', 'cél 180 g'); the live screen wrote '60g'. The frames' spacing is taken, also in the result line ('g P /100 g').
+- Status: open — a copy question; nothing was invented.
+
+## DEV-005 — S-nutrition: macro over target
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-nutrition/i18n.patch.json`
+- Package: S-nutrition
+- The frames show: `nutrition-1` — no string is drawn at this place.
+- What the app does: the old per-macro warning glyph is dropped (Pulse: no glyphs on the instrument); the figure and its bar turn warning instead.
+- Status: open — a copy question; nothing was invented.
+
+## DEV-006 — S-nutrition: calorie meter without a target
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-nutrition/i18n.patch.json`
+- Package: S-nutrition
+- The frames show: `nutrition-1` — no string is drawn at this place.
+- What the app does: with no target for the date the calorie bar is left out (the kit bar would draw a 1 pt sliver = 0 % of nothing); the figure carries the unit and the no-target sentence stands under the day line.
+- Status: open — a copy question; nothing was invented.
