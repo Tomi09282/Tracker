@@ -1,4 +1,4 @@
-import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { Screen } from '../../ui/shell/Screen';
@@ -109,6 +109,19 @@ const unitSymbol = (unit?: string) => (unit === 'pct' ? '%' : (unit ?? ''));
 
 /** The frame draws the other metrics four to a row (4 x 76.5 on 354). */
 const COLUMNS_PER_ROW = 4;
+/**
+ * Below the 376 pt breakpoint (16 pt gutters) four tracks of ~70 pt cut the mono date and a long
+ * metric name ("2026-09-..", "Arm (recht..."), so the narrow phone gets two to a row.
+ */
+const NARROW_QUERY = '(max-width: 375.98px)';
+const COLUMNS_NARROW = 2;
+
+function subscribeNarrow(onChange: () => void) {
+  const mq = window.matchMedia(NARROW_QUERY);
+  mq.addEventListener('change', onChange);
+  return () => mq.removeEventListener('change', onChange);
+}
+const isNarrow = () => window.matchMedia(NARROW_QUERY).matches;
 
 function BodyTab() {
   const { t, i18n } = useTranslation();
@@ -188,8 +201,9 @@ function BodyTab() {
 
   const metricName = (key: string) => t(`progress.metricName.${key}`);
   const latest = series[series.length - 1];
+  const perRow = useSyncExternalStore(subscribeNarrow, isNarrow, () => false) ? COLUMNS_NARROW : COLUMNS_PER_ROW;
   const columnRows: (typeof tiles)[] = [];
-  for (let i = 0; i < tiles.length; i += COLUMNS_PER_ROW) columnRows.push(tiles.slice(i, i + COLUMNS_PER_ROW));
+  for (let i = 0; i < tiles.length; i += perRow) columnRows.push(tiles.slice(i, i + perRow));
   const entries = rows
     .slice()
     .sort((a, b) => (a.measured_on < b.measured_on ? 1 : -1))
@@ -235,6 +249,8 @@ function BodyTab() {
               {columnRows.map((chunk) => (
                 <MacroColumns
                   key={chunk[0].key}
+                  // A short last row keeps the full rows' column width (76.5 pt on the frame).
+                  tracks={perRow}
                   columns={chunk.map((tile) => ({
                     name: metricName(tile.key),
                     value: tile.value,
@@ -257,27 +273,23 @@ function BodyTab() {
             onChange={setMetric}
             options={metricList.map((m) => ({ value: m.key, label: metricName(m.key) }))}
           />
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-2 gap-4">
-              <Field
-                label={unit ? `${t('progress.value')} (${unit})` : t('progress.value')}
-                inputMode="decimal"
-                value={value}
-                aria-invalid={record.isError || undefined}
-                onChange={(e) => {
-                  setValue(e.target.value);
-                  // The error belongs to the value that produced it.
-                  if (record.isError) record.reset();
-                }}
-              />
-              <DateTrigger label={t('progress.on')} value={on} onChange={setOn} />
-            </div>
-            {/* Full width under the pair: in the 169 pt column the sentence would wrap to five lines. */}
-            {record.isError ? (
-              <NoticeLine tone="danger" role="alert">
-                {t('progress.outOfRange')}
-              </NoticeLine>
-            ) : null}
+          {/* `items-start`: an error under the value field grows that column only, the date
+              trigger keeps its own height. */}
+          <div className="grid grid-cols-2 items-start gap-4">
+            <Field
+              label={unit ? `${t('progress.value')} (${unit})` : t('progress.value')}
+              inputMode="decimal"
+              value={value}
+              // The kit's field error state (`inputField` st 'error'): the line thickens to 2 pt
+              // danger and the sentence sits under THIS field, where the wrong number is.
+              error={record.isError ? t('progress.outOfRange') : undefined}
+              onChange={(e) => {
+                setValue(e.target.value);
+                // The error belongs to the value that produced it.
+                if (record.isError) record.reset();
+              }}
+            />
+            <DateTrigger label={t('progress.on')} value={on} onChange={setOn} />
           </div>
           <Pressable variant="primary" size="lg" className="w-full" busy={record.isPending} onClick={submit}>
             {t('common.save')}
@@ -295,7 +307,10 @@ function BodyTab() {
                 title={metricName(m.metric_key)}
                 sub={m.measured_on}
                 control={
-                  <span className="flex items-center gap-5">
+                  // progress-1 "Value + delete": the figure ends 4 before the 44 pt target, whose
+                  // box ends on the right gutter (334-378) and whose 20 pt text-2 cross has its ink
+                  // on that edge — the kit's `glyph="field"`, as Táplálkozás draws its cross.
+                  <span className="flex items-center gap-1">
                     <span className="flex items-baseline gap-1">
                       <span className="text-data-l text-text-1">{formatMeasure(m.value, i18n.language)}</span>
                       <span className="text-cap text-text-2">{unitSymbol(m.unit)}</span>
@@ -305,7 +320,7 @@ function BodyTab() {
                     <Pressable
                       variant="link"
                       shape="icon"
-                      className="-mr-4"
+                      glyph="field"
                       aria-label={t('common.delete')}
                       onClick={() =>
                         remove.mutate(m.id, {
@@ -339,17 +354,21 @@ function BodyTab() {
 const TAPE_WIDTH = 201;
 const TAPE_LEFT = 177;
 const TAPE_GUTTER = 24;
+/** The narrowest the tape is drawn; past this a very wide reading lets it run off the edge. */
+const TAPE_MIN = 120;
 
 /**
  * The hero: eyebrow, the giant reading with its unit, and the tape glowing out of the black on the
  * right, its top 1 above the eyebrow, "kg" in its black corner. The frame's "83,1" ends exactly where
- * the tape begins; a wider reading ("105,1" chest, "100,3" weight) would run into the coil, so the
- * tape starts no earlier than the digits' ink ends and slides out past the screen edge instead
- * (the scaffold clips it). Measured on the laid-out figure, so it holds at 360 / 402 / 430 too.
+ * the tape begins. A wider reading ("83,4", "105,1" chest) would run into the coil, so the tape starts
+ * no earlier than the digits' ink ends and SHRINKS (aspect kept) to the room left before its right
+ * edge, as the kit build sizes it from the reading ("the whole object stays inside the right
+ * margin", progress-1.body.js) - the hanging end is never cut by the screen edge. Measured on the
+ * laid-out figure, so it holds at 360 / 402 / 430 too.
  */
 function HeroFigure({ label, value, unit }: { label: string; value: string; unit: string }) {
   const boxRef = useRef<HTMLDivElement>(null);
-  const [left, setLeft] = useState(TAPE_LEFT);
+  const [tape, setTape] = useState({ left: TAPE_LEFT, width: TAPE_WIDTH });
 
   useLayoutEffect(() => {
     const box = boxRef.current;
@@ -360,8 +379,11 @@ function HeroFigure({ label, value, unit }: { label: string; value: string; unit
       // flush with the screen's right edge, whatever the gutter (24, or 16 below 376 pt)
       const flush = document.documentElement.clientWidth - box.getBoundingClientRect().left - TAPE_WIDTH;
       // ...but never past the column's own gutter on a desktop-wide window
-      const column = box.clientWidth + TAPE_GUTTER - TAPE_WIDTH;
-      setLeft(Math.round(Math.max(Math.min(flush, column), inkEnd)));
+      const home = Math.min(flush, box.clientWidth + TAPE_GUTTER - TAPE_WIDTH);
+      const right = home + TAPE_WIDTH;
+      const left = Math.max(home, inkEnd);
+      const width = Math.max(TAPE_MIN, Math.min(TAPE_WIDTH, right - left));
+      setTape({ left: Math.round(left), width: Math.round(width) });
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -371,8 +393,8 @@ function HeroFigure({ label, value, unit }: { label: string; value: string; unit
 
   return (
     <div ref={boxRef} className="relative">
-      <span aria-hidden className="absolute -top-px left-[var(--tape-x)]" style={{ '--tape-x': `${left}px` } as CSSProperties}>
-        <Pic slot="hero-tape" width={TAPE_WIDTH} priority bleed />
+      <span aria-hidden className="absolute -top-px left-[var(--tape-x)]" style={{ '--tape-x': `${tape.left}px` } as CSSProperties}>
+        <Pic slot="hero-tape" width={tape.width} priority bleed />
       </span>
       <StatBlock label={label} className="relative">
         <Numeral size="giant" value={value} unit={unit} />
