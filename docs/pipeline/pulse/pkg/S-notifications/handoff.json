@@ -1,0 +1,43 @@
+{
+  "id": "S-notifications",
+  "branch": "pulse/S-notifications",
+  "screen": "/notifications (Értesítések)",
+  "summary": "NotificationsPage.tsx is rewritten on the Pulse kit against notifications-1 / -2; everything above the return is kept (ago, TYPE_ICON / iconFor with MessageSquare -> MessageCircle, useOnline, the hooks, the frozen arrival ref, the auto mark-read effect). Composition as the body scripts: Screen top=push > ScreenHeader push (‹ KEZDŐLAP = navigate(-1), ÉRTESÍTÉSEK) > the stat (giant Numeral static in a 100 pt slot, 8, the body caption; 0 at the pending tone) > 20 > the one lime lg pill while something is unread > RowStack open of unread ListRows (bare type glyph lead, title, server body as sub, trailing Dot + mono age in text-1) > Section Korábbiak > RowStack of read rows (mono age as value). Empty and error under the strong rule with EmptyState (error: Újra text link). Budget emptied and deleted (28 -> 0).",
+  "frames": {
+    "notifications-1": {
+      "verdict": "matched-fixture",
+      "reason": "the recorded member inbox holds kinds no server code writes; the fixture (states.json overrides) replaces the list with the frame's six rows of the two real kinds. Mark-read POST answered by the declared stub, never reaches the server.",
+      "capture": ".pulse/shots/S-notifications/notifications-1.png",
+      "tiles": [".pulse/shots/S-notifications/notifications-1.tile-1.png"],
+      "pair": ".pulse/pairs/S-notifications/notifications-1.pair.png",
+      "geometry": "57 compared, 48 matched (all within 0.5-0.9 pt: the line-box half-pixel), 9 deviating width-only (the frame's fill-width title / sub boxes vs the hugging rendered runs, dy -0.5), 1 style = the Kezdőlap tab lit (Q6), 0 unmatched. File .pulse/pairs/S-notifications/notifications-1.geometry.json"
+    },
+    "notifications-2": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-notifications/notifications-2.png",
+      "tiles": [".pulse/shots/S-notifications/notifications-2.tile-1.png"],
+      "pair": ".pulse/pairs/S-notifications/notifications-2.pair.png",
+      "geometry": "23 compared, 20 matched, 3 deviating width-only (title, NINCS ÉRTESÍTÉS and the body: fill-width boxes vs hugging runs; the body breaks before 'itt' as drawn), 1 style = the Kezdőlap tab lit (Q6), 0 unmatched. File .pulse/pairs/S-notifications/notifications-2.geometry.json"
+    }
+  },
+  "states": {
+    "notifications-settled": { "verdict": "structure", "reason": "undrawn (the old screen note's frame 2): numeral still 2, no pill, one ruled list of read rows; captured on a fixture", "capture": ".pulse/shots/S-notifications/notifications-settled.png" },
+    "notifications-only-unread": { "verdict": "structure", "reason": "undrawn: frame 1 without the Korábbiak section; fixture", "capture": ".pulse/shots/S-notifications/notifications-only-unread.png" },
+    "notifications-nothing-unread": { "verdict": "structure", "reason": "undrawn: 0 at the off level, no pill, one list; fixture", "capture": ".pulse/shots/S-notifications/notifications-nothing-unread.png" },
+    "notifications-error": { "verdict": "structure", "reason": "undrawn: no numeral, strong rule, generic error title, Újra (44 pt target); fixture GET 500", "capture": ".pulse/shots/S-notifications/notifications-error.png" },
+    "notifications-offline": { "verdict": "structure", "reason": "undrawn: shell strip, list kept, pill disabled (quiet grey primary); fixture + offline step", "capture": ".pulse/shots/S-notifications/notifications-offline.png" },
+    "notifications-mark-failed": { "verdict": "structure", "reason": "undrawn: mark-read stub 500, pill idle and enabled, dots stay; no message exists (none invented)", "capture": ".pulse/shots/S-notifications/notifications-mark-failed.png" },
+    "notifications-loading": { "verdict": "structure", "reason": "unreachable in capture (no hold field in pulse-shot); header + numeral skeleton + two ListRowSkeletons in a status list, by code review" },
+    "notifications-new-on-poll": { "verdict": "structure", "reason": "hook-owned 60 s poll; composes exactly as notifications-1; not captured" }
+  },
+  "variants": { "w360+de": ".pulse/shots/S-notifications/w360-de/_contact.w360.de-1.png — all 8 states, no overflow, the sub line truncates, the pill label fits" },
+  "probes": "fonts, pill, boxed, overflow, targets pass on all 8 states; geometry 'not passing' only for the width-only deviations and the Q6 tab style above",
+  "inventory": "every state: -1 button 'Vissza' +1 button 'KEZDŐLAP' (the back control named by its parent, as the frame draws it); nothing else removed",
+  "budget": { "before": 28, "after": 0, "file": "deleted (done signal)" },
+  "requests": ["kit: StatBlock with an optional label and a body-size caption (the stat is composed in the page with data-kit=statBlock meanwhile)", "product: the back label says KEZDŐLAP also for a coach who came from /coach (the bells would have to pass their origin; frozen files)"],
+  "deviations": "docs/pipeline/pulse/pkg/S-notifications/deviations.md",
+  "proposedCopy": [],
+  "i18n": "no change (all ten notifications.* keys and nav.home exist)",
+  "liveSmoke": "none — the package makes no live writes; every mutation outcome is a stub / fixture",
+  "lastBuild": "pulse-verify: build green · 8 of 8 captured (replay)"
+}

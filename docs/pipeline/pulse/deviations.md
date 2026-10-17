@@ -490,3 +490,35 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: a member (five tabs) with the note, the knee limitation on Óvatosan (onboarding-1) and an empty Hetente hány edzés? (onboarding-3).
 - What the app does: no product change. The frames are captured on user@ (M) instead of the freeze's coach@ (C); C stays as the extra state onboarding-step5-coach. M's recording has the limitation on Kerülendő and 4 sessions per week, and pulse-fixture-check refuses the two edits, so onboarding-1 and -3 each differ by that one value (with the edits the captures equal the frames). work-packages.json fixtureFrames should also list onboarding-1.
 - Status: open — fixture request R-S-onboarding-01.
+
+## DEV-058 — S-notifications: the back label reads KEZDŐLAP for every viewer
+
+- Source: docs/pipeline/pulse/pkg/S-notifications/deviations.md behaviour row 1
+- Package: S-notifications
+- The frames show: a push ScreenHeader with "‹ KEZDŐLAP" (notifications-1 / -2).
+- What the app does: the back step stays `navigate(-1)` (the bell lives on Home and on `/coach`), labelled with the frame's KEZDŐLAP; the control's accessible name changes from "Vissza" to "KEZDŐLAP". A coach who came from `/coach` reads KEZDŐLAP but returns to `/coach`. A real fix needs both bells (NotificationBell and the coach dashboard, frozen for this package) to pass where they came from.
+- Status: open — needs a ruling (product question).
+
+## DEV-059 — S-notifications: undrawn states composed from the kit
+
+- Source: docs/pipeline/pulse/pkg/S-notifications/deviations.md behaviour rows 2-6, states.json (PLAN.md Q4)
+- Package: S-notifications
+- The frames show: notifications-1 (arrival, 2 unread) and notifications-2 (empty) only.
+- What the app does: the automatic mark-read on arrival and the frozen arrival count are unchanged; the numeral is static (no roll) and the lime lg pill is busy for one round trip, disabled (quiet grey primary) while offline. Settled, only-unread, nothing-unread, error, offline, mark-failed and loading are composed from the kit; the error retry is a 44 pt "Újra" TextLink under the error title (no second pill). The stat block is composed in the page (`data-kit="statBlock"`, 100 pt numeral slot + 16/22 body caption) because the kit StatBlock requires an eyebrow and a cap-13 caption; kit request: an optional label and a body caption. Loading (no capture tool can hold a GET open) and new-row-on-poll are verified by code review only.
+- Status: open — kit and tool requests only.
+
+## DEV-060 — S-notifications: glyphs removed with the frame
+
+- Source: docs/pipeline/pulse/pkg/S-notifications/deviations.md "Removed on purpose"
+- Package: S-notifications
+- The frames show: no bell glyph or tinted disc above the numeral, no check in the pill, no read check on read rows; the message row glyph is a message circle.
+- What the app does: follows the frame — the bell / struck bell, the pill's check and the read check are gone (read rows carry the age in text-2, unread rows the lime dot and the age in text-1); MessageSquare becomes MessageCircle. Nothing a user can do is lost.
+- Status: closed — the frame wins.
+
+## DEV-061 — S-notifications: notifications-1 captured on a fixture
+
+- Source: docs/pipeline/pulse/pkg/S-notifications/deviations.md "Frame differences that stay", states.json
+- Package: S-notifications
+- The frames show: six rows of the two real notification kinds, no tab lit.
+- What the app does: no product change. The recorded member inbox holds kinds no server code writes, so notifications-1 runs on a fixture with the frame's six rows (verdict matched-fixture, user@ = M); notifications-2 runs on demo.nagy.balazs (N, recorded empty list). The Kezdőlap tab is lit (Q6 = a, shell).
+- Status: closed — capture decision.
