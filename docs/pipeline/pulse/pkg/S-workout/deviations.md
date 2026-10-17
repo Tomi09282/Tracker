@@ -34,3 +34,14 @@ For INT to append to `docs/pipeline/pulse/deviations.md`. Frames: workout-1, wor
 ## Copy
 
 No new string. "Következik" + ":" (the colon is punctuation, as the old card printed it). The skip link prints `workout.skipRest` (was aria-only).
+
+## Fix round 2 (2026-10-17, review re-check findings 2-4)
+
+| # | Where | Change | Why |
+|---|---|---|---|
+| F2-1 | `RestTimer.tsx` | the band takes the docked layer (`--z-dock`, over the tab bar's fade, under sheets and toasts) | the 4 pt line runs inside the bar's fade (744 down); under it the flat accent read (169,213,39) -> (153,193,36). Now (203,255,46) on all four pixel rows, as the frame paints the band after the chrome |
+| F2-2 | `RestTimer.tsx` | top padding 15 instead of 16 (the band is the frame's 137, `BUDGET.rest`) | the 138 pt band took 1 pt from the table, the closing rule rose to 615 and covered the active row's two field edges; now rule at 616 with the edges under it (117,118,113 at x 200 / 290) |
+| F2-3 | `SetRow.tsx` | under 376 pt viewport width the previous value drops its unit ("72,5 × 8") | the 86 pt cell holds 84 at 360 x 640 and the ellipsis cut the reps; the KG column head names the unit. Not drawn by any frame (402 frames are unchanged pixel for pixel apart from glyph anti-alias) |
+| F2-4 | `WorkoutPlayer.tsx` | the list scrolls to the SMALLEST offset that shows the whole active row, recomputed from the top; once scrolled, its top 16 pt fade (mask) instead of slicing a row at the head rule | `scrollIntoView('nearest')` kept an offset a shorter column had left (360 x 640 opened with row 1 gone and row 2's figure pressed on the rule). At scrollTop 0 (every frame) there is no mask |
+
+Hand-ins: `i18n.patch.json` and `variants.json` re-cut to empty against pulse-redesign - their round-1 content is merged, so `pulse-sync` refused them as stale. No new string, no new key.

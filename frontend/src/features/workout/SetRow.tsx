@@ -222,14 +222,27 @@ export function SetRow({ set, previous, onCheck, onUndo, autoFocus, active, lamp
 
   // "72,5 kg × 8" — through the same formatter as the recorded value, so the column and the field
   // write a weight the same way (the old cell printed the raw dot).
-  const prevLabel = previous
-    ? [
-        previous.weight_kg != null ? `${formatMeasure(previous.weight_kg, i18n.language)} ${t('workout.kg')}` : null,
-        previous.reps != null ? `× ${previous.reps}` : null,
-      ]
-        .filter(Boolean)
-        .join(' ') || '—'
-    : '—';
+  //
+  // On a narrow phone (content under 344) the 86 pt cell does not hold the whole line, and an
+  // ellipsis would cut the reps — the half the lifter needs. So the unit gives way instead: "72,5 × 8"
+  // stands under the column's own ELŐZŐ head, next to the KG head that already names the unit.
+  const prevWeight = previous?.weight_kg != null ? formatMeasure(previous.weight_kg, i18n.language) : null;
+  const prevReps = previous?.reps != null ? `× ${previous.reps}` : null;
+  const prevLabel =
+    prevWeight != null || prevReps != null ? (
+      <>
+        {prevWeight != null ? (
+          <>
+            {prevWeight}
+            <span className="max-[23.5rem]:hidden"> {t('workout.kg')}</span>
+          </>
+        ) : null}
+        {prevWeight != null && prevReps != null ? ' ' : null}
+        {prevReps}
+      </>
+    ) : (
+      '—'
+    );
 
   const hasRecord = records.length > 0;
   const isActive = Boolean(active) && !locked;

@@ -63,6 +63,20 @@ function fitFor(height: number, resting: boolean, stage: boolean): Fit {
   return 2;
 }
 
+/**
+ * The list's top edge once it is scrolled (a short phone, or the rest band taking the room): a row
+ * leaving under the column head's rule fades out over 16 pt instead of being sliced at the rule.
+ * At rest (scrollTop 0, every frame) there is no mask at all. A mask reads only alpha.
+ */
+const LIST_MASK_SCROLLED = 'linear-gradient(to bottom, transparent, currentColor 16px)';
+
+/** Presentational only: the mask follows the list's own scroll position (no state, no re-render). */
+function fadeListEdge(el: HTMLElement) {
+  const mask = el.scrollTop > 0 ? LIST_MASK_SCROLLED : '';
+  el.style.setProperty('mask-image', mask);
+  el.style.setProperty('-webkit-mask-image', mask);
+}
+
 /** The gutter the switcher and the rest band bleed into, so the row runs off the screen edge. */
 const BLEED_RIGHT = '-mr-6 pr-6 max-[23.5rem]:-mr-4 max-[23.5rem]:pr-4';
 
@@ -248,10 +262,19 @@ export function WorkoutPlayer() {
   // THE ACTIVE ROW STAYS IN REACH. When the rest band rises (49 pt more than the switcher) or the
   // column gives way, the list region shrinks — on a small phone the active row could end up below
   // its fold (the offline line takes its height too). It is scrolled back into view, never focused.
+  //
+  // The SMALLEST scroll that shows the whole active row, computed from the top every time — not
+  // `scrollIntoView({ block: 'nearest' })`, which keeps whatever offset an earlier, shorter column
+  // left behind (a 360 x 640 phone opened with row 1 scrolled away and the next figure pressed
+  // against the header rule). The 1 pt under the row is its field edges.
   useEffect(() => {
-    listRef.current
-      ?.querySelector('[data-active]')
-      ?.scrollIntoView({ block: 'nearest' });
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>('[data-active]');
+    if (!list || !row) return;
+    const top = row.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    const bottom = top + row.offsetHeight + 1;
+    list.scrollTop = Math.min(top, Math.max(0, bottom - list.clientHeight));
+    fadeListEdge(list);
   }, [rest.running, fit, activeSetId, columnHeight]);
 
   if (isPending) {
@@ -501,6 +524,7 @@ export function WorkoutPlayer() {
               scroll box; the closing rule is drawn over them, as in the frame. */}
           <div
             ref={listRef}
+            onScroll={(e) => fadeListEdge(e.currentTarget)}
             // The gutter on both sides is room for the active pill's glow, which a scroll box would clip.
             className="-mx-6 min-h-0 overflow-y-auto overscroll-contain px-6 pb-px max-[23.5rem]:-mx-4 max-[23.5rem]:px-4"
           >

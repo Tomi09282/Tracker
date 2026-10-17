@@ -634,3 +634,19 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: the phone only; the element rail with the selected word in text-1 and the lime mark.
 - What the app does: on a phone the rail is drawn as in the frame and every option's accessible name ends in "— nem használt"; at 1024 pt and up the rail becomes a 27-row `RowStack` / `ListRow` radiogroup column (256 wide) beside the workspace (CSS `hidden lg:flex` beside a `lg:hidden` rail; both radiogroups are in the DOM, one is displayed).
 - Status: closed — R21 keeps the desktop layout.
+
+## DEV-076 — S-workout: the rest band on the docked layer, 137 pt tall (fix round 2)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md "Fix round 2" rows F2-1 and F2-2
+- Package: S-workout
+- The frames show: (workout-2) the rest band painted after the chrome, its 4 pt line in the flat accent, the band 137 pt tall with the table's closing rule at y 616 and the active row's two 1 pt field edges under it.
+- What the app does: `RestTimer.tsx` puts the band on `--z-dock` (above the tab bar's fade, below sheets and toasts), so the line reads (203,255,46) on all four pixel rows; its top padding is 15 pt (`pt-[15px]`, annotated `token-lint-disable` with the frame's measured 617 -> 632), so the band is the frame's 137 and the closing rule is back on 616. This restores the frame; the one off-grid value is the only deviation.
+- Status: closed — matches workout-2.
+
+## DEV-077 — S-workout: the 360 pt set list (unit dropped, smallest scroll, top fade) (fix round 2)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md "Fix round 2" rows F2-3 and F2-4
+- Package: S-workout
+- The frames show: only 402 pt; no frame is drawn at 360 x 640 and none is scrolled.
+- What the app does: below 376 pt viewport width the previous value drops its unit ("72,5 × 8"; the KG column head names it) instead of ellipsising the reps; the set list scrolls to the smallest offset that shows the whole active row (recomputed from the top), and once scrolled its top 16 pt fade out (a mask) instead of slicing a row at the head rule. At scroll 0 — every frame — there is no mask, and the 402 captures differ from the earlier ones only in the anti-aliasing of the "kg" glyphs.
+- Status: closed — no frame is affected (360 x 640 only).

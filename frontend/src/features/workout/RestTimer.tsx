@@ -13,6 +13,8 @@ export interface RestTimerProps {
   onSkip: () => void;
 }
 
+const BAND = 'relative z-[var(--z-dock)] flex flex-col gap-4 bg-linear-to-b from-surface-0/0 from-0% to-surface-0 to-15% pr-6 pt-[15px] max-[23.5rem]:pr-4'; // token-lint-disable — the frame's 15 above the clock row (617 -> 632), which makes the band its 137; not a layout gap
+
 /**
  * The rest between two sets — frame `workout-2`, the band under the set list.
  *
@@ -20,6 +22,15 @@ export interface RestTimerProps {
  * stacks the two; the switcher goes inert underneath): nothing floats, nothing is fixed above the
  * tab bar, and nothing the lifter can reach is covered — the switcher is one rest away, as it
  * always was under the old card. The first 20 pt fade in, so the active pill's glow is never cut.
+ *
+ * Its height is the frame's, to the point: 15 + the 102 clock row + 16 + the 4 pt line = 137
+ * (`BUDGET.rest` in the player). One point more and the table above gives that point up, so the
+ * closing rule rises onto the active row and the row's two field edges vanish under it.
+ *
+ * It is painted AFTER the chrome, as the frame paints it: the line runs 750-754, inside the tab
+ * bar's fade (744 down), and under that translucent fade the flat accent read as a dull olive. So
+ * the band takes the docked layer (`--z-dock`: over the bar's fade, under every sheet and toast),
+ * as `Dock` does for a docked action. It ends 28 above the tab cells, so it covers no tab.
  *
  * Inside: the clock is the screen's ONE giant numeral, ticking in fixed digit cells so it never
  * jitters sideways (DEV-003); its draining lime line runs under it, numeral then bar, as on Home.
@@ -43,7 +54,7 @@ export function RestTimer({ remaining, progress, running, nextUp, onSkip }: Rest
   const clock = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
   return (
-    <div className="relative z-[2] flex flex-col gap-4 bg-linear-to-b from-surface-0/0 from-0% to-surface-0 to-15% pr-6 pt-4 max-[23.5rem]:pr-4">
+    <div className={BAND}>
       <div className="relative h-[102px]">
         <Numeral value={clock} size="giant" mode="tick" className="relative -top-px" srText={t('workout.restRemaining', { time: clock })} />
         <TextLink lead={<X aria-hidden />} onClick={onSkip} className="absolute right-2.5 -top-[18px]">

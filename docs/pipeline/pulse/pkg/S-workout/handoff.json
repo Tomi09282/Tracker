@@ -91,5 +91,23 @@
   ],
   "deviations": "docs/pipeline/pulse/pkg/S-workout/deviations.md",
   "proposedCopy": [],
-  "lastBuild": "pulse-verify: build green in 18 s · 15 of 15 captured (replay)"
+  "lastBuild": "pulse-verify: build green in 18 s · 15 of 15 captured (replay)",
+  "fix2": {
+    "branch": "pulse/S-workout-fix2",
+    "date": "2026-10-17",
+    "findings": {
+      "2 rest line dull": "fixed",
+      "3 field edges of the active row": "fixed",
+      "4 360x640 previous ellipsis": "fixed (unit drops under 376 pt; smallest scroll + 16 pt top fade)",
+      "5 workout-2 standard frame entry needs the package fixture": "open (tooling, scripts/** not owned)",
+      "6 probe pairs the trophy with the check pill": "open (tooling, scripts/** not owned)",
+      "7 undo pill gone (owner flag)": "unchanged"
+    },
+    "frames": {
+      "workout-1": "matched-fixture",
+      "workout-2": "matched-fixture",
+      "workout-3": "superseded by D2 (library-1)"
+    },
+    "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-workout-fix2/"
+  }
 }

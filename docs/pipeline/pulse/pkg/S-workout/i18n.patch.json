@@ -1,11 +1,11 @@
 {
   "package": "S-workout",
-  "base": "a9e6d956baad925cacad6454e606669c8dcdb9f3",
-  "namespaces": ["workout"],
+  "base": "ba932df299c0cc35cdcb2b224c21c695d00e0136",
+  "namespaces": [
+    "workout"
+  ],
   "set": [],
   "change": [],
-  "remove": [
-    { "key": "workout.holdToCheck", "reason": "its only consumer was the E21 hold-to-confirm look (variant B) in SetRow.tsx (this package); the set row is one Pulse look, tap" }
-  ],
+  "remove": [],
   "copyQuestions": []
 }
