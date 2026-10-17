@@ -1,0 +1,2980 @@
+{
+  "about": "S-admin - the frame data of admin-1 / -2 / -3 and the undrawn states of /admin (PLAN 4.1 rule 7). Every fixture is a list of edits over a recording of the admin account (GET /admin/stats, /admin/moderation, /admin/moderation/:id, /admin/users), or a stub with an empty body for an error status or a mutation answer (R26). Accounts: A = admin@ (frames and every state but one), M = user@ (forbidden). Nothing is written live by this package: approve, reject and resolve are never fired against the backend; their outcomes are fixtures.",
+  "overrides": {
+    "admin-1": {
+      "why": "The recording of A holds 49 users (45 / 3 / 1), 1660 exercises, 4 media files, 21 sessions and 2 audit events, and the queue owners are coach@tracker.local / demo.coach.feher.tamas@tracker.local. The frame draws 19 users (15 / 3 / 1), 1656, 3, \"3 aktív munkamenet · 14 naplóesemény\" and the shared @pelda.hu owners. The edits set those figures and owners; the three submissions, their order, names, ages (8 / 3 / 1 days at the recording instant) and media counts are the recording.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue/0/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/1/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/2/owner_email",
+              "value": "feher.tamas@pelda.hu"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "admin-2": {
+      "why": "admin-1 data, and the frame opens the SECOND submission (\"Demó – Bolgár kitörés\", _subcheck wrongItem). Its recorded review is edited to the frame where the seed answers other words (owner, description, steps, muscles, equipment - see the edits). The submitted image is the seed's blank upload (masked in the comparison: the frame draws a barbell photograph). The frame is drawn scrolled (switch at y 72); the capture cannot scroll by a distance, so the same state is also captured 404 pt taller (admin-2-tall) and cropped at y 404 for the pair.",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Bolgár kitörés"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue/0/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/1/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/2/owner_email",
+              "value": "feher.tamas@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation/1657",
+          "edits": [
+            {
+              "pointer": "/exercise/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.approve"
+        }
+      }
+    },
+    "admin-3": {
+      "why": "admin-1 figures, and the account list as the frame draws it: the recorded first eight rows re-valued to the eight @pelda.hu accounts (roles, registration dates, client counts, the illustrative jelszócsere flag; the letiltva flag of molnar.zsolt is NOT set: no recording holds a disabled account, so a disabledAt value cannot be schema-checked (R26) and the illustrative flag of the frame stays undrawn), the other sixteen removed and no page cap (nextCursor null). Drawn scrolled like admin-2 (admin-3-tall).",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/users",
+          "query": {
+            "sort": "created",
+            "dir": "desc"
+          },
+          "edits": [
+            {
+              "pointer": "/users/0/email",
+              "value": "lukacs.adam@pelda.hu"
+            },
+            {
+              "pointer": "/users/0/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/0/createdAt",
+              "value": 1787918400
+            },
+            {
+              "pointer": "/users/0/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/0/mustChange",
+              "value": 1
+            },
+            {
+              "pointer": "/users/0/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/1/email",
+              "value": "kiss.anna@pelda.hu"
+            },
+            {
+              "pointer": "/users/1/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/1/createdAt",
+              "value": 1786708800
+            },
+            {
+              "pointer": "/users/1/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/2/email",
+              "value": "takacs.daniel@pelda.hu"
+            },
+            {
+              "pointer": "/users/2/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/2/createdAt",
+              "value": 1783684800
+            },
+            {
+              "pointer": "/users/2/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/3/email",
+              "value": "molnar.zsolt@pelda.hu"
+            },
+            {
+              "pointer": "/users/3/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/3/createdAt",
+              "value": 1782129600
+            },
+            {
+              "pointer": "/users/3/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/4/email",
+              "value": "feher.tamas@pelda.hu"
+            },
+            {
+              "pointer": "/users/4/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/4/createdAt",
+              "value": 1780488000
+            },
+            {
+              "pointer": "/users/4/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/5/email",
+              "value": "toth.lilla@pelda.hu"
+            },
+            {
+              "pointer": "/users/5/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/5/createdAt",
+              "value": 1779019200
+            },
+            {
+              "pointer": "/users/5/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/6/email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/users/6/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/6/createdAt",
+              "value": 1773316800
+            },
+            {
+              "pointer": "/users/6/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/7/email",
+              "value": "kovacs.peter@pelda.hu"
+            },
+            {
+              "pointer": "/users/7/role",
+              "value": "admin"
+            },
+            {
+              "pointer": "/users/7/createdAt",
+              "value": 1768478400
+            },
+            {
+              "pointer": "/users/7/clientCount",
+              "value": 6
+            },
+            {
+              "pointer": "/users/7/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/7/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/23",
+              "remove": true
+            },
+            {
+              "pointer": "/users/22",
+              "remove": true
+            },
+            {
+              "pointer": "/users/21",
+              "remove": true
+            },
+            {
+              "pointer": "/users/20",
+              "remove": true
+            },
+            {
+              "pointer": "/users/19",
+              "remove": true
+            },
+            {
+              "pointer": "/users/18",
+              "remove": true
+            },
+            {
+              "pointer": "/users/17",
+              "remove": true
+            },
+            {
+              "pointer": "/users/16",
+              "remove": true
+            },
+            {
+              "pointer": "/users/15",
+              "remove": true
+            },
+            {
+              "pointer": "/users/14",
+              "remove": true
+            },
+            {
+              "pointer": "/users/13",
+              "remove": true
+            },
+            {
+              "pointer": "/users/12",
+              "remove": true
+            },
+            {
+              "pointer": "/users/11",
+              "remove": true
+            },
+            {
+              "pointer": "/users/10",
+              "remove": true
+            },
+            {
+              "pointer": "/users/9",
+              "remove": true
+            },
+            {
+              "pointer": "/users/8",
+              "remove": true
+            },
+            {
+              "pointer": "/nextCursor",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  },
+  "states": {
+    "admin-2-tall": {
+      "title": "Admin áttekintés — Beküldés megnyitva (404 pt magasabb, a pár kivágásához)",
+      "account": "A",
+      "route": "/admin",
+      "height": 2011,
+      "reach": "fixture",
+      "why": "admin-2 exactly, in a viewport 404 pt taller than the frame so the whole page is drawn; the pair crops it at y 404 (the frame is drawn scrolled to the section switch).",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Bolgár kitörés"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue/0/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/1/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/2/owner_email",
+              "value": "feher.tamas@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation/1657",
+          "edits": [
+            {
+              "pointer": "/exercise/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.approve"
+        }
+      }
+    },
+    "admin-3-tall": {
+      "title": "Admin áttekintés — Fiókok (404 pt magasabb, a pár kivágásához)",
+      "account": "A",
+      "route": "/admin",
+      "height": 1278,
+      "reach": "fixture",
+      "why": "admin-3 exactly, 404 pt taller; the pair crops it at y 404.",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/users",
+          "query": {
+            "sort": "created",
+            "dir": "desc"
+          },
+          "edits": [
+            {
+              "pointer": "/users/0/email",
+              "value": "lukacs.adam@pelda.hu"
+            },
+            {
+              "pointer": "/users/0/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/0/createdAt",
+              "value": 1787918400
+            },
+            {
+              "pointer": "/users/0/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/0/mustChange",
+              "value": 1
+            },
+            {
+              "pointer": "/users/0/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/1/email",
+              "value": "kiss.anna@pelda.hu"
+            },
+            {
+              "pointer": "/users/1/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/1/createdAt",
+              "value": 1786708800
+            },
+            {
+              "pointer": "/users/1/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/2/email",
+              "value": "takacs.daniel@pelda.hu"
+            },
+            {
+              "pointer": "/users/2/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/2/createdAt",
+              "value": 1783684800
+            },
+            {
+              "pointer": "/users/2/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/3/email",
+              "value": "molnar.zsolt@pelda.hu"
+            },
+            {
+              "pointer": "/users/3/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/3/createdAt",
+              "value": 1782129600
+            },
+            {
+              "pointer": "/users/3/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/4/email",
+              "value": "feher.tamas@pelda.hu"
+            },
+            {
+              "pointer": "/users/4/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/4/createdAt",
+              "value": 1780488000
+            },
+            {
+              "pointer": "/users/4/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/5/email",
+              "value": "toth.lilla@pelda.hu"
+            },
+            {
+              "pointer": "/users/5/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/5/createdAt",
+              "value": 1779019200
+            },
+            {
+              "pointer": "/users/5/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/6/email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/users/6/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/6/createdAt",
+              "value": 1773316800
+            },
+            {
+              "pointer": "/users/6/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/7/email",
+              "value": "kovacs.peter@pelda.hu"
+            },
+            {
+              "pointer": "/users/7/role",
+              "value": "admin"
+            },
+            {
+              "pointer": "/users/7/createdAt",
+              "value": 1768478400
+            },
+            {
+              "pointer": "/users/7/clientCount",
+              "value": 6
+            },
+            {
+              "pointer": "/users/7/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/7/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/23",
+              "remove": true
+            },
+            {
+              "pointer": "/users/22",
+              "remove": true
+            },
+            {
+              "pointer": "/users/21",
+              "remove": true
+            },
+            {
+              "pointer": "/users/20",
+              "remove": true
+            },
+            {
+              "pointer": "/users/19",
+              "remove": true
+            },
+            {
+              "pointer": "/users/18",
+              "remove": true
+            },
+            {
+              "pointer": "/users/17",
+              "remove": true
+            },
+            {
+              "pointer": "/users/16",
+              "remove": true
+            },
+            {
+              "pointer": "/users/15",
+              "remove": true
+            },
+            {
+              "pointer": "/users/14",
+              "remove": true
+            },
+            {
+              "pointer": "/users/13",
+              "remove": true
+            },
+            {
+              "pointer": "/users/12",
+              "remove": true
+            },
+            {
+              "pointer": "/users/11",
+              "remove": true
+            },
+            {
+              "pointer": "/users/10",
+              "remove": true
+            },
+            {
+              "pointer": "/users/9",
+              "remove": true
+            },
+            {
+              "pointer": "/users/8",
+              "remove": true
+            },
+            {
+              "pointer": "/nextCursor",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "admin-recorded": {
+      "title": "Admin áttekintés — a felvett adatok (49 felhasználó)",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "seed",
+      "why": "the recording as it is: 49 users (45 / 3 / 1, the legend and the split from the real partition), 1660 / 4, the queue with the tracker.local owners, the footer 21 / 2",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "admin-forbidden": {
+      "title": "Admin áttekintés — tag nyitja meg",
+      "account": "M",
+      "route": "/admin",
+      "height": 874,
+      "reach": "seed",
+      "why": "a member opens the route: the forbidden empty state is the page (its h1), no header, no figures, no switch; the stats read is not made (enabled only for an admin)",
+      "arrived": {
+        "text": {
+          "key": "admin.forbiddenTitle"
+        }
+      }
+    },
+    "admin-figures-failed": {
+      "title": "Admin áttekintés — a számok nem töltődtek be",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "fixture",
+      "why": "GET /admin/stats fails: the user figure, the ledger line, the count on Moderáció and the footer are absent (as today: no copy exists for a message, R22); the header, the switch and the queue stay",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/stats",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "noText": "Tagok"
+      }
+    },
+    "admin-moderation-empty": {
+      "title": "Admin áttekintés — üres moderációs sor",
+      "account": "A",
+      "route": "/admin",
+      "height": 874,
+      "reach": "fixture",
+      "why": "nothing waits: the queue answers an empty list and the stats pending 0 - no count on the switch or the head, the left-aligned empty state",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/moderation/pending",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue/2",
+              "remove": true
+            },
+            {
+              "pointer": "/queue/1",
+              "remove": true
+            },
+            {
+              "pointer": "/queue/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "admin.queueEmptyTitle"
+        }
+      }
+    },
+    "admin-review-stale": {
+      "title": "Admin áttekintés — a megnyitott beküldés már nincs a sorban",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "fixture",
+      "why": "someone decided the first submission meanwhile: its review answers 404 - the warning line with its explanation inside the open row; the refresh glyph in the head is the way out",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Kötélhúzás"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "admin.reviewGoneTitle"
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation/1658",
+          "status": 404,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/moderation/1658",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "admin.reviewGoneTitle"
+        }
+      }
+    },
+    "admin-rejecting": {
+      "title": "Admin áttekintés — elutasítás indoklással",
+      "account": "A",
+      "route": "/admin",
+      "height": 874,
+      "reach": "seed",
+      "why": "the first submission open, Elutasítás pressed and a reason typed (the seed's real rejection text): the reason field with the author-facing hint, Elutasítás in danger now enabled, Mégse; nothing is sent",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Kötélhúzás"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.reject"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "admin.reason"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "admin.reason"
+            },
+            "text": "A leírás nem elég részletes, és nincs kép a kiindulási helyzetről."
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.reject"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "scroll": {
+            "role": "button",
+            "name": {
+              "key": "common.cancel"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.cancel"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.reject"
+        },
+        "disabled": false
+      }
+    },
+    "admin-approved": {
+      "title": "Admin áttekintés — jóváhagyás után",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "fixture",
+      "why": "Jóváhagyás on the first submission: the POST is answered 200 by a stub; the re-read queue no longer holds the row and the stats say 2 waiting - nothing stays open, the hint is back",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Kötélhúzás"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          },
+          "arrived": {
+            "absent": {
+              "role": "button",
+              "name": {
+                "re": "^Demó – Kötélhúzás"
+              }
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/moderation/1658",
+          "whenBody": {
+            "decision": "approve"
+          },
+          "status": 204,
+          "label": "decided"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "after": "decided",
+          "edits": [
+            {
+              "pointer": "/queue/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "after": "decided",
+          "edits": [
+            {
+              "pointer": "/moderation/pending",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "absent": {
+          "role": "button",
+          "name": {
+            "re": "^Demó – Kötélhúzás"
+          }
+        }
+      }
+    },
+    "admin-rejected": {
+      "title": "Admin áttekintés — elutasítás után",
+      "account": "A",
+      "route": "/admin",
+      "height": 1138,
+      "reach": "fixture",
+      "why": "the reject path to its end: reason typed, Elutasítás pressed, the POST answered 200 by a stub (matched on decision reject); the row leaves the list",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Kötélhúzás"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.reject"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "admin.reason"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "admin.reason"
+            },
+            "text": "A leírás nem elég részletes, és nincs kép a kiindulási helyzetről."
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.reject"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.reject"
+            }
+          },
+          "arrived": {
+            "absent": {
+              "role": "button",
+              "name": {
+                "re": "^Demó – Kötélhúzás"
+              }
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/admin/moderation/1658",
+          "whenBody": {
+            "decision": "reject"
+          },
+          "status": 204,
+          "label": "decided"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "after": "decided",
+          "edits": [
+            {
+              "pointer": "/queue/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "after": "decided",
+          "edits": [
+            {
+              "pointer": "/moderation/pending",
+              "value": 2
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "absent": {
+          "role": "button",
+          "name": {
+            "re": "^Demó – Kötélhúzás"
+          }
+        }
+      }
+    },
+    "admin-accounts-recorded": {
+      "title": "Fiókok — a felvett lista (24 sor, oldalkorlát)",
+      "account": "A",
+      "route": "/admin",
+      "height": 2200,
+      "reach": "seed",
+      "why": "the recorded first page: 24 accounts of 49 and a nextCursor, so the page-cap note stands under the list",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "adminUsers.moreMatches"
+        }
+      }
+    },
+    "admin-accounts-none": {
+      "title": "Fiókok — nincs találat",
+      "account": "A",
+      "route": "/admin",
+      "height": 874,
+      "reach": "seed",
+      "why": "a term that matches nobody: the left-aligned no-match state under the search line",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "type": {
+            "role": [
+              "searchbox",
+              "textbox"
+            ],
+            "name": {
+              "key": "adminUsers.search"
+            },
+            "text": "zzzzz"
+          },
+          "arrived": {
+            "text": {
+              "key": "adminUsers.noneTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "adminUsers.noneTitle"
+        }
+      }
+    },
+    "admin-accounts-by-role": {
+      "title": "Fiókok — szerepkör szerint rendezve",
+      "account": "A",
+      "route": "/admin",
+      "height": 1600,
+      "reach": "seed",
+      "why": "a tap on the Szerepkör key re-reads the list sorted by role (admin and coaches first); the read is made by the server",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Szerepkör"
+            }
+          },
+          "arrived": {
+            "text": "admin@tracker.local"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "admin@tracker.local"
+      }
+    },
+    "admin-marketplace-open": {
+      "title": "Piactér — nyitott bejelentések",
+      "account": "A",
+      "route": "/admin",
+      "height": 2000,
+      "reach": "seed",
+      "why": "the Piactér section with its status filter on Nyitott: the open reports with reason, reporters, date, subject, the live-post link, the note, the snapshot and Döntés",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Piactér"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.marketplace.status.open"
+        },
+        "pressed": true
+      }
+    },
+    "admin-marketplace-triaged": {
+      "title": "Piactér — vizsgált",
+      "account": "A",
+      "route": "/admin",
+      "height": 874,
+      "reach": "seed",
+      "why": "the Vizsgált filter",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Piactér"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.triaged"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.triaged"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.marketplace.status.triaged"
+        },
+        "pressed": true
+      }
+    },
+    "admin-marketplace-upheld": {
+      "title": "Piactér — helybenhagyott",
+      "account": "A",
+      "route": "/admin",
+      "height": 1100,
+      "reach": "seed",
+      "why": "a closed report: no snapshot, no Döntés",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Piactér"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.upheld"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.upheld"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.marketplace.status.upheld"
+        },
+        "pressed": true
+      }
+    },
+    "admin-marketplace-rejected": {
+      "title": "Piactér — elutasított",
+      "account": "A",
+      "route": "/admin",
+      "height": 1100,
+      "reach": "seed",
+      "why": "a closed report: no snapshot, no Döntés",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Piactér"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.rejected"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.status.rejected"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.marketplace.status.rejected"
+        },
+        "pressed": true
+      }
+    },
+    "admin-marketplace-decide": {
+      "title": "Piactér — döntés űrlap",
+      "account": "A",
+      "route": "/admin",
+      "height": 1400,
+      "reach": "seed",
+      "why": "Döntés on the first open report: the removal reason (with its hint) and the internal note, the uphold pill disabled until a reason is typed, Elutasítás, Mégse and the helper line; nothing is sent",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Piactér"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Piactér"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "admin.marketplace.decide"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "admin.marketplace.removalReason"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "admin.marketplace.removalReason"
+        }
+      }
+    },
+    "admin-w1280": {
+      "title": "Admin áttekintés — asztali (1280)",
+      "account": "A",
+      "route": "/admin",
+      "width": 1280,
+      "height": 1200,
+      "reach": "fixture",
+      "why": "the desktop layout kept (R21): the rail beside the panel, the moderation list beside the review pane, with the second submission open",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Moderáció"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Moderáció"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Demó – Bolgár kitörés"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "admin.approve"
+            }
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue/0/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/1/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/queue/2/owner_email",
+              "value": "feher.tamas@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation/1657",
+          "edits": [
+            {
+              "pointer": "/exercise/owner_email",
+              "value": "szilagyi.reka@pelda.hu"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "admin.approve"
+        }
+      }
+    },
+    "admin-accounts-w1280": {
+      "title": "Fiókok — asztali (1280)",
+      "account": "A",
+      "route": "/admin",
+      "width": 1280,
+      "height": 1100,
+      "reach": "fixture",
+      "why": "the account list on the desktop column",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "re": "^Fiókok"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/users/total",
+              "value": 19
+            },
+            {
+              "pointer": "/users/coaches",
+              "value": 3
+            },
+            {
+              "pointer": "/users/admins",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/total",
+              "value": 1656
+            },
+            {
+              "pointer": "/media/total",
+              "value": 3
+            },
+            {
+              "pointer": "/sessions/active",
+              "value": 3
+            },
+            {
+              "pointer": "/audit/events_24h",
+              "value": 14
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/users",
+          "query": {
+            "sort": "created",
+            "dir": "desc"
+          },
+          "edits": [
+            {
+              "pointer": "/users/0/email",
+              "value": "lukacs.adam@pelda.hu"
+            },
+            {
+              "pointer": "/users/0/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/0/createdAt",
+              "value": 1787918400
+            },
+            {
+              "pointer": "/users/0/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/0/mustChange",
+              "value": 1
+            },
+            {
+              "pointer": "/users/0/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/1/email",
+              "value": "kiss.anna@pelda.hu"
+            },
+            {
+              "pointer": "/users/1/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/1/createdAt",
+              "value": 1786708800
+            },
+            {
+              "pointer": "/users/1/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/1/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/2/email",
+              "value": "takacs.daniel@pelda.hu"
+            },
+            {
+              "pointer": "/users/2/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/2/createdAt",
+              "value": 1783684800
+            },
+            {
+              "pointer": "/users/2/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/2/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/3/email",
+              "value": "molnar.zsolt@pelda.hu"
+            },
+            {
+              "pointer": "/users/3/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/3/createdAt",
+              "value": 1782129600
+            },
+            {
+              "pointer": "/users/3/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/3/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/4/email",
+              "value": "feher.tamas@pelda.hu"
+            },
+            {
+              "pointer": "/users/4/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/4/createdAt",
+              "value": 1780488000
+            },
+            {
+              "pointer": "/users/4/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/4/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/5/email",
+              "value": "toth.lilla@pelda.hu"
+            },
+            {
+              "pointer": "/users/5/role",
+              "value": "user"
+            },
+            {
+              "pointer": "/users/5/createdAt",
+              "value": 1779019200
+            },
+            {
+              "pointer": "/users/5/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/5/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/6/email",
+              "value": "szilagyi.reka@pelda.hu"
+            },
+            {
+              "pointer": "/users/6/role",
+              "value": "coach"
+            },
+            {
+              "pointer": "/users/6/createdAt",
+              "value": 1773316800
+            },
+            {
+              "pointer": "/users/6/clientCount",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/6/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/7/email",
+              "value": "kovacs.peter@pelda.hu"
+            },
+            {
+              "pointer": "/users/7/role",
+              "value": "admin"
+            },
+            {
+              "pointer": "/users/7/createdAt",
+              "value": 1768478400
+            },
+            {
+              "pointer": "/users/7/clientCount",
+              "value": 6
+            },
+            {
+              "pointer": "/users/7/mustChange",
+              "value": 0
+            },
+            {
+              "pointer": "/users/7/disabledAt",
+              "value": null
+            },
+            {
+              "pointer": "/users/23",
+              "remove": true
+            },
+            {
+              "pointer": "/users/22",
+              "remove": true
+            },
+            {
+              "pointer": "/users/21",
+              "remove": true
+            },
+            {
+              "pointer": "/users/20",
+              "remove": true
+            },
+            {
+              "pointer": "/users/19",
+              "remove": true
+            },
+            {
+              "pointer": "/users/18",
+              "remove": true
+            },
+            {
+              "pointer": "/users/17",
+              "remove": true
+            },
+            {
+              "pointer": "/users/16",
+              "remove": true
+            },
+            {
+              "pointer": "/users/15",
+              "remove": true
+            },
+            {
+              "pointer": "/users/14",
+              "remove": true
+            },
+            {
+              "pointer": "/users/13",
+              "remove": true
+            },
+            {
+              "pointer": "/users/12",
+              "remove": true
+            },
+            {
+              "pointer": "/users/11",
+              "remove": true
+            },
+            {
+              "pointer": "/users/10",
+              "remove": true
+            },
+            {
+              "pointer": "/users/9",
+              "remove": true
+            },
+            {
+              "pointer": "/users/8",
+              "remove": true
+            },
+            {
+              "pointer": "/nextCursor",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "re": "^Fiókok"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  },
+  "notCapturable": {
+    "loading (figures, queue, review, accounts, reports)": "a replay answers at once, so a skeleton is never on screen when the page settles; each is built from the kit (Skeleton blocks at the text lines) and read in the source; verdict structure",
+    "offline": "nothing of its own on this screen (the shell strip, F13); decisions fail silently as today"
+  }
+}

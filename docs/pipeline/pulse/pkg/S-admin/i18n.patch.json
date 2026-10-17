@@ -1,0 +1,81 @@
+{
+  "package": "S-admin",
+  "base": "82e10dbce0f696aecfe586038a4badfe84a17554",
+  "namespaces": [
+    "admin",
+    "adminUsers"
+  ],
+  "set": [],
+  "change": [],
+  "remove": [
+    {
+      "key": "adminMetrics.title",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.window",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.loggedPeople",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.loggedPeopleSub",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.signups",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.activeCoaches",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.activeCoachesSub",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.coinVelocity",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.coinVelocitySub",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.completedWorkouts",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.cardHint",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.clock.local_date",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.clock.utc",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "adminMetrics.notEnough",
+      "reason": "AdminMetrics.tsx was imported nowhere and is deleted by S-admin (work-packages.json notes); it was the only reader of this key"
+    },
+    {
+      "key": "admin.exercises",
+      "reason": "no reader: the old exercise tile label; admin-1 names the figure with admin.unit.exercise (only a code comment mentioned it)"
+    },
+    {
+      "key": "admin.media",
+      "reason": "no reader: the old media tile label; admin-1 names the figure with admin.unit.media"
+    },
+    {
+      "key": "admin.section.overview",
+      "reason": "no reader: no overview section exists among accounts / moderation / marketplace (AdminShell reads admin.section.<key> for those three only)"
+    }
+  ],
+  "copyQuestions": []
+}

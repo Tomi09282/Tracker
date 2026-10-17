@@ -522,3 +522,43 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: six rows of the two real notification kinds, no tab lit.
 - What the app does: no product change. The recorded member inbox holds kinds no server code writes, so notifications-1 runs on a fixture with the frame's six rows (verdict matched-fixture, user@ = M); notifications-2 runs on demo.nagy.balazs (N, recorded empty list). The Kezdőlap tab is lit (Q6 = a, shell).
 - Status: closed — capture decision.
+
+## DEV-062 — S-admin: undrawn behaviour kept in Pulse forms
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md behaviour rows 1-4 and 6-11
+- Package: S-admin
+- The frames show: admin-1 (Moderáció, nothing open), admin-2 (a submission open), admin-3 (Fiókok) on a phone only.
+- What the app does: the section tabs become the kit's `Segmented layout="cells"` radiogroup (role change only; the Moderáció option is named "Moderáció 3"); from 1024 px the sections are a `RowStack` rail beside an unboxed review pane (R21); the refresh control shows the kit's busy dots; the reject flow (Indoklás field, Elutasítás disabled until a reason, Mégse, no confirm) is kept 1:1 as links; a stale submission is a warn `NoticeLine`; missing instructions a warn line; the review follows the frame's order; muscles use `RoleKey`, equipment the 48 pt still; accounts become two-line rows with mono sort labels (KLIENSEK static; kit request R-S-admin-01).
+- Status: closed — Pulse form of existing behaviour.
+
+## DEV-063 — S-admin: silent failures kept (approve, figures)
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md behaviour rows 5 and 12
+- Package: S-admin
+- The frames show: no failure state for Jóváhagyás or for the figures.
+- What the app does: as in the base, a failed approve shows nothing, and failed figures leave the hero, ledger, count and footer absent (the skeleton stands while the query client retries a 5xx twice). No copy exists for either.
+- Status: open — known gap, needs copy and a ruling.
+
+## DEV-064 — S-admin: Piactér reports stay expanded
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md behaviour row 13
+- Package: S-admin
+- The frames show: no Piactér tab (undrawn).
+- What the app does: the moderation grammar without a new tap — the status filter as a bleeding `ChipRow`, each report a ruled block with subject, reason, reporters, mono date, the live-page link, the note and the snapshot, then Döntés with two fields, the one lime pill and the Elutasítás / Mégse links. The prep's collapsed variant needed an owner yes that was not asked.
+- Status: open — owner ruling wanted: collapse the reports behind a row tap like Moderáció?
+
+## DEV-065 — S-admin: AdminMetrics and its keys removed
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md "Removed on purpose"
+- Package: S-admin
+- The frames show: no donut, summary tiles or section icons.
+- What the app does: `AdminMetrics.tsx` (imported nowhere) and its 14 `adminMetrics.*` keys, plus `admin.exercises`, `admin.media`, `admin.section.overview` (no reader) are removed through i18n.patch.json; the Gauge, tiles, CountUp and the section / status glyphs give way to the rolling `Numeral`, `SplitBar` + `SplitLegend`.
+- Status: closed — the frame wins.
+
+## DEV-066 — S-admin: frames captured on fixtures, admin-2 / -3 paired from taller captures
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md "Data that only fixtures reach", states.json, requests R-S-admin-02
+- Package: S-admin
+- The frames show: 19 users (15 / 3 / 1), 1656 exercises, 3 media, `@pelda.hu` owners, a barbell photo, a LETILTVA flag; admin-2 / -3 drawn already scrolled (switch at y 72).
+- What the app does: no product change. The frame states replay recordings edited to the frame's figures (verdict matched-fixture; the dev DB answers 49 / 45 / 3 / 1, 1660, 4). The LETILTVA flag is drawn by the code but no recording holds a disabled account; the submitted image is the seed's blank upload. admin-2 / -3 are paired from 404 pt taller states cut at y 403 until pulse-shot gets a scroll step (R-S-admin-02).
+- Status: open — tool request only.

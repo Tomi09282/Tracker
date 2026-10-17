@@ -1,0 +1,129 @@
+{
+  "id": "S-admin",
+  "branch": "pulse/S-admin",
+  "screen": "/admin (Admin áttekintés)",
+  "summary": "AdminPage, AdminShell, ModerationQueue, UserSearch and MarketplaceQueue are rewritten on the Pulse kit against admin-1 / -2 / -3; everything above the returns is kept (Stats, queries and keys, decide / resolve mutations, debounce, sort, useAgo, useWide now exported, the forbidden gate, the partition math, lazy section render). Composition as the body scripts: Screen top=push width=wide > ScreenHeader section (ADMINISZTRÁCIÓ, ÁTTEKINTÉS, the Stílus stúdió TextLink, the only door to /admin/styles) > StatBlock + giant Numeral roll + SplitLegend stack beside it + SplitBar (G-data) > LedgerRow with pair (GYAKORLAT / MÉDIAFÁJL) in RowStack open close > Segmented cells with the lime count (rail of ListRows from 1024 up, R21) > the section > the liveness footer under a strong Rule with its figures in ink. Moderation: closed ListRows (name, e-mail, mono age · media, chevron), the open block between strong rules (display-face head with chevron up, UserPhoto at judging size, description, RoleKey, equipment stills, numbered steps, the one lime Jóváhagyás pill + Elutasítás link, the reject form). Accounts: SectionHeader, SearchField, mono sort keys, two-line ListRows. Piactér in the same grammar. AdminMetrics.tsx deleted with its 14 keys; budget 120 -> 0, deleted.",
+  "frames": {
+    "admin-1": {
+      "verdict": "matched-fixture",
+      "reason": "figures and owners are the frame data replayed from edited recordings (live: 49 users, 1660 exercises, other owners). Geometry: 74 compared, 61 matched, 13 deviating width-only (fill-width frame text boxes vs hugging runs; dy within 1 pt), 2 style notes = the two sentences whose figures are inked in text-1 and words in text-2 exactly as the frame segments (the comparator reads one colour per node), 0 unmatched.",
+      "capture": ".pulse/shots/S-admin/admin-1.png",
+      "pair": ".pulse/pairs/S-admin/admin-1.pair.png",
+      "overview": ".pulse/pairs/S-admin/admin-1.overview.png",
+      "geometry": ".pulse/pairs/S-admin/admin-1.geometry.json"
+    },
+    "admin-2": {
+      "verdict": "matched-fixture",
+      "reason": "frame data replayed (the second submission opened, override of _subcheck wrongItem). The frame is drawn scrolled 404 pt; the frame-height capture cannot scroll, so the probe reports every node 403-405 pt lower (R-S-admin-02). With that offset removed all text nodes are within 1 pt (residual dy -0.2 .. -0.8); the pair is cut from admin-2-tall at y 403. The submitted image is the seed blank upload (frame: barbell photo). Unmatched = rules / dots / glyphs the probe pairs by box (all visible in the pair).",
+      "capture": ".pulse/shots/S-admin/admin-2-tall.png",
+      "pair": ".pulse/pairs/S-admin/admin-2.pair.png",
+      "zoom": [
+        ".pulse/pairs/S-admin/admin-2.zoom-head.pair.png",
+        ".pulse/pairs/S-admin/admin-2.zoom-steps.pair.png"
+      ],
+      "overview": ".pulse/pairs/S-admin/admin-2.overview.png",
+      "geometry": ".pulse/pairs/S-admin/admin-2.geometry.json"
+    },
+    "admin-3": {
+      "verdict": "matched-fixture",
+      "reason": "frame data replayed (eight @pelda.hu accounts). Same scroll offset as admin-2 (R-S-admin-02); residual dy within 1 pt (the admin row 1.8). The illustrative letiltva flag of molnar.zsolt is not set: no recording holds a disabled account (schema-check ruling), so that one flag is absent in the pair; the code draws it. Style notes Fiókok / Placeholder are probe mis-pairings (the switch word, the visually hidden field label).",
+      "capture": ".pulse/shots/S-admin/admin-3-tall.png",
+      "pair": ".pulse/pairs/S-admin/admin-3.pair.png",
+      "overview": ".pulse/pairs/S-admin/admin-3.overview.png",
+      "geometry": ".pulse/pairs/S-admin/admin-3.geometry.json"
+    }
+  },
+  "extraStates": {
+    "admin-recorded": {
+      "verdict": "structure",
+      "note": "live recording (49 users): the same layout with the real figures"
+    },
+    "admin-forbidden": {
+      "verdict": "structure",
+      "note": "user@: EmptyState h1, no icon"
+    },
+    "admin-figures-failed": {
+      "verdict": "structure",
+      "note": "stats 500: the skeleton stands during the client retries, then the figures are absent (as base)"
+    },
+    "admin-moderation-empty": {
+      "verdict": "structure",
+      "note": "EmptyState, no count on head or switch"
+    },
+    "admin-review-stale": {
+      "verdict": "structure",
+      "note": "NoticeLine warn in the open block"
+    },
+    "admin-rejecting": {
+      "verdict": "structure",
+      "note": "reason Field + danger / quiet links, stops before the POST"
+    },
+    "admin-approved": {
+      "verdict": "matched-fixture",
+      "note": "POST stubbed, the row gone, count 2"
+    },
+    "admin-rejected": {
+      "verdict": "matched-fixture",
+      "note": "POST stubbed, the row gone, count 2"
+    },
+    "admin-accounts-recorded": {
+      "verdict": "structure",
+      "note": "24 rows + the cap note"
+    },
+    "admin-accounts-none": {
+      "verdict": "structure",
+      "note": "Nincs találat"
+    },
+    "admin-accounts-by-role": {
+      "verdict": "structure",
+      "note": "role sort, the user-cog glyph on the admin row"
+    },
+    "admin-marketplace-open": {
+      "verdict": "structure",
+      "note": "undrawn tab"
+    },
+    "admin-marketplace-triaged": {
+      "verdict": "structure",
+      "note": "empty state"
+    },
+    "admin-marketplace-upheld": {
+      "verdict": "structure",
+      "note": "closed report, no decide"
+    },
+    "admin-marketplace-rejected": {
+      "verdict": "structure",
+      "note": "closed report, no decide"
+    },
+    "admin-marketplace-decide": {
+      "verdict": "structure",
+      "note": "the decide form, no POST"
+    },
+    "admin-w1280": {
+      "verdict": "structure",
+      "note": "desktop rail + two panes (R21)"
+    },
+    "admin-accounts-w1280": {
+      "verdict": "structure",
+      "note": "desktop accounts"
+    }
+  },
+  "probes": "every captured state at 402 and 360: fonts loaded, pills <= 1 (the approve or the uphold pill), boxed surfaces 0, no overflow, targets >= 44, focus walk passes (5-18 stops). Geometry fails only for the reasons per frame.",
+  "budget": {
+    "before": 120,
+    "after": 0,
+    "file": "deleted by check-pulse --fix-down S-admin"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-admin/i18n.patch.json (remove the 14 adminMetrics.* keys + admin.exercises, admin.media, admin.section.overview)",
+    "docs/pipeline/pulse/pkg/S-admin/deviations.md (for docs/pipeline/pulse/deviations.md)",
+    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-01.json (SortKeys)",
+    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-02.json (capture scroll step)"
+  ],
+  "requests": [
+    "R-S-admin-01",
+    "R-S-admin-02"
+  ],
+  "proposedCopy": [],
+  "liveWrites": "none: approve / reject / resolve were never fired live; their outcomes are fixtures",
+  "lastGreenBuild": "pulse-verify --package S-admin --port 5184 after pulse-sync onto pulse-redesign (merge dc67271): build green, 23 of 23 captured (replay); --width 360 --focus-walk 23 of 23, all probes pass"
+}

@@ -147,8 +147,6 @@
     "eyebrow": "Verwaltung",
     "title": "Übersicht",
     "users": "Nutzer",
-    "exercises": "Übungen",
-    "media": "Mediendateien",
     "moderation": "Moderationswarteschlange",
     "pendingCount": "{{count}} warten",
     "queueEmptyTitle": "Nichts zu moderieren",
@@ -197,7 +195,6 @@
     "styleStudio": "Stil-Studio",
     "sections": "Bereiche",
     "section": {
-      "overview": "Überblick",
       "accounts": "Konten",
       "moderation": "Moderation",
       "marketplace": "Marktplatz"
@@ -956,24 +953,6 @@
     "loadFailedBody": "Der Server hat nicht geantwortet. Lade die Seite neu.",
     "variants": "Varianten",
     "commitNote": "Was du hier wählst, gilt beim nächsten Laden für alle Nutzer — ohne Codeänderung und ohne Deployment."
-  },
-  "adminMetrics": {
-    "title": "Kennzahlen",
-    "window": "letzte {{days}} Tage",
-    "loggedPeople": "Personen mit Eintrag",
-    "loggedPeopleSub": "heute: {{today}}",
-    "signups": "Registrierungen",
-    "activeCoaches": "Aktive Coaches",
-    "activeCoachesSub": "{{withRole}} mit Coach-Rolle",
-    "coinVelocity": "Münzbewegung",
-    "coinVelocitySub": "bewegte Einheiten, ohne Vorzeichen",
-    "completedWorkouts": "Abgeschlossene Workouts",
-    "cardHint": "Der Wert bezieht sich auf den gewählten Zeitraum.",
-    "clock": {
-      "local_date": "eigener Tag",
-      "utc": "UTC"
-    },
-    "notEnough": "Noch zu wenig Daten für ein Diagramm ({{count}} Tag(e)). Drei Tage Messwerte sind nötig."
   },
   "adminUsers": {
     "title": "Konten",

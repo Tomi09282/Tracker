@@ -147,8 +147,6 @@
     "eyebrow": "Administration",
     "title": "Overview",
     "users": "Users",
-    "exercises": "Exercises",
-    "media": "Media files",
     "moderation": "Moderation queue",
     "pendingCount": "{{count}} waiting",
     "queueEmptyTitle": "Nothing to moderate",
@@ -197,7 +195,6 @@
     "styleStudio": "Style studio",
     "sections": "Sections",
     "section": {
-      "overview": "Overview",
       "accounts": "Accounts",
       "moderation": "Moderation",
       "marketplace": "Marketplace"
@@ -956,24 +953,6 @@
     "loadFailedBody": "The server did not answer. Reload the page.",
     "variants": "Variants",
     "commitNote": "What you pick here applies to every user on their next load — no code change, no redeploy."
-  },
-  "adminMetrics": {
-    "title": "Metrics",
-    "window": "last {{days}} days",
-    "loggedPeople": "People who logged",
-    "loggedPeopleSub": "today: {{today}}",
-    "signups": "Signups",
-    "activeCoaches": "Active coaches",
-    "activeCoachesSub": "{{withRole}} hold the coach role",
-    "coinVelocity": "Coin movement",
-    "coinVelocitySub": "units moved, sign dropped",
-    "completedWorkouts": "Completed workouts",
-    "cardHint": "The figure covers the selected window.",
-    "clock": {
-      "local_date": "user's own day",
-      "utc": "UTC"
-    },
-    "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three days of measurements are needed."
   },
   "adminUsers": {
     "title": "Accounts",

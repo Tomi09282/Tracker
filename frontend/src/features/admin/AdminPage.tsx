@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router';
-import { Users, Dumbbell, Image, ShieldCheck, Palette, Globe, RefreshCw } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { ChevronRight, Palette, RefreshCw } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
-import { CountUp } from '../../ui/feedback/CountUp';
-import { Gauge } from '../../ui/feedback/Gauge';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { Surface } from '../../ui/primitives/Surface';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { SummaryTile } from '../../ui/data/SummaryTile';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { StatBlock } from '../../ui/data/StatBlock';
+import { Numeral } from '../../ui/data/Numeral';
+import { SplitBar, SplitLegend, type SplitPart } from '../../ui/data/SplitBar';
+import { LedgerRow } from '../../ui/data/LedgerRow';
+import { RowStack } from '../../ui/data/RowStack';
+import { SectionHeader } from '../../ui/data/SectionHeader';
+import { Rule } from '../../ui/data/Rule';
 import { useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
 import { ModerationQueue } from './ModerationQueue';
@@ -29,94 +33,102 @@ interface Stats {
 }
 
 /**
- * ═══ THE ARCS PARTITION BY ROLE, AND THAT IS THE WHOLE POINT ═══════════════════════════════════
+ * A translated sentence with some of its figures in ink.
  *
- * A donut claims its arcs add up to the hole. The obvious three — members, coaches, new this week —
- * do not: `users.new_7d` counts everyone who registered in the last seven days, so a coach who
- * signed up on Tuesday is in TWO of them, and `total − coaches − new` would silently redefine
- * "coaches" as "coaches who did not join this week".
- *
- * `role` is one column on `users` — the server counts `SUM(role = 'coach')` and `SUM(role =
- * 'admin')` off it — so member / coach / admin are disjoint by construction and sum to the total
- * exactly. That is a partition the picture can honestly make, and it is also the one an admin
- * actually reads: who is on the platform, in what capacity.
- *
- * `new_7d` is a rate, not a slice, and a rate belongs on a trend, not in a ring.
+ * The figures are interpolated as markers and the sentence is cut around them, so the words stay
+ * the bundle's (in every language, in its own order) and only the figures change colour — "3
+ * várakozik", "3 aktív munkamenet · 14 naplóesemény az elmúlt 24 órában" (admin-1: the counts in
+ * ink, the words in text-2; the "24" of the sentence is a word, not a figure).
  */
-const ARC_COLOR = ['var(--accent)', 'var(--text-2)', 'var(--text-3)'] as const;
+function inked(sentence: (marks: Record<string, string>) => string, figures: Record<string, string>): ReactNode[] {
+  const names = Object.keys(figures);
+  const marks = Object.fromEntries(names.map((name, i) => [name, `\u0001${i}\u0001`]));
+  return sentence(marks)
+    .split(/\u0001(\d+)\u0001/)
+    .map((part, i) =>
+      i % 2 === 1 ? (
+        <span key={i} className="text-text-1">
+          {figures[names[Number(part)]]}
+        </span>
+      ) : (
+        part
+      ),
+    );
+}
 
-function UserDonut({ users }: { users: Stats['users'] }) {
-  const { t, i18n } = useTranslation();
-
+/**
+ * ═══ THE PARTS PARTITION BY ROLE, AND THAT IS THE WHOLE POINT ══════════════════════════════════
+ *
+ * A split claims its parts add up to the whole. The obvious three — members, coaches, new this week
+ * — do not: `users.new_7d` counts everyone who registered in the last seven days, so a coach who
+ * signed up on Tuesday is in TWO of them. `role` is one column on `users`, so member / coach / admin
+ * are disjoint by construction and sum to the total exactly.
+ *
+ * admin-1: the giant total under its eyebrow, the three-line legend beside it (first cap line on the
+ * numeral's top, last baseline on its baseline), and the proportional bar 20 under the numeral in
+ * three ink steps — roles are categories, never lime. From five digits the numeral needs the width,
+ * so the legend drops under the bar (`admin-1.body.js`).
+ */
+function UserSplit({ users }: { users: Stats['users'] }) {
+  const { t } = useTranslation();
   const members = Math.max(0, users.total - users.coaches - users.admins);
-  /* The legend names POPULATIONS, in the plural — `Tagok`, `Edzők`, `Adminok`, as the mockup
-     writes them. It borrowed `adminUsers.role.*`, which is the admin TABLE's vocabulary: those
-     are the singular values of one row's role column, and `Felhasználó` beside 1 147 read as a
-     label for a single person. It is also the wrong word for this arc — coaches and admins are
-     users too; the slice is the members. */
-  const slices = [
-    { key: 'user', label: t('admin.legend.members'), count: members, color: ARC_COLOR[0] },
-    { key: 'coach', label: t('admin.legend.coaches'), count: users.coaches, color: ARC_COLOR[1] },
-    { key: 'admin', label: t('admin.legend.admins'), count: users.admins, color: ARC_COLOR[2] },
+  // The legend names POPULATIONS (`Tagok`, `Edzők`, `Adminok`); the eyebrow names the unit the
+  // figure counts (`Felhasználó`), not the plural table label `admin.users`.
+  const parts: SplitPart[] = [
+    { label: t('admin.legend.members'), count: members },
+    { label: t('admin.legend.coaches'), count: users.coaches },
+    { label: t('admin.legend.admins'), count: users.admins },
   ];
+  const long = String(users.total).length >= 5;
+  const figure = (
+    <StatBlock label={t('admin.unit.user')}>
+      <Numeral size="giant" value={users.total} mode="roll" from={0} />
+    </StatBlock>
+  );
 
   return (
-    <Surface as="section" className="flex flex-col items-center gap-group">
-      <Gauge
-        className="aspect-square w-full max-w-72"
-        label={t('admin.users')}
-        thickness={0.14}
-        /* A CLOSED track, unlike every other gauge in the app. The open bottom exists so a single
-           near-full arc does not read as a plain circle outline; here three coloured arcs already
-           say "donut", and a hole at six o'clock would take a slice out of a total that is
-           supposed to be whole.
-           This governs only the ZERO-SEGMENT fallback track: with segments, `Gauge` takes its
-           donut branch and carves an even seam out of each arc's own end, which is the separation
-           the design asks for between adjacent slices. */
-        gap={0}
-        segments={
-          users.total > 0
-            ? slices.map((s) => ({ value: s.count / users.total, color: s.color, label: s.label }))
-            : []
-        }
-      >
-        <span className="flex flex-col items-center">
-          <span className="text-display-legacy font-display tabular-nums text-text-1">
-            <CountUp to={users.total} />
-          </span>
-          {/* SINGULAR — `Felhasználó`, the unit the figure above counts, not the plural table
-              label `admin.users` carries. It reads as the caption of a number, which is what it
-              is; the plural key still names the accounts panel and the Gauge's own description. */}
-          <span className="text-body-s text-text-2">{t('admin.unit.user')}</span>
-        </span>
-      </Gauge>
+    <div className="flex flex-col gap-5">
+      {long ? (
+        figure
+      ) : (
+        <div className="flex items-start justify-between gap-6">
+          {figure}
+          <SplitLegend layout="stack" parts={parts} keepZero label={t('admin.users')} className="mt-6 -mb-1 w-30 self-stretch" />
+        </div>
+      )}
+      {users.total > 0 ? <SplitBar legend={long ? 'grid' : 'none'} parts={parts} label={t('admin.users')} /> : null}
+    </div>
+  );
+}
 
-      <ul className="flex flex-wrap items-center justify-center gap-group">
-        {slices.map((s) => (
-          <li key={s.key} className="text-caption flex items-center gap-tight text-text-2">
-            <span aria-hidden className="size-2 shrink-0 rounded-chip" style={{ backgroundColor: s.color }} />
-            {s.label}
-            {/* Grouped like every other figure on the screen. `CountUp` in the hole prints
-                `1 248` through the app's language; a raw `{count}` beside it printed `1147`, so
-                the total and its own parts disagreed about how a thousand is written. */}
-            <span className="tabular-nums text-text-1">{s.count.toLocaleString(i18n.language)}</span>
-          </li>
-        ))}
-      </ul>
-    </Surface>
+/** Where the figures will stand while `/admin/stats` loads: eyebrow, the giant's cap, the bar, the ledger line. */
+function FiguresSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <div role="status" className="flex flex-col gap-8">
+      <span className="sr-only">{t('common.loading')}</span>
+      <div aria-hidden className="flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-25 w-24" />
+        </div>
+        <Skeleton className="h-1.5 w-full" />
+      </div>
+      <Skeleton className="h-19 w-full" />
+    </div>
   );
 }
 
 /**
- * The moderation panel's own header — an icon tile, the heading with its waiting count under it,
- * and the refresh control.
+ * The moderation panel's head: the eyebrow, and ONE trailing node — the waiting count (mono, the
+ * figure in ink) with the refresh glyph after it.
  *
- * ═══ WHY THE REFRESH BUTTON IS NEW ═════════════════════════════════════════════════════════════
+ * ═══ WHY THE REFRESH BUTTON EXISTS ═════════════════════════════════════════════════════════════
  *
  * The queue only ever refetched as a side effect of a decision. So the one state that is REACHED by
  * doing nothing — somebody else decided a submission while this list sat on screen, and opening it
- * now 404s — had no way out except a full page reload. `admin.reviewGoneBody` literally instructs
- * the admin to "refresh the list", and until now there was nothing to press.
+ * now 404s — had no way out except a full page reload. `admin.reviewGoneBody` tells the admin to
+ * "refresh the list"; this is what they press.
  */
 function ModerationHeader({ pending }: { pending?: number }) {
   const { t } = useTranslation();
@@ -124,58 +136,40 @@ function ModerationHeader({ pending }: { pending?: number }) {
   const fetching = useIsFetching({ queryKey: ['admin', 'moderation'] }) > 0;
 
   return (
-    <div className="flex items-center gap-tight">
-      <span
-        aria-hidden
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-      >
-        <ShieldCheck className="size-icon-m" strokeWidth={2} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <h2 className="text-title-3 text-text-1">{t('admin.moderation')}</h2>
-        {/* A count, and only when there IS one — never a grey zero, which reads both as an empty
-            queue and as a badge that is broken. */}
-        {pending ? (
-          <p className="text-caption tabular-nums text-text-3">
-            {t('admin.pendingCount', { count: pending })}
-          </p>
-        ) : null}
-      </div>
-      <Pressable
-        shape="icon"
-        variant="secondary"
-        /* Its own key. `common.retry` — "Újra" — was a stand-in, and it is the ONLY name a
-           screen-reader user gets for this button: "Újra" beside a heading says try what again. */
-        aria-label={t('admin.refreshQueue')}
-        busy={fetching}
-        onClick={() => void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] })}
-      >
-        <RefreshCw
-          className={cn('size-icon-m', fetching && 'animate-spin motion-reduce:animate-none')}
-          strokeWidth={2}
-          aria-hidden
-        />
-      </Pressable>
-    </div>
+    <SectionHeader
+      rule={false}
+      title={t('admin.moderation')}
+      trailing={
+        <span className="inline-flex items-center gap-1">
+          {/* A count only when there IS one — never a grey zero. */}
+          {pending ? (
+            <span className="text-data text-text-2">
+              {inked((m) => t('admin.pendingCount', { count: pending, replace: { count: m.count } }), { count: String(pending) })}
+            </span>
+          ) : null}
+          <Pressable
+            variant="link"
+            shape="icon"
+            aria-label={t('admin.refreshQueue')}
+            busy={fetching}
+            className="-me-3"
+            onClick={() => void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] })}
+          >
+            <RefreshCw aria-hidden />
+          </Pressable>
+        </span>
+      }
+    />
   );
 }
 
 /**
  * Admin — the platform's landing screen for the one role that can change it.
  *
- * ═══ FOUR STAT CARDS BECAME A DONUT AND TWO TILES ══════════════════════════════════════════════
- *
- * `FELHASZNÁLÓK`, `GYAKORLATOK`, `FORDÍTÁSOK`, `MÉDIAFÁJLOK` were four identical label-number-subline
- * cards in a grid — four unrelated facts, read left to right, none of them the reason anybody opened
- * this page. The user count is the one number an admin looks at twice, and what it is made of is the
- * actual question, so it became the anchor. Translation row counts were cut outright: they change
- * when somebody runs an import, which is not a thing anyone monitors.
- *
- * ═══ AND `Moderáció` IS THE SECTION THAT OPENS ═════════════════════════════════════════════════
- *
- * The badge on that pill is the only element on the screen that means "someone is waiting". The
- * overview panel that used to open by default held four more stat cards and four trend charts — a
- * metrics view, which an admin arriving to clear a queue scrolled straight past.
+ * admin-1: the category header with the one door to the style studio on its eyebrow row; the user
+ * split as the hero; the exercise and media counts on one ledger line; the section switch; the open
+ * section; the liveness footer under a strong rule. Nothing is enclosed. `Moderáció` is the section
+ * that opens: its count is the only element on the screen that means "someone is waiting".
  */
 export function AdminPage() {
   const { t } = useTranslation();
@@ -194,109 +188,68 @@ export function AdminPage() {
   // a screen full of failed requests.
   if (user && user.role !== 'admin') {
     return (
-      <div className="col-wide screen-x py-6">
-        {/* `heading="h1"` because this IS the page for a non-admin — the whole route renders
-            nothing else, and a page with no `h1` is one a screen-reader user cannot navigate
-            into. Found by the Phase 1 E2E walk at 360 px, same defect class as /workout. */}
-        <EmptyState
-          icon={ShieldCheck}
-          title={t('admin.forbiddenTitle')}
-          body={t('admin.forbiddenBody')}
-          heading="h1"
-        />
-      </div>
+      <Screen top="root">
+        {/* `heading="h1"`: this IS the page for a non-admin, and a page with no `h1` is one a
+            screen-reader user cannot navigate into. */}
+        <EmptyState heading="h1" title={t('admin.forbiddenTitle')} body={t('admin.forbiddenBody')} />
+      </Screen>
     );
   }
 
   return (
-    <div className="col-wide screen-x flex flex-col gap-section py-6">
-      <header className="flex flex-wrap items-center justify-between gap-group">
-        <div className="min-w-0">
-          <p className="text-micro-legacy uppercase text-accent">{t('admin.eyebrow')}</p>
-          <h1 className="text-title-1 mt-1 text-text-1">{t('admin.title')}</h1>
-        </div>
-        {/* A real anchor, not a button that navigates: the studio is a page, and a page you can
-            open in a new tab or middle-click is a page. */}
-        <Link
-          to="/admin/styles"
-          className="text-body-s flex min-h-[var(--target-min)] items-center gap-2 text-accent"
-        >
-          <Palette className="size-icon-s" aria-hidden />
-          {t('admin.styleStudio')}
-        </Link>
-      </header>
+    <Screen top="push" width="wide">
+      <ScreenHeader
+        kind="section"
+        eyebrow={t('admin.eyebrow')}
+        title={t('admin.title')}
+        trailing={
+          // A real anchor, and the only door to the studio.
+          // `-me-1.25`: the chevron's 16 pt box ends 5 past the gutter, so its INK ends on it (admin-1).
+          <TextLink to="/admin/styles" lead={<Palette />} trail={<ChevronRight />} className="-me-1.25">
+            {t('admin.styleStudio')}
+          </TextLink>
+        }
+      />
 
       {stats.isPending ? (
-        // The skeletons carry the NEW geometry — a donut-proportioned card and two tile-proportioned
-        // ones. A placeholder at the old four-across grid would move the whole page on swap, which
-        // is the exact shift a skeleton exists to prevent.
-        <div className="flex flex-col gap-section">
-          <Skeleton className="h-88 w-full rounded-card" />
-          <div className="grid grid-cols-2 gap-group">
-            {/* 88px: card pad 16×2 + the figure/caption column (32 + 8 + 16). `layout="row"` puts
-                the 44px puck beside that column rather than above it, so the tile is a row shorter
-                than the 144 this placeholder used to reserve. */}
-            <Skeleton className="h-22 rounded-card" />
-            <Skeleton className="h-22 rounded-card" />
-          </div>
-        </div>
+        <FiguresSkeleton />
       ) : stats.data ? (
-        <div className="flex flex-col gap-section">
-          <UserDonut users={stats.data.users} />
-          {/* Puck beside the figure, as 11-admin-attekintes.webp draws them — the donut above is the
-              screen's one centred object and these two are its footnotes, not two more of it.
-              Captions stay sentence case AND SINGULAR (`Gyakorlat`, `Médiafájl`): that mockup
-              writes them that way, and unlike the coach tiles they name the unit the figure
-              counts, not a metric. The plural `admin.exercises` / `admin.media` are the panels'
-              table labels and stay theirs. */}
-          <div className="grid grid-cols-2 gap-group">
-            <SummaryTile
-              icon={Dumbbell}
-              layout="row"
+        <>
+          <UserSplit users={stats.data.users} />
+          {/* Two counts on one ledger line, not tappable: what the library and the uploads hold. */}
+          <RowStack open close>
+            <LedgerRow
+              label={t('admin.unit.exercise')}
               value={stats.data.exercises.total}
-              caption={t('admin.unit.exercise')}
+              pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
             />
-            <SummaryTile
-              icon={Image}
-              layout="row"
-              value={stats.data.media.total}
-              caption={t('admin.unit.media')}
-            />
-          </div>
-        </div>
+          </RowStack>
+        </>
       ) : null}
 
       {/*
-        Three sections behind a pill row rather than three stacked on one page.
-
-        Stacked, an admin arriving to answer "is this account disabled" scrolled past a moderation
-        table and a marketplace queue to reach the search box — and every one of those fetched on
-        arrival. Behind the row, the section that is not open does not render, so it does not fetch
-        either: `render` is a function for that reason, not a node.
+        Three sections behind one switch rather than three stacked on one page. The section that is
+        not open does not render, so it does not fetch either: `render` is a function for that reason.
       */}
       <AdminShell
         sections={[
           {
             key: 'accounts',
-            icon: Users,
             render: () => <UserSearch enabled={user?.role === 'admin'} />,
           },
           {
             key: 'moderation',
-            icon: ShieldCheck,
-            badge: stats.data?.moderation.pending || undefined,
+            count: stats.data?.moderation.pending,
             render: () => (
-              <section className="flex flex-col gap-group">
+              <div className="flex flex-col gap-4">
                 <ModerationHeader pending={stats.data?.moderation.pending} />
-                {/* The queue AND the decision live here now. They used to be a table in this file
-                    whose row carried Approve — see the header comment in ModerationQueue. */}
+                {/* The queue AND the decision live here. See the header comment in ModerationQueue. */}
                 <ModerationQueue />
-              </section>
+              </div>
             ),
           },
           {
             key: 'marketplace',
-            icon: Globe,
             render: () => <MarketplaceQueue />,
           },
         ]}
@@ -305,14 +258,19 @@ export function AdminPage() {
       />
 
       {stats.data ? (
-        // Below the fold, and kept: the cheapest liveness signal on the screen.
-        <p className="text-caption text-text-3">
-          {t('admin.footer', {
-            sessions: stats.data.sessions.active,
-            events: stats.data.audit.events_24h,
-          })}
-        </p>
+        // The last block, and kept: the cheapest liveness signal on the screen.
+        <footer className="flex flex-col gap-4">
+          <Rule strong />
+          {/* 240 wide: the sentence breaks after its second figure's word, as admin-1 draws it
+              ("… · 14 naplóesemény" / "az elmúlt 24 órában"). */}
+          <p className="max-w-60 text-cap text-text-2">
+            {inked((m) => t('admin.footer', { sessions: m.sessions, events: m.events }), {
+              sessions: String(stats.data.sessions.active),
+              events: String(stats.data.audit.events_24h),
+            })}
+          </p>
+        </footer>
       ) : null}
-    </div>
+    </Screen>
   );
 }

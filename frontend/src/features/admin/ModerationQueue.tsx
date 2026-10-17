@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, X, ShieldCheck, ImageOff, Film } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
+import { equipmentStill } from '../../assets/pulse';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
-import { Surface } from '../../ui/primitives/Surface';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { SectionHeader } from '../../ui/data/SectionHeader';
+import { Numeral } from '../../ui/data/Numeral';
+import { RoleKey } from '../../ui/data/RoleKey';
+import { Pic } from '../../ui/media/Pic';
+import { UserPhoto } from '../../ui/media/UserPhoto';
 
 interface QueueItem {
   id: number;
@@ -30,8 +39,10 @@ interface Submission {
     owner_email: string | null;
     submitted_at: number;
   };
-  muscles: { slug: string; label: string; role: 'primary' | 'secondary' }[];
-  equipment: { slug: string; label: string }[];
+  // The server answers the localised word as `name` (`exercises/detail.js` labelJoin); `label` is
+  // what this type promised before and never received — read both, name first.
+  muscles: { slug: string; name?: string; label?: string; role: 'primary' | 'secondary' }[];
+  equipment: { slug: string; name?: string; label?: string }[];
   media: { id: number; storage_key: string; width: number | null; height: number | null }[];
 }
 
@@ -40,13 +51,12 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
- * "2 napja", "20 órája" — from `Intl`, not from the bundle.
+ * "3 nappal ezelőtt", "20 órával ezelőtt" — from `Intl`, not from the bundle.
  *
  * A relative timestamp is one of the few strings that does NOT want a translation key: CLDR already
- * carries the plural rules and the suffix for every locale the app ships, and three hand-written
- * keys per unit is three chances for a German plural to be wrong. `numeric: 'always'` on purpose —
- * `'auto'` renders "tegnap" for a one-day-old submission, which reads as a date rather than an age
- * when it sits in a column of ages.
+ * carries the plural rules and the suffix for every locale the app ships. `numeric: 'always'` on
+ * purpose — `'auto'` renders "tegnap" for a one-day-old submission, which reads as a date rather
+ * than an age when it sits in a column of ages.
  */
 function useAgo() {
   const { i18n } = useTranslation();
@@ -64,14 +74,14 @@ function useAgo() {
 }
 
 /**
- * Is there room for the two-pane split?
+ * Is there room for the two-pane split (and for the section rail of `AdminShell`)?
  *
  * A media query in JS rather than in CSS because this decides WHERE ONE SUBTREE LIVES, not how it
- * looks: below the breakpoint the review renders inside the selected row, above it in the panel
- * beside the list. Rendering both and hiding one with `lg:hidden` would put two copies of every
- * submitted image and two copies of the rejection field in the document.
+ * looks: below the breakpoint the review renders inside the open row, above it in the pane beside
+ * the list. Rendering both and hiding one would put two copies of every submitted image and two
+ * copies of the rejection field in the document.
  */
-function useWide() {
+export function useWide() {
   const query = '(min-width: 1024px)';
   const [wide, setWide] = useState(() =>
     typeof matchMedia === 'function' ? matchMedia(query).matches : false,
@@ -87,25 +97,23 @@ function useWide() {
   return wide;
 }
 
+const wordOf = (item: { name?: string; label?: string; slug: string }) => item.name ?? item.label ?? item.slug;
+
 /**
  * ═══ THE DECISION CONTROLS LIVE IN THE REVIEW, NOT IN THE ROW ══════════════════════════════════
  *
- * The lite queue put Approve and Reject in the table row, beside a name, an owner's email and a
- * media count. Approving publishes a movement into the shared library — every user in the product
- * can find it, and follow it under load — and the only thing the moderator had read was its name.
+ * Approving publishes a movement into the shared library — every user can find it and follow it
+ * under load. So the buttons do not exist until the review is open, and the review is what fetches
+ * the instructions, the muscles and the media: deciding without loading the submission is
+ * impossible, not discouraged.
  *
- * Keeping the buttons inside the review is not a nudge towards looking. It makes deciding without
- * loading the submission impossible: the buttons do not exist until the review is open, and the
- * review is what fetches the instructions, the muscles and the media. A warning would have been the
- * cheaper change and it would have been obeyed exactly as often as warnings are.
+ * ═══ ON A PHONE THE ROW OPENS IN PLACE (admin-2) ═══════════════════════════════════════════════
  *
- * ═══ WHICH IS WHY SELECTING A ROW EXPANDS IT, RATHER THAN ARMING IT ════════════════════════════
- *
- * The phone layout has no room for a panel beside the list, and the obvious phone shape — a row
- * that reveals Approve and Reject when you tap it — is EXACTLY the defect above wearing a different
- * hat. So the row expands in place into the whole review: media, instructions, muscle and equipment
- * chips, the missing-description warning, and the two controls at the bottom of all of it. The
- * invariant is unchanged; only the container moved. Above 1024px the two-pane split stays as it was.
+ * The open row is one block between two strong rules: its head (the name in the display face, the
+ * e-mail, the age and media line, the chevron up — a tap closes it), the image at judging size, the
+ * description, the muscles, the equipment, the numbered steps and the decision. The rows before it
+ * and after it stay rows, dimmed while one is open. Above 1024 px the list and the review stand side
+ * by side as before (R21).
  */
 export function ModerationQueue() {
   const { t, i18n } = useTranslation();
@@ -147,37 +155,73 @@ export function ModerationQueue() {
   const rows = queue.data?.queue ?? [];
 
   if (queue.isPending) {
-    // Row-shaped, at the height the real rows render at, so the swap does not move the page.
+    // Three blocks per row where its three lines will be, at the real row's 82 pt.
     return (
-      <div className="flex flex-col gap-tight">
-        {Array.from({ length: 3 }, (_, i) => (
-          <Skeleton key={i} className="h-18 rounded-field" />
-        ))}
+      <div role="status">
+        <span className="sr-only">{t('common.loading')}</span>
+        <RowStack as="div" aria-hidden>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="flex flex-col gap-2 py-3">
+              <Skeleton className={i === 1 ? 'h-4 w-45' : 'h-4 w-65'} />
+              <Skeleton className="h-3 w-40" />
+              <Skeleton className="h-3 w-35" />
+            </div>
+          ))}
+        </RowStack>
       </div>
     );
   }
 
   if (rows.length === 0) {
-    return (
-      <Surface>
-        <EmptyState icon={Check} title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
-      </Surface>
-    );
+    // Also where a failed list lands (as before): no copy exists for a failure here.
+    return <EmptyState title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />;
   }
+
+  const toggle = (id: number) => {
+    setSelected(selected === id ? null : id);
+    setRejecting(false);
+    setReason('');
+  };
+
+  const metaOf = (row: QueueItem) =>
+    `${ago(row.submitted_at)} · ${row.media_count === 0 ? t('admin.noMedia') : t('admin.mediaCount', { count: row.media_count })}`;
+
+  // The two lines under a row's name: the submitter, then the age and media line in mono.
+  const subOf = (row: QueueItem) => (
+    <>
+      <span className="block truncate">{row.owner_email ?? '—'}</span>
+      <span className="mt-0.5 block truncate text-data">{metaOf(row)}</span>
+    </>
+  );
+
+  const closedRow = (row: QueueItem) => (
+    <ListRow
+      key={row.id}
+      title={row.name}
+      sub={subOf(row)}
+      subLines={2}
+      tone={selected !== null && selected !== row.id ? 'muted' : 'default'}
+      trailing={<ChevronDown aria-hidden className="-me-0.75 size-4 text-text-3" strokeWidth={1.75} />}
+      onClick={() => toggle(row.id)}
+      aria-current={row.id === selected ? 'true' : undefined}
+      aria-expanded={wide ? undefined : row.id === selected}
+    />
+  );
 
   // ONE review subtree, placed by `wide` rather than duplicated and hidden. See `useWide`.
   const review: ReactNode =
-    selected === null ? (
-      <EmptyState icon={ShieldCheck} title={t('admin.reviewPickTitle')} body={t('admin.reviewPickBody')} />
-    ) : submission.isPending ? (
-      <Skeleton className="h-64 rounded-card" />
+    selected === null ? null : submission.isPending ? (
+      <ReviewSkeleton />
     ) : submission.isError || !submission.data ? (
-      // A submission somebody else decided while this queue was on screen is a 404, and saying so
-      // beats a spinner that never resolves. The refresh control in the panel header is the way out.
-      <EmptyState icon={X} title={t('admin.reviewGoneTitle')} body={t('admin.reviewGoneBody')} />
+      // A submission somebody else decided while this queue was on screen is a 404. The refresh
+      // glyph in the panel head is the way out.
+      <NoticeLine tone="warn" role="status" detail={t('admin.reviewGoneBody')}>
+        {t('admin.reviewGoneTitle')}
+      </NoticeLine>
     ) : (
       <ReviewBody
         data={submission.data}
+        showHeader={wide}
         busy={decide.isPending}
         rejecting={rejecting}
         reason={reason}
@@ -197,128 +241,87 @@ export function ModerationQueue() {
       />
     );
 
+  // "Open one first": why the rows carry no approve control.
+  const hint = (
+    <div className="flex flex-col gap-1">
+      <p className="text-body-m text-text-1">{t('admin.reviewPickTitle')}</p>
+      <p className="text-cap text-text-2">{t('admin.reviewPickBody')}</p>
+    </div>
+  );
+
+  if (wide) {
+    return (
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-4 min-w-0">
+          <RowStack close aria-label={t('admin.moderation')}>
+            {rows.map(closedRow)}
+          </RowStack>
+        </div>
+        <div className="col-span-8 min-w-0">{selected === null ? hint : review}</div>
+      </div>
+    );
+  }
+
+  const at = rows.findIndex((row) => row.id === selected);
+  if (at < 0) {
+    return (
+      <div className="flex flex-col gap-4">
+        <RowStack close aria-label={t('admin.moderation')}>
+          {rows.map(closedRow)}
+        </RowStack>
+        {hint}
+      </div>
+    );
+  }
+
+  const open = rows[at];
   return (
-    // THE SAME TWELVE COLUMNS THE SHELL AROUND IT USES.
-    //
-    // This was an arbitrary two-track template — a fixed first column against a 1fr second — while
-    // the shell around it runs a 3:9 twelve-column split, so switching admin sections moved the left
-    // edge of the content column sideways for no reason a reader could attribute to anything.
-    //
-    // 4:8 is a column ratio, not a measurement. `min-w-0` is not decoration — without it a grid
-    // child's `min-width: auto` lets a wide media row push the whole grid out instead of scrolling
-    // inside itself.
-    <div className="grid gap-6 lg:grid-cols-12">
-      <ul className="flex min-w-0 flex-col gap-tight lg:col-span-4" aria-label={t('admin.moderation')}>
-        {rows.map((row) => {
-          const active = row.id === selected;
-          // On a phone the open row and its review are ONE object, not a row with a second card
-          // parked under it. The `li` becomes that object — it carries the accent edge, the wash
-          // and the leading bar for the whole height — and the row inside it drops to `ghost` so
-          // there is no second border drawn across the middle of the card.
-          const expanded = !wide && active;
-          return (
-            <li
-              key={row.id}
-              className={cn(
-                'relative',
-                // No `overflow-hidden` here even though it would tidy the corners: the row inside
-                // is a button, its focus ring is drawn at `outline-offset-2`, and a clipped focus
-                // ring is a keyboard user losing their place. The ghost row has no fill of its own
-                // to spill past the radius anyway.
-                expanded &&
-                  'rounded-field border-[length:var(--border-width)] border-accent bg-accent-subtle',
-              )}
-            >
-              {/*
-                A Pressable, not a raw <button> — `check-tokens` refuses those outside `src/ui/`,
-                and it was right to: the recipe is where the 44 px floor, the focus ring and the
-                press feedback live. `shape="field"` is already full-width and left-aligned; the
-                className only turns the single row into a stack.
+    <div className="flex flex-col">
+      {at > 0 ? <RowStack aria-label={t('admin.moderation')}>{rows.slice(0, at).map(closedRow)}</RowStack> : null}
+      <Rule strong />
+      <div className="flex flex-col pt-2.5 pb-3">
+        {/* The open head: the same three lines, the name in the display face; a tap closes it. The
+            chevron stands on the name's line (admin-2), so it is drawn beside the row, not in it. */}
+        <div className="relative">
+          <ListRow
+            title={<span className="mb-0.5 block text-display uppercase">{open.name}</span>}
+            lines={2}
+            sub={subOf(open)}
+            subLines={2}
+            onClick={() => toggle(open.id)}
+            aria-current="true"
+            aria-expanded
+          />
+          <ChevronUp aria-hidden className="pointer-events-none absolute top-4.75 -right-0.75 size-4 text-text-1" strokeWidth={1.75} />
+        </div>
+        {/* 24 under the head's last line: the row's own 10 of padding + 14. */}
+        <div className="mt-3.5">{review}</div>
+      </div>
+      <Rule strong />
+      {at < rows.length - 1 ? <RowStack>{rows.slice(at + 1).map(closedRow)}</RowStack> : null}
+    </div>
+  );
+}
 
-                `aria-current` tells a screen reader which submission the review is showing;
-                `aria-expanded` is added only where the row really does own the expansion.
-              */}
-              <Pressable
-                shape="field"
-                variant={expanded ? 'ghost' : 'secondary'}
-                onClick={() => {
-                  setSelected(active ? null : row.id);
-                  setRejecting(false);
-                  setReason('');
-                }}
-                aria-current={active ? 'true' : undefined}
-                aria-expanded={wide ? undefined : active}
-                className={cn(
-                  'relative h-auto flex-col items-start gap-tight whitespace-normal py-3 pl-5',
-                  active && !expanded && 'border-accent bg-accent-subtle',
-                )}
-              >
-                <span className="flex w-full items-baseline gap-tight">
-                  <span className="text-body-legacy min-w-0 flex-1 truncate text-text-1">{row.name}</span>
-                  <span className="text-caption shrink-0 tabular-nums text-text-3">
-                    {ago(row.submitted_at)}
-                  </span>
-                </span>
-                <span className="flex w-full flex-wrap items-center gap-tight">
-                  <span className="text-caption min-w-0 flex-1 truncate text-text-3">
-                    {row.owner_email ?? '—'}
-                  </span>
-                  <span className="text-micro-legacy flex shrink-0 items-center gap-tight text-text-3">
-                    {row.media_count === 0 ? (
-                      <>
-                        <ImageOff className="size-icon-s shrink-0" strokeWidth={2} aria-hidden />
-                        {t('admin.noMedia')}
-                      </>
-                    ) : (
-                      <>
-                        <Film className="size-icon-s shrink-0" strokeWidth={2} aria-hidden />
-                        {t('admin.mediaCount', { count: row.media_count })}
-                      </>
-                    )}
-                  </span>
-                </span>
-              </Pressable>
-
-              {/* Inside the same card, divided by a hairline rather than by a gap. `pl-5` keeps the
-                  review's text on the row's own left edge, clear of the accent bar. */}
-              {expanded ? (
-                <div className="border-t-[length:var(--border-width)] border-[var(--card-border)] p-[var(--card-pad)] pl-5">
-                  {review}
-                </div>
-              ) : null}
-
-              {/* The leading edge bar. Every row has one so the list reads as a column of objects;
-                  only the open one is accent, and when the review is open the bar runs the full
-                  height of it — which is what marks the whole expansion as the selection rather
-                  than just its first two lines. LAST child on purpose: it is a sibling of the
-                  button now, and two positioned siblings paint in document order, so this is what
-                  puts it over the row's own fill without spending a z-index the scale has no
-                  token for. */}
-              <span
-                aria-hidden
-                className={cn(
-                  'pointer-events-none absolute inset-y-3 left-2 w-1 rounded-chip',
-                  active ? 'bg-accent' : 'bg-[var(--surface-border-strong)]',
-                )}
-              />
-            </li>
-          );
-        })}
-      </ul>
-
-      {wide ? (
-        <Surface className="min-w-0 lg:col-span-8">{review}</Surface>
-      ) : selected === null ? (
-        // On a phone there is no panel to hold the "open one first" guidance, and it is the
-        // sentence that explains why the buttons are not on the rows. It goes under the list.
-        <Surface>{review}</Surface>
-      ) : null}
+/** The review while it loads: a display line, two mono lines, the image's 16:9, three text lines. */
+function ReviewSkeleton() {
+  const { t } = useTranslation();
+  return (
+    <div role="status" className="flex flex-col gap-4">
+      <span className="sr-only">{t('common.loading')}</span>
+      <Skeleton className="aspect-video w-full" />
+      <div aria-hidden className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-70" />
+        <Skeleton className="h-4 w-50" />
+      </div>
     </div>
   );
 }
 
 function ReviewBody({
   data,
+  showHeader,
   busy,
   rejecting,
   reason,
@@ -328,6 +331,8 @@ function ReviewBody({
   onDecide,
 }: {
   data: Submission;
+  /** The name and e-mail as the review's own header — the wide pane; on a phone the open row is the header. */
+  showHeader: boolean;
   busy: boolean;
   rejecting: boolean;
   reason: string;
@@ -340,141 +345,123 @@ function ReviewBody({
   const { exercise, muscles, equipment, media } = data;
 
   return (
-    <article className="flex flex-col gap-group">
-      <header>
-        <h3 className="text-title-3 text-text-1">{exercise.name}</h3>
-        <p className="text-caption mt-1 text-text-3">{exercise.owner_email ?? '—'}</p>
-      </header>
+    <article className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
+        {showHeader ? (
+          <header className="flex flex-col gap-1">
+            <h3 className="text-display uppercase text-text-1">{exercise.name}</h3>
+            <p className="text-cap text-text-2">{exercise.owner_email ?? '—'}</p>
+          </header>
+        ) : null}
 
-      {/* The media, at the size somebody can actually judge. The moderation queue used to serve
-          these as a COUNT, and the route behind them answered 404 for admins — measured, then
-          fixed in `exercises/media.js`. */}
-      {media.length > 0 ? (
-        <ul className="flex flex-wrap gap-tight">
-          {media.map((m) => (
-            <li key={m.id}>
-              <img
-                src={`/api/v1/media/${m.storage_key}`}
-                alt={t('admin.mediaAlt', { name: exercise.name })}
-                width={m.width ?? undefined}
-                height={m.height ?? undefined}
-                /* The pack owns the border width (Mono declares 2px) and the card owns its colour,
-                   so a review image follows the glass material instead of pinning a 1px hairline. */
-                className="max-h-56 w-auto rounded-card border-[length:var(--border-width)] border-[var(--card-border)] object-cover"
-              />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-caption flex items-center gap-tight text-text-3">
-          <ImageOff className="size-icon-s" strokeWidth={2} aria-hidden />
-          {t('admin.noMedia')}
-        </p>
-      )}
-
-      {exercise.description ? <p className="text-body-legacy text-text-2">{exercise.description}</p> : null}
-
-      {exercise.instructions.length > 0 ? (
-        <section>
-          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.howTo')}</h4>
-          <ol className="text-body-legacy mt-2 flex list-decimal flex-col gap-1 pl-5 text-text-2">
-            {exercise.instructions.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ol>
-        </section>
-      ) : (
-        // Not decoration: a submission with no instructions is the most common reason to reject
-        // one, and it has to be visible rather than absent.
-        <p className="text-caption text-warning">{t('admin.noInstructions')}</p>
-      )}
-
-      {muscles.length > 0 ? (
-        <section>
-          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.muscle')}</h4>
-          <ul className="mt-2 flex flex-wrap gap-tight">
-            {muscles.map((m) => (
-              <li
-                key={m.slug}
-                className={cn(
-                  'text-caption rounded-chip px-2 py-0.5',
-                  m.role === 'primary' ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-text-2',
-                )}
-              >
-                {m.label}
+        {/* The media at the size somebody can judge: user content, never hero art, not desaturated. */}
+        {media.length > 0 ? (
+          <ul className="flex flex-col gap-4">
+            {media.map((m) => (
+              <li key={m.id}>
+                <UserPhoto
+                  src={`/api/v1/media/${m.storage_key}`}
+                  alt={t('admin.mediaAlt', { name: exercise.name })}
+                  ratio={m.width && m.height ? Math.min(16 / 9, Math.max(1, m.width / m.height)) : 16 / 9}
+                  fit="contain"
+                />
               </li>
             ))}
           </ul>
+        ) : (
+          <p className="text-cap text-text-2">{t('admin.noMedia')}</p>
+        )}
+
+        {exercise.description ? <p className="text-body text-text-1">{exercise.description}</p> : null}
+      </div>
+
+      {muscles.length > 0 ? (
+        <section className="flex flex-col gap-4">
+          <SectionHeader rule={false} heading="h3" title={t('library.muscle')} />
+          <RoleKey
+            layout="inline"
+            items={muscles.map((m) => ({ role: m.role, label: wordOf(m) }))}
+            roleLabels={{ primary: t('muscleMap.primary'), secondary: t('muscleMap.secondary') }}
+          />
         </section>
       ) : null}
 
       {equipment.length > 0 ? (
-        <section>
-          <h4 className="text-micro-legacy uppercase text-text-3">{t('library.equipment')}</h4>
-          <ul className="mt-2 flex flex-wrap gap-tight">
-            {equipment.map((q) => (
-              <li key={q.slug} className="text-caption rounded-chip bg-surface-2 px-2 py-0.5 text-text-2">
-                {q.label}
-              </li>
-            ))}
+        <section className="flex flex-col gap-4">
+          <SectionHeader rule={false} heading="h3" title={t('library.equipment')} />
+          <ul className="flex flex-wrap gap-x-6 gap-y-4">
+            {equipment.map((q) => {
+              const still = equipmentStill(q.slug);
+              return (
+                <li key={q.slug} className="flex items-center gap-3">
+                  {still ? <Pic slot={still} width={48} /> : null}
+                  <span className="text-body-m text-text-1">{wordOf(q)}</span>
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}
 
-      {/* ── the decision ──────────────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[var(--surface-border)] pt-4">
+      <div className="flex flex-col gap-6">
+        {exercise.instructions.length > 0 ? (
+          <section className="flex flex-col gap-4">
+            <SectionHeader rule={false} heading="h3" title={t('library.howTo')} />
+            <RowStack as="ol" close>
+              {exercise.instructions.map((step, i) => (
+                <div key={i} className={i === 0 ? 'flex gap-4 pb-4' : 'flex gap-4 py-4'}>
+                  {/* The column is the text's 44 pt high and the 48 pt numeral overhangs it, so a
+                      row is as tall as its paragraph (admin-2: 60 for two lines). */}
+                  <span className="mt-1 -mb-1 h-11 w-8 shrink-0">
+                    <Numeral size="num" value={i + 1} />
+                  </span>
+                  <p className="text-body text-text-2">{step}</p>
+                </div>
+              ))}
+            </RowStack>
+          </section>
+        ) : (
+          // Not decoration: a submission with no instructions is the most common reason to reject one.
+          <NoticeLine tone="warn">{t('admin.noInstructions')}</NoticeLine>
+        )}
+
+        {/* ── the decision ── */}
         {rejecting ? (
-          <div className="flex flex-col gap-tight">
+          <div className="flex flex-col gap-4">
             <Field
               label={t('admin.reason')}
               value={reason}
               onChange={(e) => onReason(e.target.value)}
-              /* The author READS this — `ExerciseDetailPage` renders it on their own exercise —
-                 so it is the one field here that reaches somebody outside this screen. */
+              /* The author READS this on their own exercise. */
               hint={t('admin.reasonHint')}
             />
-            <div className="grid grid-cols-2 gap-tight">
-              <Pressable
-                variant="danger"
-                density="compact"
-                className="w-full"
+            <div className="flex items-center gap-6">
+              {/* Destructive: it cannot fire without a reason the author can act on. */}
+              <TextLink
+                text="body"
+                tone="danger"
                 disabled={reason.trim().length === 0}
                 busy={busy}
                 onClick={() => onDecide('reject')}
               >
                 {t('admin.reject')}
-              </Pressable>
-              <Pressable density="compact" variant="ghost" className="w-full" onClick={onCancelReject}>
+              </TextLink>
+              <TextLink text="body" onClick={onCancelReject}>
                 {t('common.cancel')}
-              </Pressable>
+              </TextLink>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-tight">
-            <Pressable
-              variant="primary"
-              density="compact"
-              className="w-full"
-              busy={busy}
-              icon={<Check className="size-icon-m" strokeWidth={2} aria-hidden />}
-              onClick={() => onDecide('approve')}
-            >
+          <div className="flex flex-col items-start gap-2">
+            <Pressable variant="primary" size="lg" className="w-full" busy={busy} onClick={() => onDecide('approve')}>
               {t('admin.approve')}
             </Pressable>
-            {/* Destructive action: never in the primary position, and it cannot fire without a
-                reason the author can act on. */}
-            <Pressable
-              variant="ghost"
-              density="compact"
-              className="w-full"
-              icon={<X className="size-icon-m" strokeWidth={2} aria-hidden />}
-              onClick={onStartReject}
-            >
+            <TextLink text="body" onClick={onStartReject}>
               {t('admin.reject')}
-            </Pressable>
+            </TextLink>
           </div>
         )}
-      </footer>
+      </div>
     </article>
   );
 }

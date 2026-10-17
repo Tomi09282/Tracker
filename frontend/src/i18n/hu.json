@@ -147,8 +147,6 @@
     "eyebrow": "Adminisztráció",
     "title": "Áttekintés",
     "users": "Felhasználók",
-    "exercises": "Gyakorlatok",
-    "media": "Médiafájlok",
     "moderation": "Moderációs sor",
     "pendingCount": "{{count}} várakozik",
     "queueEmptyTitle": "Nincs mit moderálni",
@@ -197,7 +195,6 @@
     "styleStudio": "Stílus stúdió",
     "sections": "Szakaszok",
     "section": {
-      "overview": "Áttekintés",
       "accounts": "Fiókok",
       "moderation": "Moderáció",
       "marketplace": "Piactér"
@@ -956,24 +953,6 @@
     "loadFailedBody": "A szerver nem válaszolt. Frissítsd az oldalt.",
     "variants": "Változatok",
     "commitNote": "Amit itt kiválasztasz, az a következő betöltésnél minden felhasználónál érvényes lesz — kódmódosítás és újratelepítés nélkül."
-  },
-  "adminMetrics": {
-    "title": "Mérőszámok",
-    "window": "utolsó {{days}} nap",
-    "loggedPeople": "Naplózó emberek",
-    "loggedPeopleSub": "ma: {{today}}",
-    "signups": "Regisztrációk",
-    "activeCoaches": "Aktív edzők",
-    "activeCoachesSub": "{{withRole}} edző szerepkörrel",
-    "coinVelocity": "Érme-mozgás",
-    "coinVelocitySub": "mozgatott egység, előjel nélkül",
-    "completedWorkouts": "Befejezett edzések",
-    "cardHint": "A szám a kiválasztott időablakra vonatkozik.",
-    "clock": {
-      "local_date": "saját nap",
-      "utc": "UTC"
-    },
-    "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három napnyi mérés kell hozzá."
   },
   "adminUsers": {
     "title": "Fiókok",
