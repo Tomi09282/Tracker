@@ -552,7 +552,14 @@
       "offline": "No connection",
       "failed": "Could not record"
     },
-    "withdrawn": "Withdrawn"
+    "withdrawn": "Withdrawn",
+    "finish": {
+      "open": "Finish",
+      "title": "Finish workout",
+      "summary": "{{done}} logged · {{left}} to go",
+      "complete": "Finish",
+      "abandon": "Abandon"
+    }
   },
   "plans": {
     "eyebrow": "Authoring",

@@ -552,7 +552,14 @@
       "offline": "Keine Verbindung",
       "failed": "Konnte nicht erfasst werden"
     },
-    "withdrawn": "Zurückgenommen"
+    "withdrawn": "Zurückgenommen",
+    "finish": {
+      "open": "Beenden",
+      "title": "Training beenden",
+      "summary": "{{done}} erfasst · {{left}} offen",
+      "complete": "Beenden",
+      "abandon": "Aufgeben"
+    }
   },
   "plans": {
     "eyebrow": "Planung",

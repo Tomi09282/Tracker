@@ -89,6 +89,7 @@ function SheetBody({
   onRetry,
   onClose,
   onGrab,
+  closeControl = true,
   children,
 }: {
   title: string;
@@ -97,6 +98,7 @@ function SheetBody({
   onRetry?: () => void;
   onClose?: () => void;
   onGrab?: (e: ReactPointerEvent<HTMLSpanElement>) => void;
+  closeControl?: boolean;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
@@ -122,9 +124,11 @@ function SheetBody({
             <span aria-hidden className={cn('size-1.5 rounded-full', status === 'error' ? 'bg-danger' : 'bg-success')} />
           ) : null}
           {status === 'error' && onRetry ? <TextLink onClick={onRetry}>{t('common.retry')}</TextLink> : null}
-          <Pressable variant="link" shape="icon" aria-label={t('common.close')} onClick={onClose}>
-            <X aria-hidden />
-          </Pressable>
+          {closeControl ? (
+            <Pressable variant="link" shape="icon" aria-label={t('common.close')} onClick={onClose}>
+              <X aria-hidden />
+            </Pressable>
+          ) : null}
         </div>
       </div>
       <div className="flex w-full flex-col gap-4">{children}</div>
@@ -172,6 +176,7 @@ export function Sheet({
   children,
   status = 'idle',
   onRetry,
+  closeControl = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -181,6 +186,12 @@ export function Sheet({
   status?: ElementStatus;
   /** Offered beside the error dot. An error with no way forward is a dead end, not feedback. */
   onRetry?: () => void;
+  /**
+   * The header's close button (default on). Off only when the body ends in its own cancel, "Mégse"
+   * as a `text-1` link (frame workout-finish-confirm: one cancel control, the close button removed).
+   * Escape, the scrim and the grabber drag still close the sheet.
+   */
+  closeControl?: boolean;
 }) {
   const motionSafe = useMotionSafe();
   const panel = useRef<HTMLDivElement>(null);
@@ -284,6 +295,7 @@ export function Sheet({
               onRetry={onRetry}
               onClose={onClose}
               onGrab={(e) => dragControls.start(e)}
+              closeControl={closeControl}
             >
               {children}
             </SheetBody>

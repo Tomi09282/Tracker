@@ -1,10 +1,54 @@
 {
   "package": "S-workout",
-  "base": "ba932df299c0cc35cdcb2b224c21c695d00e0136",
-  "namespaces": [
-    "workout"
+  "base": "bdfa1b9c600fe9a9582c31c28811e681074a3d48",
+  "namespaces": ["workout"],
+  "set": [
+    {
+      "key": "workout.finish.open",
+      "hu": "Befejezés",
+      "en": "Finish",
+      "de": "Beenden",
+      "after": "workout.withdrawn",
+      "copy": "inventory",
+      "source": "S-workout-finish (D3): frame nezetek/workout-finish (Figma 161:2, approved in design round A), Link/Befejezés in the player header after Videó"
+    },
+    {
+      "key": "workout.finish.title",
+      "hu": "Edzés befejezése",
+      "en": "Finish workout",
+      "de": "Training beenden",
+      "after": "workout.finish.open",
+      "copy": "inventory",
+      "source": "frame nezetek/workout-finish-confirm (Figma 171:2, round A), Sheet/Edzés befejezése title"
+    },
+    {
+      "key": "workout.finish.summary",
+      "hu": "{{done}} sorozat rögzítve · {{left}} hátravan",
+      "en": "{{done}} logged · {{left}} to go",
+      "de": "{{done}} erfasst · {{left}} offen",
+      "after": "workout.finish.title",
+      "copy": "inventory",
+      "source": "frame nezetek/workout-finish-confirm, Summary '2 sorozat rögzítve · 15 hátravan' (the counts are the session's recorded / still open sets)"
+    },
+    {
+      "key": "workout.finish.complete",
+      "hu": "Befejezés",
+      "en": "Finish",
+      "de": "Beenden",
+      "after": "workout.finish.summary",
+      "copy": "inventory",
+      "source": "frame nezetek/workout-finish-confirm, Row/Befejezés (POST /workouts/:id/finish)"
+    },
+    {
+      "key": "workout.finish.abandon",
+      "hu": "Félbehagyás",
+      "en": "Abandon",
+      "de": "Aufgeben",
+      "after": "workout.finish.complete",
+      "copy": "inventory",
+      "source": "frame nezetek/workout-finish-confirm, Row/Félbehagyás in danger (POST /workouts/:id/abandon)"
+    }
   ],
-  "set": [],
   "change": [],
   "remove": [],
   "copyQuestions": []

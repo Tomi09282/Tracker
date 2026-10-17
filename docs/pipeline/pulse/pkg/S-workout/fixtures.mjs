@@ -9,6 +9,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const CURRENT = '/api/v1/workouts/current';
 const PREVIOUS = '/api/v1/workouts/current/previous';
 const CHECK = '/api/v1/sets/*/check';
+const FINISH = '/api/v1/workouts/*/finish';
+const ABANDON = '/api/v1/workouts/*/abandon';
 
 // Recorded session of user@ (freeze 2026-10-15, rec/user/GET_workouts_current_dc8781770d): exercises
 // 214..217, sets 718..731 (index 0..13). The frame draws the Friday plan day: five exercises in
@@ -113,6 +115,10 @@ const checked3 = [
 ];
 const recordAnswer = { applied: true, replayed: false, records: [{ kind: 'e1rm', repBucket: 6, value: 99, previous: 98.2 }] };
 const failBody = (code, error) => ({ error, code, requestId: 'fixture' });
+const backSide = {
+  click: { role: ['button', 'radio', 'tab'], name: { key: 'muscleMap.back' } },
+  arrived: { anyOf: [{ role: ['button', 'radio', 'tab'], name: { key: 'muscleMap.back' }, checked: true }, { role: ['button', 'radio', 'tab'], name: { key: 'muscleMap.back' }, pressed: true }, { role: ['button', 'radio', 'tab'], name: { key: 'muscleMap.back' }, selected: true }] },
+};
 const intervalBlock = [
   { pointer: '/exercises/0/block_kind', value: 'circuit' },
   ...[0, 1, 2, 3].flatMap((i) => [
@@ -151,6 +157,86 @@ const doc = {
     },
   },
   states: {
+    // ── S-workout-finish (D3): frames nezetek/workout-finish and nezetek/workout-finish-confirm ──
+    // Both frames draw workout-1's content (Hátul selected), so they ride the same data; the PNGs
+    // live in kepernyok-2x/nezetek/ (design round A), so `frame` names that sub-path for the pair.
+    'workout-finish': {
+      title: 'Edzéslejátszó - the Befejezés link in the header line (D3)',
+      frame: 'nezetek/workout-finish',
+      account: 'M',
+      route: '/workout',
+      height: 874,
+      reach: 'fixture',
+      fixtures: base,
+      why: "workout-1's drawn session (the same edits) with the back of the figure, as the frame draws it; the link only opens the sheet",
+      steps: [backSide],
+      arrived: { role: 'button', name: { key: 'workout.finish.open' } },
+      mustSee: [{ role: 'button', name: { key: 'workout.check' }, nth: 0 }, { role: 'button', name: { key: 'workout.finish.open' } }],
+    },
+    'workout-finish-confirm': {
+      title: 'Edzéslejátszó - the finish sheet: Befejezés / Félbehagyás / Mégse (D3)',
+      frame: 'nezetek/workout-finish-confirm',
+      account: 'M',
+      route: '/workout',
+      height: 874,
+      reach: 'fixture',
+      fixtures: base,
+      why: 'the sheet opened from the header link over the drawn session; nothing is written (the choice is not made). Summary = the session\'s recorded / open sets: 2 and 15 on the drawn data',
+      steps: [backSide, { click: { role: 'button', name: { key: 'workout.finish.open' } }, arrived: { role: 'button', name: { key: 'workout.finish.abandon' } } }],
+      arrived: { role: 'button', name: { key: 'workout.finish.abandon' } },
+      mustSee: [{ role: 'button', name: { key: 'workout.finish.complete' }, nth: 1 }, { role: 'button', name: { key: 'common.cancel' } }],
+    },
+    'workout-finish-failed': {
+      title: 'Edzéslejátszó - the finish was refused (500): the sheet stays, danger dot + Újra',
+      account: 'M',
+      route: '/workout',
+      height: 874,
+      reach: 'fixture',
+      why: 'a failed end must not look like one that worked: the sheet stays open with the error dot and Újra (repeats the same choice); the session stays live',
+      fixtures: [{ method: 'POST', path: FINISH, status: 500, body: failBody('INTERNAL', 'Internal error') }, ...base],
+      expect: { requests: [{ method: 'POST', path: FINISH, status: 500 }], console: ['500'] },
+      steps: [
+        { click: { role: 'button', name: { key: 'workout.finish.open' } }, arrived: { role: 'button', name: { key: 'workout.finish.complete' } } },
+        { click: { role: 'button', name: { key: 'workout.finish.complete' }, nth: 1 }, arrived: { role: 'button', name: { key: 'common.retry' } } },
+      ],
+      arrived: { role: 'button', name: { key: 'common.retry' } },
+    },
+    'workout-finish-done': {
+      title: 'Edzéslejátszó - Befejezés landed: the app is on Home',
+      account: 'M',
+      route: '/workout',
+      height: 874,
+      reach: 'fixture',
+      why: 'POST /workouts/:id/finish answers 200 (the outcome kept to a status, R26); the player leaves for Home (replace) and the session / today queries are invalidated (the refetched session is null)',
+      fixtures: [
+        { method: 'POST', path: FINISH, label: 'finish', status: 200 },
+        { method: 'GET', path: CURRENT, after: 'finish', edits: [{ pointer: '/log', value: null }, { pointer: '/exercises', value: [] }, { pointer: '/sets', value: [] }] },
+        ...base,
+      ],
+      steps: [
+        { click: { role: 'button', name: { key: 'workout.finish.open' } }, arrived: { role: 'button', name: { key: 'workout.finish.complete' } } },
+        { click: { role: 'button', name: { key: 'workout.finish.complete' }, nth: 1 }, arrived: { url: '/' } },
+      ],
+      arrived: { url: '/' },
+    },
+    'workout-abandon-done': {
+      title: 'Edzéslejátszó - Félbehagyás landed: the app is on Home',
+      account: 'M',
+      route: '/workout',
+      height: 874,
+      reach: 'fixture',
+      why: 'POST /workouts/:id/abandon answers 200; same landing as the finish',
+      fixtures: [
+        { method: 'POST', path: ABANDON, label: 'abandon', status: 200 },
+        { method: 'GET', path: CURRENT, after: 'abandon', edits: [{ pointer: '/log', value: null }, { pointer: '/exercises', value: [] }, { pointer: '/sets', value: [] }] },
+        ...base,
+      ],
+      steps: [
+        { click: { role: 'button', name: { key: 'workout.finish.open' } }, arrived: { role: 'button', name: { key: 'workout.finish.abandon' } } },
+        { click: { role: 'button', name: { key: 'workout.finish.abandon' } }, arrived: { url: '/' } },
+      ],
+      arrived: { url: '/' },
+    },
     'workout-live': {
       title: 'Edzéslejátszó - the recording as it is (seed freestyle session, English snapshots)',
       account: 'M',

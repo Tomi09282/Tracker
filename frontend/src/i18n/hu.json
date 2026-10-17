@@ -552,7 +552,14 @@
       "offline": "Nincs kapcsolat",
       "failed": "Nem sikerült rögzíteni"
     },
-    "withdrawn": "Visszavonva"
+    "withdrawn": "Visszavonva",
+    "finish": {
+      "open": "Befejezés",
+      "title": "Edzés befejezése",
+      "summary": "{{done}} sorozat rögzítve · {{left}} hátravan",
+      "complete": "Befejezés",
+      "abandon": "Félbehagyás"
+    }
   },
   "plans": {
     "eyebrow": "Tervezés",

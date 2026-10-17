@@ -1,17 +1,19 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { Check, PersonStanding, Play } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Screen } from '../../ui/shell/Screen';
 import { Rule } from '../../ui/data/Rule';
 import { RoleKey } from '../../ui/data/RoleKey';
 import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
 import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { TextLink } from '../../ui/primitives/TextLink';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { MuscleMap, type MuscleRole, type MuscleSide } from '../../ui/muscle-map/MuscleMap';
 import { useExercise } from '../library/useExercises';
@@ -24,6 +26,7 @@ import {
   useRestTimer,
   usePreviousSets,
 } from './useWorkout';
+import { useFinishWorkout, type SessionEnd } from './useFinishWorkout';
 import { vibrate, speak, tone, unlockAudio } from './cues';
 import { groupIntervalBlocks } from './intervalPlan';
 import { useIntervalTimer } from './useIntervalTimer';
@@ -97,7 +100,14 @@ const BLEED_RIGHT = '-mr-6 pr-6 max-[23.5rem]:-mr-4 max-[23.5rem]:pr-4';
  *                 · strong rule
  *   bottom cell   the exercise switcher — or, while resting, the rest band over it
  *
- * The ONE lime pill is the check of the active set. No finish-workout control (D3).
+ * The ONE lime pill is the check of the active set.
+ *
+ * THE WAY OUT (owner decision D3, frames `workout-finish` / `workout-finish-confirm`): a quiet text
+ * link "Befejezés" in the header line after the hero toggle — no new shape — opens a bottom sheet
+ * that chooses: Befejezés (the session is completed) · Félbehagyás (abandoned, danger words) ·
+ * Mégse. The sheet holds no pill (the set check under the scrim stays the screen's one lime shape)
+ * and has ONE cancel, "Mégse": the header's close button is off. A finished or abandoned session
+ * lands on Home, where today's card already knows.
  */
 export function WorkoutPlayer() {
   const { t, i18n } = useTranslation();
@@ -126,6 +136,26 @@ export function WorkoutPlayer() {
   // anchor — was one tap away behind a chip nobody had a reason to press.
   const [showMedia, setShowMedia] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
+
+  // ── THE WAY OUT (D3) ─────────────────────────────────────────────────────────────────────────
+  //
+  // The sheet stays open while the end is in flight and when it fails: a failed finish must not
+  // look like one that worked (the sheet's header shows the danger dot and "Újra", which repeats
+  // the SAME choice). Not offline-queued — see useFinishWorkout.
+  const navigate = useNavigate();
+  // Set the moment the end lands, before the session queries are invalidated (see useFinishWorkout):
+  // from then on "no session" means "you just finished" and leads Home, never to the library.
+  const [ended, setEnded] = useState(false);
+  const finish = useFinishWorkout(() => {
+    // Nothing is resting between anything any more, and no round may record itself after the end.
+    rest.stop();
+    interval.stop();
+    setEnded(true);
+    setFinishOpen(false);
+    navigate('/', { replace: true });
+  });
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [lastEnd, setLastEnd] = useState<SessionEnd | null>(null);
 
   const exercises = data?.exercises ?? [];
   const current = exercises[activeExercise];
@@ -344,6 +374,8 @@ export function WorkoutPlayer() {
     );
   }
 
+  if (!data?.log && ended) return <Navigate to="/" replace />;
+
   if (!data?.log) {
     // NO SESSION: THE EDZÉS TAB OPENS THE LIBRARY (owner decision D2). The empty player is never
     // drawn (frame `workout-3` is not built). `replace`, so Back does not return to a URL that
@@ -351,6 +383,28 @@ export function WorkoutPlayer() {
     // door (REQUIRED_DOORS), and `verify-gates` probes that deleting it is caught.
     return <Navigate to="/library" replace />;
   }
+
+  const logId = data.log.id;
+  const endSession = async (end: SessionEnd) => {
+    if (finish.isPending) return;
+    setLastEnd(end);
+    try {
+      await finish.mutateAsync({ logId, end }); // success: the hook's onEnded above leads Home
+    } catch {
+      // the sheet stays open with the danger dot and "Újra"
+    }
+  };
+  const closeFinish = () => {
+    if (finish.isPending) return;
+    setFinishOpen(false);
+    finish.reset();
+  };
+  // The sheet's summary: the sets of the whole session, a withdrawn one counted as neither.
+  const live = data.sets.filter((s) => s.voided_at == null);
+  const setsDone = live.filter((s) => s.completed_at != null).length;
+  const setsLeft = live.length - setsDone;
+  const summary = t('workout.finish.summary', { done: setsDone, left: setsLeft });
+  const summaryLead = /^\d+/.exec(summary)?.[0] ?? '';
 
   const onCheck = async (
     setId: number,
@@ -425,6 +479,9 @@ export function WorkoutPlayer() {
                   }}
                 >
                   {t(mapShown ? 'workout.showMedia' : 'workout.showMuscles')}
+                </TextLink>
+                <TextLink aria-haspopup="dialog" onClick={() => setFinishOpen(true)}>
+                  {t('workout.finish.open')}
                 </TextLink>
               </div>
             ) : null}
@@ -609,6 +666,40 @@ export function WorkoutPlayer() {
           </div>
         </div>
       </div>
+
+      {/* ── the way out: frame workout-finish-confirm (sheet 539-874 at 402 x 874) ──────────── */}
+      <Sheet
+        open={finishOpen}
+        onClose={closeFinish}
+        title={t('workout.finish.title')}
+        status={finish.isPending ? 'busy' : finish.isError ? 'error' : 'idle'}
+        onRetry={lastEnd ? () => void endSession(lastEnd) : undefined}
+        closeControl={false}
+      >
+        {/* The summary in mono: the recorded count in ink, the rest of the line in text-2. */}
+        <p className="text-data text-text-2">
+          <span className="text-text-1">{summaryLead}</span>
+          {summary.slice(summaryLead.length)}
+        </p>
+        <RowStack open close>
+          <ListRow
+            title={t('workout.finish.complete')}
+            onClick={() => void endSession('complete')}
+            busy={finish.isPending && lastEnd === 'complete'}
+            disabled={finish.isPending && lastEnd !== 'complete'}
+          />
+          <ListRow
+            title={t('workout.finish.abandon')}
+            tone="danger"
+            onClick={() => void endSession('abandon')}
+            busy={finish.isPending && lastEnd === 'abandon'}
+            disabled={finish.isPending && lastEnd !== 'abandon'}
+          />
+        </RowStack>
+        <TextLink text="body" className="self-start" onClick={closeFinish}>
+          {t('common.cancel')}
+        </TextLink>
+      </Sheet>
     </Screen>
   );
 }

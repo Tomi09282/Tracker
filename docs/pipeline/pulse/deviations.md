@@ -666,3 +666,39 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: only the phone (down / up chevrons of admin-1 / -2).
 - What the app does: at 1024 px and up the list rows' chevrons point right, toward the review beside the list; the chosen row's chevron is in ink like its name, the others text-3. The phone is unchanged.
 - Status: closed — no frame is affected.
+
+## DEV-080 — S-workout-finish: the Befejezés link goes with the header line at 360 x 640 (Q7)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/finish-handoff.json DEV-S-workout-finish-01
+- Package: S-workout (round S-workout-finish, D3)
+- The frames show: nezetek/workout-finish and nezetek/workout-finish-confirm (design round A, Figma 161:2 / 171:2).
+- What the app does: The Befejezés link lives in the header line, so it goes with the header line when the Q7 default takes it: at 360 x 640 only while the rest band AND the offline line are both on screen (workout-law-rest-offline.w360, workout-offline-inflight.w360). The link is back as soon as the rest ends or the network returns. While offline a finish would fail anyway (not queued).
+- Why: Q7 order (figure first, then the header line) is the owner's rule for this column; the finish is not a set control and must not push the active check out of reach.
+- Status: open - owner ruling: the Q7 order also takes the Befejezés link at 360 x 640 with rest + offline (the finish would fail offline anyway).
+
+## DEV-081 — S-workout-finish: no header actions while an interval block runs
+
+- Source: docs/pipeline/pulse/pkg/S-workout/finish-handoff.json DEV-S-workout-finish-02
+- Package: S-workout (round S-workout-finish, D3)
+- The frames show: nezetek/workout-finish and nezetek/workout-finish-confirm (design round A, Figma 161:2 / 171:2).
+- What the app does: While an interval block is RUNNING the header actions (Időzítő, Videó, Befejezés) are hidden, as the hero toggle already was; the link returns when the stage is paused or stopped.
+- Why: A running interval records rounds by itself; ending the session mid-round from the header would race the round's own write. Stopping first is one tap on the stage.
+- Status: open - owner ruling: the header actions stay hidden while an interval block runs.
+
+## DEV-082 — S-workout-finish: the kit sheet stands 1 pt in (its edge is a CSS border)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/finish-handoff.json DEV-S-workout-finish-03
+- Package: S-workout (round S-workout-finish, D3)
+- The frames show: nezetek/workout-finish and nezetek/workout-finish-confirm (design round A, Figma 161:2 / 171:2).
+- What the app does: The sheet's content stands 1 pt in from the frame (x 25, w 352 instead of 24 / 354) and the panel starts at y 538 instead of 539.
+- Why: The kit Sheet draws its 1 px hairS edge as a CSS border inside the panel; the Figma kit keeps the stroke out of the layout. Kit-wide (every sheet), within the 2 pt tolerance; not changed here.
+- Status: open - kit-wide (every sheet), within the 2 pt tolerance.
+
+## DEV-083 — S-workout-finish: the in-flight and failed states are built from the kit
+
+- Source: docs/pipeline/pulse/pkg/S-workout/finish-handoff.json DEV-S-workout-finish-04
+- Package: S-workout (round S-workout-finish, D3)
+- The frames show: nezetek/workout-finish and nezetek/workout-finish-confirm (design round A, Figma 161:2 / 171:2).
+- What the app does: Not drawn by any frame, built in the same language: the in-flight state (the chosen row holds its pressed level, the other row is inert, the sheet header shows the three dots) and the failed state (sheet stays open, danger dot + Újra repeating the same choice). No new copy.
+- Why: PLAN 4.1 rule 7: undrawn states are built from the kit; a failed end must never look like one that worked.
+- Status: closed - built from the kit, no new copy.
