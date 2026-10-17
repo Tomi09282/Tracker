@@ -37,6 +37,38 @@ const SORTS = {
   newest: 'e.created_at DESC, e.id DESC',
 };
 
+/**
+ * The equipment slugs of one list row, as a JSON array, in the taxonomy's own sort order.
+ *
+ * The same `slug` vocabulary the `?equipment=` filter takes and `GET /taxonomies` lists, so the
+ * client can key a picture (or a label) on it without a second lookup. Labels are deliberately
+ * NOT carried: the list is the busiest response in the app, and the client already holds the
+ * translated taxonomy.
+ *
+ * A correlated scalar subquery, like `thumb_key`, rather than a join or a second query over the
+ * page's ids:
+ *   - a one-to-many JOIN in the main statement is how the GROUP BY and the keyset cursor start
+ *     duplicating or skipping rows (see the note on `annotateForClient`);
+ *   - a second statement would be a second pool call, so the page and its equipment would be two
+ *     read snapshots, and an `IN (?, ?, …)` list would prepare a new statement for every page size.
+ * One statement, one worker call, one snapshot. `json_group_array` over no rows is `[]`, so an
+ * exercise without equipment answers an empty array, never null. A static string: nothing in it
+ * varies per request, and it binds no parameter.
+ */
+const EQUIPMENT_SLUGS = `(SELECT json_group_array(q.slug ORDER BY q.sort_order, q.id)
+                FROM exercise_equipment_map x JOIN equipment q ON q.id = x.equipment_id
+               WHERE x.exercise_id = e.id)`;
+
+/** The subquery's JSON text as an array. Anything unexpected is no equipment, never a crash. */
+const parseSlugs = (raw) => {
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value.filter((s) => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
 const ListQuery = z
   .object({
     q: z.string().trim().max(120).optional(),
@@ -215,7 +247,8 @@ router.get(
               COALESCE(t.normalized_name, tf.normalized_name, e.normalized_name) AS normalized_name,
               CASE WHEN t.lang IS NOT NULL THEN 1 ELSE 0 END                AS translated,
               (SELECT storage_key FROM exercise_media WHERE exercise_id = e.id AND deleted_at IS NULL
-                 ORDER BY position, id LIMIT 1) AS thumb_key
+                 ORDER BY position, id LIMIT 1) AS thumb_key,
+              ${EQUIPMENT_SLUGS} AS equipment
          FROM exercises e
          ${searchJoin}
          ${langJoin}
@@ -232,6 +265,7 @@ router.get(
 
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
+    for (const row of page) row.equipment = parseSlugs(row.equipment);
     const last = page.at(-1);
     const nextCursor =
       hasMore && last

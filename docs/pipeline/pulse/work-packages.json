@@ -1143,6 +1143,35 @@
         "node scripts/pulse-verify.mjs capture of auth-1 / auth-2"
       ],
       "notes": "Added by the integrator at merge (merge-G-inputs): the lane was cut from _kit-gaps.md and never had an entry. The lane listed Field / TextArea / NumberStepper under its own owns.json; here they stay owned by F12 (closed) and are listed under extends, so ownership keeps one owner per file. minRows, maxRows and labelHidden of item 8 were already shipped by F12 stage 2. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
+    },
+    {
+      "id": "B-equipment",
+      "title": "Equipment keys on the exercise list (owner decision 2026-10-17, .pulse/owner-answers.md last section: extend the backend now): GET /api/v1/exercises carries equipment: string[] per row",
+      "owns": [
+        "backend/src/exercises/routes.js",
+        "backend/scripts/verify-equipment.mjs",
+        "backend/package.json",
+        "docs/pipeline/pulse/pkg/B-equipment/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/features/library/useExercises.ts"
+        ]
+      },
+      "dependsOn": [],
+      "parallelGroup": "backend lane (owner decision 2026-10-17, after the screens)",
+      "size": "S",
+      "acceptance": [
+        "every row of GET /api/v1/exercises has equipment: string[] - the equipment slugs in the taxonomy sort order, the vocabulary of ?equipment= and GET /taxonomies; [] when the exercise has none",
+        "one statement, one worker call: the slugs come from a correlated subquery in the page statement, so the GROUP BY and the keyset cursor are unchanged; no new bound parameter, no migration",
+        "ExerciseRow.equipment: string[] in frontend/src/features/library/useExercises.ts (frozen, travels as shared.patch); nothing renders it yet, so no frame changes"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:equipment is its last step)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field."
     }
   ],
   "screens": [

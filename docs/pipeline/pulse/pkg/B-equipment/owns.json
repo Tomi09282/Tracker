@@ -1,0 +1,18 @@
+{
+  "id": "B-equipment",
+  "decision": "owner 2026-10-17, .pulse/owner-answers.md, last section: extend the backend now (equipment keys on the exercise list)",
+  "owns": [
+    "backend/src/exercises/routes.js",
+    "backend/scripts/verify-equipment.mjs",
+    "backend/package.json",
+    "docs/pipeline/pulse/pkg/B-equipment/**"
+  ],
+  "handIn": {
+    "shared.patch": ["frontend/src/features/library/useExercises.ts"]
+  },
+  "notInScope": [
+    "the frontend rendering of the still (the library row / picker packages key it on ExerciseRow.equipment)",
+    "the eight missing equipment stills (asset generation, owner decision 2026-10-17)",
+    "no migration: the data already exists in equipment / exercise_equipment_map (migration 003)"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "B-equipment",
+  "status": "done",
+  "change": "GET /api/v1/exercises: every row carries equipment: string[] (equipment slugs, taxonomy sort order, [] when none). One correlated scalar subquery in the existing page statement: same worker call, prepared, binds nothing new, no migration (data in equipment / exercise_equipment_map since 003).",
+  "consumers": ["LibraryPage (library rows)", "PlanEditorPage exercise picker (same endpoint via useExercises)"],
+  "verify": {
+    "verify:equipment": "28 passed, 0 failed (hermetic: temp encrypted DB, throwaway server, generated keys); 13 of them fail against the pre-change routes.js",
+    "smoke": "579 passed, 0 failed",
+    "frontend build": "green with shared.patch applied"
+  },
+  "handIn": ["docs/pipeline/pulse/pkg/B-equipment/shared.patch (frontend/src/features/library/useExercises.ts: ExerciseRow.equipment)"],
+  "followUps": [
+    "a frontend package renders the 48 pt still from ExerciseRow.equipment (no key = empty cell)",
+    "the eight equipment types without a still get one through the asset pipeline (owner decision 2026-10-17)",
+    "the running dev backend on :3000 serves the field only after the orchestrator restarts it on the merged code"
+  ]
+}

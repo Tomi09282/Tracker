@@ -1,0 +1,18 @@
+diff --git a/frontend/src/features/library/useExercises.ts b/frontend/src/features/library/useExercises.ts
+index b5ee5a1..c1032ca 100644
+--- a/frontend/src/features/library/useExercises.ts
++++ b/frontend/src/features/library/useExercises.ts
+@@ -12,6 +12,13 @@ export interface ExerciseRow {
+   /** 0 when the name came from the fallback chain rather than the requested language. */
+   translated: 0 | 1;
+   thumb_key: string | null;
++  /**
++   * The exercise's equipment slugs, in the taxonomy's sort order — the vocabulary of the
++   * `equipment` filter and of `Taxonomy.slug`. Always an array: `[]` means no equipment, and the
++   * row then shows no equipment still (never a guessed one). Labels are not carried; resolve them
++   * from `useTaxonomies`.
++   */
++  equipment: string[];
+   /** Both present only when `forClient` was asked for. */
+   missing_equipment?: string[];
+   conflicts?: { body_area: string; severity: 'avoid' | 'caution'; relation: 'loads' | 'stabilises' }[];
