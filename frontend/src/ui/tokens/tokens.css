@@ -14,8 +14,9 @@
  * THE BRIDGE. The liquid-glass look this file used to describe is gone. Its colour and decoration
  * names (the accent ramp and wash, the `-subtle` / `-border` / `on-*` / `info` status forms, glass,
  * blur, card, overlay shadow) left in the closing cleanup (F19 row 1), and `check:tokens` now refuses
- * a colour utility on a retired stem (`RETIRED_STEMS`). What is still marked BRIDGE below leaves in
- * the later closing rows; do not write new code against a BRIDGE name.
+ * a colour utility on a retired stem (`RETIRED_STEMS`). The last bridged names (the old bar's and
+ * toast's slab, the detached bar's offset, the old bottom pad) left in row 6; nothing here is a
+ * bridge any more, and `check:pulse` bans a var() of any retired name.
  *
  * THERE ARE NO THEME PACKS. One look, no `[data-theme]`, no translucency setting. The mechanism to
  * bring a pack back is kept cheap on purpose: every lit value derives from `--accent`, so a future
@@ -233,8 +234,6 @@
    * always did. */
   --offline-h: 0px;
   --viewport-h: calc(100dvh - var(--offline-h));
-  --content-pad-b-lg: calc(var(--nav-h) + 32px);  /* BRIDGE (layout) — unchanged until its consumer goes */
-  --nav-dock-offset: 16px;                        /* BRIDGE (layout) — the detached bar's air on three sides */
   --col-mobile: 480px;      /* mobile-shaped flows stay in this column on desktop */
   --col-wide: 1120px;       /* admin / dashboards / grids */
 
@@ -301,7 +300,7 @@
   --head-top-push: calc(var(--safe-t) + 2px);                           /* header of a pushed screen */
   --band-pad-t: calc(var(--safe-t) + 6px);                              /* the toast band */
 
-  /* lane:F11 — the shell (ui/nav/BottomNav, ui/shell/Screen · ScreenHeader · Dock). */
+  /* The shell (ui/nav/BottomNav, ui/shell/Screen · ScreenHeader · Dock). */
   --tabbar-inset-5: 10px;    /* the bar's side inset by tab count: cells 76.4 / 63 / 55.1 on 402 */
   --tabbar-inset-6: 12px;
   --tabbar-inset-7: 8px;
@@ -411,19 +410,6 @@
   --sheet-bg: var(--surface-2);
   --sheet-radius: var(--radius-sheet);
 
-  /* The tab bar has no surface in Pulse: it stands on the canvas over a fade. Until the bar is
-     rebuilt it is still a fixed slab with content scrolling under it, so its fill is the canvas,
-     OPAQUE — a transparent fixed bar over moving text is unreadable. BRIDGE. */
-  --nav-bg: var(--surface-0);
-  --nav-blur: 0px;                       /* BRIDGE (decoration) */
-  --nav-fg-active: var(--accent);
-  --nav-fg-idle: var(--text-3);
-
-  /* The toast is "the page's own black dropping over the header zone". Opaque for the same reason
-     as the bar. */
-  --toast-bg: var(--surface-0);
-  --toast-blur: 0px;                     /* BRIDGE (decoration) */
-
   /* The two fades of the shell: the canvas rising from nothing to solid, under the tab bar (solid
      from 28 % of `--fade-h`) and under a docked action (from 50 %). Written from `transparent`:
      gradients interpolate premultiplied, so the ramp is the canvas colour at a growing alpha, with
@@ -526,27 +512,13 @@
      self-reference with no Layer-2 backing resolves to nothing. */
 }
 
-/* ── Lane blocks ──────────────────────────────────────────────────────────────────────────
+/* ── Component tokens of the foundation lanes ─────────────────────────────────────────────
  *
- * One named, EMPTY block per foundation lane. A lane that needs a token does not edit the layers
- * above: it writes COMPLETE rules between its own two markers —
- *
- *     :root { … }           a semantic or component token
- *     @theme static { … }   a primitive that must survive tree-shaking or become a utility
- *     @theme inline { … }   a Tailwind name for one of the above
- *
- * — and hands the hunk in as `docs/pipeline/pulse/pkg/<id>/shared.patch`. Because every lane writes
- * inside its own block, and the blocks are three lines apart, two lanes' patches never touch
- * neighbouring lines and apply in any order. The integrator moves a token that proved itself into
- * its layer; the emptied markers are deleted in the closing cleanup.
+ * Each lane of the redesign added the tokens its components needed in a block of its own, under
+ * the lane's heading. The lanes are closed; the blocks stay as the place where these tokens live.
  */
 
-/* F5 — assets: Pic, UserPhoto */
-/* lane:F5 */
-/* /lane:F5 */
-
 /* F6 — actions: control(), Pressable, TextLink */
-/* lane:F6 */
 :root {
   /* How long an idle pill waits before its glow starts to breathe (Pulse System 2.4, "Resting
      pulse … starts after 1.5 s"). A delay, not a duration: nothing eases over it. */
@@ -570,10 +542,8 @@
     50% { opacity: 0.3; }
   }
 }
-/* /lane:F6 */
 
 /* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */
-/* lane:F8 */
 :root {
   /* The count badge (`BadgeCount`, kit `badgeCount`): 18 high and at least 18 wide, the figure 5
      from either edge. 5 is off the 4 pt grid on purpose: it is what centres one digit of `tab-on`
@@ -581,14 +551,8 @@
   --badge-h: 18px;
   --badge-pad-x: 5px;
 }
-/* /lane:F8 */
-
-/* F9 — structure: SectionHeader, Rule, RowStack, ListRow, EmptyState, Skeleton, NoticeLine, Monogram */
-/* lane:F9 */
-/* /lane:F9 */
 
 /* F10 — data: Numeral, Fraction, StatBlock, SegmentBar, MacroColumns, ProgressBar, CountUp, LedgerRow */
-/* lane:F10 */
 :root {
   /* The display face's vertical metrics, in em — Big Shoulders Display as the shipped woff2 lays
      out in Chrome (ascent / descent of the line, OS/2 cap height; F10 proofs/face-metrics.json).
@@ -604,14 +568,8 @@
   --trim-display-t: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-ascent) + var(--face-display-cap));
   --trim-display-b: calc((var(--face-display-ascent) + var(--face-display-descent) - 1lh) / 2 - var(--face-display-descent));
 }
-/* /lane:F10 */
-
-/* F11 — shell: tab bar, Screen, ScreenHeader, Dock, PublicLayout */
-/* lane:F11 */
-/* /lane:F11 */
 
 /* F12 — inputs and the sheet: Field, SearchField, TextArea, NumberStepper, SelectSheet, Sheet */
-/* lane:F12 */
 :root {
   /* A masked value (a password) is drawn as 6 pt discs on an 11 pt pitch, centred on the field's
      line (frame auth-2). Geist's own bullet at the 16 pt body size is a 4 pt dot on a 5 pt pitch,
@@ -627,16 +585,3 @@
      a control's edge — the drag it offers is a convenience; the close button is the way out. */
   --grabber: rgb(255 255 255 / 0.24);
 }
-/* /lane:F12 */
-
-/* F13 — status zone: toast band, offline line, command palette */
-/* lane:F13 */
-/* /lane:F13 */
-
-/* F14 — charts: TrendChart, Sparkline */
-/* lane:F14 */
-/* /lane:F14 */
-
-/* F15 — mannequin: MuscleMap */
-/* lane:F15 */
-/* /lane:F15 */

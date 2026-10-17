@@ -81,7 +81,7 @@ const RADIUS_SIDES = ['t', 'r', 'b', 'l', 's', 'e', 'tl', 'tr', 'bl', 'br', 'ss'
 const RADIUS_LEGACY = ['card', 'field', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
 
 /**
- * Token names the closing cleanup DELETES (tokens.css marks each "BRIDGE"; PLAN.md 7.3 rows 1, 2, 6).
+ * Token names the closing cleanup deleted (PLAN.md 7.3 rows 1, 2, 6): a var() of one is banned, since it resolves to nothing.
  *
  * Not here, on purpose: `--focus-ring` (the kept rule below needs it), `--sheet-bg`, `--skeleton-*`,
  * `--field-*` and `--muscle-*` — component tokens that STAY and were only re-valued.
@@ -535,7 +535,7 @@ export const RULES = [
   },
   {
     id: 'legacy-var',
-    what: 'a var() of a bridged token (a name the closing cleanup deletes)',
+    what: 'a var() of a bridged token (a name the closing cleanup deleted)',
     instead: 'the Pulse token, or nothing where the name was decoration',
     probe: withClass(arb('p', 'var(--card-pad)')),
     cases: [
