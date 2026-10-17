@@ -21,16 +21,22 @@
  * rather than an element — a CSS text fill (the monogram texture) and a preload.
  *
  * The exception to "import this file": a module that a build gate imports into bare Node
- * (`app/navTabs.ts`) may not import anything that imports an image. It takes its key TYPE straight
- * from `slots.ts` with `import type`, which is erased before Node ever resolves it.
+ * (`app/navTabs.ts`) may not import anything that imports an image. It takes its key TYPES straight
+ * from `slots.ts` / `navIcons.ts` with `import type`, which is erased before Node ever resolves it.
+ *
+ *   navIcons.ts  HAND-WRITTEN — the tab bar's icon key → raster table, placeholders included.
  */
 import { EQUIPMENT_STILL, PULSE_SLOTS, TAB_ICON_KEYS } from './slots';
 import type { PulseFamily, PulseLitSlot, PulseSlot, PulseSlotMeta, TabIconKey } from './slots';
+import { NAV_ICON_SOURCE, PLACEHOLDER_NAV_KEYS, SWITCH_ICON_KEYS } from './navIcons';
+import type { NavIconKey, NavIconSource, SwitchIconKey } from './navIcons';
 import { PULSE_URLS } from './urls';
 import type { PulseVariants } from './urls';
 
 export { EQUIPMENT_STILL, PULSE_SLOTS, TAB_ICON_KEYS };
 export type { PulseFamily, PulseLitSlot, PulseSlot, PulseSlotMeta, TabIconKey };
+export { NAV_ICON_SOURCE, PLACEHOLDER_NAV_KEYS, SWITCH_ICON_KEYS };
+export type { NavIconKey, NavIconSource, SwitchIconKey };
 
 /** What an `<img>` needs to draw a slot, straight from the manifest. */
 export interface PulseSource {
@@ -68,7 +74,10 @@ export function pulseHeight(slot: PulseSlot, width: number): number {
   return Math.round((width * meta.height) / meta.width);
 }
 
-/** A tab's icon key → its slot. The slot always has a lit raster (`check:assets`, assertion 4). */
+/**
+ * A tab's icon key → its slot. The slot always has a lit raster (`check:assets`, assertion 4).
+ * The bar draws through `NAV_ICON_SOURCE` (navIcons.ts); this stays for the kit specimens.
+ */
 export function tabIconSlot(key: TabIconKey): PulseLitSlot {
   return `tab-${key}`;
 }

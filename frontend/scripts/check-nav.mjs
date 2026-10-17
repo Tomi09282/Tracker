@@ -33,10 +33,11 @@
  * from the imports of `router.tsx`. A tab is always a door. Only a parameterised route is reached
  * through its family (`/library/1467` reaches `/library/:id`).
  *
- * `/compose` and `/m` are red under that rule, which is the truth. Whether they get a door is a
- * product decision (owner question Q5: no new door for now), so they carry OPEN exemptions — and
- * an open exemption is printed on every run until it is closed. "We will add the link later" is
- * not a reason this gate accepts silently.
+ * `/m` is red under that rule, which is the truth. Whether it gets a door is a product decision
+ * (owner question Q5: no new door for now), so it carries an OPEN exemption — and an open
+ * exemption is printed on every run until it is closed. "We will add the link later" is not a
+ * reason this gate accepts silently. (`/compose` had one too, until it became the trainer bar's
+ * Pult tab — owner checkpoint C3 of the LifeOS plan.)
  *
  * Run: npm run check:nav
  */
@@ -51,8 +52,20 @@ const ROUTER_FILE = path.join(SRC, 'app/router.tsx');
 const ROUTE_META_FILE = path.join(SRC, 'app/routeMeta.ts');
 const LOCALES = ['hu', 'en', 'de'];
 
-/** How many tabs each role's bar carries. The mockups are the source; this is the assertion. */
-const EXPECTED_COUNT = { user: 5, coach: 6, admin: 7 };
+/**
+ * How many cells each VIEW's bar carries, switches included. Design round A (frame `bars`) is the
+ * source; this is the assertion. The member's bar is the same for every role in Phase 1; the
+ * trainer and admin bars open with their switch cells.
+ */
+const EXPECTED_COUNT = { user: 5, trainer: 4, admin: 5 };
+
+/**
+ * The switch cells each view's bar OPENS with, in order: the view each one returns to. A switch
+ * goes to the root of its view, and the bar that opens with it is reached from Profil's NÉZETEK
+ * rows (REQUIRED_DOORS below) — so a switch is the way back from a door, never the only door.
+ */
+const EXPECTED_SWITCHES = { user: [], trainer: ['user'], admin: ['user', 'trainer'] };
+const VIEW_ROOT = { user: '/', trainer: '/coach', admin: '/admin' };
 
 /**
  * Routes that are allowed to have no inbound link, each with the reason.
@@ -76,16 +89,6 @@ const NO_INBOUND_BY_DESIGN = new Map([
   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
-  [
-    '/compose',
-    {
-      open: true,
-      question: 'Q5',
-      reason:
-        'the coach\'s marketplace desk has no way in on a phone — only the desktop command palette lists it. ' +
-        'Owner, 2026-10-12: it stays reachable by URL only for now; no new door is invented',
-    },
-  ],
   [
     '/m',
     {
@@ -111,6 +114,11 @@ const NO_INBOUND_BY_DESIGN = new Map([
  */
 export const REQUIRED_DOORS = new Map([
   ['/library', { from: 'features/workout/WorkoutPlayer.tsx', reason: 'the Edzés tab lands here when no session runs (D2)' }],
+  // The member's bar is the same five tabs for every role (plan Phase 1, design round A): the
+  // trainer and the admin view are entered from Profil's NÉZETEK rows and from nowhere else on a
+  // phone. The switch cells are only the way BACK from them.
+  ['/coach', { from: 'features/settings/SettingsPage.tsx', reason: 'Profil\'s "Edzői nézet" row is the door to the trainer view' }],
+  ['/admin', { from: 'features/settings/SettingsPage.tsx', reason: 'Profil\'s "Admin nézet" row is the door to the admin view' }],
 ]);
 
 async function main() {
@@ -121,24 +129,55 @@ async function main() {
      is not the inset. (The safe-area test below was satisfied by any comment that named it.) */
   const codeOf = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-  /* ── 1. the table declares the three roles at the three counts ─────────────────────────────── */
+  /* ── 1. the table declares the three views at their counts, switches first ───────────────── */
 
-  const navSrc = read(NAV_TABS_FILE);
-  for (const role of Object.keys(EXPECTED_COUNT)) {
-    const m = navSrc.match(new RegExp(`\\b${role}:\\s*\\[([\\s\\S]*?)\\n\\s*\\]`));
-    if (!m) {
-      problems.push(`navTabs.ts declares no "${role}" tab list`);
+  // The table is DATA (app/navTabs.ts is pure on purpose), so it is imported, not parsed.
+  let NAV_TABS = null;
+  try {
+    ({ NAV_TABS } = await import(pathToFileURL(path.resolve(NAV_TABS_FILE)).href));
+  } catch (error) {
+    problems.push(`navTabs.ts cannot be imported into bare Node: ${error.message.split('\n')[0]}`);
+  }
+  const views = NAV_TABS && typeof NAV_TABS === 'object' ? NAV_TABS : {};
+  for (const view of Object.keys(views)) {
+    if (!(view in EXPECTED_COUNT)) problems.push(`navTabs.ts declares a "${view}" bar the design does not have`);
+  }
+  for (const [view, expected] of Object.entries(EXPECTED_COUNT)) {
+    const tabs = views[view];
+    if (!Array.isArray(tabs)) {
+      problems.push(`navTabs.ts declares no "${view}" tab list`);
       continue;
     }
-    const count = [...m[1].matchAll(/\{\s*to:/g)].length;
-    if (count !== EXPECTED_COUNT[role]) {
+    if (tabs.length !== expected) {
       problems.push(
-        `the ${role} bar has ${count} tabs, and the approved design has ${EXPECTED_COUNT[role]}.\n` +
+        `the ${view} bar has ${tabs.length} cells, and the approved design has ${expected}.\n` +
           '      If the design changed, change EXPECTED_COUNT here in the same commit — the count is\n' +
           '      a decision, and a decision that lives in only one of two places drifts.',
       );
     }
+    const keys = tabs.map((tab) => tab.key);
+    const dup = keys.filter((key, i) => keys.indexOf(key) !== i);
+    if (keys.some((key) => typeof key !== 'string' || key === '')) problems.push(`the ${view} bar has a cell with no key — the bar keys its cells by it`);
+    if (dup.length) problems.push(`the ${view} bar repeats the key(s) ${[...new Set(dup)].join(', ')} — React would reuse one cell for two tabs`);
+
+    const switches = tabs.filter((tab) => tab.kind === 'switch');
+    const lead = tabs.slice(0, switches.length);
+    const want = EXPECTED_SWITCHES[view] ?? [];
+    if (switches.length !== want.length || lead.some((tab) => tab.kind !== 'switch')) {
+      problems.push(
+        `the ${view} bar must OPEN with ${want.length} switch cell(s) (${want.map((v) => `back to ${v}`).join(', ') || 'none'}), ` +
+          `found ${switches.length}${lead.some((tab) => tab.kind !== 'switch') ? ', not all of them first' : ''}.\n` +
+          '      The switch column is fixed (64 pt per cell from inset 12): a switch after a destination\n' +
+          '      would move the way back between views.',
+      );
+    }
+    switches.forEach((tab, i) => {
+      if (tab.view !== want[i]) problems.push(`the ${view} bar's switch ${i + 1} returns to "${tab.view}", the design returns to "${want[i]}"`);
+      if (tab.to !== VIEW_ROOT[tab.view]) problems.push(`the ${view} bar's switch to the ${tab.view} view opens "${tab.to}", not that view's root ${VIEW_ROOT[tab.view]}`);
+      if (typeof tab.nameKey !== 'string') problems.push(`the ${view} bar's switch "${tab.key}" has no nameKey — its accessible name must be the whole phrase, not the one word it shows`);
+    });
   }
+  const allTabs = Object.values(views).flatMap((tabs) => (Array.isArray(tabs) ? tabs : []));
 
   /* ── 2. every tab points at a route that exists ────────────────────────────────────────────── */
 
@@ -148,7 +187,7 @@ async function main() {
   const routePaths = new Set([...routerSrc.matchAll(/path:\s*'([^']+)'/g)].map(([, p]) => absolute(p)));
   if (routerSrc.includes('index: true')) routePaths.add('/');
 
-  const tabTargets = new Set([...navSrc.matchAll(/\{\s*to:\s*'([^']+)'/g)].map((m) => m[1]));
+  const tabTargets = new Set(allTabs.map((tab) => tab.to));
   for (const to of tabTargets) {
     if (!routePaths.has(to)) {
       problems.push(`the bar has a tab for "${to}", and the router has no such path`);
@@ -161,7 +200,7 @@ async function main() {
   const resolve = (bundle, key) => key.split('.').reduce((o, k) => (o == null ? undefined : o[k]), bundle);
   const missingIn = (key) => LOCALES.filter((l) => typeof resolve(bundles[l], key) !== 'string');
 
-  for (const key of new Set([...navSrc.matchAll(/labelKey:\s*'([^']+)'/g)].map((m) => m[1]))) {
+  for (const key of new Set(allTabs.flatMap((tab) => [tab.labelKey, tab.nameKey]).filter((k) => typeof k === 'string'))) {
     const missing = missingIn(key);
     if (missing.length) {
       problems.push(`the bar asks for "${key}", which is missing from: ${missing.join(', ')}`);
@@ -395,6 +434,15 @@ async function main() {
       if (!routePaths.has(route)) problems.push(`routeMeta has a row for "${route}", and the router has no such path`);
       if (typeof meta?.parent !== 'string' || !routePaths.has(meta.parent)) {
         problems.push(`routeMeta sends "${route}" back to "${meta?.parent}", which is not a router path`);
+      }
+      for (const [view, alt] of Object.entries(meta?.byView ?? {})) {
+        if (!(view in EXPECTED_COUNT) || view === 'user') problems.push(`routeMeta gives "${route}" a parent for "${view}", which is not another view`);
+        if (typeof alt?.parent !== 'string' || !routePaths.has(alt.parent)) {
+          problems.push(`routeMeta sends "${route}" back to "${alt?.parent}" in the ${view} view, which is not a router path`);
+        }
+        if (typeof alt?.parentLabelKey !== 'string' || missingIn(alt.parentLabelKey).length) {
+          problems.push(`routeMeta labels the ${view} parent of "${route}" with "${alt?.parentLabelKey}", which does not resolve in every bundle`);
+        }
       }
       if (typeof meta?.parentLabelKey !== 'string') {
         problems.push(`routeMeta names no parentLabelKey for "${route}" — the header would have a back arrow with no name`);

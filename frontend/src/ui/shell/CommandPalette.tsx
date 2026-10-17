@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { Search, CornerDownLeft } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { useSession } from '../../features/auth/useSession';
+import { hasRole, useSession } from '../../features/auth/useSession';
 
 export interface Command {
   id: string;
@@ -90,7 +90,7 @@ export function CommandPalette({ commands, inline = false }: CommandPaletteProps
       go('settings', t('nav.settings'), '/settings', 'theme tema beallitasok'),
     ];
 
-    if (user?.role === 'coach' || user?.role === 'admin') {
+    if (hasRole(user, 'coach')) {
       base.push(
         go('coach', t('nav.coach'), '/coach', 'clients kliensek dashboard'),
         go('plans', t('nav.plans'), '/coach/plans', 'tervek programs'),
@@ -98,9 +98,11 @@ export function CommandPalette({ commands, inline = false }: CommandPaletteProps
         go('composeProfile', t('nav.composeProfile'), '/compose/profile', 'public profile nyilvanos profil handle'),
       );
     }
-    if (user?.role === 'admin') {
+    if (hasRole(user, 'admin')) {
       base.push(
-        go('admin', t('nav.admin'), '/admin', 'stats moderation'),
+        go('admin', t('nav.admin'), '/admin', 'stats moderation moderacio'),
+        go('accounts', t('nav.accounts'), '/admin/accounts', 'users felhasznalok fiokok accounts'),
+        go('adminMarketplace', t('admin.section.marketplace'), '/admin/marketplace', 'reports bejelentesek piacter moderation'),
         go('styleStudio', t('nav.styleStudio'), '/admin/styles', 'variants elements stilus'),
         go('playground', t('nav.playground'), '/playground', 'qa feedback matrix'),
       );

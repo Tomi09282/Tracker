@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, Check, ChevronDown, ChevronUp, Eye, EyeOff, Trash2,
 import { useState, type ReactNode } from 'react';
 import { Monogram } from '../../../ui/data/Monogram';
 import { Pic } from '../../../ui/media/Pic';
-import { BottomNav, type NavTab } from '../../../ui/nav/BottomNav';
+import { BottomNav, useNavTabs } from '../../../ui/nav/BottomNav';
 import { Chip, ChipRow } from '../../../ui/primitives/ChipRow';
 import { Pressable, PressableLink, UnlitPills } from '../../../ui/primitives/Pressable';
 import { TextLink } from '../../../ui/primitives/TextLink';
@@ -78,14 +78,6 @@ function Rail({ initial }: { initial: string | null }) {
 const DEVICE =
   '[--tabbar-offset:36px] [--fade-h:130px] [--dock-b:104px] [--dock-b-bare:50px] [--head-top-root:72px] [--head-top-push:64px] [--status-bar-h:0px] [--viewport-h:874px] [--offline-h:0px] [--content-pad-b:92px]';
 
-const TABS: NavTab[] = [
-  { to: '/', icon: 'home', label: 'Kezdőlap', end: true },
-  { to: '/workout', icon: 'training', label: 'Edzés' },
-  { to: '/nutrition', icon: 'nutrition', label: 'Étkezés' },
-  { to: '/progress', icon: 'progress', label: 'Haladás' },
-  { to: '/settings', icon: 'profile', label: 'Profil' },
-];
-
 /** The column of a one-viewport screen: a header, ONE inner scroller, a closing block on the bar. */
 function FixedPhone() {
   return (
@@ -104,7 +96,7 @@ function FixedPhone() {
             az utolsó blokk: 28 pt-tal a sáv fölött
           </div>
         </Screen>
-        <BottomNav inline tabs={TABS} at="/workout" />
+        <BottomNav inline tabs={useNavTabs('user')} at="/workout" />
       </div>
     </ShellProvider>
   );

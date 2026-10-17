@@ -137,6 +137,8 @@ const TOKENS = 'src/ui/tokens/tokens.css';
 const CATALOG = 'src/ui/feedback/catalog.ts';
 const SAFE_AREA_EXEMPT = 'scripts/data/safe-area-exempt.json';
 const WORKOUT_PLAYER = 'src/features/workout/WorkoutPlayer.tsx';
+const SETTINGS_PAGE = 'src/features/settings/SettingsPage.tsx';
+const NAV_ICONS = 'src/assets/pulse/navIcons.ts';
 
 const noHorizontalInset = (text) => text.replace(/env\(\s*safe-area-inset-(?:left|right)\s*\)/g, '0px');
 const firstBottomTokenInUse = (ctx) =>
@@ -165,17 +167,19 @@ const PROBES = [
     id: 'nav/way-back-is-not-a-door',
     gate: 'check:nav',
     label: "a child's back-link does not keep its parent reachable",
-    file: 'src/features/coaching/CoachDashboard.tsx',
-    mutate: swap(/\bto\s*=\s*"\/coach\/plans"/, 'to="/coach"'),
-    expect: /"\/coach\/plans" is a route nobody links to[\s\S]*?ways BACK/,
+    // The trainer's desk is reached by its Pult tab only; its two children go back to it through
+    // routeMeta. Point the tab at a child and only those ways back are left.
+    file: NAV_TABS,
+    mutate: swap(/(key:\s*'desk',\s*to:\s*)'\/compose'/, "$1'/compose/profile'"),
+    expect: /"\/compose" is a route nobody links to[\s\S]*?ways BACK/,
   },
   {
     id: 'nav/open-exemption-outlives-its-reason',
     gate: 'check:nav',
     label: 'an OPEN exemption fails the day its route gets a door',
     file: PLANT,
-    create: () => `export const probe = <a to="/compose" />;${LF}`,
-    expect: /"\/compose" has a door now/,
+    create: () => `export const probe = <a to="/m" />;${LF}`,
+    expect: /"\/m" has a door now/,
   },
   {
     id: 'nav/required-door-entry',
@@ -211,15 +215,15 @@ const PROBES = [
     gate: 'check:nav',
     label: 'a tab count that drifts from the design is caught',
     file: NAV_TABS,
-    mutate: swap(/[ \t]*\{\s*to:\s*'\/admin'[^}]*\},?[ \t]*\r?\n/, ''),
-    expect: /the approved design has 7/,
+    mutate: swap(/[ \t]*\{\s*key:\s*'accounts'[^}]*\},?[ \t]*\r?\n/, ''),
+    expect: /the admin bar has 4 cells, and the approved design has 5/,
   },
   {
     id: 'nav/tab-to-missing-route',
     gate: 'check:nav',
     label: 'a tab pointing at a route that does not exist is caught',
     file: NAV_TABS,
-    mutate: swap(/\{\s*to:\s*'\/progress'/, "{ to: '/progres'"),
+    mutate: swap(/(\bto:\s*)'\/progress'/, "$1'/progres'"),
     expect: /the bar has a tab for "\/progres", and the router has no such path/,
   },
   {
@@ -248,6 +252,27 @@ const PROBES = [
         ? null
         : `${noHorizontalInset(text)}${LF}// keeps env(safe-area-inset-left) and env(safe-area-inset-right) in mind${LF}`,
     expect: /never mentions safe-area-inset-left/,
+  },
+  {
+    id: 'nav/switch-door-deleted',
+    gate: 'check:nav',
+    label: "deleting Profil's door to the trainer view is caught (the switch is only the way back)",
+    file: SETTINGS_PAGE,
+    mutate: swap(/\bto\s*=\s*"\/coach"/, 'to="/settings"'),
+    expect: /the required door to "\/coach" is gone from features\/settings\/SettingsPage\.tsx/,
+  },
+  {
+    id: 'nav/view-count',
+    gate: 'check:nav',
+    label: 'a switch cell that leaves the head of its bar is caught',
+    file: NAV_TABS,
+    // Rotate the trainer bar's switch to its end: the count stays 4, the column is broken.
+    mutate: (text) => {
+      const m = text.match(/(\n[ \t]*\{ kind: 'switch', key: 'switch-user'[^\n]*\n)([ \t]*\/\/[^\n]*\n)?([ \t]*\{ key: 'clients'[^\n]*\n[ \t]*\{ key: 'plans'[^\n]*\n[ \t]*\{ key: 'desk'[^\n]*\n)/);
+      if (!m) return null;
+      return text.replace(m[0], `\n${m[2] ?? ''}${m[3]}${m[1].slice(1)}`);
+    },
+    expect: /the trainer bar must OPEN with 1 switch cell/,
   },
   {
     id: 'nav/route-meta-parent-planted',
@@ -286,15 +311,40 @@ const PROBES = [
     label: 'a screen that stops lighting its tab is caught',
     file: NAV_TABS,
     mutate: swap(/,\s*owns:\s*\[\s*'\/library'\s*\]/, ''),
-    expect: /user on \/library lights exactly one tab/,
+    expect: /user view on \/library lights exactly one tab/,
   },
   {
     id: 'nav-active/notifications-owner',
     gate: 'check:nav-active',
     label: 'Értesítések without its Kezdőlap tab is caught',
     file: NAV_TABS,
-    mutate: swap(/,\s*'\/notifications'\s*\]/, ']'),
-    expect: /user on \/notifications lights exactly one tab/,
+    mutate: swap(/(owns:\s*\['\/onboarding'),\s*'\/notifications'\s*\]/, '$1]'),
+    expect: /user view on \/notifications lights exactly one tab/,
+  },
+  {
+    id: 'nav-active/switch-lit',
+    gate: 'check:nav-active',
+    label: 'a switch cell that lights is caught',
+    file: NAV_TABS,
+    mutate: swap(/\n[ \t]*if \(isSwitch\(tab\)\) return false;/, ''),
+    expect: /the switch "switch-user" never lights/,
+  },
+  {
+    id: 'nav-active/shared-parent-missing',
+    gate: 'check:nav-active',
+    label: "Értesítések without its trainer-view parent is caught",
+    file: ROUTE_META,
+    when: () => exists(ROUTE_META) || 'src/app/routeMeta.ts has not landed yet (F11)',
+    mutate: swap(/\n[ \t]*trainer:\s*\{\s*parent:\s*'\/coach'[^}]*\},?/, ''),
+    expect: /trainer view: \/notifications lights the tab of its parent \//,
+  },
+  {
+    id: 'nav-active/view-fallback',
+    gate: 'check:nav-active',
+    label: 'a trainer bar shown to an account without the coach role is caught',
+    file: NAV_TABS,
+    mutate: swap(/return allowed\.includes\(view\) \? view : 'user';/, 'return view;'),
+    expect: /user on \/coach \(came from nowhere\) shows the user bar/,
   },
   {
     id: 'nav-active/route-meta-owner-planted',
@@ -674,6 +724,22 @@ const PROBES = [
     file: 'src/assets/pulse/slots.ts',
     mutate: swap(/('tab-home':\s*\{[^}]*?\blit:\s*)true/, '$1false'),
     expect: /tab icon key "home" has no lit raster/,
+  },
+  {
+    id: 'assets/switch-has-lit',
+    gate: 'check:assets',
+    label: 'a switch icon that asks to light is caught',
+    file: NAV_ICONS,
+    mutate: swap(/('switch-trainer':\s*\{[^}]*?\blit:\s*)'none'/, "$1'raster'"),
+    expect: /switch icon key "switch-trainer" asks to light/,
+  },
+  {
+    id: 'assets/switch-names-destination',
+    gate: 'check:assets',
+    label: 'a switch cell drawn with a destination icon is caught',
+    file: NAV_TABS,
+    mutate: swap(/(key:\s*'switch-trainer',[^}]*?icon:\s*)'switch-trainer'/, "$1'coach'"),
+    expect: /the switch to \/coach names icon "coach", which is not a switch icon key/,
   },
   {
     id: 'assets/blend-mode',

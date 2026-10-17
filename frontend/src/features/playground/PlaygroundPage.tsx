@@ -167,8 +167,8 @@ export function Demo({ id }: { id: string }) {
           <BottomNav
             inline
             tabs={[
-              { to: '/playground', icon: 'home', label: 'One', end: true },
-              { to: '/library', icon: 'training', label: 'Two' },
+              { key: 'one', to: '/playground', icon: 'home', label: 'One', end: true },
+              { key: 'two', to: '/library', icon: 'training', label: 'Two' },
             ]}
           />
         </div>

@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { routeMetaFor } from '../../app/routeMeta';
+import { useCurrentView } from '../../app/viewContext';
 import { cn } from '../../lib/cn';
 
 /**
@@ -176,6 +177,7 @@ function BackControl({ back }: { back: ScreenHeaderBack }) {
 export function ScreenHeader(props: ScreenHeaderProps) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const view = useCurrentView();
   const { trailing, children, titleId, className } = props;
 
   if (props.kind === 'greet' || props.kind === 'root') {
@@ -246,7 +248,8 @@ export function ScreenHeader(props: ScreenHeaderProps) {
     );
   }
 
-  const row = routeMetaFor(pathname);
+  // The view decides the parent of a screen every view shares (`/notifications`, `byView`).
+  const row = routeMetaFor(pathname, view);
   const back: ScreenHeaderBack | null =
     props.back ?? (row ? { to: row.parent, label: t(row.parentLabelKey), bare: row.bare } : null);
 

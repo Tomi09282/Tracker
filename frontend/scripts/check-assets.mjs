@@ -23,8 +23,11 @@
 //   2 pixels     every file's real pixel size (read from its WebP header) is its width and the
 //                slot's aspect ratio; a lit raster has the size of its idle twin
 //   3 budget     the folder stays under 1.0 MB and every file under its family's cap
-//   4 tabs       every tab icon key has an idle and a lit raster; every tab of NAV_TABS names such a
-//                key (that second leg is switched on by assets.json when the bar takes string keys)
+//   4 tabs       every tab icon key has an idle and a lit raster; navIcons.ts maps every bar icon
+//                key to a raster on disk (a `raster` light to a slot with a lit twin; a SWITCH key
+//                to an idle raster only — it never lights, and a switch master never ships a lit
+//                file); every cell of NAV_TABS names such a key — a switch cell a switch key, a
+//                destination a destination key
 //   5 equipment  EQUIPMENT_STILL decides every equipment slug the database knows, and only ever
 //                points at an equipment still
 //   6 door       outside src/assets/pulse and src/ui/media nothing imports an image or reaches into
@@ -626,6 +629,52 @@ export async function runChecks({ root = FRONTEND_ROOT, navTabs, navTabsError, m
       }
     }
 
+    // The bar's icon keys → rasters (src/assets/pulse/navIcons.ts, hand-written, pure). Until the
+    // owner's masters exist, six keys are drawn by PLACEHOLDER rasters that already ship: the two
+    // switch cells by the idle profile / coach icon, Tervek / Pult / Fiókok by a photo still and
+    // Piactér by the coin. This is the one place that says so, and this leg holds it to the disk.
+    let navIcons = null;
+    try {
+      navIcons = await importFresh(path.join(root, PULSE_REL, 'navIcons.ts'));
+    } catch (error) {
+      fail(4, `${PULSE_REL}/navIcons.ts cannot be imported into bare Node: ${error.message.split(LF)[0]}`);
+    }
+    const SOURCES = navIcons?.NAV_ICON_SOURCE ?? {};
+    const SWITCH_KEYS = navIcons?.SWITCH_ICON_KEYS ?? [];
+    if (navIcons) {
+      if (SWITCH_KEYS.length === 0) fail(4, 'navIcons.ts names no SWITCH_ICON_KEYS — the role bars open with switch cells');
+      for (const key of TAB_KEYS) {
+        if (!SOURCES[key]) fail(4, `tab icon key "${key}" has no row in NAV_ICON_SOURCE — the bar could not draw it`);
+      }
+      for (const [key, source] of Object.entries(SOURCES)) {
+        const meta = SLOTS[source?.slot];
+        const isSwitchKey = SWITCH_KEYS.includes(key);
+        if (!meta) {
+          fail(4, `NAV_ICON_SOURCE.${key} draws slot "${source?.slot}", which is not a slot`);
+          continue;
+        }
+        for (const width of meta.widths ?? []) {
+          if (!onDisk.has(`${source.slot}-${width}.webp`)) fail(4, `NAV_ICON_SOURCE.${key}: ${IMG_REL}/${source.slot}-${width}.webp is not on disk`);
+        }
+        if (!['raster', 'tint', 'none'].includes(source.lit)) fail(4, `NAV_ICON_SOURCE.${key} lights by "${source.lit}" — raster, tint or none`);
+        if (source.lit === 'raster' && !meta.lit) {
+          fail(4, `NAV_ICON_SOURCE.${key} lights by its raster, and slot "${source.slot}" has no lit raster — the active tab would have nothing to light`);
+        }
+        if (isSwitchKey && source.lit !== 'none') {
+          fail(4, `switch icon key "${key}" asks to light ("${source.lit}") — a switch is a way back, never the current place: an idle raster and nothing else`);
+        }
+        if (!isSwitchKey && source.lit === 'none') {
+          fail(4, `destination icon key "${key}" never lights ("none") — only a switch has no lit state`);
+        }
+      }
+      // The masters to come (checkpoint C2): a switch master ships its idle file ONLY.
+      for (const key of SWITCH_KEYS) {
+        for (const slot of [key, `tab-${key}`]) {
+          if (SLOTS[slot]?.lit) fail(4, `switch master "${slot}" ships a lit raster — a switch never lights; drop its litSource from ${MANIFEST_REL}`);
+        }
+      }
+    }
+
     const leg = manifest.navTabs?.leg;
     const field = manifest.navTabs?.field ?? 'icon';
     if (leg !== 'pending' && leg !== 'enforced') {
@@ -633,17 +682,23 @@ export async function runChecks({ root = FRONTEND_ROOT, navTabs, navTabsError, m
     } else if (!navTabs) {
       fail(4, `app/navTabs.ts could not be imported, so the tab table cannot be checked${navTabsError ? `: ${navTabsError}` : ''}`);
     } else {
-      const tabs = Object.entries(navTabs).flatMap(([role, list]) => list.map((tab) => ({ role, tab })));
+      const tabs = Object.entries(navTabs).flatMap(([view, list]) => list.map((tab) => ({ view, tab })));
       let keyed = 0;
-      for (const { role, tab } of tabs) {
+      for (const { view, tab } of tabs) {
         const value = tab[field];
         if (typeof value === 'string') {
           keyed += 1;
-          if (!TAB_KEYS.includes(value)) {
-            fail(4, `NAV_TABS.${role}: the tab to ${tab.to} names icon "${value}", which is not a tab icon key (${TAB_KEYS.join(', ')})`);
+          if (tab.kind === 'switch') {
+            if (!SWITCH_KEYS.includes(value)) {
+              fail(4, `NAV_TABS.${view}: the switch to ${tab.to} names icon "${value}", which is not a switch icon key (${SWITCH_KEYS.join(', ')}) — a switch draws an idle raster only`);
+            }
+          } else if (SWITCH_KEYS.includes(value)) {
+            fail(4, `NAV_TABS.${view}: the tab to ${tab.to} names the switch icon "${value}" — a destination must be able to light`);
+          } else if (!Object.hasOwn(SOURCES, value)) {
+            fail(4, `NAV_TABS.${view}: the tab to ${tab.to} names icon "${value}", which is not a bar icon key (${Object.keys(SOURCES).join(', ')})`);
           }
         } else if (leg === 'enforced') {
-          fail(4, `NAV_TABS.${role}: the tab to ${tab.to} has no string icon key in "${field}" — the bar draws raster pairs, and this file must stay importable by bare Node`);
+          fail(4, `NAV_TABS.${view}: the tab to ${tab.to} has no string icon key in "${field}" — the bar draws rasters by key, and this file must stay importable by bare Node`);
         }
       }
       if (leg === 'pending') {
@@ -693,7 +748,7 @@ export async function runChecks({ root = FRONTEND_ROOT, navTabs, navTabsError, m
     `(?:\\bfrom\\s*|\\bimport\\s*\\(?\\s*|\\bnew\\s+URL\\s*\\(\\s*|\\bglob\\s*\\(\\s*\\[?\\s*|\\burl\\s*\\(\\s*)(['"\`]?)(?!data:|https?:)([^'"\`)\\s]*\\.(?:${IMAGE_EXT}))(?:\\?[^'"\`)\\s]*)?\\1`,
     'i',
   );
-  const typeOnlySlots = /^\s*import\s+type\s+[^;]*?\bfrom\s+['"][^'"]*assets\/pulse\/slots(?:\.ts)?['"]/;
+  const typeOnlySlots = /^\s*import\s+type\s+[^;]*?\bfrom\s+['"][^'"]*assets\/pulse\/(?:slots|navIcons)(?:\.ts)?['"]/;
   for (const file of existsSync(srcDir) ? await walk(srcDir) : []) {
     if (!TEXT_EXT.has(path.extname(file))) continue;
     const rel = posix(path.relative(root, file));
@@ -816,10 +871,23 @@ async function relock(root) {
  */
 const BLEND_UTILITY = ['mix', 'blend', 'lighten'].join('-');
 
-/** A NAV_TABS-shaped table in the state the real file is in today: components, not keys. */
+/** A NAV_TABS-shaped table as the shell lane found it: components, not keys. */
 const NAV_COMPONENTS = { user: [{ to: '/', icon: () => null }, { to: '/settings', icon: () => null }] };
-/** …and in the state the shell lane leaves it in. */
-const navKeys = (...keys) => ({ user: keys.map((icon, i) => ({ to: `/tab-${i}`, icon })) });
+/** A NAV_TABS-shaped table with destination keys only. */
+const navKeys = (...keys) => ({ user: keys.map((icon, i) => ({ key: `k${i}`, to: `/tab-${i}`, icon })) });
+/** A NAV_TABS-shaped table in the state the real file is in: views, switch cells first, keys. */
+const NAV_VIEWS = {
+  user: [{ key: 'home', to: '/', icon: 'home' }, { key: 'profile', to: '/settings', icon: 'profile' }],
+  trainer: [
+    { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user' },
+    { key: 'plans', to: '/coach/plans', icon: 'plans' },
+  ],
+  admin: [
+    { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user' },
+    { kind: 'switch', key: 'switch-trainer', to: '/coach', view: 'trainer', icon: 'switch-trainer' },
+    { key: 'market', to: '/admin/marketplace', icon: 'market' },
+  ],
+};
 
 /**
  * One planted defect per assertion (more where an assertion has several legs).
@@ -924,7 +992,33 @@ const PROBES = [
   {
     expect: 4,
     name: 'pending leg left on after every tab took a key',
-    plant: async () => ({ navTabs: navKeys('home', 'training', 'profile') }),
+    plant: async (root) => {
+      await editManifest(root, (manifest) => {
+        manifest.navTabs.leg = 'pending';
+      });
+      return { navTabs: navKeys('home', 'training', 'profile') };
+    },
+  },
+  {
+    expect: 4,
+    name: 'switch-has-lit: a switch key asks to light (navIcons.ts switch-user -> raster)',
+    plant: (root) =>
+      editFile(path.join(root, PULSE_REL, 'navIcons.ts'), (text) =>
+        text.replace(/('switch-user':\s*\{[^}]*?lit:\s*)'none'/, "$1'raster'"),
+      ),
+  },
+  {
+    expect: 4,
+    name: 'a switch cell that names a destination icon (profile)',
+    plant: async () => ({
+      navTabs: { ...NAV_VIEWS, trainer: [{ kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'profile' }, ...NAV_VIEWS.trainer.slice(1)] },
+    }),
+  },
+  {
+    expect: 4,
+    name: 'a placeholder pointed at a slot that does not exist (desk -> hero-desk)',
+    plant: (root) =>
+      editFile(path.join(root, PULSE_REL, 'navIcons.ts'), (text) => text.replace(/(desk:\s*\{\s*slot:\s*)'hero-stopwatch'/, "$1'hero-desk'")),
   },
   {
     expect: 5,
@@ -1046,11 +1140,11 @@ async function runProbes() {
   let ok = true;
   let aligned = false;
   try {
-    // The control: an untouched copy must pass, with the tab table in both of its legal states.
+    // The control: an untouched copy must pass, with a tab table in the shape the real one has.
     const control = path.join(base, 'control', 'frontend');
     await buildSandbox(FRONTEND_ROOT, control);
     aligned = await alignSandboxTokens(control);
-    const green = await runChecks({ root: control, navTabs: NAV_COMPONENTS });
+    const green = await runChecks({ root: control, navTabs: NAV_VIEWS });
     rows.push(['control', 'an untouched copy', 'green', green.problems.length === 0 ? 'green' : `RED: ${green.problems[0].message}`]);
     if (green.problems.length) ok = false;
 
@@ -1061,7 +1155,7 @@ async function runProbes() {
       let result;
       try {
         const options = (await probe.plant(root)) ?? {};
-        const run = await runChecks({ root, navTabs: NAV_COMPONENTS, ...options });
+        const run = await runChecks({ root, navTabs: NAV_VIEWS, ...options });
         const red = [...new Set(run.problems.map((p) => p.n))].sort();
         const allowed = new Set([probe.expect, ...(probe.also ?? [])]);
         const stray = red.filter((n) => !allowed.has(n));

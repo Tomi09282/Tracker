@@ -69,7 +69,17 @@
     "compose": "Publishing",
     "composeProfile": "Public profile",
     "styleStudio": "Style studio",
-    "playground": "Playground"
+    "playground": "Playground",
+    "clients": "Clients",
+    "desk": "Desk",
+    "moderation": "Moderation",
+    "accounts": "Accounts",
+    "switch": {
+      "user": "Member",
+      "trainer": "Coach",
+      "userName": "Back to member view",
+      "trainerName": "Back to coach view"
+    }
   },
   "home": {
     "greeting": "Hi there!",
@@ -99,7 +109,6 @@
       "hapticsHint": "A buzz when a set is checked.",
       "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left."
     },
-    "openAdmin": "Open the admin area",
     "equipment": "Equipment",
     "equipmentHint": "What you can actually reach. Your plan is built around it.",
     "equipmentSaved": "Equipment saved",
@@ -111,6 +120,11 @@
       "user": "Member",
       "coach": "Coach",
       "admin": "Admin"
+    },
+    "views": {
+      "title": "Views",
+      "coach": "Coach view",
+      "admin": "Admin view"
     }
   },
   "library": {

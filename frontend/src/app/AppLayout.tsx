@@ -1,9 +1,7 @@
-import { useMemo } from 'react';
 import { Outlet } from 'react-router';
-import { useTranslation } from 'react-i18next';
-import { BottomNav, type NavTab } from '../ui/nav/BottomNav';
-import { tabsForRole } from './navTabs';
-import { useSession } from '../features/auth/useSession';
+import { BottomNav, useNavTabs } from '../ui/nav/BottomNav';
+import { useView } from './useView';
+import { ViewContext } from './viewContext';
 import { CommandPalette } from '../ui/shell/CommandPalette';
 import { ShellProvider } from '../ui/shell/Screen';
 
@@ -19,7 +17,8 @@ import { ShellProvider } from '../ui/shell/Screen';
  *            the edge. A full-height screen subtracts EXACTLY this token, so the page never scrolls
  *            by a few pixels; the extra air a scrolling page needs to bring its last block out of
  *            the fade is the scaffold's (`Screen`), not the layout's
- *   bar      the tab bar and its fade (`BottomNav`), mounted once
+ *   bar      the tab bar and its fade (`BottomNav`), mounted once, with the tabs of the current
+ *            VIEW (`useView`: derived from the URL; plan decision R2)
  *
  * `ShellProvider tabs` tells `Screen` and `Dock` that a tab bar stands at the bottom — a fact
  * about the layout, never a prop a page has to remember. The top of a screen — its inset and the
@@ -27,22 +26,13 @@ import { ShellProvider } from '../ui/shell/Screen';
  * the top it had.
  */
 export function AppLayout() {
-  const { t } = useTranslation();
-  const { data: user } = useSession();
-
-  const tabs: NavTab[] = useMemo(
-    () =>
-      tabsForRole(user?.role).map((spec) => ({
-        to: spec.to,
-        icon: spec.icon,
-        owns: spec.owns,
-        label: t(spec.labelKey),
-        end: spec.end,
-      })),
-    [user?.role, t],
-  );
+  // The bar of the view the URL is in (`useView`): the member's, the trainer's or the admin's.
+  // A view grants nothing — every route and endpoint re-checks the role on the server.
+  const view = useView();
+  const tabs = useNavTabs(view);
 
   return (
+    <ViewContext.Provider value={view}>
     <ShellProvider tabs>
       <div className="min-h-dvh">
         <CommandPalette />
@@ -54,5 +44,6 @@ export function AppLayout() {
         <BottomNav tabs={tabs} />
       </div>
     </ShellProvider>
+    </ViewContext.Provider>
   );
 }

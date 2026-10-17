@@ -23,7 +23,7 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useOnline } from '../plans/useOnline';
-import { useSession } from '../auth/useSession';
+import { hasRole, useSession } from '../auth/useSession';
 import { personLabel } from '../../lib/person';
 import {
   useClients,
@@ -111,7 +111,7 @@ export function CoachDashboard() {
   const [teamsOpen, setTeamsOpen] = useState(false);
   const [pregenOpen, setPregenOpen] = useState(false);
 
-  if (user && user.role !== 'coach' && user.role !== 'admin') {
+  if (user && !hasRole(user, 'coach')) {
     // The whole page for a non-coach, so its title is the page heading. The route is a
     // convenience; the server enforces the role regardless.
     return (

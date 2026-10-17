@@ -2,8 +2,8 @@ import { Ban, Bell, ChevronRight, Palette, Search } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Stepper } from '../../../ui/data/SegmentBar';
 import { ToastBand } from '../../../ui/feedback/ToastHost';
-import { BottomNav } from '../../../ui/nav/BottomNav';
-import type { NavTab } from '../../../ui/nav/BottomNav';
+import type { NavView } from '../../../app/navTabs';
+import { BottomNav, useNavTabs } from '../../../ui/nav/BottomNav';
 import { Pressable } from '../../../ui/primitives/Pressable';
 import { TextLink } from '../../../ui/primitives/TextLink';
 import { Dock } from '../../../ui/shell/Dock';
@@ -55,19 +55,13 @@ export interface KitSpecimen {
 
 /* ── the sample data of the board ──────────────────────────────────────────────────────────────── */
 
-const TAB = {
-  home: { to: '/', icon: 'home', label: 'Kezdőlap', end: true },
-  training: { to: '/workout', icon: 'training', label: 'Edzés' },
-  nutrition: { to: '/nutrition', icon: 'nutrition', label: 'Étkezés' },
-  progress: { to: '/progress', icon: 'progress', label: 'Haladás' },
-  coach: { to: '/coach', icon: 'coach', label: 'Edző' },
-  admin: { to: '/admin', icon: 'admin', label: 'Admin' },
-  profile: { to: '/settings', icon: 'profile', label: 'Profil' },
-} as const satisfies Record<string, NavTab>;
-
-const MEMBER: NavTab[] = [TAB.home, TAB.training, TAB.nutrition, TAB.progress, TAB.profile];
-const COACH: NavTab[] = [TAB.home, TAB.training, TAB.nutrition, TAB.progress, TAB.coach, TAB.profile];
-const ADMIN: NavTab[] = [TAB.home, TAB.training, TAB.nutrition, TAB.progress, TAB.coach, TAB.admin, TAB.profile];
+/**
+ * A view's bar, from the app's own table (`app/navTabs.ts` via `useNavTabs`): a specimen cannot
+ * show a tab, a count or an order the app does not draw.
+ */
+function ViewBar({ view, at, force }: { view: NavView; at: string; force?: { pressed?: string; focus?: string } }) {
+  return <BottomNav inline tabs={useNavTabs(view)} at={at} force={force} />;
+}
 
 /* ── the device ────────────────────────────────────────────────────────────────────────────────── */
 
@@ -125,27 +119,27 @@ export const specimens: KitSpecimen[] = [
     w: 402,
     node: (
       <Strip>
-        <BottomNav inline tabs={MEMBER} at="/" />
+        <ViewBar view="user" at="/" />
       </Strip>
     ),
   },
   {
     kit: 'tabBar',
-    label: '6 · coach · inset 12 · cell 63.0',
+    label: '4 · trainer · inset 12 · switch 64 | cell 104.7',
     w: 402,
     node: (
       <Strip>
-        <BottomNav inline tabs={COACH} at="/coach" />
+        <ViewBar view="trainer" at="/coach" />
       </Strip>
     ),
   },
   {
     kit: 'tabBar',
-    label: '7 · admin · inset 8 · cell 55.1 · icon 28',
+    label: '5 · admin · inset 12 · switch 2 × 64 | cell 83.3',
     w: 402,
     node: (
       <Strip>
-        <BottomNav inline tabs={ADMIN} at="/admin" />
+        <ViewBar view="admin" at="/admin" />
       </Strip>
     ),
   },
@@ -163,7 +157,7 @@ export const specimens: KitSpecimen[] = [
   },
   {
     kit: 'scaffold',
-    label: 'root screen · showToast (before chrome) · 7 tabs',
+    label: 'root screen · showToast (before chrome) · admin bar',
     w: 402,
     node: (
       <Phone tabs>
@@ -172,7 +166,7 @@ export const specimens: KitSpecimen[] = [
         </Screen>
         {/* The status zone's band (F13), drawn before the chrome as the board does: "Felszerelés mentve", ok. The board draws no countdown on its rule, so it is frozen at 0. */}
         <ToastBand inline toasts={[{ id: 1, kind: 'success', message: 'Felszerelés mentve' }]} onDismiss={() => {}} still={0} />
-        <BottomNav inline tabs={ADMIN} at="/library" />
+        <ViewBar view="admin" at="/library" />
       </Phone>
     ),
   },
@@ -185,7 +179,7 @@ export const specimens: KitSpecimen[] = [
         <Screen top="push">
           <ScreenHeader kind="push" title="Beállítások" back={{ to: '/settings', label: 'Profil' }} />
         </Screen>
-        <BottomNav inline tabs={MEMBER} at="/settings" />
+        <ViewBar view="user" at="/settings" />
       </Phone>
     ),
   },
@@ -212,7 +206,17 @@ export const specimens: KitSpecimen[] = [
     w: 402,
     node: (
       <Strip>
-        <BottomNav inline tabs={MEMBER} at="/" force={{ pressed: '/workout', focus: '/nutrition' }} />
+        <ViewBar view="user" at="/" force={{ pressed: '/workout', focus: '/nutrition' }} />
+      </Strip>
+    ),
+  },
+  {
+    kit: 'tabBar',
+    label: 'switch cells · pressed (↩ Tag, icon 60 %) / keyboard focus (↩ Edző) — never lit, never aria-current',
+    w: 402,
+    node: (
+      <Strip>
+        <ViewBar view="admin" at="/admin/accounts" force={{ pressed: 'switch-user', focus: 'switch-trainer' }} />
       </Strip>
     ),
   },
@@ -257,7 +261,7 @@ export const specimens: KitSpecimen[] = [
         <Dock inline>
           <Pill>Küldés</Pill>
         </Dock>
-        <BottomNav inline tabs={COACH} at="/coach" />
+        <ViewBar view="trainer" at="/coach" />
       </Phone>
     ),
   },

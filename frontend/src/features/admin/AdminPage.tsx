@@ -16,7 +16,7 @@ import { LedgerRow } from '../../ui/data/LedgerRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { Rule } from '../../ui/data/Rule';
-import { useSession } from '../auth/useSession';
+import { hasRole, useSession } from '../auth/useSession';
 import { MarketplaceQueue } from './MarketplaceQueue';
 import { ModerationQueue } from './ModerationQueue';
 import { AdminShell } from './AdminShell';
@@ -181,12 +181,12 @@ export function AdminPage() {
   const stats = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: () => apiWithRefresh<Stats>('/admin/stats'),
-    enabled: user?.role === 'admin',
+    enabled: hasRole(user, 'admin'),
   });
 
   // The server enforces this too — this is only so a non-admin sees an explanation instead of
   // a screen full of failed requests.
-  if (user && user.role !== 'admin') {
+  if (user && !hasRole(user, 'admin')) {
     return (
       <Screen top="root">
         {/* `heading="h1"`: this IS the page for a non-admin, and a page with no `h1` is one a
@@ -235,7 +235,7 @@ export function AdminPage() {
         sections={[
           {
             key: 'accounts',
-            render: () => <UserSearch enabled={user?.role === 'admin'} />,
+            render: () => <UserSearch enabled={hasRole(user, 'admin')} />,
           },
           {
             key: 'moderation',

@@ -38,11 +38,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { NAV_TABS, isTabActive, tabsForRole } from '../src/app/navTabs.ts';
+import { NAV_TABS, isTabActive, viewForPath, viewsFor } from '../src/app/navTabs.ts';
 
 const ROUTER_FILE = 'src/app/router.tsx';
 const ROUTE_META_FILE = 'src/app/routeMeta.ts';
 const ROLES = ['user', 'coach', 'admin'];
+/** The `roles` `/auth/me` answers for each stored role (the ladder). */
+const ROLES_OF = { user: ['user'], coach: ['user', 'coach'], admin: ['user', 'coach', 'admin'] };
+const VIEWS = ['user', 'trainer', 'admin'];
 
 let passed = 0;
 const failures = [];
@@ -57,75 +60,90 @@ const check = (name, ok, detail = '') => {
   }
 };
 
-/** Which tabs light for this role on this path. */
-const lit = (role, pathname) => tabsForRole(role).filter((t) => isTabActive(t, pathname)).map((t) => t.to);
+/** Which cells light in this view's bar on this path (by `to`). */
+const lit = (view, pathname) => (NAV_TABS[view] ?? []).filter((t) => isTabActive(t, pathname)).map((t) => t.to);
 
 /*
- * EVERY ROUTE A PERSON CAN LAND ON, and the tab that must own it.
+ * EVERY ROUTE A PERSON CAN LAND ON, PER VIEW, and the tab that must own it.
  *
  * Written out rather than derived from the router, deliberately: derived from the same source, the
  * table would agree with the code by construction and assert nothing. This is the SECOND opinion —
  * somebody's statement of where each screen belongs — and it is supposed to be able to disagree.
  *
- * Three lists, by who has the tab: every bar, the bars with an Edző tab, the bar with an Admin
- * tab. `/notifications` belongs to Kezdőlap for everyone (owner question Q6: the bell lives in
- * Home's header, and the header of the notifications screen names Kezdőlap as its parent).
+ * The view is the URL's (plan decision R2): the trainer's screens live under `/coach` and
+ * `/compose`, the admin's under `/admin`, everything else is the member's. `/notifications` is the
+ * one screen every view shares: it lights the root tab of the view the user came from (owner
+ * answer Q6 for the member's bar: Kezdőlap).
  */
-const EVERY_BAR = [
-  ['/', '/'],
-  ['/onboarding', '/'],
-  ['/notifications', '/'],
-  ['/workout', '/workout'],
-  ['/workout/42', '/workout'],
-  ['/library', '/workout'],
-  ['/library/1467', '/workout'],
-  ['/nutrition', '/nutrition'],
-  ['/progress', '/progress'],
-  ['/settings', '/settings'],
-  ['/coins', '/settings'],
-];
-const COACH_BARS = [
-  ['/coach', '/coach'],
-  ['/coach/clients/10', '/coach'],
-  ['/coach/clients/10/chat', '/coach'],
-  ['/coach/plans', '/coach'],
-  ['/coach/plans/3', '/coach'],
-  ['/compose', '/coach'],
-  ['/compose/profile', '/coach'],
-  ['/compose/posts/p_4f2a', '/coach'],
-];
-const ADMIN_BAR = [
-  ['/admin', '/admin'],
-  ['/admin/styles', '/admin'],
-];
-const EXPECT = [
-  ...EVERY_BAR.map((row) => ['user', ...row]),
-  ...[...EVERY_BAR, ...COACH_BARS].map((row) => ['coach', ...row]),
-  ...[...EVERY_BAR, ...COACH_BARS, ...ADMIN_BAR].map((row) => ['admin', ...row]),
-];
+const EXPECT_BY_VIEW = {
+  user: [
+    ['/', '/'],
+    ['/onboarding', '/'],
+    ['/notifications', '/'],
+    ['/workout', '/workout'],
+    ['/workout/42', '/workout'],
+    ['/library', '/workout'],
+    ['/library/1467', '/workout'],
+    ['/nutrition', '/nutrition'],
+    ['/progress', '/progress'],
+    ['/settings', '/settings'],
+    ['/coins', '/settings'],
+  ],
+  trainer: [
+    ['/coach', '/coach'],
+    ['/coach/clients/10', '/coach'],
+    ['/coach/clients/10/chat', '/coach'],
+    ['/coach/plans', '/coach/plans'],
+    ['/coach/plans/3', '/coach/plans'],
+    ['/compose', '/compose'],
+    ['/compose/profile', '/compose'],
+    ['/compose/posts/p_4f2a', '/compose'],
+    ['/notifications', '/coach'],
+  ],
+  admin: [
+    ['/admin', '/admin'],
+    ['/admin/styles', '/admin'],
+    ['/admin/accounts', '/admin/accounts'],
+    ['/admin/marketplace', '/admin/marketplace'],
+    ['/notifications', '/admin'],
+  ],
+};
+const EXPECT = Object.entries(EXPECT_BY_VIEW).flatMap(([view, rows]) => rows.map(([pathname, owner]) => [view, pathname, owner]));
 
-for (const [role, pathname, owner] of EXPECT) {
-  const active = lit(role, pathname);
+for (const [view, pathname, owner] of EXPECT) {
+  const active = lit(view, pathname);
   check(
-    `${role} on ${pathname} lights exactly one tab`,
+    `${view} view on ${pathname} lights exactly one tab`,
     active.length === 1,
     active.length === 1 ? '' : `lit ${active.length}: ${active.join(', ') || 'nothing'}`,
   );
-  check(`${role} on ${pathname} lights ${owner}`, active[0] === owner, `lit ${active[0] ?? 'nothing'}`);
+  check(`${view} view on ${pathname} lights ${owner}`, active[0] === owner, `lit ${active[0] ?? 'nothing'}`);
+}
+
+/*
+ * A SWITCH NEVER LIGHTS — not on its own `to`, not on any screen of any table above. It is a way
+ * back to another view, not a place the user is (frame `bars`, "Váltó cella"); a lit switch would
+ * also carry `aria-current`, telling a screen reader the user is somewhere they are not.
+ */
+const everyPath = [...new Set([...EXPECT.map(([, p]) => p), ...VIEWS.flatMap((v) => (NAV_TABS[v] ?? []).map((t) => t.to))])];
+for (const view of VIEWS) {
+  for (const tab of (NAV_TABS[view] ?? []).filter((t) => t.kind === 'switch')) {
+    const on = everyPath.filter((p) => isTabActive(tab, p));
+    check(`${view}: the switch "${tab.key}" never lights`, on.length === 0, `it lights on ${on.join(', ')}`);
+  }
 }
 
 /*
  * NO TAB MAY OWN ANOTHER TAB'S OWN ROUTE.
  *
- * An `owns` prefix that swallows a sibling is the failure this shape invites — `/coach` owning
- * `/compose` is intended, `/coach` owning `/coach/plans` would be harmless, but a prefix like `/`
- * or `/c` would quietly light two cells at once and the bar would stop meaning anything.
+ * An `owns` prefix (or a missing `end`) that swallows a sibling is the failure this shape invites —
+ * `/coach` without `end` would light Kliensek AND Tervek on `/coach/plans`.
  */
-for (const [role, tabs] of Object.entries(NAV_TABS)) {
-  for (const tab of tabs) {
-    const active = lit(role, tab.to);
+for (const view of VIEWS) {
+  for (const tab of (NAV_TABS[view] ?? []).filter((t) => t.kind !== 'switch')) {
+    const active = lit(view, tab.to);
     check(
-      `${role}: ${tab.to} is owned only by its own tab`,
+      `${view}: ${tab.to} is owned only by its own tab`,
       active.length === 1 && active[0] === tab.to,
       active.length === 1 ? `lit ${active[0]}` : `lit ${active.length}: ${active.join(', ')}`,
     );
@@ -134,26 +152,53 @@ for (const [role, tabs] of Object.entries(NAV_TABS)) {
 
 /*
  * THE BOUNDARY, which is the whole reason the prefix test is not `startsWith`.
- *
- * `/coins` is owned by the profile tab. A naive prefix would make `/coinsomething` match it too,
- * and `/m` would swallow `/measurements`. These are the near-misses the rule exists to refuse.
  */
 const NEAR_MISSES = [
   ['user', '/coinsomething'],
   ['user', '/librarian'],
   ['user', '/notificationsettings'],
-  ['coach', '/composer'],
-  ['coach', '/measurements'],
+  ['trainer', '/composer'],
+  ['trainer', '/coachman'],
+  ['admin', '/administrator'],
+  ['user', '/measurements'],
 ];
-for (const [role, pathname] of NEAR_MISSES) {
-  check(`${role}: ${pathname} lights nothing`, lit(role, pathname).length === 0, `lit ${lit(role, pathname).join(', ')}`);
+for (const [view, pathname] of NEAR_MISSES) {
+  check(`${view}: ${pathname} lights nothing`, lit(view, pathname).length === 0, `lit ${lit(view, pathname).join(', ')}`);
 }
 
 /*
- * COMPLETENESS — every screen inside the signed-in layout is in the table, for every bar.
+ * THE VIEW MODEL — `viewForPath` decides which bar a screen shows, from the URL and the roles.
  *
- * The router gives the list of screens; the table above gives the answers. A screen the router
- * has and the table lacks is a screen nobody decided a tab for, which is how a bar goes dark.
+ *   * the URL decides: a trainer screen shows the trainer bar, an admin screen the admin bar;
+ *   * a view the account does not hold falls back to the member's bar (a member who opens
+ *     `/coach` sees their own five tabs and the page's refusal — never a trainer bar);
+ *   * `/notifications` keeps the view the user came from, if the account holds it;
+ *   * `viewsFor` lists only the views the roles allow.
+ */
+const VIEW_CASES = [
+  ['/coach', 'coach', null, 'trainer'],
+  ['/compose/profile', 'admin', null, 'trainer'],
+  ['/admin/accounts', 'admin', null, 'admin'],
+  ['/coach', 'user', null, 'user'],
+  ['/admin', 'coach', null, 'user'],
+  ['/settings', 'admin', 'admin', 'user'],
+  ['/notifications', 'coach', 'trainer', 'trainer'],
+  ['/notifications', 'admin', 'admin', 'admin'],
+  ['/notifications', 'user', 'trainer', 'user'],
+  ['/notifications', 'coach', 'admin', 'user'],
+  ['/notifications', 'admin', null, 'user'],
+];
+for (const [pathname, role, lastView, expected] of VIEW_CASES) {
+  const got = viewForPath(pathname, ROLES_OF[role], lastView);
+  check(`${role} on ${pathname} (came from ${lastView ?? 'nowhere'}) shows the ${expected} bar`, got === expected, `shows ${got}`);
+}
+check('a member holds the user view only', JSON.stringify(viewsFor(ROLES_OF.user)) === '["user"]', JSON.stringify(viewsFor(ROLES_OF.user)));
+check('a coach holds user + trainer', JSON.stringify(viewsFor(ROLES_OF.coach)) === '["user","trainer"]', JSON.stringify(viewsFor(ROLES_OF.coach)));
+check('an admin holds all three', JSON.stringify(viewsFor(ROLES_OF.admin)) === '["user","trainer","admin"]', JSON.stringify(viewsFor(ROLES_OF.admin)));
+
+/*
+ * COMPLETENESS — every screen inside the signed-in layout is in the table, in every view it can
+ * show, for every role that may open it.
  */
 
 /** Screens that light no tab ON PURPOSE, each with the reason. An entry that lights a tab is dead. */
@@ -162,8 +207,8 @@ const NO_TAB_BY_DESIGN = new Map([
 ]);
 
 /**
- * Screens only some bars can own: the bar of a role without the Edző or the Admin tab has nothing
- * to light there, and the route itself refuses that role. A prefix names the whole family.
+ * Screens only some roles can open: the server refuses everybody else, and the bar a refused
+ * member sees there is their own five tabs, none of which owns the page. A prefix names the family.
  */
 const ONLY_FOR = new Map([
   ['/coach', ['coach', 'admin']],
@@ -184,6 +229,8 @@ const instanceOf = (pathname, pattern) => {
 };
 /** A concrete pathname for a pattern — `/coach/clients/:id/chat` → `/coach/clients/1/chat`. */
 const sample = (pattern) => pattern.replace(/:[^/]+/g, '1');
+/** Every view a route can show for a role: the URL's, or — on a shared screen — any it came from. */
+const viewsOn = (route, role) => [...new Set([null, ...VIEWS].map((last) => viewForPath(sample(route), ROLES_OF[role], last)))];
 
 const routerSrc = fs.readFileSync(ROUTER_FILE, 'utf8');
 const signedIn = (() => {
@@ -219,10 +266,10 @@ if (!signedIn || signedIn.length === 0) {
 } else {
   for (const route of signedIn) {
     if (NO_TAB_BY_DESIGN.has(route)) {
-      for (const role of ROLES) {
-        const active = lit(role, sample(route));
+      for (const view of VIEWS) {
+        const active = lit(view, sample(route));
         check(
-          `${role}: ${route} lights nothing, as NO_TAB_BY_DESIGN says`,
+          `${view}: ${route} lights nothing, as NO_TAB_BY_DESIGN says`,
           active.length === 0,
           `lit ${active.join(', ')} — delete the entry and give the route a row`,
         );
@@ -230,12 +277,14 @@ if (!signedIn || signedIn.length === 0) {
       continue;
     }
     for (const role of rolesFor(route)) {
-      check(
-        `${role}: ${route} has a row in the table`,
-        EXPECT.some(([r, pathname]) => r === role && instanceOf(pathname, route)),
-        `a route with no row is a screen nobody chose a tab for — today it lights ${lit(role, sample(route)).join(', ') || 'NOTHING'}. ` +
-          'Add the row, or a reason in NO_TAB_BY_DESIGN',
-      );
+      for (const view of viewsOn(route, role)) {
+        check(
+          `${role} in the ${view} view: ${route} has a row in the table`,
+          EXPECT.some(([v, pathname]) => v === view && instanceOf(pathname, route)),
+          `a route with no row is a screen nobody chose a tab for — today it lights ${lit(view, sample(route)).join(', ') || 'NOTHING'}. ` +
+            'Add the row, or a reason in NO_TAB_BY_DESIGN',
+        );
+      }
     }
   }
   for (const route of NO_TAB_BY_DESIGN.keys()) {
@@ -247,15 +296,11 @@ if (!signedIn || signedIn.length === 0) {
 }
 
 /*
- * A PUSHED SCREEN AND ITS PARENT LIGHT THE SAME TAB.
+ * A PUSHED SCREEN AND ITS PARENT LIGHT THE SAME TAB — in every view the screen can show.
  *
- * `app/routeMeta.ts` (lane F11) names the parent a pushed header goes back to:
- *
- *   export const ROUTE_META = { '/coins': { parent: '/settings', parentLabelKey: 'nav.profile' }, … }
- *
- * If the header says "Profil" and the bar lights Kezdőlap, one of the two is wrong and nothing
- * else would notice. check-nav holds the parent to the router and its label to the bundles; this
- * holds it to the bar. The table does not exist until the shell lands, and the leg says so.
+ * `app/routeMeta.ts` names the parent a pushed header goes back to, and for a screen every view
+ * shares, a parent per view (`byView`). If the header says "Kliensek" and the bar lights nothing,
+ * one of the two is wrong and nothing else would notice.
  */
 if (fs.existsSync(ROUTE_META_FILE)) {
   const table = (await import(pathToFileURL(path.resolve(ROUTE_META_FILE)).href)).ROUTE_META;
@@ -268,17 +313,19 @@ if (fs.existsSync(ROUTE_META_FILE)) {
   for (const [route, meta] of rows) {
     if (typeof meta?.parent !== 'string') continue; // check-nav reports the malformed row
     if (signedIn && !signedIn.includes(route)) continue; // a public screen renders no bar
-    for (const role of rolesFor(route)) {
-      const child = lit(role, sample(route));
-      const parent = lit(role, sample(meta.parent));
+    const shown = new Set(rolesFor(route).flatMap((role) => viewsOn(route, role)));
+    for (const view of shown) {
+      const parent = (view !== 'user' && meta.byView?.[view]?.parent) || meta.parent;
+      const child = lit(view, sample(route));
+      const up = lit(view, sample(parent));
       check(
-        `${role}: ${route} lights the tab of its parent ${meta.parent}`,
-        child.length === 1 && parent.length === 1 && child[0] === parent[0],
-        `the screen lights ${child.join(', ') || 'nothing'}, its parent lights ${parent.join(', ') || 'nothing'}`,
+        `${view} view: ${route} lights the tab of its parent ${parent}`,
+        child.length === 1 && up.length === 1 && child[0] === up[0],
+        `the screen lights ${child.join(', ') || 'nothing'}, its parent lights ${up.join(', ') || 'nothing'}`,
       );
     }
   }
-  notes.push(`${rows.length} routeMeta parent(s) held to the bar`);
+  notes.push(`${rows.length} routeMeta parent(s) held to the bar, per view`);
 } else {
   notes.push('routeMeta leg waiting for src/app/routeMeta.ts');
 }
@@ -291,7 +338,7 @@ if (failures.length) {
 }
 
 console.log(
-  `check-nav-active: OK — ${passed} assertions, ${signedIn.length} signed-in route(s), every one lights exactly one tab` +
-    ` or says why not (${NO_TAB_BY_DESIGN.size})`,
+  `check-nav-active: OK — ${passed} assertions, ${signedIn.length} signed-in route(s) in ${VIEWS.length} views, every one lights exactly one tab` +
+    ` or says why not (${NO_TAB_BY_DESIGN.size}); no switch ever lights`,
 );
 for (const note of notes) console.log(`                  ${note}`);

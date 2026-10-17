@@ -18,7 +18,7 @@ import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { usePlans, useCreatePlan, type PlanSummary } from './usePlans';
 import { useOnline } from './useOnline';
-import { useSession } from '../auth/useSession';
+import { hasRole, useSession } from '../auth/useSession';
 import { initialsOf, personLabel } from '../../lib/person';
 
 type PlanStatus = PlanSummary['status'];
@@ -141,7 +141,7 @@ export function PlanListPage() {
   // ROLE GATE, ahead of the query branches. Without it a member who opens /coach/plans got the
   // server's 403 as a retryable error that fails on every press. The forbidden state is the page:
   // its title is the h1, and there is no header and no pill.
-  if (user && user.role !== 'coach' && user.role !== 'admin') {
+  if (user && !hasRole(user, 'coach')) {
     return (
       <Screen top="root">
         <EmptyState heading="h1" title={t('coaching.forbiddenTitle')} body={t('coaching.forbiddenBody')} />

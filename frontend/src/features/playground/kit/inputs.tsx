@@ -7,7 +7,7 @@ import { Section } from '../../../ui/data/SectionHeader';
 import { ConfirmSheet, ConfirmSheetBody } from '../../../ui/feedback/ConfirmSheet';
 import { FeedbackField } from '../../../ui/feedback/variants/E7Field';
 import { Sheet, SheetStatic } from '../../../ui/feedback/variants/E14E20';
-import { BottomNav, type NavTab } from '../../../ui/nav/BottomNav';
+import { BottomNav, useNavTabs } from '../../../ui/nav/BottomNav';
 import { DateTrigger } from '../../../ui/primitives/DateTrigger';
 import { Field } from '../../../ui/primitives/Field';
 import { FilePick } from '../../../ui/primitives/FilePick';
@@ -292,14 +292,6 @@ function Feedback() {
 
 /* ── the sheet ─────────────────────────────────────────────────────────────────────────────────── */
 
-const MEMBER: NavTab[] = [
-  { to: '/', icon: 'home', label: 'Kezdőlap', end: true },
-  { to: '/workout', icon: 'training', label: 'Edzés' },
-  { to: '/nutrition', icon: 'nutrition', label: 'Étkezés' },
-  { to: '/progress', icon: 'progress', label: 'Haladás' },
-  { to: '/settings', icon: 'profile', label: 'Profil' },
-];
-
 /**
  * The design's device for a 402 × H specimen (the shell lane's numbers): insets 62 / 34 — the bar
  * 36 above the bottom, a pushed header at 64 — and the sheet's own bottom pad, 16 + 34 = the drawn 50.
@@ -329,7 +321,7 @@ function BoardSheetScreen() {
           </RowStack>
         </Section>
       </Screen>
-      <BottomNav inline tabs={MEMBER} at="/settings" />
+      <BottomNav inline tabs={useNavTabs('user')} at="/settings" />
       <SheetStatic title="Kijelentkezés" onClose={noop}>
         <ConfirmSheetBody
           message="Biztosan kijelentkezel erről az eszközről?"

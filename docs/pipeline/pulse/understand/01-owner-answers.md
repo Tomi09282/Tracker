@@ -57,3 +57,12 @@ guessed picture.
   resolved in a local merge), the owner reviews and pushes himself; the owner coordinates migration numbers 030-035
   with the other developer.
 - LifeOS plan approved: C:/Users/Petike/.claude/plans/abundant-booping-willow.md.
+
+## Owner, 2026-10-18 — LifeOS design round B and the economy sheet (C3, C4)
+
+- Design round B (Figma pages 15-17, exports in TRACKER-mockups/5-pulse/kepernyok-2x/lifeos/, sheets
+  osszesitok/lifeos-round-b-b1..b3.png) is APPROVED: build Phases 2-6 1:1 to these frames.
+- The economy sheet is approved AS DEFAULTED in the plan: 1 point = 1 coin; daily earn cap 400 coins; penalties may
+  take the balance below zero (shown as debt), spends may not; a day settles 6 h after the next day starts; at most
+  7 days of catch-up; the perfect day needs the scheduled workout; Pult (/compose) is a trainer tab; an admin acting
+  as a trainer is seat-exempt (no client cap).

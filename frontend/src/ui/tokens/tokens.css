@@ -301,6 +301,7 @@
   --band-pad-t: calc(var(--safe-t) + 6px);                              /* the toast band */
 
   /* The shell (ui/nav/BottomNav, ui/shell/Screen · ScreenHeader · Dock). */
+  --tabbar-inset-4: 12px;    /* four cells, and every bar with a switch column: ↩ Tag on x 44 in every view (frame bars) */
   --tabbar-inset-5: 10px;    /* the bar's side inset by tab count: cells 76.4 / 63 / 55.1 on 402 */
   --tabbar-inset-6: 12px;
   --tabbar-inset-7: 8px;

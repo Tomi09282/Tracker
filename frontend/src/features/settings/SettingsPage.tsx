@@ -16,7 +16,7 @@ import { Pic } from '../../ui/media/Pic';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { CueSettings } from './CueSettings';
 import { EquipmentSection } from './EquipmentSection';
-import { useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
+import { hasRole, useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
 import { toCoins, useAchievements, useWallet } from '../coins/useCoins';
 import { useMeasurements } from '../progress/useProgress';
 import { isValidDisplayName, personLabel } from '../../lib/person';
@@ -175,6 +175,34 @@ export function SettingsPage() {
           </RowStack>
         </div>
 
+        {/* NÉZETEK — the doors to the trainer and the admin view (design round A, settings-v2-1).
+            The member's bar is the same five tabs for every role, so these rows are the ONLY way
+            into /coach and /admin on a phone: check-nav holds both as REQUIRED_DOORS of this file.
+            A view grants nothing; each route re-checks the role on the server. */}
+        {hasRole(user, 'coach') ? (
+          <section aria-labelledby="settings-views" className="flex flex-col gap-group">
+            <SectionHeader title={t('settings.views.title')} titleId="settings-views" />
+            <RowStack>
+              <ListRow
+                to="/coach"
+                lead={<Pic slot="tab-coach" width={32} />}
+                leadSlot
+                title={t('settings.views.coach')}
+                chevron
+              />
+              {hasRole(user, 'admin') ? (
+                <ListRow
+                  to="/admin"
+                  lead={<Pic slot="tab-admin" width={32} />}
+                  leadSlot
+                  title={t('settings.views.admin')}
+                  chevron
+                />
+              ) : null}
+            </RowStack>
+          </section>
+        ) : null}
+
         <div className="flex flex-col gap-4">
           <h1 className="text-display text-text-1">{t('settings.title')}</h1>
           {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET: `users.display_name` is NULL
@@ -190,12 +218,9 @@ export function SettingsPage() {
       {/* Applies at once and lives on this device: the choice sits in the section head. */}
       <SectionHeader title={t('common.language')} trailing={<LanguageToggle />} />
 
-      {/* Admin lives HERE as well as in the bar: role-specific and infrequent, which is secondary
-          navigation. The route and every endpoint behind it enforce the role on the server.
-          Sign-out: one tap, no confirmation, busy while it runs. It renders even while the
+      {/* Sign-out: one tap, no confirmation, busy while it runs. It renders even while the
           session loads, because it depends on there BEING a session, not on its contents. */}
       <RowStack open>
-        {user?.role === 'admin' ? <ListRow to="/admin" title={t('settings.openAdmin')} chevron /> : null}
         <ListRow title={t('auth.logout')} tone="danger" busy={logout.isPending} onClick={() => logout.mutate()} />
       </RowStack>
     </Screen>

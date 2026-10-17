@@ -69,7 +69,17 @@
     "compose": "Publikálás",
     "composeProfile": "Nyilvános profil",
     "styleStudio": "Stílus stúdió",
-    "playground": "Playground"
+    "playground": "Playground",
+    "clients": "Kliensek",
+    "desk": "Pult",
+    "moderation": "Moderáció",
+    "accounts": "Fiókok",
+    "switch": {
+      "user": "Tag",
+      "trainer": "Edző",
+      "userName": "Vissza: tag nézet",
+      "trainerName": "Vissza: edzői nézet"
+    }
   },
   "home": {
     "greeting": "Szia!",
@@ -99,7 +109,6 @@
       "hapticsHint": "Rezgés a sorozat pipálásakor.",
       "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés."
     },
-    "openAdmin": "Admin felület megnyitása",
     "equipment": "Felszerelés",
     "equipmentHint": "Amit el tudsz érni. Az edzésterved ehhez igazodik.",
     "equipmentSaved": "Felszerelés mentve",
@@ -111,6 +120,11 @@
       "user": "Tag",
       "coach": "Edző",
       "admin": "Admin"
+    },
+    "views": {
+      "title": "Nézetek",
+      "coach": "Edzői nézet",
+      "admin": "Admin nézet"
     }
   },
   "library": {

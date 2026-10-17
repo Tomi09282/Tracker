@@ -50,6 +50,12 @@ const StyleStudioPage = lazy(() =>
 const AdminPage = lazy(() =>
   import('../features/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 );
+const AdminAccountsPage = lazy(() =>
+  import('../features/admin/AdminAccountsPage').then((m) => ({ default: m.AdminAccountsPage })),
+);
+const AdminMarketplacePage = lazy(() =>
+  import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
+);
 const PlaygroundPage = lazy(() =>
   import('../features/playground/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
 );
@@ -138,6 +144,10 @@ export const router = createBrowserRouter([
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },
+      // The admin bar's Fiókok and Piactér tabs (design round A): sections of /admin that became
+      // routes, so each has a URL, a lit tab and a way in from the bar.
+      { path: 'admin/accounts', element: suspended(<AdminAccountsPage />) },
+      { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
       // Its own route rather than a tab on the admin page: the studio is a full-width workspace
       // with its own list column, and folding it into a tab would force both into one layout.
       { path: 'admin/styles', element: suspended(<StyleStudioPage />) },
