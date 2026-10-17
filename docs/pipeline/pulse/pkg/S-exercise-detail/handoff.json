@@ -1,0 +1,118 @@
+{
+  "id": "S-exercise-detail",
+  "base": "pulse-redesign d96b6e8 (merged into pulse/S-exercise-detail; F15 stage 1 included)",
+  "frames": {
+    "exercise-detail-1": {
+      "verdict": "matched",
+      "why": "live-recorded bench press (44), account M; every node within 0.5 pt of the frame except text boxes that hug their words (the frame boxes are fixed widths) and the substitute strip whose TEXT is data (the product ranks other substitutes than the frame sample; positions match). The figure is the merged F15 stage 1 render (lit chest + secondary cap)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/exercise-detail-1.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-1.pair.png",
+      "tiles": [
+        "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-1.pair.tile-1.png",
+        "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-1.pair.tile-2.png"
+      ],
+      "geometry": "51 matched + 3 same slot / other string (strip data) / 63 compared; 9 deviating: 7 width-only (hugging text boxes: Title, caption, Rúd, 4 step texts, all dx/dy <= 0.5) and 2 strip difficulty words matched to another column (data)",
+      "pairOrder": "Figma | app | difference"
+    },
+    "exercise-detail-2": {
+      "verdict": "matched",
+      "why": "live-recorded pull-ups (560), click Hátul; as frame 1 (the strip text is data: 1-Arm Half-Kneeling Lat Pulldown ... instead of the frame sample)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/exercise-detail-2.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-2.pair.png",
+      "tiles": [
+        "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-2.pair.tile-1.png",
+        "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-2.pair.tile-2.png",
+        "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/exercise-detail-2.pair.tile-3.png"
+      ],
+      "geometry": "49 matched + 2 same slot / other string / 61 compared; 10 deviating: 6 width-only (dx/dy <= 0.5), 4 strip words matched to another column (data)",
+      "pairOrder": "Figma | app | difference"
+    }
+  },
+  "states": {
+    "ed-loading": {
+      "verdict": "structure",
+      "why": "not drawn; held through /library/abc (known defect: a non-numeric id never loads) — the only way to keep the skeleton in a replay",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-loading.png"
+    },
+    "ed-not-found": {
+      "verdict": "structure",
+      "why": "not drawn; live 404 (DEV-6)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-not-found.png"
+    },
+    "ed-rejected": {
+      "verdict": "structure",
+      "why": "not drawn; live seed row 1660 as coach@ (DEV-1, DEV-3, DEV-5)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-rejected.png"
+    },
+    "ed-pending": {
+      "verdict": "structure",
+      "why": "not drawn; live seed row 1657 as coach@ — notice, image block (seed placeholder is a tiny dark webp), Eszköz hidden (DEV-1, DEV-2)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-pending.png"
+    },
+    "ed-dark-view": {
+      "verdict": "structure",
+      "why": "not drawn; live seed row 1658 — all lit muscles on the back, Elöl unlit + caption",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-dark-view.png"
+    },
+    "ed-description": {
+      "verdict": "structure",
+      "why": "not drawn; fixture edit over the recorded bench press (DEV-4)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-description.png"
+    },
+    "ed-no-muscles": {
+      "verdict": "structure",
+      "why": "not drawn; fixture edit (DEV-5)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-no-muscles.png"
+    },
+    "ed-lang-mark": {
+      "verdict": "structure",
+      "why": "not drawn; live row 80 in de (DEV-3)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-lang-mark.png"
+    },
+    "ed-offline": {
+      "verdict": "structure",
+      "why": "not drawn; the shell line only",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-exercise-detail/ed-offline.png"
+    },
+    "video upload": {
+      "verdict": "structure",
+      "why": "unreachable: uploads ingest images only; verified by reading (DEV-2)"
+    },
+    "many muscles": {
+      "verdict": "structure",
+      "why": "not captured; the stage grows (min 404, Eszköz in flow with mt-auto) — verified by reading (DEV-9)"
+    }
+  },
+  "probes": {
+    "fonts": "pass (all states, 402 / 360 / en / de)",
+    "pill": "0 lime pills (all states)",
+    "boxed": "pass",
+    "overflow": "pass at 360 and 402, en and de",
+    "targets": "pass",
+    "focusWalk": "pass at 402 and 360 (15 stops on exercise-detail-1, none without visible focus)",
+    "geometry": "fails only on the hugging text widths and the strip data listed above"
+  },
+  "languages": {
+    "en": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/states-contact-en.png",
+    "de": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/states-contact-de.png",
+    "note": "all states arrive in en and de with names by key; ed-lang-mark in en correctly shows no mark (the interface is English), so its literal arrived text does not hold there"
+  },
+  "inventory": "Elöl / Hátul button -> radio (kit Segmented radiogroup); nothing removed; the back link keeps /library",
+  "before": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-exercise-detail/before-hybrid-contact.png",
+  "budget": {
+    "before": 39,
+    "after": 0,
+    "note": "pkg/S-exercise-detail/budget.json deleted by check-pulse --fix-down; SectionBadge.tsx deleted"
+  },
+  "requests": [
+    "R-S-exercise-detail-01 (ColumnStrip, interim screen-drawn)",
+    "R-S-exercise-detail-02 (ScreenHeader balance, interim span)",
+    "R-S-exercise-detail-03 (resolve entries for the literal ids)"
+  ],
+  "deviations": "deviations.md (DEV-1 .. DEV-10) — to be appended to docs/pipeline/pulse/deviations.md by the integrator",
+  "proposedCopy": [],
+  "copyQuestions": [
+    "muscleMap.alsoOnOtherSide on Hátul prints \"a elöl\" (frame 2 draws it so); the key is the mannequin lane's"
+  ],
+  "build": "pulse-verify: build green in 13 s · 11 of 11 captured (replay)"
+}

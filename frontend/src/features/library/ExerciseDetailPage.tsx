@@ -1,29 +1,35 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, Dumbbell, Info, ListOrdered, PersonStanding, Play, TriangleAlert } from 'lucide-react';
-import { cn } from '../../lib/cn';
-import { control } from '../../ui/primitives/control';
+import { Play } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { Segmented, type SegmentedOption } from '../../ui/feedback/variants/E6Segmented';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Section, SectionHeader } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { Numeral } from '../../ui/data/Numeral';
+import { RoleKey } from '../../ui/data/RoleKey';
+import { Pic } from '../../ui/media/Pic';
+import { UserPhoto } from '../../ui/media/UserPhoto';
+import { equipmentStill } from '../../assets/pulse';
 import { useExercise, type Taxonomy } from './useExercises';
 import { MuscleMap, type MuscleRole } from '../../ui/muscle-map/MuscleMap';
-import { SectionBadge } from './SectionBadge';
-
-/** The outlined pill the meta row, the muscle chips and the equipment chips all share. */
-const PILL = [
-  'text-body-s inline-flex items-center gap-tight rounded-chip px-3 py-2',
-  'border-[length:var(--border-width)]',
-].join(' ');
+import { musclesOnSide, type MuscleSide } from '../../ui/muscle-map/figure';
 
 /**
- * Exercise detail — [[55-Screens/gyakorlat-reszletei]].
+ * Exercise detail — exercise-detail-1 / -2 (Pulse, Open Field).
  *
- * The anchor is the media hero: the question this screen answers is *how is this done*, and a
- * demonstration answers it before any sentence does. Everything below defers to it — the muscle
- * map in particular is drawn deliberately smaller than the same component on the library screen,
- * because here anatomy is evidence rather than the subject.
+ * Read-only: no lime pill anywhere. The one picture of the exercise is the mannequin, floating on
+ * the right of the stage with its right hand on the content edge; the left column is its key —
+ * the muscle names keyed by the two lime levels, the note about the other side and, on the line
+ * of the feet, what the movement needs. Then the steps as numbered rows and the substitutes as a
+ * strip of text columns that runs off the right edge.
  */
 export function ExerciseDetailPage() {
   const { t, i18n } = useTranslation();
@@ -33,35 +39,43 @@ export function ExerciseDetailPage() {
   const { data, isPending } = useExercise(Number.isFinite(id) ? id : null, lang);
 
   /*
-   * The hero player has two states and the FIRST one is ours. At rest the browser's control bar is
-   * a strip pinned to the bottom edge of the frame; the mockup's anchor is one large circular play
-   * button centred on the poster — "a still photograph is a decoration, a frame with a play button
-   * on it is a promise". From the first activation the native player owns the frame, and this is
-   * deliberately one-way: an overlay that returned on pause would cover the native pause button.
+   * The hero player has two states and the FIRST one is ours: one bare play glyph centred on the
+   * poster. From the first activation the native player owns the frame, and this is deliberately
+   * one-way: an overlay that returned on pause would cover the native pause button.
    *
    * Declared above the early returns because hooks cannot be conditional.
    */
   const videoRef = useRef<HTMLVideoElement>(null);
   const [started, setStarted] = useState(false);
-
-  const nameOf = (tax: Taxonomy) => tax.name;
+  // The view of the figure: local, the front on every mount, never in the URL (R20).
+  const [side, setSide] = useState<MuscleSide>('front');
 
   if (isPending) {
-    // The new geometry, not the old one: back link, then the hero at its reserved ratio, then a
-    // two-thirds title bar and a one-third meta bar, then one block. Nothing moves on the swap.
+    // The page's own geometry: the real back row, the display line and the meta line, the
+    // stage's three key lines, then one ruled section. No figure: images are withheld, never
+    // drawn as grey squares.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-section py-6" role="status" aria-busy>
+      <Screen top="push" role="status" aria-busy>
         <span className="sr-only">{t('common.loading')}</span>
-        <div className="flex flex-col gap-group">
-          <Skeleton className="h-[var(--control-h)] w-32" />
-          <Skeleton className="aspect-video w-full rounded-card" />
-          <div className="flex flex-col gap-tight">
-            <Skeleton className="h-7 w-2/3" />
+        <ScreenHeader kind="push">
+          <div className="flex flex-col gap-2" aria-hidden>
+            <Skeleton className="h-8 w-2/3" />
             <Skeleton className="h-4 w-1/3" />
           </div>
+        </ScreenHeader>
+        <div className="flex flex-col gap-3.5" aria-hidden>
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-4 w-20" />
         </div>
-        <Skeleton className="h-64 w-full rounded-card" />
-      </div>
+        <div className="flex flex-col gap-4" aria-hidden>
+          <Rule strong />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </Screen>
     );
   }
 
@@ -70,324 +84,228 @@ export function ExerciseDetailPage() {
      * A failed fetch and a bad id land here together, and the page says the exercise was not
      * found either way. That is a known defect recorded in the screen note, not a decision — it
      * needs a distinguishable network state before it can offer a retry that means anything.
-     *
-     * The way out is a LINK styled with the control recipe, not a `Pressable` with an `<a>`
-     * inside it: an anchor nested in a button is invalid markup, and it made the back-out
-     * unreachable for anyone navigating by links.
+     * The way out is the header's back control (a real link to Gyakorlatok); a second link here
+     * would say the same thing twice.
      */
     return (
-      <div className="col-mobile screen-x flex flex-col gap-group py-6">
-        <p className="text-body-legacy text-text-2">{t('library.emptyTitle')}</p>
-        <Link to="/library" className={cn(control({ variant: 'secondary' }), 'self-start')}>
-          <ArrowLeft className="size-icon-m" strokeWidth={2} aria-hidden />
-          {t('nav.library')}
-        </Link>
-      </div>
+      <Screen top="push">
+        <ScreenHeader kind="push" />
+        <EmptyState heading="h1" title={t('library.emptyTitle')} />
+      </Screen>
     );
   }
 
   const { exercise, muscles, equipment, media, substitutions, availableLangs } = data;
   const hero = media[0];
   // The play affordance renders ONLY when there is something to play. Over a still photograph it
-  // would be a promise the media contract cannot keep — there is no video/poster pairing in the
-  // payload, so a triangle on a photo would be decoration that does nothing when tapped. The
-  // image and empty branches below therefore stay exactly as they were; the spec forbids the
-  // button on both by name.
+  // would be a promise the media contract cannot keep.
   const heroIsVideo = hero?.mime.startsWith('video/') ?? false;
 
   // slug → role, exactly the shape the map wants.
   const highlights: Record<string, MuscleRole> = Object.fromEntries(
     muscles.map((m) => [m.slug, m.role]),
   );
+  // A lit muscle that has no region on the side shown: the screen says so under the key.
+  const onSide = musclesOnSide(side);
+  const offSide = Object.keys(highlights).some((slug) => !onSide.includes(slug));
+
+  const sides: SegmentedOption<MuscleSide>[] = [
+    { value: 'front', label: t('muscleMap.front') },
+    { value: 'back', label: t('muscleMap.back') },
+  ];
+
+  // Say plainly that this text is not in the requested language, rather than letting the
+  // fallback pass for a translation: the codes, in the warning ink, as the meta line's last item.
+  const langMark =
+    exercise.translated === 0 && lang !== 'en'
+      ? (availableLangs.map((l) => l.lang).join(' / ') || 'en').toUpperCase()
+      : null;
+  const meta = [
+    exercise.difficulty ? t(`library.difficulty.${exercise.difficulty}`) : null,
+    exercise.exercise_type ? t(`library.type.${exercise.exercise_type}`) : null,
+  ].filter((part): part is string => part !== null);
+
+  /*
+   * Equipment comes back only when there is no photograph: the photograph shows the bar and the
+   * bench, so on a populated exercise the list restates the picture. A still exists for most
+   * slugs (EQUIPMENT_STILL); a slug without one is the name alone, on the same text edge.
+   */
+  const showEquipment = !hero && equipment.length > 0;
+  const anyStill = equipment.some((q) => equipmentStill(q.slug) !== null);
+  const equipmentRows = (
+    <RowStack>
+      {equipment.map((q: Taxonomy) => {
+        const still = equipmentStill(q.slug);
+        return (
+          <ListRow
+            key={q.slug}
+            title={q.name}
+            lead={still ? <Pic slot={still} width={48} /> : undefined}
+            leadSlot={!still && anyStill}
+          />
+        );
+      })}
+    </RowStack>
+  );
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      {/* ── the hero block ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-group">
-        <Link
-          to="/library"
-          className={cn(
-            'inline-flex min-h-[var(--target-min)] items-center gap-tight self-start',
-            'text-body-s text-text-2 transition-colors duration-[var(--duration-fast)]',
-            'ease-[var(--ease-standard)] hover:text-text-1',
-          )}
-        >
-          <ArrowLeft className="size-icon-m" strokeWidth={2} aria-hidden />
-          {t('nav.library')}
-        </Link>
-
-        {/*
-          ═══ THE OTHER END OF THE MODERATION LOOP ═════════════════════════════════════════════
-          The admin route has always REFUSED a rejection with no reason — a zod `.refine` whose
-          message reads "a rejection must carry a reason", written so the coach would not have to
-          guess what to fix. The reason was then stored, returned by this very endpoint, and
-          rendered nowhere. The coach guessed anyway, for the whole of Phase 1.
-
-          ABOVE the media, not below the steps: somebody opening a submission they are waiting on
-          should not have to scroll to find out it was turned down. The reason is the moderator's
-          verbatim free text and is never truncated to fit.
-        */}
-        {exercise.status === 'rejected' ? (
-          <Surface role="status" className="flex items-start gap-tight">
-            <span
-              aria-hidden
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-danger-subtle text-danger"
-            >
-              <TriangleAlert className="size-icon-m" strokeWidth={2} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-body-strong text-text-1">{t('library.rejectedTitle')}</p>
-              {exercise.rejection_reason ? (
-                <p className="text-body-s mt-1 text-text-2">{exercise.rejection_reason}</p>
-              ) : null}
-            </div>
-          </Surface>
-        ) : exercise.status === 'pending_review' ? (
-          <Surface role="status" className="flex items-center gap-tight">
-            <span
-              aria-hidden
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-info-subtle text-info"
-            >
-              <Info className="size-icon-m" strokeWidth={2} />
-            </span>
-            <p className="text-body-s text-text-2">{t('library.pendingReview')}</p>
-          </Surface>
+    <Screen top="push">
+      <ScreenHeader kind="push" title={<span className="block text-balance">{exercise.name}</span>}>
+        {meta.length > 0 || langMark ? (
+          <p className="text-body text-text-2">
+            {meta.join(' · ')}
+            {langMark ? (
+              <>
+                {meta.length > 0 ? ' · ' : null}
+                <span className="text-data text-warning">{langMark}</span>
+              </>
+            ) : null}
+          </p>
         ) : null}
-
-        {/* The aspect ratio is reserved whether or not media exists, so nothing shifts on load. */}
-        <Surface
-          elevation="inset"
-          pad="none"
-          className="relative grid aspect-video w-full place-items-center overflow-hidden"
-        >
-          {heroIsVideo ? (
-            <>
-              <video
-                ref={videoRef}
-                src={`/api/v1/media/${hero.storage_key}`}
-                // `preload="metadata"` is what puts the first frame under the button, so the
-                // resting state is a poster rather than a black rectangle.
-                controls={started}
-                playsInline
-                preload="metadata"
-                aria-label={exercise.name}
-                // Covers a start that did not come from the button — a keyboard activation on the
-                // element itself, or a browser that begins playback on its own.
-                onPlay={() => setStarted(true)}
-                className="size-full object-cover"
-              />
-              {!started ? (
-                // `absolute inset-0 m-auto` over a definite size centres it in the frame without
-                // giving the grid a second track. The scrim is what keeps a white glyph legible on
-                // an arbitrary photograph; the ring is the ink at its full weight, not a hairline,
-                // because it has to hold against whatever is behind it.
-                <Pressable
-                  shape="icon"
-                  variant="ghost"
-                  aria-label={t('library.playVideo')}
-                  className={cn(
-                    'absolute inset-0 m-auto size-20',
-                    'border-[length:var(--border-width)] border-[var(--text-1)]',
-                    'bg-scrim text-text-1 hover:bg-scrim-strong hover:text-text-1',
-                  )}
-                  onClick={() => {
-                    setStarted(true);
-                    // If it rejects, the native controls are already on screen and the user can
-                    // start it themselves — swallowing beats an unhandled rejection in the console.
-                    void videoRef.current?.play().catch(() => {});
-                  }}
-                >
-                  <Play className="size-icon-l" strokeWidth={2} aria-hidden />
-                </Pressable>
-              ) : null}
-            </>
-          ) : hero ? (
-            <img
-              src={`/api/v1/media/${hero.storage_key}`}
-              alt={exercise.name}
-              width={hero.width}
-              height={hero.height}
-              className="size-full object-cover"
-            />
-          ) : (
-            <Dumbbell size={48} strokeWidth={1.5} aria-hidden className="text-text-3" />
-          )}
-        </Surface>
-
-        <div className="flex flex-col gap-tight">
-          <h1 className="text-title-1 text-text-1">{exercise.name}</h1>
-
-          <div className="flex flex-wrap items-center gap-tight">
-            {exercise.difficulty ? (
-              <span className={cn(PILL, 'border-[var(--surface-border)] text-text-2')}>
-                {t(`library.difficulty.${exercise.difficulty}`)}
-              </span>
-            ) : null}
-            {exercise.exercise_type ? (
-              <span className={cn(PILL, 'border-[var(--surface-border)] text-text-2')}>
-                {t(`library.type.${exercise.exercise_type}`)}
-              </span>
-            ) : null}
-            {/* Say plainly that this text is not in the requested language, rather than letting
-                the fallback pass for a translation. */}
-            {exercise.translated === 0 && lang !== 'en' ? (
-              <span
-                className={cn(
-                  'text-micro-legacy uppercase inline-flex items-center rounded-chip px-3 py-2',
-                  'border-[length:var(--border-width)] border-warning-border bg-warning-subtle text-warning',
-                )}
-              >
-                {availableLangs.map((l) => l.lang).join(' / ') || 'en'}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </div>
+      </ScreenHeader>
 
       {/*
-        ═══ BLOCK 6 — `Hozzáadás az edzéshez` — DELIBERATELY NOT BUILT ═══════════════════════════
-        The mockup draws a full-width filled-accent button here and the screen note calls it "the
-        single largest open question on the screen". It stays unbuilt because the API has no verb
-        for it: `backend/src/logs/routes.js` exposes `POST /workouts/start` (which takes a plan day
-        or a title, not an exercise), `POST /sets/:id/check`, `/void`, `/finish` and `/abandon` —
-        nothing appends an exercise to a running session, and a session's exercises come from its
-        plan day. Wiring the label to a navigation instead would be a button whose verb does
-        something other than what it says, which is the same lie as a play triangle over a still.
-
-        Two things that are NOT the reason, so nobody re-litigates them:
-        - Shipping it `disabled` is not the mitigation. The note's own words are "a primary button
-          that is dead most of the time is worse than no button", and §7 #45 makes disabled inert.
-        - It would also trip §7 #47 today: `MuscleMap` renders the `Elöl` / `Hátul` chips as
-          `variant={side === s ? 'primary' : 'secondary'}`, so this screen's only filled accent is
-          already a view switch. That belongs to the shared component and is recorded there.
+        THE OTHER END OF THE MODERATION LOOP. The moderator's reason is verbatim free text and is
+        never truncated. Directly under the header: above everything the reader acts on.
       */}
+      {exercise.status === 'rejected' ? (
+        <NoticeLine tone="danger" role="status" detail={exercise.rejection_reason ?? undefined}>
+          {t('library.rejectedTitle')}
+        </NoticeLine>
+      ) : exercise.status === 'pending_review' ? (
+        <NoticeLine tone="info" role="status">
+          {t('library.pendingReview')}
+        </NoticeLine>
+      ) : null}
 
-      {/* ── anatomy ────────────────────────────────────────────────────────────────────────── */}
-      {muscles.length > 0 ? (
-        <section className="flex flex-col gap-group">
-          <SectionBadge icon={PersonStanding}>
-            <h2 className="text-micro-legacy uppercase text-accent">{t('library.muscle')}</h2>
-          </SectionBadge>
-
-          {/*
-            Smaller than the same component on the library screen, on purpose: only one element on
-            a screen may dominate and here that is the demonstration above. The figure is READ-ONLY
-            — no `onSelect` — so its regions are not tap targets and not keyboard stops either. A
-            region that navigated away from a read-only diagram would be a trap, not a shortcut.
-
-            `legend={false}` because the chips directly below carry the same role dots: the legend
-            here is the identical key printed twice, and the screen note records it as cut. If the
-            chip dots ever go, the legend comes back WITH them, not instead of them.
-          */}
-          <MuscleMap
-            highlights={highlights}
-            legend={false}
-            className="mx-auto w-full max-w-[220px]"
+      {/* An uploaded demonstration takes its own block; the catalogue has none, so no frame draws it. */}
+      {heroIsVideo ? (
+        <div className="relative aspect-video w-full overflow-hidden">
+          <video
+            ref={videoRef}
+            src={`/api/v1/media/${hero.storage_key}`}
+            // `preload="metadata"` puts the first frame under the glyph: a poster, not a black box.
+            controls={started}
+            playsInline
+            preload="metadata"
+            aria-label={exercise.name}
+            // Covers a start that did not come from the glyph (a keyboard activation on the
+            // element itself, or a browser that begins playback on its own).
+            onPlay={() => setStarted(true)}
+            className="size-full object-cover"
           />
-
-          <div className="flex flex-wrap gap-tight">
-            {muscles.map((m) => (
-              // The dot is the key to the figure's two fills: full accent = the muscle this
-              // movement is for, the lighter step = one it also loads. Drop the dots and the
-              // colour distinction on the map stops being information.
-              <span
-                key={m.slug}
-                className={cn(PILL, 'border-[var(--accent-border)] text-text-1')}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    'inline-block size-2 shrink-0 rounded-chip',
-                    m.role === 'primary' ? 'bg-accent' : 'bg-[var(--accent-300)]',
-                  )}
-                />
-                {nameOf(m)}
-              </span>
-            ))}
-          </div>
-        </section>
+          {!started ? (
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('library.playVideo')}
+              className="absolute inset-0 m-auto"
+              onClick={() => {
+                setStarted(true);
+                // If it rejects, the native controls are already on screen.
+                void videoRef.current?.play().catch(() => {});
+              }}
+            >
+              <Play />
+            </Pressable>
+          ) : null}
+        </div>
+      ) : hero ? (
+        <UserPhoto src={`/api/v1/media/${hero.storage_key}`} alt={exercise.name} ratio={16 / 9} priority />
       ) : null}
 
-      {/*
-        ═══ EQUIPMENT COMES BACK WHEN THE HERO IS EMPTY ══════════════════════════════════════════
-        The chips were cut because the photograph shows the bar and the bench, so on a populated
-        exercise they restate the picture. On an exercise with no media there is no picture, and
-        the chips are then the ONLY statement of what the user needs to have in front of them.
-        Shipping the cut unconditionally is the defect the screen note names.
-      */}
-      {!hero && equipment.length > 0 ? (
-        <section className="flex flex-col gap-tight">
-          <h2 className="text-micro-legacy uppercase text-text-2">{t('library.equipment')}</h2>
-          <div className="flex flex-wrap gap-tight">
-            {equipment.map((q) => (
-              <span
-                key={q.slug}
-                className={cn(PILL, 'border-[var(--surface-border)] text-text-2')}
-              >
-                {nameOf(q)}
-              </span>
-            ))}
+      {muscles.length > 0 ? (
+        /*
+          The stage: 404 tall in the frames; the Eszköz block stands on its foot with the row's
+          bottom padding (10) hanging under it, so the next rule is 32 under the stage, not under
+          the row. Many muscles grow the stage instead of running into Eszköz.
+        */
+        <div className="relative -mb-2.5 flex min-h-[414px] flex-col gap-4">
+          {/* Read-only: no `onSelect`, so no region is a target or a focus stop. */}
+          <MuscleMap
+            sideControl="none"
+            side={side}
+            highlights={highlights}
+            className="absolute top-[26px] right-[-24px] h-[400px] max-[23.5rem]:right-[-16px]"
+          />
+          <SectionHeader
+            rule={false}
+            title={t('library.muscle')}
+            trailing={<Segmented label={t('muscleMap.viewLabel')} options={sides} value={side} onChange={setSide} />}
+            className="relative"
+          />
+          <div className="relative flex max-w-[200px] flex-col items-start gap-3">
+            <RoleKey
+              items={muscles.map((m) => ({ role: m.role, label: m.name }))}
+              roleLabels={{ primary: t('muscleMap.primary'), secondary: t('muscleMap.secondary') }}
+              label={t('library.muscle')}
+            />
+            {offSide ? (
+              <p className="max-w-[132px] text-cap text-text-2">
+                {t('muscleMap.alsoOnOtherSide', {
+                  side: t(`muscleMap.${side === 'front' ? 'back' : 'front'}`).toLowerCase(),
+                })}
+              </p>
+            ) : null}
           </div>
-        </section>
+          {showEquipment ? (
+            <div className="relative mt-auto w-full max-w-[200px]">
+              <SectionHeader rule={false} title={t('library.equipment')} />
+              {equipmentRows}
+            </div>
+          ) : null}
+        </div>
+      ) : showEquipment ? (
+        <Section title={t('library.equipment')}>{equipmentRows}</Section>
       ) : null}
 
-      {/* ── how it is done ─────────────────────────────────────────────────────────────────── */}
       {exercise.instructions.length > 0 ? (
-        <section className="flex flex-col gap-group">
-          <SectionBadge icon={ListOrdered}>
-            <h2 className="text-title-2 text-text-1">{t('library.howTo')}</h2>
-          </SectionBadge>
-          <ol className="flex flex-col gap-group">
+        <Section title={t('library.howTo')}>
+          <RowStack as="ol">
             {exercise.instructions.map((step, i) => (
-              <li key={i} className="flex items-start gap-tight">
-                <span
-                  aria-hidden
-                  className="text-caption inline-flex size-8 shrink-0 items-center justify-center rounded-chip bg-accent-subtle tabular-nums text-accent"
-                >
-                  {i + 1}
-                </span>
-                <span className="text-body-legacy measure mt-1 text-text-2">{step}</span>
-              </li>
+              <div key={i} className="flex gap-4 py-4">
+                {/* The numeral hangs from the line top (ink 4 below it) and never makes a short step taller:
+                    the column is the frame's 42 pt number box, the numeral is placed in it. */}
+                <div className="relative min-h-[42px] w-8 shrink-0" aria-hidden>
+                  <Numeral value={String(i + 1)} className="absolute top-1 left-0" />
+                </div>
+                <p className="min-w-0 flex-1 text-body text-text-2">{step}</p>
+              </div>
             ))}
-          </ol>
-        </section>
+          </RowStack>
+        </Section>
       ) : exercise.description ? (
         /*
-          The three-sentence description was merged away because the numbered how-to says the same
-          thing operationally, and prose above a procedure is the same content twice at lower
-          density. It is NOT deleted: an exercise with no steps has nothing else, and a detail page
-          that renders a title and a photograph is not a detail page.
+          No steps: the description is all there is. One paragraph under the section rule, no
+          heading — there is no word for it in the copy, and none is invented (R22).
         */
-        <section>
-          <p className="text-body-legacy measure text-text-2">{exercise.description}</p>
-        </section>
+        <div className="flex flex-col gap-4">
+          <Rule strong />
+          <p className="text-body text-text-2">{exercise.description}</p>
+        </div>
       ) : null}
 
-      {/* ── a way out to something else ────────────────────────────────────────────────────── */}
       {substitutions.length > 0 ? (
-        <section className="flex flex-col gap-group">
-          <h2 className="text-title-2 text-text-1">{t('library.substitutions')}</h2>
-          {/* The strip scrolls inside itself; the page body never scrolls sideways. */}
-          <div className="-mx-4 flex gap-tight overflow-x-auto px-4 pb-1">
-            {substitutions.map((s) => (
-              <Surface
-                key={s.id}
-                as={Link}
-                to={`/library/${s.id}`}
-                interactive
-                className="flex w-40 shrink-0 flex-col justify-center gap-tight"
-              >
-                <span className="text-body-strong line-clamp-2 text-text-1">{s.name}</span>
-                {s.difficulty ? (
-                  <span className="text-caption text-text-3">
-                    {t(`library.difficulty.${s.difficulty}`)}
-                  </span>
-                ) : null}
-              </Surface>
+        <Section title={t('library.substitutions')}>
+          {/* The strip scrolls inside itself and bleeds to the screen edge; the page never scrolls sideways. */}
+          <ul className="-mx-6 flex overflow-x-auto px-6 [scrollbar-width:none] max-[23.5rem]:-mx-4 max-[23.5rem]:px-4">
+            {substitutions.map((s, i) => (
+              <li key={s.id} className="flex shrink-0">
+                {i > 0 ? <span aria-hidden className="mx-4 w-px bg-hair" /> : null}
+                <Link
+                  to={`/library/${s.id}`}
+                  className="flex min-h-16 w-[136px] flex-col gap-0.5 transition-opacity duration-[var(--duration-instant)] active:opacity-[var(--pressed-opacity)]"
+                >
+                  <span className="line-clamp-2 text-body-m text-text-1">{s.name}</span>
+                  {s.difficulty ? (
+                    <span className="text-cap text-text-2">{t(`library.difficulty.${s.difficulty}`)}</span>
+                  ) : null}
+                </Link>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </Section>
       ) : null}
-    </div>
+    </Screen>
   );
 }

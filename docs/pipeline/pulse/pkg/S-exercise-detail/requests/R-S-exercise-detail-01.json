@@ -1,0 +1,14 @@
+{
+  "id": "R-S-exercise-detail-01",
+  "from": "S-exercise-detail",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/data/ (lane ST): a ColumnStrip (or RowStack orientation=\"horizontal\" + a column ListRow)",
+  "need": "exercise-detail-1 / -2 draw the substitutes as a horizontal strip of text columns: 136 wide, min 64 high (44 pt target), name body-m in up to 2 lines then the difficulty cap text-2 2 below, a 1 x 64 hairline (white 8 %) in the middle of each 33 pt gap (16 + 1 + 16), the strip runs off the right screen edge and scrolls inside itself; each column is a link. No kit component draws a horizontal row of rows.",
+  "evidence": ".pulse/geometry/exercise-detail-1.json (Substitutes strip 24,1504 643 x 64; Rule/column x 176 / 345); .pulse/pairs/S-exercise-detail/exercise-detail-1.pair.png",
+  "proposedApi": "<ColumnStrip label?> <ColumnStrip.Item to title sub /> </ColumnStrip>, bleeding to the screen edges with the gutter as its scroll padding",
+  "proposedPatch": null,
+  "interim": "ExerciseDetailPage.tsx draws it: a ul -mx-6 px-6 (16 below 376 pt) overflow-x-auto without scrollbar, li = optional w-px bg-hair mx-4 + router Link w-[136px] min-h-16 with the pressed opacity",
+  "status": "open",
+  "resolution": null
+}

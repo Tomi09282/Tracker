@@ -290,3 +290,83 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: none of it.
 - What the app does: unchanged behaviour, listed so nobody reads it as new - the roster is ordered by team then name; expired codes still count as live; revoke is one tap without confirmation and all Visszavonás links go busy together; failed mint / revoke / archive / team create / account creation show nothing (no copy, R22); "átadásra vár" stays until the client changes the password.
 - Status: open — needs a ruling.
+
+## DEV-033 — S-exercise-detail: the moderation notice
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-1
+- Package: S-exercise-detail
+- The frames show: no moderation notice.
+- What the app does: a rejected submission shows a danger NoticeLine ("Ezt a beküldést elutasították") with the moderator's reason as its detail line, never cut; a pending one an info NoticeLine ("Beküldve — moderálásra vár."); its own block directly under the pushed header.
+- Status: open — needs a ruling.
+
+## DEV-034 — S-exercise-detail: uploaded image or video
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-2
+- Package: S-exercise-detail
+- The frames show: no uploaded media (the mannequin is the picture).
+- What the app does: the first upload is a UserPhoto 16:9 block between the header (or notice) and the stage, full content width, no radius; with an image Eszköz is not rendered; no upload = no block (the old dumbbell glyph is gone). A video keeps the one-way player: the first frame as poster with one bare Play glyph centred (no ring, no scrim), native controls from the first tap. Open owner questions: is a bare play glyph legible over an arbitrary poster, and may the image stay a 16:9 block between the header and the stage.
+- Status: open — needs a ruling.
+
+## DEV-035 — S-exercise-detail: the language mark
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-3
+- Package: S-exercise-detail
+- The frames show: the meta line "Kezdő · Erő" only.
+- What the app does: when the exercise text is not in the interface language the language codes ("EN / HU", or "EN") follow as the meta line's last item, mono, in the warning ink - text, no box (was an amber outlined chip).
+- Status: open — needs a ruling.
+
+## DEV-036 — S-exercise-detail: description only
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-4
+- Package: S-exercise-detail
+- The frames show: not drawn.
+- What the app does: no steps but a description = one paragraph under a strong rule, no heading (no heading word exists in the copy, R22).
+- Status: open — needs a ruling.
+
+## DEV-037 — S-exercise-detail: no muscle tagged
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-5
+- Package: S-exercise-detail
+- The frames show: not drawn.
+- What the app does: no stage, no figure, no switch; Eszköz becomes a ruled section of its own (strong rule, eyebrow, the same rows).
+- Status: open — needs a ruling.
+
+## DEV-038 — S-exercise-detail: not found
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-6
+- Package: S-exercise-detail
+- The frames show: not drawn.
+- What the app does: not found / failed read / not allowed = the kit EmptyState h1 "Nincs találat" under the pushed header, whose real "Gyakorlatok" link is the way out; the old secondary button is not repeated. One state for three causes and no retry is the known defect, unchanged.
+- Status: open — needs a ruling.
+
+## DEV-039 — S-exercise-detail: loading
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-7
+- Package: S-exercise-detail
+- The frames show: not drawn.
+- What the app does: the real back row, a display-line and a meta-line block, three key-line blocks, then one ruled section of blocks; no figure block. Known defect unchanged: /library/abc stays loading.
+- Status: open — needs a ruling.
+
+## DEV-040 — S-exercise-detail: equipment without a still
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-8
+- Package: S-exercise-detail
+- The frames show: the equipment row with a 48 pt still.
+- What the app does: a slug without a still (medicine-ball, stability-ball, foam-roller, other) is the name alone; in a list where another row has a still it keeps the same text edge. EQUIPMENT_STILL is the only source.
+- Status: open — needs a ruling.
+
+## DEV-041 — S-exercise-detail: the stage grows with many muscles
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-9
+- Package: S-exercise-detail
+- The frames show: a 404 pt stage for three labels.
+- What the app does: the stage is at least 404 tall and grows; Eszköz stands on the figure's foot line while the key is short and moves down when the key and caption need the room (never overlaps).
+- Status: open — needs a ruling.
+
+## DEV-042 — S-exercise-detail: the other-side caption copy
+
+- Source: docs/pipeline/pulse/pkg/S-exercise-detail/deviations.md DEV-10
+- Package: S-exercise-detail
+- The frames show: "További célizmok a elöl nézetben." (frame 2).
+- What the app does: printed exactly as the product prints it (the muscleMap.alsoOnOtherSide key of the mannequin lane); the grammar ("a elöl") is a copy question, not fixed here.
+- Status: open — needs a ruling.
