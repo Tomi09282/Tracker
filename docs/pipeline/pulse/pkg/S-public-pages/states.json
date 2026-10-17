@@ -1,0 +1,526 @@
+{
+  "about": "S-public-pages - the two signed-out pages /m/p/:publicId (post-detail-1/-2/-3) and /m/c/:handle (coach-profile-1/-2): the frame data the seed does not hold (PLAN 4.1 rule 7) and the states the five frames do not draw. Account: signed out for every state (GET /auth/me answers 401). Every GET is replay (anonymous recordings under .pulse/rec/anon); the gone answers, the announcement post and the unverified coach were recorded with --record --only-missing. Every fixture is an edit list over the recording of the same endpoint (the PublicPost / PublicCoach shapes of features/marketplace/usePublic.ts) - no new key, no write. The overrides feed post-detail-1/-2 the frame's price and date (the seed stores 100x prices - _subcheck.dataNotDrawn.prices - and the event is +21 days from the freeze, 2026. 11. 05.), so those two frames are matched-fixture, never matched. Every fixture passes pulse-fixture-check; the post-detail-3 specimen fixture it refuses is kept beside this file (unrecorded-post-detail-3.json) and reported as structure.",
+  "overrides": {
+    "post-detail-1": {
+      "why": "frame data: the seed event is 'Guggolás-technika műhely – szeptember 14.' on 2026. 11. 05. at 1 200 000 Ft (the seed's 100x price); the frame draws 'október 30.', 2026. 10. 30. and 12 000 Ft. The edits set exactly those three facts.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/{postEvent}",
+          "edits": [
+            {
+              "pointer": "/post/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/post/eventAt",
+              "value": 1793376000
+            },
+            {
+              "pointer": "/post/priceMinor",
+              "value": 12000
+            }
+          ]
+        }
+      ]
+    },
+    "post-detail-2": {
+      "why": "frame data: the seed programme costs 4 500 000 Ft (the seed's 100x price); the frame draws 45 000 Ft.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/{postProgram}",
+          "edits": [
+            {
+              "pointer": "/post/priceMinor",
+              "value": 45000
+            }
+          ]
+        }
+      ]
+    },
+    "coach-profile-1": {
+      "why": "language-neutral arrival: the frame state names the button by its Hungarian word, so the en / de variants never arrive; the key says the same thing in every language.",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.more"
+        }
+      }
+    },
+    "coach-profile-2": {
+      "why": "language-neutral open step and arrival (as coach-profile-1).",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "common.more"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.less"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.less"
+        },
+        "expanded": true
+      }
+    }
+  },
+  "states": {
+    "coach-profile-1-frame-data": {
+      "title": "Edzői profil — a keret adataival (coach-profile-1 box for box)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 874,
+      "reach": "fixture",
+      "frame": "coach-profile-1",
+      "why": "the frame's post list reads Program 2026. 10. 08. / Közlemény 2026. 10. 05. 'Novembertől két új időpont' / Esemény 2026. 10. 30. 'Guggolás-technika műhely – október 30.' / Program 2026. 09. 18.; the seed has 'Szeptembertől…', 'szeptember 14.' and other dates. The edits set the drawn titles and dates only. The plain recording is the frame state coach-profile-1.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/coaches/kovacs-peter",
+          "edits": [
+            {
+              "pointer": "/posts/0/publishedAt",
+              "value": 1791453600
+            },
+            {
+              "pointer": "/posts/1/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/1/publishedAt",
+              "value": 1791194400
+            },
+            {
+              "pointer": "/posts/2/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/2/eventAt",
+              "value": 1793376000
+            },
+            {
+              "pointer": "/posts/3/publishedAt",
+              "value": 1789725600
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.more"
+        }
+      }
+    },
+    "coach-profile-2-frame-data": {
+      "title": "Edzői profil — bio kinyitva, a keret adataival (coach-profile-2 box for box)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 1376,
+      "reach": "fixture",
+      "frame": "coach-profile-2",
+      "why": "as coach-profile-1-frame-data, with the bio opened by its Több link.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/coaches/kovacs-peter",
+          "edits": [
+            {
+              "pointer": "/posts/0/publishedAt",
+              "value": 1791453600
+            },
+            {
+              "pointer": "/posts/1/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/1/publishedAt",
+              "value": 1791194400
+            },
+            {
+              "pointer": "/posts/2/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/2/eventAt",
+              "value": 1793376000
+            },
+            {
+              "pointer": "/posts/3/publishedAt",
+              "value": 1789725600
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.less"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.less"
+        },
+        "expanded": true
+      }
+    },
+    "public-post-gone": {
+      "title": "Poszt — nem érhető el (ismeretlen azonosító)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/zzzzzzzzzzzz",
+      "height": 874,
+      "reach": "seed",
+      "why": "a draft, a removed post, an unknown id and a failed request are one answer (the 404 is recorded); after the hook's two silent retries the gone page: the back row, the display line as the page's h1, one line, the 'Vissza a piactérre' text link. No icon, no retry control. Answered by a bodiless 404 fixture (the recorded 404 has the same status): publicGet throws on !res.ok without reading the body, so Chrome never reports the recorded JSON body finished and the capture tool cannot settle (request R-S-public-pages-01).",
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "path": "/api/v1/public/posts/zzzzzzzzzzzz",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "marketplace.postGoneTitle"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/zzzzzzzzzzzz",
+          "status": 404,
+          "body": null
+        }
+      ]
+    },
+    "public-coach-gone": {
+      "title": "Edzői profil — nem érhető el (ismeretlen handle)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/nincs-ilyen",
+      "height": 874,
+      "reach": "seed",
+      "why": "an unpublished profile, a removed one and an unknown handle are one answer (the 404 is recorded): the gone page as on the post. Answered by a bodiless 404 fixture (the recorded 404 has the same status): publicGet throws on !res.ok without reading the body, so Chrome never reports the recorded JSON body finished and the capture tool cannot settle (request R-S-public-pages-01).",
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "path": "/api/v1/public/coaches/nincs-ilyen",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "marketplace.coachGoneTitle"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/coaches/nincs-ilyen",
+          "status": 404,
+          "body": null
+        }
+      ]
+    },
+    "post-announcement": {
+      "title": "Poszt — közlemény (nincs ár, dátum, létszám)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/Pyc1JUPJw_Ke",
+      "height": 874,
+      "reach": "seed",
+      "why": "an announcement of kovacs-peter (id from the recorded feed): the kind line is the eyebrow with the city inline ('KÖZLEMÉNY · BUDAPEST'), no right-hand meta, no price block - the page ends with the body.",
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      }
+    },
+    "post-tag-only": {
+      "title": "Poszt — nincs borító, dátum, létszám, ár (csak fajta és város)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/{postEvent}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the common real case: a post written in today's editor carries its kind (and here its city) and nothing else. No cover, so the kind line starts 32 under the top bar; the city joins the kind as one eyebrow line; no meta, no price; the page must look complete. (A post with no city at all - the tag alone - cannot be fed: the recordings hold no null city, request R-S-public-pages-02.)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/{postEvent}",
+          "edits": [
+            {
+              "pointer": "/media",
+              "value": []
+            },
+            {
+              "pointer": "/post/eventAt",
+              "value": null
+            },
+            {
+              "pointer": "/post/capacity",
+              "value": null
+            },
+            {
+              "pointer": "/post/priceMinor",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      }
+    },
+    "post-long-title": {
+      "title": "Poszt — 140 karakteres cím",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/p/{postEvent}",
+      "height": 1400,
+      "reach": "fixture",
+      "why": "the longest title the API accepts (140 characters) at displayXL 48 / 48: it wraps over several lines, never cut, and pushes the coach row down.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/posts/{postEvent}",
+          "edits": [
+            {
+              "pointer": "/post/title",
+              "value": "Guggolás-technika műhely haladóknak és kezdőknek – három óra gyakorlat, videóelemzés, légzés, törzsfeszítés és lábfejállás, október 30."
+            },
+            {
+              "pointer": "/post/priceMinor",
+              "value": 12000
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "link",
+        "name": {
+          "re": "^Kovács Péter"
+        }
+      }
+    },
+    "coach-unverified": {
+      "title": "Edzői profil — nem ellenőrzött, szűkös adatlap (Fehér Tamás)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/feher-tamas",
+      "height": 874,
+      "reach": "seed",
+      "why": "an unverified coach from the seed (recorded): no lime check, the credential row is the city alone; whatever the profile lacks is absent, not a gap.",
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "re": "^Fehér Tamás"
+        }
+      }
+    },
+    "coach-minimal": {
+      "title": "Edzői profil — szűkös (nincs headline, ellenőrzés, szakterület, bio, bejegyzés)",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the near-minimum page: the monogram, the name, the credential line as the city alone (unverified), then BEJEGYZÉSEI with the 'Még nincs közzétett bejegyzése.' line. No headline, no specialty line, no bio, no expander. (No city at all cannot be fed: the recordings hold no null city, request R-S-public-pages-02.)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/coaches/kovacs-peter",
+          "edits": [
+            {
+              "pointer": "/coach/headline",
+              "value": ""
+            },
+            {
+              "pointer": "/coach/verified",
+              "value": 0
+            },
+            {
+              "pointer": "/coach/doc",
+              "value": []
+            },
+            {
+              "pointer": "/specialties",
+              "value": []
+            },
+            {
+              "pointer": "/posts",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "marketplace.noPostsYet"
+        }
+      }
+    },
+    "coach-short-bio-long-name": {
+      "title": "Edzői profil — egy rövid bekezdés bio, 120 karakteres név",
+      "package": "S-public-pages",
+      "account": null,
+      "route": "/m/c/kovacs-peter",
+      "height": 1100,
+      "reach": "fixture",
+      "why": "a bio of one short paragraph shows whole with no expander; a 120-character name wraps the display h1 over several lines.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/public/coaches/kovacs-peter",
+          "edits": [
+            {
+              "pointer": "/coach/displayName",
+              "value": "Kovács-Szentgyörgyi Péter Bálint Zsigmond, okleveles erőnléti és rehabilitációs edző, sportdietetikus és futóedző Budapest"
+            },
+            {
+              "pointer": "/coach/doc",
+              "value": [
+                {
+                  "k": "p",
+                  "c": [
+                    {
+                      "k": "text",
+                      "v": "Írj bátran, ha kérdésed van."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      },
+      "arrived": {
+        "text": "Írj bátran, ha kérdésed van."
+      }
+    }
+  },
+  "notCapturable": {
+    "post-loading": "usePost isLoading: pulse-shot answers a recorded GET at once and has no delayed answer, so the skeleton (top bar, eyebrow block, two 48 pt title blocks, one coach row skeleton between strong rules, three body line blocks, role=status + common.loading) is checked in the code only",
+    "coach-loading": "useCoach isLoading: same reason; MonogramSkeleton 176, name block, two headline blocks, the eyebrow block and three kicker row skeletons, checked in the code only",
+    "offline": "the offline line is app-level and no frame draws these pages offline; a cold offline load ends, after the two retries, in the gone state (public-post-gone / public-coach-gone draw it)"
+  }
+}

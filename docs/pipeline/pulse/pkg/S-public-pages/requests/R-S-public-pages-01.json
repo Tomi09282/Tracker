@@ -1,0 +1,11 @@
+{
+  "id": "R-S-public-pages-01",
+  "from": "S-public-pages",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (settle) or frontend/src/features/marketplace/usePublic.ts (publicGet)",
+  "what": "A recorded 404 of GET /public/posts/:id or /public/coaches/:handle never settles in a capture: publicGet throws on !res.ok without reading the body, Chrome never reports loadingFinished for the fulfilled JSON body, the request stays in the tool's in-flight set and the page fails 'not-settled' after 20 s (the initial request and both retries stay listed).",
+  "how": "Either settle() ignores a request whose response headers arrived and whose body nobody reads (responseReceived + no consumer), or publicGet reads/cancels the body before throwing (res.body?.cancel()). usePublic.ts is frozen for this package.",
+  "interim": "public-post-gone and public-coach-gone are answered by a bodiless 404 fixture (same status as the recording); the page under test is identical.",
+  "then": "Drop the two inline fixtures and let the recorded 404s answer."
+}

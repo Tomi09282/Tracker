@@ -1,0 +1,82 @@
+{
+  "about": "The post-detail-3 specimen fixture refused by pulse-fixture-check (the recordings hold no h3 / strong / em / link node, request R-S-public-pages-02). Captured from a scratch frames file; verdict structure.",
+  "override": {
+    "why": "post-detail-3 is the DocRenderer type specimen (402 x 542), not a screen. The fixture replaces the programme post's body with the four samples the frame draws (h3, a bold run, an italic run, a link; placeholder copy, fixture only) and drops the cover, so the body stands right under the coach row. Only the body typography is compared: the frame's mono annotations and its first eyebrow are Figma labels and are never rendered.",
+    "height": 1100,
+    "fixtures": [
+      {
+        "method": "GET",
+        "path": "/api/v1/public/posts/{postProgram}",
+        "edits": [
+          {
+            "pointer": "/media",
+            "value": []
+          },
+          {
+            "pointer": "/post/doc",
+            "value": [
+              {
+                "k": "h",
+                "level": 3,
+                "c": [
+                  {
+                    "k": "text",
+                    "v": "Így működik"
+                  }
+                ]
+              },
+              {
+                "k": "p",
+                "c": [
+                  {
+                    "k": "text",
+                    "v": "Hozz magaddal "
+                  },
+                  {
+                    "k": "strong",
+                    "v": "edzőcipőt"
+                  },
+                  {
+                    "k": "text",
+                    "v": " és kényelmes ruhát."
+                  }
+                ]
+              },
+              {
+                "k": "p",
+                "c": [
+                  {
+                    "k": "text",
+                    "v": "Háromórás "
+                  },
+                  {
+                    "k": "em",
+                    "v": "gyakorlati műhely"
+                  },
+                  {
+                    "k": "text",
+                    "v": " a guggolás technikájáról."
+                  }
+                ]
+              },
+              {
+                "k": "p",
+                "c": [
+                  {
+                    "k": "link",
+                    "v": "jelentkezés itt",
+                    "href": "https://forms.gle/example"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "pointer": "/post/priceMinor",
+            "value": 45000
+          }
+        ]
+      }
+    ]
+  }
+}

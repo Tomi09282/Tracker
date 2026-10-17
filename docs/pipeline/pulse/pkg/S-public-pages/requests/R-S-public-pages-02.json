@@ -1,0 +1,11 @@
+{
+  "id": "R-S-public-pages-02",
+  "from": "S-public-pages",
+  "kind": "recording",
+  "blocking": false,
+  "target": ".pulse/rec/anon (public GETs)",
+  "what": "Recordings of a public post whose body carries a level-3 heading, a strong run, an em run and a link (the closed grammar of backend/src/public/markdown.js), of a post with city null, and of a coach with city / headline null. Without them pulse-fixture-check refuses the post-detail-3 specimen fixture (kept in pkg/S-public-pages/unrecorded-post-detail-3.json) and the 'no city' variants of post-tag-only / coach-minimal.",
+  "how": "Seed (or publish on a sandbox coach) one post written with '### heading', '**bold**', '*italic*' and a [link](https://example.org), one post and one coach profile with no city, then record GET /public/posts/:id and /public/coaches/:handle with --record --only-missing. This package makes no live writes (PLAN 4.7).",
+  "interim": "post-detail-3 is captured from a scratch frames file with the refused fixture (.pulse/pairs/S-public-pages/specimen) and reported as structure; post-tag-only and coach-minimal keep the city.",
+  "then": "Move the override back into states.json and re-capture."
+}
