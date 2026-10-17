@@ -1,0 +1,14 @@
+{
+  "id": "R-S-compose-hub-01",
+  "from": "S-compose-hub",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-fixture-check.mjs (mutation-outcome fixtures; R-F3-01)",
+  "need": "Let a state stub the answer of POST /api/v1/compose/profile/unpublish ({ postsWentDark: 4 }) and POST /api/v1/compose/profile/publish (409 { reason: \"needs_guidelines\", activeVersion } / { reason: \"too_new\", eligibleAt }), schema-checked against useSetProfilePublished / ComposeConflict (useCompose.ts), as the orchestrator ruling of 2026-10-17 allows. No recording of these POSTs exists and this package may not write live (unpublish would darken the demo posts).",
+  "evidence": "states.json notCapturable.sheet-unpublished / sheet-refusal",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the wentDark notice line (role=status) and the refusal line (role=alert, version / when now filled in) are checked in code only and reported as structure",
+  "status": "open",
+  "resolution": null
+}

@@ -1,0 +1,421 @@
+{
+  "about": "S-compose-hub - the frame data of compose-hub-1 / -2 and the undrawn states of the Piactéri pult (/compose, URL only on a phone, owner answer Q5; PLAN 4.1 rule 7). Every fixture is an edit list over the recordings of GET /api/v1/compose/context and GET /api/v1/compose/posts?state=all of account C (R26), or a stubbed answer. Nothing is written live by this package: publish / unpublish / accept are never fired (liveWrites none).",
+  "overrides": {
+    "compose-hub-1": {
+      "why": "The recording of C lists the PULSE sandbox draft first (6 posts, 2 drafts; the frame draws 5 and 1), two titles are the seed originals (Szeptembertől két új időpont, Guggolás-technika műhely – szeptember 14.) and the quota reads 0 published of 10 (the frame: 1 of 10, \"Ma még 9\"). The edits drop the sandbox row, retitle the two posts as drawn and set publishedToday to 1. Verdict cap matched-fixture.",
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "compose-hub-2": {
+      "why": "The recording of C lists the PULSE sandbox draft first (6 posts, 2 drafts; the frame draws 5 and 1), two titles are the seed originals (Szeptembertől két új időpont, Guggolás-technika műhely – szeptember 14.) and the quota reads 0 published of 10 (the frame: 1 of 10, \"Ma még 9\"). The edits drop the sandbox row, retitle the two posts as drawn and set publishedToday to 1. Verdict cap matched-fixture. The status control is the first button named Élő in DOM order (header before the filter), so the frame steps are unchanged.",
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "states": {
+    "hub-recorded": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "seed",
+      "title": "Piactéri pult — a felvett pult (6 bejegyzés, homokozóval)",
+      "why": "the recording as it is: 6 posts with the sandbox draft first (Élő 4 / Piszkozat 2), quota 0 of 10 (Ma még 10)",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.newPost"
+        }
+      }
+    },
+    "hub-filter-expanded": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — a szűrő kibontva (Több)",
+      "why": "Több opens Levett and Eltávolított once and disappears; five words wrap inside the column",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "compose.state.removed"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "compose.state.removed"
+        }
+      }
+    },
+    "hub-filter-live-empty": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — a szűrő nem talál semmit",
+      "why": "Élő chosen and the server returns no row: the empty state with Összes mutatása; the hero keeps the real total",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "live"
+          },
+          "status": 200,
+          "body": {
+            "posts": [],
+            "nextCursor": null
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "compose.state.live"
+            },
+            "nth": 1
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "compose.showAllPosts"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "compose.showAllPosts"
+        }
+      }
+    },
+    "hub-empty": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — üres pult",
+      "why": "no post at all: the hero reads 0 with four quiet zeros, the empty state has no action, the pill stays",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/5",
+              "remove": true
+            },
+            {
+              "pointer": "/posts/4",
+              "remove": true
+            },
+            {
+              "pointer": "/posts/3",
+              "remove": true
+            },
+            {
+              "pointer": "/posts/2",
+              "remove": true
+            },
+            {
+              "pointer": "/posts/1",
+              "remove": true
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.newPost"
+        }
+      }
+    },
+    "hub-gate-age": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — túl új fiók",
+      "why": "standing.oldEnough false: the notice line with the date; no pill on the screen; Új bejegyzés is the section text link",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/standing/oldEnough",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.newPost"
+        }
+      }
+    },
+    "hub-quota-used": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — elfogyott a napi keret",
+      "why": "publishedToday = max: Ma még 0 (the 0 in ink) and the meter full in the warning colour",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 10
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.newPost"
+        }
+      }
+    },
+    "hub-error": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — nem érhető el (403)",
+      "why": "the context answers 403 (what a member gets): the h1 empty state, no retry, no way back",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "status": 403,
+          "body": {}
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "compose.unavailableTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/compose/context",
+            "status": 403
+          }
+        ],
+        "console": [
+          "403"
+        ]
+      }
+    }
+  },
+  "notCapturable": {
+    "hub-loading": "ctx.isPending / posts.isPending: pulse-shot answers a recorded GET at once and has no held answer, so the two skeletons (role=status) are checked in the code only - same cause as R-S-coach-plans-02",
+    "sheet-unpublished": "the wentDark notice after POST /api/v1/compose/profile/unpublish: no recording of that POST exists and the package may not write live (it would darken four demo posts) - request R-S-compose-hub-01",
+    "sheet-refusal": "the 409 refusal line (needs_guidelines / too_new) after POST .../publish: same reason - request R-S-compose-hub-01",
+    "sheet-busy": "the busy row while the POST is in flight: no held answer (R-S-coach-plans-02)"
+  },
+  "pendingStates": "states.pending.json: five undrawn states whose fixtures set a schema-valid null that pulse-fixture-check refuses today (request R-S-compose-hub-02); captured ad hoc for the pictures"
+}

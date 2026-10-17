@@ -154,3 +154,43 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: no undo pill is drawn; the set row is tap-to-check (variants.json E21 live:false).
 - What the app does: the 6 s Visszavonás pill is gone with hold-to-confirm and swipe-weight: a normal check can be taken back only after a 409, where the void is still reachable. Flag for the owner.
 - Status: open — needs a ruling.
+
+## DEV-016 — S-compose-hub: unpublishing the profile has no confirmation
+
+- Source: docs/pipeline/pulse/pkg/S-compose-hub/handoff.json (PLAN.md Q4: behaviour wins)
+- Package: S-compose-hub
+- The frames show: compose-hub-2 draws the Profil sheet with the danger unpublish row; no confirmation is drawn.
+- What the app does: the unpublish row acts at once, as the screen note requires; the kit rule "destructive = ConfirmSheet" is not applied here. The sheet stays open after publish / unpublish so the wentDark / refusal line is read where it was raised.
+- Status: open — needs a ruling.
+
+## DEV-017 — S-compose-hub: the gate states (guidelines, too new, no profile, takedown, account blocker)
+
+- Source: docs/pipeline/pulse/pkg/S-compose-hub/handoff.json (PLAN.md Q4: behaviour wins)
+- Package: S-compose-hub
+- The frames show: not drawn.
+- What the app does: one NoticeLine between the title and the hero; a gate with its own action takes the lime pill and Új bejegyzés becomes the trailing text link of the Bejegyzések head (also for the account blocker, which draws no notice). With no profile or after a takedown the identity row is absent and the title stands alone.
+- Status: open — needs a ruling.
+
+## DEV-018 — S-compose-hub: withdrawn and removed post rows
+
+- Source: docs/pipeline/pulse/pkg/S-compose-hub/handoff.json (PLAN.md Q4: behaviour wins)
+- Package: S-compose-hub
+- The frames show: only live and draft rows.
+- What the app does: a withdrawn or removed post's caption carries the off dot.
+- Status: open — needs a ruling.
+
+## DEV-019 — S-compose-hub: the refusal line fills its version / date
+
+- Source: docs/pipeline/pulse/pkg/S-compose-hub/handoff.json (fix while rewriting)
+- Package: S-compose-hub
+- The frames show: not drawn.
+- What the app does: the sheet's refusal line passes version / when to compose.reason.*, so no raw {{version}} / {{when}} placeholder prints any more.
+- Status: open — needs a ruling.
+
+## DEV-020 — S-compose-hub: old decoration dropped
+
+- Source: docs/pipeline/pulse/pkg/S-compose-hub/handoff.json (screen note: safe to drop)
+- Package: S-compose-hub
+- The frames show: none of it.
+- What the app does: the kind glyph tiles, the section glyph tile, the gate glyphs, the globe / eye-off glyphs, the success wash of live rows and the Gauge donut are gone; the filter is ChipRow + Segment with the ink mark (as the frame and kit chipRow({ink:true}) draw), Több is a non-selecting Segment; the four-state split is local to the page.
+- Status: open — needs a ruling.

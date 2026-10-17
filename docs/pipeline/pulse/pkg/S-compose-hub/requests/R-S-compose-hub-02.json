@@ -1,0 +1,14 @@
+{
+  "id": "R-S-compose-hub-02",
+  "from": "S-compose-hub",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-fixture-check.mjs (type check of edits)",
+  "need": "Accept a null edit where the response type allows null although the recordings of the account hold a number / object: GET /api/v1/compose/context /profile (ComposeProfileSummary | null), /profile/publishedAt (number | null), /standing/guidelinesAcceptedAt (number | null). Then the five states of states.pending.json (hub-hidden, hub-hidden-sheet, hub-gate-guidelines, hub-gate-noprofile, hub-takedown) move into states.json unchanged.",
+  "evidence": "pulse-fixture-check S-compose-hub on those states: type: /profile/publishedAt is null, the recordings have number (and the same for the other three pointers)",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the five states are captured with an ad-hoc frames file (.pulse/pairs/S-compose-hub/_adhoc-frames.json, contact .pulse/pairs/S-compose-hub/_contact-pending-states.png) and reported as structure",
+  "status": "open",
+  "resolution": null
+}
