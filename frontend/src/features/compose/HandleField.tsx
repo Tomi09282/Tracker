@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, Loader2, X } from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
+import { NoticeLine, type NoticeTone } from '../../ui/feedback/NoticeLine';
 import { useComposeContext, useHandleAvailable } from './useCompose';
 
 /**
@@ -82,15 +82,6 @@ export function HandleField({
     return null;
   })();
 
-  const TONE = {
-    malformed: 'text-danger',
-    taken: 'text-danger',
-    free: 'text-success',
-    own: 'text-text-3',
-    checking: 'text-text-3',
-    unknown: 'text-text-3',
-  } as const;
-
   return (
     <div className="flex flex-col gap-1">
       <Field
@@ -111,30 +102,36 @@ export function HandleField({
         and an assertive region would interrupt the screen reader mid-word on every keystroke.
         The region is always present so it can announce a change — one that appears only when there
         is something to say is a region that has just been created, and is often not announced.
+        It keeps the notice line's 44 pt row while it is empty, so nothing under it jumps when the
+        answer arrives (compose-profile-2: "Szabad" 4 under the hint).
       */}
-      <p className={`text-caption flex min-h-5 items-center gap-1 ${status ? TONE[status] : 'text-text-3'}`} aria-live="polite">
-        {status === 'checking' ? (
-          <>
-            <Loader2 className="size-icon-s animate-spin motion-reduce:animate-none" aria-hidden />
-            {t('compose.handleChecking')}
-          </>
-        ) : null}
-        {status === 'free' ? (
-          <>
-            <Check className="size-icon-s" aria-hidden />
-            {t('compose.handleFree')}
-          </>
-        ) : null}
-        {status === 'taken' ? (
-          <>
-            <X className="size-icon-s" aria-hidden />
-            {t('compose.handleTaken')}
-          </>
-        ) : null}
-        {status === 'malformed' ? t('compose.handleMalformed') : null}
-        {status === 'own' ? t('compose.handleIsYours') : null}
-        {status === 'unknown' ? t('compose.handleUnknown') : null}
-      </p>
+      <div className="min-h-11" aria-live="polite">
+        {status ? <NoticeLine tone={TONE[status]}>{t(WORDS[status])}</NoticeLine> : null}
+      </div>
     </div>
   );
 }
+
+/**
+ * The dot of each answer. Pulse draws no spinner in a line, so "checking" is the quiet ink dot; a
+ * failed probe is a warning, never a refusal (see `unknown` above).
+ */
+const TONE: Record<HandleStatus, NoticeTone> = {
+  malformed: 'danger',
+  taken: 'danger',
+  free: 'ok',
+  own: 'info',
+  checking: 'info',
+  unknown: 'warn',
+};
+
+const WORDS: Record<HandleStatus, string> = {
+  malformed: 'compose.handleMalformed',
+  taken: 'compose.handleTaken',
+  free: 'compose.handleFree',
+  own: 'compose.handleIsYours',
+  checking: 'compose.handleChecking',
+  unknown: 'compose.handleUnknown',
+};
+
+type HandleStatus = 'malformed' | 'own' | 'checking' | 'unknown' | 'free' | 'taken';

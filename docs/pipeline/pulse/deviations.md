@@ -562,3 +562,43 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: 19 users (15 / 3 / 1), 1656 exercises, 3 media, `@pelda.hu` owners, a barbell photo, a LETILTVA flag; admin-2 / -3 drawn already scrolled (switch at y 72).
 - What the app does: no product change. The frame states replay recordings edited to the frame's figures (verdict matched-fixture; the dev DB answers 49 / 45 / 3 / 1, 1660, 4). The LETILTVA flag is drawn by the code but no recording holds a disabled account; the submitted image is the seed's blank upload. admin-2 / -3 are paired from 404 pt taller states cut at y 403 until pulse-shot gets a scroll step (R-S-admin-02).
 - Status: open — tool request only.
+
+## DEV-067 — S-compose-profile: undrawn states composed from the kit
+
+- Source: docs/pipeline/pulse/pkg/S-compose-profile/deviations.md rows 1, 2 and 6
+- Package: S-compose-profile
+- The frames show: compose-profile-1 (the whole form, identity panel closed) and compose-profile-2 (identity panel open, a new handle typed) only.
+- What the app does: create mode (no profile yet) uses the same kit - monogram "·" and the h1 "Profil létrehozása" until a name is typed, no identity line, the Felhasználónév field with its status line, the Város row, no public row, the pill "Profil létrehozása"; taken down (`removedAt` set) shows one danger NoticeLine "A profilodat levették", every field, word, the switch and Mentés disabled, the identity line plain text, Előnézet live; the rename refusal is a danger NoticeLine inside the panel under the warning. None of these is capturable from the recordings (pulse-fixture-check refuses a null profile, a numeric `removedAt`, a null `listedAt`): verdict structure.
+- Status: closed — Pulse form of existing behaviour.
+
+## DEV-068 — S-compose-profile: city row, switch outcomes, refusals and preview kept
+
+- Source: docs/pipeline/pulse/pkg/S-compose-profile/deviations.md rows 3, 4, 5 and 9
+- Package: S-compose-profile
+- The frames show: the city row only inside the open identity panel (frame 2); the public switch row without outcomes; Előnézet as a text link.
+- What the app does: the city stays behind the identity line (edit) or under the handle (create), saved by Mentés; the native `<select>` became the Város list row (value + chevron) opening the kit bottom Sheet with radio rows and the lime tick. The switch outcomes stay ("went dark" info NoticeLine with role status, the refusal danger NoticeLine with role alert); the refusal now fills `{{version}}` / `{{when}}` from the conflict instead of printing them raw (render-only fix, no key changed). The save refusal is a warn NoticeLine and the markdown refusal a danger NoticeLine under Előnézet (were tinted boxes). Előnézet toggles to "Előnézet elrejtése" and opens a ruled ELŐNÉZET section with DocRenderer.
+- Status: closed — Pulse form of existing behaviour.
+
+## DEV-069 — S-compose-profile: specialty words and counters
+
+- Source: docs/pipeline/pulse/pkg/S-compose-profile/deviations.md rows 7 and 8
+- Package: S-compose-profile
+- The frames show: specialty words with the lime mark; the counters in two inks.
+- What the app does: the words are kit `Chip`s without the check glyph (the mark carries the state), still `aria-pressed` toggle buttons inside the ChipRow's named `role="group"`; at the cap further taps do nothing; Több reveals the rest with no way back, as before. The bio counter turns warning past 90 % and danger past the cap (reads 0), as before; calm it is the frame's two inks, found in the translated string.
+- Status: closed — the frame wins, behaviour kept.
+
+## DEV-070 — S-compose-profile: inherited product gaps logged
+
+- Source: docs/pipeline/pulse/pkg/S-compose-profile/deviations.md row 10
+- Package: S-compose-profile
+- The frames show: nothing for these cases.
+- What the app does: a failed profile load still falls through to the empty create form (product gap 1), and flipping the switch / confirming a rename reloads the profile and drops unsaved edits (gap 5). Logic above the return, not changed.
+- Status: open — owner ruling, later.
+
+## DEV-071 — S-compose-profile: the "Erő" word is under the 44 pt target
+
+- Source: docs/pipeline/pulse/pkg/S-compose-profile/deviations.md row 11, requests/R-S-compose-profile-01.json
+- Package: S-compose-profile
+- The frames show: "Erő" as a 25 pt word.
+- What the app does: the kit Chip box is the word + 16, so "Erő" is a 41.5 x 44 target in Hungarian (en / de words are wide enough). Request R-S-compose-profile-01 asks for a 44 pt floor on Chip.
+- Status: open — kit request.
