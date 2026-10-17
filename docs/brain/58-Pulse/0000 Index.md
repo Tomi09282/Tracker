@@ -1,13 +1,22 @@
 ---
 type: design-index
 title: Pulse — the design of record
-updated: 2026-10-11
+updated: 2026-10-18
 tags: [ux, design, pulse, index]
 ---
 
 # Pulse — the design of record
 
-The app's visual design after the owner dropped the liquid-glass look in October 2026. Every screen is drawn in Figma in one language, **Pulse V1 “Open Field”**; nothing of it is implemented in code yet. Decision and history: [[60-Decisions/0020-pulse-replaces-liquid-glass]].
+The app's visual design after the owner dropped the liquid-glass look in October 2026. Every screen is drawn in Figma in one language, **Pulse V1 “Open Field”**, and it is **implemented** on the local branch `pulse-redesign` (2026-10-18; not pushed, not merged into `master`). Decision and history: [[60-Decisions/0020-pulse-replaces-liquid-glass]]; how it was built and what was ruled on the way: [[60-Decisions/0021-pulse-implementation]].
+
+> [!success] State of the implementation (2026-10-18)
+> All 24 screens are rebuilt on the Pulse kit (`frontend/src/ui`), the liquid-glass bridge is deleted, and the build refuses every construct of the old boxed look (`check:pulse`). Values live in `frontend/src/ui/tokens/tokens.css`; this folder holds the rules.
+> - **Matched (17 frames):** the app on recorded data equals the frame within the measured tolerance.
+> - **Matched on a fixture (32):** the same, but the recording does not hold the frame's sample data, so a schema-checked fixture supplies it — the look is proven, the data is a sample.
+> - **Matched by code, not reachable as a screen (1):** post-detail-3. **No screen any more (1):** workout-3 (D2 sends a member with no session to the library).
+> - **Still differ (8):** library-1..3 (the equipment stills: the API carries the keys now, eight stills are still to be made), marketplace-1/2 (the lead post's caption is held back), admin-2 (the submission's photograph is data), style-studio-1/2 (every element is honestly dormant — Q3 — so no live specimen and no save toast).
+> - **Open:** `docs/pipeline/pulse/deviations.md` (where the app knowingly differs, each waiting for a ruling), `docs/pipeline/pulse/copy-to-approve.md` (strings the owner did not draw), `docs/pipeline/pulse/review/open.md` (the regression sweep's non-regression findings), and the follow-up packages in order: (1) the coin-store pack delisting on the backend (Q2), (2) finish / abandon workout (D3).
+> Per frame: `docs/pipeline/pulse/review/final.json`.
 
 - **Figma:** https://www.figma.com/design/SkWidL9kDDWhBip7cUCFtr — pages “10 · PULSE — Rendszer” (tokens, 51 components in every state, the image shelf), “11 · PULSE — Tag”, “12 · PULSE — Edző”, “13 · PULSE — Piactér, belépés, admin”. Pages 01–05 are the five explored directions; page “03 · Pulse” holds the two approved V1 screens.
 - **Archive on disk:** `C:\Users\Petike\Documents\TRACKER-mockups\5-pulse` — all 59 frames as 2x PNG, the 49 images with their manifest, the Figma build kit and one build script per frame.
@@ -96,7 +105,9 @@ The app's visual design after the owner dropped the liquid-glass look in October
 - [[Product gaps]] — what the designs need that the product does not provide today (data, endpoints, strings), per screen.
 - [[Pulse Review Brief]] — the five-lens review of the first Pulse screens: measured findings and proposals, several of them still open.
 
-## Open decisions (the owner's, before implementation)
+## Open decisions (the owner's, before implementation) — all answered
+
+Answered on 2026-10-11 / -12 (D2, D3, D1 + Q2, Q1) and recorded in [[60-Decisions/0021-pulse-implementation]]: the "Edzés" tab shows the selector when no session runs and Home has a library row; finishing a workout is its own package after the screens; Pulse is the only look and the packs are delisted; the mannequin is neutral renders with drawn regions (built, 1:1 with the frames). The list below is the question as it stood.
 
 1. **Where the muscle selector lives.** Today `/library` is reachable only from Home's empty state; the “Edzés” tab opens the player, which is an empty text screen when no session runs. Options: the tab shows the selector when no session runs / a permanent row on Home / leave as is.
 2. **Finishing a workout.** Nothing in the UI finishes or abandons a session, so after the first “Indítás” Home shows “Edzés folyamatban · Folytatás” for ever. The endpoints exist; the action and its copy do not.
@@ -107,6 +118,6 @@ The app's visual design after the owner dropped the liquid-glass look in October
 
 - First-pass design: one review-and-fix round per screen, no user testing, dark only, 402 pt wide only.
 - All photographs and renders are AI-generated (Higgsfield); usage terms and long-term consistency have to be checked before release.
-- Exercise thumbnails use eight equipment stills; the list API carries no equipment key today and eight of the sixteen equipment types have no still.
+- Exercise thumbnails use eight equipment stills; the list API now carries each exercise's equipment keys (owner ruling 2026-10-17), but eight of the sixteen equipment types still have no still, so the library rows leave the cell empty.
 - Tab-bar icons are raster; the coach and admin tabs have theirs, any further tab or accent pack needs a new render or a tint.
 - The Dynamic Island / native iOS pieces from the Liquid Glass exploration are not part of Pulse.

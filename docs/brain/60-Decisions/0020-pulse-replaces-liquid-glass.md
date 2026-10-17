@@ -8,6 +8,21 @@ tags: [decision, adr, design-system, redesign, pulse]
 
 # ADR-0020 — Pulse replaces the liquid-glass redesign
 
+> [!success] Implemented — 2026-10-18, on the local branch `pulse-redesign`
+> All 24 screens (59 frames) are rebuilt on the Pulse kit in `frontend/src/ui`, and the liquid-glass
+> bridge is deleted (closing cleanup F19). Of the 59 frames, 17 match the app on recorded data, 32 match
+> on a schema-checked fixture (`matched-fixture`: the recording does not hold the frame's sample data),
+> 1 matches by code but cannot be reached as a screen (post-detail-3), 1 is no screen any more
+> (workout-3: D2 sends a member with no session to the library), and 8 still differ: library-1..3 (the
+> equipment stills are not drawn yet), marketplace-1/2 (the lead post's caption is held back), admin-2
+> (the submission's photograph is data) and style-studio-1/2 (every element is honestly dormant, so no
+> live specimen or save toast). Per frame: `docs/pipeline/pulse/review/final.json`. Open: the
+> deviations awaiting a ruling (`docs/pipeline/pulse/deviations.md`), the proposed strings
+> (`copy-to-approve.md`), the sweep's findings (`docs/pipeline/pulse/review/open.md`) and the follow-up
+> packages — (1) the coin-store pack delisting on the backend (Q2), (2) finish / abandon workout (D3).
+> How it was done and what was ruled on the way: [[0021-pulse-implementation]]. The paragraphs below are
+> the record of 2026-10-11 and are left as written.
+
 **Context.** On 2026-10-05 the owner looked at the shipped liquid-glass UI and dropped it in one
 sentence: the app has a design, it is not good, forget it. He asked for a very clean
 ("nagyon letisztult"), mobile-first, image-led UI designed from the product's real feature list,
@@ -80,7 +95,9 @@ blocking findings were fixed. That is one round. Nobody has used these screens.
 - *Git:* the work happens on the local branch `pulse-redesign`, one commit per finished step,
   nothing pushed until he says so.
 
-**Still open.** The mannequin's production strategy (see [[58-Pulse/0000 Index]]).
+**Still open (2026-10-11).** The mannequin's production strategy (see [[58-Pulse/0000 Index]]) —
+answered 2026-10-12 (Q1: neutral renders with regions over them) and built as F15; see
+[[0021-pulse-implementation]].
 
 **Not chosen.** Liquid Glass, Editorial, Clay and Flow: the owner picked Pulse out of the five and
 gave no reasons against the others, so none are recorded here; their three screens each stay in

@@ -1,173 +1,176 @@
 ---
 type: design-system
 title: Pulse V1 “Open Field” — the system
-updated: 2026-10-11
+updated: 2026-10-18
 tags: [ux, design-system, pulse]
 ---
 
-> [!important] Design values live here until the code catches up
-> Pulse is not implemented yet, so its tokens have no `tokens.css` to live in. The values below are the specification the implementation starts from; once a Pulse block exists in `frontend/src/ui/tokens/tokens.css`, the code becomes the source and this note must stop carrying numbers.
+> [!important] The code holds the values; this note holds the rules
+> Pulse is implemented (branch `pulse-redesign`, see [[0000 Index]]). Every value — colour, type size, spacing, radius, glow, duration, metric — now lives in `frontend/src/ui/tokens/tokens.css` and nowhere else, and this note names the token instead of repeating the number. The Figma frames' exact boxes are in the geometry export (`.pulse/geometry/<screen>-<n>.json`, file `SkWidL9kDDWhBip7cUCFtr`). Sections 6 and 7 still quote the Figma kit's own calls (`app-kit.js`): those arguments are the drawing tool's, not the app's.
 > File paths below (`build/pulse/…`, `shots/…`) refer to the Figma build archive at `C:\Users\Petike\Documents\TRACKER-mockups\5-pulse`.
 
 # PULSE V1 "OPEN FIELD" — the system
 
 Operational spec for every screen builder and for the developers. The approved look is `shots/pulse/v1-home@2x.png` + `v1-profile@2x.png`; where this file and those two shots disagree, the shots win.
-Kit: `build/pulse/app-kit.js` (paste verbatim, 29.8 k chars → about 20 k left for a screen body; if the workflow hands you `build/pulse/loader.js`, paste that instead — it loads this same kit from the file and exposes the same names). Worked example: `build/pulse/app-home.js`. Reference in Figma (file `SkWidL9kDDWhBip7cUCFtr`, page `70:2`): "Pulse — Components" (`80:2`, x 0, every component in every state) and "Reference — Home" (`78:2`, x 1500).
+Kit: `build/pulse/app-kit.js` (if the workflow hands you `build/pulse/loader.js`, paste that instead — it loads this same kit from the file and exposes the same names). Worked example: `build/pulse/app-home.js`. Reference in Figma (file `SkWidL9kDDWhBip7cUCFtr`, page `70:2`): "Pulse — Components" (`80:2`, every component in every state) and "Reference — Home" (`78:2`).
 
 ## 1. The idea
 
 A black room in which things light up. Near-black canvas, one acid-lime lamp, giant condensed numerals, graphite renders and low-key black-and-white photographs glowing out of the dark.
-Nothing is enclosed: structure = one left edge (x 24), one right edge (x 378), 1 px rules, eyebrows, large numerals, mono meta, and space.
+Nothing is enclosed: structure = one left edge (the gutter), one right edge, 1 px rules, eyebrows, large numerals, mono meta, and space.
 Lime is light, not paint. A screen has ONE glowing lime pill (its primary action); every other lime mark is a small sign that something is live, selected or done.
 "Nagyon letisztult": if an element is not content, a control or a rule, it does not exist.
 
 **Non-negotiables**
 1. **No boxes.** No card, tile, panel, capsule, outlined pill, input box, icon disc, avatar circle, framed thumbnail. The only surface in the product is the bottom sheet (§4).
-2. **One lime action per screen**, the only filled lime shape on it (`btnPrimary`). A second action is text.
-3. **Lime only for:** the primary action · a selected filter (2 pt mark) · live / done data (segment, tick, end dot, switch on, lit tab, badge). Never for decoration, headings, links, icons at rest. Only the primary pill glows.
+2. **One lime action per screen**, the only filled lime shape on it (the primary pill). A second action is text.
+3. **Lime only for:** the primary action · a selected filter (the selection mark) · live / done data (segment, tick, end dot, switch on, lit tab, badge). Never for decoration, headings, links, icons at rest. Only the primary pill glows.
 4. **Images glow out of black with no frame** (§5). Text never sits on a lit area.
 5. **Very clean:** one hero per screen (a giant numeral, a monogram or an image — one of them), then ruled sections. No gradients, no shadows, no blur, no second accent.
 
-## 2. Tokens (`P` in the kit)
+`check:pulse` (the build) bans every construct of the old boxed look; `check:tokens` bans a raw value outside `tokens.css`; `check:type-scale` holds the ramp below.
+
+## 2. Tokens (`tokens.css`; `P` in the Figma kit)
 
 ### 2.1 Palette
 
-| Token | Value | Contrast on bg | Use |
-|---|---|---|---|
-| `bg` | `#0B0D0A` | — | the canvas, everywhere; every image is graded to it |
-| `s2` | `#1E2219` | 1.21 | bottom sheet · skeleton block · disabled pill. Nothing else |
-| `s3` | `#2A2F24` | 1.42 | switch track (off) only |
-| `s1` | `#141712` | 1.08 | reserved — do not use |
-| `t1` | `#F2F5EA` | 17.7 | primary text, numerals, glyphs, neutral selection mark |
-| `t2` | `#A9B09D` | 8.7 (7.2 on s2) | secondary text, eyebrows, inactive tab labels, utility glyphs |
-| `t3` | `#858C79` | 5.6 (4.6 on s2, 3.9 on s3) | hints, placeholders, pending numerals ("/4"), chevrons. Never on `s3` |
-| `accent` | `#CBFF2E` | 16.6 | the lamp (rule 3) |
-| `accentDown` | `#B4E61F` | — | pressed primary pill |
-| `onAccent` | `#0B0D0A` | 16.6 on accent | text and knob on lime |
-| `edge` | `#5E615B` (= t1 36 %) | 3.1 | the edge of anything you type into or tick: field underline, empty set-check ring |
-| `hair` | white 8 % (`#1F201E`) | 1.19 | rule between rows; disabled field underline |
-| `hairS` | white 14 % (`#2D2F2C`) | 1.44 | rule that opens a section / closes a table; sheet edge |
-| `track` | white 10 % (`#232522`) | 1.26 | "off" level: meter track, blank day, locked segment |
-| `danger` | `#F87171` | 7.1 (5.9 on s2) | THE one danger colour: destructive text, field error, failed-save dot |
-| `warn` | `#FBBF24` | 11.7 | over-target macro (value + bar), offline dot |
-| `ok` | `#34D399` | 10.2 | "saved" dot. Accent is never success |
-| scrim | black 60 % | — | under a bottom sheet |
+| Kit | Token (utility) | Use |
+|---|---|---|
+| `bg` | `--surface-0` (`bg-surface-0`) | the canvas, everywhere; every image is graded to it |
+| `s2` | `--surface-2` | bottom sheet · skeleton block · disabled pill. Nothing else |
+| `s3` | `--surface-3` | switch track (off) only |
+| `s1` | `--surface-1` | reserved — do not use (`check:pulse` bans it) |
+| `t1` | `--text-1` | primary text, numerals, glyphs, neutral selection mark |
+| `t2` | `--text-2` | secondary text, eyebrows, inactive tab labels, utility glyphs |
+| `t3` | `--text-3` | hints, placeholders, pending numerals ("/4"), chevrons. Never on `--surface-3` |
+| `accent` | `--accent` | the lamp (rule 3) |
+| `accentDown` | `--accent-pressed` | pressed primary pill |
+| `onAccent` | `--accent-fg` | text and knob on lime |
+| `edge` | `--edge` | the edge of anything you type into or tick: field underline, empty set-check ring |
+| `hair` | `--surface-border` (`border-hair`) | rule between rows; disabled field underline |
+| `hairS` | `--surface-border-strong` (`border-hair-strong`) | rule that opens a section / closes a table; sheet edge |
+| `track` | `--track` | "off" level: meter track, blank day, locked segment |
+| `danger` | `--danger` | THE one danger colour: destructive text, field error, failed-save dot |
+| `warn` | `--warning` | over-target macro (value + bar), offline dot |
+| `ok` | `--success` | "saved" dot. Accent is never success |
+| scrim | `--scrim` | under a bottom sheet |
 
-All three text tiers pass 4.5 : 1 on `bg` and on `s2`; no text token had to change. Rules and tracks are decoration (below 3 : 1 on purpose) and never the only carrier of a state. Semantic colours appear only as a 6 pt dot, as text, as a 2 px field underline or as an over-target value + bar — never as a filled surface, never glowing. Pulse is dark-only.
+All three text tiers pass WCAG AA on the canvas and on the sheet (the ratios are recorded beside each token in `tokens.css`). Rules and tracks are decoration (below the 3 : 1 of a control on purpose) and never the only carrier of a state. Semantic colours appear only as a status dot, as text, as a field's error underline or as an over-target value + bar — never as a filled surface, never glowing. Pulse is dark-only.
 
-**Light levels** (one grammar for every state): lit = `accent` (done · selected · live) · pending = `t1` 50 % segment / `t3` numeral (planned) · off = `track` · ink = `t1` (data, neutral selection). No state is carried by hue alone: each level also differs in tone or shape.
+**Light levels** (one grammar for every state): lit = `--accent` (done · selected · live) · pending = half-tone `--text-1` segment / `--text-3` numeral (planned) · off = `--track` · ink = `--text-1` (data, neutral selection). No state is carried by hue alone: each level also differs in tone or shape.
 
-### 2.2 Type — 7 sizes, 16 roles (`TY`, set with `tx(str, role, colour)`)
+### 2.2 Type — 16 roles (`text-<role>` utilities; `TY` in the kit)
 
-| Role | Family · style | Size / LH | Track | Use |
-|---|---|---|---|---|
-| `giant` | Big Shoulders Display · Black | 124 / 108 | −1 % | the ONE hero numeral of a screen; digits, "/" and ":" only |
-| `num` | Big Shoulders Display · Black | 48 / 48 | 0 | ledger and stat numerals (190, 4/7, 83,1) |
-| `displayXL` | Big Shoulders Display · Bold · UPPER | 48 / 48 | +1 % | the screen's subject line (today's session). Max one per screen |
-| `display` | Big Shoulders Display · Bold · UPPER | 32 / 34 | +1 % | screen title (h1), empty-state title, in-page heading |
-| `eyebrow` | Big Shoulders Display · Bold · UPPER | 16 / 20 | +6 % | section labels, ledger labels, back-link parent; colour `t2` |
-| `title` | Geist · SemiBold | 22 / 28 | −1 % | greeting, person name, sheet title |
-| `body` / `bodyM` / `bodyB` | Geist · Regular / Medium / SemiBold | 16 / 22 | 0 | body, input text / row titles, chips, standalone links / primary-pill label |
-| `cap` / `capM` | Geist · Regular / Medium | 13 / 18 | 0 | meta, hints, units, macro names / field labels, inline links, notices |
-| `tab` / `tabOn` | Geist · Medium / SemiBold | 11 / 14 | +1 % | tab labels; `tabOn` also the badge figure |
-| `dataL` | Geist Mono · Medium | 16 / 20 | −1 % | inline figures (macro values) |
-| `data` | Geist Mono · Medium | 13 / 18 | 0 | meta with figures ("18:00 · 5 gyakorlat"), weekday letters, counts, trailing values that contain a digit |
-| `micro` | Geist Mono · Medium · UPPER | 11 / 16 | +10 % | tags ("TAG", "EN"), time stamps, board labels |
+| Role (utility) | Family · style | Use |
+|---|---|---|
+| `text-giant` | Big Shoulders Display · Black | the ONE hero numeral of a screen; digits, "/" and ":" only; capped by `--giant-fluid` on narrow phones |
+| `text-num` | Big Shoulders Display · Black | ledger and stat numerals (190, 4/7, 83,1) |
+| `text-display-xl` | Big Shoulders Display · Bold · UPPER | the screen's subject line (today's session). Max one per screen |
+| `text-display` | Big Shoulders Display · Bold · UPPER | screen title (h1), empty-state title, in-page heading |
+| `text-eyebrow` | Big Shoulders Display · Bold · UPPER | section labels, ledger labels, back-link parent; colour `--text-2` |
+| `text-title` | Geist · SemiBold | greeting, person name, sheet title |
+| `text-body` / `-body-m` / `-body-b` | Geist · Regular / Medium / SemiBold | body, input text / row titles, chips, standalone links / primary-pill label |
+| `text-cap` / `-cap-m` | Geist · Regular / Medium | meta, hints, units, macro names / field labels, inline links, notices |
+| `text-tab` / `-tab-on` | Geist · Medium / SemiBold | tab labels; `tab-on` also the badge figure |
+| `text-data-l` | Geist Mono · Medium | inline figures (macro values) |
+| `text-data` | Geist Mono · Medium | meta with figures ("18:00 · 5 gyakorlat"), weekday letters, counts, trailing values that contain a digit |
+| `text-micro` | Geist Mono · Medium · UPPER | tags ("TAG", "EN"), time stamps, board labels |
 
-Rules: display-face words are always UPPER, Geist is sentence case, exact Hungarian strings from `feature-inventory.md` / `hu.json`. Nothing under 11 pt; body copy never under 13; input text is 16 (WebKit zoom). No size between the steps. Mono is for figures and codes; a trailing value made of words uses `cap`. Selection never changes weight except the active tab label (cells are fixed, nothing shifts). Never SF Pro (does not render in this file); Inter exists only in the status-bar clock. The monogram is component-local (Black, any size).
+Size, line height, weight and tracking of each role are declared once in `tokens.css` (`--text-<role>` and its `--line-height` / `--font-weight` / `--letter-spacing`); `check:type-scale` holds these 16 steps and nothing else. Rules: display-face words are always UPPER, Geist is sentence case, exact Hungarian strings from `feature-inventory.md` / `hu.json`. Nothing below the `micro` / `tab` step; body copy never below `cap`; input text is `body` (WebKit zoom). No size between the steps. Mono is for figures and codes; a trailing value made of words uses `cap`. Selection never changes weight except the active tab label (cells are fixed, nothing shifts). Never SF Pro; Inter exists only in the Figma status-bar clock. The monogram is component-local (Black, sized by `--mono-sm` / `--mono-md` / `--mono-lg`). The display face has no tabular figures: a number that changes on screen in it gets fixed-width digit cells from `Numeral`.
 
 ### 2.3 Spacing, radii, glow
 
-- **Grid 4 pt.** Scale: 4 · 8 · 12 · 16 · 20 · 24 · 32 (· 48 only before a screen's last block if it needs air).
-- **Gutter 24** → content width 354 (`P.cw`). Everything starts on x 24; trailing glyphs and values end on x 378 by ink.
-- **Vertical rhythm:** between blocks **32** · rule → eyebrow **16** · eyebrow → content **16** · eyebrow → big numeral **8** · title → subtitle **4** · label → value **8** · number → unit **4** · content → primary pill **20** (keep ≥ 20 clear around the pill for its glow) · chips 24 apart · list rows hug: min 56, 64 with a sub line, 76 ledger.
-- **Touch:** every target ≥ 44 × 44 (bare glyphs and links sit in 44 pt hit frames).
-- **Radii — only where a shape exists:** primary pill 28 (full) · switch 14 (full) · badge 9 (full) · bottom-sheet top 28 · bars and segments 1 · skeleton 2 · user photos 2. Images, thumbs, rows, fields: none. Phone frame 52 (canvas only).
-- **Glow** (`P.glow`): `0 0 20px accent 38 %` + `0 4px 10px -2px accent 30 %`, on the idle primary pill only. No other shadow, blur or elevation anywhere.
-- **Bottom fade:** `bg` 0 → 100 % over the first 28 % of the last 130 pt, under the tab bar. Dock fade: same, 50 %.
+- **One grid:** Tailwind's `--spacing` is the 4 pt grid of record; its three named steps are `--spacing-tight` (inside one group), `--spacing-group` (between peers; rule → eyebrow → content) and `--spacing-section` (between blocks). A larger step only before a screen's last block if it needs air.
+- **Gutter:** one side gutter on the frames' left and right edges (narrower below the small-phone breakpoint, see §3); trailing glyphs and values end on the right edge by ink.
+- **Vertical rhythm:** between blocks `section` · rule → eyebrow `group` · eyebrow → content `group` · eyebrow → big numeral `tight` · title → subtitle and number → unit one grid step · keep the glow of the primary pill clear of other content · chips a fixed word gap apart · list rows hug: `--row-h`, `--row-h-sub` with a sub line, `--row-h-ledger` for a ledger row.
+- **Touch:** every target ≥ `--target-min` square (bare glyphs and links sit in a hit frame of that size).
+- **Radii — only where a shape exists:** primary pill, switch and badge full (`--radius-full`) · bottom-sheet top `--radius-sheet` · bars and segments `--radius-bar` · skeleton and user photos `--radius-1`. Images, thumbs, rows, fields: none (`check:pulse` bans every other radius).
+- **Glow** (`--shadow-glow`): on the idle primary pill only, breathing on `animate-pulse-rest`. No other shadow, blur or elevation anywhere.
+- **Bottom fade:** `--nav-fade` over `--fade-h` under the tab bar; the docked action's `--dock-fade`.
 
-### 2.4 Motion (developers; app tokens)
+### 2.4 Motion
 
-`instant` 100 ms · `fast` 150 · `base` 250 · `slow` 400 · `ambient` 1200 · easing `cubic-bezier(0.16, 1, 0.3, 1)`. Transform and opacity only.
+Durations `--duration-instant` · `-fast` · `-base` · `-slow` · `-ambient` (and `--duration-toast` for the toast's stay), easing `--ease-standard` (`--ease-linear` for loops). Transform and opacity only.
 
 | Motion | Spec |
 |---|---|
-| Press | pill → `accentDown`, glow off, scale 0.98 in `instant`; rows and links → opacity 0.6 |
+| Press | pill → `--accent-pressed`, glow off, a slight scale-down in `instant`; rows and links → `--pressed-opacity` |
 | Ignite (select chip / tab / check / switch / segment done) | mark or fill 0 → 100 % in `fast`; previous selection fades in `fast`; nothing slides |
-| Count-up (hero numeral, bars) | only when the value changed: digits roll in `slow`, segments fill left → right `fast` each with 60 ms stagger, bars grow in `base` |
-| Resting pulse | idle primary pill: glow opacity 100 → 65 → 100 % on `ambient` alternate, starts after 1.5 s; max one loop per screen |
-| Lights-on (route) | hero image fades up from black in `slow`; content rises 8 px with a `base` fade, max 4 staggered items |
+| Count-up (hero numeral, bars) | only when the value changed: digits roll in `slow`, segments fill left → right in `fast` each with a short stagger, bars grow in `base` |
+| Resting pulse | idle primary pill: glow opacity breathes on `ambient` alternate after `--delay-rest`; max one loop per screen |
+| Lights-on (route) | hero image fades up from black in `slow`; content rises a grid step with a `base` fade, max 4 staggered items |
 | Sheet | rises in `slow`, scrim fades in `base`; closes in `base` |
-| Toast | drops from the status zone in `base`, stays 4 s, leaves in `fast` |
-| Skeleton | sheen on `ambient`; never a spinner |
+| Toast | drops from the status zone in `base`, stays `--duration-toast`, leaves in `fast` |
+| Skeleton | sheen on `ambient` (`animate-sheen`); never a spinner |
 
-`prefers-reduced-motion`: state changes stay, travel and loops go.
+`prefers-reduced-motion`: state changes stay, travel and loops go (the backstop in `src/index.css`, held by `check:pulse`).
 
-## 3. Layout grammar (402 × 874, iPhone 17 Pro)
+## 3. Layout grammar (drawn on the 402 pt iPhone 17 Pro frame)
 
-| Zone | y | Notes |
+| Zone | Where | Notes |
 |---|---|---|
-| Status bar | 0 – 62 | Dynamic Island 126 × 37 at y 11. Only the toast band may enter |
-| Header, root screen | 72 – 120 | `scaffold(..)` → content top 72; `screenHead('greet' / 'root')` is 48 high |
-| Header, pushed screen | 64 – 146 | `scaffold(.., { top: 64 })`; back row 64 – 108 (chevron + parent eyebrow), display title 112 – 146 |
-| First block | 152 (root) · 178 (pushed) | then blocks 32 apart |
-| Bottom fade | 744 – 874 | solid from 780 |
-| Tab bar | 782 – 838 | 56 high; no capsule, no surface |
-| Docked action | 714 – 770 with tabs · 768 – 824 without | `dockAction` (adds its own fade) |
-| Home indicator | 861 – 866 | 139 × 5 |
+| Status bar | the top inset (`--safe-t`) | Only the toast band (`--band-pad-t`) may enter |
+| Header, root screen | from `--head-top-root` | the greeting header (Home only) or one `display` title |
+| Header, pushed screen | from `--head-top-push` | back row (chevron + parent eyebrow), then the `display` title |
+| First block | under the header | then blocks `--spacing-section` apart |
+| Bottom fade | `--fade-h` above the bottom | under the tab bar |
+| Tab bar | `--nav-h` high, `--tabbar-offset` above the bottom inset | no capsule, no surface |
+| Docked action | `--dock-b` with tabs · `--dock-b-bare` without | adds its own fade |
+| Home indicator | the bottom inset (`--safe-b`) | — |
 
-- **Header patterns:** root + greeting (`greet`: title 22 + date line; Home only) · root + big title (`root`: one `display` line + ONE optional trailing `iconBtn`) · pushed (`push`: back chevron + parent name as eyebrow, then the `display` title; the tab bar stays, the owning tab stays lit) · modal = `bottomSheet` (title 22 + close). No top app bar, no centred title, no hamburger.
-- **Section** = `sect()`: strong rule → eyebrow (+ one trailing meta or link on the same baseline) → content. The hero block directly under the header has no rule (`{ rule: false }` or a `statBlock`).
-- **How much fits:** below a root header there are 592 pt before the fade. That is a hero (≈ 190) + two sections (≈ 200 + ≈ 135) — the Home — or one section head + 8 list rows with the 9th cut. If you need more, it scrolls; do not shrink type or gaps.
-- **The fold:** content either ends ≥ 24 pt above the fade (y ≤ 720) or runs under it. The fade may cut a row or a control, never a label standing alone; a scrolling list always shows a cut row (the scroll cue).
-- **Long-scroll frame:** build the 874 viewport first; then the full page as a second frame `"<Screen> · scroll"` with `scaffold(name, x + 502, y, { h: contentEnd + 140 })` — `chrome` docks the tabs at its bottom.
-- **Screens without tabs** (login, register, public marketplace, multi-step flows): `chrome(root, null)`; the primary action is docked with `dockAction(root, pill, false)`.
-- **Full-bleed:** a chip row or a hero image may run past x 378 and is cut by the screen edge; nothing runs past x 24 on the left.
-- **Widths** (developers): 360 – 430 supported, drawn at 402; gutter 16 below 376; `giant` = `min(124px, 31vw)`.
+The frames' exact positions per screen are in the geometry export; the app's are the tokens above, so a screen never spells an offset of its own.
 
-## 4. Components (kit function → anatomy → states)
+- **Header patterns:** root + greeting (Home only) · root + big title (one `display` line + ONE optional trailing icon button) · pushed (back chevron + parent name as eyebrow, then the `display` title; the tab bar stays, the owning tab stays lit) · modal = bottom sheet (title + close). No top app bar, no centred title, no hamburger.
+- **Section** = strong rule → eyebrow (+ one trailing meta or link on the same baseline) → content. The hero block directly under the header has no rule.
+- **How much fits:** below a root header, a hero + two sections (the Home) or one section head + about eight list rows with the next one cut. If you need more, it scrolls; do not shrink type or gaps.
+- **The fold:** content either ends clear above the fade or runs under it. The fade may cut a row or a control, never a label standing alone; a scrolling list always shows a cut row (the scroll cue).
+- **Screens without tabs** (login, register, public marketplace, multi-step flows): no tab bar; the primary action is docked bare.
+- **Full-bleed:** a chip row or a hero image may run past the right edge and is cut by the screen edge; nothing runs past the gutter on the left.
+- **Widths:** 360 – 430 supported, drawn at 402; a narrower gutter on the smallest phones; above `--screen-max` a screen without a desktop layout is a centred column; `giant` follows `--giant-fluid`.
 
-| Component | Kit | Anatomy and metrics | States |
+## 4. Components (app component · kit function → anatomy → states)
+
+| Component | Kit | Anatomy | States |
 |---|---|---|---|
-| Tab bar | `tabBar` (via `chrome`) | equal cells on 402 − 2 × inset; image icon 32 + 2 + label 11 pt; whole cell × 56 is the target. **5 tabs** inset 10 → 76.4 pt · **6** inset 12 → 63.0 · **7** inset 8 → 386 / 7 = **55.1 pt** with icon 28: widest label "Kezdőlap" measures 49 pt (3 pt air each side), tightest neighbours "Étkezés" 42 / "Haladás" 43 keep 12.6 pt between labels; every cell ≥ 44. At 360 pt a 7th cell is 49.1 — if it fails on a device, admin loses its tab (owner's call) | inactive: steel icon 100 % + `t2` Medium · active: lime-lit icon + `t1` SemiBold · pressed (dev): icon 60 %. No badges on tabs. all seven icons (incl. the whistle "Edző" and the shield "Admin") are in `P.img`; a missing `tab2-coach` / `tab2-admin` hash falls back to profile / progress |
-| Primary pill | `btnPrimary` | 56 high (sm 44), full radius, content width or docked; label `bodyB` on `onAccent` | default: accent + glow · pressed: `accentDown`, no glow · disabled: `s2` fill, `t3` label · busy: three dots, no glow |
-| Secondary action | `textLink` | bare text in a 44 pt frame; `capM` + chevron in a section head, `bodyM` standalone, on the left edge | default `t1` · off 40 % · pressed (dev) 60 % |
-| Destructive action | `textLink({ danger })`, `listRow({ color: P.danger })` | danger text only — never a red fill | always confirmed in a bottom sheet (confirm = danger text, cancel = `t1` text, no lime pill in that sheet) |
-| Icon button | `iconBtn` | bare 24 pt glyph (stroke 1.75) in 44 × 44; lime count badge top-right | with / without badge (1 – 99, 99+) |
-| Filter chips | `chipRow` | words 24 apart, 44 high, `bodyM`; the row bleeds off the right edge | idle `t2` · selected `t1` + 2 pt lime mark under the word · multi-select wraps (`{ wrap, w }`) |
-| Segmented switch | `segSwitch` | same words; hug (in a section head) or equal cells on a hairline (page-level tabs) | selected `t1` + 2 pt INK mark (neutral: it changes the view, not the subject) |
-| Underline field | `inputField` | label `capM t2` · 44 pt input, text 16 · 1 px `edge` underline · hint `cap t3` 8 below | idle · focus: 2 px lime underline + lime caret · error: 2 px danger underline, hint in danger · disabled: `t3` text, hairline · empty: placeholder `t3` |
-| Search field | `searchField` | field without label, search glyph 20 `t2`, placeholder | empty · focus · filled + clear (trail `glyph('x')`) |
-| Switch | `uiSwitch` | 48 × 28 — the one control that is a shape | on: accent + dark knob · off: `s3` + `t2` knob · disabled 40 % (its hint is the row's sub line) |
-| Set check | `setCheck` | 44 pt frame | to do: 24 pt ring in `edge` · done: bare lime tick. Also the radio mark of a single-choice list |
-| List row | `listRow` + `rowStack` | title `bodyM` (1 line, 2 with `lines`), sub `cap t2`; lead slot 48 = glow thumb or 28 pt monogram or 20 pt glyph; trailing value / node / chevron (ink on the right edge); hairline between rows | plain · sub · thumb · monogram · value · two-line · destructive · with switch / check / tag · pressed (dev) 60 % · skeleton |
-| Ledger row | `ledgerRow` | 76 high, ONE baseline at 57: eyebrow label x 0 · note x 112 · `num` value ink-right 334 (+ unit) · chevron | value · fraction · unit + sparkline · failed = "—" (never 0) |
-| Big numeral | `statBlock` + `numeral` / `fraction` | eyebrow → 8 → ink-tight numeral on the gutter → caption | `giant` (one per screen) · `num`; denominator in `t3` |
-| Week / segment bar | `segBar` | 7 (or n) square-ended 6 pt segments, 8 apart, optional mono labels | on (lime) · half (`t1` 50 %) · off (`track`) · today: label `t1` + 4 pt dot |
-| Macro columns | `macroCol` | 4 across, 16 apart: name · mono value + unit · 4 pt bar · target | on target · over (`warn` value + bar) · no target (no bar) |
-| Progress bar | `progressBar` | 4 pt, `track` + `t1` fill | 0 – 100 %; lime only if it is the screen's live datum |
-| Sparkline / chart | `sparkline` | 1.5 px line, 3 pt end dot; no area, no grid, no box. Chart = same at full width + hairline axes + mono labels | series · gap (dotted) · live end dot (lime) |
-| Monogram | `monogramMark` | Big Shoulders Black initials, ink-tight. The product has NO profile photos and no avatar discs | 28 (rows) · 64 (headers) · hero 176 with the light texture + lime dot (one per screen) |
-| Badge / tag | `badgeCount` · `tx(s, 'micro', P.t2)` | lime count on the bell only · a tag is plain mono caps, no outline | hidden at 0 · 1 – 99 · 99+ |
-| Empty / error state | `emptyState` | left-aligned: `display` title, `body t2`, then the pill (if it is the screen's one action) or a link | empty · error ("Újra") |
-| Skeleton | `skel` | `s2` blocks, radius 2, in place of each text line (16 / 12 high); numerals = one block at cap height; images are withheld | — |
-| Status line / toast | `noticeLine` · `showToast` | 6 pt semantic dot + `capM` (+ trailing link). Toast = the page's own black dropping over the header zone (0 – 120) with one line and a rule: no capsule | `danger` · `warn` · `ok` · ink. In flow it is the inline error / offline strip. No celebration toasts |
-| Bottom sheet | `bottomSheet` | THE one surface: `s2`, top radius 28, hairline edge, on a 60 % scrim; grabber, title 22 + close, body 16 apart. Pickers and confirmations are sheets — no centred dialogs | — |
-| Chat | `chatMsg` | no bubbles — a bubble is a card. The edge says who speaks (theirs left, mine right, max 280 wide) and the tone says whose (theirs `t1`, mine `t2`); 4 within a group, 20 between, one mono stamp per group. Composer = `inputField` + `btnPrimary({ sm })` | in · out · with time |
-| Flow progress | `stepper` | n 4 pt segments, the first `cur` lit, + mono "cur / n" | — |
+| Tab bar | `tabBar` (via `chrome`) | equal cells across the bar inset by tab count (`--tabbar-inset-5` / `-6` / `-7`); image icon `--tab-icon` (`--tab-icon-dense` with seven tabs) over a `tab` label; the whole cell is the target, every cell ≥ `--target-min` | inactive: steel icon + `--text-2` Medium · active: lime-lit icon + `--text-1` SemiBold · pressed: icon at `--pressed-opacity`. No badges on tabs. All seven icons (incl. the whistle "Edző" and the shield "Admin") are rendered stills |
+| Primary pill | `btnPrimary` | `--control-h-primary` high (sm: `--control-h`), full radius, content width or docked; label `body-b` on `--accent-fg` | default: accent + glow · pressed: `--accent-pressed`, no glow · disabled: `--surface-2` fill, `--text-3` label · busy: three dots, no glow |
+| Secondary action | `textLink` | bare text in a target-size frame; `cap-m` + chevron in a section head, `body-m` standalone, on the left edge | default `--text-1` · off `--disabled-opacity` · pressed `--pressed-opacity` |
+| Destructive action | `textLink({ danger })`, `listRow({ color: P.danger })` | danger text only — never a red fill | always confirmed in a bottom sheet (confirm = danger text, cancel = `--text-1` text, no lime pill in that sheet) |
+| Icon button | `iconBtn` | bare `--icon-lg` glyph in a target-size frame; lime count badge top-right | with / without badge (1 – 99, 99+) |
+| Filter chips | `chipRow` | words a word-gap apart, target height, `body-m`; the row bleeds off the right edge | idle `--text-2` · selected `--text-1` + `--mark-h` lime mark under the word · multi-select wraps |
+| Segmented switch | `segSwitch` | same words; hug (in a section head) or equal cells on a hairline (page-level tabs) | selected `--text-1` + `--mark-h` INK mark (neutral: it changes the view, not the subject) |
+| Underline field | `inputField` | label `cap-m --text-2` · target-height input, `body` text · 1 px `--edge` underline · hint `cap --text-3` under it | idle · focus: 2 px lime underline + lime caret · error: 2 px danger underline, hint in danger · disabled: `--text-3` text, hairline · empty: placeholder `--text-3` |
+| Search field | `searchField` | field without label, search glyph `--icon-md` `--text-2`, placeholder | empty · focus · filled + clear |
+| Switch | `uiSwitch` | `--switch-w` × `--switch-h`, knob `--switch-knob` — the one control that is a shape | on: accent + dark knob · off: `--surface-3` + `--text-2` knob · disabled `--disabled-opacity` (its hint is the row's sub line) |
+| Set check | `setCheck` | target-size frame | to do: a ring in `--edge` · done: bare lime tick. Also the radio mark of a single-choice list |
+| List row | `listRow` + `rowStack` | title `body-m` (1 line, 2 with `lines`), sub `cap --text-2`; lead slot `--thumb` = glow thumb or `--mono-sm` monogram or glyph; trailing value / node / chevron (ink on the right edge); hairline between rows | plain · sub · thumb · monogram · value · two-line · destructive · with switch / check / tag · pressed · skeleton |
+| Ledger row | `ledgerRow` | `--row-h-ledger` high, ONE baseline: eyebrow label · note · `num` value ink-right (+ unit) · chevron | value · fraction · unit + sparkline · failed = "—" (never 0) |
+| Big numeral | `statBlock` + `numeral` / `fraction` | eyebrow → `tight` → ink-tight numeral on the gutter (`--trim-display-*`) → caption | `giant` (one per screen) · `num`; denominator in `--text-3` |
+| Week / segment bar | `segBar` | 7 (or n) square-ended `--seg-h` segments, optional mono labels | on (lime) · half (half-tone `--text-1`) · off (`--track`) · today: label `--text-1` + dot |
+| Macro columns | `macroCol` | 4 across: name · mono value + unit · `--bar-h` bar · target | on target · over (`--warning` value + bar) · no target (no bar) |
+| Progress bar | `progressBar` | `--bar-h`, `--track` + `--text-1` fill | 0 – 100 %; lime only if it is the screen's live datum |
+| Sparkline / chart | `sparkline` | a thin line with an end dot; no area, no grid, no box. Chart = same at full width + hairline axes + mono labels | series · gap (dotted) · live end dot (lime) |
+| Monogram | `monogramMark` | Big Shoulders Black initials, ink-tight. The product has NO profile photos and no avatar discs | `--mono-sm` (rows) · `--mono-md` (headers) · `--mono-lg` hero with the light texture + lime dot (one per screen) |
+| Badge / tag | `badgeCount` · `tx(s, 'micro', P.t2)` | lime count (`--badge-h`) on the bell only · a tag is plain mono caps, no outline | hidden at 0 · 1 – 99 · 99+ |
+| Empty / error state | `emptyState` | left-aligned: `display` title, `body --text-2`, then the pill (if it is the screen's one action) or a link | empty · error ("Újra") |
+| Skeleton | `skel` | `--skeleton-base` blocks, `--radius-1`, in place of each text line; numerals = one block at cap height; images are withheld | — |
+| Status line / toast | `noticeLine` · `showToast` | `--dot` semantic dot + `cap-m` (+ trailing link). Toast = the page's own black dropping over the header zone with one line and a rule: no capsule | `--danger` · `--warning` · `--success` · ink. In flow it is the inline error / offline strip. No celebration toasts |
+| Bottom sheet | `bottomSheet` | THE one surface: `--sheet-bg`, top `--sheet-radius`, hairline edge, on `--scrim`; grabber (`--grabber`), title + close, body `group` apart. Pickers and confirmations are sheets — no centred dialogs | — |
+| Chat | `chatMsg` | no bubbles — a bubble is a card. The edge says who speaks (theirs left, mine right, a capped measure) and the tone says whose (theirs `--text-1`, mine `--text-2`); tight within a group, wider between, one mono stamp per group. Composer = underline field + small primary pill | in · out · with time |
+| Flow progress | `stepper` | n `--bar-h` segments, the first `cur` lit, + mono "cur / n" | — |
 
-Recipes without a kit function: number stepper = `iconBtn('minus')` · `numeral` · `iconBtn('plus')` · live marker = a 6 pt lime dot before the title · section status = trailing `cap` text in the section head ("Felszerelés mentve").
+Recipes without a kit function: number stepper = icon button (minus) · numeral · icon button (plus) · live marker = a `--dot` lime dot before the title · section status = trailing `cap` text in the section head ("Felszerelés mentve").
 
 ## 5. Imagery
 
 - **Two families only.** (a) Graphite / bead-blasted steel CG objects on pure black: tab icons, coin, equipment, the mannequin. (b) Low-key black-and-white photography on true black: the Home fist (`hero-grip`). No colour photography, no illustration, no line-icon as a main visual, no stock-photo rectangles.
-- **How an image sits:** `pic(slot, w, h)` — a true-black-edged still set to LIGHTEN, so no rectangle shows; it bleeds off the right or top edge or floats in black. No frame, radius, border, scrim or caption box; no parent up to the screen may have a fill. Transparent cutouts (icons, coin) use `pic(slot, w, h, true)`.
-- **Text never sits on a lit area.** Keep ≥ 12 pt of black between ink and the lit part of an image.
+- **How an image sits:** a true-black-edged still set to LIGHTEN (`Pic`), so no rectangle shows; it bleeds off the right or top edge or floats in black. No frame, radius, border, scrim or caption box; no parent up to the screen may have a fill. Transparent cutouts (icons, coin) are drawn as they are.
+- **Text never sits on a lit area.** Keep a clear band of black between ink and the lit part of an image.
 - **At most one hero image per screen**, to the right of or above the hero text, never behind it. A screen whose hero is a numeral or a monogram needs none.
-- **Thumbnails** (48 pt, in a list row's lead slot) are keyed by equipment or exercise type — the catalogue has no per-exercise media. In a mixed list every row keeps the same text edge (the 48 pt slot stays, empty). A text-only list is always acceptable; a grey placeholder square is not.
-- **The mannequin** is the body motif and the only image that is also an interface: the selected muscle is the lamp. It may appear on the muscle selector (large), exercise detail and workout player (small, read-only: primary 100 %, secondary 40 %) and as a crop on a library entry row. Nowhere as decoration. `muscle-figure-front` has the chest lit, `figure-back-pull` the back; the neutral and other lit variants are in `manifest-app.json` (one shared canvas, so they swap without moving).
-- **User photos** (progress photos, a marketplace cover) are the only non-generated images: plain rectangles, radius 2, no border, shown desaturated in lists and feeds.
-- Image hashes: `P.img` in the kit; more arrive in `assets/pulse/manifest-app.json` — paint them with `pic('<imageHash>', w, h)` or patch `P.img`.
+- **Thumbnails** (`--thumb`, in a list row's lead slot) are keyed by equipment or exercise type — the catalogue has no per-exercise media. In a mixed list every row keeps the same text edge (the slot stays, empty). A text-only list is always acceptable; a grey placeholder square is not.
+- **The mannequin** is the body motif and the only image that is also an interface: the selected muscle is the lamp. It may appear on the muscle selector (large), exercise detail and workout player (small, read-only: primary lit, secondary `--muscle-secondary`) and as a crop on a library entry row. Nowhere as decoration. Front and back renders share one canvas, so the lit variants swap without moving.
+- **User photos** (progress photos, a marketplace cover) are the only non-generated images: plain rectangles, `--radius-1`, no border, shown desaturated in lists and feeds.
+- The 49 stills and their manifest ship through the asset pipeline (`frontend/src/assets/pulse`, `check:assets`).
 
 ## 6. Do / Don't
 
@@ -290,5 +293,5 @@ Order of the overlays: content → `showToast` → `chrome` → `dockAction` →
 
 ## Appendix — what changed against the V1 scripts, and what did not
 
-Deliberate token fixes (all visible on "Reference — Home" only as 1 – 3.5 pt shifts): pill label 17 → 16 SemiBold · plan line / e-mail 15 → 16 · weekday letters mono 12 → 13 · number → unit 3 → 4 · numerals placed by ink (8 under the eyebrow) · tab cells equal (icons move ≤ 3 pt; "Kezdőlap" still starts on the gutter) · field underline white 24 % (2.1 : 1) → `edge` (3.1 : 1) · retired roles: `num` 64, `displayL` 36, `label` 14, `dataS` 12, `headline` 17, `body` 15.
-Not applied — open owner decisions, the approved look stays: Geist Mono stays · the fist photograph and the textured monogram stay · the mannequin stays as rendered · "Edzés" opens the player · no finish-workout action · rules stay 8 / 14 % and the off level 10 %.
+Deliberate token fixes against the first V1 scripts (visible on "Reference — Home" only as shifts of a few points): the pill label is `body-b`, the plan line and the e-mail are `body`, the weekday letters are `data`, numerals are placed by ink under the eyebrow, tab cells are equal, the field underline is `--edge` instead of a fainter white, and the retired roles of those scripts (a second `num` size, `displayL`, `label`, `dataS`, `headline`, a smaller `body`) do not exist.
+Not applied — owner decisions kept the approved look: Geist Mono stays · the fist photograph and the textured monogram stay · the mannequin stays as rendered · "Edzés" opens the player (and the library when no session runs, D2) · no finish-workout action (D3, its own package) · the rules and the off level keep their tones.
