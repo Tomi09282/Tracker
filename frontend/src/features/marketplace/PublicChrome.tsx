@@ -108,7 +108,7 @@ export function PublicTopBar({
   cta = 'primary',
 }: {
   backTo?: string;
-  cta?: 'primary' | 'secondary';
+  cta?: 'primary' | 'link';
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ export function PublicTopBar({
         // A PLAIN LINK, NEVER A SESSION PROBE. Reading the session here to hide the login for a
         // signed-in reader would reintroduce the exact defect the router comment records — the
         // public surface defeated at the client. Navigation is an anchor, so both looks are links.
-        cta === 'secondary' ? (
+        cta === 'link' ? (
           <TextLink to="/login" text="body">
             {t('auth.switchToLogin')}
           </TextLink>

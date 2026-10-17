@@ -1,10 +1,8 @@
 import { useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { pulseSrcSet } from '../../assets/pulse';
 import { Pic } from '../media/Pic';
-import { Pressable } from '../primitives/Pressable';
 import { Segmented } from '../feedback/variants/E6Segmented';
 import { useMotionSafe } from '../feedback/useMotionSafe';
 import { REGIONS } from './regions';
@@ -133,15 +131,9 @@ export interface MuscleMapProps {
    */
   legend?: boolean;
   /**
-   * WHICH `Elöl` / `Hátul` CONTROL. The three screens that render this map do not draw the same
-   * one, so it is a prop rather than a rewrite: 04-library.webp and 04-gyakorlat-reszletei.webp
-   * both draw a pill PAIR (`Elöl` filled accent with a check, `Hátul` outlined, a gap between
-   * them), while 02-workout-player.webp draws one rounded TRACK with the active label in an
-   * inner pill — which is the shared E6 `Segmented`. Swapping the component outright would put
-   * the workout's control on the two screens whose mockups draw chips.
-   *
-   * Defaults to the chips because two of the three want them, and because the read-only
-   * exercise-detail screen wants the control that is left-aligned in a section, not a hero.
+   * WHICH `Elöl` / `Hátul` CONTROL. `'segmented'` (the default) draws the shared E6 `Segmented`
+   * above the figure. The bridged chip pair the old library and exercise-detail mockups drew left
+   * in the closing cleanup (F19 row 3): no screen asked for it any more.
    *
    * `'none'` (Pulse, F15 stage 0): the SCREEN draws the `Elöl` / `Hátul` switch, the legend and
    * the "also on the other side" note where its frame puts them, and owns the side through
@@ -151,7 +143,7 @@ export interface MuscleMapProps {
    * do not apply in this mode. The box carries `data-kit="pic"`: the Figma kit draws the mannequin
    * as a `pic`, and the geometry probe maps the frames' `Image/figure-…` layers to it.
    */
-  sideControl?: 'chips' | 'segmented' | 'none';
+  sideControl?: 'segmented' | 'none';
   /**
    * THE SIDE, CONTROLLED. Omitted (every call site before Pulse): the map keeps the side itself
    * and starts on the front, as it always has. Given: the map shows exactly this side and never
@@ -159,7 +151,7 @@ export interface MuscleMapProps {
    */
   side?: MuscleSide;
   /**
-   * Called with the side the map's own control asks for (`chips` / `segmented`), controlled or
+   * Called with the side the map's own control asks for (`segmented`), controlled or
    * not; not called for a tap on the side already shown. With `sideControl="none"` the map has no
    * control, so the screen's own switch sets `side` directly.
    */
@@ -204,7 +196,7 @@ export function MuscleMap({
   selected,
   fill = false,
   legend = true,
-  sideControl = 'chips',
+  sideControl = 'segmented',
   side: sideProp,
   onSideChange,
   className,
@@ -249,40 +241,19 @@ export function MuscleMap({
         className,
       )}
     >
-      {sideControl === 'segmented' ? (
-        // The hero's control. Segmented also brings what a pair of buttons cannot: one radiogroup
-        // with one tab stop, arrows moving between the two, and "Elöl, 1 of 2" announced instead
-        // of two unrelated pressed buttons. No `icon` passed — the mockup draws no check, and the
-        // component has its own glyph story (a tick over the segment on commit), so adding one
-        // would put two ticks on the same 44px.
-        <div className="shrink-0">
-          <Segmented
-            options={SIDES.map((s) => ({ value: s, label: t(`muscleMap.${s}`) }))}
-            value={side}
-            onChange={setSide}
-            label={t('muscleMap.viewLabel')}
-          />
-        </div>
-      ) : (
-        <div className="flex shrink-0 gap-2">
-          {SIDES.map((s) => (
-            <Pressable
-              key={s}
-              shape="chip"
-              density="compact"
-              variant={side === s ? 'primary' : 'secondary'}
-              aria-pressed={side === s}
-              /* The check is the same active-chip idiom the muscle chips below the figure use, and
-                 the mockups draw it on both. Without it the two pills differ only by fill, which is
-                 a colour distinction — the one kind roughly a twelfth of men cannot make. */
-              icon={side === s ? <Check className="size-icon-s" strokeWidth={3} aria-hidden /> : undefined}
-              onClick={() => setSide(s)}
-            >
-              {t(`muscleMap.${s}`)}
-            </Pressable>
-          ))}
-        </div>
-      )}
+      {/* The hero's control. Segmented also brings what a pair of buttons cannot: one radiogroup
+          with one tab stop, arrows moving between the two, and "Elöl, 1 of 2" announced instead
+          of two unrelated pressed buttons. No `icon` passed — the mockup draws no check, and the
+          component has its own glyph story (a tick over the segment on commit), so adding one
+          would put two ticks on the same 44px. */}
+      <div className="shrink-0">
+        <Segmented
+          options={SIDES.map((s) => ({ value: s, label: t(`muscleMap.${s}`) }))}
+          value={side}
+          onChange={setSide}
+          label={t('muscleMap.viewLabel')}
+        />
+      </div>
 
       {fill ? (
         <FillFigure side={side} highlights={highlights} selected={selected} onSelect={onSelect} />

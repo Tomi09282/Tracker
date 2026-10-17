@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import { isValidElement, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 
@@ -33,22 +32,9 @@ import { cn } from '../../lib/cn';
  * The 20 above the action is also the glow's clearance (Pulse System 2.3: keep >= 20 clear around
  * the pill), so nothing may be drawn closer to it than that.
  *
- * ═══ WHAT STAYED FOR THE CALL SITES THAT ARE NOT REBUILT YET (PLAN R5) ══════════════════════════
- *
- * `icon`, `badge` and `size` are accepted and not rendered. They leave at the call sites with each
- * screen's own package; `check:pulse` counts every `icon=` that is left, and `noUnusedLocals` then
- * removes the orphaned Lucide import.
+ * The old `icon`, `badge` and `size` props left with the mark they drew (F19 row 3).
  */
 export interface EmptyStateProps {
-  /**
-   * @deprecated Pulse draws no mark in an empty state. Accepted so the existing call sites
-   * compile, never rendered; delete it at the call site.
-   */
-  icon?: LucideIcon;
-  /** @deprecated It decorated the mark that is gone. Accepted, never rendered. */
-  badge?: LucideIcon;
-  /** @deprecated It sized the mark that is gone. Accepted, without effect. */
-  size?: 'inline' | 'anchor';
   /** The display line, in the words of the frame or `hu.json`. */
   title: string;
   /** One line of `body` in `text-2`: why it is empty, or what failed. */

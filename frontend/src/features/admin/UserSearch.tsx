@@ -10,7 +10,6 @@ import { EmptyState } from '../../ui/feedback/EmptyState';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
-import { nextSort, type SortDirection } from '../../ui/data/DataTable';
 
 interface AdminUser {
   id: number;
@@ -21,6 +20,14 @@ interface AdminUser {
   mustChange: 0 | 1;
   hasProfile: 0 | 1;
   clientCount: number;
+}
+
+type SortDirection = 'asc' | 'desc';
+
+/** A tap on a sort label: a new column starts ascending, the current one flips. */
+function nextSort(current: { key: string; direction: SortDirection } | undefined, key: string) {
+  if (current?.key !== key) return { key, direction: 'asc' as SortDirection };
+  return { key, direction: current.direction === 'asc' ? ('desc' as SortDirection) : ('asc' as SortDirection) };
 }
 
 /** The three columns the server sorts by (`admin/routes.js` USER_SORTS); "Kliensek" is not one. */

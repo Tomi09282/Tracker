@@ -71,7 +71,7 @@ export function PostPage() {
     // server. A "this was removed" message would be an oracle for the existence of removed content.
     return (
       <Screen top="push" as="main">
-        <PublicTopBar backTo="/m" cta="secondary" />
+        <PublicTopBar backTo="/m" cta="link" />
         <EmptyState
           title={t('marketplace.postGoneTitle')}
           body={t('marketplace.postGoneBody')}
@@ -107,7 +107,7 @@ export function PostPage() {
 
   return (
     <Screen top="push" as="main">
-      <PublicTopBar backTo="/m" cta="secondary" />
+      <PublicTopBar backTo="/m" cta="link" />
 
       {cover ? (
         // The 276 pt slot the frames reserve (24,140 354 x 276); the picture is 480 x 360, centred
@@ -268,7 +268,7 @@ function PostSkeleton() {
   return (
     <Screen top="push" role="status" aria-busy="true">
       <span className="sr-only">{t('common.loading')}</span>
-      <PublicTopBar backTo="/m" cta="secondary" />
+      <PublicTopBar backTo="/m" cta="link" />
 
       <div className="flex flex-col gap-4">
         <Skeleton className="h-4 w-24" />

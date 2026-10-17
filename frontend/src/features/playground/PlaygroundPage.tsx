@@ -107,6 +107,7 @@ export function Demo({ id }: { id: string }) {
       return (
         <>
           <Pressable
+            variant="link"
             onClick={() => {
               setSheetStatus('idle');
               setSheet(true);
@@ -127,10 +128,10 @@ export function Demo({ id }: { id: string }) {
                 over to the state; the other four keep the content and put a badge in the header,
                 each settling on its own axis. */}
             <div className="mt-4 flex gap-tight">
-              <Pressable density="compact" onClick={() => void driveSheet('success')}>
+              <Pressable variant="link" onClick={() => void driveSheet('success')}>
                 Succeed
               </Pressable>
-              <Pressable density="compact" variant="secondary" onClick={() => void driveSheet('error')}>
+              <Pressable variant="link" onClick={() => void driveSheet('error')}>
                 Fail
               </Pressable>
             </div>
@@ -141,7 +142,7 @@ export function Demo({ id }: { id: string }) {
       return (
         <div className="w-full">
           <Pressable
-            density="compact"
+            variant="link"
             onClick={() =>
               setToasts((t) => [
                 ...t,

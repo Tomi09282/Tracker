@@ -1,4 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
 import { isValidElement, useId, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Rule } from './Rule';
@@ -37,11 +36,8 @@ import { Rule } from './Rule';
  * the last child is a glyph): the chevron's box is 16 wide and its ink ends 6 px short of it, so
  * the TIP lands on the content edge instead of the empty box.
  *
- * ═══ WHAT STAYED FOR THE CALL SITES THAT ARE NOT REBUILT YET (PLAN R5) ══════════════════════════
- *
- * `icon` is accepted and not rendered; `action` is the old name of `trailing`. Both leave at the
- * call sites with each screen's own package — `check:pulse` counts every `icon=` that is left.
- * `title` OR `children`, never both: `children` is the slot of the two screens that still write
+ * The old `icon` prop and `action` (the old name of `trailing`) left in the closing cleanup (F19
+ * row 3). `title` OR `children`, never both: `children` is the slot of the two screens that still write
  * their own heading element, and a rebuilt screen has no reason to use it.
  */
 
@@ -49,18 +45,11 @@ type HeadingTag = 'h2' | 'h3';
 
 interface SectionHeaderBase {
   /**
-   * @deprecated Pulse draws no icon in a section head. Accepted so the existing call sites compile,
-   * never rendered; delete it at the call site.
-   */
-  icon?: LucideIcon;
-  /**
    * ONE node on the eyebrow's baseline, ending on the right edge: a count or meta
    * (`<span className="text-data text-text-2">6</span>`), a status, a text link, a hug segmented
    * switch. Never a second one, never a lime pill (but see `trailingInFlow`).
    */
   trailing?: ReactNode;
-  /** @deprecated The old name of `trailing`. Used only when `trailing` is not given. */
-  action?: ReactNode;
   /**
    * The trailing node is a 44 pt control the head makes room for (the small pill of
    * `coach-dashboard-1`): the row grows to 44 and the eyebrow is centred on it.
@@ -99,13 +88,12 @@ export function SectionHeader(props: SectionHeaderProps) {
     titleId,
     children,
     trailing,
-    action,
     trailingInFlow = false,
     rule = true,
     heading: Heading = 'h2',
     className,
   } = props;
-  const tail = present(trailing) ? trailing : action;
+  const tail = trailing;
   return (
     <div className={cn('flex w-full flex-col gap-group', className)}>
       {rule ? <Rule strong /> : null}

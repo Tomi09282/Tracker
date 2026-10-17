@@ -62,7 +62,7 @@ export function CoachProfilePage() {
     // same rule the server follows, so the page cannot become an oracle the API refused to be.
     return (
       <Screen top="push" as="main">
-        <PublicTopBar backTo="/m" cta="secondary" />
+        <PublicTopBar backTo="/m" cta="link" />
         <EmptyState
           title={t('marketplace.coachGoneTitle')}
           body={t('marketplace.coachGoneBody')}
@@ -111,7 +111,7 @@ function CoachProfileView({
           name, the headline and the credential line 24 under the monogram. */}
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <PublicTopBar backTo="/m" cta="secondary" />
+          <PublicTopBar backTo="/m" cta="link" />
           <Monogram initials={initialsOf(coach.displayName)} size={176} dot className="self-start" />
         </div>
 
@@ -278,7 +278,7 @@ function CoachProfileSkeleton() {
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <PublicTopBar backTo="/m" cta="secondary" />
+          <PublicTopBar backTo="/m" cta="link" />
           <MonogramSkeleton size={176} />
         </div>
         <div className="flex flex-col gap-3">

@@ -19,12 +19,9 @@ import { cn } from '../../lib/cn';
  * Every number below is the Figma kit's (`figma-build/app-kit.js`, lines 196-209) and the measured
  * boxes of the component board (`_components.json`: `Button/primary`, `Link/…`, `Button/icon · …`).
  *
- * ═══ AND THE OLD LOOKS STILL COMPILE, UNTOUCHED ══════════════════════════════════════════════
- *
- * `secondary`, the chip and field shapes and the three densities are the bridge (`ghost`, `danger`,
- * the `selected` wash and the status chip `chip()` left in the closing cleanup, F19 row 1). They emit exactly the classes they emitted before this file learned Pulse — the same set, in
- * another order, so the same pixels and the same hit geometry — and they leave in the closing
- * cleanup, counted by `check:pulse` until then. Do not write new code against them.
+ * There is no third look. The bridged ones (`secondary`, `ghost`, `danger`, the chip and field
+ * shapes, the densities, the status chip) left in the closing cleanup (F19 rows 1 and 3), and
+ * `check:pulse` refuses their names. A control names its variant: there is no default look.
  *
  * ═══ NOTHING GROWS BEHIND A SCREEN'S BACK ════════════════════════════════════════════════════
  *
@@ -33,12 +30,6 @@ import { cn } from '../../lib/cn';
  * (the workout player is one viewport tall by law; twelve taller buttons would push its check
  * control off the screen). The default flips in the closing cleanup.
  */
-
-/**
- * Press and disabled feedback of the three bridged variants — what the base carried for every
- * variant before Pulse gave the pill and the link their own. Kept to the letter.
- */
-const LEGACY_STATES = 'active:scale-[0.97] disabled:opacity-45';
 
 /**
  * The kit specimen has to show a pressed pill and a focused link side by side, and no page can
@@ -125,15 +116,6 @@ const recipe = cva(
           'aria-busy:disabled:bg-accent aria-busy:disabled:text-accent-fg',
           FORCED_FOCUS,
         ].join(' '),
-        // BRIDGE. The border WIDTH comes from the token; hover strengthens the edge as well as
-        // the fill — a surface-2 hover on a surface-1 control is a 1.1:1 change, which is not an
-        // answer to a pointer.
-        secondary: [
-          'border-[length:var(--border-width)] border-[var(--surface-border)]',
-          'bg-surface-1 text-text-1',
-          'hover:border-[var(--surface-border-strong)] hover:bg-surface-2',
-          LEGACY_STATES,
-        ].join(' '),
         /**
          * THE TEXT LINK — every action that is not the screen's one pill. Bare text in a 44 pt
          * frame: no fill, no border, no hover wash. `text-1` at rest; pressed is 60 % and "off"
@@ -158,20 +140,6 @@ const recipe = cva(
         // Square controls: the floor already guarantees 44×44, so no width class is needed.
         // With `variant: 'link'` this is the Pulse icon button: a bare glyph, nothing around it.
         icon: 'rounded-chip px-0 min-w-[var(--control-h)]',
-        // BRIDGE.
-        chip: 'rounded-chip px-4',
-        // BRIDGE.
-        field: 'w-full justify-start rounded-field px-3 text-left font-normal',
-      },
-      /**
-       * BRIDGE — visual density of the legacy looks. NOTE: this changes padding and type size only,
-       * never the hit area. The Pulse pill and the link take their type from the role
-       * (`body-b`; `cap-m` / `body-m`), so a density beside them changes nothing. The type is
-       * `cap` (13 / 18 Regular), the same metrics as the retired `body-s` step it replaces.
-       */
-      density: {
-        compact: 'text-cap px-3',
-        default: 'text-cap',
       },
       /**
        * HEIGHT, and with it the Pulse metrics of the pill.
@@ -180,7 +148,7 @@ const recipe = cva(
        *   lg   56 — the Pulse pill
        *   sm   44 — the small Pulse pill (a chat composer's "Küldés" beside a 44 pt field)
        *
-       * Declared AFTER `shape` and `density` so that its word is the last one on padding and type.
+       * Declared AFTER `shape` so that its word is the last one on padding and type.
        */
       size: {
         md: 'min-h-[var(--control-h)]',
@@ -278,7 +246,7 @@ const recipe = cva(
       // The element's own ring is switched off for the link only (`iconBtn` keeps the round one).
       {
         variant: 'link',
-        shape: ['button', 'chip', 'field'],
+        shape: 'button',
         class: [
           'min-w-0 justify-start gap-1 px-0 text-cap-m',
           '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.75]',
@@ -331,7 +299,7 @@ const recipe = cva(
     ],
     // `text: 'cap'` names the link's default role so that the weight rules can match it; it adds
     // no class to any look.
-    defaultVariants: { variant: 'secondary', shape: 'button', density: 'default', size: 'md', text: 'cap' },
+    defaultVariants: { shape: 'button', size: 'md', text: 'cap' },
   },
 );
 
@@ -344,9 +312,8 @@ type ControlProps = Parameters<typeof recipe>[0];
  *
  * A Pulse look is resolved here, once, so that it is right for EVERY consumer: `Pressable` runs
  * the class merger over the result anyway, but `<Link className={control(…)}>` does not, and the
- * pill's 24 px padding must replace the bridged shape's 16 rather than sit beside it and let the
- * stylesheet's source order decide. The bridged looks are returned exactly as the recipe emits
- * them — the same class set as before, for the two call sites that never merged.
+ * pill's 24 px padding must replace the button shape's 16 rather than sit beside it and let the
+ * stylesheet's source order decide.
  */
 export function control(props?: ControlProps): string {
   const classes = recipe(props);
@@ -356,8 +323,8 @@ export function control(props?: ControlProps): string {
 
 /**
  * The `data-kit` name of a control: the kit function of the Figma board it is an instance of, or
- * `undefined` for a bridged look. The geometry probe finds a component by this name and compares
- * its box with the frame (PLAN R27), so a legacy 44 px primary must NOT call itself the pill.
+ * `undefined` for none. The geometry probe finds a component by this name and compares its box
+ * with the frame (PLAN R27), so a 44 px `md` primary must NOT call itself the pill.
  */
 export function kitName({ variant, shape, size }: Pick<ControlVariants, 'variant' | 'shape' | 'size'>): 'btnPrimary' | 'textLink' | 'iconBtn' | undefined {
   if (variant === 'link') return shape === 'icon' ? 'iconBtn' : 'textLink';

@@ -27,7 +27,7 @@ export interface PressableProps
   busy?: boolean;
   /**
    * Leading glyph. On a text link it is drawn at 16 px in `text-2` (in the danger colour on a
-   * danger link); on the bridged looks it is sized by the caller from the icon tokens.
+   * danger link); on the pill it is sized by the caller from the icon tokens.
    */
   icon?: ReactNode;
   /** Trailing glyph — the chevron of an inline link. 16 px, `text-2`, also on a danger link. */
@@ -102,9 +102,8 @@ export function ControlBody({ variant, shape, tone, busy = false, icon, trail, c
 }
 
 /**
- * The single interactive primitive. The lime pill, the text link, the bare icon button — and, on
- * screens that have not been rebuilt, the bridged buttons, chips and menu triggers — are all this
- * component with different variants, which is what makes the 44 px floor and the interaction
+ * The single interactive primitive. The lime pill, the text link and the bare icon button are all
+ * this component with different variants, which is what makes the 44 px floor and the interaction
  * states impossible to forget.
  *
  *     <Pressable variant="primary" size="lg">Indítás</Pressable>            the pill (56)
@@ -119,7 +118,7 @@ export function ControlBody({ variant, shape, tone, busy = false, icon, trail, c
  * second path. Reference: docs/pipeline/pulse/kit/actions.md.
  */
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function Pressable(
-  { className, variant, shape, density, size, tone, text, weight, glyph, lit, busy = false, icon, trail, children, disabled, type, ...rest },
+  { className, variant, shape, size, tone, text, weight, glyph, lit, busy = false, icon, trail, children, disabled, type, ...rest },
   ref,
 ) {
   const ambientLit = useContext(PillLit);
@@ -132,12 +131,12 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
       // aria-busy drives both the styling and the screen-reader announcement from one source.
       aria-busy={busy || undefined}
       disabled={disabled || busy}
-      // The kit function this control is an instance of — absent on a bridged look. Before
+      // The kit function this control is an instance of — absent on a 44 pt `md` primary. Before
       // `rest`, so a composite that IS another kit component (the header's back button) can
       // name itself.
       data-kit={kitName({ variant, shape, size })}
       className={cn(
-        control({ variant, shape, density, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        control({ variant, shape, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
         'relative',
         className,
       )}
@@ -153,7 +152,7 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
 
 /** See `PressableLinkProps`. Reference: docs/pipeline/pulse/kit/G-shell.md. */
 export const PressableLink = forwardRef<HTMLAnchorElement, PressableLinkProps>(function PressableLink(
-  { className, variant, shape, density, size, tone, text, weight, glyph, lit, disabled = false, icon, trail, children, onClick, tabIndex, ...rest },
+  { className, variant, shape, size, tone, text, weight, glyph, lit, disabled = false, icon, trail, children, onClick, tabIndex, ...rest },
   ref,
 ) {
   const ambientLit = useContext(PillLit);
@@ -162,7 +161,7 @@ export const PressableLink = forwardRef<HTMLAnchorElement, PressableLinkProps>(f
       ref={ref}
       data-kit={kitName({ variant, shape, size })}
       className={cn(
-        control({ variant, shape, density, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        control({ variant, shape, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
         'relative',
         variant === 'primary' && ANCHOR_DISABLED_PILL,
         className,

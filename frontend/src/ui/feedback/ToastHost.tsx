@@ -25,21 +25,9 @@ import { DUR_MS, secs, Toast, type ToastData, type ToastKind } from './variants/
  * each with its own countdown on its own rule.
  */
 
-/**
- * Which edge the toast came from — kept for the call sites that name it.
- *
- * Pulse has one band, at the top, for every toast; `placement` is accepted and no longer rendered
- * (PLAN R5: a prop Pulse does not render becomes optional and unrendered, and the screen package
- * that owns the call site deletes it). `'top'` is what the workout player asked for, and it is
- * where every toast now lands.
- */
-export type ToastPlacement = 'top' | 'bottom';
-
 /** Everything optional about a raise, in one bag so the call site never counts positions. */
 export interface ToastOptions {
   onUndo?: () => void;
-  /** Not rendered any more: every toast drops in the top band. See `ToastPlacement`. */
-  placement?: ToastPlacement;
 }
 
 interface ToastApi {
