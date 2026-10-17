@@ -3,7 +3,6 @@
   "id": "F15",
   "files": {
     "frontend/src/ui/muscle-map/MuscleMap.tsx": {
-      "legacy-type": 3,
       "legacy-variant": 1,
       "pill-size": 1
     }

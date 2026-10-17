@@ -18,12 +18,10 @@
     background: var(--surface-0);
     color: var(--text-1);
     font-family: var(--font-body);
-    /* The size every element WITHOUT a type class inherits. It stays the old 15 / 22 for as long as
-       the bridge stands, so unclassed text on a screen that has not been rebuilt does not reflow;
-       a rebuilt screen names its Pulse step on every text. The closing cleanup deletes the legacy
-       step, and check:tokens then forces this rule onto --text-body (16 / 22). */
-    font-size: var(--text-body-legacy);
-    line-height: var(--text-body-legacy--line-height);
+    /* The size every element WITHOUT a type class inherits: the Pulse body, 16 / 22. (It was the
+       old 15 / 22 while the bridge stood; the legacy step left in the closing cleanup.) */
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }

@@ -121,7 +121,7 @@ export function Demo({ id }: { id: string }) {
             status={sheetStatus}
             onRetry={() => void driveSheet('success')}
           >
-            <p className="text-body-s text-text-2">Escape closes this, and focus lands inside it.</p>
+            <p className="text-cap text-text-2">Escape closes this, and focus lands inside it.</p>
             {/* Both outcomes, one tap apart, because that is the only way to compare five
                 variants' answers rather than five variants' entrances. E hands the whole panel
                 over to the state; the other four keep the content and put a badge in the header,
@@ -182,7 +182,7 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
   const active = useElementVariant(id);
   if (active !== variant) return null;
   return (
-    <span className="text-micro-legacy uppercase text-accent">
+    <span className="text-micro text-accent">
       active
     </span>
   );
@@ -237,13 +237,13 @@ export function PlaygroundPage() {
       <Suspense fallback={null}>
         <PulseKit layout="list" onLayoutChange={setKitLayout} />
       </Suspense>
-      <p className="text-micro-legacy uppercase text-accent">QA matrix</p>
-      <h1 className="text-title-1 mt-1 text-text-1">Feedback playground</h1>
-      <p className="text-body-legacy measure mt-2 text-text-2">
+      <p className="text-micro text-accent">QA matrix</p>
+      <h1 className="text-title mt-1 text-text-1">Feedback playground</h1>
+      <p className="text-body measure mt-2 text-text-2">
         Every element against all five of its variants. The variant marked <em>active</em> is the
         one the admin setting currently applies across the whole product.
       </p>
-      <p className="text-body-s mt-2 text-text-3">
+      <p className="text-cap mt-2 text-text-3">
         Reduced motion is currently <strong className="text-text-1">{motionSafe ? 'off' : 'on'}</strong> —
         with it on, every state change below still happens, it just does not travel.
       </p>
@@ -251,8 +251,8 @@ export function PlaygroundPage() {
       {previewable.map((entry) => (
         <section key={entry.id} className="mt-8">
           <div className="flex items-baseline gap-2">
-            <h2 className="text-title-3 text-text-1">{entry.name}</h2>
-            <span className="text-caption tabular-nums text-text-3">{entry.id}</span>
+            <h2 className="text-body-b text-text-1">{entry.name}</h2>
+            <span className="text-data text-text-3">{entry.id}</span>
           </div>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -262,7 +262,7 @@ export function PlaygroundPage() {
                 className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-micro-legacy uppercase text-text-3">
+                  <span className="text-micro text-text-3">
                     {v} · {entry.variants[v]}
                   </span>
                   <ActiveBadge id={entry.id} variant={v} />
@@ -282,8 +282,8 @@ export function PlaygroundPage() {
 
       {liveNoDemo.length > 0 ? (
         <section className="mt-10">
-          <h2 className="text-title-3 text-text-1">Shipping, with no demo on this page</h2>
-          <p className="text-body-s measure mt-1 text-text-2">
+          <h2 className="text-body-b text-text-1">Shipping, with no demo on this page</h2>
+          <p className="text-cap measure mt-1 text-text-2">
             Real components read these variants, so changing them in the studio changes the product.
             They just have no tile here yet — a gap in this page, not in the app. They were listed
             under &ldquo;not yet built&rdquo; until the roster was measured against the actual call
@@ -295,10 +295,10 @@ export function PlaygroundPage() {
                 key={e.id}
                 className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
               >
-                <span className="text-body-s text-text-2">
+                <span className="text-cap text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
                 </span>
-                <span className="text-micro-legacy uppercase text-success">live</span>
+                <span className="text-micro text-success">live</span>
               </li>
             ))}
           </ul>
@@ -306,8 +306,8 @@ export function PlaygroundPage() {
       ) : null}
 
       <section className="mt-10">
-        <h2 className="text-title-3 text-text-1">Catalogued, and nothing reads them</h2>
-        <p className="text-body-s measure mt-1 text-text-2">
+        <h2 className="text-body-b text-text-1">Catalogued, and nothing reads them</h2>
+        <p className="text-cap measure mt-1 text-text-2">
           These rows exist in <code>element_style_config</code> and no component consults them, so an
           admin can pick a variant, watch it save and see it audited while the product does not
           change by a pixel. Saying so beats a card that looks finished — and the studio marks them
@@ -319,10 +319,10 @@ export function PlaygroundPage() {
               key={e.id}
               className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
             >
-              <span className="text-body-s text-text-2">
+              <span className="text-cap text-text-2">
                 <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
               </span>
-              <span className="text-micro-legacy uppercase text-text-3">phase {e.phase}</span>
+              <span className="text-micro text-text-3">phase {e.phase}</span>
             </li>
           ))}
         </ul>

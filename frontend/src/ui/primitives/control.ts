@@ -166,12 +166,12 @@ const recipe = cva(
       /**
        * BRIDGE — visual density of the legacy looks. NOTE: this changes padding and type size only,
        * never the hit area. The Pulse pill and the link take their type from the role
-       * (`body-b`; `cap-m` / `body-m`), so a density beside them changes nothing.
+       * (`body-b`; `cap-m` / `body-m`), so a density beside them changes nothing. The type is
+       * `cap` (13 / 18 Regular), the same metrics as the retired `body-s` step it replaces.
        */
       density: {
-        compact: 'text-body-s px-3',
-        default: 'text-body-s',
-        large: 'text-title-3 px-5',
+        compact: 'text-cap px-3',
+        default: 'text-cap',
       },
       /**
        * HEIGHT, and with it the Pulse metrics of the pill.

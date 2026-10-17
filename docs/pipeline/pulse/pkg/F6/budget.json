@@ -3,7 +3,6 @@
   "id": "F6",
   "files": {
     "frontend/src/ui/primitives/control.ts": {
-      "legacy-type": 3,
       "legacy-radius": 1,
       "legacy-variant": 1,
       "reserved-surface-1": 1,

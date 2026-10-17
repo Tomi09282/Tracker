@@ -5,12 +5,13 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * THE TYPE STEPS HAVE TO BE DECLARED, OR THE MERGER DELETES THEM.
  *
  * `tailwind-merge` resolves a conflict by deciding which GROUP a class belongs to, and it knows
- * stock Tailwind's names. This project's scale is custom — `text-title-1`, `text-body-s`,
- * `text-caption` — and so are its ink tokens, `text-text-1` / `text-text-2` / `text-text-3`. To an
+ * stock Tailwind's names. This project's scale is custom — `text-eyebrow`, `text-cap`,
+ * `text-micro` — and so are its ink tokens, `text-text-1` / `text-text-2` / `text-text-3`. To an
  * unconfigured merger every one of those is `text-<something>`, so it files them all under
  * text-COLOUR and keeps the last one it sees.
  *
- * Measured before this file was fixed, with the project's own installed tailwind-merge:
+ * Measured before this file was fixed, with the project's own installed tailwind-merge (on the
+ * steps of the old ramp, since retired):
  *
  *   cn('text-title-1 tabular-nums', 'text-text-1')  ->  'tabular-nums text-text-1'
  *   cn('text-body-s',               'text-text-2')  ->  'text-text-2'
@@ -31,13 +32,10 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * `text-text-N` at the call site, and they belong in the colour group where the merger already
  * puts them.
  *
- * THE LIST IS THE SAME 26 NAMES AS `--text-<step>` IN `tokens.css` — `check:type-scale` fails the
- * build on a difference in either direction. Sixteen are the Pulse ramp. Ten are the ramp it
- * replaces, kept with their old metrics while screens are rebuilt one by one: a legacy step
- * dropped from here too early loses its size at every call site that still names it, even though
- * `tokens.css` still declares it. Three of the ten carry the suffix `-legacy` because Pulse
- * re-uses their names (`body`, `display`, `micro`) with other metrics. The ten leave this list and
- * `tokens.css` together, in the closing cleanup.
+ * THE LIST IS THE SAME 16 NAMES AS `--text-<step>` IN `tokens.css` — the Pulse ramp — and
+ * `check:type-scale` fails the build on a difference in either direction. The ten steps of the
+ * ramp Pulse replaced (`title-1`, `body-s`, `caption`, `micro-legacy` …) left this list and
+ * `tokens.css` together, in the closing cleanup (F19 row 2).
  */
 const TYPE_STEPS = [
   // The Pulse ramp (Pulse System §2.2).
@@ -57,17 +55,6 @@ const TYPE_STEPS = [
   'data-l',
   'data',
   'micro',
-  // BRIDGE — the old ramp, old metrics. Do not use in new code.
-  'display-legacy',
-  'timer',
-  'title-1',
-  'title-2',
-  'title-3',
-  'body-legacy',
-  'body-strong',
-  'body-s',
-  'caption',
-  'micro-legacy',
 ] as const;
 
 const twMerge = extendTailwindMerge({

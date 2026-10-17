@@ -291,7 +291,7 @@ export function MuscleMap({
       )}
 
       {!fill && hiddenHighlights.length > 0 ? (
-        <p className="text-caption mt-2 text-text-3">
+        <p className="text-cap mt-2 text-text-3">
           {t('muscleMap.alsoOnOtherSide', {
             side: t(`muscleMap.${side === 'front' ? 'back' : 'front'}`).toLowerCase(),
           })}
@@ -307,11 +307,11 @@ export function MuscleMap({
           that does not, and a legend missing where it was needed is the worse failure. */}
       {legend && Object.keys(highlights).length > 0 ? (
         <div className={cn('flex shrink-0 items-center gap-4', fill ? 'mt-0' : 'mt-3')}>
-          <span className="text-caption inline-flex items-center gap-1.5 text-text-2">
+          <span className="text-cap-m inline-flex items-center gap-1.5 text-text-2">
             <span aria-hidden className="inline-block size-3 rounded-chip bg-accent" />
             {t('muscleMap.primary')}
           </span>
-          <span className="text-caption inline-flex items-center gap-1.5 text-text-2">
+          <span className="text-cap-m inline-flex items-center gap-1.5 text-text-2">
             {/* The swatch has to be the FILL, not a near neighbour of it — a key that shows a
                 different colour from the thing it keys is worse than no key. */}
             <span
