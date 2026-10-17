@@ -1,0 +1,21 @@
+diff --git a/frontend/src/ui/data/SegmentBar.tsx b/frontend/src/ui/data/SegmentBar.tsx
+--- a/frontend/src/ui/data/SegmentBar.tsx
++++ b/frontend/src/ui/data/SegmentBar.tsx
+@@ -56,7 +56,7 @@ export type SegmentBarProps = SegmentBarBase &
+     | {
+         /** The interactive strip: one button per slot, the numeral over its segment. */
+         slots: readonly SegmentSlot[];
+-        /** Slots that share the width before the strip scrolls sideways. Default 7 (pitch (354 + 8) / 7 = 51.7). */
++        /** Slots that share the width before the strip scrolls sideways. Default 7 (pitch (354 + 8) / 7 = 51.7). A fraction (7.5) cuts the next slot at the edge: the cue that the strip scrolls. */
+         perView?: number;
+         segments?: never;
+         value?: never;
+@@ -142,7 +142,7 @@ const SLOT_ACTION = [
+  * and scroll sideways; the cut slot at the edge is the cue.
+  */
+ function SegmentSlots({ slots, perView = 7, label, className }: { slots: readonly SegmentSlot[]; perView?: number; label?: string; className?: string }) {
+-  const n = Math.max(1, Math.floor(perView));
++  const n = Math.max(1, perView);
+   return (
+     <div
+       data-kit="segBar"

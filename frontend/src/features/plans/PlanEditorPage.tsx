@@ -173,6 +173,42 @@ export function PlanEditorPage() {
     el.select();
   }, [wantsName, loaded]);
 
+  /*
+   * A CYCLE LONGER THAN SEVEN DAYS. The strip keeps its pitch and scrolls sideways (the kit's
+   * `perView`), so two things are the page's to keep honest: the lit (open) slot must be on screen
+   * whichever way the day was opened — a day row far below opens day 11 just as well as its slot —
+   * and a strip with more days than it shows must say so. The first is a sideways scroll of the
+   * strip ONLY (never `scrollIntoView`, which would also drag the page up to the strip); the second
+   * is the strip feathering out at the edge that has more days behind it.
+   */
+  const strip = useRef<HTMLDivElement>(null);
+  const [stripMore, setStripMore] = useState<{ start: boolean; end: boolean }>({ start: false, end: false });
+  const cycleDays = data?.plan?.cycle_days ?? 0;
+  const readStripEdges = () => {
+    const scroller = strip.current?.querySelector<HTMLElement>('[data-kit="segBar"]');
+    if (!scroller) return;
+    const start = scroller.scrollLeft > 1;
+    const end = scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
+    setStripMore((prev) => (prev.start === start && prev.end === end ? prev : { start, end }));
+  };
+  useEffect(() => {
+    const scroller = strip.current?.querySelector<HTMLElement>('[data-kit="segBar"]');
+    if (!scroller) return;
+    const lit = scroller.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (lit) {
+      // Comfortably on screen = a whole slot clear of either edge, out of the feather and with
+      // the next day showing beside it. Otherwise the lit slot is brought to the middle (the
+      // browser clamps the scroll at both ends, so day 1 or day 14 simply sit at their edge).
+      const box = scroller.getBoundingClientRect();
+      const slot = lit.getBoundingClientRect();
+      if (slot.left < box.left + slot.width || slot.right > box.right - slot.width) {
+        scroller.scrollLeft += slot.left + slot.width / 2 - (box.left + box.width / 2);
+      }
+    }
+    readStripEdges();
+    // `readStripEdges` only reads the DOM and sets state through an updater: no dependency of its own.
+  }, [openDay, cycleDays, loaded]);
+
   if (isPending) {
     return (
       <Screen top="push" role="status" aria-busy="true">
@@ -192,6 +228,9 @@ export function PlanEditorPage() {
     // whether the plan exists.
     return (
       <Screen top="push">
+        {/* The way back, as on every pushed screen (EDZÉSTERVEK from `routeMeta`): without it the
+            tab bar was the only way out of a plan the server refused. */}
+        <ScreenHeader kind="push" />
         <EmptyState title={t('plans.missingTitle')} heading="h1" body={t('plans.missingBody')} />
       </Screen>
     );
@@ -467,8 +506,11 @@ export function PlanEditorPage() {
   const picker = (block: PlanBlock) => (
     <div className="mt-2 flex flex-col">
       <Field label={t('plans.findExercise')} value={search} autoFocus onChange={(e) => setSearch(e.target.value)} />
-      <div className="max-h-56 overflow-y-auto">
-        <RowStack close>
+      {/* At most three and a half rows (a row is 56 + its hairline): the half row cut at the
+          bottom is what says the list scrolls. The closing rule is the scroller's own, so it
+          stays under the list instead of scrolling away with the last row. */}
+      <div className={(results.data?.pages?.[0]?.exercises ?? []).length > 0 ? 'max-h-50 overflow-y-auto border-b border-hair-strong' : 'max-h-50 overflow-y-auto'}>
+        <RowStack>
           {(results.data?.pages?.[0]?.exercises ?? []).slice(0, 12).map((r) => {
             /* FLAGS, NOT A FILTER. The coach may know the client's knee is fine this week, or that the
                gym has kit the questionnaire predates. An option that vanishes teaches them nothing;
@@ -718,7 +760,28 @@ export function PlanEditorPage() {
           title={t('plans.cycle', { days: plan.cycle_days })}
           trailing={<CountWords text={t('plans.trainingDayCount', { count: trainingDays })} count={trainingDays} />}
         />
+        {/* The wrapper is the strip's own box (the strip overhangs the gutter by 4 on each side, and
+            so does this): the feather is a mask on it, at the edge that has more days behind it.
+            Scroll events do not bubble; the capture phase still passes through here. */}
+        <div
+          ref={strip}
+          className="-mx-1 px-1"
+          onScrollCapture={readStripEdges}
+          style={
+            stripMore.start || stripMore.end
+              ? {
+                  maskImage: `linear-gradient(to right, ${stripMore.start ? 'transparent, black 2rem' : 'black, black'}, ${stripMore.end ? 'black calc(100% - 2rem), transparent' : 'black'})`,
+                }
+              : undefined
+          }
+        >
         <SegmentBar
+          // A cycle longer than the view cuts the next slot at the edge: the kit's cue that the
+          // strip scrolls. The kit floors `perView` today (R-S-plan-editor-fix-01 lets it take
+          // 7.5); until that lands the page sets the same 7.5-slot pitch on the slots itself, so a
+          // 14-day strip never looks like a 7-day one. Drop the class when the request lands.
+          perView={plan.cycle_days > 7 ? 7.5 : 7}
+          className={plan.cycle_days > 7 ? '[&_[data-kit=segSlot]]:!w-[calc(100%/7.5)]' : undefined}
           label={t('plans.cycle', { days: plan.cycle_days })}
           slots={Array.from({ length: plan.cycle_days }, (_, i) => {
             const day = dayByIndex.get(i);
@@ -742,6 +805,7 @@ export function PlanEditorPage() {
             };
           })}
         />
+        </div>
       </section>
 
       {/* The server refuses to activate a client plan with no start date — it would generate zero
@@ -822,6 +886,9 @@ export function PlanEditorPage() {
               leadSlot
               lead={<Copy />}
               title={t('plans.duplicateCycle', { days: plan.cycle_days })}
+              // A two-digit cycle ("A teljes 14 napos ciklus másolása előre") no longer fits one
+              // line at 354 - 44; the sentence wraps instead of losing its end.
+              lines={2}
               className="min-h-16"
               busy={copyDays.isPending}
               disabled={offline}

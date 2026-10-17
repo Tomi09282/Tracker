@@ -1,0 +1,14 @@
+{
+  "id": "R-S-plan-editor-fix-01",
+  "from": "S-plan-editor-fix",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/data/SegmentBar.tsx",
+  "need": "The slots strip honours a fractional perView (7.5), so a cycle longer than seven days shows the eighth slot cut at the edge - the cue the kit comment already promises ('the cut slot at the edge is the cue'). Today Math.floor turns 7.5 back into 7 whole slots and a 14-day strip looks exactly like a 7-day one (review S-plan-editor finding 1).",
+  "evidence": ".pulse/review/S-plan-editor/use/rv-p5.live.png (14 NAPOS CIKLUS over seven whole slots); .pulse/pairs/S-plan-editor-fix/p5-*.png",
+  "proposedApi": "<SegmentBar slots perView={7.5} /> - no new prop; perView may be a fraction. Every current caller passes nothing (default 7) or an integer, so no screen changes.",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-plan-editor/requests/R-S-plan-editor-fix-01.patch",
+  "interim": "PlanEditorPage already passes perView={cycle_days > 7 ? 7.5 : 7} (no effect until this lands), scrolls the lit slot into the strip whenever the open day changes, and feathers the strip (a mask) at the edge that has more days behind it. Once this lands the cut slot and the feather show together; the feather can then be dropped from the page if the owner prefers the cut alone.",
+  "status": "open",
+  "resolution": null
+}
