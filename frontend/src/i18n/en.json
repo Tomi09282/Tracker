@@ -333,7 +333,8 @@
       "addMeal": "Add a meal",
       "mealDefault": "Meal",
       "draftNote": "This plan is still a draft — the client cannot see it until you activate it.",
-      "activate": "Activate"
+      "activate": "Activate",
+      "itemLine": "{{grams}}g · {{kcal}} kcal · {{protein}}g P"
     },
     "profileFull": "Full questionnaire",
     "profileIncomplete": "Incomplete",

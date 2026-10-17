@@ -333,7 +333,8 @@
       "addMeal": "Mahlzeit hinzufügen",
       "mealDefault": "Mahlzeit",
       "draftNote": "Dieser Plan ist noch ein Entwurf — der Klient sieht ihn erst nach der Aktivierung.",
-      "activate": "Aktivieren"
+      "activate": "Aktivieren",
+      "itemLine": "{{grams}}g · {{kcal}} kcal · {{protein}}g P"
     },
     "profileFull": "Vollständiger Fragebogen",
     "profileIncomplete": "Unvollständig",

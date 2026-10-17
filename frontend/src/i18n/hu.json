@@ -333,7 +333,8 @@
       "addMeal": "Étkezés hozzáadása",
       "mealDefault": "Étkezés",
       "draftNote": "Ez az étrend még vázlat — a kliens nem látja, amíg nem aktiválod.",
-      "activate": "Aktiválás"
+      "activate": "Aktiválás",
+      "itemLine": "{{grams}}g · {{kcal}} kcal · {{protein}}g P"
     },
     "profileFull": "Teljes kérdőív",
     "profileIncomplete": "Hiányos",

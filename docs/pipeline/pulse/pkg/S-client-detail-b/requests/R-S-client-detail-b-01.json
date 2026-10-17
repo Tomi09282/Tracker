@@ -1,0 +1,14 @@
+{
+  "id": "R-S-client-detail-b-01",
+  "from": "S-client-detail-b",
+  "kind": "sandbox",
+  "blocking": false,
+  "target": ".pulse/sandbox.json (+ pulse-sandbox)",
+  "need": "A sandbox diet on K's link (demo.kovacs.eszter@, writeClientLink 2): one nutrition plan in status 'draft' with cycle_days 7 and at least one day, registered under a sandbox id (e.g. ids.writeClientDiet). The capture tool admits a live write only on a path that names a sandbox id; every diet write of the Táplálkozás tab goes to /nutrition-plans/:planId/... (days, meals, items, items/:id, PATCH status), and no current sandbox id is a diet id, so the brief's live writes (add day / meal / item, delete, activate on K) cannot run.",
+  "evidence": "frontend/scripts/pulse-shot.mjs allowedWrites(): '... does not target a sandbox object ({key} of .pulse/sandbox.json) and the account is not the sandbox write member'; .pulse/sandbox.json ids hold no nutrition plan; work-packages.json S-client-detail-b liveWrites",
+  "proposedApi": "sandbox.json ids.writeClientDiet = <plan id>; states then write e.g. { method: 'POST', path: '/api/v1/nutrition-plans/{writeClientDiet}/days' }",
+  "proposedPatch": null,
+  "interim": "every write the tab fires is proven in replay by a stub that answers the fired request (cdb-nut-add-stub: POST /nutrition-plans/1/items; cdb-nut-delete-stub: DELETE /nutrition-plans/1/items/1); the mutations themselves are unchanged code. The draft state (draft note + Aktiválás) is code-only until then (pulse-fixture-check refuses status 'draft': no recording holds it).",
+  "status": "open",
+  "resolution": null
+}

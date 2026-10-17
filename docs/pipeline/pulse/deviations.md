@@ -410,3 +410,35 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: not drawn; the prep expected the failed line.
 - What the app does: TanStack Query holds the PUT while offline (networkMode online), so the autosave row reads Mentés… and the header save word shows busy dots until the network returns, exactly as the base build behaves.
 - Status: open — needs a ruling.
+
+## DEV-048 — S-client-detail-b: the Táplálkozás editor's undrawn states
+
+- Source: docs/pipeline/pulse/pkg/S-client-detail-b/handoff.json deviations 1-5 (PLAN.md Q4)
+- Package: S-client-detail-b
+- The frames show: client-detail-2 one open active diet, seven alike day cells, meals with their items and search lines.
+- What the app does: a cycle day not created yet has no tone of its own and shows the Nap hozzáadása link; with several diets the open editor follows its own row and a closed diet's caret points down; search results are rows under the meal's search line (name + kcal / 100 g in mono) and the SearchField brings its own clear button; a picked food is a row with the hidden-label grams field (a plain 64 pt field, not Field unit='g': the content-sized input failed the targets probe) and the Hozzáadás text link; a draft diet is the info notice line + the one pill Aktiválás (code only, no recording holds a draft).
+- Status: open — needs a ruling.
+
+## DEV-049 — S-client-detail-b: empty and thin states
+
+- Source: docs/pipeline/pulse/pkg/S-client-detail-b/handoff.json deviations 6, 7, 10
+- Package: S-client-detail-b
+- The frames show: not drawn.
+- What the app does: no diet = a left-aligned EmptyState whose action is the one pill Új étrend (the Apple icon is gone); no history = EmptyState without the calendar icon; a thin series = the exercise name over the not-enough sentence, no box; with sessions only, Edzések keeps its section rule 16 under the switch.
+- Status: open — needs a ruling.
+
+## DEV-050 — S-client-detail-b: Haladás charts up to three exercises
+
+- Source: docs/pipeline/pulse/pkg/S-client-detail-b/handoff.json deviations 8, 9 (kept behaviour)
+- Package: S-client-detail-b
+- The frames show: client-detail-3 two charts (its board note: the third left out for want of sample data); no trophy glyph on the record rows.
+- What the app does: the page still charts up to three distinct exercises, so a third chart stands above Rekordok; the per-record trophy glyph is gone as drawn.
+- Status: open — needs a ruling.
+
+## DEV-051 — S-client-detail-b: live number formats kept 1:1
+
+- Source: docs/pipeline/pulse/pkg/S-client-detail-b/handoff.json deviation 11, i18n key coaching.nutrition.itemLine (untranslated)
+- Package: S-client-detail-b
+- The frames show: '60g · 222 kcal · 8.1g P', record and session figures with decimal points and ISO dates (as the live app prints them; both board notes leave it to the owner).
+- What the app does: the item line, the record and the session figures keep the live format (decimal point, glued units, ISO dates) in all three languages.
+- Status: open — needs a ruling.

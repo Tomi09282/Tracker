@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Trophy, CalendarCheck } from 'lucide-react';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { Section, SectionHeader } from '../../ui/data/SectionHeader';
 import { useClientWorkouts, useClientRecords, useProgress } from './useCoaching';
 import { ProgressChart, type Measure } from '../../ui/feedback/ProgressChart';
 
@@ -43,9 +44,9 @@ function ExerciseProgress({ linkId, exerciseId, name }: { linkId: number; exerci
   // information they can act on.
   if (!chosen) {
     return (
-      <div className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-        <p className="text-body-s text-text-1">{name}</p>
-        <p className="text-caption mt-1 text-text-3">{t('progress.notEnough', { count: points.length })}</p>
+      <div>
+        <p className="text-body-m text-text-1">{name}</p>
+        <p className="text-cap mt-1 text-text-2">{t('progress.notEnough', { count: points.length })}</p>
       </div>
     );
   }
@@ -56,7 +57,6 @@ function ExerciseProgress({ linkId, exerciseId, name }: { linkId: number; exerci
       measure={chosen.key}
       unit={chosen.unit}
       label={name}
-      className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
     />
   );
 }
@@ -83,9 +83,12 @@ export function ProgressTab({ linkId }: { linkId: number }) {
 
   if (workouts.isPending || records.isPending) {
     return (
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-20 w-full rounded-card" />
-        <Skeleton className="h-20 w-full rounded-card" />
+      <div className="pt-2" role="status" aria-label={t('common.loading')}>
+        <RowStack as="div">
+          {[0, 1, 2].map((i) => (
+            <ListRowSkeleton key={i} sub index={i} />
+          ))}
+        </RowStack>
       </div>
     );
   }
@@ -100,21 +103,21 @@ export function ProgressTab({ linkId }: { linkId: number }) {
   ).values()].slice(0, 3) as { exerciseId: number; name: string }[];
 
   if (!logs.length && !prs.length) {
-    return <EmptyState icon={CalendarCheck} title={t('coaching.noHistoryTitle')} body={t('coaching.noHistoryBody')} />;
+    return <EmptyState className="mt-2" title={t('coaching.noHistoryTitle')} body={t('coaching.noHistoryBody')} />;
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    // 16 under the view switch (the page leaves 8); the blocks stand 32 apart (client-detail-3)
+    <div className="flex flex-col gap-section pt-2">
       {/* THE CHARTS COME FIRST, and only for movements the client has actually beaten a record on.
           That is the honest selection: an exercise with a record has, by definition, been done
           more than once, so there is something to plot. Charting whatever happens to be most
-          recent would produce a line through one point. */}
+          recent would produce a line through one point. The block directly under the switch has
+          no rule. */}
       {chartable.length ? (
-        <section aria-labelledby="progress-heading">
-          <h3 id="progress-heading" className="text-micro-legacy uppercase text-text-2">
-            {t('progress.heading')}
-          </h3>
-          <div className="mt-2 flex flex-col gap-4">
+        <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
+          <SectionHeader rule={false} titleId="progress-heading" title={t('progress.heading')} />
+          <div className="flex flex-col gap-section">
             {chartable.map((c) => (
               <ExerciseProgress key={c.exerciseId} linkId={linkId} exerciseId={c.exerciseId} name={c.name} />
             ))}
@@ -123,65 +126,54 @@ export function ProgressTab({ linkId }: { linkId: number }) {
       ) : null}
 
       {prs.length ? (
-        <section aria-labelledby="records-heading">
-          <h3 id="records-heading" className="text-micro-legacy uppercase text-text-2">
-            {t('coaching.records')}
-          </h3>
-          <ul className="mt-2 flex flex-col gap-2">
+        <Section title={t('coaching.records')}>
+          <RowStack>
             {prs.slice(0, 8).map((r) => (
-              <li
+              <ListRow
                 key={r.id}
-                className="flex items-center gap-3 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
-              >
-                <Trophy className="size-icon-m shrink-0 text-warning" aria-hidden />
-                <div className="min-w-0 flex-1">
-                  <p className="text-body-legacy truncate">{r.exercise_name_snapshot}</p>
-                  <p className="text-caption text-text-2">
-                    {t(`workout.record.${r.kind}`)}
-                    {r.rep_bucket > 0 ? ` · ${r.rep_bucket}${r.rep_bucket === 13 ? '+' : ''}` : ''}
-                    {' · '}
-                    {r.local_date}
-                  </p>
-                </div>
-                <span className="text-body-legacy shrink-0 tabular-nums font-medium">
-                  {Math.round(r.value * 10) / 10}
-                  <span className="text-caption ml-1 text-text-2">{r.value_unit}</span>
-                </span>
-              </li>
+                title={r.exercise_name_snapshot}
+                sub={`${t(`workout.record.${r.kind}`)}${r.rep_bucket > 0 ? ` · ${r.rep_bucket}${r.rep_bucket === 13 ? '+' : ''}` : ''} · ${r.local_date}`}
+                // the figure and the unit as stored (a locale defect kept 1:1: "131.3 kg")
+                value={String(Math.round(r.value * 10) / 10)}
+                valueUnit={r.value_unit}
+              />
             ))}
-          </ul>
-        </section>
+          </RowStack>
+        </Section>
       ) : null}
 
       {logs.length ? (
-        <section aria-labelledby="sessions-heading">
-          <h3 id="sessions-heading" className="text-micro-legacy uppercase text-text-2">
-            {t('coaching.sessions')}
-          </h3>
-          <ul className="mt-2 flex flex-col gap-2">
+        <Section title={t('coaching.sessions')}>
+          <RowStack>
             {logs.map((l) => (
-              <li key={l.id} className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="text-body-legacy truncate font-medium">
-                    {l.day_name_snapshot ?? l.title ?? t('workout.freestyle')}
-                  </p>
-                  <span className="text-caption shrink-0 tabular-nums text-text-2">{l.local_date}</span>
-                </div>
-                <p className="text-caption mt-1 flex flex-wrap gap-x-3 text-text-2 tabular-nums">
-                  <span>{t('coaching.setsCount', { count: l.total_working_sets ?? 0 })}</span>
-                  <span>{t('coaching.repsCount', { count: l.total_reps ?? 0 })}</span>
-                  <span>{fmtVolume(l.total_volume_kg)}</span>
-                  {fmtDuration(l.duration_seconds) ? <span>{fmtDuration(l.duration_seconds)}</span> : null}
-                  {/* A session still running is not a result. Saying so prevents a coach reading a
-                      half-finished workout as a completed one. */}
-                  {l.completed_at == null ? (
-                    <span className="text-accent">{t('coaching.stillRunning')}</span>
-                  ) : null}
-                </p>
-              </li>
+              <ListRow
+                key={l.id}
+                title={l.day_name_snapshot ?? l.title ?? t('workout.freestyle')}
+                value={l.local_date}
+                sub={
+                  <>
+                    {[
+                      t('coaching.setsCount', { count: l.total_working_sets ?? 0 }),
+                      t('coaching.repsCount', { count: l.total_reps ?? 0 }),
+                      fmtVolume(l.total_volume_kg),
+                      fmtDuration(l.duration_seconds),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                    {/* A session still running is not a result. Saying so prevents a coach reading a
+                        half-finished workout as a completed one. */}
+                    {l.completed_at == null ? (
+                      <>
+                        {' · '}
+                        <span className="text-accent">{t('coaching.stillRunning')}</span>
+                      </>
+                    ) : null}
+                  </>
+                }
+              />
             ))}
-          </ul>
-        </section>
+          </RowStack>
+        </Section>
       ) : null}
     </div>
   );

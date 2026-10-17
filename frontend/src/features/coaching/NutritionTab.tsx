@@ -1,11 +1,20 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Apple, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { SearchField } from '../../ui/primitives/SearchField';
+import { Field } from '../../ui/primitives/Field';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { LedgerRow } from '../../ui/data/LedgerRow';
+import { StatusLine } from '../../ui/data/StatusLine';
+import { Rule } from '../../ui/data/Rule';
 import { apiWithRefresh } from '../../lib/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import {
   useNutritionPlans,
   useNutritionPlan,
@@ -34,6 +43,15 @@ import {
  * A portion is a food and a number of grams. The kcal shown beside the input is computed here from
  * the food's own per-100 g figures purely so the number is not a surprise after saving — it is
  * never sent, and sending one is a 400.
+ *
+ * ═══ THE LOOK (client-detail-2) ════════════════════════════════════════════════════════════════
+ *
+ * Nothing is enclosed. A diet is a row (name; the status line with the lime dot only for an active
+ * diet); the open one is followed by its editor: the day picker as seven equal cells on a hairline
+ * with the ink mark of the chosen day, then each meal as an open ledger — the eyebrow name and the
+ * 48 pt kcal numeral on one baseline, the items as rows with the delete cross, the food search line
+ * closing the meal. The two create controls are quiet text links on two levels: a meal hangs on the
+ * day, a new diet opens its own block under a section rule.
  */
 export function NutritionTab({ linkId }: { linkId: number }) {
   const { t, i18n } = useTranslation();
@@ -45,75 +63,84 @@ export function NutritionTab({ linkId }: { linkId: number }) {
 
   if (plans.isLoading) {
     return (
-      <div className="flex flex-col gap-2">
-        {[0, 1].map((i) => (
-          <Skeleton key={i} className="h-16 rounded-card" />
-        ))}
+      <div role="status" aria-label={t('common.loading')}>
+        <RowStack as="div">
+          <ListRowSkeleton sub index={0} />
+          <ListRowSkeleton sub index={1} />
+        </RowStack>
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      {mine.length === 0 ? (
-        <EmptyState
-          icon={Apple}
-          title={t('coaching.nutrition.emptyTitle')}
-          body={t('coaching.nutrition.emptyBody')}
-          action={
-            <Pressable
-              variant="primary"
-              busy={create.isPending}
-              onClick={() =>
-                create.mutate({
-                  name: t('coaching.nutrition.defaultName'),
-                  coach_client_id: linkId,
-                  starts_on: todayLocal(),
-                })
-              }
-            >
-              {t('coaching.nutrition.create')}
-            </Pressable>
-          }
-        />
-      ) : (
-        <>
-          <ul className="flex flex-col gap-2">
-            {mine.map((p) => (
-              <li key={p.id}>
-                <Pressable
-                  variant={openId === p.id ? 'secondary' : 'ghost'}
-                  className="w-full justify-between text-left"
-                  onClick={() => setOpenId(openId === p.id ? null : p.id)}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="text-body-legacy block truncate text-text-1">{p.name}</span>
-                    <span className="text-caption text-text-3">
-                      {t(`plans.status.${p.status}`, { defaultValue: p.status })} ·{' '}
-                      {t('coaching.nutrition.cycle', { count: p.cycle_days })}
-                    </span>
-                  </span>
-                </Pressable>
-                {openId === p.id ? <PlanEditor planId={p.id} lang={i18n.language} /> : null}
-              </li>
-            ))}
-          </ul>
-          <Pressable
-            variant="ghost"
-            busy={create.isPending}
-            onClick={() =>
-              create.mutate({
-                name: t('coaching.nutrition.defaultName'),
-                coach_client_id: linkId,
-                starts_on: todayLocal(),
-              })
-            }
-          >
-            <Plus className="size-icon-s" aria-hidden />
+  const createDiet = () =>
+    create.mutate({
+      name: t('coaching.nutrition.defaultName'),
+      coach_client_id: linkId,
+      starts_on: todayLocal(),
+    });
+
+  if (mine.length === 0) {
+    // The empty state carries the screen's one pill: creating the first diet IS the action here.
+    return (
+      <EmptyState
+        className="mt-2"
+        title={t('coaching.nutrition.emptyTitle')}
+        body={t('coaching.nutrition.emptyBody')}
+        action={
+          <Pressable variant="primary" size="lg" busy={create.isPending} onClick={createDiet}>
             {t('coaching.nutrition.create')}
           </Pressable>
-        </>
-      )}
+        }
+      />
+    );
+  }
+
+  // The open editor follows ITS row: the rows up to the open one, the editor, then the rest — so an
+  // editor never sits inside a row and a closed diet below it keeps its own hairline.
+  const openAt = mine.findIndex((p) => p.id === openId);
+  const groups = openAt < 0 ? [mine] : [mine.slice(0, openAt + 1), mine.slice(openAt + 1)];
+
+  const row = (p: (typeof mine)[number]) => {
+    const open = openId === p.id;
+    const Caret = open ? ChevronUp : ChevronDown;
+    return (
+      <ListRow
+        key={p.id}
+        title={p.name}
+        sub={
+          <StatusLine
+            tone={p.status === 'active' ? 'live' : undefined}
+            word={t(`plans.status.${p.status}`, { defaultValue: p.status })}
+            meta={t('coaching.nutrition.cycle', { count: p.cycle_days })}
+          />
+        }
+        // the 16 pt caret's ink (8 wide, 4 inside its box) ends on the content edge, as drawn
+        trailing={<Caret className="-mr-1 size-4 text-text-3" strokeWidth={1.75} aria-hidden />}
+        aria-expanded={open}
+        onClick={() => setOpenId(open ? null : p.id)}
+      />
+    );
+  };
+
+  return (
+    <div className="flex flex-col gap-section">
+      <div className="flex flex-col gap-2">
+        {groups.map((g, i) =>
+          g.length ? (
+            <Fragment key={g[0].id}>
+              <RowStack>{g.map(row)}</RowStack>
+              {i === 0 && openAt >= 0 ? <PlanEditor planId={mine[openAt].id} lang={i18n.language} /> : null}
+            </Fragment>
+          ) : null,
+        )}
+      </div>
+      {/* A new diet belongs under the diet LIST, not under the open day: its own block. */}
+      <div className="flex flex-col gap-4">
+        <Rule strong />
+        <TextLink text="body" className="self-start" lead={<Plus />} busy={create.isPending} onClick={createDiet}>
+          {t('coaching.nutrition.create')}
+        </TextLink>
+      </div>
     </div>
   );
 }
@@ -161,7 +188,15 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
   });
 
   if (tree.isLoading || !tree.data) {
-    return <Skeleton className="mt-2 h-24 rounded-card" />;
+    return (
+      <div role="status" aria-label={t('common.loading')}>
+        <RowStack as="div">
+          {[0, 1, 2].map((i) => (
+            <ListRowSkeleton key={i} sub index={i} />
+          ))}
+        </RowStack>
+      </div>
+    );
   }
 
   const { plan, days, meals, items } = tree.data;
@@ -169,97 +204,95 @@ function PlanEditor({ planId, lang }: { planId: number; lang: string }) {
   const dayMeals = day ? meals.filter((m) => m.day_id === day.id) : [];
 
   return (
-    <div className="mt-2 rounded-card border border-[var(--surface-border)] bg-surface-1 p-4">
+    <div className="flex flex-col gap-4">
       {/* THE CYCLE IS THE SCHEDULE RULE'S INPUT, so the day picker is exactly cycle_days wide. A
           day outside it is refused by a trigger, and a picker that could produce one would be
-          offering a control that cannot succeed. */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {Array.from({ length: plan.cycle_days }, (_, i) => {
-          const exists = days.some((d) => d.day_index === i);
-          return (
-            <Pressable
-              key={i}
-              density="compact"
-              variant={i === dayIndex ? 'primary' : exists ? 'secondary' : 'ghost'}
-              onClick={() => setDayIndex(i)}
-            >
-              {i + 1}
-            </Pressable>
-          );
-        })}
-      </div>
+          offering a control that cannot succeed. Choosing a day is local state: nothing is
+          written until "Nap hozzáadása" is pressed, so the arrows may select as they move. */}
+      <Segmented
+        layout="cells"
+        label={t('coaching.nutrition.cycle', { count: plan.cycle_days })}
+        options={Array.from({ length: plan.cycle_days }, (_, i) => ({ value: String(i), label: String(i + 1) }))}
+        value={String(dayIndex)}
+        onChange={(v) => setDayIndex(Number(v))}
+      />
 
       {!day ? (
-        <Pressable
-          variant="secondary"
+        <TextLink
+          text="body"
+          className="self-start"
+          lead={<Plus />}
           busy={addDay.isPending}
           onClick={() => addDay.mutate({ day_index: dayIndex })}
         >
-          <Plus className="size-icon-s" aria-hidden />
           {t('coaching.nutrition.addDay')}
-        </Pressable>
+        </TextLink>
       ) : (
         <>
-          {dayMeals.map((m) => {
-            const mine = items.filter((i) => i.meal_id === m.id);
-            // Totals are SUM over the rows the server already computed. The card does not do its
-            // own macro arithmetic, because a second sum is a second answer.
-            const kcal = mine.reduce((a, b) => a + b.kcal, 0);
-            return (
-              <section key={m.id} className="mb-4">
-                <h4 className="text-micro-legacy mb-2 flex justify-between uppercase text-text-3">
-                  <span>{m.name}</span>
-                  <span className="tabular-nums">{Math.round(kcal)} kcal</span>
-                </h4>
-                <ul className="flex flex-col gap-1">
-                  {mine.map((i) => (
-                    <li key={i.id} className="flex items-center gap-2 rounded-card bg-surface-2 px-3">
-                      <span className="min-w-0 flex-1 py-2">
-                        <span className="text-body-s block truncate text-text-1">{i.name}</span>
-                        <span className="text-caption tabular-nums text-text-3">
-                          {round(i.grams)}g · {round(i.kcal)} kcal · {round(i.protein_g)}g P
-                        </span>
-                      </span>
-                      <Pressable
-                        variant="ghost"
-                        shape="icon"
-                        onClick={() => delItem.mutate(i.id)}
-                        aria-label={t('common.delete')}
-                      >
-                        <Trash2 className="size-icon-s" aria-hidden />
-                      </Pressable>
-                    </li>
-                  ))}
-                </ul>
-                <FoodPicker
-                  lang={lang}
-                  busy={addItem.isPending}
-                  onPick={(foodId, grams) => addItem.mutate({ meal_id: m.id, food_id: foodId, grams })}
-                />
-              </section>
-            );
-          })}
+          {dayMeals.length ? (
+            <div className="flex flex-col gap-section">
+              {dayMeals.map((m) => {
+                const mine = items.filter((i) => i.meal_id === m.id);
+                // Totals are SUM over the rows the server already computed. The card does not do its
+                // own macro arithmetic, because a second sum is a second answer.
+                const kcal = mine.reduce((a, b) => a + b.kcal, 0);
+                return (
+                  <section key={m.id} aria-label={m.name}>
+                    <RowStack as="div">
+                      <LedgerRow label={m.name} value={Math.round(kcal)} unit={t('nutrition.unitKcal')} />
+                      {mine.map((i) => (
+                        <ListRow
+                          key={i.id}
+                          title={i.name}
+                          sub={t('coaching.nutrition.itemLine', {
+                            grams: round(i.grams),
+                            kcal: round(i.kcal),
+                            protein: round(i.protein_g),
+                          })}
+                          control={
+                            <Pressable
+                              variant="link"
+                              shape="icon"
+                              glyph="field"
+                              onClick={() => delItem.mutate(i.id)}
+                              aria-label={t('common.delete')}
+                            >
+                              <X />
+                            </Pressable>
+                          }
+                        />
+                      ))}
+                      <FoodPicker
+                        lang={lang}
+                        busy={addItem.isPending}
+                        onPick={(foodId, grams) => addItem.mutate({ meal_id: m.id, food_id: foodId, grams })}
+                      />
+                    </RowStack>
+                  </section>
+                );
+              })}
+            </div>
+          ) : null}
 
-          <Pressable
-            variant="ghost"
-            density="compact"
+          <TextLink
+            text="body"
+            className="self-start"
+            lead={<Plus />}
             busy={addMeal.isPending}
-            onClick={() =>
-              addMeal.mutate({ day_id: day.id, name: t('coaching.nutrition.mealDefault') })
-            }
+            onClick={() => addMeal.mutate({ day_id: day.id, name: t('coaching.nutrition.mealDefault') })}
           >
-            <Plus className="size-icon-s" aria-hidden />
             {t('coaching.nutrition.addMeal')}
-          </Pressable>
+          </TextLink>
         </>
       )}
 
       {plan.status === 'draft' ? (
-        <div className="mt-4 border-t border-[var(--surface-border)] pt-4">
+        <div className="flex flex-col gap-4 pt-4">
           {/* A DRAFT IS INVISIBLE TO THE CLIENT, and the coach is told so rather than left to
-              wonder why nothing appeared on the client's phone. */}
-          <p className="text-caption mb-2 text-text-3">{t('coaching.nutrition.draftNote')}</p>
-          <Pressable variant="primary" busy={activate.isPending} onClick={() => activate.mutate()}>
+              wonder why nothing appeared on the client's phone. Activating is the one action of a
+              draft diet, so it is the screen's one pill. */}
+          <NoticeLine tone="info">{t('coaching.nutrition.draftNote')}</NoticeLine>
+          <Pressable variant="primary" size="lg" className="w-full" busy={activate.isPending} onClick={() => activate.mutate()}>
             {t('coaching.nutrition.activate')}
           </Pressable>
         </div>
@@ -283,62 +316,52 @@ function FoodPicker({
   const [picked, setPicked] = useState<{ id: number; name: string; kcal_per_100g: number } | null>(null);
   const search = useFoodSearch(q, lang);
 
+  const add = (food: { id: number }) => {
+    const g = Number(grams.replace(',', '.'));
+    if (!Number.isFinite(g) || g <= 0) return;
+    onPick(food.id, g);
+    setPicked(null);
+    setQ('');
+  };
+
   return (
-    <div className="mt-2">
-      <input
+    <div>
+      <SearchField
+        label={t('nutrition.searchPlaceholder')}
+        placeholder={t('nutrition.searchPlaceholder')}
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
           setPicked(null);
         }}
-        placeholder={t('nutrition.searchPlaceholder')}
-        aria-label={t('nutrition.searchPlaceholder')}
-        className="text-body-s min-h-[var(--target-min)] w-full rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-3 text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+        onClear={() => setPicked(null)}
       />
       {q && !picked ? (
-        <ul className="mt-2 flex flex-col gap-1">
+        <RowStack>
           {(search.data?.foods ?? []).slice(0, 5).map((f) => (
-            <li key={f.id}>
-              <Pressable
-                variant="ghost"
-                density="compact"
-                className="w-full justify-start text-left"
-                onClick={() => setPicked(f)}
-              >
-                <span className="min-w-0 flex-1 truncate">{f.name}</span>
-                <span className="text-caption shrink-0 tabular-nums text-text-3">
-                  {round(f.kcal_per_100g)}
-                </span>
-              </Pressable>
-            </li>
+            <ListRow key={f.id} title={f.name} value={String(round(f.kcal_per_100g))} onClick={() => setPicked(f)} />
           ))}
-        </ul>
+        </RowStack>
       ) : null}
       {picked ? (
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-body-s min-w-0 flex-1 truncate text-text-1">{picked.name}</span>
-          <input
-            inputMode="decimal"
-            value={grams}
-            onChange={(e) => setGrams(e.target.value)}
-            aria-label={t('nutrition.grams')}
-            className="text-body-s min-h-[var(--target-min)] w-16 rounded-field border border-[var(--surface-border)] bg-[var(--field-bg)] px-2 text-right tabular-nums text-text-1 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-          />
-          <Pressable
-            variant="primary"
-            density="compact"
-            busy={busy}
-            onClick={() => {
-              const g = Number(grams.replace(',', '.'));
-              if (!Number.isFinite(g) || g <= 0) return;
-              onPick(picked.id, g);
-              setPicked(null);
-              setQ('');
-            }}
-          >
-            {t('common.add')}
-          </Pressable>
-        </div>
+        <ListRow
+          title={picked.name}
+          control={
+            <span className="flex items-center gap-4">
+              <Field
+                label={t('nutrition.grams')}
+                labelHidden
+                inputMode="decimal"
+                value={grams}
+                onChange={(e) => setGrams(e.target.value)}
+                className="w-16"
+              />
+              <TextLink text="body" busy={busy} onClick={() => add(picked)}>
+                {t('common.add')}
+              </TextLink>
+            </span>
+          }
+        />
       ) : null}
     </div>
   );
