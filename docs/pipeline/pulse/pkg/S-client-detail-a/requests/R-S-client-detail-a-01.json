@@ -1,0 +1,14 @@
+{
+  "id": "R-S-client-detail-a-01",
+  "from": "S-client-detail-a",
+  "kind": "fixture",
+  "blocking": false,
+  "target": "docs/pipeline/pulse/pkg/S-client-detail-a/states.json (overrides.client-detail-1) / .pulse/rec/coach/GET_clients_1_onboarding_*.json",
+  "need": "client-detail-1 draws the limitation as 'Térd — Óvatosan' (severity caution) with the two-line note 'Régi meniszkusz-sérülés, 90 fok alatt kellemetlen.'. The only recording of GET /clients/:id/onboarding holds severity 'avoid' and the one-word note 'meniszkusz', so pulse-fixture-check refuses both edits (enum). The committed fixture therefore shows 'Térd — Kerülendő' in the warning ink with a one-line note, and every box under the Answers table sits 18 pt higher than drawn.",
+  "evidence": ".pulse/pairs/S-client-detail-a/client-detail-1.pair.png (committed fixture: 33 matched, the rest dy -18); .pulse/pairs/S-client-detail-a/client-detail-1.with-drawn-note.pair.png (with the two edits: 79+ matched, the rest width-only)",
+  "proposedApi": "accept the two edits { pointer: '/profile/limitations/0/severity', value: 'caution' } and { pointer: '/profile/limitations/0/note', value: 'Régi meniszkusz-sérülés, 90 fok alatt kellemetlen.' } for GET /api/v1/clients/:id/onboarding, or record a client whose limitation is caution",
+  "proposedPatch": null,
+  "interim": "the committed fixture keeps the recorded avoid / meniszkusz; the verdict is matched-fixture with that one named difference",
+  "status": "open",
+  "resolution": null
+}

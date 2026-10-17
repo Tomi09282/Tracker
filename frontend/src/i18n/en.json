@@ -345,7 +345,12 @@
       "plans": "Plans"
     },
     "equipmentHint": "The kit this client can reach. They are notified when you change it.",
-    "equipmentSaved": "Equipment saved"
+    "equipmentSaved": "Equipment saved",
+    "account": {
+      "owned": "The client owns their account",
+      "pending": "The handover is still pending"
+    },
+    "moreFlagged": "+{{count}} more areas to protect"
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",

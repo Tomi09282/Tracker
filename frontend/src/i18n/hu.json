@@ -345,7 +345,12 @@
       "plans": "Terv"
     },
     "equipmentHint": "A kliens elérhető eszközei. A módosításról értesítést kap.",
-    "equipmentSaved": "Felszerelés mentve"
+    "equipmentSaved": "Felszerelés mentve",
+    "account": {
+      "owned": "A kliens saját fiókkal rendelkezik",
+      "pending": "Az átadás még függőben van"
+    },
+    "moreFlagged": "+{{count}} további kímélendő terület"
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",

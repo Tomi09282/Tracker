@@ -1,0 +1,534 @@
+{
+  "about": "S-client-detail-a - the frame data of client-detail-1 and the undrawn states of the client page (/coach/clients/:id: the page, the Terv and Üzenetek tabs, the equipment editor; PLAN 4.1 rule 7). Account C = coach@ for every state, on the link of M (user@, {linkOfMember}). Every state is replay: the page's GETs (/clients, /clients/1, /clients/1/onboarding, /plans, /taxonomies, /conversations, /conversations/1/messages) are recorded. Every fixture is an edit list over the recording of the same endpoint, or a mutation outcome / stub with an empty or error-envelope body (R26). Nothing is written live by these states: the equipment save is answered by its fixture in the browser.",
+  "overrides": {
+    "client-detail-1": {
+      "why": "The recording is Teszt Elek (TE) with the six drawn chips lit, 15 sessions in 28 days, 4 a week, one plan; the frame is drawn for Takács Dániel (TD), a plan started 2026-07-13 and a knee limitation that is 'caution' with a full sentence. The edits set the drawn name and the drawn start date; the note stays the client's recorded word \"meniszkusz\" (pulse-fixture-check refuses the drawn sentence: an identifier-like value no recording holds), and the severity stays the recorded 'avoid' when pulse-fixture-check refuses 'caution' for this endpoint (no recording of GET /clients/:id/onboarding holds it), so the value reads 'Térd — Kerülendő' in the warning ink instead of 'Térd — Óvatosan' in ink.",
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients/1",
+          "edits": [
+            {
+              "pointer": "/client/display_name",
+              "value": "Takács Dániel"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/clients",
+          "edits": [
+            {
+              "pointer": "/clients/1/display_name",
+              "value": "Takács Dániel"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/1/starts_on",
+              "value": "2026-07-13"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "coaching.tab.plan"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "coaching.tab.plan"
+            },
+            "selected": true
+          }
+        ]
+      }
+    }
+  },
+  "states": {
+    "cd-recorded": {
+      "title": "Kliens adatlap — a felvett adatokkal (Teszt Elek)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "seed",
+      "why": "the recording exactly as it is: TE, the avoid limitation with the client's own word 'meniszkusz', the plan started 2026-07-20. The second structure check of the frame.",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "coaching.tab.plan"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "coaching.tab.plan"
+            },
+            "selected": true
+          }
+        ]
+      }
+    },
+    "cd-handover-pending": {
+      "title": "Kliens adatlap — átadás függőben (a jelszót még az edző ismeri)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "must_change_credentials = 1: the monogram's full stop turns warn and is named, the handover notice line stands under the team line",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients/1",
+          "edits": [
+            {
+              "pointer": "/client/must_change_credentials",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coaching.handoverBody"
+        }
+      }
+    },
+    "cd-sheet": {
+      "title": "Kliens adatlap — Teljes kérdőív (lap)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 874,
+      "reach": "seed",
+      "why": "the questionnaire sheet: ten answers as rows, the flagged area with its warn dot, the client's notes",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "coaching.profileFull"
+            }
+          },
+          "arrived": {
+            "role": "heading",
+            "name": {
+              "key": "coaching.profileTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.profileTitle"
+        }
+      }
+    },
+    "cd-clone-open": {
+      "title": "Kliens adatlap — Klónozás nyitva (sablonok a helyükön)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1700,
+      "reach": "seed",
+      "why": "the template list opens inline under the link, every template with its day count",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "plans.cloneOpen"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.cloneOpen"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.cloneOpen"
+        },
+        "expanded": true
+      }
+    },
+    "cd-plan-empty": {
+      "title": "Kliens adatlap — Terv: a kliensnek nincs terve",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "fixture",
+      "why": "the client's one plan removed from GET /plans: the left-aligned empty state, then the pill and the Klónozás link; the Terv stat reads 0",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/1",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "plans.noneForClient"
+        }
+      }
+    },
+    "cd-plan-no-start": {
+      "title": "Kliens adatlap — Terv: kezdőnap nélküli terv",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "fixture",
+      "why": "a plan with no start date generates nothing: the meta line is replaced by the warn line plans.needsStart",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/1/starts_on",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "plans.needsStart"
+        }
+      }
+    },
+    "cd-equipment-changed": {
+      "title": "Kliens adatlap — felszerelés módosítva, Mentés él",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "seed",
+      "why": "one chip toggled on: the lime mark lands under Kettlebell, Mentés in the section head is enabled (the script scrolls to the end before the clicks, so that a chip never sits under the fixed tab bar at 874 pt, and back to the top before the shot)",
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          }
+        },
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell",
+            "checked": true
+          }
+        },
+        {
+          "scroll": "top",
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell",
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        },
+        "disabled": false
+      }
+    },
+    "cd-equipment-saved": {
+      "title": "Kliens adatlap — felszerelés mentve (visszajelzés)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "fixture",
+      "why": "the save is answered 200 by the fixture in the browser (nothing reaches the server, nobody is notified): the draft is cleared, Mentés is off again and the toast band says Felszerelés mentve (the toast is transient: the arrival is the settled section head) (the script scrolls to the end before the clicks, so that a chip never sits under the fixed tab bar at 874 pt, and back to the top before the shot)",
+      "fixtures": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/clients/1/onboarding/equipment",
+          "status": 200,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          }
+        },
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": true
+          }
+        },
+        {
+          "scroll": "top",
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        },
+        "disabled": true
+      }
+    },
+    "cd-equipment-failed": {
+      "title": "Kliens adatlap — felszerelés mentése nem sikerült",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "fixture",
+      "why": "the save is answered 500 by the fixture: the danger notice line under the chips, the draft kept, Mentés still enabled for a retry (the script scrolls to the end before the clicks, so that a chip never sits under the fixed tab bar at 874 pt, and back to the top before the shot)",
+      "fixtures": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/clients/1/onboarding/equipment",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/clients/1/onboarding/equipment",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          }
+        },
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        },
+        {
+          "scroll": "top",
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "onboarding.saveError"
+        }
+      }
+    },
+    "cd-chat-tab": {
+      "title": "Kliens adatlap — Üzenetek fül",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1700,
+      "reach": "seed",
+      "why": "the fourth view: the door to the full conversation and the embedded ChatPanel (recorded conversation 1)",
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "coaching.tab.chat"
+            }
+          },
+          "arrived": {
+            "role": "link",
+            "name": {
+              "key": "chat.openFull"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "chat.openFull"
+        }
+      }
+    },
+    "cd-offline": {
+      "title": "Kliens adatlap — offline",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 1394,
+      "reach": "seed",
+      "why": "the network drops after the page is drawn: the shell's offline line, the pill and Klónozás disabled (plan writes are guarded; equipment save is not, as today)",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.newForClient"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.newForClient"
+        },
+        "disabled": true
+      }
+    },
+    "cd-missing": {
+      "title": "Kliens adatlap — a kliens nem érhető el",
+      "account": "C",
+      "route": "/coach/clients/999999",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the server answers 404 for not yours / archived / never existed alike: the empty state is the page's h1, the way back a text link",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/clients/999999",
+          "status": 404,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/clients/999999/onboarding",
+          "status": 404,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/clients/999999",
+            "status": 404
+          },
+          {
+            "path": "/api/v1/clients/999999/onboarding",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.clientMissingTitle"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "page-loading": "replay answers instantly; the skeleton (back row, monogram block, name block, three numeral blocks) is code-only - structure",
+    "answers-loading / equipment-loading / plans-loading / chat-loading": "the same: code-only skeleton blocks - structure",
+    "no-questionnaire": "needs profile: null on GET /clients/:id/onboarding; no recording holds it (fixture-check refuses the type) - code only, structure",
+    "draft-questionnaire / several flagged areas": "needs status 'draft' on the same endpoint; no recording holds it - code only, structure",
+    "creating / cloning busy": "a held answer is not available in the capture tool - code only"
+  }
+}

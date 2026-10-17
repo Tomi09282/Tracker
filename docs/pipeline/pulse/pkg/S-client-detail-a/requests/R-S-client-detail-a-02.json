@@ -1,0 +1,14 @@
+{
+  "id": "R-S-client-detail-a-02",
+  "from": "S-client-detail-a",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/features/chat/ChatPanel.tsx (S-coach-chat, merged)",
+  "need": "Embedded in the Üzenetek view of the client page, ChatPanel draws its own 64 pt monogram and the client's name again, under the page's 124 pt monogram and h1 - the identity is on screen twice (prep gap K4).",
+  "evidence": ".pulse/pairs/S-client-detail-a/cd-chat-tab.png",
+  "proposedApi": "<ChatPanel anchor?: boolean /> (default true); ChatTab passes anchor={false}",
+  "proposedPatch": null,
+  "interim": "the repeat stays (behaviour as today); undrawn view, verdict structure",
+  "status": "open",
+  "resolution": null
+}

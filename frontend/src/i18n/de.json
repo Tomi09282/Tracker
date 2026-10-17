@@ -345,7 +345,12 @@
       "plans": "Pläne"
     },
     "equipmentHint": "Die Ausrüstung, die dieser Klient erreichen kann. Er wird über Änderungen benachrichtigt.",
-    "equipmentSaved": "Ausrüstung gespeichert"
+    "equipmentSaved": "Ausrüstung gespeichert",
+    "account": {
+      "owned": "Der Kunde verwaltet sein eigenes Konto",
+      "pending": "Die Übergabe steht noch aus"
+    },
+    "moreFlagged": "+{{count}} weitere zu schonende Bereiche"
   },
   "onboarding": {
     "stepOf": "Schritt {{current}} von {{total}}",

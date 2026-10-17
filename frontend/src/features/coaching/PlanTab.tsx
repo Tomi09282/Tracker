@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { Check, ChevronRight, ClipboardList, Copy, Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { chip, type ChipVariants } from '../../ui/primitives/control';
-import { Surface } from '../../ui/primitives/Surface';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { StatusLine } from '../../ui/data/StatusLine';
+import type { DotTone } from '../../ui/data/Dot';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { usePlans, useCreatePlan, useClonePlan, type PlanSummary } from '../plans/usePlans';
 import { useOnline } from '../plans/useOnline';
 
@@ -24,61 +25,45 @@ import { useOnline } from '../plans/useOnline';
  */
 
 /**
- * Status → the `chip` recipe's tone. A MAP OF TONES, not of class strings.
- *
- * The four pills used to be hand-written here at `px-2 py-0.5`, which renders a 16px slab — the
- * mockup draws comfortable pills, and control.ts:143 names these coaching screens as the copies
- * the recipe was written to absorb. A tone is a semantic claim, and a claim that is copy-pasted
- * drifts; `quiet` for draft and ended is the recipe's own "state, but do not shout about it".
+ * Status → the dot of the row's status line (Pulse: a colour is a 6 pt dot or text, never a fill).
+ * Lime is the live state only; a paused plan waits (warn); draft and ended carry no dot and say
+ * their word in the quiet ink.
  */
-const STATUS_TONE: Record<PlanSummary['status'], NonNullable<ChipVariants['tone']>> = {
-  active: 'success',
-  draft: 'quiet',
-  paused: 'warning',
-  ended: 'quiet',
+const STATUS_DOT: Record<PlanSummary['status'], DotTone | undefined> = {
+  active: 'live',
+  draft: undefined,
+  paused: 'warn',
+  ended: undefined,
 };
 
-function PlanCard({ plan }: { plan: PlanSummary }) {
+/** client-detail-1 "Plans": the plan's name over its status word and meta, the chevron. */
+function PlanRow({ plan }: { plan: PlanSummary }) {
   const { t } = useTranslation();
   const dates = [plan.starts_on, plan.ends_on].filter(Boolean).join(' → ');
 
   return (
-    <li>
-      <Surface as={Link} to={`/coach/plans/${plan.id}`} interactive className="flex items-center gap-tight">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-tight">
-            <span className="text-title-3 text-text-1">{plan.name}</span>
-            {/* Trailing check, matching 07-coach-client-detail-terv.webp — the plan LIST draws it
-                leading, and the two mockups differ on purpose: there the chip opens the meta line,
-                here it closes the title. */}
-            <span className={chip({ tone: STATUS_TONE[plan.status] })}>
-              {t(`plans.status.${plan.status}`)}
-              {plan.status === 'active' ? <Check className="size-icon-s" strokeWidth={2} aria-hidden /> : null}
-            </span>
-          </div>
-
-          <p className="text-caption mt-1 text-text-2">
-            {/* A plan with no start date generates no occurrences — it is invisible on the
-                client's home screen no matter what its status says. Saying so here is the
-                difference between a coach finding that out now and finding it out from a
-                confused client. */}
-            {plan.starts_on ? (
-              <>
-                {t('plans.dayCount', { count: plan.day_count })}
-                {' · '}
-                {t('plans.cycle', { days: plan.cycle_days })}
-                {' · '}
-                {dates}
-              </>
+    <ListRow
+      to={`/coach/plans/${plan.id}`}
+      chevron
+      lines={2}
+      title={plan.name}
+      sub={
+        // A plan with no start date generates no occurrences — it is invisible on the client's
+        // home screen no matter what its status says. Saying so here is the difference between a
+        // coach finding that out now and finding it out from a confused client.
+        <StatusLine
+          tone={STATUS_DOT[plan.status]}
+          word={t(`plans.status.${plan.status}`)}
+          meta={
+            plan.starts_on ? (
+              `${t('plans.dayCount', { count: plan.day_count })} · ${t('plans.cycle', { days: plan.cycle_days })} · ${dates}`
             ) : (
               <span className="text-warning">{t('plans.needsStart')}</span>
-            )}
-          </p>
-        </div>
-
-        <ChevronRight className="size-icon-m shrink-0 text-text-3" aria-hidden />
-      </Surface>
-    </li>
+            )
+          }
+        />
+      }
+    />
   );
 }
 
@@ -99,89 +84,83 @@ export function PlanTab({ linkId }: { linkId: number }) {
   const templates = useMemo(() => plans.filter((p) => p.scope === 'template'), [plans]);
 
   if (isPending) {
-    // The new card geometry, so nothing shifts when the list arrives.
+    // The row geometry, so nothing shifts when the list arrives.
     return (
-      <div className="flex flex-col gap-group">
-        <Skeleton className="h-[92px] w-full rounded-card" />
-        <Skeleton className="h-[92px] w-full rounded-card" />
-      </div>
+      <RowStack as="div">
+        <ListRowSkeleton sub index={0} />
+        <ListRowSkeleton sub index={1} />
+      </RowStack>
     );
   }
 
   return (
-    <div className="flex flex-col gap-group">
+    <div className="flex flex-col gap-2">
       {mine.length ? (
-        <ul className="flex flex-col gap-tight">
+        <RowStack>
           {mine.map((p) => (
-            <PlanCard key={p.id} plan={p} />
+            <PlanRow key={p.id} plan={p} />
           ))}
-        </ul>
+        </RowStack>
       ) : (
-        <EmptyState icon={ClipboardList} title={t('plans.noneForClient')} body={t('plans.noneForClientBody')} />
+        <EmptyState title={t('plans.noneForClient')} body={t('plans.noneForClientBody')} />
       )}
 
-      {/* The one primary on the panel, full width; the clone action defers to it underneath. */}
-      <Pressable
-        variant="primary"
-        className="w-full"
-        busy={createPlan.isPending}
-        disabled={offline}
-        icon={<Plus className="size-icon-m" strokeWidth={2} aria-hidden />}
-        // The plan is created THROUGH the link — the server's INSERT ... SELECT carries the
-        // ownership check, so this sends the link id and nothing else that matters.
-        onClick={() =>
-          // `plans.defaultName`, not `plans.newName`: the latter is the editor input's FIELD LABEL
-          // ("Új terv neve"), and creating with it left rows in the library reading like a form.
-          createPlan.mutate({ name: t('plans.defaultName'), coach_client_id: linkId, cycle_days: 7 })
-        }
-      >
-        {t('plans.newForClient')}
-      </Pressable>
-
-      {templates.length ? (
+      <div className="flex flex-col gap-2 pt-3">
+        {/* The screen's one pill, full width; the clone link defers to it underneath. */}
         <Pressable
-          variant="secondary"
+          variant="primary"
+          size="lg"
           className="w-full"
-          aria-expanded={cloning}
+          busy={createPlan.isPending}
           disabled={offline}
-          icon={<Copy className="size-icon-s" aria-hidden />}
-          onClick={() => setCloning((v) => !v)}
+          // The plan is created THROUGH the link — the server's INSERT ... SELECT carries the
+          // ownership check, so this sends the link id and nothing else that matters.
+          onClick={() =>
+            // `plans.defaultName`, not `plans.newName`: the latter is the editor input's FIELD LABEL
+            // ("Új terv neve"), and creating with it left rows in the library reading like a form.
+            createPlan.mutate({ name: t('plans.defaultName'), coach_client_id: linkId, cycle_days: 7 })
+          }
         >
-          {t('plans.cloneOpen')}
+          {t('plans.newForClient')}
         </Pressable>
-      ) : null}
 
-      {/* The template list is revealed INLINE rather than shown in a dialog: on a phone a dialog
-          over this tab hides the plans the coach is comparing against. */}
-      {cloning ? (
-        <Surface>
-          <ul className="flex flex-col gap-tight">
+        {templates.length ? (
+          <TextLink
+            text="body"
+            className="self-start"
+            trail={cloning ? <ChevronUp /> : <ChevronDown />}
+            aria-expanded={cloning}
+            disabled={offline}
+            onClick={() => setCloning((v) => !v)}
+          >
+            {t('plans.cloneOpen')}
+          </TextLink>
+        ) : null}
+
+        {/* The template list is revealed INLINE rather than shown in a dialog: on a phone a dialog
+            over this view hides the plans the coach is comparing against. */}
+        {cloning ? (
+          <RowStack>
             {templates.map((tpl) => (
-              <li key={tpl.id}>
-                <Pressable
-                  variant="ghost"
-                  className="w-full justify-between"
-                  busy={clonePlan.isPending}
-                  // The list can already be open when the connection drops, so the rows carry the
-                  // guard too rather than relying on the toggle above them.
-                  disabled={offline}
-                  onClick={() =>
-                    clonePlan.mutate(
-                      { id: tpl.id, coach_client_id: linkId, name: tpl.name },
-                      { onSuccess: () => setCloning(false) },
-                    )
-                  }
-                >
-                  <span className="min-w-0 truncate text-text-1">{tpl.name}</span>
-                  <span className="text-caption shrink-0 text-text-3">
-                    {t('plans.dayCount', { count: tpl.day_count })}
-                  </span>
-                </Pressable>
-              </li>
+              <ListRow
+                key={tpl.id}
+                title={tpl.name}
+                value={t('plans.dayCount', { count: tpl.day_count })}
+                busy={clonePlan.isPending}
+                // The list can already be open when the connection drops, so the rows carry the
+                // guard too rather than relying on the link above them.
+                disabled={offline}
+                onClick={() =>
+                  clonePlan.mutate(
+                    { id: tpl.id, coach_client_id: linkId, name: tpl.name },
+                    { onSuccess: () => setCloning(false) },
+                  )
+                }
+              />
             ))}
-          </ul>
-        </Surface>
-      ) : null}
+          </RowStack>
+        ) : null}
+      </div>
     </div>
   );
 }
