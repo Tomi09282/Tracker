@@ -26,6 +26,7 @@ import { useNutritionDay } from '../nutrition/useNutrition';
  *
  *   no target for the day   the name and the figure only: no bar, no "cél" line
  *   over target             `MacroColumns` turns that figure and its bar to the warning colour
+ *   failed read             the four names with "—" for every figure and "Újra" under them
  *   nothing logged, no target   the block is not rendered at all — a permanent row of zeros on the
  *                               screen opened twenty times a day is not a prompt
  *   loading                 blocks where the eyebrow and the columns' lines will be
@@ -36,7 +37,7 @@ export function HomeNutrition({ date }: { date: string }) {
 
   if (day.isLoading) {
     return (
-      <div role="status" aria-busy="true" className="flex flex-col gap-4">
+      <div id={NUTRITION_ID} role="status" aria-busy="true" className="flex flex-col gap-4">
         <span className="sr-only">{t('common.loading')}</span>
         <Skeleton className="h-4 w-28" />
         <div className="grid grid-cols-4 gap-4">
@@ -48,6 +49,29 @@ export function HomeNutrition({ date }: { date: string }) {
           ))}
         </div>
       </div>
+    );
+  }
+
+  const header = (
+    <TextLink to="/nutrition" trail={<ChevronRight />}>
+      {t('nutrition.card.open')}
+    </TextLink>
+  );
+
+  // A failed read is not "nothing logged": the four names stay with a dash for every figure and
+  // "Újra" under them, the same treatment as the week's failed read — never 0, never a vanished
+  // section.
+  if (day.isError && !day.data) {
+    const columns: MacroColumn[] = MACROS.map((key) => ({ name: t(`nutrition.macro.${key}`), value: '—' }));
+    return (
+      <Section id={NUTRITION_ID} title={t('nutrition.card.title')} trailing={header}>
+        <div className="flex flex-col gap-4">
+          <MacroColumns columns={columns} />
+          <TextLink text="body" className="self-start" onClick={() => void day.refetch()}>
+            {t('common.retry')}
+          </TextLink>
+        </div>
+      </Section>
     );
   }
 
@@ -78,18 +102,21 @@ export function HomeNutrition({ date }: { date: string }) {
   }));
 
   return (
-    <Section
-      title={t('nutrition.card.title')}
-      trailing={
-        <TextLink to="/nutrition" trail={<ChevronRight />}>
-          {t('nutrition.card.open')}
-        </TextLink>
-      }
-    >
+    <Section id={NUTRITION_ID} title={t('nutrition.card.title')} trailing={header}>
       <MacroColumns columns={columns} />
     </Section>
   );
 }
+
+/**
+ * The block's id, whatever state it is in. `HomePage` asks the column above the library row for it
+ * (`:has(#home-nutrition)`): only a screen that SHOWS the nutrition section is the drawn first
+ * screen, so only then is the row held below the fold.
+ */
+const NUTRITION_ID = 'home-nutrition';
+
+/** The four columns, in the frame's order. */
+const MACROS = ['kcal', 'protein', 'carb', 'fat'] as const;
 
 /** The display rounding the nutrition screen uses, so the two screens never print a different figure. */
 const round = (v: number) => (Math.abs(v) >= 10 ? Math.round(v) : Math.round(v * 10) / 10);

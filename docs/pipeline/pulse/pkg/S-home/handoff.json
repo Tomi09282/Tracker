@@ -94,10 +94,12 @@
   },
   "budget": "45 -> 0, budget.json deleted",
   "deviations": [
-    "D2 library row (ListRow 'Gyakorlatok ›', 20 under the pill) is in no frame: on a training day it moves the nutrition section 76 pt down, so the macro figures sit under the tab bar's fade in the first viewport (they scroll clear). Masked per PLAN 1.2; not drawn in the empty state, where the pill is the same door",
+    "D2 library row (ListRow 'Gyakorlatok ›') is in no frame. Owner ruling 2026-10-17: it stands BELOW the nutrition section, opened by the strong rule, nothing under it. On the drawn first screen (week + session pill + nutrition) the column above it has a floor of min(viewport, 874) - bar - top - 32, so the row starts at the top of the tab bar (11 pt more than the block gap on 874 pt) and the first screen is exactly home-1 / home-2; on every other screen (rest, done, no-plan session, no nutrition) it follows the last block 32 below",
     "Rest day / done / several sessions: composed from the kit (Q4): the rest day prints the day's name as the subject and 'Pihenőnap' as the section status (the seed's day name is also 'Pihenőnap', so it reads twice for M); done = lime dot + 'Kész'; further sessions are ListRows with an 'Indítás' text link (one pill per screen)",
     "German: the macro name 'Kohlenhydrate' is cut with an ellipsis in its 76.5 pt column (MacroColumns truncates; kit file)",
-    "home-1 / home-2 nutrition totals are the frame's figures by fixture (the recorded Friday logs 1275 / 69 / 137 / 53)"
+    "home-1 / home-2 nutrition totals are the frame's figures by fixture (the recorded Friday logs 1275 / 69 / 137 / 53)",
+    "A failed GET /my-plans/today renders the empty state ('Ma nincs betervezve edzés' + the library pill) rather than an error - unchanged behaviour, documented in HomePage.tsx; flagged by review S-home finding 6 for an owner ruling (Q4 log)",
+    "A failed nutrition read keeps TÁPLÁLKOZÁS with the four names, '—' for every figure and 'Újra' under them (review S-home finding 5; before: the section vanished)"
   ],
   "proposedCopy": [],
   "requests": [
@@ -105,5 +107,24 @@
     "R-S-home-02",
     "R-S-home-03"
   ],
-  "lastBuild": "pulse-verify: build green in 17 s · 12 of 12 captured (replay)"
+  "lastBuild": "pulse-verify: build green in 17 s · 12 of 12 captured (replay)",
+  "fixRound": {
+    "branch": "pulse/S-home-fix",
+    "review": ".pulse/review/S-home/REVIEW.md",
+    "findings": {
+      "1 (blocking) library row eats the nutrition section": "fixed per owner 2026-10-17: the row is below TÁPLÁLKOZÁS; geometry home-1 80 matched / 1 deviating (hero image box past the screen edge) / 6 unmatched (invisible today dots), was 47 / 26",
+      "2 section hairline missing at y 606": "fixed with 1 (matched)",
+      "3 home-2 fixture not promoted": "open, integrator: request R-S-home-01 (unchanged)",
+      "4 late-night date mismatch": "not changed: backend day boundary of /my-plans/today (forOrchestrator)",
+      "5 failed nutrition read removes the section": "fixed: '—' + Újra, state home-nutrition-error (expects its 500)",
+      "6 failed today read shows the empty state": "kept (behaviour), logged in deviations for the owner",
+      "7 truncation": "accepted (no overlap)",
+      "home-2 live dot unmatched": "the live status dot is now the kit Dot (data-kit=dot); the geometry tool still lists the Figma 'Live dot' ellipse as unmatched"
+    },
+    "newStates": [
+      "home-1-end (capture with --scroll-end)",
+      "home-nutrition-error"
+    ],
+    "pairs": ".pulse/pairs/S-home-fix/"
+  }
 }

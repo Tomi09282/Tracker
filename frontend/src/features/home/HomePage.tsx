@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../lib/cn';
 import { useNavigate } from 'react-router';
 import { NotificationBell } from '../chat/NotificationBell';
+import { Dot } from '../../ui/data/Dot';
 import { ListRow } from '../../ui/data/ListRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { Section } from '../../ui/data/SectionHeader';
@@ -40,8 +42,9 @@ import { HomeNutrition } from './HomeNutrition';
  *
  * ═══ WHAT THE FRAMES DO NOT DRAW, BUILT IN THE SAME LANGUAGE (owner answer Q4) ═════════════════
  *
- * · The library row (D2): a `ListRow` "Gyakorlatok ›" under the today block, 20 under the pill —
- *   the permanent way to the exercise library on a day that has a session. Not in the empty state:
+ * · The library row (D2): a ruled `ListRow` "Gyakorlatok ›" at the END of the screen, below the
+ *   nutrition section (owner, 2026-10-17), so the first screen is exactly home-1 / home-2 — the
+ *   permanent way to the exercise library on a day that has a session. Not in the empty state:
  *   there the pill already is that door.
  * · A rest day: the day's name and the plan, "Pihenőnap" as the section's status, no action.
  * · Already trained: the same, with a lit dot and "Kész" as the status, no action.
@@ -107,131 +110,166 @@ export function HomePage() {
     return meta(day);
   };
 
+  // D2's library row is shown on a day that has a session (see its block at the end).
+  const libraryRow = !today.isPending && (live != null || subject != null);
+  // The layout home-1 / home-2 draw: the week, today's session with its pill (Indítás or
+  // Folytatás) and — checked in CSS, see below — the nutrition section. Only that screen is held
+  // to the frame's first screen; a shorter day (rest, done, a session without a plan) is no drawn
+  // frame, and holding its row below the fold would open an empty band above it.
+  const drawnFirstScreen =
+    libraryRow &&
+    todayDate != null &&
+    days.length > 0 &&
+    (live != null || (subject != null && !subject.is_rest && subject.log_id == null));
+
   return (
     <Screen top="root">
-      {/* No page title and no breadcrumb: the active tab already says where you are. */}
-      <ScreenHeader
-        kind="greet"
-        title={t('home.greeting')}
-        sub={<span className="block truncate first-letter:uppercase">{dateLabel}</span>}
-        trailing={<NotificationBell />}
-      />
+      {/* Everything above the library row. On the drawn first screen (`drawnFirstScreen` AND the
+          nutrition section on the screen: `#home-nutrition`, in any of its states) this column is
+          at least as tall as the first screen down to the top of the tab bar, so the row's rule
+          starts where the bar starts: the first screen is exactly home-1 / home-2 (owner,
+          2026-10-17) and the row is one scroll further down, never peeking out of the bar's fade.
+          That costs 11 pt over the block gap on 874 pt; a longer day (several sessions, a long
+          name, a 640 pt phone) is taller than the floor anyway. The floor never measures more
+          than the frame's own 874 pt, so a taller phone or a desktop window shows the row on its
+          first screen 11 pt further down instead of opening a band. Every other screen: the row
+          simply follows the last block 32 below it — no empty band. */}
+      <div
+        className={cn(
+          'flex flex-col gap-8',
+          drawnFirstScreen &&
+            'has-[#home-nutrition]:min-h-[calc(min(var(--viewport-h),874px)_-_var(--content-pad-b)_-_var(--head-top-root)_-_var(--spacing)_*_8)]',
+        )}
+      >
+        {/* No page title and no breadcrumb: the active tab already says where you are. */}
+        <ScreenHeader
+          kind="greet"
+          title={t('home.greeting')}
+          sub={<span className="block truncate first-letter:uppercase">{dateLabel}</span>}
+          trailing={<NotificationBell />}
+        />
 
-      {today.isPending ? (
-        // Blocks where the hero's lines and the session's lines will be. Which of the two branches
-        // arrives (the week + today, or the empty state) is exactly what this cannot know yet.
-        <div role="status" aria-busy="true" className="flex flex-col gap-8">
-          <span className="sr-only">{t('common.loading')}</span>
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-[99px] w-[170px]" />
+        {today.isPending ? (
+          // Blocks where the hero's lines and the session's lines will be. Which of the two branches
+          // arrives (the week + today, or the empty state) is exactly what this cannot know yet.
+          <div role="status" aria-busy="true" className="flex flex-col gap-8">
+            <span className="sr-only">{t('common.loading')}</span>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-[99px] w-[170px]" />
+            </div>
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-9 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-9 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* No plan day today means no denominator: the week is replaced entirely by the empty
-              state rather than rendered at zero. */}
-          {todayDate && days.length > 0 ? <WeekStrip today={todayDate} /> : null}
+        ) : (
+          <>
+            {/* No plan day today means no denominator: the week is replaced entirely by the empty
+                state rather than rendered at zero. */}
+            {todayDate && days.length > 0 ? <WeekStrip today={todayDate} /> : null}
 
-          {live || subject ? (
-            <Section title={t('home.todayTitle')} trailing={status(subject)}>
-              <div className="flex flex-col gap-5">
-                {live ? (
-                  /* A session already running outranks the schedule. It replaces the whole day
-                     list and takes the screen's only pill. */
-                  <>
-                    <p className="text-display-xl break-words text-text-1">{live.title ?? t('workout.freestyle')}</p>
-                    <Pressable variant="primary" size="lg" className="w-full" onClick={() => void navigate('/workout')}>
-                      {t('home.resume')}
-                    </Pressable>
-                  </>
-                ) : subject ? (
-                  <>
-                    <div className="flex flex-col gap-1">
-                      <p className="text-display-xl break-words text-text-1">{subject.day_name}</p>
-                      <p className="text-body text-text-2">{subject.plan_name}</p>
-                    </div>
-                    {/* A rest day and a trained day are information, not an action. */}
-                    {!subject.is_rest && subject.log_id == null ? (
-                      <Pressable
-                        variant="primary"
-                        size="lg"
-                        className="w-full"
-                        busy={start.isPending}
-                        // A session already running would be RESUMED by the server rather than
-                        // replaced, so "start" would be a lie about what the tap does.
-                        disabled={live != null}
-                        onClick={() => void begin(subject)}
-                      >
-                        {t('home.start')}
+            {live || subject ? (
+              <Section title={t('home.todayTitle')} trailing={status(subject)}>
+                <div className="flex flex-col gap-5">
+                  {live ? (
+                    /* A session already running outranks the schedule. It replaces the whole day
+                       list and takes the screen's only pill. */
+                    <>
+                      <p className="text-display-xl break-words text-text-1">{live.title ?? t('workout.freestyle')}</p>
+                      <Pressable variant="primary" size="lg" className="w-full" onClick={() => void navigate('/workout')}>
+                        {t('home.resume')}
                       </Pressable>
-                    ) : null}
-                    {others.length > 0 ? (
-                      <RowStack>
-                        {others.map((day) => (
-                          <ListRow
-                            key={`${day.plan_id}-${day.day_id}-${day.slot}`}
-                            title={day.day_name}
-                            sub={day.plan_name}
-                            value={day.is_rest || day.log_id != null ? undefined : meta(day)}
-                            trailing={
-                              day.is_rest ? (
-                                <span className="text-cap text-text-2">{t('home.restDay')}</span>
-                              ) : day.log_id != null ? (
-                                <LiveStatus>{t('home.done')}</LiveStatus>
-                              ) : undefined
-                            }
-                            control={
-                              !day.is_rest && day.log_id == null ? (
-                                <TextLink busy={start.isPending} disabled={live != null} onClick={() => void begin(day)}>
-                                  {t('home.start')}
-                                </TextLink>
-                              ) : undefined
-                            }
-                          />
-                        ))}
-                      </RowStack>
-                    ) : null}
-                  </>
-                ) : null}
+                    </>
+                  ) : subject ? (
+                    <>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-display-xl break-words text-text-1">{subject.day_name}</p>
+                        <p className="text-body text-text-2">{subject.plan_name}</p>
+                      </div>
+                      {/* A rest day and a trained day are information, not an action. */}
+                      {!subject.is_rest && subject.log_id == null ? (
+                        <Pressable
+                          variant="primary"
+                          size="lg"
+                          className="w-full"
+                          busy={start.isPending}
+                          // A session already running would be RESUMED by the server rather than
+                          // replaced, so "start" would be a lie about what the tap does.
+                          disabled={live != null}
+                          onClick={() => void begin(subject)}
+                        >
+                          {t('home.start')}
+                        </Pressable>
+                      ) : null}
+                      {others.length > 0 ? (
+                        <RowStack>
+                          {others.map((day) => (
+                            <ListRow
+                              key={`${day.plan_id}-${day.day_id}-${day.slot}`}
+                              title={day.day_name}
+                              sub={day.plan_name}
+                              value={day.is_rest || day.log_id != null ? undefined : meta(day)}
+                              trailing={
+                                day.is_rest ? (
+                                  <span className="text-cap text-text-2">{t('home.restDay')}</span>
+                                ) : day.log_id != null ? (
+                                  <LiveStatus>{t('home.done')}</LiveStatus>
+                                ) : undefined
+                              }
+                              control={
+                                !day.is_rest && day.log_id == null ? (
+                                  <TextLink busy={start.isPending} disabled={live != null} onClick={() => void begin(day)}>
+                                    {t('home.start')}
+                                  </TextLink>
+                                ) : undefined
+                              }
+                            />
+                          ))}
+                        </RowStack>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
+              </Section>
+            ) : (
+              /* Empty AND error: a failed `today` read renders this state rather than an error,
+                 because a client who cannot be told what is scheduled needs the same way out as one
+                 with nothing scheduled. The failure itself is a server-log concern. */
+              <>
+                {/* The still of the frame: 480 pt, its dim left end on the gutter, the lit right end
+                    past the screen edge. The stage is as tall as the stack's ink plus 20 above it. */}
+                <div aria-hidden className="relative h-[310px]">
+                  <Pic slot="hero-plates" width={480} bleed className="absolute -left-[31px] -top-[14px]" />
+                </div>
+                <EmptyState
+                  title={t('home.emptyTitle')}
+                  body={t('home.emptyBody')}
+                  action={
+                    <Pressable variant="primary" size="lg" onClick={() => void navigate('/library')}>
+                      {t('home.browseLibrary')}
+                    </Pressable>
+                  }
+                />
+              </>
+            )}
+          </>
+        )}
 
-                {/* D2: the permanent way to the exercise library on a day that has a session. */}
-                <RowStack>
-                  <ListRow title={t('nav.library')} to="/library" chevron />
-                </RowStack>
-              </div>
-            </Section>
-          ) : (
-            /* Empty AND error: a failed `today` read renders this state rather than an error,
-               because a client who cannot be told what is scheduled needs the same way out as one
-               with nothing scheduled. The failure itself is a server-log concern. */
-            <>
-              {/* The still of the frame: 480 pt, its dim left end on the gutter, the lit right end
-                  past the screen edge. The stage is as tall as the stack's ink plus 20 above it. */}
-              <div aria-hidden className="relative h-[310px]">
-                <Pic slot="hero-plates" width={480} bleed className="absolute -left-[31px] -top-[14px]" />
-              </div>
-              <EmptyState
-                title={t('home.emptyTitle')}
-                body={t('home.emptyBody')}
-                action={
-                  <Pressable variant="primary" size="lg" onClick={() => void navigate('/library')}>
-                    {t('home.browseLibrary')}
-                  </Pressable>
-                }
-              />
-            </>
-          )}
-        </>
-      )}
+        {/* Below the session, because training is what this screen is for and food is context. */}
+        <HomeNutrition date={todayLocal()} />
+      </div>
 
-      {/* Below the session, because training is what this screen is for and food is context. */}
-      <HomeNutrition date={todayLocal()} />
+      {/* D2: the permanent way to the exercise library on a day that has a session. The owner's
+          ruling of 2026-10-17 puts it BELOW the nutrition section: the first screen stays exactly
+          home-1 / home-2, the row is one scroll further down, opened by the same strong rule a
+          section opens with, and nothing follows it but the screen's own end. */}
+      {libraryRow ? (
+        <RowStack open>
+          <ListRow title={t('nav.library')} to="/library" chevron />
+        </RowStack>
+      ) : null}
     </Screen>
   );
 }
@@ -240,7 +278,7 @@ export function HomePage() {
 function LiveStatus({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex items-center gap-2 text-cap-m text-text-1">
-      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />
+      <Dot tone="live" />
       {children}
     </span>
   );

@@ -543,6 +543,89 @@
           }
         ]
       }
+    },
+    "home-1-end": {
+      "title": "Kezdőlap — edzésnap, a képernyő vége (Gyakorlatok sor)",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixture": "home-1",
+      "why": "the D2 library row stands BELOW the nutrition section (owner, 2026-10-17): home-1 scrolled to its end (capture with --scroll-end) shows the macro row, the strong rule and the Gyakorlatok row, nothing under it",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Indítás"
+        },
+        {
+          "role": "link",
+          "name": "Gyakorlatok"
+        }
+      ]
+    },
+    "home-nutrition-error": {
+      "title": "Kezdőlap — az étkezés adat nem jött meg",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixture": "home-1",
+      "why": "the nutrition read fails on its own: the four macro names stay with a dash for every figure and Újra under them, never 0 and never a vanished section (review S-home finding 5)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/nutrition-log/2026-10-09",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Újra"
+        },
+        {
+          "role": "button",
+          "name": "Indítás"
+        }
+      ]
     }
   }
 }
