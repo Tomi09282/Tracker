@@ -540,6 +540,16 @@ const PROBES = [
     expect: /\[undeclared-token\]\s+var\(--verify-gates-probe\)/,
   },
   {
+    // F19 row 1 (PLAN 3.6): `on` lost its last mapping, so without RETIRED_STEMS this class would
+    // pass the stem check and resolve to nothing.
+    id: 'tokens/retired-stem',
+    gate: 'check:tokens',
+    label: 'a colour utility on a retired stem (text-on-success) is caught',
+    file: PLANT,
+    create: () => `export const probe = <div className="text-on-success" />;${LF}`,
+    expect: /\[retired-color\]\s+text-on-success/,
+  },
+  {
     id: 'interval/segment-boundary',
     gate: 'check:interval',
     label: 'a timer that stops on the wrong segment is caught',

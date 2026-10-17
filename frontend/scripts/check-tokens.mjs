@@ -169,6 +169,27 @@ const COLOR_PREFIXES = ['text', 'bg', 'border', 'fill', 'stroke', 'ring', 'outli
 const OWNED_STEMS = new Set([...themeColors].map((c) => c.split('-')[0]));
 
 /*
+ * ═══ STEMS THAT LOST THEIR LAST MAPPING ════════════════════════════════════════════════════════
+ *
+ * The stem check above only holds a name to the vocabulary when its first segment is a stem the
+ * vocabulary still has. So the closing cleanup, which deleted every `--color-on-*` and
+ * `--color-info*` mapping (F19 row 1, PLAN 3.6), would have turned `text-on-success` from a build
+ * failure into a class that passes this gate and resolves to nothing — the exact silent defect the
+ * rule exists for. A retired stem is therefore owned FOREVER: any colour utility on it fails, and
+ * it never resolves, because nothing may declare it again.
+ *
+ * Kept by hand on purpose: it is the list of what WAS, which the token file cannot tell. A stem
+ * that loses its last mapping in a later commit is added here in that same commit.
+ */
+const RETIRED_STEMS = new Set(['on', 'info']);
+for (const stem of RETIRED_STEMS) {
+  if (OWNED_STEMS.has(stem)) {
+    console.error(`check-tokens: "${stem}" is a retired colour stem, but tokens.css maps --color-${stem}… again`);
+    process.exit(1);
+  }
+}
+
+/*
  * Tailwind's built-in animation utilities carry durations this project never declared:
  * animate-pulse is 2s, animate-spin/bounce/ping are 1s. Nine feature files reached for
  * animate-pulse across three phases and every Bible audit reported "0 rogue durations", because
@@ -348,6 +369,16 @@ for await (const file of walk(SRC)) {
     for (const m of code.matchAll(/\b([a-z]+)-([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\b/g)) {
       const [, prefix, name] = m;
       if (!COLOR_PREFIXES.includes(prefix)) continue;
+      if (RETIRED_STEMS.has(name.split('-')[0])) {
+        violations.push({
+          file: path.relative(process.cwd(), file),
+          line: i + 1,
+          rule: 'retired-color',
+          found: `${prefix}-${name}`,
+          msg: `"${name.split('-')[0]}" is a retired colour stem (RETIRED_STEMS) — .${prefix}-${name} resolves to nothing. Use a Pulse ink (text-text-1/2/3, accent, success, warning, danger).`,
+        });
+        continue;
+      }
       if (!OWNED_STEMS.has(name.split('-')[0])) continue;
       if (themeColors.has(name)) continue;
       if (localUtilities.has(`${prefix}-${name}`)) continue;

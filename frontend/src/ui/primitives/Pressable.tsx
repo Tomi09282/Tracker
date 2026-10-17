@@ -119,7 +119,7 @@ export function ControlBody({ variant, shape, tone, busy = false, icon, trail, c
  * second path. Reference: docs/pipeline/pulse/kit/actions.md.
  */
 export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function Pressable(
-  { className, variant, shape, density, selected, size, tone, text, weight, glyph, lit, busy = false, icon, trail, children, disabled, type, ...rest },
+  { className, variant, shape, density, size, tone, text, weight, glyph, lit, busy = false, icon, trail, children, disabled, type, ...rest },
   ref,
 ) {
   const ambientLit = useContext(PillLit);
@@ -137,7 +137,7 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
       // name itself.
       data-kit={kitName({ variant, shape, size })}
       className={cn(
-        control({ variant, shape, density, selected, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        control({ variant, shape, density, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
         'relative',
         className,
       )}
@@ -153,7 +153,7 @@ export const Pressable = forwardRef<HTMLButtonElement, PressableProps>(function 
 
 /** See `PressableLinkProps`. Reference: docs/pipeline/pulse/kit/G-shell.md. */
 export const PressableLink = forwardRef<HTMLAnchorElement, PressableLinkProps>(function PressableLink(
-  { className, variant, shape, density, selected, size, tone, text, weight, glyph, lit, disabled = false, icon, trail, children, onClick, tabIndex, ...rest },
+  { className, variant, shape, density, size, tone, text, weight, glyph, lit, disabled = false, icon, trail, children, onClick, tabIndex, ...rest },
   ref,
 ) {
   const ambientLit = useContext(PillLit);
@@ -162,7 +162,7 @@ export const PressableLink = forwardRef<HTMLAnchorElement, PressableLinkProps>(f
       ref={ref}
       data-kit={kitName({ variant, shape, size })}
       className={cn(
-        control({ variant, shape, density, selected, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
+        control({ variant, shape, density, size, tone, text, weight, glyph, lit: lit ?? ambientLit }),
         'relative',
         variant === 'primary' && ANCHOR_DISABLED_PILL,
         className,

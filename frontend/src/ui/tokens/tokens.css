@@ -11,16 +11,11 @@
  * lamp, 1 px rules, no boxes, no blur, no shadow except the glow of the one primary pill. The law is
  * `docs/brain/58-Pulse/Pulse System.md`; where a value is given there, that value is here verbatim.
  *
- * THE BRIDGE. The liquid-glass look this file used to describe is gone, but 140 files were written
- * against its token NAMES. Every one of those names is still declared below, so nothing fails the
- * `undeclared-token` rule while screens are rebuilt one by one — and the VALUES are Pulse:
- *
- *   a name that carries STATE      (selected, error, focus, a role)   keeps a visible, derived value
- *   a name that was DECORATION     (glass, blur, shadow, tint) is neutral: transparent / none / 0
- *   a fixed bar or a floating layer (nav, toast, sheet)               stays OPAQUE — text scrolls under it
- *
- * Each such declaration is marked BRIDGE. They are deleted together in the closing cleanup, when the
- * last consumer is gone; until then do not write new code against a BRIDGE name.
+ * THE BRIDGE. The liquid-glass look this file used to describe is gone. Its colour and decoration
+ * names (the accent ramp and wash, the `-subtle` / `-border` / `on-*` / `info` status forms, glass,
+ * blur, card, overlay shadow) left in the closing cleanup (F19 row 1), and `check:tokens` now refuses
+ * a colour utility on a retired stem (`RETIRED_STEMS`). What is still marked BRIDGE below leaves in
+ * the later closing rows; do not write new code against a BRIDGE name.
  *
  * THERE ARE NO THEME PACKS. One look, no `[data-theme]`, no translucency setting. The mechanism to
  * bring a pack back is kept cheap on purpose: every lit value derives from `--accent`, so a future
@@ -383,13 +378,6 @@
   --page-pad-b-bare: calc(var(--safe-b) + 32px);                        /* what a scrolling page without tabs pads by */
   --dock-reserve: 0px;       /* published at run time by a mounted Dock: its height + the air above it */
 
-  /* Blur scale — BRIDGE (decoration). Pulse has no blur anywhere, so every step is zero and
-     `backdrop-blur-[var(--blur-lg)]` at an unmigrated call site is a filter that does nothing. */
-  --blur-sm: 0px;
-  --blur-md: 0px;
-  --blur-lg: 0px;
-  --blur-xl: 0px;
-
   /* Z-index ladder.
      --z-sticky sits BELOW the nav: a table header that scrolled over the bottom navigation would
      be a header covering the way out of the screen. */
@@ -439,7 +427,7 @@
 
   /* THE LAMP — the one accent, and the ONLY place in the source where the lime is written.
      Everything lit derives from it: the pressed pill, the glow, the focus ring, the selection
-     wash of the bridge. Its one other copy is `accent` in `assets-src/pulse/assets.json`, baked
+     wash. Its one other copy is `accent` in `assets-src/pulse/assets.json`, baked
      into the lit rasters; `check:assets` holds the two equal. */
   --accent: #CBFF2E;
   --accent-fg: var(--surface-0);         /* text and knob on lime: the canvas itself, 16.6:1 */
@@ -483,136 +471,13 @@
   /* Rule weight and the default control height. No pack owns them any more. */
   --border-width: 1px;
   --control-h: 44px;
-
-  /* ═══ BRIDGE — legacy names that carry STATE: visible, derived from the lamp ═══════════════
-   *
-   * `bg-accent-subtle` draws "selected" at 81 call sites, the `*-subtle` / `*-border` pairs draw
-   * every status chip and toast edge, `text-on-*` is the ink on a filled status. Neutralising any of
-   * them would hide a state on every screen nobody has rebuilt yet, with a green build. They keep
-   * the derivations they always had and simply follow the new sources.
-   */
-
-  /* The 50–950 ramp, interpolated in OKLab. --accent is step 500. On a lime the light half is
-     nearly flat (300 is 1.07:1 against 500), which is why step 300 is NOT a white mix any more —
-     see `--muscle-secondary` in Layer 3. */
-  --accent-50:  color-mix(in oklab, var(--accent), white 92%);
-  --accent-100: color-mix(in oklab, var(--accent), white 84%);
-  --accent-200: color-mix(in oklab, var(--accent), white 68%);
-  --accent-300: var(--muscle-secondary);
-  --accent-400: color-mix(in oklab, var(--accent), white 28%);
-  --accent-500: var(--accent);
-  --accent-600: color-mix(in oklab, var(--accent), black 14%);
-  --accent-700: color-mix(in oklab, var(--accent), black 28%);
-  --accent-800: color-mix(in oklab, var(--accent), black 42%);
-  --accent-900: color-mix(in oklab, var(--accent), black 56%);
-  --accent-950: color-mix(in oklab, var(--accent), black 70%);
-
-  /* Pulse defines press, not hover: a hovered pill is the pill. */
-  --accent-hover: var(--accent);
-
-  /* The "this one is selected / active / mine" wash, 1.68:1 over the canvas, and its edge. */
-  --accent-subtle: color-mix(in srgb, var(--accent) 20%, transparent);
-  --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);
-  /* The foreground for text sitting ON that wash — the ink (10.5:1), not the accent. */
-  --on-accent-subtle: var(--text-1);
-
-  /* The fourth semantic colour has no Pulse role; seven call sites still say "info". */
-  --info: #60A5FA;
-
-  --on-success: #04150E;
-  --on-warning: #241703;
-  --on-danger:  #2A0A0C;
-  --on-info:    #06152B;
-
-  --success-subtle: color-mix(in srgb, var(--success) 12%, transparent);
-  --success-border: color-mix(in srgb, var(--success) 30%, transparent);
-  --warning-subtle: color-mix(in srgb, var(--warning) 12%, transparent);
-  --warning-border: color-mix(in srgb, var(--warning) 30%, transparent);
-  --danger-subtle:  color-mix(in srgb, var(--danger) 12%, transparent);
-  --danger-border:  color-mix(in srgb, var(--danger) 30%, transparent);
-  --info-subtle:    color-mix(in srgb, var(--info) 12%, transparent);
-  --info-border:    color-mix(in srgb, var(--info) 30%, transparent);
-
-  /* The ink of an icon that used to sit in a tinted disc. The disc is gone (below); the icon stays. */
-  --tile-tint-fg: var(--accent);
-
-  /* A floating layer used to separate from the page by its shadow, with this edge held back
-     ("border OR shadow, never both"). The shadow is gone, so the edge is what separates it now —
-     the stronger rule, which is the sheet's edge in Pulse. */
-  --overlay-border: var(--surface-border-strong);
-
-  /* There is one scrim. */
-  --scrim-strong: var(--scrim);
-
-  /* The brand gradient is gone — and its name cannot simply go dark with the other decoration. At
-     one call site it is the ONLY body of a link: the marketplace's lead post, when it has no cover
-     picture, is this fill and nothing else, with an icon in the canvas colour on top. Neutral, the
-     way in to that post would be an empty stretch of canvas. So it is a flat placeholder block, in
-     the one tone Pulse keeps for "something will be here" — the skeleton's. A plain colour is valid
-     wherever the gradient was written (every consumer sets it as a `background`). */
-  --gradient-brand: var(--surface-2);
-
-  /* ═══ BRIDGE — legacy names that were DECORATION: neutral ══════════════════════════════════
-   *
-   * Glass, rim, sheen, grain, tile tint, elevation. A card built from them
-   * is now invisible and still pads its content, which is the intended look of an unmigrated
-   * screen: content on the canvas, in the old layout.
-   *
-   * The shadow names are a zero shadow and NOT `none`. Tailwind writes an arbitrary shadow into a
-   * five-part list (`box-shadow: …, var(--tw-ring-shadow), var(--tw-shadow)`), and `none` inside a
-   * list is invalid — the whole declaration is dropped at computed-value time, any ring on the
-   * same element with it. A zero-size transparent shadow is valid in every position.
-   */
-  --glass-1: transparent;
-  --glass-2: transparent;
-  --glass-3: transparent;
-  --glass-rim: transparent;
-  --glass-lip: 0 0 0 0 transparent;
-  --glass-underside: 0 0 0 0 transparent;
-  --glass-sheen-angle: 0deg;
-  --glass-sheen: none;
-  --card-saturate: 1;
-  --noise-overlay: none;
-  --tile-tint: transparent;
-  --shadow-overlay: 0 0 0 0 transparent;
-  --shadow-overlay-strong: 0 0 0 0 transparent;
 }
 
 /* ── Layer 3 — component tokens ───────────────────────────────────────────────────────── */
 :root {
-  /* The pill. Declared since the first build and consumed by nothing — `control.ts` writes the
-     utilities — so these follow the lamp and wait for the closing cleanup. BRIDGE. */
-  --btn-bg: var(--accent);
-  --btn-fg: var(--accent-fg);
-  --btn-bg-hover: var(--accent-hover);
-  --btn-bg-pressed: var(--accent-pressed);
-  --btn-radius: var(--radius-button);
-
-  /* A field is an underline on the canvas: no fill, an `edge` line. Until the field itself is
-     rebuilt the old markup draws that line on all four sides — a square outline, which is still
-     unmistakably "you type here". */
-  --field-bg: transparent;
-  --field-border: var(--edge);
-  --field-radius: var(--radius-field);
-
-  /* No card exists. BRIDGE (decoration): invisible, still padding. */
-  --card-bg: transparent;
-  --card-blur: 0px;
-  --card-rim: transparent;
-  --card-border: transparent;
-  --card-radius: var(--radius-card);
-  --card-pad: --spacing(4);            /* 16px — BRIDGE (layout), unchanged until its consumer goes */
-
-  /* The radius a surface nested INSIDE a card used: outer radius − the padding between them,
-     clamped at 0 (a negative radius is invalid and would hand the element the browser default).
-     With a 2 px card it is 0. BRIDGE (layout). */
-  --radius-inset: max(0px, calc(var(--radius-card) - var(--card-pad)));
-
   /* THE one surface: the bottom sheet. Opaque — a form is read on it. */
   --sheet-bg: var(--surface-2);
-  --sheet-blur: 0px;                     /* BRIDGE (decoration) */
   --sheet-radius: var(--radius-sheet);
-  --sheet-shadow: var(--shadow-overlay); /* BRIDGE (decoration) — a zero shadow */
 
   /* The tab bar has no surface in Pulse: it stands on the canvas over a fade. Until the bar is
      rebuilt it is still a fixed slab with content scrolling under it, so its fill is the canvas,
@@ -656,9 +521,8 @@
    *
    * It used to be `--accent-300`, a white mix that was the BRIGHTEST fill on the old periwinkle
    * figure. On a lime that step is 1.07:1 against the accent itself — primary and secondary would
-   * be one colour, on the map and on the chip dots of the exercise screen, which paint
-   * `--accent-300` so that map, legend and chip are one key. The key is kept and turned round:
-   * `--accent-300` now reads THIS token (Layer 2, bridge), and the distinction is 3.2:1. */
+   * be one colour, on the map and on the chip dots of the exercise screen. This token is the one
+   * key of map, legend and chip, and the distinction is 3.2:1. */
   --muscle-secondary: color-mix(in srgb, var(--accent) 40%, var(--muscle-body));
 
   /* Skeleton: `s2` blocks with a sheen on the ambient loop. The sheen is the base plus a little
@@ -683,11 +547,7 @@
 
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
-  --color-accent-hover: var(--accent-hover);
   --color-accent-pressed: var(--accent-pressed);
-  --color-accent-subtle: var(--accent-subtle);
-  --color-accent-border: var(--accent-border);
-  --color-on-accent-subtle: var(--on-accent-subtle);
 
   /* The Pulse line and level names: `border-edge`, `border-hair`, `divide-hair`,
      `bg-hair-strong` (a rule drawn as a 1 px element), `bg-track`. `edge`, `hair` and `track` are
@@ -697,28 +557,14 @@
   --color-hair-strong: var(--surface-border-strong);
   --color-track: var(--track);
 
-  /* `bg-scrim` / `bg-scrim-strong`. Mapped rather than left as `bg-[var(--scrim)]` so the gate's
+  /* `bg-scrim`. Mapped rather than left as `bg-[var(--scrim)]` so the gate's
      own stem check owns the name: a `bg-scrim-x` that resolves to nothing is a build failure
      instead of a transparent overlay. */
   --color-scrim: var(--scrim);
-  --color-scrim-strong: var(--scrim-strong);
 
   --color-success: var(--success);
-  --color-success-subtle: var(--success-subtle);
-  --color-success-border: var(--success-border);
-  --color-on-success: var(--on-success);
   --color-warning: var(--warning);
-  --color-warning-subtle: var(--warning-subtle);
-  --color-warning-border: var(--warning-border);
-  --color-on-warning: var(--on-warning);
   --color-danger: var(--danger);
-  --color-danger-subtle: var(--danger-subtle);
-  --color-danger-border: var(--danger-border);
-  --color-on-danger: var(--on-danger);
-  --color-info: var(--info);
-  --color-info-subtle: var(--info-subtle);
-  --color-info-border: var(--info-border);
-  --color-on-info: var(--on-info);
 
   /* These resolve against the real declarations in Layer 2 and 3. A self-reference is only safe
      because such a declaration exists, unlayered, and beats this `@layer theme` copy. */
@@ -727,7 +573,6 @@
   --radius-card: var(--radius-card);
   --radius-sheet: var(--radius-sheet);
   --radius-chip: var(--radius-chip);
-  --radius-inset: var(--radius-inset);
 
   /* `shadow-glow` — the idle primary pill, and nothing else. */
   --shadow-glow: var(--shadow-glow);

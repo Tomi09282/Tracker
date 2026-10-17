@@ -21,9 +21,8 @@ import { cn } from '../../lib/cn';
  *
  * ═══ AND THE OLD LOOKS STILL COMPILE, UNTOUCHED ══════════════════════════════════════════════
  *
- * `secondary`, `ghost`, `danger`, the `selected` wash, the chip and field shapes and the three
- * densities are the bridge: 110 call sites on screens nobody has rebuilt yet still name them.
- * They emit exactly the classes they emitted before this file learned Pulse — the same set, in
+ * `secondary`, the chip and field shapes and the three densities are the bridge (`ghost`, `danger`,
+ * the `selected` wash and the status chip `chip()` left in the closing cleanup, F19 row 1). They emit exactly the classes they emitted before this file learned Pulse — the same set, in
  * another order, so the same pixels and the same hit geometry — and they leave in the closing
  * cleanup, counted by `check:pulse` until then. Do not write new code against them.
  *
@@ -135,10 +134,6 @@ const recipe = cva(
           'hover:border-[var(--surface-border-strong)] hover:bg-surface-2',
           LEGACY_STATES,
         ].join(' '),
-        // BRIDGE.
-        ghost: `text-text-2 hover:bg-accent-subtle hover:text-text-1 ${LEGACY_STATES}`,
-        // BRIDGE. Pulse has no filled red anywhere: a destructive action is `link` + `tone: 'danger'`.
-        danger: `bg-danger text-on-danger hover:opacity-90 ${LEGACY_STATES}`,
         /**
          * THE TEXT LINK — every action that is not the screen's one pill. Bare text in a 44 pt
          * frame: no fill, no border, no hover wash. `text-1` at rest; pressed is 60 % and "off"
@@ -156,28 +151,6 @@ const recipe = cva(
           'disabled:opacity-[var(--disabled-opacity)] aria-busy:disabled:opacity-100',
           'aria-disabled:pointer-events-none aria-disabled:opacity-[var(--disabled-opacity)]',
           FORCED_FOCUS,
-        ].join(' '),
-      },
-      /**
-       * BRIDGE — the selected state of a legacy filter chip / toggle: `bg-accent-subtle` + accent ink.
-       * Pulse marks selection with a 2 pt line under the word (`ChipRow`, `Segmented`), never a wash.
-       *
-       * A variant rather than a call-site constant because it was already being hand-written twice
-       * (MarketplacePage, ComposePage), and the hover half is the part a call site forgets: without
-       * `hover:bg-accent-subtle` the selected chip REVERTS to `surface-2` under the pointer, which
-       * reads as "you are about to deselect" on a chip that is merely being hovered.
-       *
-       * The transparent border is not decoration: `secondary` carries a `--border-width` edge, so a
-       * selected chip that simply dropped it would shrink by 1–2px and shove the row.
-       *
-       * DECLARED BETWEEN `variant` AND `density`, deliberately. cva emits variants in key order and
-       * `cn()` runs twMerge over the result, so position decides who wins a conflict.
-       */
-      selected: {
-        true: [
-          'bg-accent-subtle text-on-accent-subtle',
-          'border-[length:var(--border-width)] border-transparent',
-          'hover:bg-accent-subtle hover:text-on-accent-subtle hover:border-transparent',
         ].join(' '),
       },
       shape: {
@@ -393,45 +366,6 @@ export function kitName({ variant, shape, size }: Pick<ControlVariants, 'variant
   if (variant === 'primary' && (s === 'button' || s === 'icon') && (size === 'lg' || size === 'sm')) return 'btnPrimary';
   return undefined;
 }
-
-/**
- * BRIDGE — the STATUS chip: a chip-shaped label that reports state and does nothing when you touch it.
- * Pulse writes a state as a 6 pt dot and a word (`NoticeLine`) or a mono tag; the seven tinted
- * tones below leave in the closing cleanup. Do not write new code against them.
- *
- * Separate from `control` rather than a variant of it, because everything `control` guarantees is
- * wrong here: a `cursor-pointer` on a `<span>` promises an action that does not exist,
- * `active:scale-[0.97]` answers a press nobody made, `min-h-[var(--control-h)]` inflates a 24px
- * word to 44px, and the disabled/busy states have no meaning on a thing that was never a target.
- * The 44px floor exists to protect TARGETS; applying it to a label does not make anything more
- * accessible, it just makes the row taller.
- *
- * The tone strings carry the INK and the base carries the size, in that order on purpose: under
- * today's twMerge config `text-caption` and `text-danger` share one class group, and if the sizes
- * came last a `danger` pill would render in the inherited colour — a warning with no warning in
- * it.
- */
-export const chip = cva(['inline-flex items-center gap-1 whitespace-nowrap', 'rounded-chip px-3 py-1', 'text-caption'], {
-  variants: {
-    tone: {
-      /** The default: a bordered pill on the card surface. Says "state", claims nothing about it. */
-      neutral:
-        'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 text-text-2',
-      /** Borderless, recessed — for a count or a tag that must not compete with the row it labels. */
-      quiet: 'bg-surface-2 text-text-3',
-      // `text-on-accent-subtle`, NOT `text-accent` — the wash is the accent at 20%, so
-      // accent-on-accent-wash cannot open a contrast gap at any hue.
-      accent: 'bg-accent-subtle text-on-accent-subtle',
-      success: 'bg-success-subtle text-success',
-      warning: 'bg-warning-subtle text-warning',
-      danger: 'bg-danger-subtle text-danger',
-      info: 'bg-info-subtle text-info',
-    },
-  },
-  defaultVariants: { tone: 'neutral' },
-});
-
-export type ChipVariants = VariantProps<typeof chip>;
 
 /**
  * G-shell — the disabled pill on an ANCHOR (`PressableLink`): what `disabled:` draws on a button,

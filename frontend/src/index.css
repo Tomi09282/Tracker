@@ -52,7 +52,8 @@
   }
 
   ::selection {
-    background: var(--accent-subtle);
+    /* The lamp at 20 % — the value the retired `--accent-subtle` wash carried. */
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
     color: var(--text-1);
   }
 

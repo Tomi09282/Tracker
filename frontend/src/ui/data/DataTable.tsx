@@ -100,7 +100,7 @@ export function DataTable<Row>({
                 >
                   {c.sortable && onSort ? (
                     <Pressable
-                      variant="ghost"
+                      variant="link"
                       density="compact"
                       className={cn('-mx-2 gap-1', c.numeric && 'ml-auto')}
                       onClick={() => onSort(c.key)}

@@ -182,7 +182,7 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
   const active = useElementVariant(id);
   if (active !== variant) return null;
   return (
-    <span className="text-micro-legacy uppercase rounded-chip bg-accent-subtle px-1.5 text-accent">
+    <span className="text-micro-legacy uppercase text-accent">
       active
     </span>
   );
@@ -298,7 +298,7 @@ export function PlaygroundPage() {
                 <span className="text-body-s text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
                 </span>
-                <span className="text-micro-legacy uppercase rounded-chip bg-success-subtle px-1.5 text-success">live</span>
+                <span className="text-micro-legacy uppercase text-success">live</span>
               </li>
             ))}
           </ul>
