@@ -1,0 +1,119 @@
+{
+  "id": "S-library",
+  "base": "pulse-redesign 550567a (merged into pulse/S-library)",
+  "frames": {
+    "library-1": {
+      "verdict": "pending-F15",
+      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-1.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-1.pair.png",
+      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-1.with-F15-wip.pair.png",
+      "fixture": "states.json overrides.library-1 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
+      "cap": "matched-fixture once F15 stage 1 is merged",
+      "geometry": "26 / 45 matched; deviating = the text-only rows (DEV-1: text dx -64, rows 64 not 68) and the strip words drifting about 0.6 pt per chip (Bicepsz -2.4); figure box 207,128 195 x 411 exact; header, glyph, eyebrow, hint, switch and its mark within 0.5"
+    },
+    "library-2": {
+      "verdict": "pending-F15",
+      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-2.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-2.pair.png",
+      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-2.with-F15-wip.pair.png",
+      "fixture": "states.json overrides.library-2 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
+      "cap": "matched-fixture once F15 stage 1 is merged",
+      "geometry": "29 / 48 matched; the subject MELL hugs its word (the frame box is a fixed 216 wide, the ink is the same); rows as library-1"
+    },
+    "library-3": {
+      "verdict": "pending-F15",
+      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-3.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-3.pair.png",
+      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-3.with-F15-wip.pair.png",
+      "fixture": "states.json overrides.library-3 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
+      "cap": "matched-fixture once F15 stage 1 is merged",
+      "geometry": "28 / 48 matched; the strip scrolls 135 (Tricepsz on the gutter) as drawn; the lime mark under Széles hátizom stands 2-3 pt left of the frame mark (word advance); rows as library-1"
+    }
+  },
+  "states": {
+    "library-search": {
+      "verdict": "structure",
+      "why": "not drawn (DEV-2)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-search.png"
+    },
+    "library-empty-term": {
+      "verdict": "structure",
+      "why": "not drawn",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-empty-term.png"
+    },
+    "library-fullbody": {
+      "verdict": "structure",
+      "why": "not drawn; full-body has no region, the strip follows the chosen chip to its end",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-fullbody.png"
+    },
+    "library-offside": {
+      "verdict": "structure",
+      "why": "not drawn (DEV-4)",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-offside.png"
+    },
+    "library-offline": {
+      "verdict": "structure",
+      "why": "not drawn; the shell line only",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-offline.png"
+    },
+    "loading, tail loading, chip skeleton": {
+      "verdict": "structure",
+      "why": "unreachable in replay (answers arrive at once); built from ListRowSkeleton / Skeleton, verified by reading"
+    },
+    "row with an upload": {
+      "verdict": "structure",
+      "why": "unreachable: the seed has no exercise media"
+    },
+    "failed list / taxonomy": {
+      "verdict": "structure",
+      "why": "behaviour unchanged (DEV-7, DEV-10); not captured"
+    }
+  },
+  "probes": {
+    "fonts": "pass (all states)",
+    "pill": "0 lime pills (all states)",
+    "boxed": "pass",
+    "overflow": "pass at 360 / 402 / 430",
+    "targets": "pass (muscle regions exempted while the chip row is on screen)",
+    "focusWalk": "pass at 360 (80 stops, none without visible focus)",
+    "reducedMotion": "pass (shots/S-library-rm)",
+    "scrollEnd": "atEnd false by design: the infinite list fetches the next page as the end nears, so the content keeps growing; no content under the bar at the captured end",
+    "geometry": "fails only on the listed row / chip-advance differences"
+  },
+  "languages": {
+    "en": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-en/_contact.en-1.png",
+    "de": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-de/_contact.de-1.png",
+    "note": "all states reach in en and de with names by i18n key (empty-term / offline after the key fix); no overflow; check:i18n green; no key added, changed or removed"
+  },
+  "inventory": "library-1: Elöl / Hátul button -> radio (Segmented radiogroup, F8); the searchbox moved behind the Keresés glyph button (DEV-2); the back-side chips are not on the front view (DEV-4, reachable via Hátul); the row links keep /library/<id>, their names now carry \" · \" and the fixture names. library-2 / -3: the same.",
+  "ledger": [
+    {
+      "line": "aria-pressed 1 -> 0 (literal in the file)",
+      "reason": "the chips are kit Chips: Chip writes aria-pressed itself from `selected`; the library-2 / -3 arrived assertions prove the chosen chip is pressed"
+    },
+    {
+      "line": "sr-only 0 -> 1",
+      "reason": "the result count kept for assistive tech (DEV-3)"
+    }
+  ],
+  "budget": {
+    "before": 21,
+    "after": 0,
+    "note": "pkg/S-library/budget.json deleted by check-pulse --fix-down"
+  },
+  "requests": [
+    "R-S-library-01 (fixture files for the three frames)",
+    "R-S-library-02 (equipment slug in the list answer)"
+  ],
+  "deviations": "deviations.md (DEV-1 .. DEV-10)",
+  "proposedCopy": [],
+  "liveSmoke": {
+    "run": "pulse-verify --live --smoke",
+    "result": "library-1 rendered against the live backend, no undeclared error, no write",
+    "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-live"
+  },
+  "build": "pulse-verify: build green in 19 s · 8 of 8 captured (replay)"
+}
