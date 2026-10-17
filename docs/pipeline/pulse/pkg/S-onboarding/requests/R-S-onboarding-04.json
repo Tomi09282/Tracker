@@ -1,0 +1,14 @@
+{
+  "id": "R-S-onboarding-04",
+  "from": "S-onboarding",
+  "kind": "shell",
+  "blocking": false,
+  "target": "frontend/src/index.css",
+  "need": "A control the browser scrolls into view (keyboard focus, scrollIntoView) lands just inside the viewport bottom, i.e. behind the tab bar and the Dock (review S-onboarding, difference 3; WCAG 2.4.11). At 360 x 640 the capture tool clicked the Fertig pill instead of the Schulter chip, and the step-1 goals sit under Zurück / Weiter.",
+  "evidence": ".pulse/review/S-onboarding/w360-de.log; .pulse/pairs/S-onboarding-fix2/w360-de.log (the same three states still fail to arrive: onboarding-1, onboarding-three-areas-save-failed, onboarding-offline at 360 x 640 de)",
+  "proposedApi": "html { scroll-padding-bottom: calc(var(--dock-b) + var(--dock-reserve, 0px)) }",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-onboarding/requests/R-S-onboarding-04.patch",
+  "interim": "none in the package (the scroller is the document root, owned by the shell); the controls are reachable by scrolling",
+  "status": "open",
+  "resolution": null
+}

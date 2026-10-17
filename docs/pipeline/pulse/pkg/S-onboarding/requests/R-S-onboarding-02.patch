@@ -1,0 +1,22 @@
+diff --git a/frontend/src/ui/primitives/NumberStepper.tsx b/frontend/src/ui/primitives/NumberStepper.tsx
+index 70ebb1c..02dd4d6 100644
+--- a/frontend/src/ui/primitives/NumberStepper.tsx
++++ b/frontend/src/ui/primitives/NumberStepper.tsx
+@@ -164,7 +164,16 @@ export const NumberStepper = forwardRef<HTMLInputElement, NumberStepperProps>(fu
+       {/* `Input/number`: 60 high, the figure and the two buttons top-aligned so a thicker line never
+           moves them. */}
+       <div className={cn('flex h-15 items-start', fieldLine({ disabled, error: !!error }))}>
+-        <div className="flex h-15 min-w-0 flex-1 items-start">
++        {/* The figure is only as wide as its digits; a tap anywhere on the empty part of the line
++            types into it (the probe's 44 pt target, and the empty field onboarding-3 asks to fill). */}
++        <div
++          className="flex h-15 min-w-0 flex-1 cursor-text items-start"
++          onPointerDown={(e) => {
++            if (disabled || e.target instanceof HTMLInputElement) return;
++            e.preventDefault();
++            e.currentTarget.querySelector('input')?.focus();
++          }}
++        >
+           <input
+             ref={ref}
+             id={inputId}

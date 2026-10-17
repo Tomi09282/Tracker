@@ -1,23 +1,11 @@
 {
   "package": "S-onboarding",
-  "base": "38ae74180d695e43b403dcf7981fb31c6fb338a4",
+  "base": "ba932df299c0cc35cdcb2b224c21c695d00e0136",
   "namespaces": [
     "onboarding"
   ],
   "set": [],
-  "change": [
-    {
-      "key": "onboarding.step.limitations.title",
-      "hu": {
-        "from": "Van sérülésed vagy korlátod?",
-        "to": "Van sérülésed vagy korlátod?"
-      },
-      "en": null,
-      "de": null,
-      "copy": "fix",
-      "source": "frame onboarding-1 breaks the h1 after \"sérülésed\" (VAN SÉRÜLÉSED / VAGY KORLÁTOD?); a no-break space keeps \"vagy korlátod?\" together so the h1 wraps there by itself, without text-balance (which breaks onboarding-3 at the wrong word). The visible words do not change; the only reader is OnboardingPage (the step title template)."
-    }
-  ],
+  "change": [],
   "remove": [],
   "copyQuestions": [
     {

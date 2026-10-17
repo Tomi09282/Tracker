@@ -1,0 +1,13 @@
+diff --git a/frontend/src/index.css b/frontend/src/index.css
+index e045bbc..27adad4 100644
+--- a/frontend/src/index.css
++++ b/frontend/src/index.css
+@@ -12,6 +12,8 @@
+     /* Native controls (scrollbars, date pickers, form widgets) follow the app, not the OS. */
+     color-scheme: dark;
+     -webkit-tap-highlight-color: transparent;
++    /* A control scrolled into view (focus, find) lands above the tab bar and a mounted Dock, never under them (WCAG 2.4.11). */
++    scroll-padding-bottom: calc(var(--dock-b) + var(--dock-reserve, 0px));
+   }
+ 
+   body {

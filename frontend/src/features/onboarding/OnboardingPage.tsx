@@ -510,8 +510,21 @@ export function OnboardingPage() {
           never moves under a thumb), Vissza (always drawn, off on the first step) and the one
           lime pill, then — only after a refused "Kész" — the line that names what is missing. */}
       <Dock as="footer" className={cn('gap-5', missing.length ? 'pb-2' : undefined)}>
-        {/* `polite`: a save confirmation must never interrupt someone mid-answer. */}
-        <div aria-live="polite" className="min-h-5">
+        {/* `polite`: a save confirmation must never interrupt someone mid-answer.
+            The line stands where onboarding-2 draws it (40 above the pill), but the dock's own fade
+            is still largely transparent there, so on a page longer than the screen the rows behind
+            showed through the words. While a line is shown it gets the canvas under it: a 48 pt
+            ramp above it, solid from its first pixel down to the pill, gutter to gutter. The page
+            scrolls under it like under the pill, and the dock's reserve (which counts this slot)
+            still lets the last row come out above it. */}
+        <div aria-live="polite" className="relative min-h-5">
+          {saveLine ? (
+            <span
+              aria-hidden
+              data-part="save-line-backing"
+              className="pointer-events-none absolute -inset-x-6 -bottom-5 -top-12 -z-10 bg-[linear-gradient(to_bottom,transparent_0,var(--surface-0)_48px)]"
+            />
+          ) : null}
           {saveLine}
         </div>
         <div className="flex items-center gap-6">

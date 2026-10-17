@@ -1,0 +1,13 @@
+diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
+index ff93d39..343e4f8 100644
+--- a/frontend/src/ui/tokens/tokens.css
++++ b/frontend/src/ui/tokens/tokens.css
+@@ -632,7 +632,7 @@
+      gradients interpolate premultiplied, so the ramp is the canvas colour at a growing alpha, with
+      no grey band in the middle. */
+   --nav-fade: linear-gradient(to bottom, transparent 0%, var(--surface-0) 28%);
+-  --dock-fade: linear-gradient(to bottom, transparent 0%, var(--surface-0) 50%);
++  --dock-fade: linear-gradient(to bottom, transparent 0, var(--surface-0) 48px); /* solid from the top of the content box (Dock pt-12): a status line above the action never shows the page through it */
+ 
+   /* THE FIGURE — interim values for the vector muscle map, until the rendered mannequin replaces
+    * its inside.
