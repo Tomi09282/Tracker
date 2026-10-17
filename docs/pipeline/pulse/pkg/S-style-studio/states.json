@@ -1,0 +1,185 @@
+{
+  "about": "S-style-studio - the frame override of style-studio-2 and the undrawn states of /admin/styles (PLAN 4.1 rule 7). Account A = admin@ for every state. Nothing is written live by this package (liveWrites: []): under Q3 (a) every one of the 27 catalogue entries is dormant on pulse-redesign (catalog.ts live: false), so every commit control is disabled and no save can be fired from this screen at all. Every fixture is a list of edits over the recorded GET /api/v1/ui/element-styles, or a stub with an empty body for an error status (R26).",
+  "overrides": {
+    "style-studio-1": {
+      "why": "language-neutral arrival (the frame entry asserts the Hungarian word, so the --lang en / de captures of 5.1 row 7 could not open): the same word by its key.",
+      "arrived": {
+        "text": {
+          "key": "studio.variants"
+        }
+      }
+    },
+    "style-studio-2": {
+      "why": "On the honest studio (Q3 a, catalog.ts: E1 live false) the 'Legyen ez' controls are disabled, so the frame's click cannot happen and the success toast never appears (_subcheck.json 'style-studio-2 (current build)'). The override drops the click and the toast assertion, feeds the first styles read with E1 = C directly (the same edit the INT fixture applies after its PUT, without the PUT) and scrolls to the end: the frame is page 1226 drawn in a 905 viewport, i.e. scrolled 321 = to the end. It reaches the drawn table (rows A-E, C active). The toast band is not reachable on this page; it is F13's ToastHost and is proven on the kit board.",
+      "fixture": null,
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ui/element-styles",
+          "edits": [
+            {
+              "pointer": "/styles/E1",
+              "value": "C"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "text": {
+              "key": "studio.isActive"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "studio.isActive"
+        }
+      },
+      "opened": {
+        "text": {
+          "key": "studio.variants"
+        }
+      }
+    }
+  },
+  "states": {
+    "studio-e2-stages": {
+      "title": "Elem-stílus stúdió - E2 Copy button (dormant, with a preview demo)",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 1300,
+      "reach": "seed",
+      "why": "undrawn: an element that still has a playground Demo (PREVIEWABLE: E2, E6, E7, E11, E14, E15) - the hero specimen at 150 % and the five row stages are drawn, as the frames draw them for E1. Shows the stage geometry of the frames on the final tree.",
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "re": "^E2\\s?Copy button"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "re": "^E2\\s?Copy button"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "re": "^E2\\s?Copy button"
+        },
+        "checked": true
+      }
+    },
+    "studio-e23-inert": {
+      "title": "Elem-stílus stúdió - E23 Like / reaction, nem használt (screen note frame 3)",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 1300,
+      "reach": "seed",
+      "why": "undrawn (screen note, frame 3): an element no component reads - hero tag and section tag 'nem használt', studio.noPreview in the hero, studio.inertExplain in place of the consequence note, five disabled commits, the active row still 'Ez az aktív'.",
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "re": "^E23\\s?Like"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "re": "^E23\\s?Like"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "re": "^E23\\s?Like"
+        },
+        "checked": true
+      }
+    },
+    "studio-e21-no-preview": {
+      "title": "Elem-stílus stúdió - E21 Set-check row (no preview on this screen)",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 1300,
+      "reach": "seed",
+      "why": "undrawn: an element this screen cannot demonstrate - the hero carries studio.noPreview beside the giant letter, the rows have no stage.",
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "re": "^E21\\s?Set-check"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "re": "^E21\\s?Set-check"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "re": "^E21\\s?Set-check"
+        },
+        "checked": true
+      }
+    },
+    "studio-load-failed": {
+      "title": "Elem-stílus stúdió - the styles read failed",
+      "account": "A",
+      "route": "/admin/styles",
+      "height": 1300,
+      "reach": "fixture",
+      "why": "GET /ui/element-styles fails: the hero falls back to studio.noPreview with the '·' caption, the five rows render with none active, the load-failed message stands under the list (no retry control: none exists today, R22).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/ui/element-styles",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/ui/element-styles",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "studio.loadFailed"
+        }
+      }
+    }
+  },
+  "unreachable": {
+    "studio-loading": "the styles read is pending: the capture tool has no way to hold a response (no delay / hold rule in pulse-shot), and a replay answers at once. Built from the kit (Skeleton blocks in the hero and the rows); proven by reading, verdict structure.",
+    "studio-saving": "a commit in flight: no element is live (Q3 a), every commit control is disabled, choose() returns early for !entry.live. Unreachable on the final tree; the code keeps TextLink busy on the tapped row.",
+    "studio-saved-toast": "the success toast (frame 2's band): unreachable for the same reason; the band is F13's ToastHost.",
+    "studio-save-failed": "the error toast: unreachable for the same reason."
+  }
+}

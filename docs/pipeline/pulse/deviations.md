@@ -602,3 +602,35 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: "Erő" as a 25 pt word.
 - What the app does: the kit Chip box is the word + 16, so "Erő" is a 41.5 x 44 target in Hungarian (en / de words are wide enough). Request R-S-compose-profile-01 asks for a 44 pt floor on Chip.
 - Status: open — kit request.
+
+## DEV-072 — S-style-studio: the studio shows E1 as dormant, the frames draw it live
+
+- Source: docs/pipeline/pulse/pkg/S-style-studio/deviations.md rows SS-1 to SS-6 and SS-9
+- Package: S-style-studio
+- The frames show: E1 as a live element - "aktív" in the hero, the lime dot after the giant D and after the active row letter, the glowing "Save" pill at 150 % and five unlit Save pills in the row stages, "Legyen ez" in text-1, `studio.commitNote`, and (style-studio-2) the "E1 mostantól C változatot használ" toast band.
+- What the app does: under Q3 (a) all 27 catalogue entries are `live: false` on pulse-redesign and F20 retired the E1 Demo, so the hero and the section head read "nem használt", the hero shows `studio.noPreview` beside the letter, no lime dot, no E1 stage, `studio.inertExplain` (4 lines, everything below 18 pt lower at 402), "Legyen ez" disabled at 40 %, and no save can be fired, so the toast band cannot be reached. Elements that still have a Demo draw the hero and the five stages in the frame's places (state studio-e2-stages). style-studio-2 is reached by the package's override (E1 = C in the first styles read, scrolled to the end); both frames carry the verdict structure.
+- Status: closed — Q3 (a), honest dormant studio.
+
+## DEV-073 — S-style-studio: the "Ez az aktív" tick is the kit CheckMark
+
+- Source: docs/pipeline/pulse/pkg/S-style-studio/deviations.md row SS-7
+- Package: S-style-studio
+- The frames show: a 20 pt lime tick, stroke 2, before "Ez az aktív".
+- What the app does: the kit `CheckMark` (24 pt, stroke 2.5) + the words; the row carries `aria-current`; the old disabled "Ez az aktív" button is now a state, not a control.
+- Status: closed — kit part used.
+
+## DEV-074 — S-style-studio: open owner questions (load retry, copy conflict)
+
+- Source: docs/pipeline/pulse/pkg/S-style-studio/deviations.md rows SS-10 and SS-11
+- Package: S-style-studio
+- The frames show: neither case.
+- What the app does: a failed styles read keeps today's behaviour (no giant letter, `studio.noPreview`, no active row, EmptyState, no retry; `common.retry` exists if a retry is wanted). `studio.noPreview` ("the components read it") and `studio.inertExplain` ("no component reads it") can stand on one screen and contradict each other; raised, not changed (R22).
+- Status: open — owner ruling.
+
+## DEV-075 — S-style-studio: the desktop element list (R21)
+
+- Source: docs/pipeline/pulse/pkg/S-style-studio/deviations.md rows SS-8 and SS-12
+- Package: S-style-studio
+- The frames show: the phone only; the element rail with the selected word in text-1 and the lime mark.
+- What the app does: on a phone the rail is drawn as in the frame and every option's accessible name ends in "— nem használt"; at 1024 pt and up the rail becomes a 27-row `RowStack` / `ListRow` radiogroup column (256 wide) beside the workspace (CSS `hidden lg:flex` beside a `lg:hidden` rail; both radiogroups are in the DOM, one is displayed).
+- Status: closed — R21 keeps the desktop layout.
