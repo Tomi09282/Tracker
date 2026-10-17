@@ -10,12 +10,12 @@
  *
  * So the box is the contract, not the drawing inside it. A screen that sizes and places the box by
  * these numbers today keeps its layout when the inside changes from the vector map to the render
- * (F15 stage 1) — nothing reflows, because the box never changes shape.
+ * (F15 stage 1, done) — nothing reflows, because the box never changes shape.
  */
-import { MUSCLES_BY_SIDE, type BodySide } from './shapes';
+import { REGIONS } from './regions';
 
 /** The two views of the figure. Same values, same order as the map's own side control. */
-export type MuscleSide = BodySide;
+export type MuscleSide = 'front' | 'back';
 
 /** The canvas every figure still shares, and where the body sits on it (fractions of the box). */
 export const FIGURE_BOX = {
@@ -43,6 +43,6 @@ export function musclesOnSide(side: MuscleSide): readonly string[] {
 }
 
 const SLUGS_BY_SIDE: Record<MuscleSide, readonly string[]> = {
-  front: [...new Set(MUSCLES_BY_SIDE.front.map((m) => m.slug))],
-  back: [...new Set(MUSCLES_BY_SIDE.back.map((m) => m.slug))],
+  front: REGIONS.front.map((r) => r.slug),
+  back: REGIONS.back.map((r) => r.slug),
 };

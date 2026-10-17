@@ -91,7 +91,7 @@ re-measuring: the head is `FIGURE_BOX.headTop` of the box height below the box t
 - Accessibility is the map's, unchanged: `role="img"` named by `muscleMap.frontTitle` /
   `backTitle`; regions as above. The documented 44 pt exception holds (regions are smaller; the
   screen's chip row is the accessible path — `MuscleMap.tsx`, the comment above the component).
-  The focus ring on a region is the stroke `--focus-ring`, 3 wide, on `:focus-visible`.
+  The focus ring on a region: see stage 1 below (two-tone, every panel of the region).
 - No motion of its own beyond the region fill transition (`--duration-base`, off under reduced
   motion, as before).
 
@@ -115,7 +115,89 @@ The kit host collects `features/playground/kit/*.tsx`, a folder this lane does n
 one-line `features/playground/kit/mannequin.tsx` that lists this file is a request to the
 integrator (`pkg/F15/requests/`).
 
-## Not in stage 0
+## Stage 1 — the inside of the box (done; fix round 1 applied)
+
+Nothing a screen wrote changes: the props, the box, `FIGURE_BOX` and `musclesOnSide` are as above.
+What is inside the box:
+
+- **The render.** `<Pic slot="figure-front | figure-back">` stretched over the box (its 585 x 1236
+  pixels are the 597 x 1261 canvas scaled by 0.98; the ratio differs by 0.03 %). Its `sizes` follow
+  the box's measured width. Note: the box carries `data-kit="pic"` and so does the `<img>` inside it
+  (Pic always does) — same rectangle, two nodes.
+- **The regions.** One SVG over it, `viewBox="0 0 597 1261"`, with the paths of `regions.ts`
+  (generated; 22 regions = 12 front + 10 back for the 19 slugs — neck, forearms and calves are on
+  both sides). They were traced on the renders themselves: `docs/pipeline/pulse/pkg/F15/trace/`.
+  `build.py` cuts each render into its panels with a seeded watershed on the groove lines
+  (`panels.py`, two cuts: "groove" — the local-mean darkness, used where stage 1's outlines held — and
+  "ridge" — the Hessian ridge of the luminance plus a seed in every panel, used for the arms, the
+  back and the back of the legs); a region is a union of panels, closed over the grooves inside one
+  muscle (the forearm's two strips, the triceps' heads), opened and smoothed. Two-sided regions
+  traced on the ridge cut keep only what both sides agree on (the mask AND its mirror image about
+  x = 297.75), so a one-sided leak over a faint groove cannot survive and the two sides match
+  (`symmetry.json`: every pair within 1 % except the delts' anatomical split, 3-7 %). For chest, the
+  shoulder cap, quads and lats the outline is the lime of the baked lit render the frames were made
+  from; the five groove-less muscles are cut out by anatomy — the cap split into front / side delt,
+  the front of the neck (the throat column between the two sternocleidomastoid lines), adductors,
+  abductors (the hip panel above the quads, ending on their top edge). The masters stay outside
+  the repository.
+- **One cap, two muscles.** The render draws the front and the side delt as ONE shoulder-cap panel.
+  `regions.ts` gives both `group: 'cap'` and the whole cap as `panel`: lighting either delt (or both)
+  paints the whole cap, at the strongest role either has — what exercise-detail-1 draws for a press
+  whose data names only the side delt. Each delt keeps its own path as its button and hit area; the
+  two paths share one edge (overlap 0.1 units², was 214 per side).
+- **Unlit** = the plain render: the path is there (hit area) and paints nothing; hover (pointer
+  devices) shows a 30 % accent hint.
+- **Primary / selected** = solid `--accent` panel + bloom: the panel blurred twice, a tight and a
+  wide halo, summed and held under a ceiling — `bloom: [s1, k1, s2, k2, ceiling]` per region — and
+  drawn in accent under it: SVG `feGaussianBlur` x 2 + `feComposite` (arithmetic) +
+  `feComponentTransfer` (an alpha table: identity up to the ceiling, flat above). The ceiling is
+  what keeps the sternum: between the two pectorals the two halves' halos add up, and without it
+  they reached full accent and closed the groove. The sternum itself is the region's **seam**
+  (`seam` in `regions.ts`, chest only): where the two written pectorals come within 8 canvas px of
+  each other, the gap between them is painted as the accent darkened to 0.78 (accent, then the
+  canvas colour at 22 % over it), because that is what the frames draw there — a darker lime line
+  about 4 device px wide, (156-168, 195-213, 35-38), not the grey render; above and below, where the
+  panels part, the groove opens into the dark render as in the frames. Chest and lats were fitted on the FRAMES
+  (`trace/sim.py` draws the map offline at the frames' device size and reports the capture's
+  numbers; `search` over the halo against library-2 / exercise-detail-1 and library-3 / workout-1),
+  quads on its lit render. Over the solid fill lies the **imprint**: the render clipped to the panel,
+  turned into black with alpha rising as its luminance falls under 0.3 (at most 5 %), so the
+  render's grooves show through the lime faintly, as in the frames, while the panel's face keeps
+  the token. No blend mode anywhere, no raster per muscle.
+- **Secondary** = the render itself, clipped to the panel and recoloured by one `feColorMatrix`
+  built from `--accent` (accent x (0.438 + 0.428 x luminance)), so the shading shows through as in
+  `figure-front-press`. No bloom (the press render has none around the cap).
+- **Buttons.** With `onSelect`, every region is ONE button and one tab stop: its first closed
+  panel carries `role="button"`, `tabIndex=0`, Enter / Space, `aria-pressed`, `aria-label` =
+  `muscle.<slug>`; its other panels (the right pectoral, …) are further hit areas of the same muscle
+  — clickable, `tabIndex=-1`, `aria-hidden`. So a screen reader announces each muscle once (12 tab
+  stops on the front, 10 on the back), and a pointer or a tool aiming at the middle of the button
+  lands on muscle, never on the gap between two halves. Focus-visible: every panel of the focused
+  region outlined, two-tone — a 2 px ink stroke over a 4.5 px `--surface-0` edge, non-scaling — on
+  an unlit and a lit panel alike, so a focused muscle never looks selected. Read-only: no
+  interactive element at all.
+- **Legacy column** (`chips` / `segmented`, what the three screens still mount until their
+  packages): the same figure; in `fill` mode it is laid over an empty SVG with the canvas viewBox
+  that takes exactly the place the vector drawing took.
+- Deleted: `shapes.ts`, `landmarks.ts`. `figure.ts` reads the slugs from `regions.ts`.
+
+Evidence (built app, `pulse-verify`): `.pulse/pairs/F15s1/r1/` after fix round 1 (the stage-1
+originals one level up) — pairs against library-1..3,
+exercise-detail-1..2, workout-1..2 (app | frame | 50 % overlay | lit pixels), zoomed lit areas,
+several-at-once, the contact sheet of all 22 regions lit one by one, the keyboard focus
+(`focus-tab-onto-mell.png`), the sternum close-ups (`sternum-*.png`: app | frame) and
+`regions-outlined.png` (every region outlined on both renders). Fix round 1 numbers (lit IoU against
+the frame): library-2 0.979, library-3 0.962, exercise-detail-2 0.962, workout-1 / -2 0.958,
+exercise-detail-1 0.943 (the secondary cap's highlight along its top edge passes the lit threshold
+where the frame's does not); sternum gap 4 device px over the whole chest, as the frames. Numbers in `pairs.json` / `iou.json`
+/ `symmetry.json`.
+
+Still open for the owner: the regions without a lit reference — above all the five groove-less ones
+(front / side delt split, neck front, adductors, abductors) — need his sign-off on the contact sheet;
+and the cap rule above (either delt lights the whole cap) is the review's proposed default, his to
+confirm.
+
+## Not in stage 0 (history)
 
 `regions.ts`, the render inside the box, the lit halo, deleting `shapes.ts` / `landmarks.ts`, the
 `--muscle-*` tokens, the region gate and the IoU regression picture — all stage 1 (PLAN 5.2 row 11).

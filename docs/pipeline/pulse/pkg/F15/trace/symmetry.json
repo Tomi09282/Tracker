@@ -1,0 +1,125 @@
+{
+ "front:neck": {
+  "single": 2713,
+  "subpaths": 1
+ },
+ "front:chest": {
+  "left": 9254,
+  "right": 9286,
+  "diffPct": 0.3,
+  "subpaths": 2
+ },
+ "front:front-delts": {
+  "left": 1819,
+  "right": 1701,
+  "diffPct": -6.5,
+  "subpaths": 2
+ },
+ "front:side-delts": {
+  "left": 2269,
+  "right": 2349,
+  "diffPct": 3.4,
+  "subpaths": 2
+ },
+ "front:biceps": {
+  "left": 5788,
+  "right": 5801,
+  "diffPct": 0.2,
+  "subpaths": 2
+ },
+ "front:forearms": {
+  "left": 7376,
+  "right": 7375,
+  "diffPct": -0.0,
+  "subpaths": 2
+ },
+ "front:abs": {
+  "single": 20091,
+  "subpaths": 1
+ },
+ "front:obliques": {
+  "left": 4729,
+  "right": 4807,
+  "diffPct": 1.6,
+  "subpaths": 2
+ },
+ "front:quads": {
+  "left": 12910,
+  "right": 12965,
+  "diffPct": 0.4,
+  "subpaths": 2
+ },
+ "front:adductors": {
+  "left": 2669,
+  "right": 2557,
+  "diffPct": -4.2,
+  "subpaths": 2
+ },
+ "front:abductors": {
+  "left": 1555,
+  "right": 1616,
+  "diffPct": 3.8,
+  "subpaths": 2
+ },
+ "front:calves": {
+  "left": 4767,
+  "right": 4778,
+  "diffPct": 0.2,
+  "subpaths": 2
+ },
+ "back:neck": {
+  "single": 2273,
+  "subpaths": 1
+ },
+ "back:traps": {
+  "single": 17778,
+  "subpaths": 1
+ },
+ "back:rear-delts": {
+  "left": 3317,
+  "right": 3306,
+  "diffPct": -0.3,
+  "subpaths": 2
+ },
+ "back:lats": {
+  "left": 9123,
+  "right": 9142,
+  "diffPct": 0.2,
+  "subpaths": 2
+ },
+ "back:triceps": {
+  "left": 5593,
+  "right": 5586,
+  "diffPct": -0.1,
+  "subpaths": 2
+ },
+ "back:forearms": {
+  "left": 7209,
+  "right": 7202,
+  "diffPct": -0.1,
+  "subpaths": 2
+ },
+ "back:lower-back": {
+  "single": 6567,
+  "subpaths": 1
+ },
+ "back:glutes": {
+  "left": 10747,
+  "right": 10724,
+  "diffPct": -0.2,
+  "subpaths": 2
+ },
+ "back:hamstrings": {
+  "left": 11991,
+  "right": 11973,
+  "diffPct": -0.2,
+  "subpaths": 2
+ },
+ "back:calves": {
+  "left": 9947,
+  "right": 9840,
+  "diffPct": -1.1,
+  "subpaths": 2
+ },
+ "delt overlap units^2": 0.1
+}
