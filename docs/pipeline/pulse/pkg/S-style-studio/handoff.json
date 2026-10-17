@@ -9,7 +9,10 @@
       "reason": "reached on the recording (E1 = D) and compared; the layout matches the frame region by region, but the frame draws E1 LIVE and the product has no live element any more (Q3 a, catalog.ts 27 x live: false; F20 retired the E1 Demo). So the hero shows 'nem használt' + studio.noPreview instead of 'aktív' + the glowing Save pill, no lime dot after the letters, inertExplain (4 lines) in place of commitNote (3 lines), no row stages, the four 'Legyen ez' disabled (deviations SS-1..SS-7). Geometry (402 x 1226, replay): 76 compared, 27 matched, 22 deviating = the title / intro fill-width boxes (dw only), the giant D (same centre, line box 108 ink-tight vs Monogram's 124), E4 Toggle dx -2.8 (accumulated word widths), the note (other string, +18 h) and every row node +17.7..18.5 (the longer note; within 1 pt once the 18 is removed); 6 style notes = the numeral line box and the single-letter tracking -0.48 the kit Numeral does not set; 27 unmatched = the hero pill / share glyph / Save, the five row pills, the two lime dots, the frame's own rules and the check vector (the rules and the tick are drawn, the comparator pairs them by box only).",
       "capture": ".pulse/shots/S-style-studio/style-studio-1.png",
       "pair": ".pulse/pairs/S-style-studio/style-studio-1.pair.png",
-      "tiles": [".pulse/pairs/S-style-studio/style-studio-1.tile-1.png", ".pulse/pairs/S-style-studio/style-studio-1.tile-2.png"],
+      "tiles": [
+        ".pulse/pairs/S-style-studio/style-studio-1.tile-1.png",
+        ".pulse/pairs/S-style-studio/style-studio-1.tile-2.png"
+      ],
       "geometry": ".pulse/pairs/S-style-studio/style-studio-1.geometry.json",
       "beforeAfter": ".pulse/pairs/S-style-studio/style-studio-1.before-after.png"
     },
@@ -19,18 +22,48 @@
       "fixture": "states.json overrides.style-studio-2: GET /api/v1/ui/element-styles edits [/styles/E1 = \"C\"]",
       "capture": ".pulse/shots/S-style-studio/style-studio-2.png",
       "pair": ".pulse/pairs/S-style-studio/style-studio-2.pair.png",
-      "tiles": [".pulse/pairs/S-style-studio/style-studio-2.tile-1.png", ".pulse/pairs/S-style-studio/style-studio-2.tile-2.png"],
+      "tiles": [
+        ".pulse/pairs/S-style-studio/style-studio-2.tile-1.png",
+        ".pulse/pairs/S-style-studio/style-studio-2.tile-2.png"
+      ],
       "geometry": ".pulse/pairs/S-style-studio/style-studio-2.geometry.json"
     }
   },
   "extraStates": {
-    "studio-e2-stages": { "verdict": "structure", "note": "an element that still has a Demo: the hero specimen at 150 % and the five 142 pt row stages are drawn exactly in the frames' places (unlit), so the stage geometry of the frames is shown on the final tree", "pair": ".pulse/pairs/S-style-studio/studio-e2-stages.pair.png" },
-    "studio-e23-inert": { "verdict": "structure", "note": "screen note frame 3 (not drawn in Figma): E23 selected, rail scrolled so the chosen word stands on the gutter, nem használt twice, inertExplain, disabled commits, A active", "pair": ".pulse/pairs/S-style-studio/studio-e23-inert.pair.png" },
-    "studio-e21-no-preview": { "verdict": "structure", "note": "noPreview beside the giant A, rows without a stage", "capture": ".pulse/shots/S-style-studio/studio-e21-no-preview.png" },
-    "studio-load-failed": { "verdict": "structure", "note": "GET 500 fixture: no giant letter, noPreview, caption '·', rows with none active, EmptyState (display title + body) under the list; no retry (none today)", "capture": ".pulse/pairs/S-style-studio/studio-load-failed.end.png" },
-    "studio-loading": { "verdict": "structure", "note": "unreachable in a capture (pulse-shot cannot hold a response); built from Skeleton blocks in the hero (letter, specimen, caption) and in each row's stage line, tag omitted" },
-    "studio-saving / saved toast / save failed": { "verdict": "structure", "note": "unreachable on the final tree: no element is live, every commit is disabled and choose() returns early; the code keeps TextLink busy on the tapped row and the two toast() calls unchanged" },
-    "desktop": { "verdict": "structure", "note": "1280: the 27-row ListRow radiogroup column (256) beside the workspace, hero above (R21)", "capture": ".pulse/pairs/S-style-studio/style-studio-1.w1280.png", "beforeAfter": ".pulse/pairs/S-style-studio/style-studio-1.w1280.before-after.png" }
+    "studio-e2-stages": {
+      "verdict": "structure",
+      "note": "an element that still has a Demo: the hero specimen at 150 % and the five 142 pt row stages are drawn exactly in the frames' places (unlit), so the stage geometry of the frames is shown on the final tree",
+      "pair": ".pulse/pairs/S-style-studio/studio-e2-stages.pair.png"
+    },
+    "studio-e23-inert": {
+      "verdict": "structure",
+      "note": "screen note frame 3 (not drawn in Figma): E23 selected, rail scrolled so the chosen word stands on the gutter, nem használt twice, inertExplain, disabled commits, A active",
+      "pair": ".pulse/pairs/S-style-studio/studio-e23-inert.pair.png"
+    },
+    "studio-e21-no-preview": {
+      "verdict": "structure",
+      "note": "noPreview beside the giant A, rows without a stage",
+      "capture": ".pulse/shots/S-style-studio/studio-e21-no-preview.png"
+    },
+    "studio-load-failed": {
+      "verdict": "structure",
+      "note": "GET 500 fixture: no giant letter, noPreview, caption '·', rows with none active, EmptyState (display title + body) under the list; no retry (none today)",
+      "capture": ".pulse/pairs/S-style-studio/studio-load-failed.end.png"
+    },
+    "studio-loading": {
+      "verdict": "structure",
+      "note": "unreachable in a capture (pulse-shot cannot hold a response); built from Skeleton blocks in the hero (letter, specimen, caption) and in each row's stage line, tag omitted"
+    },
+    "studio-saving / saved toast / save failed": {
+      "verdict": "structure",
+      "note": "unreachable on the final tree: no element is live, every commit is disabled and choose() returns early; the code keeps TextLink busy on the tapped row and the two toast() calls unchanged"
+    },
+    "desktop": {
+      "verdict": "structure",
+      "note": "1280: the 27-row ListRow radiogroup column (256) beside the workspace, hero above (R21)",
+      "capture": ".pulse/pairs/S-style-studio/style-studio-1.w1280.png",
+      "beforeAfter": ".pulse/pairs/S-style-studio/style-studio-1.w1280.before-after.png"
+    }
   },
   "probes": "every state at 402: fonts, pill (0 or 1 lime pill), boxed (none), overflow (also at 360 / 430 / 1280), targets, focus walk (style-studio-1: 34 stops, none without visible focus; studio-e2-stages: 37) pass; --reduced-motion: no running infinite animation (pass); geometry 'not passing' only for the reasons in the frame verdicts",
   "languages": "hu / en / de captured for all six states (arrivals by i18n key); no key path, no truncated label, no overflow (.pulse/pairs/S-style-studio/_contact-states.en.png, _contact-states.de.png)",
@@ -39,11 +72,37 @@
   "budget": "36 -> 0, budget.json deleted (check-pulse --fix-down S-style-studio)",
   "i18n": "no patch: no key added, changed or removed; all 16 studio.* keys stay consumed",
   "variants": "none (this page owns no useElementVariant read)",
-  "requests": [],
+  "requests": [
+    {
+      "id": "R-S-style-studio-01",
+      "to": "owner / F20",
+      "ask": "the frames hero and row specimens (the lime Save pill) need an E1 Demo case in PlaygroundPage (retired by F20). Owner ruling: (a) keep the studio without the E1 specimen, (b) restore the E1 Demo so the real Pulse button stands on the hero and the five stages, (c) hide the route until an element is live again. The page renders it with no change the moment PREVIEWABLE has E1."
+    },
+    {
+      "id": "R-S-style-studio-02",
+      "to": "shell (F lane)",
+      "ask": "scrolled pushed screens slice glyphs under the top safe-area band (style-studio-2 band y 56-70); the shell-level top fade S-coach-chat-fix built locally, applied once in Screen top=push."
+    }
+  ],
   "kitGapsClosed": "G1 (Numeral dot, G-data) used for the live letter; G3 (UnlitPills, G-shell) used for the row stages; G2 (an E1 Demo) overtaken by F20, which retired the E1 Demo on purpose - no request filed",
   "deviations": "docs/pipeline/pulse/pkg/S-style-studio/deviations.md (SS-1..SS-12)",
   "proposedCopy": [],
   "liveSmoke": "pulse-verify --live --smoke: style-studio-1.live renders against the backend with no undeclared error; writes made: none",
   "lastBuild": "pulse-verify: build green in 20 s · 6 of 6 captured (replay) - on 2045e0f (pulse-redesign bdbd420 merged)",
-  "mergeCheck": "pulse-merge-check S-style-studio: may merge (4 owned paths)"
+  "mergeCheck": "pulse-merge-check S-style-studio: may merge (4 owned paths)",
+  "fix2": {
+    "branch": "pulse/S-style-studio-fix2",
+    "review": ".pulse/review/S-style-studio/REVIEW.md (blocking 1, 2; minor 4)",
+    "changes": [
+      "the active letter is lit as drawn: the 16 pt lime dot after the giant letter and the 6 pt dot after the active row letter (Numeral dot marks ACTIVE, not live - SS-4 resolved)",
+      "no contradictory copy: studio.noPreview only for a live element without a stage; an inert element shows the letter alone, inertExplain carries the message (SS-11 resolved); the empty hero line collapses on a failed read",
+      "the row stage shrinks at 360 (min-w-0 flex-1 max-w-[142px]) so Ez az aktív ends on the gutter (SS-13)"
+    ],
+    "pairs": ".pulse/pairs/S-style-studio-fix2/",
+    "i18n": "no patch: no key added, changed or removed",
+    "requests": [
+      "R-S-style-studio-01",
+      "R-S-style-studio-02"
+    ]
+  }
 }

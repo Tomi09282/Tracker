@@ -35,10 +35,15 @@ import { useElementStyles, useSetElementVariant } from './useElementStyles';
  * Under one Pulse look per element no component reads a variant any more: every catalogue entry is
  * `live: false` (`catalog.ts`, held to the call sites by `check-element-roster.mjs`). The screen
  * says so instead of pretending: the hero and the section head carry "nem használt", the
- * consequence note gives way to `studio.inertExplain`, the five commit controls are disabled and
- * the active letter has no lime dot (the dot means "live"). Nothing of that is special-cased: it is
- * the same `entry.live` branch the page has always had, so an element that gets a consumer again
- * lights up here without a code change.
+ * consequence note gives way to `studio.inertExplain` and the five commit controls are disabled.
+ * The hero then shows nothing beside the letter: `studio.noPreview` ("…the components read it")
+ * would contradict `inertExplain` four lines lower, so it is kept for a LIVE element without a
+ * stage. Nothing of that is special-cased: it is the same `entry.live` branch the page has always
+ * had, so an element that gets a consumer again lights up here without a code change.
+ *
+ * The lime dot after a letter marks the ACTIVE variant (the kit's `Numeral dot`, screen note "one
+ * meaning of active: accent everywhere"), not liveness: the stored letter is real whether or not a
+ * component reads it, so the giant letter and the active row's letter are lit as the frames draw.
  *
  * ═══ THE GRAMMAR OF THE FRAMES ═════════════════════════════════════════════════════════════════
  *
@@ -102,30 +107,32 @@ export function StyleStudioPage() {
 
           {/* The live-element line: the active letter on the left, the specimen standing on its
               baseline at the right edge. Both bottom-aligned, so the pill's foot is the D's. */}
-          <div className="flex min-h-24 items-end justify-between gap-4">
-            {styles.isPending ? (
-              <>
-                <Skeleton className="h-24 w-16" />
-                <Skeleton className="h-14 w-32" />
-              </>
-            ) : (
-              <>
-                {active ? <Numeral size="giant" value={active} dot={entry.live} /> : null}
-                {previewable && active ? (
-                  /* 112 pt of layout, drawn at 150 % from its bottom-right corner: a pill lands
-                     168 x 84 on the right edge, and a demo that asks for the full width (E7's
-                     field) fills 168 and never reaches the letter. */
-                  <div className="flex w-28 shrink-0 origin-bottom-right scale-150 justify-end">
-                    <VariantOverride styles={{ [entry.id]: active }}>
-                      <Demo id={entry.id} />
-                    </VariantOverride>
-                  </div>
-                ) : (
-                  <p className="text-cap min-w-0 flex-1 text-text-3">{t('studio.noPreview')}</p>
-                )}
-              </>
-            )}
-          </div>
+          {styles.isPending || active || entry.live ? (
+            <div className="flex min-h-24 items-end justify-between gap-4">
+              {styles.isPending ? (
+                <>
+                  <Skeleton className="h-24 w-16" />
+                  <Skeleton className="h-14 w-32" />
+                </>
+              ) : (
+                <>
+                  {active ? <Numeral size="giant" value={active} dot /> : null}
+                  {previewable && active ? (
+                    /* 112 pt of layout, drawn at 150 % from its bottom-right corner: a pill lands
+                       168 x 84 on the right edge, and a demo that asks for the full width (E7's
+                       field) fills 168 and never reaches the letter. */
+                    <div className="flex w-28 shrink-0 origin-bottom-right scale-150 justify-end">
+                      <VariantOverride styles={{ [entry.id]: active }}>
+                        <Demo id={entry.id} />
+                      </VariantOverride>
+                    </div>
+                  ) : entry.live ? (
+                    <p className="text-cap min-w-0 flex-1 text-text-3">{t('studio.noPreview')}</p>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ) : null}
 
           {styles.isPending ? (
             <Skeleton className="h-5 w-40" />
@@ -191,7 +198,7 @@ export function StyleStudioPage() {
               return (
                 <div key={v} aria-current={isActive || undefined} className="flex items-end gap-4 pt-3 pb-4">
                   <span className="flex h-11 w-12 shrink-0 items-center">
-                    <Numeral size="num" value={v} tone={isActive ? 'ink' : 'pending'} dot={isActive && entry.live} />
+                    <Numeral size="num" value={v} tone={isActive ? 'ink' : 'pending'} dot={isActive} />
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <div className="flex h-5 items-baseline justify-between gap-4">
@@ -206,7 +213,7 @@ export function StyleStudioPage() {
                       ) : (
                         <>
                           {previewable ? (
-                            <div className="flex h-11 w-[142px] shrink-0 items-center overflow-hidden">
+                            <div className="flex h-11 min-w-0 max-w-[142px] flex-1 items-center overflow-hidden">
                               <UnlitPills>
                                 <VariantOverride styles={{ [entry.id]: v }}>
                                   <Demo id={entry.id} />

@@ -85,7 +85,7 @@
       "route": "/admin/styles",
       "height": 1300,
       "reach": "seed",
-      "why": "undrawn (screen note, frame 3): an element no component reads - hero tag and section tag 'nem használt', studio.noPreview in the hero, studio.inertExplain in place of the consequence note, five disabled commits, the active row still 'Ez az aktív'.",
+      "why": "undrawn (screen note, frame 3): an element no component reads - hero tag and section tag 'nem használt', the giant letter with its lime active dot and nothing beside it (fix2: studio.noPreview would contradict inertExplain), studio.inertExplain in place of the consequence note, five disabled commits, the active row still 'Ez az aktív'.",
       "steps": [
         {
           "click": {
@@ -117,7 +117,7 @@
       "route": "/admin/styles",
       "height": 1300,
       "reach": "seed",
-      "why": "undrawn: an element this screen cannot demonstrate - the hero carries studio.noPreview beside the giant letter, the rows have no stage.",
+      "why": "undrawn: an element this screen cannot demonstrate - while it is live the hero carries studio.noPreview beside the giant letter; dormant today (Q3 a), so the letter stands alone (fix2); the rows have no stage.",
       "steps": [
         {
           "click": {
@@ -149,7 +149,7 @@
       "route": "/admin/styles",
       "height": 1300,
       "reach": "fixture",
-      "why": "GET /ui/element-styles fails: the hero falls back to studio.noPreview with the '·' caption, the five rows render with none active, the load-failed message stands under the list (no retry control: none exists today, R22).",
+      "why": "GET /ui/element-styles fails: no letter, the empty hero line collapses (fix2), the '·' caption, the five rows render with none active, the load-failed message stands under the list (no retry control: none exists today, R22).",
       "fixtures": [
         {
           "method": "GET",
