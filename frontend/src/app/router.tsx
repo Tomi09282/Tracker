@@ -158,3 +158,28 @@ export const router = createBrowserRouter([
   // Every unknown path lands somewhere real rather than on a blank screen.
   { path: '*', element: <Navigate to="/" replace /> },
 ]);
+
+// ── THE SIGN-IN CHUNK IS WARMED, SO IT IS THERE WHEN THE NETWORK IS NOT ─────────────────────────
+//
+// Splitting AuthPage out of the first bundle (above) has one offline cost. A signed-in member who
+// opens the app with no signal is sent to /login by RequireAuth (the session read fails), and the
+// service worker caches hashed chunks only on first use (public/sw.js) - so a member who never
+// visited /login had no AuthPage chunk on disk, and the router showed its default "Failed to fetch
+// dynamically imported module" screen instead of the sign-in form (sweep B, row 7). Base shipped
+// AuthPage eagerly and never hit this.
+//
+// The fix keeps the split: once the first paint is done and the page is idle, the same module is
+// imported once in the background. Vite resolves it to the same hashed chunk the lazy route uses,
+// so the request goes through the service worker and lands in its cache like any visited page.
+// A failure here is silent: it only means the chunk is fetched later, on demand, as before.
+if (typeof window !== 'undefined') {
+  const warmSignIn = () => {
+    void import('../features/auth/AuthPage').catch(() => {});
+  };
+  const whenIdle = () => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(warmSignIn, { timeout: 5000 });
+    else window.setTimeout(warmSignIn, 2000);
+  };
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
+}

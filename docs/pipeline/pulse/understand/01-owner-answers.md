@@ -49,3 +49,11 @@ client errors, the backend check suite green, a verify script for the new field)
 no still get one, generated in the same style as the existing stills and shipped through the asset pipeline. The
 library rows (and exercise detail, if it shows equipment) render the still by key; no key = the empty cell, never a
 guessed picture.
+
+## Owner, 2026-10-17 — Phase 0 of the LifeOS effort
+
+- Q2 theme packs: delist on the backend (migration 030) with **no compensation** - dev/test data only, no real buyers.
+- Master: after the Pulse closing, the orchestrator prepares the merge of pulse-redesign with master locally (conflicts
+  resolved in a local merge), the owner reviews and pushes himself; the owner coordinates migration numbers 030-035
+  with the other developer.
+- LifeOS plan approved: C:/Users/Petike/.claude/plans/abundant-booping-willow.md.
