@@ -380,16 +380,27 @@ export function PostEditorPage() {
                   is not published, which is the property that route exists for.
                   Feathered, as the visitor meets it on the post page and in the feed (kit gap
                   G-data 11): the picture glows out of the black the way compose-post-1 draws it,
-                  instead of standing as a grey-edged rectangle. */}
-              <UserPhoto
-                src={'/api/v1/compose/posts/' + post.id + '/cover'}
-                alt={cover.alt ?? ''}
-                ratio={16 / 9}
-                priority
-                feather
-                className="w-full"
-              />
-              <div className="flex flex-col gap-1">
+                  instead of standing as a grey-edged rectangle. Drawn WHOLE at its own shape
+                  inside the 16:9 slot, never cropped to it — see `coverPlacement`. */}
+              {(() => {
+                const at = coverPlacement(cover.width, cover.height);
+                return (
+                  <div className="relative w-full" style={{ aspectRatio: SLOT_RATIO }}>
+                    <div className="absolute" style={{ left: at.left, top: at.top, width: at.width }}>
+                      <UserPhoto
+                        src={'/api/v1/compose/posts/' + post.id + '/cover'}
+                        alt={cover.alt ?? ''}
+                        ratio={at.ratio}
+                        priority
+                        feather
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+              {/* `relative`: a picture taller than the slot runs 23 pt under it (the frame's
+                  split), and the caption has to paint over that faded edge, not under it. */}
+              <div className="relative flex flex-col gap-1">
                 {/* `Kép eltávolítása` and not `Csere`: there IS no replace. The server refuses a
                     second cover, so changing one is delete then upload. */}
                 <SectionHeader
@@ -632,4 +643,41 @@ export function PostEditorPage() {
       </Sheet>
     </Screen>
   );
+}
+
+/** The cover slot: the column's width at 16:9 (compose-post-1: 354 x 199). */
+const SLOT_RATIO = 16 / 9;
+/** The tallest a cover is drawn, as a fraction of the slot's width (compose-post-1: 240 / 354). */
+const COVER_MAX_H = 240 / 354;
+/** Of a picture taller than the slot, the share that rises above it (compose-post-1: 18 of 41 pt). */
+const COVER_RISE = 18 / 41;
+
+/**
+ * Where the cover is drawn inside its 16:9 slot — compose-post-1, body script `pic('cover-gym',
+ * 320, 240)` at `[17, -18]` in the 354 x 199 slot.
+ *
+ * ═══ WHOLE, NEVER CROPPED ══════════════════════════════════════════════════════════════════════
+ *
+ * The frame draws the picture whole at its own shape: the 4:3 still is 320 x 240, centred across
+ * the slot and standing 18 pt above it and 23 pt below it, so the hanging lamp at its top and the
+ * pool of light at its bottom both survive. Cropping it to fill the slot (what this page did before)
+ * cut the lamp off — and the description under it says "lámpafényben".
+ *
+ * Generalised to any upload, which keeps its own aspect on the server (`fit: inside`): the
+ * picture is as wide as the slot unless that would make it taller than 240 / 354 of the slot's
+ * width; then the height wins. So a 16:9 upload fills the slot exactly (the honest rectangle the
+ * screen note asks for), a 4:3 one is the frame's 320 x 240, a portrait one stands narrower in the
+ * middle. A picture taller than the slot overflows it with the frame's 18 : 23 split; one shorter
+ * than the slot is centred in it. The slot keeps its 16:9 height in the flow, so the caption and
+ * everything under it stay on the frame's lines whatever the upload's shape.
+ *
+ * All four numbers are fractions of the slot, so the same picture scales with a narrower column.
+ * A cover with no recorded size falls back to the slot's own shape.
+ */
+function coverPlacement(width: number, height: number) {
+  const ratio = width > 0 && height > 0 ? width / height : SLOT_RATIO;
+  const w = Math.min(1, COVER_MAX_H * ratio); // of the slot's width
+  const h = (w / ratio) * SLOT_RATIO; // of the slot's height
+  const top = h > 1 ? -(h - 1) * COVER_RISE : (1 - h) / 2;
+  return { ratio, left: `${((1 - w) / 2) * 100}%`, width: `${w * 100}%`, top: `${top * 100}%` };
 }

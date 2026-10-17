@@ -2,17 +2,9 @@
   "about": "S-compose-post - the frame data of compose-post-1 / -2 and the undrawn states of the Poszt szerkesztő (/compose/posts/:publicId, URL only on a phone, owner answer Q5; PLAN 4.1 rule 7). Account C. compose-post-1 runs on the sandbox draft post ({draftPost}); its title is a fixture edit of the recorded GET and the autosave receipt comes from two keystrokes whose PUT is answered from the recorded GET of the same post (no recording of the PUT exists; the page does not read the PUT answer beyond success). Nothing is written live by these captures: publish / withdraw / restore are never fired, and the autosave PUTs are answered in the browser.",
   "overrides": {
     "compose-post-1": {
-      "why": "The sandbox draft is titled \"PULSE homokozó – piszkozat borítóval\" (the sandbox script finds it by that name, so it is never renamed live); the frame reads \"Téli tömegelő – piszkozat\" (115 left). The receipt \"Automatikus mentés · Mentve 09:40\" exists only after an autosave: one character typed and removed again, each PUT answered from the recorded GET of the same post, the clock at 09:40. The body is the recorded one, character for character the frame's. Verdict cap matched-fixture. The cover slot is masked: the frame draws the 4:3 sample still whole inside the 16:9 slot (risk R2), the app shows the honest cover crop.",
+      "why": "The sandbox draft is titled \"PULSE homokozó – piszkozat borítóval\" (the sandbox script finds it by that name, so it is never renamed live); the frame reads \"Téli tömegelő – piszkozat\" (115 left). The receipt \"Automatikus mentés · Mentve 09:40\" exists only after an autosave: one character typed and removed again, each PUT answered from the recorded GET of the same post, the clock at 09:40. The body is the recorded one, character for character the frame's. Verdict cap matched-fixture. The cover is not masked: since fix round 2 the picture is drawn whole at its own 4:3 shape inside the 16:9 slot (320 x 240, 18 pt above and 23 pt below the slot), as the frame draws it.",
       "reach": "fixture",
       "clock": "2026-10-15T09:40:00+02:00",
-      "mask": [
-        {
-          "x": 24,
-          "y": 178,
-          "w": 354,
-          "h": 199
-        }
-      ],
       "fixtures": [
         {
           "method": "GET",

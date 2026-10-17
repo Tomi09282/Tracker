@@ -68,5 +68,18 @@
   "copyQuestions": [],
   "proposedCopy": [],
   "requests": ["R-S-compose-post-01 (open, not blocking)"],
-  "budget": { "before": 50, "after": 0 }
+  "budget": { "before": 50, "after": 0 },
+  "fix2": {
+    "date": "2026-10-17",
+    "review": ".pulse/review/S-compose-post/REVIEW.md (re-check 2026-10-17)",
+    "fixed": [
+      "diff 1 (blocking): the cover is drawn WHOLE at its own shape inside the 16:9 slot (coverPlacement in PostEditorPage.tsx): as wide as the slot unless that makes it taller than 240/354 of the slot width, then the height wins; taller than the slot = overflow with the frame 18 : 23 split, shorter = centred. compose-post-1: Image/cover-gym matched at 41,160,320,240 (delta 0 / 0.1). A 16:9 upload still fills the slot exactly. Feather kept: blend modes are banned in src, and without it the pure-black edge of the uploaded still shows as a rectangle on the canvas and over the caption. The caption is relative so it paints over the faded overflow. The slot mask in states.json is dropped."
+    ],
+    "notFixedHere": [
+      "diff 2 (minor): the error toast over the push row - toasts are fired by the frozen handlers and drawn by the shell ToastHost; request to the shell owner",
+      "diff 3 (minor): the seeded demo posts carry a 64 x 180 transparent placeholder cover - seed data (backend), not this screen",
+      "diff 4 (minor): the focus-walk probe misses the TextArea focus line, which the kit draws as ::after on the wrapper (lime 2 px on focus-within) - probe / kit, not this screen"
+    ],
+    "pairs": ".pulse/pairs/S-compose-post-fix2/"
+  }
 }
