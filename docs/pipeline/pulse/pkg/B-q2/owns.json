@@ -1,0 +1,22 @@
+{
+  "id": "B-q2",
+  "decision": "owner 2026-10-17, .pulse/owner-answers.md, 'Phase 0 of the LifeOS effort': Q2 theme packs are delisted on the backend (migration 030) with no compensation",
+  "owns": [
+    "backend/src/db/migrations/030_retire_theme_packs.sql",
+    "backend/scripts/verify-030.mjs",
+    "backend/scripts/seed-smoke-store.mjs",
+    "backend/scripts/verify-019.mjs",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke-run.mjs",
+    "backend/package.json",
+    "docs/pipeline/pulse/pkg/B-q2/**"
+  ],
+  "handIn": {
+    "shared.patch": ["frontend/src/features/coins/CoinsPage.tsx"]
+  },
+  "notInScope": [
+    "no compensation, no refund ledger row, no new reason key (owner ruling)",
+    "no revocation of existing entitlements and no rewrite of user_theme_prefs (history stays as it was)",
+    "seed-demo.mjs is unchanged: it already buys only a live item, so a fresh demo seed now writes no purchase"
+  ]
+}

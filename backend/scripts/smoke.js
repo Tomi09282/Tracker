@@ -4322,13 +4322,21 @@ if (seeded) {
   }
 
   // --- the store ---------------------------------------------------------------------------------
-  let aurora = null;
-  let ember = null;
+  // Migration 030 retired the only two items the app sold (the Aurora / Ember theme packs), so the
+  // store a fresh database ships is EMPTY. smoke-run seeds two probe items (seed-smoke-store.mjs)
+  // so the money route below keeps its five passes; verify-030 proves the retirement itself.
+  let probeA = null;
+  let probeB = null;
   {
     const { res, json } = await call('/api/v1/coins/store', { jar: rich });
-    aurora = (json?.items ?? []).find((i) => i.sku === 'theme.aurora');
-    ember = (json?.items ?? []).find((i) => i.sku === 'theme.ember');
-    check('the store lists the premium packs, unowned', res.status === 200 && aurora?.owned === 0 && ember?.owned === 0, `${json?.items?.length} items`);
+    probeA = (json?.items ?? []).find((i) => i.sku === 'smoke.probe-a');
+    probeB = (json?.items ?? []).find((i) => i.sku === 'smoke.probe-b');
+    check('the store lists the two probe items, unowned', res.status === 200 && probeA?.owned === 0 && probeB?.owned === 0, `${json?.items?.length} items`);
+    check(
+      'and no retired theme pack is offered (030)',
+      res.status === 200 && !(json?.items ?? []).some((i) => i.sku.startsWith('theme.')),
+      (json?.items ?? []).map((i) => i.sku).join(', '),
+    );
   }
 
   // --- the admin adjustment, which is the only way coins enter --------------------------------
@@ -4405,37 +4413,37 @@ if (seeded) {
   // --- the purchase ------------------------------------------------------------------------------
   {
     // FORGE: the client sends the price it wants to pay.
-    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'cheapbuy001', expected_price_minor: aurora.priceMinor, price_minor: 1 },
+    const { res } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'cheapbuy001', expected_price_minor: probeA.priceMinor, price_minor: 1 },
     });
     check('FORGE: sending a price alongside the agreement -> 400', res.status === 400, `status ${res.status}`);
   }
   {
     // FORGE: the agreement itself is wrong. It can only make the purchase FAIL.
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
       method: 'POST', jar: rich, body: { idempotency_key: 'wrongprice1', expected_price_minor: 1 },
     });
     const wallet = await call('/api/v1/coins/wallet', { jar: rich });
-    check('FORGE: disagreeing about the price -> 409 with the real one, nothing charged', res.status === 409 && json?.priceMinor === aurora.priceMinor && wallet.json?.balanceMinor === 100000, `status ${res.status}, priceMinor ${json?.priceMinor}`);
+    check('FORGE: disagreeing about the price -> 409 with the real one, nothing charged', res.status === 409 && json?.priceMinor === probeA.priceMinor && wallet.json?.balanceMinor === 100000, `status ${res.status}, priceMinor ${json?.priceMinor}`);
   }
   let receipt = null;
   {
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeA.priceMinor },
     });
     receipt = json;
     check(
       'a purchase debits exactly the item price and grants the entitlement',
-      res.status === 200 && json?.pricePaidMinor === aurora.priceMinor
-        && json.balanceMinor === 100000 - aurora.priceMinor && Number.isInteger(json.entitlementId),
+      res.status === 200 && json?.pricePaidMinor === probeA.priceMinor
+        && json.balanceMinor === 100000 - probeA.priceMinor && Number.isInteger(json.entitlementId),
       `status ${res.status}, paid ${json?.pricePaidMinor}, balance ${json?.balanceMinor}`,
     );
   }
   {
     // REPLAY: byte-identical except for `replayed`. This is the defect the review found in every
     // candidate — a fresh path reporting a JS variable and a replay path reporting the stored row.
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeA.priceMinor },
     });
     const differing = Object.keys({ ...receipt, ...json }).filter((k) => k !== 'replayed' && JSON.stringify(receipt[k]) !== JSON.stringify(json[k]));
     check(
@@ -4446,12 +4454,12 @@ if (seeded) {
   }
   {
     const wallet = await call('/api/v1/coins/wallet', { jar: rich });
-    check('and the replay charged nothing', wallet.json?.balanceMinor === 100000 - aurora.priceMinor, `${wallet.json?.balanceMinor}`);
+    check('and the replay charged nothing', wallet.json?.balanceMinor === 100000 - probeA.priceMinor, `${wallet.json?.balanceMinor}`);
   }
   {
     // REPLAY, THIRD CASE: same key, different ITEM.
-    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: ember.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeB.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeB.priceMinor },
     });
     check('REPLAY: the same key for a different item -> 409, not somebody else\'s receipt', res.status === 409, `status ${res.status}`);
   }
@@ -4464,14 +4472,14 @@ if (seeded) {
     check('NAMESPACE: the same client key on another endpoint is a real, separate operation', res.status === 200 && json?.replayed === false, `status ${res.status}, replayed ${json?.replayed}`);
   }
   {
-    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyagain001', expected_price_minor: aurora.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyagain001', expected_price_minor: probeA.priceMinor },
     });
     check('buying what you already own -> 409', res.status === 409, `status ${res.status}`);
   }
   {
-    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
-      method: 'POST', jar: poor, body: { idempotency_key: 'poorbuy0001', expected_price_minor: ember.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeB.id}/purchase`, {
+      method: 'POST', jar: poor, body: { idempotency_key: 'poorbuy0001', expected_price_minor: probeB.priceMinor },
     });
     check('buying with an empty wallet -> 409', res.status === 409, `status ${res.status}`);
   }
@@ -4495,12 +4503,12 @@ if (seeded) {
 
     await call(`/api/v1/admin/users/${raceId}/coins`, {
       method: 'POST', jar: adminJar,
-      body: { amount_minor: aurora.priceMinor, note: 'exactly one purchase', idempotency_key: `race-${stamp}`.slice(0, 60) },
+      body: { amount_minor: probeA.priceMinor, note: 'exactly one purchase', idempotency_key: `race-${stamp}`.slice(0, 60) },
     });
 
     const [a, b] = await Promise.all([
-      call(`/api/v1/coins/store/${aurora.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceaurora1', expected_price_minor: aurora.priceMinor } }),
-      call(`/api/v1/coins/store/${ember.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceember01', expected_price_minor: ember.priceMinor } }),
+      call(`/api/v1/coins/store/${probeA.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceaurora1', expected_price_minor: probeA.priceMinor } }),
+      call(`/api/v1/coins/store/${probeB.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceember01', expected_price_minor: probeB.priceMinor } }),
     ]);
     const wallet = await call('/api/v1/coins/wallet', { jar: raceJar });
     const won = [a, b].filter((r) => r.res.status === 200).length;
@@ -4533,18 +4541,27 @@ if (seeded) {
   }
 
   // --- THE THEME IS THE THING THE COINS BOUGHT ----------------------------------------------------
+  //
+  // Since 030 no premium pack is on sale or wearable: Aurora and Ember are retired, so every
+  // account gets the same 404 for them that an unknown pack gets, and the roster lists the five
+  // free packs only. The owner-can-apply path is verify-019's (on the 029 schema it was built for).
   {
     const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'aurora', accent: null, gradient: null } });
-    check('IDOR: applying a theme you have not bought -> 404, not 403', res.status === 404, `status ${res.status}`);
+    check('IDOR: applying a premium theme you have not bought -> 404, not 403', res.status === 404, `status ${res.status}`);
   }
   {
     const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'nosuchpack', accent: null, gradient: null } });
     check('and an unknown pack answers IDENTICALLY, so the paid catalogue cannot be enumerated', res.status === 404, `status ${res.status}`);
   }
   {
-    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: rich, body: { pack: 'aurora', accent: null, gradient: null } });
+    const { json } = await call('/api/v1/me/theme', { jar: rich });
+    const keys = (json?.packs ?? []).map((p) => p.key);
+    check('the roster lists the five free packs and no retired one (030)', keys.length === 5 && !keys.includes('aurora') && !keys.includes('ember'), keys.join(', '));
+  }
+  {
+    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: rich, body: { pack: 'solar', accent: null, gradient: null } });
     const read = await call('/api/v1/me/theme', { jar: rich });
-    check('the buyer CAN apply it', res.status === 200 && read.json?.theme?.pack === 'aurora', `status ${res.status}, pack ${read.json?.theme?.pack}`);
+    check('a free pack applies', res.status === 200 && read.json?.theme?.pack === 'solar', `status ${res.status}, pack ${read.json?.theme?.pack}`);
   }
 
   // --- AN ACHIEVEMENT IS ACTUALLY EARNABLE ------------------------------------------------------

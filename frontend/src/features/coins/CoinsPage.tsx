@@ -124,14 +124,19 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
     );
   }
 
-  const items = store.data?.items ?? [];
-  // Q2 (owner answer, a DISPLAY filter): a theme pack the member does not own is not offered any
-  // more — Pulse has one look. One already bought keeps its "Megvan" row. The purchase flow below
-  // is untouched; the backend delisting is its own package.
-  const listed = items.filter((i) => !(i.sku.startsWith('theme.') && i.owned !== 1));
-  if (listed.length === 0) {
+  // A failed read keeps the empty copy it always had (there is no error copy for the store).
+  if (store.isError) {
     return <EmptyState title={t('coins.storeEmptyTitle')} body={t('coins.storeEmptyBody')} />;
   }
+
+  const items = store.data?.items ?? [];
+  // Q2: the theme packs are delisted on the server (migration 030, owner ruling 2026-10-17), so
+  // GET /coins/store no longer returns them at all. The filter stays as a display belt for an
+  // older server: a theme pack the member does not own is never offered. An EMPTY store draws
+  // nothing — no section label, no empty-state block: there is nothing to say about a shop that
+  // has nothing in it, and the frames draw no such state.
+  const listed = items.filter((i) => !(i.sku.startsWith('theme.') && i.owned !== 1));
+  if (listed.length === 0) return null;
 
   return (
     <>

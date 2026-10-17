@@ -1150,7 +1150,6 @@
       "owns": [
         "backend/src/exercises/routes.js",
         "backend/scripts/verify-equipment.mjs",
-        "backend/package.json",
         "docs/pipeline/pulse/pkg/B-equipment/**"
       ],
       "handIn": {
@@ -1171,7 +1170,7 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field."
+      "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field. At merge-B-q2 backend/package.json passed to B-q2 (B-equipment is closed; one file, one owner)."
     },
     {
       "id": "B-roles",
@@ -1182,7 +1181,6 @@
         "backend/src/logs/routes.js",
         "backend/scripts/check-routes.mjs",
         "backend/scripts/verify-gates.mjs",
-        "backend/scripts/smoke.js",
         "docs/pipeline/pulse/pkg/B-roles/**"
       ],
       "handIn": {},
@@ -1201,7 +1199,44 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-roles): the package ran outside the plan entry list (no brief). The plan ownership table gave check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them. It also fixed a CRLF misread in check-routes (the public-router scan splits lines on \r?\n). The frontend half (useSession roles, the trainer chat list on side=coach) is the integrator's. The dev backend on :3000 needs a restart on the merged code before the live app serves roles, side and the records 403."
+      "notes": "Added by the integrator at merge (merge-B-roles): the package ran outside the plan entry list (no brief). The plan ownership table gave check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them. It also fixed a CRLF misread in check-routes (the public-router scan splits lines on \r?\n). The frontend half (useSession roles, the trainer chat list on side=coach) is the integrator's. The dev backend on :3000 needs a restart on the merged code before the live app serves roles, side and the records 403. At merge-B-q2 backend/scripts/smoke.js passed to B-q2 (B-roles is closed; one file, one owner)."
+    },
+    {
+      "id": "B-q2",
+      "title": "Q2 theme packs off sale on the backend (owner ruling 2026-10-17, .pulse/owner-answers.md, Phase 0 of the LifeOS effort): migration 030 delists the Aurora / Ember store items and retires both premium theme packs, with no compensation",
+      "owns": [
+        "backend/src/db/migrations/030_retire_theme_packs.sql",
+        "backend/scripts/verify-030.mjs",
+        "backend/scripts/seed-smoke-store.mjs",
+        "backend/scripts/verify-019.mjs",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke-run.mjs",
+        "backend/package.json",
+        "docs/pipeline/pulse/pkg/B-q2/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/features/coins/CoinsPage.tsx"
+        ]
+      },
+      "dependsOn": [
+        "B-roles"
+      ],
+      "parallelGroup": "backend lane (approved plan phase 0)",
+      "size": "S",
+      "acceptance": [
+        "migration 030 delists theme.aurora and theme.ember the way 019 allows (active = 0, delisted_at set, identity frozen) and retires both premium theme_packs (active = 0); nothing is deleted, no entitlement is revoked, no money moves, no compensation row is written",
+        "triggers keep the sale closed for every writer: a retired item cannot be relisted, no new live item can grant a retired pack entitlement, a retired priced pack cannot be switched back on",
+        "GET /coins/store returns no theme pack and a purchase of one is refused with nothing charged; existing purchase history is byte-identical (verify-030, last step of check:all)",
+        "verify-019 builds from migrations 001..029; smoke keeps the purchase route forge / replay / race passes on two seeded probe items (seed-smoke-store)",
+        "hand-in: an empty store draws nothing under the switch on the coins page; a failed store read keeps the existing empty copy"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-q2): the package ran outside the plan entry list (no brief). It owns smoke.js after the closed B-roles. seed-demo.mjs is unchanged: a fresh demo seed after 030 writes no Aurora purchase (demo balance 440 instead of 190). The dev backend on :3000 applies 030 only after a restart on the merged code."
     }
   ],
   "screens": [
@@ -2183,6 +2218,8 @@
         "frontend/src/features/admin/ModerationQueue.tsx",
         "frontend/src/features/admin/MarketplaceQueue.tsx",
         "frontend/src/features/admin/AdminMetrics.tsx",
+        "frontend/src/features/admin/AdminAccountsPage.tsx",
+        "frontend/src/features/admin/AdminMarketplacePage.tsx",
         "docs/pipeline/pulse/pkg/S-admin/**"
       ],
       "mustNotTouch": [
@@ -2215,7 +2252,7 @@
       ],
       "size": "L",
       "wave": 3,
-      "notes": "Deletes the dead AdminMetrics.tsx and the 14 adminMetrics.* keys (allowed by the consumer rule: no other file reads them); the adminMetrics.clock.utc exemption entry is dropped by the tool. Keep the Stílus stúdió link (the only door to /admin/styles). The account list becomes two-line rows built from ListRow. The undrawn Piactér tab follows the moderation grammar. Approve / reject are never fired live: their outcomes are fixtures. The desktop layout stays (R21).",
+      "notes": "Deletes the dead AdminMetrics.tsx and the 14 adminMetrics.* keys (allowed by the consumer rule: no other file reads them); the adminMetrics.clock.utc exemption entry is dropped by the tool. Keep the Stílus stúdió link (the only door to /admin/styles). The account list becomes two-line rows built from ListRow. The undrawn Piactér tab follows the moderation grammar. Approve / reject are never fired live: their outcomes are fixtures. The desktop layout stays (R21). At merge-B-q2 the integrator gave S-admin the two placeholder pages P1-nav created for it (AdminAccountsPage.tsx, AdminMarketplacePage.tsx), which had no owner.",
       "i18nNamespaces": [
         "admin",
         "adminUsers"

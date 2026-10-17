@@ -1,0 +1,19 @@
+{
+  "id": "B-q2",
+  "status": "done",
+  "change": "Migration 030_retire_theme_packs.sql: the two store items theme.aurora / theme.ember are delisted (active = 0, delisted_at stamped - 019's retirement path, item identity frozen) and the premium theme_packs aurora / ember are retired (active = 0). Three triggers keep the sale closed for every writer: no relisting of an item that grants a retired pack, no NEW live item that grants one (019's partial unique index releases the string on delist), no re-activation of a retired priced pack. Nothing is deleted, no entitlement is revoked, no money moves, no reason key is added (no compensation). The routes are unchanged: GET /coins/store and purchaseStoreItemTx already share the 'active = 1 AND delisted_at IS NULL' predicate, so the store answers [] and a purchase is 404.",
+  "frontend": "shared.patch on CoinsPage.tsx (owned by S-coins): an EMPTY store draws nothing under the Bolt / Eredmények / Kimutatás switch (no section label, no empty-state block); a FAILED store read keeps the existing 'A bolt üres' empty copy (the screen note's only failure copy). No i18n key added or removed.",
+  "tests": {
+    "verify:030": "31 passed, 0 failed; 17 fail with 030 removed. Builds a 029 encrypted DB with a real Aurora purchase (receipt, debit, entitlement, audit, theme pref), boots the real server (its runner applies 030), proves history byte-identical, store empty, Ember purchase with enough coins 404 + nothing charged, owned Aurora 404, statement and entitlements intact, packs gone from the roster and not applicable even by the owner, free pack applies, schema refuses receipt / relist / new live item / pack re-activation, an unrelated new item still sells. Hermetic: temp DB, random port, generated secrets.",
+    "verify:019": "56 passed - now built from migrations 001..029 (the schema it attacks); on the full chain its Aurora purchases would be refused by 030 instead of the guard each assertion names.",
+    "smoke": "593 passed, 0 failed - smoke-run seeds two probe items (seed-smoke-store.mjs, smoke.probe-a / -b at 25000) so the purchase route keeps its forge / replay / race / IDOR / extremes passes; new: no theme.* item listed, the roster has the five free packs only, a free pack applies (replaces 'the buyer CAN apply aurora').",
+    "check:all": "every step green on a throwaway migrated + dev-user-seeded DB, verify:030 last (verify:015 also green there; its known 'Túró Rudi' red is a dev-DB data issue).",
+    "frontend build": "npm run build green with shared.patch applied"
+  },
+  "handIn": ["docs/pipeline/pulse/pkg/B-q2/shared.patch (frontend/src/features/coins/CoinsPage.tsx)"],
+  "followUps": [
+    "the dev backend on :3000 applies 030 only when the orchestrator restarts it on the merged code; until then the live store still sells both packs",
+    "after 030 the live coins-1 frame (Aurora 'Megvan' + Ember 250) can no longer be reached: the Bolt view is empty. The replay recording still shows the old store; a 'store empty' fixture / state for S-coins would make the new truth capturable",
+    "a FRESH seed-demo no longer writes the member's Aurora purchase, so the demo balance becomes 440 instead of 190 and the statement loses the -250 row; the existing dev DB keeps its history"
+  ]
+}

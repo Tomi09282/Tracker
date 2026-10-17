@@ -85,8 +85,9 @@ if (!up) {
 
   // Taxonomy labels beyond English, plus German switched on. This is application DATA in the
   // same sense migrations are: without it the suite cannot tell a working fallback chain from a
-  // broken one, because every language would look equally untranslated.
-  for (const step of ['scripts/seed-taxonomy-i18n.mjs', 'scripts/seed-smoke-languages.mjs']) {
+  // broken one, because every language would look equally untranslated. The store probes give the
+  // purchase route something to sell now that 030 has retired the only real items.
+  for (const step of ['scripts/seed-taxonomy-i18n.mjs', 'scripts/seed-smoke-languages.mjs', 'scripts/seed-smoke-store.mjs']) {
     const code = await new Promise((resolve) => {
       // stdout is inherited on purpose. A silent setup step that quietly did nothing is how the
       // language checks came to fail with a message about German that had nothing to do with the
