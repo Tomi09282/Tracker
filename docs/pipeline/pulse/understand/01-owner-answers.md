@@ -28,3 +28,12 @@ Asked after the independent review of S-home (blocking finding 1: the D2 library
 bar). Answer: **the "Gyakorlatok" row goes BELOW the nutrition section.** The first screen of Home stays exactly the
 approved home-1 / home-2 (header, week, today's workout, pill, nutrition); the library row is one scroll further down,
 after TÁPLÁLKOZÁS. No empty band under it.
+
+## Orchestrator ruling, 2026-10-17 — S-workout capture fixtures (R-S-workout-04 / -07)
+
+pulse-merge-check refused three S-workout fixtures that are mutation answers or values no recording holds (the
+record trophy of workout-2 = the POST /sets/:id/check answer; interval-idle and withdrawn states). RULING: such a
+fixture is ALLOWED when it is schema-checked against the real response type of that endpoint (the shared TypeScript
+type or the backend route's zod / response shape), lives only in the package's states.json / fixtures, and the frame
+is reported as "matched-fixture", never "matched". Product code never reads a fixture. The integrator merges S-workout
+on that basis; if a fixture cannot be schema-checked, that one state drops to "structure".

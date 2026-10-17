@@ -546,7 +546,6 @@
     "templates": "Vorlagen",
     "clientPlans": "Klientenpläne",
     "newName": "Name des neuen Plans",
-    "create": "Erstellen",
     "emptyTitle": "Noch keine Pläne",
     "emptyBody": "Baue eine Vorlage einmal und gib sie danach jedem Klienten.",
     "dayCount": "{{count}} Tage",

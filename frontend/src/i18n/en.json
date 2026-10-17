@@ -546,7 +546,6 @@
     "templates": "Templates",
     "clientPlans": "Client plans",
     "newName": "New plan name",
-    "create": "Create",
     "emptyTitle": "No plans yet",
     "emptyBody": "Build a template once, then hand it to any client.",
     "dayCount": "{{count}} days",

@@ -1,0 +1,73 @@
+{
+  "package": "S-coach-plans",
+  "branch": "pulse/S-coach-plans",
+  "verifiedOn": "pulse/S-coach-plans = pulse-redesign 550567a + the S-coach-plans commits, i18n.patch.json applied by pulse-sync",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-coach-plans/i18n.patch.json"
+  ],
+  "files": {
+    "frontend/src/features/plans/PlanListPage.tsx": "render rewritten on the kit: Screen push, ScreenHeader section tight (Tervezés / Edzéstervek), the anchor (hero-plates Pic 238 under the figure, StatBlock + giant Numeral roll, SplitBar inline legend with the status tones live / half / warn / off, the ONE lime pill with the 20 pt plus), Section Sablonok / Kliens-tervek with the count as the trailing node, RowStack trim of module-level PlanRow = ListRow titleSize title, lines 2, subFace data, lime tick subLead for active, the status word in ink (active) / warning (paused), Monogram 28 in the lead slot for client plans with the client name as its sr-only label; empty = hero-plates 352 stage + EmptyState with the pill as its action; error = NoticeLine danger + Újra; loading = blocks; forbidden = Screen root + EmptyState h1. Everything above the return is unchanged (hooks, partitions, byStatus, startPlan with state.focusName, the role gate condition)",
+    "docs/pipeline/pulse/pkg/S-coach-plans/budget.json": "deleted by check-pulse --fix-down (34 -> 0)",
+    "docs/pipeline/pulse/pkg/S-coach-plans/states.json": "overrides.coach-plans-1 (six-row fixture over the recording) + 6 undrawn states + notCapturable (loading, creating)",
+    "docs/pipeline/pulse/pkg/S-coach-plans/i18n.patch.json": "remove plans.create (no reader left); one copy question (failed create has no message)",
+    "docs/pipeline/pulse/pkg/S-coach-plans/requests/": "R-S-coach-plans-01 (ended status in the frame-1 fixture), R-S-coach-plans-02 (a held answer for loading / busy captures)"
+  },
+  "verdicts": {
+    "coach-plans-1": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-coach-plans/coach-plans-1.png",
+      "pair": ".pulse/pairs/S-coach-plans/coach-plans-1.pair.png",
+      "pairWithEndedEdit": ".pulse/pairs/S-coach-plans/coach-plans-1.with-ended-edit.pair.png",
+      "fixture": "states.json overrides.coach-plans-1 (checker OK); the frame's ended row needs R-S-coach-plans-01, so the committed fixture shows that row active: bar and legend read Aktív 5 / Piszkozat 1, the NE row reads ✓ Aktív",
+      "geometry": "committed fixture: 75 compared, 62 matched, 7 deviating (6 plan-name widths only = Figma fixed text boxes against hugging text, dx 0 dy -0.3; the legend count, which is the Lezárva entry the fixture cannot draw), 1 same slot other string + 5 unmatched = the Lezárva legend entry and the ended meta line; 4 style flags = mixed-fill meta lines (frame export reports the first run). With the ended edit (R-01): 68 matched, 7 deviating (6 widths + legend count dx -2.6), 0 unmatched"
+    },
+    "coach-plans-2": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-coach-plans/coach-plans-2.png",
+      "pair": ".pulse/pairs/S-coach-plans/coach-plans-2.pair.png",
+      "geometry": "23 compared, 21 matched, 2 deviating = width only of the empty state's title and body (fixed 354 boxes against hugging text); 0 style mismatches"
+    },
+    "coach-plans-recorded": {
+      "verdict": "structure",
+      "note": "11 plans, two-digit total next to the still, four parts with the warn part, the paused word in the warning ink"
+    },
+    "coach-plans-error": {
+      "verdict": "structure",
+      "open": "targets probe measures the TextLink 'Újra' layout box 24.7 x 44 (same cause as R-S-home-03)"
+    },
+    "coach-plans-offline": {
+      "verdict": "structure",
+      "note": "shell offline line, the pill in the kit's disabled look, rows stay links"
+    },
+    "coach-plans-one": {
+      "verdict": "structure",
+      "note": "one part fills the bar, one legend entry, no Kliens-tervek section"
+    },
+    "coach-plans-long-name": {
+      "verdict": "structure",
+      "note": "two lines + ellipsis in the 327 and 263 columns"
+    },
+    "coach-plans-forbidden": {
+      "verdict": "structure",
+      "note": "member: forbidden empty state as the h1, no header, no pill; GET /plans 403 recorded for user@ with --record --only-missing"
+    },
+    "loading": {
+      "verdict": "structure",
+      "note": "not capturable (R-S-coach-plans-02); code only"
+    },
+    "creating": {
+      "verdict": "structure",
+      "note": "not capturable (R-S-coach-plans-02); Pressable busy"
+    }
+  },
+  "deviations": [
+    "Q4 kept behaviour: a failed 'Új terv' shows no message (none drawn; copy question in i18n.patch.json)",
+    "Q4 kept behaviour: the total counts every non-archived plan; personal / system plans are in the total but in neither section (unchanged quirk)",
+    "Q4 undrawn: the paused status gets the fourth (warn) part of the bar and legend, and the paused word is in the warning ink",
+    "Q4 undrawn: the forbidden state for a member is the kit EmptyState as the h1 without the header (the old ClipboardList mark is gone)",
+    "plans.dayCount counts every day row including rest days (7 nap for a 4-session split) - not changed"
+  ],
+  "copyQuestions": [
+    "failed create has no drawn message"
+  ]
+}

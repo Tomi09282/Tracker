@@ -546,7 +546,6 @@
     "templates": "Sablonok",
     "clientPlans": "Kliens-tervek",
     "newName": "Új terv neve",
-    "create": "Létrehozás",
     "emptyTitle": "Még nincs terved",
     "emptyBody": "Hozz létre egy sablont, és építsd fel egyszer — utána bármelyik kliensnek adhatod.",
     "dayCount": "{{count}} nap",

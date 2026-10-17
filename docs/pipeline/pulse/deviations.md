@@ -82,3 +82,11 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: `nutrition-1` — no string is drawn at this place.
 - What the app does: with no target for the date the calorie bar is left out (the kit bar would draw a 1 pt sliver = 0 % of nothing); the figure carries the unit and the no-target sentence stands under the day line.
 - Status: open — a copy question; nothing was invented.
+
+## DEV-007 — S-coach-plans: PlanListPage 'Új terv' (POST /plans refused)
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-coach-plans/i18n.patch.json`
+- Package: S-coach-plans
+- The frames show: no string is drawn at this place.
+- What the app does: A failed create shows no message today and none is drawn in coach-plans-1 / coach-plans-2; a message would be new copy. Kept silent until the owner decides.
+- Status: open — a copy question; nothing was invented.
