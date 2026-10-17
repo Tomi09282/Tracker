@@ -9,6 +9,6 @@
   "proposedApi": "<Pressable variant=\"link\" shape=\"icon\" glyph=\"field\" … />  (glyph: 'm' default = today, 'field' = [&_svg]:size-5 text-text-2 justify-end)",
   "proposedPatch": null,
   "interim": "the reveal control is the kit icon button as it is (24 pt, text-1, centred); everything else on the line matches",
-  "status": "open",
-  "resolution": null
+  "status": "resolved",
+  "resolution": "G-shell (8827841) added glyph=\"field\" to the control recipe and set it on the reveal control; the probe now matches glyph/eyeOff on auth-1 (21 of 21 layers matched, S-auth-fix final run)."
 }

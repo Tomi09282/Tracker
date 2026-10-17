@@ -33,7 +33,8 @@ const emailLooksValid = (value: string) => schema.shape.email.safeParse(value ??
  * The footer is docked to the bottom and grows UPWARD when the alert line appears; the form hangs
  * under the wordmark. The hero stage between them is the one flexible element: it gives up exactly
  * what keeps CLEAR between the last line of the form and the first line of the footer, in 4 pt steps,
- * at most SQUEEZE_MAX. At rest (both frames) it gives up nothing.
+ * at most SQUEEZE_MAX. At rest (both frames) it gives up nothing. Past SQUEEZE_MAX the footer leaves
+ * the dock and follows the form (small phones, see useFooterFit).
  */
 const STAGE_H = 236; // the stage under the 44 pt top row: y 108 - 344
 const HERO_H = 320; // the still at rest: 250 x 320, from y 32
@@ -45,27 +46,39 @@ const SQUEEZE_MAX = 80;
 
 /**
  * What the hero stage gives up so the form never runs under the docked footer — the frame's own
- * `squeeze` rule, measured on the live layout. The form's end is taken at rest (its measured end
- * plus what is already given up), so the answer does not feed back into itself.
+ * `squeeze` rule, measured on the live layout — and whether the footer can stay docked at all.
+ *
+ * The form's end is taken at rest (its measured end plus what is already given up) and the docked
+ * footer's top is computed from the viewport, the footer's height and the dock's bottom distance,
+ * so neither answer depends on the mode it selects: no feedback, no flicker.
+ *
+ * When even the full squeeze does not make room (a short phone, the offline strip, an alert line,
+ * inline errors) the footer stops docking: it follows the form in the page's flow and the page
+ * scrolls. A fixed footer over the fields is never an option.
  */
-function useHeroSqueeze() {
+function useFooterFit() {
   const formRef = useRef<HTMLFormElement>(null);
   const footRef = useRef<HTMLDivElement>(null);
-  const current = useRef(0);
-  const [squeeze, setSqueeze] = useState(0);
+  const current = useRef({ squeeze: 0, docked: true });
+  /** The docked footer's bottom distance from the viewport bottom, read while it is docked. */
+  const dockGap = useRef(0);
+  const [fit, setFit] = useState({ squeeze: 0, docked: true });
 
   const measure = useCallback(() => {
     const form = formRef.current;
     const foot = footRef.current;
     if (!form || !foot) return;
-    // The footer is fixed (viewport coordinates); the form scrolls (document coordinates).
-    const formEnd = form.getBoundingClientRect().bottom + window.scrollY + current.current;
-    const footTop = foot.getBoundingClientRect().top;
+    const viewportH = document.documentElement.clientHeight;
+    const footBox = foot.getBoundingClientRect();
+    if (current.current.docked) dockGap.current = viewportH - footBox.bottom;
+    // The footer is fixed when docked (viewport coordinates); the form scrolls (document coordinates).
+    const formEnd = form.getBoundingClientRect().bottom + window.scrollY + current.current.squeeze;
+    const footTop = viewportH - dockGap.current - footBox.height;
     const need = Math.ceil((formEnd + CLEAR - footTop) / SQUEEZE_STEP) * SQUEEZE_STEP;
-    const next = Math.min(SQUEEZE_MAX, Math.max(0, need));
-    if (next !== current.current) {
+    const next = { squeeze: Math.min(SQUEEZE_MAX, Math.max(0, need)), docked: need <= SQUEEZE_MAX };
+    if (next.squeeze !== current.current.squeeze || next.docked !== current.current.docked) {
       current.current = next;
-      setSqueeze(next);
+      setFit(next);
     }
   }, []);
 
@@ -73,6 +86,7 @@ function useHeroSqueeze() {
     measure();
     const observer = new ResizeObserver(measure);
     if (formRef.current) observer.observe(formRef.current);
+    // The footer node changes with the mode, so the observer is set up again for each one.
     if (footRef.current) observer.observe(footRef.current);
     // Something above the screen can push the form down without resizing it — the app-level
     // offline strip takes room at the top — so the page's own height is watched too.
@@ -82,9 +96,9 @@ function useHeroSqueeze() {
       observer.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [measure]);
+  }, [measure, fit.docked]);
 
-  return { formRef, footRef, squeeze };
+  return { formRef, footRef, ...fit };
 }
 
 /**
@@ -148,10 +162,35 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   });
 
   const formId = useId();
-  const { formRef, footRef, squeeze } = useHeroSqueeze();
+  const { formRef, footRef, squeeze, docked } = useFooterFit();
   const heroH = HERO_H - squeeze;
   const heroW = Math.round(heroH * HERO_RATIO);
   const heroTop = squeeze ? HERO_LIFT - 4 : HERO_LIFT;
+
+  const footer = (
+    <div ref={footRef} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
+          {formError ? (
+            <NoticeLine tone="danger" role="alert" compact>
+              {formError}
+            </NoticeLine>
+          ) : null}
+          <Pressable type="submit" form={formId} variant="primary" size="lg" busy={busy} className="w-full">
+            {mode === 'login' ? t('auth.login') : t('auth.register')}
+          </Pressable>
+        </div>
+        <p className="flex items-center gap-1.5">
+          <span className="text-body text-text-2">{mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}</span>
+          {/* Its OWN keys, not the button's: this link navigates, it does not create an account. */}
+          <TextLink text="body" to={mode === 'login' ? '/register' : '/login'}>
+            {mode === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
+          </TextLink>
+        </p>
+      </div>
+      <LanguageToggle />
+    </div>
+  );
 
   return (
     <Screen as="main" top="push" gap="none">
@@ -242,32 +281,10 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         />
       </form>
 
-      {/* The docked footer: [alert line, 20 above the pill] → the ONE pill → the switch line →
-          the language switch. It hangs from the bottom and grows upward. */}
-      <Dock as="footer">
-        <div ref={footRef} className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col gap-5">
-              {formError ? (
-                <NoticeLine tone="danger" role="alert" compact>
-                  {formError}
-                </NoticeLine>
-              ) : null}
-              <Pressable type="submit" form={formId} variant="primary" size="lg" busy={busy} className="w-full">
-                {mode === 'login' ? t('auth.login') : t('auth.register')}
-              </Pressable>
-            </div>
-            <p className="flex items-center gap-1.5">
-              <span className="text-body text-text-2">{mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}</span>
-              {/* Its OWN keys, not the button's: this link navigates, it does not create an account. */}
-              <TextLink text="body" to={mode === 'login' ? '/register' : '/login'}>
-                {mode === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
-              </TextLink>
-            </p>
-          </div>
-          <LanguageToggle />
-        </div>
-      </Dock>
+      {/* The footer: [alert line, 20 above the pill] → the ONE pill → the switch line → the language
+          switch. Docked to the bottom while there is room for it (it grows upward); on a phone too
+          short for form and footer it follows the form and the page scrolls (useFooterFit). */}
+      {docked ? <Dock as="footer">{footer}</Dock> : <footer className="mt-8">{footer}</footer>}
     </Screen>
   );
 }
