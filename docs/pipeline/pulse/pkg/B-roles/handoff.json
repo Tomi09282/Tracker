@@ -1,0 +1,21 @@
+{
+  "id": "B-roles",
+  "status": "done",
+  "changes": [
+    "GET /api/v1/auth/me and PATCH /api/v1/auth/me: user.roles derived from users.role as a ladder (user -> [user], coach -> [user, coach], admin -> [user, coach, admin]; a role outside the ladder -> [] fail closed); user.role kept",
+    "GET /api/v1/conversations?side=coach|client: .strict() zod query (z.enum); one static prepared statement, the excluded side bound as NULL (c.coach_id = NULL is never true); absent side = both, unchanged; every row stays bound to req.user.id",
+    "GET /api/v1/clients/:id/records: requireCoach, like /clients/:id/workouts (a member now gets 403 forbidden instead of an empty list)",
+    "check-routes assertion 5: no source in src/ reads the client's view (req.query.view, req.query['view'], { view } = req.query, .parse(req.query).view, an 'x-view' literal); comments blanked, strings kept",
+    "check-routes: the public-router req.user scan splits on \r?\n (it reported two false positives on a CRLF checkout)",
+    "verify-gates: two probes plant req.query.view and req.get('X-View') in the conversation list and expect assertion 5 to fail",
+    "smoke: a stacked-roles section (12 assertions) before logout"
+  ],
+  "consumers": [
+    "frontend useSession (roles), the view switcher / navTabs (viewsFor(roles)), the trainer chat list (?side=coach) - integrator, plan Phase 1"
+  ],
+  "handIn": [],
+  "followUps": [
+    "the running dev backend on :3000 serves roles / side / the records guard only after the orchestrator restarts it on the merged code",
+    "work-packages.json has no B-roles entry (pulse-sync cannot resolve the id); the integrator adds one at merge, as for B-equipment"
+  ]
+}

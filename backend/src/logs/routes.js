@@ -724,10 +724,15 @@ router.get(
  * proof. A subquery that matches nothing yields NULL, `client_user_id = NULL` matches no rows, and
  * an archived link therefore returns an EMPTY LIST rather than an error. The miss is
  * indistinguishable from "this client has no records", which is the point.
+ *
+ * `requireCoach` like its siblings (`/clients/:id/workouts`): the SQL already returns nothing to a
+ * member, but a coach-only read answers a member the same 403 every other coach route does, rather
+ * than an empty list that reads as "no records".
  */
 router.get(
   '/clients/:id/records',
   requireAuth,
+  requireCoach,
   asyncRoute(async (req, res) => {
     const linkId = idParam.parse(req.params.id);
     const records = await db.all(

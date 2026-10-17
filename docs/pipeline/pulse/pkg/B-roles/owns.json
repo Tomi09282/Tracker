@@ -1,0 +1,19 @@
+{
+  "id": "B-roles",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 1 'Backend' (R1 roles ladder, R3 a view grants nothing); owner request 'kezdjuk el implementalni a tervet'",
+  "owns": [
+    "backend/src/auth/routes.js",
+    "backend/src/chat/routes.js",
+    "backend/src/logs/routes.js",
+    "backend/scripts/check-routes.mjs",
+    "backend/scripts/verify-gates.mjs",
+    "backend/scripts/smoke.js",
+    "docs/pipeline/pulse/pkg/B-roles/**"
+  ],
+  "handIn": {},
+  "notInScope": [
+    "the frontend half: useSession gains roles (typed from GET /auth/me), hasRole(), the view model - the integrator's (plan Phase 1 'Client view model (INT)')",
+    "no migration, no JWT change, no guard change: users.role stays the single stored role; roles is derived per read",
+    "POST /auth/login and other endpoints that answer a user row are unchanged; only GET /me and PATCH /me carry roles (as the plan names)"
+  ]
+}

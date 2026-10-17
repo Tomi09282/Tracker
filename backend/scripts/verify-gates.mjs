@@ -98,6 +98,7 @@ const TOUCHED = [
   'src/coaching/routes.js',
   'src/theme/routes.js',
   'src/db/gdpr.js',
+  'src/chat/routes.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -246,6 +247,29 @@ await mutate({
   to: '    const parsed = feedQuery.safeParse(req.query);\n    const who = req.user?.id ?? null;',
   gate: 'scripts/check-routes.mjs',
   expect: 'req.user',
+});
+
+/*
+ * The client's VIEW (user / trainer / admin) is presentation only and must never reach a handler.
+ * Planted where it would be most tempting: the conversation list, whose `?side=` filter is the
+ * legitimate way the trainer view narrows the list — a `?view=` read next to it is the forgery.
+ */
+await mutate({
+  label: 'a handler reading req.query.view is caught — the client view grants nothing',
+  file: 'src/chat/routes.js',
+  from: '    const { side } = ListQuery.parse(req.query);',
+  to: "    const { side } = ListQuery.parse(req.query);\n    const view = req.query.view === 'coach' ? 'coach' : side;",
+  gate: 'scripts/check-routes.mjs',
+  expect: "reads the client's view (req.query.view)",
+});
+
+await mutate({
+  label: "a handler reading an X-View header is caught — the same rule over a header",
+  file: 'src/chat/routes.js',
+  from: '    const { side } = ListQuery.parse(req.query);',
+  to: "    const { side } = ListQuery.parse(req.query);\n    const view = req.get('X-View');",
+  gate: 'scripts/check-routes.mjs',
+  expect: "reads the client's view (an 'x-view' header)",
 });
 
 console.log('\n── check-admin-audit: the log that has to be there when somebody asks ──────────');

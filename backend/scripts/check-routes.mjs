@@ -13,6 +13,9 @@
 //   3. Every route with an `:id` in its path parses it and does not interpolate it. A guard against
 //      the one class of mistake that turns an ownership bug into a database one.
 //
+// Below them: 4. the public router never reads req.user; 5. no source reads the client's VIEW
+//    (?view= / X-View) — roles stack on one account and the view switcher is presentation only.
+//
 // Run: node scripts/check-routes.mjs   (wired into `npm run smoke`'s siblings and the release gate)
 //
 // ═══ THE PARSER LIVES IN scripts/lib/parse-routes.mjs ══════════════════════════════════════════
@@ -23,7 +26,7 @@
 // been printing a route count that was four short since those routes were written.
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseRoutes } from './lib/parse-routes.mjs';
+import { blankComments, parseRoutes } from './lib/parse-routes.mjs';
 
 const ROOT = 'src';
 
@@ -217,7 +220,10 @@ console.log(
   const publicRouter = path.join(ROOT, 'public', 'routes.js');
   if (fs.existsSync(publicRouter)) {
     const src = fs.readFileSync(publicRouter, 'utf8');
-    src.split('\n').forEach((line, i) => {
+    // `\r?\n`, not `\n`: a CRLF checkout (core.autocrlf, no .gitattributes) leaves a `\r` on every
+    // line, `.` does not match it, and the comment-skipping regex below then read the file's own
+    // comment lines as code — two false "read req.user" reports on a clean tree.
+    src.split(/\r?\n/).forEach((line, i) => {
       // Skip comments — the file EXPLAINS the rule, and a gate that trips on its own
       // documentation is a gate somebody deletes.
       const code = line.replace(/\/\/.*$/, '').replace(/^\s*\*.*$/, '');
@@ -235,6 +241,46 @@ console.log(
         );
       }
     });
+  }
+}
+
+/* ── 5. THE CLIENT'S VIEW NEVER REACHES THE SERVER ──────────────────────────────────────────────
+ *
+ * Roles stack on one account (GET /me answers `roles`), and the app offers a view switcher: user,
+ * trainer, admin. The view is a PRESENTATION choice, derived from the URL on the client. It grants
+ * nothing, so the server must never read it: the moment a handler branches on a `?view=` or an
+ * `X-View` header, the client is choosing its own permissions — a forged request (Burp, curl) sets
+ * `view=admin` and the only thing between it and the data is whoever remembered to re-check.
+ *
+ * Every route decides from `req.user` (the verified token) and its own SQL, and this keeps it so.
+ * The check reads every source file with comments blanked (the rule is explained in prose in more
+ * than one place) and strings intact (a header name is a string). It is a textual gate: it catches
+ * the direct spellings — `req.query.view`, `req.query['view']`, `{ view } = req.query`,
+ * `.parse(req.query).view`, and any 'x-view' literal (req.get / req.header / req.headers[...]).
+ */
+{
+  const VIEW_READS = [
+    [/\breq\s*\.\s*query\s*(?:\?\.|\.)\s*view\b/, 'req.query.view'],
+    [/\breq\s*\.\s*query\s*(?:\?\.)?\s*\[\s*['"`]view['"`]\s*\]/, "req.query['view']"],
+    [/\{[^}]*\bview\b[^}]*\}\s*=\s*req\s*\.\s*query\b/, '{ view } = req.query'],
+    [/\breq\s*\.\s*query\s*\)\s*(?:\?\.|\.)\s*view\b/, '.parse(req.query).view'],
+    [/['"`]x-view['"`]/i, "an 'x-view' header"],
+  ];
+  for (const file of files) {
+    const rel = path.relative(ROOT, file).replace(/\\/g, '/');
+    blankComments(fs.readFileSync(file, 'utf8'))
+      .split(/\r?\n/)
+      .forEach((line, i) => {
+        for (const [re, what] of VIEW_READS) {
+          if (re.test(line)) {
+            problems.push(
+              `${rel}:${i + 1} — reads the client's view (${what}). The view is chosen on the client and ` +
+                'grants nothing; a route decides from req.user and its own SQL, never from a view the ' +
+                'caller can forge.',
+            );
+          }
+        }
+      });
   }
 }
 

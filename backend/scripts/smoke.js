@@ -5575,6 +5575,154 @@ if (seeded) {
   }
 }
 
+// --- stacked roles: /me answers the ladder, the chat list filters by side, records is coach-only ---
+//
+// One account, one stored role; what stacks is the permission (requireCoach admits an admin). /me
+// spells the ladder out as `roles` so the app can offer a view switcher — and the view itself never
+// reaches the server (check-routes asserts that). The trainer view lists only coach-side threads
+// through `?side=coach`, a FILTER on the caller's own rows. Placed last, before logout, because it
+// links the second coach to the first as a client — no earlier section sees that link.
+{
+  const member = new Jar();
+  const coachA = new Jar();
+  const dual = new Jar();
+  const admin = new Jar();
+  const pupil = new Jar();
+  const memberEmail = `roles-member-${stamp}@example.com`;
+  const pupilEmail = `roles-pupil-${stamp}@example.com`;
+
+  await call('/api/v1/auth/register', { method: 'POST', body: { email: memberEmail, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: memberEmail, password: PASSWORD }, jar: member });
+  await call('/api/v1/auth/register', { method: 'POST', body: { email: pupilEmail, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: pupilEmail, password: PASSWORD }, jar: pupil });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: coachA });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: dual });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.admin.email, password: seeded.admin.password }, jar: admin });
+
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const ladder = [
+    ['user', member, ['user']],
+    ['coach', coachA, ['user', 'coach']],
+    ['admin', admin, ['user', 'coach', 'admin']],
+  ];
+  for (const [role, who, roles] of ladder) {
+    const { res, json } = await call('/api/v1/auth/me', { jar: who });
+    check(
+      `/me of the ${role} account keeps role '${role}' and answers roles ${JSON.stringify(roles)}`,
+      res.status === 200 && json?.user?.role === role && same(json?.user?.roles, roles),
+      `status ${res.status}, role ${json?.user?.role}, roles ${JSON.stringify(json?.user?.roles)}`,
+    );
+  }
+  {
+    const { res, json } = await call('/api/v1/auth/me', {
+      method: 'PATCH', jar: coachA, body: { displayName: 'Roles Coach' },
+    });
+    check(
+      'PATCH /me answers the same shape, roles included',
+      res.status === 200 && json?.user?.role === 'coach' && same(json?.user?.roles, ['user', 'coach']),
+      `status ${res.status}, roles ${JSON.stringify(json?.user?.roles)}`,
+    );
+  }
+
+  // The dual account: coach of `pupil`, and at the same time a client of coach A.
+  const meId = async (who) => (await call('/api/v1/auth/me', { jar: who })).json?.user?.id;
+  const dualId = await meId(dual);
+  const { json: codeA } = await call('/api/v1/invite-codes', { method: 'POST', jar: coachA, body: { kind: 'multi', max_uses: 5 } });
+  const joinedA = await call('/api/v1/join', { method: 'POST', jar: dual, body: { code: codeA?.code } });
+  const { json: codeD } = await call('/api/v1/invite-codes', { method: 'POST', jar: dual, body: { kind: 'multi', max_uses: 5 } });
+  const joinedD = await call('/api/v1/join', { method: 'POST', jar: pupil, body: { code: codeD?.code } });
+  const linkOf = async (coachJar, email) =>
+    ((await call('/api/v1/clients', { jar: coachJar })).json?.clients ?? []).find((c) => c.email === email)?.link_id;
+  const linkAsClient = await linkOf(coachA, seeded.coach2.email);
+  const linkAsCoach = await linkOf(dual, pupilEmail);
+  check(
+    'the dual fixture holds: the second coach is a client of the first and the coach of a pupil',
+    joinedA.res.status < 300 && joinedD.res.status < 300 && linkAsClient > 0 && linkAsCoach > 0,
+    `${joinedA.res.status} / ${joinedD.res.status}, links ${linkAsClient} / ${linkAsCoach}`,
+  );
+  const opened = [
+    await call('/api/v1/conversations', { method: 'POST', jar: coachA, body: { coach_client_id: linkAsClient } }),
+    await call('/api/v1/conversations', { method: 'POST', jar: dual, body: { coach_client_id: linkAsCoach } }),
+  ];
+  const [asClientId, asCoachId] = opened.map((o) => o.json?.conversation?.id);
+
+  const list = async (query) => {
+    const { res, json } = await call(`/api/v1/conversations${query}`, { jar: dual });
+    return { status: res.status, rows: json?.conversations ?? [] };
+  };
+  {
+    const both = await list('');
+    const ids = both.rows.map((c) => c.id);
+    check(
+      'no side lists both threads, as before',
+      both.status === 200 && ids.includes(asClientId) && ids.includes(asCoachId),
+      `status ${both.status}, ids ${ids}`,
+    );
+  }
+  {
+    const coachSide = await list('?side=coach');
+    check(
+      'side=coach lists only the threads where the caller is the coach',
+      coachSide.status === 200 && coachSide.rows.length > 0
+        && coachSide.rows.every((c) => c.coach_id === dualId)
+        && coachSide.rows.some((c) => c.id === asCoachId) && !coachSide.rows.some((c) => c.id === asClientId),
+      `status ${coachSide.status}, ${coachSide.rows.map((c) => `${c.id}:${c.coach_id}`)}`,
+    );
+  }
+  {
+    const clientSide = await list('?side=client');
+    check(
+      'side=client lists only the threads where the caller is the client',
+      clientSide.status === 200 && clientSide.rows.length > 0
+        && clientSide.rows.every((c) => c.client_id === dualId)
+        && clientSide.rows.some((c) => c.id === asClientId) && !clientSide.rows.some((c) => c.id === asCoachId),
+      `status ${clientSide.status}, ${clientSide.rows.map((c) => `${c.id}:${c.client_id}`)}`,
+    );
+  }
+  {
+    // The filter is the caller's OWN rows narrowed — it never widens. A member with no coach side
+    // asking for it gets an empty list, not someone else's threads.
+    const { res, json } = await call('/api/v1/conversations?side=coach', { jar: pupil });
+    check(
+      'a member asking for side=coach gets an empty list, never another account\'s threads',
+      res.status === 200 && (json?.conversations ?? []).length === 0,
+      `status ${res.status}, ${(json?.conversations ?? []).length} rows`,
+    );
+  }
+  {
+    const bad = await call('/api/v1/conversations?side=admin', { jar: dual });
+    const extra = await call('/api/v1/conversations?side=coach&view=admin', { jar: dual });
+    const twice = await call('/api/v1/conversations?side=coach&side=client', { jar: dual });
+    check(
+      'side outside the enum, an unknown query key, and a repeated side are each a 400',
+      bad.res.status === 400 && extra.res.status === 400 && twice.res.status === 400,
+      `${bad.res.status} / ${extra.res.status} / ${twice.res.status}`,
+    );
+  }
+
+  // Records is a coach read now, like its siblings: a member is refused outright.
+  {
+    const { res, json } = await call(`/api/v1/clients/${linkAsCoach}/records`, { jar: member });
+    check(
+      'GET /clients/:id/records refuses a member with 403',
+      res.status === 403 && json?.code === 'forbidden',
+      `status ${res.status}, code ${json?.code}`,
+    );
+  }
+  {
+    const { res, json } = await call(`/api/v1/clients/${linkAsCoach}/records`, { jar: dual });
+    check(
+      'and its own coach still reads it',
+      res.status === 200 && Array.isArray(json?.records),
+      `status ${res.status}`,
+    );
+  }
+
+  // Leave nothing behind for a later section to trip on: the two links are archived.
+  await call(`/api/v1/clients/${linkAsClient}/archive`, { method: 'POST', jar: coachA });
+  await call(`/api/v1/clients/${linkAsCoach}/archive`, { method: 'POST', jar: dual });
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

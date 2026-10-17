@@ -301,6 +301,30 @@ router.post(
   }),
 );
 
+/**
+ * The roles an account holds, as the ladder the guards already enforce.
+ *
+ * One account, one stored role — `users.role` stays the single source of truth, and nothing here
+ * writes it. What stacks is the PERMISSION: `requireCoach` admits an admin, and every coach-side
+ * SQL check reads `role IN ('coach','admin')`. So a coach is also a user and an admin is also a
+ * coach; this list spells that out for the client, which needs it to offer a view switcher and
+ * nothing else. The client's chosen view is never sent back (check-routes asserts it), so this list
+ * grants nothing — every route keeps its own server-side check.
+ *
+ * Derived on every read, never stored and never in the token: there is no second copy to drift.
+ * A role outside the ladder (the CHECK in 001 makes that impossible today) yields an EMPTY list —
+ * fail closed, never a guess.
+ */
+const ROLE_LADDER = Object.freeze({
+  user: Object.freeze(['user']),
+  coach: Object.freeze(['user', 'coach']),
+  admin: Object.freeze(['user', 'coach', 'admin']),
+});
+const rolesFor = (role) => (Object.hasOwn(ROLE_LADDER, role) ? [...ROLE_LADDER[role]] : []);
+
+/** The `/me` row as the client sees it: the stored `role`, kept, plus the derived `roles`. */
+const meView = (user) => ({ ...user, roles: rolesFor(user.role) });
+
 router.get(
   '/me',
   requireAuth,
@@ -311,7 +335,7 @@ router.get(
       [req.user.id],
     );
     if (!user) return sendError(res, 401, ERR.UNAUTHORIZED, 'unauthorized');
-    res.json({ user });
+    res.json({ user: meView(user) });
   }),
 );
 
@@ -398,7 +422,9 @@ router.patch(
       'SELECT id, email, display_name, role, created_at, must_change_credentials FROM users WHERE id = ?',
       [req.user.id],
     );
-    res.json({ user });
+    // The same shape as GET /me, so the client can replace its session row with this answer. A
+    // row gone between the write and this read keeps the old null answer rather than throwing.
+    res.json({ user: user ? meView(user) : null });
   }),
 );
 

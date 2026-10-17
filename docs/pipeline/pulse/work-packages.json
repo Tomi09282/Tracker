@@ -1172,6 +1172,36 @@
         "npm run build (cwd frontend/, integration worktree)"
       ],
       "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field."
+    },
+    {
+      "id": "B-roles",
+      "title": "Roles stack on one account in what the server answers (approved plan phase 1 Backend, owner request \"kezdjuk el implementalni a tervet\"): GET /auth/me and PATCH /me carry roles, GET /conversations takes ?side=coach|client, GET /clients/:id/records is coach-only, check-routes refuses any read of a client view",
+      "owns": [
+        "backend/src/auth/routes.js",
+        "backend/src/chat/routes.js",
+        "backend/src/logs/routes.js",
+        "backend/scripts/check-routes.mjs",
+        "backend/scripts/verify-gates.mjs",
+        "backend/scripts/smoke.js",
+        "docs/pipeline/pulse/pkg/B-roles/**"
+      ],
+      "handIn": {},
+      "dependsOn": [],
+      "parallelGroup": "backend lane (approved plan phase 1)",
+      "size": "S",
+      "acceptance": [
+        "user.roles on GET /auth/me and PATCH /me is derived per read from users.role as a ladder: user -> [user], coach -> [user, coach], admin -> [user, coach, admin]; any other role -> [] (fail closed); user.role stays; no migration, JWT or guard change",
+        "GET /conversations takes an optional side validated by a .strict() zod object (z.enum(['coach', 'client'])); one fixed prepared statement binds the filtered-out side as NULL; every row stays bound to req.user.id; no side lists both as before",
+        "GET /clients/:id/records has requireCoach like /clients/:id/workouts",
+        "check-routes fails on any read of a client view under src/ (req.query.view, an X-View header); verify-gates proves it with two planted probes",
+        "smoke covers /me per role, PATCH /me, a coach that is also a client, side=coach and side=client, a member asking side=coach gets [], 400 for a bad / unknown / repeated side, 403 on records for a member"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-roles): the package ran outside the plan entry list (no brief). The plan ownership table gave check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them. It also fixed a CRLF misread in check-routes (the public-router scan splits lines on \r?\n). The frontend half (useSession roles, the trainer chat list on side=coach) is the integrator's. The dev backend on :3000 needs a restart on the merged code before the live app serves roles, side and the records 403."
     }
   ],
   "screens": [
