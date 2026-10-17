@@ -1,24 +1,15 @@
 import { Suspense, lazy, useState } from 'react';
-import { Share2 } from 'lucide-react';
 import type { KitLayout } from './PulseKit';
 import { CATALOG, VARIANTS, type Variant } from '../../ui/feedback/catalog';
 import { VariantOverride, useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
-import { Dumbbell } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { FeedbackButton } from '../../ui/feedback/variants/E1Button';
 import { CopyButton } from '../../ui/feedback/variants/E2CopyButton';
-import { Toggle } from '../../ui/feedback/variants/E4Toggle';
-import { Checkbox } from '../../ui/feedback/variants/E5Checkbox';
-import { IconButton } from '../../ui/feedback/variants/E3IconButton';
 import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { FeedbackField } from '../../ui/feedback/variants/E7Field';
-import { Heart, Play, Pause, Trash2, Flame } from 'lucide-react';
-import { Tabs } from '../../ui/feedback/variants/E10Tabs';
-import { InteractiveCard, Toast, Progress, type ToastData } from '../../ui/feedback/variants/E12E16';
-import { Sheet, SwipeItem, Fab } from '../../ui/feedback/variants/E14E20';
-import { Slider, SkeletonBlock, PullToRefresh } from '../../ui/feedback/variants/E17E19';
-import { Select, DatePicker } from '../../ui/feedback/variants/E8E9';
+import { Heart } from 'lucide-react';
+import { Toast, type ToastData } from '../../ui/feedback/variants/E12E16';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { BottomNav } from '../../ui/nav/BottomNav';
 
 /**
@@ -38,10 +29,7 @@ import { BottomNav } from '../../ui/nav/BottomNav';
  * `catalog.ts` as `live`, beside its labels, where the gate holds it to the measured call sites.
  * This set stays what it always was: which elements this page can DEMONSTRATE.
  */
-export const PREVIEWABLE = new Set([
-  'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
-  'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20',
-]);
+export const PREVIEWABLE = new Set(['E2', 'E6', 'E7', 'E11', 'E14', 'E15']);
 
 /*
  * The Pulse kit specimen host, the first section of this page. Its own chunk: the style studio
@@ -68,22 +56,6 @@ function readKitLayout(): KitLayout {
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * E19's demo alternates success and failure, pull by pull.
- *
- * Half of what pull-to-refresh has to communicate is that the refresh did NOT work — a gesture
- * that silently returns you to stale data is worse than one that never ran. With `onRefresh`
- * always resolving, that half of every variant was unreachable from the one screen where these
- * are judged. Module scope rather than component state on purpose: it is not rendered, so it must
- * not re-render anything, and it survives the five `VariantOverride` tiles independently.
- */
-let e19Attempt = 0;
-// E1's five variants differ most in how they say NO — a shake, a red flood from the contact point,
-// a red sweep, a bar that completes in danger, a badge that slides in. None of that could be seen
-// while the demo's action could only ever resolve. Alternating means the two outcomes are one tap
-// apart, which is what makes them comparable rather than merely reachable.
-let e1Attempt = 0;
-
-/**
  * One live, interactive instance of an element.
  *
  * EXPORTED, because the admin studio needs exactly this and building a second preview harness would
@@ -92,13 +64,8 @@ let e1Attempt = 0;
  * committing a change is the component every user will get, not a picture of it.
  */
 export function Demo({ id }: { id: string }) {
-  const [toggled, setToggled] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [seg, setSeg] = useState<'all' | 'mine'>('all');
   const [text, setText] = useState('');
-  const [playing, setPlaying] = useState(false);
-  const [tab, setTab] = useState<'a' | 'b'>('a');
-  const [picked, setPicked] = useState(false);
   const [sheet, setSheet] = useState(false);
   // The sheet's five variants differ on the way in AND on how they answer, and a demo that only
   // opens one shows exactly half of each. These two drive the panel through the states.
@@ -109,51 +76,10 @@ export function Demo({ id }: { id: string }) {
     setSheetStatus(outcome);
   };
   const [toasts, setToasts] = useState<ToastData[]>([]);
-  const [pct, setPct] = useState(45);
-  const [sel, setSel] = useState<string | null>('a');
-  const [date, setDate] = useState<Date | null>(new Date());
-  const [weight, setWeight] = useState(60);
 
   switch (id) {
-    case 'E1':
-      return (
-        <FeedbackButton
-          variant="primary"
-          icon={<Share2 size={20} strokeWidth={2} aria-hidden />}
-          onAction={() =>
-            wait(900).then(() => {
-              if (e1Attempt++ % 2 === 1) throw new Error('demo failure');
-            })
-          }
-        >
-          Save
-        </FeedbackButton>
-      );
     case 'E2':
       return <CopyButton value="tracker-demo-value" label="Copied" />;
-    case 'E4':
-      return <Toggle checked={toggled} onChange={(v) => { setToggled(v); return wait(700); }} label="Demo toggle" />;
-    case 'E5':
-      return <Checkbox checked={checked} onChange={setChecked} label="Demo checkbox" />;
-    case 'E3':
-      return (
-        <IconButton
-          aria-label="Play"
-          toggled={playing}
-          onClick={() => setPlaying((v) => !v)}
-          // The status layer is the half of E3 a still screenshot cannot show, so the demo
-          // exercises BOTH outcomes: starting playback succeeds, stopping it fails. Presses
-          // therefore alternate spinner→tick and spinner→warning+shake. `playing` is read
-          // pre-toggle, which is what makes it alternate without a second piece of state.
-          onAction={() =>
-            wait(700).then(() => {
-              if (playing) throw new Error('demo failure');
-            })
-          }
-          icon={<Play size={20} strokeWidth={2} aria-hidden />}
-          altIcon={<Pause size={20} strokeWidth={2} aria-hidden />}
-        />
-      );
     case 'E6':
       return (
         <Segmented
@@ -176,30 +102,6 @@ export function Demo({ id }: { id: string }) {
           onChange={(e) => setText(e.target.value)}
           className="w-full"
         />
-      );
-    case 'E10':
-      return (
-        <Tabs
-          label="Demo tabs"
-          value={tab}
-          onChange={setTab}
-          items={[
-            { value: 'a', label: 'Plan', icon: <Flame size={16} strokeWidth={2} aria-hidden /> },
-            { value: 'b', label: 'Log', badge: 3 },
-          ]}
-        />
-      );
-    case 'E12':
-      return (
-        <InteractiveCard selected={picked} onClick={() => setPicked((v) => !v)}>
-          <span className="text-body-s text-text-1">Interactive card</span>
-        </InteractiveCard>
-      );
-    case 'E13':
-      return (
-        <SwipeItem onComplete={() => undefined} onDelete={() => undefined}>
-          <span className="text-body-s text-text-1">Swipe me</span>
-        </SwipeItem>
       );
     case 'E14':
       return (
@@ -256,30 +158,6 @@ export function Demo({ id }: { id: string }) {
           </div>
         </div>
       );
-    case 'E16':
-      return (
-        <div className="flex w-full items-center gap-3">
-          <Progress value={pct} label="Demo progress" />
-          <Pressable shape="icon" aria-label="Advance" onClick={() => setPct((v) => (v >= 100 ? 0 : v + 25))}>
-            <Play size={20} strokeWidth={2} aria-hidden />
-          </Pressable>
-        </div>
-      );
-    case 'E8':
-      return (
-        <Select
-          label="Demo select"
-          value={sel}
-          onChange={setSel}
-          options={[
-            { value: 'a', label: 'Barbell' },
-            { value: 'b', label: 'Dumbbell' },
-            { value: 'c', label: 'Kettlebell' },
-          ]}
-        />
-      );
-    case 'E9':
-      return <DatePicker label="Demo date" value={date} onChange={setDate} />;
     case 'E11':
       return (
         // Rendered inline rather than fixed, so five copies do not stack on the viewport edge.
@@ -294,42 +172,6 @@ export function Demo({ id }: { id: string }) {
           />
         </div>
       );
-    case 'E17':
-      return (
-        <Slider
-          label="Weight"
-          value={weight}
-          onChange={setWeight}
-          min={0}
-          max={200}
-          step={2.5}
-          format={(v) => `${v} kg`}
-          ends={[<Flame key="a" size={16} strokeWidth={2} aria-hidden />, <Flame key="b" size={22} strokeWidth={2.5} aria-hidden />]}
-        />
-      );
-    case 'E18':
-      return (
-        <div className="w-full space-y-2">
-          {[0, 1, 2].map((i) => (
-            <SkeletonBlock key={i} index={i} className={i === 0 ? 'h-4 w-2/3' : 'h-3 w-1/2'} />
-          ))}
-        </div>
-      );
-    case 'E19':
-      return (
-        <PullToRefresh
-          onRefresh={() =>
-            wait(900).then(() => {
-              // Odd pulls succeed, even pulls fail, so both outcomes are one gesture apart.
-              if (e19Attempt++ % 2 === 1) throw new Error('demo failure');
-            })
-          }
-        >
-          <span className="text-body-s block text-text-2">Pull down from the top</span>
-        </PullToRefresh>
-      );
-    case 'E20':
-      return <span className="text-body-s text-text-3">Rendered fixed to the viewport, bottom-right</span>;
     default:
       return null;
   }
@@ -437,32 +279,6 @@ export function PlaygroundPage() {
           </div>
         </section>
       ))}
-
-      {/* THE FAB NEEDS BOTH A PRESS AND A SELECTION TO BE JUDGEABLE.
-          `actions` is what makes A a speed-dial and B a morph-sheet, and for those two the outcome
-          arrives from the action you PICKED. For C, D and E there is no menu, so the press itself
-          is the work. Supplying both means every variant reaches busy → tick and busy → warning,
-          which is where their gestures differ — a spin, a swallow, a roll-through, a snap.
-          `Exercise` succeeds and `Note` fails, so the two outcomes are one tap apart. */}
-      <Fab
-        label="Demo action"
-        onPress={() => wait(800)}
-        actions={[
-          {
-            label: 'Exercise',
-            icon: <Dumbbell size={20} strokeWidth={2} aria-hidden />,
-            onSelect: () => wait(800),
-          },
-          {
-            label: 'Note',
-            icon: <Trash2 size={20} strokeWidth={2} aria-hidden />,
-            onSelect: () =>
-              wait(800).then(() => {
-                throw new Error('demo failure');
-              }),
-          },
-        ]}
-      />
 
       {liveNoDemo.length > 0 ? (
         <section className="mt-10">

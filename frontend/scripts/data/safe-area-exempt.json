@@ -2,10 +2,6 @@
   "about": "Edge-pinned elements that are exempt from the safe-area inset rule. Read by scripts/check-safe-area.mjs as EXEMPT; changed through a hand-in patch applied by the integrator, never by hand in a slot. Key: \"<file under src>:<top|bottom>\" for the ONE element that file pins to that edge, or \"<file under src>:<top|bottom>@<class>\" for the element(s) pinned to that edge that carry <class> — required when the file pins several elements to the edge, so an entry written for a scrim cannot wave a sheet through. One reason per entry: an exemption is a written decision. The gate fails on an entry whose file is gone AND on an entry that exempts nothing (the element accounts for its inset now, or is no longer pinned).",
   "entries": {
     "ui/data/DataTable.tsx:top": "a table head, sticky inside the table's own scroll container: it sticks to that box and never reaches the screen edge",
-    "ui/feedback/variants/E14E20.tsx:top@bg-scrim": "the scrims behind the sheet and behind the open FAB cover the whole screen, unsafe areas included, on purpose; they hold no content",
-    "ui/feedback/variants/E14E20.tsx:bottom@bg-scrim": "the same two scrims, at the bottom edge",
-    "ui/feedback/variants/E8E9.tsx:top@bg-scrim": "the scrim behind the select sheet covers the whole screen on purpose; it holds no content",
-    "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
     "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",
     "ui/shell/CommandPalette.tsx:bottom": "the same scrim; the dialog is anchored to the top and never reaches the bottom edge",
     "ui/shell/OfflineIndicator.tsx:top": "the sticky wrapper is a grid row that opens from 0fr and must not pad; the offline line inside it pads by var(--band-pad-t), the status zone plus 6 (F13)"

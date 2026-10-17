@@ -38,7 +38,7 @@
 //
 // So a read counts as LIVE only when the exported component that holds the `useElementVariant`
 // call is imported by a file OUTSIDE `features/playground`. The unit is the EXPORT, not the file:
-// `E12E16.tsx` exports `Toast` (the product's toast, E15) beside `InteractiveCard` and `Progress`
+// `E12E16.tsx` exported `Toast` (the product's toast, E15) beside `InteractiveCard` and `Progress`
 // (E12, E16 — playground only), and `E14E20.tsx` does the same with `Sheet`.
 //
 // How an export is found without a parser: a read belongs to the top-level declaration it sits
@@ -80,7 +80,7 @@ const codeOf = (text) =>
  *
  * The one implementation of "who reads which element": the gate below judges the catalogue with
  * it, and `pulse-variants` asks it who owns a read. Paths are relative to the frontend root
- * (`src/ui/feedback/variants/E1Button.tsx`).
+ * (`src/ui/feedback/variants/E2CopyButton.tsx`).
  *
  * @param {{ root?: string }} [options] `root` is the frontend directory (default: the cwd)
  * @returns {{
