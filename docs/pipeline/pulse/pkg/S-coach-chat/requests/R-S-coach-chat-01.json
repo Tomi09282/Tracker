@@ -1,0 +1,11 @@
+{
+  "id": "R-S-coach-chat-01",
+  "from": "S-coach-chat",
+  "kind": "recording",
+  "blocking": false,
+  "target": ".pulse/rec (coach@tracker.local)",
+  "what": "A recorded GET /api/v1/conversations that carries a blocked conversation (non-null blocked_at and blocked_by) and a recorded GET /api/v1/conversations/:id/messages that carries a withdrawn message (non-null deleted_at). Without them pulse-fixture-check refuses the edits that set these fields (the recordings only ever hold null), so the three states 'blocked by me', 'blocked by the client' and 'withdrawn message' can only be shown as structure.",
+  "how": "On a sandbox object, not on M's thread: block and unblock the coach's conversation with demo.kovacs.eszter@ (conversation 2) once and record the list while it is blocked; a withdrawn message needs DELETE /api/v1/messages/:id on a sandbox message (the API has it, the UI has no control). This package may not make these writes itself (PLAN 4.7: its only live write is one message to K).",
+  "interim": "The three states are captured from a scratch frames file with the refused edits (.pulse/shots/S-coach-chat/unrecorded) and reported as structure in handoff.json.",
+  "then": "Move the three states from handoff.json unrecordedStates back into states.json and re-capture; verdict matched-fixture is then possible."
+}

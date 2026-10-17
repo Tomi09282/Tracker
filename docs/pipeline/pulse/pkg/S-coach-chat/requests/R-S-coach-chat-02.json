@@ -1,0 +1,10 @@
+{
+  "id": "R-S-coach-chat-02",
+  "from": "S-coach-chat",
+  "kind": "defect-in-frozen-file",
+  "blocking": false,
+  "target": "frontend/src/features/chat/useChat.ts (useClientConversation)",
+  "what": "When opening a thread is refused (POST /api/v1/conversations answers 4xx/5xx: the link was archived, the client left, a bad id), the effect re-fires open.mutate on every render: its guard only checks open.isPending and open.isSuccess, never open.isError. The page never settles and the server is hammered: 6113 POSTs in 20 s on the BASE build (0860942) and 7092 on this branch, both answered by a capture fixture. It is not new (the base build does the same) and it is in a frozen hook file this package must not edit.",
+  "proposal": "Add `|| open.isError` to the guard of the effect in useClientConversation (one condition), so a refusal is final for the visit and the page shows chat.unavailable. Owner of the decision: INT (frozen file).",
+  "interim": "The unavailable state is reported as structure; its capture times out (not-settled)."
+}

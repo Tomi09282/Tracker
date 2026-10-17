@@ -1,0 +1,334 @@
+{
+  "about": "S-coach-chat - the states of the conversation (/coach/clients/:id/chat) the two frames do not draw (PLAN 4.1 rule 7), the typed draft of coach-chat-2 and the frame data of both frames. Account C = coach@ for every state. Every state is replay: M's thread (conversation 1, link {linkOfMember}) and N's empty sandbox thread (conversation 6, link {linkOfN}) are recorded. Every fixture is an edit list over the recording of the same endpoint, or a mutation outcome (a status and an empty body). No message is sent to the server in a capture: the send of the offline state never leaves the browser, the send of the failed state is answered 500 by its fixture. Row addresses are plain indexes: GET /conversations is newest first (index 0 = conversation 1 with M, index 5 = conversation 6 with N), GET /conversations/1/messages is newest first (index 0 = message 5, index 4 = message 1).",
+  "overrides": {
+    "coach-chat-2": {
+      "why": "The frame draws a typed draft (43 / 4000, the send pill lit) over the empty thread. The script types the frame's draft into the composer; nothing is sent. A last click on the empty-state title takes the focus off the field, as the frame draws the field at rest (edge underline, not the lime focus line).",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            },
+            "text": "Szia Anna! Üdv a csapatban, hétfőn kezdünk."
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "key": "chat.emptyTitle"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "chat.send"
+        },
+        "disabled": false
+      }
+    }
+  },
+  "states": {
+    "coach-chat-frame-data": {
+      "title": "Csevegés — beszélgetés, a keret adataival (coach-chat-1 box for box)",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "frame": "coach-chat-1",
+      "why": "coach-chat-1 is drawn for Takács Dániel with three messages on 2026. 09. 28. 11:16 (his), 2026. 10. 06. 12:30 (mine, read) and 2026. 10. 08. 14:10 (mine, delivered); the recording of M is Teszt Elek with the same three bodies on other days plus two older messages. The edits set the drawn name, the three drawn times and remove the two older messages, so every box of the frame has its counterpart. The plain recording is the frame state coach-chat-1.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/0/other_display_name",
+              "value": "Takács Dániel"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations/1/messages",
+          "edits": [
+            {
+              "pointer": "/messages/4",
+              "remove": true
+            },
+            {
+              "pointer": "/messages/3",
+              "remove": true
+            },
+            {
+              "pointer": "/messages/2/created_at",
+              "value": 1790586960
+            },
+            {
+              "pointer": "/messages/1/created_at",
+              "value": 1791282600
+            },
+            {
+              "pointer": "/messages/1/read_at",
+              "value": 1791286200
+            },
+            {
+              "pointer": "/messages/0/created_at",
+              "value": 1791461400
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "textbox",
+          "name": {
+            "key": "chat.compose"
+          }
+        },
+        {
+          "text": "Takács Dániel"
+        }
+      ]
+    },
+    "coach-chat-empty-frame-data": {
+      "title": "Csevegés — üres, a keret adataival (coach-chat-2 box for box)",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfN}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "frame": "coach-chat-2",
+      "why": "coach-chat-2 is drawn for Kiss Anna (KA); the sandbox thread is with Nagy Balázs (NB). The edit sets the drawn name only; the draft is typed as in the frame state.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/5/other_display_name",
+              "value": "Kiss Anna"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            },
+            "text": "Szia Anna! Üdv a csapatban, hétfőn kezdünk."
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "key": "chat.emptyTitle"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "chat.send"
+          },
+          "disabled": false
+        },
+        {
+          "text": "Kiss Anna"
+        }
+      ]
+    },
+    "coach-chat-held-offline": {
+      "title": "Csevegés — küldés kapcsolat nélkül (a függő üzenet)",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "seed",
+      "why": "The connection drops with the screen open and the coach sends: the optimistic message stands dimmed with Küldés… and no delivery word, the field is empty, the pill is busy. The paused mutation never reaches the server.",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            },
+            "text": "Holnap 10:00, Alsótest – volumen. Hajrá!"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "chat.sending"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "chat.sending"
+        }
+      }
+    },
+    "coach-chat-send-failed": {
+      "title": "Csevegés — a küldés nem sikerült",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The send is answered 500: the danger line above the composer, the draft restored, the pending message stays dimmed (inventory frame 3, without the offline strip).",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/conversations/1/messages",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/conversations/1/messages",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            },
+            "text": "Holnap 10:00, Alsótest – volumen. Hajrá!"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "chat.sendFailed"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "chat.sendFailed"
+        }
+      }
+    },
+    "coach-chat-long-name": {
+      "title": "Csevegés — hosszú név",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "A 120-character display name: the heading stays one line and is cut with an ellipsis; the monogram keeps two letters.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/0/other_display_name",
+              "value": "Szentgyörgyváryné Kovácsházy-Wittelsbach Anna Krisztina Erzsébet Margit Zsófia Hajnalka Terézia Ilona Boglárka Emese"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "chat.compose"
+        }
+      }
+    }
+  },
+  "unrecordedStates": {
+    "why": "blocked by me, blocked by the client and a withdrawn message need a non-null blocked_at / blocked_by / deleted_at, which no recording holds (pulse-fixture-check refuses the edit: the recordings have null), and blocking or withdrawing live is not a write this package may make (PLAN 4.7). They are captured from a scratch frames file for evidence only and reported as structure; request R-S-coach-chat-01 asks for a recording that carries them. The unavailable state is reached (the sentence renders, on the base build too) but never settles: the frozen hook useClientConversation (useChat.ts) re-fires the POST /conversations after every refusal (6113 POSTs in 20 s on the base build), so the capture times out; it is captured from the scratch file and reported as structure, the loop is reported to the orchestrator.",
+    "states": [
+      "coach-chat-blocked-by-me",
+      "coach-chat-blocked-by-client",
+      "coach-chat-withdrawn",
+      "coach-chat-unavailable"
+    ]
+  }
+}

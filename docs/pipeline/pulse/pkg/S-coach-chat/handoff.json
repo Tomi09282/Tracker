@@ -1,0 +1,271 @@
+{
+  "id": "S-coach-chat",
+  "branch": "pulse/S-coach-chat",
+  "verifiedOn": "pulse-redesign 72a0b10 merged into the slot by pulse-sync (S-library, S-coach-plans, S-nutrition in); the final pulse-verify (lastBuild) ran on the synced branch",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-coach-chat (replay; variants en/ de/ w360/ w430/ w1280/ rm/ focus/ live/ unrecorded/); pairs in C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-coach-chat",
+  "frames": {
+    "coach-chat-1": {
+      "verdict": "matched",
+      "why": "replay of M's recorded thread; tiles compared region by region; geometry 35 matched + 5 sameSlotOtherString (Teszt Elek / TE vs Takács Dániel / TD, other dates) of 46 compared, the rest are measurement artefacts listed under probeRed. The box-for-box proof on the frame's own data is coach-chat-frame-data (40 of 46 matched, the 6 others explained).",
+      "probeRed": [
+        "Monogram/TD: the recorded letters are TE (ink 75.8 wide) - data, not layout",
+        "Day divider x3 unmatched: the recorded dates differ (10.04 / 10.12 / 10.14 vs 09.28 / 10.06 / 10.08); matched by position and style on coach-chat-frame-data",
+        "'Ja és a hétvégi edzést...': CSS text-wrap: balance picks a 223.4 wide box, Figma's balance 221 (dx 1.6, dw 2.4); same two lines, same break",
+        "Underline: drawn by TextArea's ::after pseudo-element, which the probe cannot measure; on the tile it lies on the frame's line at y 743"
+      ]
+    },
+    "coach-chat-2": {
+      "verdict": "matched",
+      "why": "replay of the sandbox thread with N (empty); the override types the frame's draft and then clicks the empty-state title so the field is at rest, as drawn; the one lime pill at 310,700 68 x 44 exactly; geometry 31 matched + 2 sameSlotOtherString (NB / Nagy Balázs vs KA / Kiss Anna) of 36",
+      "probeRed": [
+        "'Még nincs üzenet': Figma's text box is fixed 354 wide, the probe measures the text run (201); x, y, face, size agree",
+        "Value: the draft inside a textarea is measured as one 22 line box; the tile shows the same two lines as the frame",
+        "Underline: ::after pseudo-element (as above)"
+      ]
+    }
+  },
+  "states": {
+    "coach-chat-frame-data": {
+      "verdict": "matched-fixture",
+      "frame": "coach-chat-1",
+      "fixture": "states.json states.coach-chat-frame-data (the name, the three times, the two older messages removed)",
+      "why": "40 of 46 layers within 2 pt; the 6 others: the name and the 3 day dividers are fixed-width (354) text boxes measured as text runs (each divider run is centred on x 201 = the column centre), the balanced line (2.4 pt), the ::after underline"
+    },
+    "coach-chat-empty-frame-data": {
+      "verdict": "matched-fixture",
+      "frame": "coach-chat-2",
+      "fixture": "states.json (the name Kiss Anna)",
+      "why": "32 of 36 matched; the rest as coach-chat-2"
+    },
+    "coach-chat-held-offline": {
+      "verdict": "structure",
+      "frameless": true,
+      "why": "no frame: the offline strip (F13), the optimistic message dimmed 60 % with KÜLDÉS…, no delivery word, the pill busy (three dots), the field empty"
+    },
+    "coach-chat-send-failed": {
+      "verdict": "structure",
+      "frameless": true,
+      "why": "no frame (inventory frame 3 without the strip): the POST answered 500 by the fixture; the danger NoticeLine (role=alert) above the label inside the Dock, the draft restored (40 / 4000), the pending message stays; the Dock grows and the thread shrinks by its reserve. The mutation retries, so the fixture answers ~56 POSTs in the capture (the base build does the same)"
+    },
+    "coach-chat-long-name": {
+      "verdict": "structure",
+      "frameless": true,
+      "why": "a 120-character name: one line cut with an ellipsis, monogram SK"
+    },
+    "coach-chat-blocked-by-me": {
+      "verdict": "structure",
+      "why": "captured from a scratch frames file (unrecorded/), see unrecordedStates and R-S-coach-chat-01: Letiltás gone from the header, the info NoticeLine \"Ez a beszélgetés le van zárva.\" with Feloldás (undo glyph) in the Dock, the thread readable"
+    },
+    "coach-chat-blocked-by-client": {
+      "verdict": "structure",
+      "why": "as above; the line without an action"
+    },
+    "coach-chat-withdrawn": {
+      "verdict": "structure",
+      "why": "as above; message 4 becomes the italic text-3 line \"Az üzenetet visszavonták\" on my side"
+    },
+    "coach-chat-unavailable": {
+      "verdict": "structure",
+      "why": "the frozen hook loops the open POST after a refusal (R-S-coach-chat-02), the capture never settles (base build too). The branch renders the back row + EmptyState heading h1 chat.unavailable (ChatPage, the !conversation branch)"
+    },
+    "route-loading / thread-loading": {
+      "verdict": "structure",
+      "why": "a skeleton cannot be held by the capture; the route-loading form is visible in the unavailable capture (unrecorded/_contact-1.png): back row, MonogramSkeleton 96, the name block, two text-line blocks, no radius"
+    },
+    "reported": {
+      "verdict": "structure",
+      "why": "the hidden report link is reachable by Tab (focus walk: all stops show focus); a report write is not made in a capture"
+    }
+  },
+  "probes": "every captured state: fonts pass, pill pass (frame 1 no lit pill, frame 2 one, 68 x 44), boxed 0, overflow pass at 360 / 402 / 430, targets pass, reduced motion: no running infinite loop (rm/), focus walk pass (coach-chat-1 11 stops, coach-chat-2 9 stops, none without visible focus). Geometry is red only for the artefacts listed per frame.",
+  "inventory": "every state equals its baseline (controls.diff equal: true). focus/coach-chat-2 shows Küldés disabled because the focus run was started by state name without the package override (no typing), not a change.",
+  "ledger": [
+    {
+      "line": "door to=/coach 1 -> 0",
+      "reason": "the back link is now drawn by ScreenHeader kind=\"push\" from the app/routeMeta.ts row /coach/clients/:id/chat -> /coach (coaching.title): same target, same name"
+    },
+    {
+      "line": "focus-visible: 7 -> 0",
+      "reason": "the hand-written link, chip and textarea rings are gone; every control is a kit control (TextLink, Pressable, TextArea, the back control) drawing the global focus ring or the lime underline; the focus walk passes"
+    }
+  ],
+  "budget": {
+    "before": 42,
+    "after": 0,
+    "file": "deleted (check-pulse --fix-down S-coach-chat)"
+  },
+  "requests": [
+    "requests/R-S-coach-chat-01.json (recordings with blocked_at / deleted_at, non-blocking)",
+    "requests/R-S-coach-chat-02.json (useClientConversation open-POST loop in a frozen file, non-blocking)"
+  ],
+  "deviationsQ4": [
+    "Report (Jelentés) stays on the client's messages, hidden at rest and shown on pointer hover / keyboard focus; while hidden it is now pointer-events-none, so an accidental touch no longer files an unseen report (a hole closed; nothing a user can see disappears)",
+    "The withdrawn line is italic (text-cap text-3 italic): italic is not a Pulse type role; kept as the only cue that the row is a record, not a message",
+    "The composer has a 5-line ceiling (maxRows 5), then scrolls; the frame grows without a drawn limit (the old build had max-h 128)",
+    "Embedded form (coaching/ChatTab, S-client-detail-a): ChatPanel with showBlockAction true keeps the corner Letiltás (TextLink), a Monogram 64 + the name (h2) and the composer in flow (no Dock); S-client-detail-a may drop the identity there later",
+    "Block / unblock stay one tap, no confirm sheet (a confirm would be new behaviour)",
+    "The ' · ' between the time and Kézbesítve / the check is a literal separator, as the frame draws it; not copy"
+  ],
+  "removedNotControls": [
+    "the ring-and-disc anchor and the bubbles (Surface): Pulse encloses nothing",
+    "the speech-bubble icon of the empty state (EmptyState icon is deprecated, R5)"
+  ],
+  "proposedCopy": [],
+  "i18n": "no key added, changed or removed; no i18n.patch.json",
+  "keepLiteral": [],
+  "liveSmoke": {
+    "run": "pulse-verify --live --smoke (coach jar refreshed, no login): coach-chat-1.live, coach-chat-frame-data.live, coach-chat-long-name.live rendered with no undeclared error",
+    "writes": [],
+    "note": "the allowed live write (one message to demo.kovacs.eszter@) was not made: the send path is proven by the held-offline and send-failed captures and its code (submit / useSendMessage) is unchanged"
+  },
+  "unrecordedStates": {
+    "coach-chat-blocked-by-me": {
+      "title": "Csevegés — én tiltottam le",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The coach (user 7) blocked the conversation: Letiltás is gone from the header, the composer is replaced by the closed line with Feloldás; the thread stays readable.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/0/blocked_at",
+              "value": 1791900000
+            },
+            {
+              "pointer": "/conversations/0/blocked_by",
+              "value": 7
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "chat.unblock"
+          }
+        },
+        {
+          "text": {
+            "key": "chat.blocked"
+          }
+        }
+      ]
+    },
+    "coach-chat-blocked-by-client": {
+      "title": "Csevegés — a kliens tiltotta le",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The client (user 6) blocked the conversation: the closed line without an action, no Letiltás.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/0/blocked_at",
+              "value": 1791900000
+            },
+            {
+              "pointer": "/conversations/0/blocked_by",
+              "value": 6
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "chat.blocked"
+        }
+      },
+      "absent": {
+        "role": "button",
+        "name": {
+          "key": "chat.unblock"
+        }
+      }
+    },
+    "coach-chat-withdrawn": {
+      "title": "Csevegés — visszavont üzenet",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "Message 4 (mine, read) was withdrawn: its row keeps its place on my side as the quiet withdrawn line.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations/1/messages",
+          "edits": [
+            {
+              "pointer": "/messages/1/deleted_at",
+              "value": 1791900000
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "chat.withdrawn"
+        }
+      }
+    },
+    "coach-chat-unavailable": {
+      "title": "Csevegés — nem elérhető",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The link is gone (archived, the client left): the list no longer holds the thread and opening one is refused 404. The back row and the unavailable sentence.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/conversations",
+          "edits": [
+            {
+              "pointer": "/conversations/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/conversations",
+          "status": 404,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/conversations",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "chat.unavailable"
+        }
+      }
+    }
+  },
+  "knownLimits": [
+    "Soft keyboard over a docked composer (iOS keeps the layout viewport): not verifiable in the capture tool, unproven",
+    "At 360 x 640 the thread keeps about two message lines above the composer (one with the failure line) because the header and the 96 monogram take 237 pt; the frame is drawn only at 402 x 874"
+  ],
+  "lastBuild": "pulse-verify --package S-coach-chat on 72a0b10 (pulse-redesign 72a0b10 merged): build green in 14 s, 7 of 7 captured (replay), inventory = baseline in every state"
+}
