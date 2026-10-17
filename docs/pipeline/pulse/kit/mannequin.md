@@ -103,6 +103,9 @@ re-measuring: the head is `FIGURE_BOX.headTop` of the box height below the box t
 | `FIGURE_BOX` | `{ width: 597, height: 1261, headTop: 0.059, soles: 0.944, handLeft: 0.12, handRight: 0.87 }` | the canvas and where the body sits on it (fractions) |
 | `musclesOnSide(side)` | `readonly string[]` | the slugs that have a region on that side, in drawing order. For the other-side note (a highlighted slug not in the list is on the other side) and for a chip row scoped to the visible side. `full-body` is on neither side |
 
+`REGIONS` (`regions.ts`): the traced regions per side, in drawing order - which is also the order the keyboard
+walks them. `figure.ts` and `MuscleMap` read it; a screen never does.
+
 ## Specimen
 
 `frontend/src/ui/muscle-map/specimens.tsx` — `specimens` (one entry per cell) and a default

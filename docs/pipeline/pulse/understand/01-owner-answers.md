@@ -37,3 +37,15 @@ fixture is ALLOWED when it is schema-checked against the real response type of t
 type or the backend route's zod / response shape), lives only in the package's states.json / fixtures, and the frame
 is reported as "matched-fixture", never "matched". Product code never reads a fixture. The integrator merges S-workout
 on that basis; if a fixture cannot be schema-checked, that one state drops to "structure".
+
+## Owner, 2026-10-17 — equipment stills on the exercise list: extend the backend NOW
+
+The library frames draw a 48 pt equipment still at the start of every exercise row; the exercise list API carries no
+equipment key, so the cells are empty. Asked with three options; answer: **"Backend bővítés most"** - extend the backend
+in this effort. This lifts "backend/** is untouched" for exactly this change: the exercise list endpoint(s) return the
+equipment key(s) of each exercise, built under the owner's backend rules (Piscina worker pool, prepared statements with
+bound parameters, a numbered user_version migration only if the data does not exist yet, zod-validated input, generic
+client errors, the backend check suite green, a verify script for the new field). The eight equipment types that have
+no still get one, generated in the same style as the existing stills and shipped through the asset pipeline. The
+library rows (and exercise detail, if it shows equipment) render the still by key; no key = the empty cell, never a
+guessed picture.

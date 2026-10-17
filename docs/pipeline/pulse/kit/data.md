@@ -274,6 +274,9 @@ rule, row rules, section rule — the board's ledger cell).
 Not covered by `LedgerRow`: admin-1 sets TWO label → figure pairs on one ledger line (the second
 ending on the right edge, no chevron) — a screen composition, not a kit row.
 
+`LEDGER_DASH` (exported beside `LedgerRow`): the em dash a row shows instead of its figure when the read
+failed or is pending - never a 0. Screens import it for the same stand-in outside a row.
+
 ## `Stepper` — `ui/data/SegmentBar.tsx` · `data-kit="stepper"`
 
 | Prop | Type | Default | Meaning |

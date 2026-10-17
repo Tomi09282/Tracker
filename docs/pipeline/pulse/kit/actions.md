@@ -140,6 +140,10 @@ frame ("99+" is 31 wide: 26 → 57) — `_components.json` `Badge/count`, `app-k
 `ControlBody` (same file) is the inside of a control — lead, label, trail, busy dots — for the
 rare element that wears `control()` and is neither `Pressable` nor `TextLink`.
 
+`ANCHOR_DISABLED_PILL` (exported by `control.ts`, applied by `PressableLink` only): the disabled pill on an
+anchor, keyed on `aria-disabled` because an anchor cannot be `disabled`. A button never gets it (a busy pill is
+`aria-busy` + `disabled`).
+
 ## `TextLink` — `frontend/src/ui/primitives/TextLink.tsx` · `data-kit="textLink"`
 
 One look, three elements, chosen by what the link DOES:
