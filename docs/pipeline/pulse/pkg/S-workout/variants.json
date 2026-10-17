@@ -1,0 +1,4 @@
+[
+  { "element": "E21", "live": false, "reason": "one Pulse look: the scoreboard set row, tap to check, as the database serves (A); SetRow no longer calls useElementVariant('E21') - hold-to-confirm (B), swipe-weight (C) and the undo pill (E) are gone, logged in deviations" },
+  { "element": "E22", "live": false, "reason": "one Pulse look: the in-flow rest band of frame workout-2 (A); RestTimer no longer calls useElementVariant('E22') - the chip (B) and the top bar (C) are gone" }
+]

@@ -23,6 +23,8 @@
     "E2": "one Pulse look — CopyButton (variants/E2CopyButton.tsx) is the kit's iconBtn('copy') (a bare glyph; the tick in lime when done, the warning in danger when refused) and no longer reads its letter",
     "E15": "one Pulse look — Toast (variants/E12E16.tsx) is a line of the kit's toast band (noticeLine + rule + countdown) and no longer reads its letter; the behaviour is the frozen letter C's: Undo undoes and closes the line",
     "E7": "one Pulse look — FeedbackField (variants/E7Field.tsx) is the underline Field with a busy / valid mark on the line's end and no longer reads its letter",
-    "E14": "one Pulse look — Sheet (variants/E14E20.tsx) is the kit's bottomSheet (surface-2, top radius 28, hairline edge, 60 % scrim, no blur, no shadow; grabber drag kept from letter A) and no longer reads its letter"
+    "E14": "one Pulse look — Sheet (variants/E14E20.tsx) is the kit's bottomSheet (surface-2, top radius 28, hairline edge, 60 % scrim, no blur, no shadow; grabber drag kept from letter A) and no longer reads its letter",
+    "E21": "one Pulse look: the scoreboard set row, tap to check, as the database serves (A); SetRow no longer calls useElementVariant('E21') - hold-to-confirm (B), swipe-weight (C) and the undo pill (E) are gone, logged in deviations",
+    "E22": "one Pulse look: the in-flow rest band of frame workout-2 (A); RestTimer no longer calls useElementVariant('E22') - the chip (B) and the top bar (C) are gone"
   }
 }

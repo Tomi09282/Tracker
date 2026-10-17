@@ -139,8 +139,8 @@ export const CATALOG: CatalogEntry[] = [
   // E21–E26 belong to components that arrive in later phases. Their rows exist in the database
   // and their labels exist here, so the admin studio is complete from day one; only the
   // implementations are missing, and the playground marks them as such rather than pretending.
-  { id: 'E21', name: 'Set-check row', phase: 2, live: true, variants: { A: 'Tap-complete', B: 'Hold-to-confirm', C: 'Swipe-weight', D: 'PR-flash', E: 'Undo-pill' } },
-  { id: 'E22', name: 'Rest timer', phase: 2, live: true, variants: { A: 'Ring-shrink', B: 'Time-chip', C: 'Top-bar', D: 'Next-up', E: 'Auto-advance' } },
+  { id: 'E21', name: 'Set-check row', phase: 2, live: false, variants: { A: 'Tap-complete', B: 'Hold-to-confirm', C: 'Swipe-weight', D: 'PR-flash', E: 'Undo-pill' } },
+  { id: 'E22', name: 'Rest timer', phase: 2, live: false, variants: { A: 'Ring-shrink', B: 'Time-chip', C: 'Top-bar', D: 'Next-up', E: 'Auto-advance' } },
   { id: 'E23', name: 'Like / reaction', phase: 6, live: false, variants: { A: 'Heart-burst', B: 'Double-tap', C: 'Reaction-bar', D: 'Liked-pulse', E: 'Count-roll' } },
   { id: 'E24', name: 'Follow button', phase: 6, live: false, variants: { A: 'Morph-pill', B: 'Bell-offer', C: 'Avatar-slide', D: 'First-of-day', E: 'Unfollow-guard' } },
   { id: 'E25', name: 'Coin balance', phase: 5, live: true, variants: { A: 'Odometer-roll', B: 'Fly-to-wallet', C: 'Balance-pulse', D: 'Breakdown-sheet', E: 'Milestone-banner' } },

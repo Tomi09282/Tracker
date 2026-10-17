@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-06",
+  "from": "S-workout",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives (lane G-inputs: NumeralField / NumberStepper typed at the num step)",
+  "need": "The two set fields are inputs that wear the 48 pt Black numeral: placeholder in text-3, a 1 pt edge line ON the row rule (104 / 40 wide), a locked form that hugs its value with the 14 pt lock 6 after the ink, values like 142,5 wider than 104. They are the last two raw-form constructs of the package (budget raw-form 2).",
+  "evidence": "workout-1.json Súly / ism. / Field edge nodes; SetRow.tsx numeral inputs",
+  "proposedApi": "<NumeralField size=\"num\" width=\"kg|reps\" locked edge />",
+  "proposedPatch": null,
+  "interim": "SetRow.tsx keeps two raw <input> with text-num classes; budget.json keeps raw-form 2 against this request",
+  "status": "closed",
+  "resolution": "landed with the gap lanes (G-shell / G-inputs) on pulse-redesign; adopted in pulse/S-workout"
+}

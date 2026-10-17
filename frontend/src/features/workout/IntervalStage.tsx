@@ -2,6 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { Pause, Play, SkipForward, Square } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { Numeral } from '../../ui/data/Numeral';
+import { ProgressBar } from '../../ui/data/ProgressBar';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import type { IntervalBlock } from './intervalPlan';
 import type { IntervalPhase } from './useIntervalTimer';
 
@@ -28,33 +32,25 @@ export interface IntervalStageProps {
 }
 
 /**
- * E27 — the interval stage.
+ * The interval stage — no frame draws it (both player frames are straight sets), so it is composed
+ * from the kit in the frames' language and lives where the figure lives: in the hero, under the
+ * exercise title, in the 95 pt the figure, the side switch and the legend leave when the timer is
+ * shown. It costs the set list nothing, so the check controls never move.
  *
- * IT LIVES INSIDE THE PLAYER'S EXISTING HERO BOX, as a third branch beside the muscle map and the
- * dumbbell placeholder. That box is already reserved, already 16:9, already conditional — so the
- * stage costs ZERO vertical budget, all four grid rows survive, the set list keeps its full
- * `minmax(0,1fr)` height, the check buttons never move, and the no-scroll law is untouched.
- *
- * A full-screen overlay was rejected: it would force dismiss → check → re-enter on every round, it
- * would sit exactly where the rest timer already lives, and the z ladder has nothing between
- * `--z-nav` and `--z-sheet` to put it on.
- *
- * THE HEIGHT BUDGET IS MEASURED, NOT ESTIMATED. At 375 px the content column is 343 px, so the
- * 16:9 hero is 193 px — not the ~250 px the first draft assumed. `overflow-hidden` on the hero
- * would have hidden the overflow rather than reporting it. Everything below fits 154 px:
- * phase word 24 + countdown 48 + bar 6 + info line 16 + gaps 12 + controls 48.
- *
- * The ring is a full-width BAR for the same reason: a 56 px ring does not fit, and a bar is more
- * legible from the floor anyway — which is where the phone is.
+ * Running: one line of 48 pt — the countdown (`Numeral num`, ticking in fixed digit cells), the
+ * phase word after it in the phase's TEXT colour (never a strip), the three bare icon buttons at
+ * the right end — then the 4 pt line draining (lime only while working), then the round / next line.
+ * Idle, done and the interruption prompt carry the screen's ONE lime pill; while they show it the
+ * active set row draws its ring instead of its pill (the player passes `lampElsewhere`).
  */
-const PHASE_COLOR: Record<string, string> = {
-  prepare: 'var(--warning)',
-  work: 'var(--accent)',
-  rest: 'var(--success)',
-  setBreak: 'var(--info)',
-  paused: 'var(--text-2)',
-  done: 'var(--success)',
-  idle: 'var(--text-2)',
+const PHASE_TEXT: Record<string, string> = {
+  prepare: 'text-warning',
+  work: 'text-accent',
+  rest: 'text-success',
+  setBreak: 'text-text-1',
+  paused: 'text-text-2',
+  done: 'text-text-1',
+  idle: 'text-text-2',
 };
 
 const mmss = (total: number) => {
@@ -66,39 +62,30 @@ const mmss = (total: number) => {
 export function IntervalStage(props: IntervalStageProps) {
   const { t } = useTranslation();
   const { block, phase, remaining, progress, round, totalRounds, running, interrupted } = props;
+  const label = t('workout.interval.stageLabel');
 
-  // A block whose durations the coach never wrote. Saying so is the only honest option: guessing
-  // 60 seconds would have the lifter training to a prescription that does not exist.
+  // A block whose durations the coach never wrote: saying so is the only honest option.
   if (!block.runnable) {
     return (
-      <section
-        aria-label={t('workout.interval.stageLabel')}
-        className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center"
-      >
-        <p className="text-body-s text-text-2">{t('workout.interval.notConfigured')}</p>
+      <section aria-label={label} className="flex flex-col">
+        <p className="text-cap text-text-2">{t('workout.interval.notConfigured')}</p>
       </section>
     );
   }
 
-  // The interruption prompt REPLACES the stage rather than floating over it. The lifter has to
-  // answer before the block continues, and the conservative action is the one on the right.
+  // The interruption prompt REPLACES the stage: the lifter answers before the block continues.
   if (interrupted) {
     return (
-      <section
-        aria-label={t('workout.interval.stageLabel')}
-        className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center"
-      >
-        <p className="text-title-3">{t('workout.interval.interrupted')}</p>
-        <p className="text-caption text-text-2">
-          {t('workout.interval.interruptedBody', { count: props.pendingCount })}
-        </p>
-        <div className="flex gap-2">
-          <Pressable shape="chip" density="compact" variant="primary" onClick={props.onConfirmCrossed}>
+      <section aria-label={label} className="flex flex-col">
+        <p className="text-body-m text-text-1">{t('workout.interval.interrupted')}</p>
+        <p className="text-cap text-text-2">{t('workout.interval.interruptedBody', { count: props.pendingCount })}</p>
+        <div className="flex items-center gap-6">
+          <Pressable variant="primary" size="sm" onClick={props.onConfirmCrossed}>
             {t('workout.interval.confirmRounds')}
           </Pressable>
-          <Pressable shape="chip" density="compact" variant="secondary" onClick={props.onDiscardCrossed}>
+          <TextLink text="body" onClick={props.onDiscardCrossed}>
             {t('workout.interval.discardRounds')}
-          </Pressable>
+          </TextLink>
         </div>
       </section>
     );
@@ -106,18 +93,14 @@ export function IntervalStage(props: IntervalStageProps) {
 
   if (phase === 'idle' || phase === 'done') {
     return (
-      <section
-        aria-label={t('workout.interval.stageLabel')}
-        className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center"
-      >
-        <p className="text-title-3">
-          {phase === 'done' ? t('workout.interval.done') : t('workout.interval.title')}
-        </p>
-        <p className="text-caption text-text-2">
-          {t('workout.interval.round', { round: block.rounds, total: block.rounds })}
-        </p>
-        <Pressable shape="chip" variant="primary" onClick={props.onStart}>
-          <Play className="size-icon-s" aria-hidden />
+      <section aria-label={label} className="flex items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-col">
+          <p className="text-eyebrow uppercase text-text-1">
+            {phase === 'done' ? t('workout.interval.done') : t('workout.interval.title')}
+          </p>
+          <p className="text-cap text-text-2">{t('workout.interval.round', { round: block.rounds, total: block.rounds })}</p>
+        </div>
+        <Pressable variant="primary" size="sm" icon={<Play aria-hidden />} onClick={props.onStart}>
           {t('workout.interval.start')}
         </Pressable>
       </section>
@@ -125,87 +108,67 @@ export function IntervalStage(props: IntervalStageProps) {
   }
 
   const paused = phase === 'paused';
-  const colour = PHASE_COLOR[phase] ?? 'var(--text-1)';
+  const phaseWord = t(`workout.interval.${paused ? 'pause' : phase}`);
   const info = [
     t('workout.interval.round', { round, total: totalRounds }),
     props.nextName ? t('workout.interval.nextExercise', { name: props.nextName }) : null,
   ]
     .filter(Boolean)
     .join(' · ');
+  // A warning outranks the round line in the 18 pt it has (prep: the info line yields).
+  const warning = props.screenMaySleep
+    ? t('workout.interval.wakeLockLost')
+    : props.failedRounds.length
+      ? t('workout.interval.unsent', { count: props.failedRounds.length })
+      : null;
 
   return (
-    <section
-      aria-label={t('workout.interval.stageLabel')}
-      className="flex h-full flex-col justify-center gap-1 px-2 py-1"
-    >
-      <p className="text-title-3 text-center" style={{ color: colour }}>
-        {t(`workout.interval.${paused ? 'pause' : phase}`)}
-      </p>
-
-      {/* `aria-live="off"` deliberately: a countdown that announces every second is unusable with
-          a screen reader. One announcement per PHASE goes out through the status line below. */}
-      <p className="text-timer text-center font-display tabular-nums" aria-live="off">
-        {mmss(remaining)}
-      </p>
-
-      <div className="h-1.5 w-full rounded-chip bg-surface-3">
-        <div
-          className="h-full rounded-chip"
-          style={{
-            width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`,
-            backgroundColor: colour,
-            transition: 'width var(--duration-base) linear',
-          }}
-        />
+    <section aria-label={label} className="flex flex-col">
+      <div className="flex h-12 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-baseline gap-3">
+          {/* `aria-live` stays off: a countdown that announces every second is unusable with a
+              screen reader. One announcement per PHASE goes out through the status line below. */}
+          <Numeral value={mmss(remaining)} size="num" mode="tick" />
+          <span className={cn('truncate text-eyebrow uppercase', PHASE_TEXT[phase] ?? 'text-text-1')}>{phaseWord}</span>
+        </div>
+        <div className="-mr-2.5 flex shrink-0">
+          <Pressable
+            variant="link"
+            shape="icon"
+            aria-label={t(paused ? 'workout.interval.resume' : 'workout.interval.pause')}
+            onClick={paused ? props.onResume : props.onPause}
+          >
+            {paused ? <Play aria-hidden /> : <Pause aria-hidden />}
+          </Pressable>
+          <Pressable
+            variant="link"
+            shape="icon"
+            aria-label={t('workout.interval.skip')}
+            // Skipping while paused would advance a clock that is not running.
+            disabled={paused}
+            onClick={props.onSkip}
+          >
+            <SkipForward aria-hidden />
+          </Pressable>
+          <Pressable variant="link" shape="icon" aria-label={t('workout.interval.stop')} onClick={props.onStop}>
+            <Square aria-hidden />
+          </Pressable>
+        </div>
       </div>
-
-      <p className="text-caption truncate text-center text-text-2">{info}</p>
-
-      <div className="flex justify-center gap-2">
-        <Pressable
-          shape="icon"
-          density="compact"
-          variant="secondary"
-          aria-label={t(paused ? 'workout.interval.resume' : 'workout.interval.pause')}
-          onClick={paused ? props.onResume : props.onPause}
-        >
-          {paused ? <Play className="size-icon-s" aria-hidden /> : <Pause className="size-icon-s" aria-hidden />}
-        </Pressable>
-        <Pressable
-          shape="icon"
-          density="compact"
-          variant="secondary"
-          aria-label={t('workout.interval.skip')}
-          // Skipping while paused would advance a clock that is not running — the anchor maths
-          // assumes a live `elapsed()`.
-          disabled={paused}
-          onClick={props.onSkip}
-        >
-          <SkipForward className="size-icon-s" aria-hidden />
-        </Pressable>
-        <Pressable
-          shape="icon"
-          density="compact"
-          variant="secondary"
-          aria-label={t('workout.interval.stop')}
-          onClick={props.onStop}
-        >
-          <Square className="size-icon-s" aria-hidden />
-        </Pressable>
-      </div>
-
-      {/* The screen can sleep, so SAY so. The lifter can move the phone; being told after the
-          block, by a prompt asking whether they kept going, helps nobody. */}
-      {props.screenMaySleep ? (
-        <p className="text-caption text-center text-warning">{t('workout.interval.wakeLockLost')}</p>
-      ) : null}
-
-      {props.failedRounds.length ? (
-        <p className={cn('text-caption text-center', 'text-warning')}>
-          {t('workout.interval.unsent', { count: props.failedRounds.length })}
-        </p>
-      ) : null}
-
+      <ProgressBar
+        tone={phase === 'work' ? 'accent' : 'ink'}
+        value={Math.min(1, Math.max(0, progress))}
+        label={phaseWord}
+        valueText={mmss(remaining)}
+        className="mt-3"
+      />
+      {warning ? (
+        <NoticeLine tone="warn" compact className="mt-2">
+          {warning}
+        </NoticeLine>
+      ) : (
+        <p className="mt-2 truncate text-cap text-text-2">{info}</p>
+      )}
       <p role="status" className="sr-only">
         {running ? t(`workout.interval.${phase}`) : ''}
       </p>

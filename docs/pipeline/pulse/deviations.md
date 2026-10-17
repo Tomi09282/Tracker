@@ -90,3 +90,67 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: no string is drawn at this place.
 - What the app does: A failed create shows no message today and none is drawn in coach-plans-1 / coach-plans-2; a message would be new copy. Kept silent until the owner decides.
 - Status: open — a copy question; nothing was invented.
+
+## DEV-008 — S-workout: the hero toggle Videó / Izomtérkép when inert (no taxonomy)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: the toggle is drawn in the header line as in workout-1 / -2; the inert state is not drawn.
+- What the app does: the inert toggle is aria-disabled in the kit's 40 % off ink (the old screen showed it at full ink).
+- Status: open — needs a ruling.
+
+## DEV-009 — S-workout: the interval timer toggle on circuit / EMOM / AMRAP members
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: a second TextLink "Időzítő" left of the hero toggle, 24 apart.
+- Status: open — needs a ruling.
+
+## DEV-010 — S-workout: the interval stage (8 sub-states)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: in the hero under the title: one 48 pt line (countdown Numeral, phase word in its phase ink, three bare icon buttons), the 4 pt line (lime while working), the round / next line; idle, done and the interruption prompt carry the lime pill.
+- Status: open — needs a ruling.
+
+## DEV-011 — S-workout: one lime lamp while the interval stage shows its pill
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: the active set row then draws its ring instead of the lime check; the ring still checks.
+- Status: open — needs a ruling.
+
+## DEV-012 — S-workout: a failed check (offline / server error / 409)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: a danger NoticeLine over the fields and the check cell with ONE action: Újra (offline, error) or Visszavonás (409, void); the row keeps its height and its typed values.
+- Status: open — needs a ruling.
+
+## DEV-013 — S-workout: a withdrawn (voided) set
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: numerals in text-3 with no lock, a hairline through the row, no check control, "Visszavonva" right-aligned (in de "Zurückgenommen" lies over the reps figure).
+- Status: open — needs a ruling.
+
+## DEV-014 — S-workout: an exercise complete on the switcher
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: not drawn.
+- What the app does: a 16 pt lime tick after the full count.
+- Status: open — needs a ruling.
+
+## DEV-015 — S-workout: the undo pill after a normal check (E21 E)
+
+- Source: docs/pipeline/pulse/pkg/S-workout/deviations.md (PLAN.md Q4: behaviour wins)
+- Package: S-workout
+- The frames show: no undo pill is drawn; the set row is tap-to-check (variants.json E21 live:false).
+- What the app does: the 6 s Visszavonás pill is gone with hold-to-confirm and swipe-weight: a normal check can be taken back only after a 409, where the void is still reachable. Flag for the owner.
+- Status: open — needs a ruling.

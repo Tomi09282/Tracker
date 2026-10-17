@@ -1,17 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router';
-import { Check, Dumbbell, PersonStanding, Play } from 'lucide-react';
+import { Check, PersonStanding, Play } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { Screen } from '../../ui/shell/Screen';
+import { Rule } from '../../ui/data/Rule';
+import { RoleKey } from '../../ui/data/RoleKey';
+import { RowStack } from '../../ui/data/RowStack';
 import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { Pressable } from '../../ui/primitives/Pressable';
 import { TextLink } from '../../ui/primitives/TextLink';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
-import { MuscleMap, type MuscleRole } from '../../ui/muscle-map/MuscleMap';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
+import { MuscleMap, type MuscleRole, type MuscleSide } from '../../ui/muscle-map/MuscleMap';
 import { useExercise } from '../library/useExercises';
-import { SetRow, SET_ROW_COLS, type CheckResult } from './SetRow';
+import { SetRow, SET_COLS, type CheckResult } from './SetRow';
 import { RestTimer } from './RestTimer';
 import {
   useCurrentWorkout,
@@ -26,65 +30,60 @@ import { useIntervalTimer } from './useIntervalTimer';
 import { IntervalStage } from './IntervalStage';
 
 /**
- * THE FOUR-ROW COLUMN, WRITTEN ONCE.
+ * THE HEIGHT BUDGET, in the frame's points (re-derived from `workout-1` / `workout-2`):
  *
- * The loading state and the loaded state must be the SAME box, or the swap produces the layout
- * shift a skeleton exists to prevent — and on this screen a layout shift is not cosmetic, it moves
- * the check button. `h-`, never `min-h-`: this container must not be able to grow.
+ *   header line 44 · hero 187 · table pad 16 + strong rule 1 + list header 36 + rule 1 · the rows
+ *   (64 + 1 per row) · closing strong rule 1 · the bottom cell: the switcher 88, or the rest band 137
  *
- * The height subtracts exactly what the layout reserves below it, from the same token — measured,
- * not guessed. Subtracting only `--nav-h` left the page 16 px taller than the viewport, which broke
- * the law this whole layout exists to keep.
+ * The column is one viewport tall and never grows (`Screen fill="fixed"`), and it ends 28 above
+ * the bar (`bottom="near"`). At 402 x 874 the blocks share 682 under y 72: 308 for the rows with
+ * the switcher, 259 with the rest band — exactly the 4 rows drawn. At 360 x 640 the
+ * rows would get 74 / 25, so the Q7 default gives way, in this order and never by choice of the
+ * moment:
+ *
+ *   1. the figure — with the side switch and the legend, which only steer it: the hero becomes the
+ *      title alone (12 + 68 = 80, +107 for the rows)
+ *   2. the header line — the counter and the hero toggle (+44)
+ *
+ * A step is taken when the rows would otherwise get less than two of themselves (129). It is
+ * decided by the HEIGHT OF THIS COLUMN, measured, so the offline line and the rest band count; the
+ * title, the set rows and the rest band never yield. The interval stage is not the figure: while it
+ * is shown the hero keeps it, and only the header line can go.
  */
-const SHELL = cn(
-  'col-mobile screen-x grid grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-group py-4',
-  'h-[calc(var(--viewport-h)-var(--content-pad-b))] lg:h-[calc(var(--viewport-h)-var(--content-pad-b-lg))]',
-);
+const BUDGET = { header: 44, hero: 187, heroCompact: 80, table: 54, close: 1, switcher: 88, rest: 137, rows: 129 } as const;
+
+/** 0 = everything, 1 = no figure, 2 = no figure and no header line. */
+type Fit = 0 | 1 | 2;
+
+function fitFor(height: number, resting: boolean, stage: boolean): Fit {
+  const fixed = BUDGET.table + BUDGET.close + (resting ? BUDGET.rest : BUDGET.switcher);
+  const rows = (hero: number, header: number) => height - fixed - hero - header;
+  if (rows(BUDGET.hero, BUDGET.header) >= BUDGET.rows) return 0;
+  if (!stage && rows(BUDGET.heroCompact, BUDGET.header) >= BUDGET.rows) return 1;
+  return 2;
+}
+
+/** The gutter the switcher and the rest band bleed into, so the row runs off the screen edge. */
+const BLEED_RIGHT = '-mr-6 pr-6 max-[23.5rem]:-mr-4 max-[23.5rem]:pr-4';
 
 /**
- * The hero's footprint, and the single most load-bearing number on the screen.
+ * The guided workout player — frames `workout-1` (a set running) and `workout-2` (record + rest).
  *
- * 34dvh, and the number moved because what the hero CONTAINS changed under it.
+ * THE LAW THIS SCREEN IS BUILT AROUND: the page never scrolls while sets are being checked. A
+ * lifter checks a set with one hand, mid-rest, often without looking; if the page moved, the check
+ * would be somewhere different every time, and the failure is recording a lift that did not happen
+ * on a row the schema then freezes. Only the set list scrolls, inside its own box.
  *
- * 28dvh was measured when the hero was a media panel: it left the set list four full rows plus a
- * visibly clipped fifth at 375 x 812, and that was the right trade for a thumbnail. The muscle map
- * is not a thumbnail — it is a drawing of a body that has to be read — and the arithmetic is
- * unforgiving in a way an image is not. The `Elöl`/`Hátul` control and the legend are FIXED
- * heights, about 68px together, so they take 30% of a 227px hero and 25% of a 276px one. Measured
- * at 28dvh the figure got 117px of 227 — 52% of its own card — and rendered 54px wide, at which
- * size twelve anatomical regions are a smudge and the screen's central claim is illegible.
+ * Pulse composition, top to bottom on the gutter — no card, no header bar, nothing enclosed:
  *
- * 34dvh is what the approved mockup draws, and it puts the figure's share at about 83%, which is
- * the mockup's proportion too. It costs one set row: the list now shows three full rows and a
- * clipped fourth, which is also what the mockup draws. The trade was always there; it was made in
- * the other direction when the hero held something else.
+ *   header line   where you are in the session ("1 / 5") · the hero toggle (Videó / Izomtérkép)
+ *   hero 187      the exercise title (two lines reserved, balanced) · the side switch · the legend;
+ *                 the read-only mannequin on the right, standing on the table's top rule
+ *   the table     strong rule · `#  Előző  kg  ism.` · the rows as a ruled scoreboard (64 each)
+ *                 · strong rule
+ *   bottom cell   the exercise switcher — or, while resting, the rest band over it
  *
- * Still a FIXED share of the viewport rather than an aspect ratio, for the original reason: the
- * budget below it is vertical, and an aspect ratio would hand a wide phone a taller hero and
- * quietly take a set row away.
- *
- * The hero also keeps this height when it has nothing to show. Collapsing it on an exercise with
- * no muscle map would move the set list up, which means the check button lands somewhere different
- * on that exercise than on the previous one — the exact failure the no-scroll law exists to
- * prevent.
- */
-const HERO = 'relative h-[34dvh] w-full shrink-0 overflow-hidden';
-
-/**
- * Blueprint 3 — the guided workout player.
- *
- * THE LAW THIS SCREEN IS BUILT AROUND: the page never scrolls while sets are being checked. Only
- * the set list scrolls, inside its own box.
- *
- * That is not a stylistic preference. A lifter checks a set with one hand, mid-rest, often without
- * looking. If the page scrolls, the check button is somewhere different every time — and the
- * failure mode is not "mildly annoying", it is tapping the wrong set and recording a lift that did
- * not happen, on a row the schema then freezes.
- *
- * The layout is therefore a fixed-height column: a sticky hero that does not move, a scroll region
- * that owns all the overflow, and a footer pinned above the nav. `min-h-0` on the middle track is
- * what makes a grid child actually scroll instead of growing the page — the single most common way
- * this pattern is got wrong.
+ * The ONE lime pill is the check of the active set. No finish-workout control (D3).
  */
 export function WorkoutPlayer() {
   const { t, i18n } = useTranslation();
@@ -226,31 +225,78 @@ export function WorkoutPlayer() {
   const activeSetId =
     setsForCurrent.find((s) => s.completed_at == null && s.voided_at == null)?.id ?? null;
 
+
+  // The side of the figure, owned by the screen (the map draws the figure alone). Every visit opens
+  // on the front; nothing flips it by itself.
+  const [side, setSide] = useState<MuscleSide>('front');
+
+  // Q7: what gives way when the column is short. Measured on the column itself, before paint.
+  const columnRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [columnHeight, setColumnHeight] = useState(0);
+  useLayoutEffect(() => {
+    const el = columnRef.current;
+    if (!el) return;
+    setColumnHeight(el.clientHeight);
+    const observer = new ResizeObserver(() => setColumnHeight(el.clientHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [data?.log]);
+  const stageShown = Boolean(intervalBlock && showTimer);
+  const fit: Fit = columnHeight > 0 ? fitFor(columnHeight, rest.running, stageShown) : 0;
+
+  // THE ACTIVE ROW STAYS IN REACH. When the rest band rises (49 pt more than the switcher) or the
+  // column gives way, the list region shrinks — on a small phone the active row could end up below
+  // its fold (the offline line takes its height too). It is scrolled back into view, never focused.
+  useEffect(() => {
+    listRef.current
+      ?.querySelector('[data-active]')
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [rest.running, fit, activeSetId, columnHeight]);
+
   if (isPending) {
     return (
-      // THE SAME BOX AS THE LOADED SCREEN, in the same proportions. A skeleton whose shapes do not
-      // match the real geometry causes precisely the layout shift it was put there to prevent.
-      <div className={SHELL} role="status" aria-busy="true">
+      // THE SAME COLUMN AS THE LOADED SCREEN, block for block: a skeleton whose shapes do not match
+      // the real geometry causes the layout shift it is there to prevent — and here a shift moves
+      // the check. Plain blocks in place of text lines; the figure is withheld, never a grey shape.
+      <Screen top="root" gap="none" fill="fixed" bottom="near" role="status" aria-busy="true">
         <span className="sr-only">{t('common.loading')}</span>
-        <Skeleton className={cn(HERO, 'rounded-card')} />
-        <div className="flex items-center justify-between gap-3">
-          <Skeleton className="h-8 w-1/2" />
-          <Skeleton className="h-7 w-16 rounded-chip" />
+        <div className="flex h-11 shrink-0 items-center justify-between">
+          <Skeleton className="h-3 w-10" />
+          <Skeleton className="h-3 w-14" />
         </div>
-        <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
-          <div className="h-7 shrink-0" />
-          <div className="flex flex-col gap-tight">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-card" />
-            ))}
+        <div className="flex h-[187px] shrink-0 flex-col gap-3 pt-3">
+          <div className="flex h-[68px] w-[268px] max-w-full flex-col justify-center gap-2">
+            <Skeleton className="h-6 w-[70%]" />
+            <Skeleton className="h-6 w-1/2" />
           </div>
-        </Surface>
-        <div className="flex gap-3 pb-1">
-          <Skeleton className="h-11 w-28 rounded-chip" />
-          <Skeleton className="h-11 w-32 rounded-chip" />
-          <Skeleton className="h-11 w-24 rounded-chip" />
+          <div className="flex flex-col gap-4 pt-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-3 w-40" />
+          </div>
         </div>
-      </div>
+        <div className="flex shrink-0 flex-col pt-4">
+          <Rule strong />
+          <div className="flex h-9 items-center">
+            <Skeleton className="h-3 w-40" />
+          </div>
+          <Rule />
+          <RowStack as="div">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="flex h-16 items-end gap-6 pb-3">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-9 w-16" />
+                <Skeleton className="h-9 w-6" />
+              </div>
+            ))}
+          </RowStack>
+          <Rule strong />
+        </div>
+        <div className="flex shrink-0 gap-8 pt-8">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </Screen>
     );
   }
 
@@ -260,7 +306,7 @@ export function WorkoutPlayer() {
       // running to the library on a network blip, so the failure says so and offers the one way
       // forward: ask again. A refetch that fails while the last answer is still cached keeps the
       // player on screen instead (`data` is still there), which is the right thing mid-set.
-      <div className="col-mobile screen-x py-4">
+      <Screen top="root">
         <h1 className="sr-only">{t('nav.workout')}</h1>
         <NoticeLine
           tone="danger"
@@ -271,7 +317,7 @@ export function WorkoutPlayer() {
         >
           {t('workout.loadFailed')}
         </NoticeLine>
-      </div>
+      </Screen>
     );
   }
 
@@ -304,16 +350,14 @@ export function WorkoutPlayer() {
       // eye. Raised ONCE, and it dismisses itself — the row keeps the trophy, so a permanent toast
       // would be a second permanent statement of the same fact.
       //
-      // `record`, not `success`: a saved form and a personal record are both "it worked" and are
-      // not the same news, which is why E12E16 ships a fourth KIND with a trophy and an accent rail
-      // instead of a green check. `top`, not the default bottom: the bottom of this viewport is the
-      // rest timer, the nav AND the thumb path to the next check button, and the same tap that
-      // earns the record starts the rest — so a bottom toast lands on the control it celebrates.
-      // This is the screen `ToastPlacement` was built for, and it had never opted in.
+      // `record`, not `success`: a saved form and a personal record are not the same news, so the
+      // toast kind carries the trophy. Pulse has ONE toast band, at the top (F13): the old
+      // `placement` option is gone with the bottom toasts, and the band drops over the header line,
+      // never over the rest band or the next check (frame workout-2).
       //
       // The message is the bare `Új rekord`, not the kind-qualified sentence: that sentence is the
       // ROW's caption, and the toast is not a second permanent statement of the same fact.
-      toast(t('workout.recordSpoken'), 'record', { placement: 'top' });
+      toast(t('workout.recordSpoken'), 'record');
     }
     // `queued` is carried to the row, not swallowed here: the outbox accepted the write but the
     // server has not, so the row has to say `Nincs kapcsolat` instead of sitting there looking
@@ -321,256 +365,226 @@ export function WorkoutPlayer() {
     return { records, queued: result.queued === true };
   };
 
+  const lampElsewhere = stageShown && !interval.running;
+  const showHeader = fit < 2;
+  // The figure and its two steering controls go together (Q7 step 1), and with the stand-in.
+  const figureRoom = fit === 0 || stageShown;
+
   return (
-    <div className={SHELL}>
-      {/* ── THE ANCHOR ──────────────────────────────────────────────────────────────────────────
-          A framed panel that hosts the map at full bleed, not a centred small figure in a grey box.
-          `glass` is earned here and almost nowhere else on this screen: the recipe reserves the
-          backdrop blur for surfaces that float over moving content, and a hero anchor is the one
-          case on a resting page — it is a single element, so the compositing layer it costs is
-          paid once rather than once per card. */}
-      <Surface elevation="card" finish="glass" pad="none" className={HERO}>
-        {intervalBlock && showTimer ? (
-          <IntervalStage
-            block={intervalBlock}
-            phase={interval.phase}
-            remaining={interval.remaining}
-            progress={interval.progress}
-            round={interval.round}
-            totalRounds={interval.totalRounds}
-            running={interval.running}
-            interrupted={interval.interrupted}
-            pendingCount={interval.pendingCount}
-            failedRounds={interval.failedRounds}
-            screenMaySleep={interval.screenMaySleep}
-            nextName={
-              interval.segment && intervalBlock.members.length > 1
-                ? (intervalBlock.members[interval.segment.memberIndex + 1]?.name ?? null)
-                : null
-            }
-            // `unlockAudio()` runs SYNCHRONOUSLY inside the tap handler, before anything awaits.
-            // iOS starts every AudioContext suspended and only a real user gesture resumes it —
-            // after an await the browser no longer counts this as one, and the whole block would
-            // then run silently on the device where the tone is the only cue available.
-            onStart={() => {
-              unlockAudio();
-              interval.start(intervalBlock, 10);
-            }}
-            onPause={interval.pause}
-            onResume={() => {
-              unlockAudio();
-              interval.resume();
-            }}
-            onSkip={interval.skip}
-            onStop={interval.stop}
-            onConfirmCrossed={() => {
-              unlockAudio();
-              interval.confirmCrossed();
-            }}
-            onDiscardCrossed={interval.discardCrossed}
-          />
-        ) : mapShown ? (
-          // FULL BLEED. `fill` height-constrains the 260 x 560 figure to the panel instead of
-          // capping it at 280px wide, which on a wide hero left the map floating in an empty box.
-          // Read-only — no `onSelect` — so the map is not an interactive target here at all, which
-          // is the rule that lets a component with 9px-wide regions exist in this product.
-          //
-          // `sideControl="segmented"` is the whole reason that prop exists: 02-workout-player.webp
-          // draws ONE rounded track with `Elöl` in an inner pill, not the filled-accent chip pair
-          // the library and exercise-detail mockups draw. The pair also put a second saturated
-          // accent object in the hero, competing with the row's check button.
-          <MuscleMap highlights={highlights} fill sideControl="segmented" className="h-full p-3" />
-        ) : (
-          // THE HONEST STAND-IN for an exercise with no map and no media: a custom movement, a
-          // coach's own entry, anything the taxonomy has not been filled in for. A mark at anchor
-          // scale rather than a small grey glyph in an empty panel — one reads as "nothing to show
-          // here", the other reads as a broken image.
-          //
-          // Both sizes are FRACTIONS of the panel, never px. The hero is 28dvh, so a fixed glyph
-          // drifts against the circle on every viewport — which is how it ended up at 64px inside a
-          // mark only 3/5 of the panel tall: a big glyph in a circle too small for it. Measured off
-          // 02b-workout-states.webp the mark is ~77% of the panel's height; the glyph is half the
-          // mark, matching the ratio `EmptyState`'s own `anchor` mark uses, so the two anchor-scale
-          // marks in the product are drawn to one proportion.
-          <div className="flex h-full items-center justify-center">
-            <span
-              aria-hidden
-              className="inline-flex aspect-square h-3/4 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-            >
-              <Dumbbell className="size-1/2" strokeWidth={1.5} />
+    <Screen top="root" gap="none" fill="fixed" bottom="near">
+      <div ref={columnRef} className="flex min-h-0 flex-1 flex-col">
+        {/* ── 1 · the header line, 72-116: where you are · the hero toggle ─────────────────────── */}
+        {showHeader ? (
+          <div className="flex h-11 shrink-0 items-center justify-between gap-6">
+            <span className="text-data text-text-1">
+              {activeExercise + 1}
+              <span className="text-text-2"> / {exercises.length}</span>
             </span>
+            {!interval.running ? (
+              <div className="flex items-center gap-6">
+                {/* The timer toggle exists only on a block that HAS rounds; on a straight set it
+                    would be a control that does nothing. */}
+                {intervalBlock ? (
+                  <TextLink aria-pressed={showTimer} onClick={() => setShowTimer((v) => !v)}>
+                    {t('workout.showTimer')}
+                  </TextLink>
+                ) : null}
+                {/* The toggle names the OTHER view. Inert (not removed) on a movement with no
+                    taxonomy: the next movement may well have a map, and the toggle has to stay
+                    where the thumb learned it. */}
+                <TextLink
+                  lead={mapShown ? <Play aria-hidden /> : <PersonStanding aria-hidden />}
+                  aria-disabled={!mapAvailable || undefined}
+                  aria-pressed={mapAvailable ? showMedia : undefined}
+                  onClick={() => {
+                    if (!mapAvailable) return;
+                    setShowMedia((v) => !v);
+                  }}
+                >
+                  {t(mapShown ? 'workout.showMedia' : 'workout.showMuscles')}
+                </TextLink>
+              </div>
+            ) : null}
           </div>
-        )}
-        {/* The timer toggle only appears on a block that HAS rounds. On a straight set it would be
-            a control that does nothing, which is worse than no control. It is also hidden while
-            the timer is running, so the lifter cannot navigate away from a live countdown by
-            reflex. */}
-        {intervalBlock && !interval.running ? (
-          <Pressable
-            shape="chip"
-            density="compact"
-            // `selected`, not `primary`. Rule 47 / DESIGN §5.6: the one saturated accent object on
-            // this screen is the row's check button, and a toggle that is merely ON is the
-            // selected-chip idiom. Rule-derived rather than mockup-derived — the mockups draw no
-            // `Időzítő` chip at all, since both are straight-set blocks.
-            variant="secondary"
-            selected={showTimer}
-            aria-pressed={showTimer}
-            onClick={() => setShowTimer((v) => !v)}
-            className={cn('absolute left-3', mapShown ? 'bottom-9' : 'bottom-3')}
-          >
-            {t('workout.showTimer')}
-          </Pressable>
         ) : null}
-        {/* THE OFFSET FOLLOWS WHAT IS ACTUALLY UNDER THE CHIP. `bottom-9` clears the map's
-            `Fő célizom` / `Segédizom` legend, which owns the bottom band of the panel — a chip
-            parked on the one line that explains the colours has eaten the anchor's caption. With no
-            map there is no legend, and 36px above the edge is 16% of a 28dvh hero left as dead
-            space; 02b-workout-states.webp puts the chip just inside the corner. */}
-        {!interval.running ? (
-          <Pressable
-            shape="chip"
-            density="compact"
-            variant="secondary"
-            // Inert on a movement with no taxonomy, rather than a control that redraws the panel it
-            // is already showing. The chip STAYS — the next movement may well have a map, and the
-            // toggle has to be discoverable when it does.
-            //
-            // `aria-disabled` + a no-op handler, NOT `disabled`: the control recipe washes a
-            // disabled chip to `opacity-45`, and over a glass hero that is the one place the label
-            // stops being readable. The mockup draws this chip at full strength on exactly the
-            // state that has no map. The refusal is kept; only the fade is dropped.
-            aria-disabled={!mapAvailable || undefined}
-            aria-pressed={mapAvailable ? showMedia : undefined}
-            onClick={() => {
-              if (!mapAvailable) return;
-              setShowMedia((v) => !v);
-            }}
-            className={cn('absolute right-3', mapShown ? 'bottom-9' : 'bottom-3')}
-          >
-            {mapShown ? (
-              <Play className="size-icon-s" aria-hidden />
-            ) : (
-              <PersonStanding className="size-icon-s" aria-hidden />
-            )}
-            {t(mapShown ? 'workout.showMedia' : 'workout.showMuscles')}
-          </Pressable>
-        ) : null}
-      </Surface>
 
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-title-1 truncate font-display">
-          {current?.exercise_name_snapshot ?? t('workout.freestyle')}
-        </h1>
-        {/* The counter is a PILL, not bare grey text. It is the one number on this row, and it has
-            to survive being read past a long exercise name that is already truncating. */}
-        <span className="text-body-s shrink-0 rounded-chip bg-surface-2 px-3 py-1 tabular-nums text-text-3">
-          <span className="text-text-1">{activeExercise + 1}</span> / {exercises.length}
-        </span>
-      </header>
-
-      {/* ── THE ONLY THING THAT SCROLLS ─────────────────────────────────────────────────────────
-          The Surface is the frame and does NOT scroll; the `ul` inside it owns all the overflow.
-          `min-h-0` on both is what makes a grid child scroll instead of growing the page — the
-          single most common way this pattern is got wrong. The list runs to the panel's bottom edge
-          with no padding under it on purpose: a half-clipped fifth row is the affordance that says
-          "there is more", and padding would turn it into a gap. */}
-      <Surface pad="none" className="flex min-h-0 flex-col overflow-hidden px-2 pt-2">
-        {/* SENTENCE CASE, at the caption step. Both mockups draw `#  Előző  kg  ism.` with a capital
-            E and lowercase `kg` / `ism.` — a deliberate difference from the bottom nav's caps, since
-            `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro-legacy`
-            carries +0.06em tracking that exists for uppercase eyebrows and is wrong under sentence
-            case; `text-caption` is the step for metadata under a thing. */}
-        <div className={cn('text-caption grid h-7 shrink-0 items-center gap-2 px-2 text-text-3', SET_ROW_COLS)}>
-          <span className="text-center">#</span>
-          <span>{t('workout.previous')}</span>
-          <span className="text-center">{t('workout.kg')}</span>
-          <span className="text-center">{t('workout.reps')}</span>
-          <span />
-        </div>
-        <ul
-          className="flex min-h-0 flex-1 flex-col gap-tight overflow-y-auto overscroll-contain"
-          aria-label={t('workout.sets')}
-        >
-          {setsForCurrent.map((s) => (
-            <SetRow
-              key={s.id}
-              set={s}
-              // A freestyle movement has no `exercise_id`, so it has no history to compare against
-              // and the column is honestly an em-dash there.
-              previous={
-                current?.exercise_id != null
-                  ? (previousBySet.get(`${current.exercise_id}:${s.set_index}`) ?? null)
+        {/* ── 2 · the hero, 116-303: title · side switch · legend · the figure on the right ──── */}
+        <div className={cn('relative flex shrink-0 flex-col gap-3 pt-3', figureRoom ? 'h-[187px]' : 'h-20')}>
+          <h1 className="min-h-[68px] w-[268px] max-w-[calc(100%-86px)] text-balance text-display uppercase text-text-1">
+            {current?.exercise_name_snapshot ?? t('workout.freestyle')}
+          </h1>
+          {stageShown && intervalBlock ? (
+            <IntervalStage
+              block={intervalBlock}
+              phase={interval.phase}
+              remaining={interval.remaining}
+              progress={interval.progress}
+              round={interval.round}
+              totalRounds={interval.totalRounds}
+              running={interval.running}
+              interrupted={interval.interrupted}
+              pendingCount={interval.pendingCount}
+              failedRounds={interval.failedRounds}
+              screenMaySleep={interval.screenMaySleep}
+              nextName={
+                interval.segment && intervalBlock.members.length > 1
+                  ? (intervalBlock.members[interval.segment.memberIndex + 1]?.name ?? null)
                   : null
               }
-              onCheck={(v) => onCheck(s.id, v)}
-              onUndo={async () => {
-                await undo.mutateAsync({ setId: s.id, reason: 'undone from the player' });
-                // The rest that this set started is no longer resting between anything. Leaving it
-                // running would count down to a cue for a set the lifter just took back.
-                rest.stop();
+              // `unlockAudio()` runs SYNCHRONOUSLY inside the tap handler, before anything awaits:
+              // iOS starts every AudioContext suspended and only a real user gesture resumes it.
+              onStart={() => {
+                unlockAudio();
+                interval.start(intervalBlock, 10);
               }}
-              autoFocus={handoverSetId === s.id}
-              active={activeSetId === s.id}
-              disabled={check.isPending}
+              onPause={interval.pause}
+              onResume={() => {
+                unlockAudio();
+                interval.resume();
+              }}
+              onSkip={interval.skip}
+              onStop={interval.stop}
+              onConfirmCrossed={() => {
+                unlockAudio();
+                interval.confirmCrossed();
+              }}
+              onDiscardCrossed={interval.discardCrossed}
             />
-          ))}
-        </ul>
-      </Surface>
+          ) : mapShown && fit === 0 ? (
+            <>
+              <div className="flex flex-col gap-1">
+                <Segmented<MuscleSide>
+                  label={t('muscleMap.viewLabel')}
+                  options={[
+                    { value: 'front', label: t('muscleMap.front') },
+                    { value: 'back', label: t('muscleMap.back') },
+                  ]}
+                  value={side}
+                  onChange={setSide}
+                  className="self-start"
+                />
+                {Object.keys(highlights).length > 0 ? (
+                  <RoleKey
+                    size={6}
+                    items={[
+                      { role: 'primary', label: t('muscleMap.primary') },
+                      { role: 'secondary', label: t('muscleMap.secondary') },
+                    ]}
+                  />
+                ) : null}
+              </div>
+              {/* Read-only (no `onSelect`), so the map is not a target at all. Head 8 under the
+                  hero top, soles on the table's rule, the right hand on the gutter: the box runs 14
+                  past it and the screen clips it (FIGURE_BOX; workout-1 x 287, y 111, 105 x 221). */}
+              <MuscleMap
+                sideControl="none"
+                side={side}
+                highlights={highlights}
+                className="absolute right-[-14px] top-[-5px] h-[221px]"
+              />
+            </>
+          ) : null}
+        </div>
 
-      {/* ── exercise switcher, pinned ───────────────────────────────────────────────────────────
-          `gap-3` rather than `gap-2`: five tight chips read as a second navigation bar competing
-          with the real one at the bottom, and loose ones read as the filter row this actually is.
-          The chip clipped at the trailing edge is deliberate — it is what says the row scrolls. */}
-      <nav className="flex shrink-0 gap-3 overflow-x-auto pb-1" aria-label={t('workout.exercises')}>
-        {exercises.map((ex, i) => {
-          const total = (data.sets ?? []).filter((s) => s.log_exercise_id === ex.id);
-          // `voided_at` matters here for the same reason it matters on the row: the server dropped
-          // a voided set from the session totals, so counting it would make this chip say 4/4 while
-          // the record says 3. Second instance of that drift found by sweeping every read of
-          // `completed_at` after the row defect — the row was not the only place that had to agree.
-          const done = total.filter((s) => s.completed_at != null && s.voided_at == null).length;
-          const complete = total.length > 0 && done === total.length;
-          return (
-            <Pressable
-              key={ex.id}
-              shape="chip"
-              density="compact"
-              // A ~140px saturated accent pill here made the screen's largest accent object a
-              // NAVIGATION chip while the one real action — the row's check button — was the
-              // smaller of the two. Both mockups draw this as the pale selected-filter pill, which
-              // is also what the row's own comment above calls this: a filter row, not a second nav.
-              //
-              // `selected` rather than a hand-written `bg-accent-subtle`: the variant carries the
-              // `hover:bg-accent-subtle` half a call site forgets, without which the current chip
-              // reverts to surface-2 under the pointer and reads as "you are about to deselect".
-              // No `text-*` at the call site — twMerge would let it swallow `density="compact"`'s
-              // `text-body-s` and render this chip a different size from its neighbours.
-              variant="secondary"
-              selected={i === activeExercise}
-              // Kept as-is: `selected` is a visual variant and carries no semantics.
-              aria-current={i === activeExercise ? 'true' : undefined}
-              onClick={() => setActiveExercise(i)}
-            >
-              <span className="max-w-32 truncate">{ex.exercise_name_snapshot}</span>
-              {/* A finished movement gets a tick as well as a full count — the count alone is two
-                  numbers to compare at arm's length, and the tick is the same fact as a shape. */}
-              {complete ? <Check className="size-icon-s shrink-0" aria-hidden /> : null}
-              <span className="tabular-nums opacity-70">
-                {done}/{total.length}
-              </span>
-            </Pressable>
-          );
-        })}
-      </nav>
+        {/* ── 3 · the table: strong rule · header · the rows (the ONLY thing that scrolls) ───── */}
+        <div className="flex min-h-0 shrink flex-col pt-4">
+          <Rule strong />
+          <div aria-hidden className="relative h-9 shrink-0 text-eyebrow uppercase text-text-2">
+            <span className={cn('absolute top-[9px]', SET_COLS.idx)}>#</span>
+            <span className={cn('absolute top-[9px]', SET_COLS.headPrev)}>{t('workout.previous')}</span>
+            <span className={cn('absolute top-[9px]', SET_COLS.headKg)}>{t('workout.kg')}</span>
+            <span className={cn('absolute top-[9px]', SET_COLS.headReps)}>{t('workout.reps')}</span>
+          </div>
+          <Rule />
+          {/* `min-h-0` is what lets a flex child scroll instead of growing the column. The 1 pt of
+              padding keeps the last row's field edges, which lie ON the closing rule, inside the
+              scroll box; the closing rule is drawn over them, as in the frame. */}
+          <div
+            ref={listRef}
+            // The gutter on both sides is room for the active pill's glow, which a scroll box would clip.
+            className="-mx-6 min-h-0 overflow-y-auto overscroll-contain px-6 pb-px max-[23.5rem]:-mx-4 max-[23.5rem]:px-4"
+          >
+            <RowStack aria-label={t('workout.sets')}>
+              {setsForCurrent.map((s) => (
+                <SetRow
+                  key={s.id}
+                  set={s}
+                  // A freestyle movement has no `exercise_id`, so it has no history to compare
+                  // against and the column is honestly an em-dash there.
+                  previous={
+                    current?.exercise_id != null
+                      ? (previousBySet.get(`${current.exercise_id}:${s.set_index}`) ?? null)
+                      : null
+                  }
+                  onCheck={(v) => onCheck(s.id, v)}
+                  onUndo={async () => {
+                    await undo.mutateAsync({ setId: s.id, reason: 'undone from the player' });
+                    // The rest this set started is no longer resting between anything.
+                    rest.stop();
+                  }}
+                  autoFocus={handoverSetId === s.id}
+                  active={activeSetId === s.id}
+                  lampElsewhere={lampElsewhere}
+                  disabled={check.isPending}
+                />
+              ))}
+            </RowStack>
+          </div>
+          <Rule strong className="relative z-[2] -mt-px" />
+        </div>
 
-      <RestTimer
-        remaining={rest.remaining}
-        progress={rest.progress}
-        running={rest.running}
-        nextUp={nextUp}
-        onSkip={rest.stop}
-      />
-    </div>
+        {/* ── 4 · the bottom cell: the exercise switcher, and the rest band rising over it ─────── */}
+        <div className="grid shrink-0">
+          <nav
+            aria-label={t('workout.exercises')}
+            inert={rest.running}
+            className={cn('[grid-area:1/1] overflow-x-auto overscroll-x-contain pt-5 [scrollbar-width:none]', BLEED_RIGHT)}
+          >
+            <ul className="flex w-max gap-8">
+              {exercises.map((ex, i) => {
+                const rows = (data.sets ?? []).filter((s) => s.log_exercise_id === ex.id);
+                // `voided_at` matters: the server dropped a voided set from the session totals.
+                const done = rows.filter((s) => s.completed_at != null && s.voided_at == null).length;
+                const complete = rows.length > 0 && done === rows.length;
+                const on = i === activeExercise;
+                return (
+                  <li key={ex.id}>
+                    <Pressable
+                      variant="link"
+                      aria-current={on ? 'true' : undefined}
+                      onClick={() => setActiveExercise(i)}
+                      // INTERIM (R-S-workout-03): the kit has no stacked, scrolling rail yet; the link is laid
+                      // out as the frame's item here — count over name, 68 high, the ink mark under the name.
+                      className="h-[68px] flex-col items-start justify-start gap-0.5 whitespace-nowrap pt-3"
+                    >
+                      <span className="flex items-center gap-1 text-data">
+                        <span className={done > 0 ? (on ? 'text-text-1' : 'text-text-2') : 'text-text-3'}>
+                          {done}
+                          <span className="text-text-3">/{rows.length}</span>
+                        </span>
+                        {/* A finished movement gets a tick as well as a full count: the same fact
+                            as a shape, readable at arm's length. Done = lime. */}
+                        {complete ? <Check aria-hidden className="size-4 text-accent" strokeWidth={2.5} /> : null}
+                      </span>
+                      <span className={cn('text-body-m', on ? 'text-text-1' : 'text-text-2')}>{ex.exercise_name_snapshot}</span>
+                      {on ? <span aria-hidden className="absolute inset-x-0 top-[58px] h-0.5 bg-text-1" /> : null}
+                    </Pressable>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          <div className="[grid-area:1/1] -mr-6 max-[23.5rem]:-mr-4">
+            <RestTimer
+              remaining={rest.remaining}
+              progress={rest.progress}
+              running={rest.running}
+              nextUp={nextUp}
+              onSkip={rest.stop}
+            />
+          </div>
+        </div>
+      </div>
+    </Screen>
   );
 }

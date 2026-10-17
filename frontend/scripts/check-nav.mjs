@@ -285,6 +285,22 @@ async function main() {
     const stem = route.replace(/\/:[^/]+/g, '');
     return target === stem || target.startsWith(`${stem}/`);
   };
+  /*
+   * A pushed screen's back arrow is drawn by the shell from `app/routeMeta.ts` (child -> parent),
+   * so its page file holds no literal `to="/parent"` any more. Those edges are remembered here as
+   * ways BACK only: they can name a route's own screens in the report, and they are NEVER a door
+   * (a way back is not a way in), so they cannot turn a failing route green.
+   */
+  const metaBacks = new Map(); // parent route -> Set<child page file>
+  if (fs.existsSync(ROUTE_META_FILE)) {
+    const table = (await import(pathToFileURL(path.resolve(ROUTE_META_FILE)).href)).ROUTE_META;
+    for (const [child, meta] of table && typeof table === 'object' ? Object.entries(table) : []) {
+      const file = pageOf.get(child);
+      if (typeof meta?.parent !== 'string' || !file) continue;
+      if (!metaBacks.has(meta.parent)) metaBacks.set(meta.parent, new Set());
+      metaBacks.get(meta.parent).add(file);
+    }
+  }
   /** Who links to a route: `outside` are doors, `inside` are its own subtree's ways back. */
   const doorsOf = (route) => {
     const own = subtreeFiles(route);
@@ -294,6 +310,7 @@ async function main() {
       if (!opens(target, route)) continue;
       for (const from of sources) (own.has(from) ? inside : outside).add(from);
     }
+    for (const from of metaBacks.get(route) ?? []) if (own.has(from)) inside.add(from);
     return { outside: [...outside].sort(), inside: [...inside].sort() };
   };
 
