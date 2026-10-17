@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { initialsOf, personLabel } from '../../lib/person';
 import { Ban, Check, Flag, Send, Undo2 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { TextLink } from '../../ui/primitives/TextLink';
@@ -23,6 +23,36 @@ import {
 } from './useChat';
 
 const BODY_MAX = 4000;
+
+/**
+ * The thread's top edge. The scroller starts at the rule and the list carries 32 pt of top padding,
+ * so a thread that fits begins 32 under the rule, exactly where the mask turns opaque: untouched.
+ * A longer thread slides up under the hairline; the first 8 pt are fully transparent and the next
+ * 24 fade in, so a line leaving the column disappears instead of being sliced in half at the rule.
+ * A mask reads only alpha (`currentColor` = keep).
+ */
+const THREAD_MASK = 'linear-gradient(to bottom, transparent, transparent 8px, currentColor 32px)';
+const THREAD_FADE: CSSProperties = { maskImage: THREAD_MASK, WebkitMaskImage: THREAD_MASK };
+
+/**
+ * The composer's top edge. The kit field scrolls its value inside its own 11 pt top pad once the
+ * draft passes five lines, and the line leaving through it used to be cut flush against the label's
+ * descenders, so it read as struck through the label. At rest the fade covers exactly that pad (the
+ * first line starts below it and is untouched); once the value is scrolled, the field's `onScroll`
+ * swaps in the stronger fade, so the leaving line is gone under the label and the line below it
+ * fades in - the usual "more above" edge. The underline is the wrapper's pseudo-element, outside
+ * the textarea, so it is never masked.
+ */
+const COMPOSER_MASK_REST = 'linear-gradient(to bottom, transparent, currentColor 11px)';
+const COMPOSER_MASK_SCROLLED = 'linear-gradient(to bottom, transparent, transparent 8px, currentColor 24px)';
+const COMPOSER_FADE: CSSProperties = { maskImage: COMPOSER_MASK_REST, WebkitMaskImage: COMPOSER_MASK_REST };
+
+/** Presentational only: the field's mask follows its own scroll position (no state, no re-render). */
+function fadeComposerEdge(el: HTMLTextAreaElement) {
+  const mask = el.scrollTop > 0 ? COMPOSER_MASK_SCROLLED : COMPOSER_MASK_REST;
+  el.style.setProperty('mask-image', mask);
+  el.style.setProperty('-webkit-mask-image', mask);
+}
 
 /**
  * Day grouping, in the reader's own timezone.
@@ -212,10 +242,18 @@ export function ChatPanel({
       // utility's name collides with it. The rule is right to be broad — `col-mobile` and
       // `col-wide` are real project utilities and a typo in either must fail the build — so
       // the exception lives here, named, rather than the rule being loosened for everybody.
-      style={{ flexDirection: 'column-reverse' }}
-      className={cn('flex min-h-0 flex-1 overflow-y-auto overscroll-contain pt-2', showBlockAction && 'min-h-32')}
+      //
+      // THE CLIP EDGE IS THE RULE. The scroller is pulled up over the 24 the column leaves above
+      // it (`-mt-6`) and the list carries that 24 + 8 as its own top padding, so a thread that
+      // fits stands exactly where it did (32 under the rule, as the frame draws it), while a
+      // longer one slides up to the hairline instead of being cut 32 below it in the open — the
+      // old cut left a row of sliced descenders floating under the rule. The fade (8 clear + 24 soft) lies
+      // inside that padding: at rest it covers nothing, while scrolling it lets a line leave
+      // softly instead of in half.
+      style={{ flexDirection: 'column-reverse', ...THREAD_FADE }}
+      className={cn('-mt-6 flex min-h-0 flex-1 overflow-y-auto overscroll-contain', showBlockAction && 'min-h-32')}
     >
-      <ol aria-label={t('chat.thread')} className="flex flex-col gap-5">
+      <ol aria-label={t('chat.thread')} className="flex flex-col gap-5 pt-8">
         {days.map((day, d) =>
           day.messages.map((m, i) => {
             const mine = m.sender_id === meId || m.id < 0;
@@ -283,6 +321,8 @@ export function ChatPanel({
           }}
           maxLength={BODY_MAX}
           maxRows={5}
+          style={COMPOSER_FADE}
+          onScroll={(e) => fadeComposerEdge(e.currentTarget)}
         />
         {/* The screen's one lime shape, and only while there is something to send: the kit's
             small pill with the paper plane the hint below names, standing on the underline. */}

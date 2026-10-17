@@ -267,5 +267,20 @@
     "Soft keyboard over a docked composer (iOS keeps the layout viewport): not verifiable in the capture tool, unproven",
     "At 360 x 640 the thread keeps about two message lines above the composer (one with the failure line) because the header and the 96 monogram take 237 pt; the frame is drawn only at 402 x 874"
   ],
-  "lastBuild": "pulse-verify --package S-coach-chat on 72a0b10 (pulse-redesign 72a0b10 merged): build green in 14 s, 7 of 7 captured (replay), inventory = baseline in every state"
+  "lastBuild": "pulse-verify --package S-coach-chat on 72a0b10 (pulse-redesign 72a0b10 merged): build green in 14 s, 7 of 7 captured (replay), inventory = baseline in every state",
+  "fixRound": {
+    "id": "S-coach-chat-fix",
+    "branch": "pulse/S-coach-chat-fix",
+    "base": "pulse-redesign 82e10db",
+    "review": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/review/S-coach-chat/REVIEW.md",
+    "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-coach-chat-fix (replay; de/ w360/)",
+    "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-coach-chat-fix",
+    "findings": {
+      "1-blocking-thread-clip": "fixed: the scroller starts at the rule (-mt-6) and the list carries the 32 as its own top padding; a mask keeps the first 8 pt under the rule clear and fades the next 24 in, so a longer thread leaves under the hairline instead of as sliced glyphs 12 pt below it. A thread that fits is untouched (coach-chat-1, coach-chat-frame-data, held-offline, long-name byte-identical to the reviewed captures).",
+      "2-minor-composer-label": "fixed inside ChatPanel (no kit change): the TextArea gets an 11 pt rest fade over its own top pad and, while its value is scrolled, an onScroll swap to an 8 clear + 16 soft fade, so the leaving line is gone under the label. Rest-state cost: 143 px with a channel delta of 1 on coach-chat-2 / empty-frame-data (invisible).",
+      "3-minor-read-receipt-loop": "not changed (frozen logic above the return): request R-S-coach-chat-03.",
+      "4-5": "no defect / capture limit; nothing to fix."
+    },
+    "newState": "coach-chat-long-draft (states.json): recorded M thread + a 335-char draft, proves findings 1 and 2 together."
+  }
 }

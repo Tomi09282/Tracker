@@ -320,6 +320,40 @@
           "key": "chat.compose"
         }
       }
+    },
+    "coach-chat-long-draft": {
+      "title": "Csevegés — hosszú piszkozat, hosszabb szál",
+      "package": "S-coach-chat",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}/chat",
+      "height": 874,
+      "reach": "seed",
+      "why": "Fix round (review findings 1 and 2): the recorded five-message thread of M with a draft long enough to pass the composer's five-line ceiling. The grown dock shrinks the thread so it overflows its column: the thread must clip at the rule (no sliced glyphs floating under the hairline) and the composer's scrolled first line must fade under its label instead of being cut through it. The draft is typed, never sent.",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "chat.compose"
+            },
+            "text": "Tökéletes. A pénteki napon nyugodtan emelj 2,5 kg-ot a húzáson. Ja és a hétvégi edzést tedd át szombat délelőttre, ha tudod. Rendben, jövő héten videót is küldök róla. Tökéletes. A pénteki napon nyugodtan emelj 2,5 kg-ot a húzáson. Ja és a hétvégi edzést tedd át szombat délelőttre, ha tudod. Rendben, jövő héten videót is küldök róla."
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "chat.send"
+            },
+            "disabled": false
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "chat.send"
+        },
+        "disabled": false
+      }
     }
   },
   "unrecordedStates": {
