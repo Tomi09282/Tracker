@@ -3,34 +3,28 @@
   "base": "pulse-redesign 550567a (merged into pulse/S-library)",
   "frames": {
     "library-1": {
-      "verdict": "pending-F15",
-      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
-      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-1.png",
-      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-1.pair.png",
-      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-1.with-F15-wip.pair.png",
+      "verdict": "matched-fixture",
+      "why": "fix round: the merged F15 stage-1 mannequin is on the stage (lit panel and bloom as drawn); rows keep the 48 pt still column with text at x 88 and the 68 pt row; the still cells are EMPTY (DEV-1, R-S-library-02) - the one visible difference left",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-fix/library-1.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library-fix/library-1.pair.png",
       "fixture": "states.json overrides.library-1 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
-      "cap": "matched-fixture once F15 stage 1 is merged",
-      "geometry": "26 / 45 matched; deviating = the text-only rows (DEV-1: text dx -64, rows 64 not 68) and the strip words drifting about 0.6 pt per chip (Bicepsz -2.4); figure box 207,128 195 x 411 exact; header, glyph, eyebrow, hint, switch and its mark within 0.5"
+      "geometry": "34 / 45 matched (was 26 / 45); every row text now dx 0 / dy -0.5; deviating = the three Image/equip-* stills (not drawn: no equipment key), the Figma fixed text-box widths (dw only, no visual effect), the chip strip frame and the strip words' 2-3 pt advance drift"
     },
     "library-2": {
-      "verdict": "pending-F15",
-      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
-      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-2.png",
-      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-2.pair.png",
-      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-2.with-F15-wip.pair.png",
+      "verdict": "matched-fixture",
+      "why": "fix round: the merged F15 stage-1 mannequin is on the stage (lit panel and bloom as drawn); rows keep the 48 pt still column with text at x 88 and the 68 pt row; the still cells are EMPTY (DEV-1, R-S-library-02) - the one visible difference left",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-fix/library-2.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library-fix/library-2.pair.png",
       "fixture": "states.json overrides.library-2 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
-      "cap": "matched-fixture once F15 stage 1 is merged",
-      "geometry": "29 / 48 matched; the subject MELL hugs its word (the frame box is a fixed 216 wide, the ink is the same); rows as library-1"
+      "geometry": "36 / 48 (was 29 / 48); every row text now dx 0 / dy -0.5; deviating = the three Image/equip-* stills (not drawn: no equipment key), the Figma fixed text-box widths (dw only, no visual effect), the chip strip frame and the strip words' 2-3 pt advance drift"
     },
     "library-3": {
-      "verdict": "pending-F15",
-      "why": "the figure is still the stage-0 vector drawing; everything around it is composed and compared",
-      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library/library-3.png",
-      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-3.pair.png",
-      "previewWithF15Wip": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library/library-3.with-F15-wip.pair.png",
+      "verdict": "matched-fixture",
+      "why": "fix round: the merged F15 stage-1 mannequin is on the stage (lit panel and bloom as drawn); rows keep the 48 pt still column with text at x 88 and the 68 pt row; the still cells are EMPTY (DEV-1, R-S-library-02) - the one visible difference left",
+      "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-fix/library-3.png",
+      "pair": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library-fix/library-3.pair.png",
       "fixture": "states.json overrides.library-3 (3 rows: name, difficulty, exercise_type, translated, thumb_key)",
-      "cap": "matched-fixture once F15 stage 1 is merged",
-      "geometry": "28 / 48 matched; the strip scrolls 135 (Tricepsz on the gutter) as drawn; the lime mark under Széles hátizom stands 2-3 pt left of the frame mark (word advance); rows as library-1"
+      "geometry": "35 / 48 (was 28 / 48); every row text now dx 0 / dy -0.5; deviating = the three Image/equip-* stills (not drawn: no equipment key), the Figma fixed text-box widths (dw only, no visual effect), the chip strip frame and the strip words' 2-3 pt advance drift"
     }
   },
   "states": {
@@ -115,5 +109,20 @@
     "result": "library-1 rendered against the live backend, no undeclared error, no write",
     "capture": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-live"
   },
-  "build": "pulse-verify: build green in 19 s · 8 of 8 captured (replay)"
+  "build": "pulse-verify: build green in 19 s · 8 of 8 captured (replay)",
+  "fixRound": {
+    "id": "S-library-fix",
+    "base": "pulse-redesign e14cafd, re-synced to 92ea11a and verified there",
+    "review": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/review/S-library/REVIEW.md",
+    "findings": {
+      "1 (blocking) old vector drawing": "closed by the F15 stage-1 merge; verified on library-1..3 pairs (graphite render, lime panel with bloom, same box)",
+      "2 (blocking) no still, text at x 24": "closed as far as the data allows: text at x 88, 48 pt still column, a real upload shown, otherwise an empty cell as the frame's no-still row; equipment stills wait for R-S-library-02",
+      "3 (minor) row pitch 65": "closed: rows 68 + 1 rule, names at row + 13 (598 / 667 / 736 as drawn)",
+      "4 (minor) 360 x 640 stage fills the screen": "closed: the stage gives way below 784 pt (DEV-12); at 360 x 640 the words and the first row are on the first screen; all 8 states now arrive at 360",
+      "5 (minor) two magnifiers": "closed: one glass (DEV-11)"
+    },
+    "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-library-fix/",
+    "narrow": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-library-fix-360",
+    "build": "pulse-verify --package S-library: build green, 8 of 8 captured (replay) at 402 x 874 and at 360 x 640"
+  }
 }

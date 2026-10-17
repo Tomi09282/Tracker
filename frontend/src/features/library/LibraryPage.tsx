@@ -46,7 +46,9 @@ const CHIP_SKELETON = ['w-10', 'w-28', 'w-32', 'w-16'] as const;
  *                                             the chosen muscle as the screen's subject line with
  *                                             "Szűrők törlése"; the Elöl / Hátul switch at the bottom
  *   16, strong rule, 4, the chip strip, 4     the same filter as the figure, scoped to the side shown
- *   the rows                                  text-only (the list API carries no equipment key)
+ *   the rows                                  the 48 pt still column, text at x 88; the cell stays
+ *                                             empty without an upload (the list API carries no
+ *                                             equipment key, so no still is guessed)
  *
  * No pill on this screen: lime is the lit muscle, the chosen chip's mark and the lit tab.
  */
@@ -124,16 +126,31 @@ export function LibraryPage() {
       <ScreenHeader
         kind="root"
         title={t('nav.library')}
+        // Closed: the frames' search glyph. Open and empty: the same place closes the line (one
+        // glass on screen, the field's own). A typed term keeps the line open, so the header
+        // control would do nothing - it steps aside and the field's clear control is the way out.
         trailing={
-          <Pressable
-            variant="link"
-            shape="icon"
-            aria-label={t('library.search')}
-            aria-expanded={searchShown}
-            onClick={() => setSearchOpen((open) => !open)}
-          >
-            <Search />
-          </Pressable>
+          !searchShown ? (
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('library.search')}
+              aria-expanded={false}
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search />
+            </Pressable>
+          ) : search === '' ? (
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('common.close')}
+              aria-expanded
+              onClick={() => setSearchOpen(false)}
+            >
+              <X />
+            </Pressable>
+          ) : undefined
         }
       >
         {searchShown ? (
@@ -151,7 +168,9 @@ export function LibraryPage() {
 
       <div className="flex flex-col gap-4">
         {/* ── the stage: the figure and the selection, no surface ──────────────────────────── */}
-        <div className="relative flex h-[364px] flex-col justify-between">
+        {/* 364 high as drawn; on a short phone (under 784 pt) it gives way down to 260 so the
+            muscle words and the first row stay on the first screen, and the figure scales with it. */}
+        <div className="relative flex h-[clamp(260px,calc(100dvh-420px),364px)] flex-col justify-between">
           {/* FIRST in the DOM: the figure's regions are the first buttons named after a muscle,
               before the chips (the capture scripts click "Mell" / "Széles hátizom" nth 0). Its
               regions are smaller than 44 pt; the chip strip below is the full-size path to the
@@ -161,7 +180,7 @@ export function LibraryPage() {
             side={side}
             selected={muscle}
             onSelect={toggleMuscle}
-            className="absolute right-[-24px] top-[-24px] w-[195px]"
+            className="absolute right-[-24px] top-[-24px] w-[calc(clamp(260px,calc(100dvh-420px),364px)*195/364)]"
           />
 
           <div className="flex max-w-[calc(100%-138px)] flex-col gap-4 self-start">
@@ -218,7 +237,7 @@ export function LibraryPage() {
           {query.isPending ? (
             <RowStack as="div">
               {Array.from({ length: 6 }, (_, i) => (
-                <ListRowSkeleton key={i} sub index={i} />
+                <ListRowSkeleton key={i} sub leadSlot index={i} />
               ))}
             </RowStack>
           ) : rows.length === 0 ? (
@@ -251,11 +270,16 @@ export function LibraryPage() {
                     title={row.name}
                     sub={sub || undefined}
                     chevron
-                    // A real upload only; a row without one is text-only (no placeholder square).
+                    // The frames' 48 pt still column (x 24, text at x 88, rows 68): a real upload
+                    // when the exercise has one; otherwise the cell stays EMPTY, as the frame's
+                    // "Rope Jumping · no still" row draws it. The list answer carries no equipment
+                    // key (R-S-library-02), so no equipment still is guessed and no square is drawn.
                     lead={
                       row.thumb_key ? (
                         <UserPhoto src={`/api/v1/media/${row.thumb_key}`} alt="" ratio={1} desaturate className="w-12" />
-                      ) : undefined
+                      ) : (
+                        <span aria-hidden className="block size-12" />
+                      )
                     }
                     // Honest about fallback content rather than passing English off as translated.
                     trailing={
@@ -273,7 +297,7 @@ export function LibraryPage() {
             // The tail: the same rows again, so the list above never moves while a page loads.
             <RowStack as="div">
               {Array.from({ length: 3 }, (_, i) => (
-                <ListRowSkeleton key={i} sub index={i} />
+                <ListRowSkeleton key={i} sub leadSlot index={i} />
               ))}
             </RowStack>
           ) : null}

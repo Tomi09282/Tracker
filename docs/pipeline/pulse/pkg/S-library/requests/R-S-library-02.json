@@ -8,7 +8,7 @@
   "evidence": ".pulse/geometry/library-1.json rows Image/equip-*; .pulse/rec/user/GET_exercises_3b6b0c0fb9.json (no equipment field)",
   "proposedApi": "add the exercise's primary equipment slug (e.g. primary_equipment: string | null) to each list row; then ListRow lead = <Pic slot={EQUIPMENT_STILL[slug]} width={48} /> when the map has a still, and leadSlot on the others so every row keeps the x 88 text edge",
   "proposedPatch": null,
-  "interim": "text-only rows (the brief's must); nothing faked",
+  "interim": "every row keeps the 48 pt still column with the text at x 88 (frame's 'no still' row); the cell stays empty without an upload; nothing faked (S-library-fix)",
   "status": "open",
   "resolution": null
 }
