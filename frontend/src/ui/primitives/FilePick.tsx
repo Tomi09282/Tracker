@@ -67,8 +67,6 @@ export const FilePick = forwardRef<HTMLInputElement, FilePickProps>(function Fil
   // focused element is the hidden input, and only its own `:focus-visible` says it came from a key.
   const [keyFocus, setKeyFocus] = useState(false);
   const off = disabled || busy;
-  // A pill names its height (R4): the Pulse pill is 56 unless the caller asks for the 44 one.
-  const height = variant === 'primary' ? (size ?? 'lg') : size;
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -79,12 +77,12 @@ export const FilePick = forwardRef<HTMLInputElement, FilePickProps>(function Fil
   return (
     <label
       data-kit="filePick"
-      data-kit-look={kitName({ variant, shape: 'button', size: height })}
+      data-kit-look={kitName({ variant, shape: 'button', size })}
       data-force={keyFocus ? 'focus' : force}
       aria-disabled={off || undefined}
       aria-busy={busy || undefined}
       className={cn(
-        control({ variant, size: height, tone, text }),
+        control({ variant, size, tone, text }),
         'relative',
         // A <label> cannot be :disabled — the recipe's disabled pill (`surface-2`, `text-3`, no glow),
         // keyed on aria-disabled. The one legal use of the sheet's surface outside it (Pulse System 2.1).

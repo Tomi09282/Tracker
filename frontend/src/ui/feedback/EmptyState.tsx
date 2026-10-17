@@ -26,7 +26,7 @@ import { cn } from '../../lib/cn';
  *
  * That is the kit's own rule (`fillW: action.name.indexOf('Button') === 0`), read from what the
  * call site already wrote: an action element with `variant="primary"` (a `Pressable`, at any
- * size — the bridged 44 px primary of an unmigrated screen included) or a direct child that
+ * size) or a direct child that
  * carries `data-kit="btnPrimary"` is stretched; everything else keeps its own width.
  *
  * The 20 above the action is also the glow's clearance (Pulse System 2.3: keep >= 20 clear around

@@ -23,12 +23,11 @@ import { cn } from '../../lib/cn';
  * shapes, the densities, the status chip) left in the closing cleanup (F19 rows 1 and 3), and
  * `check:pulse` refuses their names. A control names its variant: there is no default look.
  *
- * ═══ NOTHING GROWS BEHIND A SCREEN'S BACK ════════════════════════════════════════════════════
+ * ═══ THE PILL IS 56 UNLESS IT SAYS 44 ═════════════════════════════════════════════════════════
  *
- * The 56 pt pill is OPT-IN: `size` defaults to `md`, which is today's 44 with today's padding and
- * type. A screen gets the Pulse metrics by writing `size="lg"` or `size="sm"` when it is rebuilt
- * (the workout player is one viewport tall by law; twelve taller buttons would push its check
- * control off the screen). The default flips in the closing cleanup.
+ * A `primary` with no `size` is the 56 pt pill (`lg`); `size="sm"` is the 44 one. Every other look
+ * is 44 high (`md`). Until the closing cleanup (F19 row 4) the default was the bridged 44 and a
+ * pill had to name its height; every rebuilt screen did, so flipping it changed nothing drawn.
  */
 
 /**
@@ -144,8 +143,8 @@ const recipe = cva(
       /**
        * HEIGHT, and with it the Pulse metrics of the pill.
        *
-       *   md   44 — the default until the closing cleanup: today's height, today's padding and type
-       *   lg   56 — the Pulse pill
+       *   md   44 — the default of every look but the pill: the link, the bare glyph
+       *   lg   56 — the Pulse pill, and the default of `primary` (see `control()`)
        *   sm   44 — the small Pulse pill (a chat composer's "Küldés" beside a 44 pt field)
        *
        * Declared AFTER `shape` so that its word is the last one on padding and type.
@@ -316,9 +315,15 @@ type ControlProps = Parameters<typeof recipe>[0];
  * stylesheet's source order decide.
  */
 export function control(props?: ControlProps): string {
-  const classes = recipe(props);
-  const pulse = props?.variant === 'link' || props?.size === 'lg' || props?.size === 'sm';
+  const size = pillSize(props?.variant, props?.size);
+  const classes = recipe({ ...props, size });
+  const pulse = props?.variant === 'link' || size === 'lg' || size === 'sm';
   return pulse ? cn(classes) : classes;
+}
+
+/** The height a control is drawn at: the one it names, else `lg` for the pill and `md` for the rest. */
+function pillSize(variant: ControlVariants['variant'], size: ControlVariants['size']): ControlVariants['size'] {
+  return size ?? (variant === 'primary' ? 'lg' : 'md');
 }
 
 /**
@@ -330,7 +335,8 @@ export function kitName({ variant, shape, size }: Pick<ControlVariants, 'variant
   if (variant === 'link') return shape === 'icon' ? 'iconBtn' : 'textLink';
   // The icon pill (G-shell) is the pill too: the same fill, glow and states around one glyph.
   const s = shape ?? 'button';
-  if (variant === 'primary' && (s === 'button' || s === 'icon') && (size === 'lg' || size === 'sm')) return 'btnPrimary';
+  const h = pillSize(variant, size);
+  if (variant === 'primary' && (s === 'button' || s === 'icon') && (h === 'lg' || h === 'sm')) return 'btnPrimary';
   return undefined;
 }
 

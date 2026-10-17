@@ -488,22 +488,8 @@ export const RULES = [
     ],
   },
   {
-    id: 'pill-size',
-    what: 'a primary that can reach an element with no size',
-    instead: 'the lime pill names its height: size="lg" (56) or size="sm" (44)',
-    probe: jsx('<Pressable variant="primary">x</Pressable>'),
-    cases: [
-      [jsx(`<Pressable variant={ready ? 'primary' : 'link'}>x</Pressable>`), { 'pill-size': 1 }],
-      [`export const cls = control({ variant: 'primary' });${LF}`, { 'pill-size': 1 }],
-      [`export function Bar({ cta = 'primary' }: { cta?: 'primary' | 'link' }) { return <a className={control({ variant: cta })} />; }${LF}`, { 'pill-size': 1 }],
-      [jsx('<Pressable variant="primary" size="lg">x</Pressable>'), {}],
-      [`export const cls = control({ variant: 'primary', size: 'sm' });${LF}`, {}],
-      [`export interface P { variant?: 'primary' | 'link' }${LF}`, {}],
-    ],
-  },
-  {
     id: 'pressable-no-variant',
-    what: 'a <Pressable> or a control() with no variant (the default is the bordered legacy button)',
+    what: 'a <Pressable> or a control() with no variant (there is no default look: it draws bare words)',
     instead: 'name the look: variant="primary" with a size, or variant="link"',
     probe: jsx('<Pressable onClick={go}>x</Pressable>'),
     cases: [
@@ -696,16 +682,6 @@ export function scanSource(source, relPath) {
   }
   for (const index of legacyAt) hit('legacy-variant', index);
 
-  /** Can the value `text` be `primary`? Directly, or through the name it hands on (declarations only). */
-  const reachesPrimary = (text) => {
-    if (literals({ text, from: 0 }).some((lit) => lit.word === 'primary')) return true;
-    const name = aliasOf(text);
-    return Boolean(name) && regionsOf(name).some((r) => !r.attribute && literals(r).some((lit) => lit.word === 'primary'));
-  };
-  for (const tag of tags) {
-    const value = tag.attrs.get('variant');
-    if (value && !tag.attrs.has('size') && reachesPrimary(code.slice(value.from, value.to))) hit('pill-size', tag.from);
-  }
   for (const m of code.matchAll(RE.controlCall)) {
     if (inString[m.index]) continue;
     const open = m.index + m[0].length - 1;
@@ -717,13 +693,7 @@ export function scanSource(source, relPath) {
     }
     const props = directProperties(code, arg, skipBalanced(code, arg));
     const named = (key) => props.find((p) => new RegExp(`^${key}\\s*(?::|$)`).test(p));
-    const variant = named('variant');
-    if (variant === undefined) {
-      hit('pressable-no-variant', m.index);
-      continue;
-    }
-    const value = variant.includes(':') ? variant.slice(variant.indexOf(':') + 1) : 'variant';
-    if (named('size') === undefined && reachesPrimary(value)) hit('pill-size', m.index);
+    if (named('variant') === undefined) hit('pressable-no-variant', m.index);
   }
 
   return hits;
