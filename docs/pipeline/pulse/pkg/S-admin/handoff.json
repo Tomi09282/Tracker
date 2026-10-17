@@ -114,10 +114,12 @@
     "file": "deleted by check-pulse --fix-down S-admin"
   },
   "handIn": [
-    "docs/pipeline/pulse/pkg/S-admin/i18n.patch.json (remove the 14 adminMetrics.* keys + admin.exercises, admin.media, admin.section.overview)",
     "docs/pipeline/pulse/pkg/S-admin/deviations.md (for docs/pipeline/pulse/deviations.md)",
     "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-01.json (SortKeys)",
-    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-02.json (capture scroll step)"
+    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-02.json (capture scroll step)",
+    "docs/pipeline/pulse/pkg/S-admin/i18n.patch.json (re-cut: empty, the round-1 removal is merged)",
+    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-03.json (a real photograph for the submitted media)",
+    "docs/pipeline/pulse/pkg/S-admin/requests/R-S-admin-04.json (feathered edge of the bleeding rail)"
   ],
   "requests": [
     "R-S-admin-01",
@@ -125,5 +127,26 @@
   ],
   "proposedCopy": [],
   "liveWrites": "none: approve / reject / resolve were never fired live; their outcomes are fixtures",
-  "lastGreenBuild": "pulse-verify --package S-admin --port 5184 after pulse-sync onto pulse-redesign (merge dc67271): build green, 23 of 23 captured (replay); --width 360 --focus-walk 23 of 23, all probes pass"
+  "lastGreenBuild": "pulse-verify --package S-admin --port 5184 after pulse-sync onto pulse-redesign (merge dc67271): build green, 23 of 23 captured (replay); --width 360 --focus-walk 23 of 23, all probes pass",
+  "fix2": {
+    "branch": "pulse/S-admin-fix2",
+    "review": ".pulse/review/S-admin/REVIEW.md (no Re-check section; findings 1-6)",
+    "fixed": {
+      "1 (blocking) admin-2 submitted media": "the 354 x 199 rectangle stands on the kit skeleton block behind the upload, at the frame's box (app 24, 370.7, 354 x 199.1 pt vs frame 24, 371, 354 x 199); the photograph itself is data (seed blank upload) - R-S-admin-03",
+      "4 (minor) desktop chosen row chevron": "chevron-right on the wide list, the chosen one in ink"
+    },
+    "notFixed": {
+      "2 Piactér rail hard cut": "kit behaviour of ChipRow scroll='bleed' (ui/**) - R-S-admin-04",
+      "3 admin-3 letiltva flag": "pulse-fixture-check refuses disabledAt as a number (recordings hold null only)",
+      "5 figures-failed skeleton": "kept from base (deviations #12), no copy exists for the failure",
+      "6 360 x 640": "note, not a defect"
+    },
+    "frames": {
+      "admin-1": "matched-fixture (geometry 74 / 61 matched / 13 width-only / 0 unmatched)",
+      "admin-2": "matched-fixture except the photograph inside the media rectangle (data: the seed's blank upload; a fixture cannot answer a binary body)",
+      "admin-3": "matched-fixture except the illustrative LETILTVA flag (fixture refused)"
+    },
+    "pairs": ".pulse/pairs/S-admin-fix2/ (admin-1 / -2 / -3 pair, admin-2.zoom-media.pair, admin-w1280, admin-marketplace-rejected.top, _contact-states)",
+    "probes": "boxed fails only on the states that show the open review's media (admin-2, admin-2-tall, admin-rejecting, admin-w1280): the one backing of deviations #14"
+  }
 }

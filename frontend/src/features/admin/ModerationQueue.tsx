@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
 import { equipmentStill } from '../../assets/pulse';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -201,7 +201,15 @@ export function ModerationQueue() {
       sub={subOf(row)}
       subLines={2}
       tone={selected !== null && selected !== row.id ? 'muted' : 'default'}
-      trailing={<ChevronDown aria-hidden className="-me-0.75 size-4 text-text-3" strokeWidth={1.75} />}
+      trailing={
+        // On a phone the row opens in place (down); when wide the review opens beside the list, so
+        // the chevron points there, and the chosen row's chevron is in ink like its name.
+        wide ? (
+          <ChevronRight aria-hidden className={row.id === selected ? '-me-0.75 size-4 text-text-1' : '-me-0.75 size-4 text-text-3'} strokeWidth={1.75} />
+        ) : (
+          <ChevronDown aria-hidden className="-me-0.75 size-4 text-text-3" strokeWidth={1.75} />
+        )
+      }
       onClick={() => toggle(row.id)}
       aria-current={row.id === selected ? 'true' : undefined}
       aria-expanded={wide ? undefined : row.id === selected}
@@ -358,7 +366,12 @@ function ReviewBody({
         {media.length > 0 ? (
           <ul className="flex flex-col gap-4">
             {media.map((m) => (
-              <li key={m.id}>
+              // The upload's own 354 x 199 rectangle (admin-2) stands even when the file draws
+              // nothing: a blank or transparent still (what the demo seed stores) or a broken one
+              // shows the kit's skeleton block, as the frame's body script specifies for a blank
+              // still, instead of a hole an admin cannot tell from "no media". An opaque photo
+              // covers it completely.
+              <li key={m.id} className="rounded-[var(--radius-1)] bg-[var(--skeleton-base)]">
                 <UserPhoto
                   src={`/api/v1/media/${m.storage_key}`}
                   alt={t('admin.mediaAlt', { name: exercise.name })}

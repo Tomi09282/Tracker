@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-04",
+  "from": "S-admin-fix2",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/ChipRow.tsx (scroll='bleed')",
+  "need": "When the bleeding rail has scrolled (a later word chosen), the first visible word is cut hard at the left edge of the scroller ('yitott' on the admin Piactér filter, review finding 2); the right end cuts the last word the same way. A feathered edge on a scrolled side (a static mask over the last 16-24 pt, only while there is content beyond it) would read as the frames' scroll cue instead of a clipped glyph.",
+  "evidence": ".pulse/review/S-admin/pkg/admin-marketplace-rejected.png, .pulse/review/S-admin/crops/mp-rejected-filter.png",
+  "proposedApi": "ChipRow scroll='bleed' gains the edge mask by default (no new prop)",
+  "interim": "MarketplaceQueue.tsx keeps the kit rail as is; the Piactér tab has no frame.",
+  "status": "open",
+  "resolution": null
+}

@@ -650,3 +650,19 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: only 402 pt; no frame is drawn at 360 x 640 and none is scrolled.
 - What the app does: below 376 pt viewport width the previous value drops its unit ("72,5 × 8"; the KG column head names it) instead of ellipsising the reps; the set list scrolls to the smallest offset that shows the whole active row (recomputed from the top), and once scrolled its top 16 pt fade out (a mask) instead of slicing a row at the head rule. At scroll 0 — every frame — there is no mask, and the 402 captures differ from the earlier ones only in the anti-aliasing of the "kg" glyphs.
 - Status: closed — no frame is affected (360 x 640 only).
+
+## DEV-078 — S-admin: the opened submission's blank upload stands on the skeleton block (fix round 2)
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md row 14, request R-S-admin-03
+- Package: S-admin
+- The frames show: (admin-2) a 354 x 199 black-and-white photograph of a barbell plate at 24 / 371; the admin-2 body script draws a blank still as `skel(P.cw, 199)`.
+- What the app does: the upload's rectangle stands at the frame's place and size (24 / 370.7 / 354 x 199.1 pt) on the kit skeleton block (`--skeleton-base`, radius 2, static); an opaque photograph covers it completely. The demo seed's upload is a blank 92-byte WebP and a fixture cannot answer a binary body, so the photograph itself is not shown (R-S-admin-03). The capture's `boxed` probe counts this backing once on admin-2, admin-2-tall, admin-rejecting and admin-w1280.
+- Status: open — owner ruling: keep the backing (the photo's own backing, not an enclosure) or remove it and accept a hole until R-S-admin-03 serves a real photograph.
+
+## DEV-079 — S-admin: wide moderation list chevrons point to the review (fix round 2)
+
+- Source: docs/pipeline/pulse/pkg/S-admin/deviations.md row 15
+- Package: S-admin
+- The frames show: only the phone (down / up chevrons of admin-1 / -2).
+- What the app does: at 1024 px and up the list rows' chevrons point right, toward the review beside the list; the chosen row's chevron is in ink like its name, the others text-3. The phone is unchanged.
+- Status: closed — no frame is affected.
