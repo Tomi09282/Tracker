@@ -442,3 +442,51 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: '60g · 222 kcal · 8.1g P', record and session figures with decimal points and ISO dates (as the live app prints them; both board notes leave it to the owner).
 - What the app does: the item line, the record and the session figures keep the live format (decimal point, glued units, ISO dates) in all three languages.
 - Status: open — needs a ruling.
+
+## DEV-052 — S-onboarding: Onboarding - GET /onboarding fails
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-onboarding/i18n.patch.json`
+- Package: S-onboarding
+- The frames show: no string is drawn at this place.
+- What the app does: Kept as today (Q4): the skeleton stays, no message (no error copy exists, R22). common.retry with the query refetch would be the only existing string if the owner wants a way out.
+- Status: open — a copy question; nothing was invented.
+
+## DEV-053 — S-onboarding: Onboarding - Kész fails for another reason (network, server error)
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-onboarding/i18n.patch.json`
+- Package: S-onboarding
+- The frames show: no string is drawn at this place.
+- What the app does: Kept as today: nothing is said and the pill is usable again. onboarding.saveError in the alert slot would be a reuse with a different meaning; not done without the owner.
+- Status: open — a copy question; nothing was invented.
+
+## DEV-054 — S-onboarding: steps 3 and 4 and the undrawn states composed from the kit
+
+- Source: docs/pipeline/pulse/pkg/S-onboarding/deviations.md rows 1, 3-6, 8-10, 13 (PLAN.md Q4)
+- Package: S-onboarding
+- The frames show: onboarding-1 (step 5/5), onboarding-2 (1/5, saved), onboarding-3 (2/5, after a refused Kész); steps 3 and 4 are not drawn.
+- What the app does: steps 3 (place + the 16 server equipment names as a wrapping ChipRow) and 4 (units, three underline Fields, sex) are composed from the same kit; the progress ring becomes the hero stage (eyebrow, static giant Numeral, SegmentBar as the progressbar); option cards become single-choice rows on hairlines without glyphs; field glyphs are gone; the note is the frame's multi-line TextArea (Enter breaks a line, maxLength 2000 kept); Vissza is a TextLink, Tovább / Kész the one lime pill; save states are the 20 pt status slot with compact NoticeLines; the required star is ink; a refused Kész keeps its jump and names the fields in a danger alert line (two lines when all four answers are missing). Loading is a skeleton in the screen's own shape. The route keeps no inbound door.
+- Status: open — needs a ruling only where DEV-055..057 say so.
+
+## DEV-055 — S-onboarding: sex options change role checkbox -> radio
+
+- Source: docs/pipeline/pulse/pkg/S-onboarding/deviations.md row 2
+- Package: S-onboarding
+- The frames show: not drawn (step 4).
+- What the app does: units and sex are single-choice rows with the tick / ring; the four sex options were Toggle chips with role checkbox behaving as a single choice and are now role radio (same names); a tap on the chosen one still keeps it.
+- Status: open — needs a ruling (accessibility role change only).
+
+## DEV-056 — S-onboarding: NumberStepper on an empty field
+
+- Source: docs/pipeline/pulse/pkg/S-onboarding/deviations.md row 7
+- Package: S-onboarding
+- The frames show: the kit NumberStepper (48 pt figure, − / + on the line, quiet text-2 tick).
+- What the app does: on an empty field + gives min and − now gives max (the kit's rule; before, − gave min); bounds unchanged (1-14, 10-240 step 5); the in-range tick is the frame's quiet tick instead of the green disc.
+- Status: open — needs a ruling.
+
+## DEV-057 — S-onboarding: frames captured on account M; two drawn values by fixture only
+
+- Source: docs/pipeline/pulse/pkg/S-onboarding/deviations.md capture decisions; request R-S-onboarding-01
+- Package: S-onboarding
+- The frames show: a member (five tabs) with the note, the knee limitation on Óvatosan (onboarding-1) and an empty Hetente hány edzés? (onboarding-3).
+- What the app does: no product change. The frames are captured on user@ (M) instead of the freeze's coach@ (C); C stays as the extra state onboarding-step5-coach. M's recording has the limitation on Kerülendő and 4 sessions per week, and pulse-fixture-check refuses the two edits, so onboarding-1 and -3 each differ by that one value (with the edits the captures equal the frames). work-packages.json fixtureFrames should also list onboarding-1.
+- Status: open — fixture request R-S-onboarding-01.

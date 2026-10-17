@@ -1,0 +1,14 @@
+{
+  "id": "R-S-onboarding-02",
+  "from": "S-onboarding",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/NumberStepper.tsx",
+  "need": "The typed figure of NumberStepper is as wide as its digits (style width Nch): with one digit (\"4\" sessions a week) the input is 24 x 48, under the 44 pt target the probe asks for (targets probe on onboarding-3 and onboarding-step2-recorded). The frame draws the tick 10 after the ink, so the figure itself cannot simply grow.",
+  "evidence": ".pulse/shots/S-onboarding/onboarding-3.probe.json targets.small: input#onb-sessions-per-week 24.33 x 48",
+  "proposedApi": "a 44 pt hit area for the figure that does not move the tick, e.g. min-width 44 on a transparent ::after of the figure slot, or clicking the empty part of the value slot focuses the input",
+  "proposedPatch": null,
+  "interim": "none needed - the figure is still typeable and the − / + buttons are 44; listed as a kit reading in handoff.json",
+  "status": "open",
+  "resolution": null
+}

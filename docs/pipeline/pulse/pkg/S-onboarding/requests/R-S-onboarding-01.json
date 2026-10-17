@@ -1,0 +1,14 @@
+{
+  "id": "R-S-onboarding-01",
+  "from": "S-onboarding",
+  "kind": "fixture",
+  "blocking": false,
+  "target": ".pulse/rec (GET /api/v1/onboarding) or a ruling on pulse-fixture-check",
+  "need": "Two values the frames draw that no recording of GET /api/v1/onboarding holds, so pulse-fixture-check refuses the edits: (1) onboarding-1 ticks the knee limitation as \"caution\" (Óvatosan) - every recording has \"avoid\" (enum refusal at /profile/limitations/0/severity); (2) onboarding-3 draws \"Hetente hány edzés?\" EMPTY - every recording has a number (type refusal for null at /profile/sessions_per_week). Both values are what the product produces: a fresh tick starts on caution (OnboardingPage toggleArea), and a draft profile has null answers (useOnboarding.ts OnboardingProfile: sessions_per_week number | null; backend onboarding routes loadProfile).",
+  "evidence": "node scripts/pulse-fixture-check.mjs on the two edits: enum: /profile/limitations/0/severity = caution - the recordings only ever have avoid; type: /profile/sessions_per_week is null, the recordings have number. Pairs: .pulse/pairs/S-onboarding/onboarding-1.pair.png (tick on Kerülendő), onboarding-3.pair.png (field shows 4).",
+  "proposedApi": "either record a GET /onboarding of an account whose draft has a null sessions_per_week and a caution limitation, or rule (as for S-workout 2026-10-17) that a GET edit schema-checked against OnboardingProfile is allowed; then the overrides get { pointer: /profile/limitations/0/severity, value: caution } and { pointer: /profile/sessions_per_week, value: null }",
+  "proposedPatch": null,
+  "interim": "the frames are captured on the recorded values (Kerülendő ticked; the field shows 4 with the error under it) and reported matched-fixture with that one difference each; a capture with the two edits is .pulse/pairs/S-onboarding/onboarding-1.drawn-values.pair.png / onboarding-3.drawn-values.pair.png",
+  "status": "open",
+  "resolution": null
+}

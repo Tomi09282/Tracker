@@ -1,0 +1,32 @@
+{
+  "package": "S-onboarding",
+  "base": "38ae74180d695e43b403dcf7981fb31c6fb338a4",
+  "namespaces": [
+    "onboarding"
+  ],
+  "set": [],
+  "change": [
+    {
+      "key": "onboarding.step.limitations.title",
+      "hu": {
+        "from": "Van sérülésed vagy korlátod?",
+        "to": "Van sérülésed vagy korlátod?"
+      },
+      "en": null,
+      "de": null,
+      "copy": "fix",
+      "source": "frame onboarding-1 breaks the h1 after \"sérülésed\" (VAN SÉRÜLÉSED / VAGY KORLÁTOD?); a no-break space keeps \"vagy korlátod?\" together so the h1 wraps there by itself, without text-balance (which breaks onboarding-3 at the wrong word). The visible words do not change; the only reader is OnboardingPage (the step title template)."
+    }
+  ],
+  "remove": [],
+  "copyQuestions": [
+    {
+      "where": "Onboarding - GET /onboarding fails",
+      "note": "Kept as today (Q4): the skeleton stays, no message (no error copy exists, R22). common.retry with the query refetch would be the only existing string if the owner wants a way out."
+    },
+    {
+      "where": "Onboarding - Kész fails for another reason (network, server error)",
+      "note": "Kept as today: nothing is said and the pill is usable again. onboarding.saveError in the alert slot would be a reuse with a different meaning; not done without the owner."
+    }
+  ]
+}

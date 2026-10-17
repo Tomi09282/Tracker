@@ -1,0 +1,160 @@
+{
+  "id": "S-onboarding",
+  "branch": "pulse/S-onboarding",
+  "screen": "/onboarding (URL only - no inbound door, none added)",
+  "summary": "OnboardingPage rebuilt on the Pulse kit to match onboarding-1 / -2 / -3: Screen top=root; the hero stage (StatBlock eyebrow + giant Numeral + thin SegmentBar, the hero-plates Pic 16 past the content edge); the question in display-xl; single choices as RowStack + ListRow + CheckMark rows on hairlines; body areas and equipment as ChipRow words; the two NumberSteppers; the multi-line TextArea; the footer docked through Dock (status NoticeLine slot, Vissza TextLink, the one lime pill, the alert NoticeLine). Everything above the return is byte-identical except the early return, which now renders the screen-shaped skeleton.",
+  "frames": {
+    "onboarding-1": {
+      "verdict": "matched-fixture",
+      "account": "M",
+      "fixture": [
+        "GET /api/v1/onboarding /profile/step = 8"
+      ],
+      "difference": "the tick stands on Kerülendő (M's recorded severity avoid) instead of Óvatosan - the edit to caution is refused by pulse-fixture-check (R-S-onboarding-01); with that edit the capture equals the frame (onboarding-1.drawn-values.pair.png)",
+      "capture": ".pulse/shots/S-onboarding/onboarding-1.png",
+      "tiles": [
+        ".pulse/pairs/S-onboarding/onboarding-1.tile-1.png",
+        ".pulse/pairs/S-onboarding/onboarding-1.tile-2.png"
+      ],
+      "pair": ".pulse/pairs/S-onboarding/onboarding-1.pair.png",
+      "pairDrawnValues": ".pulse/pairs/S-onboarding/onboarding-1.drawn-values.pair.png",
+      "geometry": "64 compared, 56 matched, 7 deviating (width-only deviations: the frame's fill-width text boxes vs the hugging rendered runs, dy <= 0.3; the note TextArea read as one 22 box), 2 style = the Óvatosan / Kerülendő tick (the fixture difference), 1 unmatched = the note underline (drawn by the TextArea box edge)"
+    },
+    "onboarding-2": {
+      "verdict": "matched-fixture",
+      "account": "M",
+      "fixture": [
+        "PATCH /api/v1/onboarding -> 200 {} (the autosave answer)"
+      ],
+      "steps": "tap Izomtömeg (M's recorded goal), advance 900 ms -> Elmentve",
+      "capture": ".pulse/shots/S-onboarding/onboarding-2.png",
+      "tiles": [
+        ".pulse/pairs/S-onboarding/onboarding-2.tile-1.png",
+        ".pulse/pairs/S-onboarding/onboarding-2.tile-2.png"
+      ],
+      "pair": ".pulse/pairs/S-onboarding/onboarding-2.pair.png",
+      "geometry": "66 compared, 49 matched, 17 deviating (width-only deviations: the frame's fill-width text boxes vs the hugging rendered runs, dy <= 0.3)"
+    },
+    "onboarding-3": {
+      "verdict": "matched-fixture",
+      "account": "M",
+      "fixture": [
+        "GET /api/v1/onboarding /profile/step = 8",
+        "POST /api/v1/onboarding/complete -> 400 {error: \"incomplete: sessions_per_week\", code, requestId}"
+      ],
+      "steps": "tap Kész on 5/5 -> jumps to 2/5 with the field error and the alert line",
+      "difference": "the sessions field shows M's recorded 4 (with its tick) above the error instead of the frame's empty field - the null edit is refused by pulse-fixture-check (R-S-onboarding-01); with that edit the capture equals the frame (onboarding-3.drawn-values.pair.png)",
+      "capture": ".pulse/shots/S-onboarding/onboarding-3.png",
+      "tiles": [
+        ".pulse/pairs/S-onboarding/onboarding-3.tile-1.png",
+        ".pulse/pairs/S-onboarding/onboarding-3.tile-2.png"
+      ],
+      "pair": ".pulse/pairs/S-onboarding/onboarding-3.pair.png",
+      "pairDrawnValues": ".pulse/pairs/S-onboarding/onboarding-3.drawn-values.pair.png",
+      "geometry": "68 compared, 56 matched, 12 deviating (width-only deviations: the frame's fill-width text boxes vs the hugging rendered runs, dy <= 0.3; the two Stepper frames are paired by the probe with the segBar - a kit-name mapping artefact; the 70 at x 24 vs 23)"
+    }
+  },
+  "extraStates": {
+    "onboarding-step1-recorded": {
+      "verdict": "matched",
+      "reach": "seed (M as recorded)",
+      "note": "frame-2 before the save: empty status slot, Vissza disabled"
+    },
+    "onboarding-step5-coach": {
+      "verdict": "matched",
+      "reach": "seed (C as recorded, six tabs, no limitation)"
+    },
+    "onboarding-step4-body": {
+      "verdict": "matched-fixture",
+      "note": "unframed step; composed from the kit"
+    },
+    "onboarding-step3-equipment": {
+      "verdict": "matched-fixture",
+      "note": "unframed step; composed from the kit"
+    },
+    "onboarding-step2-recorded": {
+      "verdict": "matched-fixture",
+      "note": "answered step 2: both ticks and hints"
+    },
+    "onboarding-imperial-save-failed": {
+      "verdict": "matched-fixture",
+      "note": "units converted (71 in, 194,9 lb), save error line"
+    },
+    "onboarding-three-areas-save-failed": {
+      "verdict": "matched-fixture",
+      "note": "three severity blocks (fresh ticks on Óvatosan), save error line"
+    },
+    "onboarding-refused-all-four": {
+      "verdict": "matched-fixture",
+      "note": "two-line alert; the base build did not reach this state in the baseline (it left the page), so it has no before"
+    },
+    "onboarding-finish-failed": {
+      "verdict": "matched-fixture",
+      "note": "silent as today"
+    },
+    "onboarding-offline": {
+      "verdict": "matched",
+      "reach": "seed + CDP offline",
+      "note": "offline line from the shell + save error"
+    },
+    "onboarding-load-failed": {
+      "verdict": "matched-fixture",
+      "note": "the screen-shaped skeleton stays, as today"
+    },
+    "saving": {
+      "verdict": "structure",
+      "reason": "the capture tool cannot hold a request open; the 700 ms debounce + PATCH settle inside one capture. The line is NoticeLine info \"Mentés…\" in the same slot (OnboardingPage saveLine)"
+    },
+    "finish-busy": {
+      "verdict": "structure",
+      "reason": "same: the POST cannot be held open; the pill uses Pressable busy (three dots), the kit's state"
+    }
+  },
+  "probes": {
+    "fonts": "pass on every state",
+    "pill": "one lime pill on every state",
+    "overflow": "none at 360 / 402 / 430",
+    "boxed": "the setCheck ring counted as boxed - kit reading, open request R-S-workout-05 (setCheck not in boxedAllow)",
+    "targets": "NumberStepper figure 24 x 48 with one digit (onboarding-3, onboarding-step2-recorded) - kit reading, request R-S-onboarding-02",
+    "focusWalk": "final run with --focus-walk (evidence)",
+    "reducedMotion": "_contact.rm-1.png: 14 / 14, no running infinite animation",
+    "scrollEnd": "_contact.end-1.png: the last content clears the dock and the bar"
+  },
+  "inventory": "equal to the baseline on every state except onboarding-step4-body and onboarding-imperial-save-failed: the four sex options checkbox -> radio (deviations.md #2)",
+  "ledger": {
+    "explained": {
+      "role progressbar 1->0": "the progressbar is SegmentBar's own (kit)",
+      "role radio 3->1, radiogroup 5->1, aria-checked 3->1": "the five radio groups go through the one local ChoiceList (RowStack role=radiogroup + ListRow role=radio aria-checked); rendered counts unchanged",
+      "aria-describedby 1->0": "NumberStepper wires its hint / error itself (FieldFrame)",
+      "aria-label 7->1": "labels are props of ChoiceList / ChipRow / SegmentBar now",
+      "aria-valuemin / valuemax / valuenow / valuetext 1->0": "SegmentBar progressbar (kit)"
+    },
+    "counts": "focus-visible 0->0, useMotionSafe 0->0, motion-reduce 0->0, sr-only 0->1 (the skeleton announcement)"
+  },
+  "budget": {
+    "before": 35,
+    "after": 0,
+    "file": "deleted by check-pulse --fix-down S-onboarding"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-onboarding/i18n.patch.json",
+    "docs/pipeline/pulse/pkg/S-onboarding/deviations.md (append to docs/pipeline/pulse/deviations.md)"
+  ],
+  "requests": [
+    "R-S-onboarding-01 (fixture: caution / null on GET /onboarding)",
+    "R-S-onboarding-02 (ui-prop: NumberStepper figure target)",
+    "R-S-workout-05 (gate: setCheck ring in boxedAllow) - shared"
+  ],
+  "proposedCopy": [],
+  "liveSmoke": {
+    "run": "pulse-verify --live --smoke",
+    "result": "4 of 4 captured live (onboarding-1, onboarding-step1-recorded, onboarding-step5-coach, onboarding-load-failed), no undeclared error",
+    "writes": "none"
+  },
+  "variants": {
+    "lang": "en / de: 12 / 14 on the first run (two Hungarian-only radio regexes), fixed to hu|en|de alternations; final run in evidence",
+    "width": "360 14/14, 430 14/14",
+    "reducedMotion": "14/14",
+    "scrollEnd": "14/14"
+  }
+}
