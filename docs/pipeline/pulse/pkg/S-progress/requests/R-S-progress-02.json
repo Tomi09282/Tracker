@@ -1,0 +1,14 @@
+{
+  "id": "R-S-progress-02",
+  "from": "S-progress",
+  "kind": "probe-allow",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-frames.json (defaults: the boxed probe's allow-list)",
+  "need": "The boxed probe counts the FilePick pill (data-kit=\"filePick\", data-kit-look=\"btnPrimary\") as a filled surface: the allow-list names btnPrimary (and, with F12's shared.patch, bottomSheet) but not filePick. progress-3 draws exactly that pill ('Fájl választása', the tab's one action), so the frame fails the probe for the kit's own primary look.",
+  "evidence": ".pulse/shots/S-progress/progress-3.probe.json probes.boxed: surfaces [{ kit: 'filePick', bg '#cbff2e', radius 9999, x 24, y 535, w 354, h 56 }]",
+  "proposedApi": "add \"filePick\" to the boxed allow-list next to btnPrimary (or let the probe honour data-kit-look)",
+  "proposedPatch": null,
+  "interim": "none needed: the pill is the kit's FilePick in its primary look; only the probe line is red",
+  "status": "open",
+  "resolution": null
+}

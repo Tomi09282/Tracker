@@ -1,28 +1,31 @@
-import { useMemo, useState } from 'react';
+import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  LineChart,
-  Camera,
-  Trash2,
-  Eye,
-  ShieldCheck,
-  Plus,
-  Ruler,
-  Percent,
-  Scale,
-  CalendarDays,
-  AlertCircle,
-  type LucideIcon,
-} from 'lucide-react';
+import { X } from 'lucide-react';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
-import { Surface } from '../../ui/primitives/Surface';
-import { SummaryTile } from '../../ui/data/SummaryTile';
+import { Switch } from '../../ui/primitives/Switch';
+import { SelectSheet } from '../../ui/primitives/SelectSheet';
+import { DateTrigger } from '../../ui/primitives/DateTrigger';
+import { FilePick } from '../../ui/primitives/FilePick';
+import { Section, SectionHeader } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { StatBlock } from '../../ui/data/StatBlock';
+import { Numeral } from '../../ui/data/Numeral';
+import { MacroColumns } from '../../ui/data/MacroColumns';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { TrendChart } from '../../ui/feedback/TrendChart';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { Sheet } from '../../ui/feedback/variants/E14E20';
+import { ConfirmSheet } from '../../ui/feedback/ConfirmSheet';
 import { useToast } from '../../ui/feedback/ToastHost';
+import { Pic } from '../../ui/media/Pic';
+import { UserPhoto } from '../../ui/media/UserPhoto';
 import { personLabel } from '../../lib/person';
 import { formatMeasure } from '../../lib/measure';
 import {
@@ -41,108 +44,71 @@ import {
 } from './useProgress';
 
 /**
- * The unified progress screen — [[55-Screens/haladas]].
+ * The unified progress screen — frames `progress-1` (Test), `progress-2` (Megosztás) and
+ * `progress-3` (Fotók, empty). Composition follows `figma-build/app/progress-*.body.js`:
  *
- * ═══ THE ANCHOR IS A CHART, AND IT IS ONE CHART ════════════════════════════════════════════════
- *
- * The question this screen exists to answer is "is it moving", which is a DIRECTION OVER TIME, and
- * only a line answers that. A ring would be wrong for a specific reason: a ring implies a target,
- * and this screen does not have one — the app does not know whether someone gaining weight is
- * bulking on purpose or dieting badly.
- *
- * What changed in the redesign is the COUNT. Every metric used to get its own full chart card, so
- * a person who records five things got a vertical stack of five identical pictures and no
- * hierarchy at all. Now the selected metric gets the one large chart and every other recorded
- * metric collapses to a `SummaryTile` — its latest reading, an icon and a date. Three tiles say
- * what nine rows said, and the space it buys is what puts the record form above the fold.
+ *   Header + switch    `ScreenHeader kind="root"` (y 72) and, 8 under it, the page tabs as a
+ *                      `Segmented layout="cells"` (y 128). One block.
+ *   Test               the hero (eyebrow, giant value + unit, the tape glowing out of the black),
+ *                      12 under it the stage chart; the other metrics as bare macro columns under
+ *                      a strong rule; "Mérés rögzítése"; "Bejegyzések".
+ *   Fotók              the subject line + sentence while there is no photo; "Fotó hozzáadása".
+ *   Megosztás          "Ki láthatja" (the coach as the subject line, the two switches, revoke);
+ *                      "Ki nézte meg".
  *
  * ═══ EVERY CHART HERE IS `direction="neutral"` AND THAT IS A DECISION ══════════════════════════
  *
  * The app does not know whether a person gaining 3 kg is bulking on purpose or dieting badly, and
  * a green number is the app telling them which. Only their own goal decides that and this screen
  * does not have it. Colouring weight loss green by default is also the easiest way for a fitness
- * app to say something harmful to someone with a disordered relationship to food, and it costs
- * nothing to not do.
+ * app to say something harmful to someone with a disordered relationship to food.
  *
  * ═══ SHARING IS ON THIS SCREEN, NOT BURIED IN SETTINGS ═════════════════════════════════════════
  *
  * A consent control that lives three taps from the thing it governs is a consent control people
- * forget they gave. It sits under the photos, saying who can see them, with revoke in reach.
+ * forget they gave.
  */
 export function ProgressPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-group py-6">
-      <h1 className="text-title-1 text-text-1">{t('progress.title')}</h1>
-
-      {/* A TAB IS A FILTER, NOT A NEW SCREEN — the Phase 2 lesson, applied. One route, one URL,
-          and no per-tab endpoint to keep in step with the others.
-          It is deliberately NOT a `<nav>`: a nav landmark announces "these go somewhere", and
-          these three do not. `role="tablist"` says what it actually is.
-
-          NOT a `Surface` either, and that is a measured decision rather than laziness: a segmented
-          track is a pill, and `Surface` hard-codes `rounded-[var(--card-radius)]`. `cn` is
-          tailwind-merge, which does NOT treat `rounded-chip` and `rounded-[var(--card-radius)]` as
-          the same group — verified — so both classes survive the merge and the CSS source order
-          decides, silently, in favour of the arbitrary one. A track is not a card; it gets the two
-          properties it actually needs. */}
-      <div
-        role="tablist"
-        aria-label={t('progress.title')}
-        className="flex gap-1 rounded-chip bg-surface-2 p-1"
-      >
-        {(['body', 'photos', 'sharing'] as const).map((key) => (
-          <Pressable
-            key={key}
-            role="tab"
-            id={`progress-tab-${key}`}
-            aria-selected={tab === key}
-            aria-controls={`progress-panel-${key}`}
-            // The accent fill marks a SELECTED STATE, not a primary action — a segmented control
-            // has no action in it at all. It is the only filled thing in the pill, which is what
-            // makes "which one am I looking at" answerable at a glance.
-            variant={tab === key ? 'primary' : 'ghost'}
-            shape="chip"
-            density="compact"
-            className="flex-1"
-            onClick={() => setTab(key)}
-          >
-            {t(`progress.tab.${key}`)}
-          </Pressable>
-        ))}
+    <Screen top="root">
+      <div className="flex flex-col gap-2">
+        <ScreenHeader kind="root" title={t('progress.title')} />
+        {/* A TAB IS A FILTER, NOT A NEW SCREEN: one route, one URL, local state (R20). */}
+        <Segmented
+          layout="cells"
+          label={t('progress.title')}
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'body', label: t('progress.tab.body') },
+            { value: 'photos', label: t('progress.tab.photos') },
+            { value: 'sharing', label: t('progress.tab.sharing') },
+          ]}
+        />
       </div>
 
-      <div
-        role="tabpanel"
-        id={`progress-panel-${tab}`}
-        aria-labelledby={`progress-tab-${tab}`}
-        className="flex flex-col gap-section"
-      >
+      <section aria-label={t(`progress.tab.${tab}`)} className="flex flex-col gap-section">
         {tab === 'body' ? <BodyTab /> : null}
         {tab === 'photos' ? <PhotosTab /> : null}
         {tab === 'sharing' ? <SharingTab /> : null}
-      </div>
-    </div>
+      </section>
+    </Screen>
   );
 }
 
 /* ── BODY ───────────────────────────────────────────────────────────────────────────────────── */
 
 /**
- * `pct` is a DATABASE ENUM, not a label. It reached the screen raw and rendered "18.5 pct" beside
- * "84 cm" — one of the three units written the way a person writes it and one written the way a
- * column is named. `%` needs no translation, which is why this is a formatter and not a key.
+ * `pct` is a DATABASE ENUM, not a label. `%` needs no translation, which is why this is a
+ * formatter and not a key.
  */
 const unitSymbol = (unit?: string) => (unit === 'pct' ? '%' : (unit ?? ''));
 
-/**
- * A glyph per metric family. The icon is what makes a row of tiles scan as objects rather than as
- * a paragraph, so a tile without one is a label-and-value table with extra padding.
- */
-const METRIC_ICON: Record<string, LucideIcon> = { weight: Scale, body_fat: Percent };
-const iconFor = (key: string): LucideIcon => METRIC_ICON[key] ?? Ruler;
+/** The frame draws the other metrics four to a row (4 x 76.5 on 354). */
+const COLUMNS_PER_ROW = 4;
 
 function BodyTab() {
   const { t, i18n } = useTranslation();
@@ -159,12 +125,8 @@ function BodyTab() {
   const metricList = metrics.data?.metrics ?? [];
   const rows = measurements.data?.measurements ?? [];
 
-  // One series per metric, so the screen draws only what the user actually records — a chart frame
-  // for a metric nobody has ever entered is a blank axis pretending to be data (T4.2.6).
-  //
-  // SORTED BY DATE, which it was not: the x axis is real time, so an out-of-order row from the API
-  // drew the line doubling back on itself. The chart cannot sort for us — by the time it sees the
-  // series it can no longer tell a back-dated entry from a genuine one.
+  // One series per metric, SORTED BY DATE: the x axis is real time, so an out-of-order row from
+  // the API would draw the line doubling back on itself.
   const byMetric = useMemo(() => {
     const out = new Map<string, { date: string; value: number }[]>();
     for (const m of rows) {
@@ -190,20 +152,9 @@ function BodyTab() {
   }, [byMetric]);
 
   /*
-   * ═══ WHERE THE METRIC COMES FROM ═════════════════════════════════════════════════════════════
-   *
-   * The redesign cut the `Mit mérsz` select out of the record form, and that cut has a cost the
-   * mockup cannot show: there are FIFTEEN metrics and hard-coding the form to `Testsúly` silently
-   * deletes fourteen features. A metric the user has never entered has no tile and no chart, so
-   * the tiles cannot be the only way in either — you cannot switch to something that is not there.
-   *
-   * So the select comes back, FULL WIDTH, exactly as the code had measured it: sharing a wrapped
-   * row with the value, the date and the save button squeezed it to 37px — under the 44px floor in
-   * the dimension a thumb misses — and it carries the longest label in the form ("Alkar (jobb)").
-   *
-   * It earns its row by doing two jobs instead of one: it is the form's metric AND the chart's.
-   * The anchor follows it, the unit suffix on `Érték` follows it, and the tiles below show every
-   * OTHER recorded metric. One control, one selected thing, nothing on screen disagreeing with it.
+   * The "Mit mérsz" control is the form's metric AND the chart's: there are fifteen metrics, and a
+   * metric the user has never entered has no column and no chart, so the columns cannot be the
+   * only way in. The hero, the chart, the unit on "Érték" and the columns all follow it.
    */
   const selected = metric ?? mostRecorded ?? 'weight';
   const meta = metricList.find((m) => m.key === selected);
@@ -217,11 +168,7 @@ function BodyTab() {
       if (key === selected) continue;
       const last = bucket[bucket.length - 1];
       const row = rows.find((r) => r.metric_key === key);
-      // FORMATTED, not raw. These rendered `37,933 cm` and `18,486 %` — three decimals of a
-      // number nobody measured to three decimals — because the value went straight from the API
-      // into `SummaryTile`, which prints what it is given. Passing a string also skips CountUp's
-      // odometer, which is correct here: these are secondary readings, and the chart above is the
-      // thing that should be moving.
+      // FORMATTED, not raw: the API value is not rounded (`37,933 cm`).
       out.push({
         key,
         value: formatMeasure(last.value, i18n.language),
@@ -239,182 +186,198 @@ function BodyTab() {
     setValue('');
   };
 
+  const metricName = (key: string) => t(`progress.metricName.${key}`);
+  const latest = series[series.length - 1];
+  const columnRows: (typeof tiles)[] = [];
+  for (let i = 0; i < tiles.length; i += COLUMNS_PER_ROW) columnRows.push(tiles.slice(i, i + COLUMNS_PER_ROW));
+  const entries = rows
+    .slice()
+    .sort((a, b) => (a.measured_on < b.measured_on ? 1 : -1))
+    .slice(0, 30);
+
   return (
     <>
-      {/* ── the anchor ─────────────────────────────────────────────────────────────────────────
-          One large chart, then the rest of the body as compact tiles. The hierarchy IS the
-          redesign: at equal weight the reader has to choose what to look at, and a screen that
-          asks that question of a phone at arm's length gets no answer. */}
       {measurements.isLoading ? (
-        <div className="flex flex-col gap-group" role="status" aria-busy>
-          {/* The skeleton is the NEW geometry, not the old one — a placeholder that does not match
-              what lands causes exactly the layout shift it exists to prevent. */}
-          <Skeleton className="h-44 rounded-card" />
-          <div className="grid grid-cols-2 gap-group">
-            <Skeleton className="h-36 rounded-card" />
-            <Skeleton className="h-36 rounded-card" />
+        // Blocks where the text will be — the eyebrow, the numeral at its cap height, the plot.
+        // The tape is withheld: a skeleton never draws a picture.
+        <div role="status" aria-busy className="flex flex-col gap-3">
+          <span className="sr-only">{t('common.loading')}</span>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-[99px] w-44" />
           </div>
+          <Skeleton className="h-[185px] w-full" />
         </div>
       ) : byMetric.size === 0 ? (
-        <EmptyState icon={LineChart} title={t('progress.emptyTitle')} body={t('progress.emptyBody')} />
+        // No reading at all (and today also a failed read: the two are one state, product gap).
+        <EmptyState title={t('progress.emptyTitle')} body={t('progress.emptyBody')} />
       ) : (
-        <div className="flex flex-col gap-group">
-          <Surface>
+        <>
+          {/* ── the hero + the stage chart: one block, the chart 12 under the figure ── */}
+          <div className="flex flex-col gap-3">
+            {latest ? (
+              <HeroFigure label={metricName(selected)} value={formatMeasure(latest.value, i18n.language)} unit={unit} />
+            ) : null}
             <TrendChart
+              variant="stage"
               series={series}
               unit={unit}
-              label={t(`progress.metricName.${selected}`)}
+              label={metricName(selected)}
               // NEUTRAL. See the file header: the app does not know which way is good.
               direction="neutral"
             />
-          </Surface>
+          </div>
 
-          {tiles.length > 0 ? (
-            <div className="grid grid-cols-2 gap-group">
-              {tiles.map((tile) => (
-                <SummaryTile
-                  key={tile.key}
-                  icon={iconFor(tile.key)}
-                  // Centred, as 05-haladas.webp draws them: the chart above owns the left edge, and
-                  // two tiles hanging off it read as a third and fourth column of the same block.
-                  align="center"
-                  value={`${tile.value} ${tile.unit}`}
-                  caption={`${t(`progress.metricName.${tile.key}`)} · ${tile.date}`}
+          {/* ── the other metrics: a strong rule, no eyebrow (none is drawn), bare columns ── */}
+          {columnRows.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              <Rule strong />
+              {columnRows.map((chunk) => (
+                <MacroColumns
+                  key={chunk[0].key}
+                  columns={chunk.map((tile) => ({
+                    name: metricName(tile.key),
+                    value: tile.value,
+                    unit: tile.unit,
+                    caption: tile.date,
+                  }))}
                 />
               ))}
             </div>
           ) : null}
-        </div>
+        </>
       )}
 
-      {/* ── record ─────────────────────────────────────────────────────────────────────────────
-          Above the fold, which is the whole point of collapsing the other charts into tiles. */}
-      <section className="flex flex-col gap-group">
-        <SectionHeading icon={Plus} title={t('progress.record')} />
-
-        <Surface className="flex flex-col gap-group">
-          {/* FULL WIDTH, NOT flex-1 — see the block comment above `selected`. */}
-          <label className="flex flex-col gap-tight">
-            <span className="text-body-s text-text-2">{t('progress.metric')}</span>
-            <select
-              value={selected}
-              onChange={(e) => setMetric(e.target.value)}
-              className="text-body-legacy min-h-[var(--control-h)] w-full rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1"
-            >
-              {metricList.map((m) => (
-                <option key={m.key} value={m.key}>
-                  {t(`progress.metricName.${m.key}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {/* `items-start`, not `items-end`: the value field GROWS DOWNWARD when the range check
-              fails, and bottom alignment would have dragged the date field and the save button
-              down with the error message. */}
-          <div className="flex flex-wrap items-start gap-tight">
-            <Field
-              label={unit ? `${t('progress.value')} (${unit})` : t('progress.value')}
-              inputMode="decimal"
-              value={value}
-              onChange={(e) => {
-                setValue(e.target.value);
-                // The error belongs to the value that produced it. Leaving it up while the user
-                // fixes the typo is the app arguing with a number that is no longer there.
-                if (record.isError) record.reset();
-              }}
-              // The trigger's range check reaches the user as a plain sentence, not a stack trace
-              // and not silence (4ab). `Field` owns the whole treatment — danger border, the glyph
-              // inside the leading edge, and a `role="alert"` line under it — so colour is never
-              // the only carrier for the ~12% of readers with a colour-vision deficiency.
-              error={record.isError ? t('progress.outOfRange') : undefined}
-              leading={record.isError ? <AlertCircle className="size-icon-s" /> : undefined}
-              className="min-w-[104px] flex-1"
-            />
-            <Field
-              label={t('progress.on')}
-              type="date"
-              value={on}
-              onChange={(e) => setOn(e.target.value)}
-              leading={<CalendarDays className="size-icon-s" />}
-              className="min-w-[144px] flex-1"
-            />
-            {/* The blank span is a LABEL-HEIGHT SPACER, not decoration: it carries the same
-                type step and the same `gap-tight` as the two fields beside it, so the button's top
-                edge lines up with theirs without a magic margin that a type-scale change breaks. */}
-            <div className="flex shrink-0 flex-col gap-tight">
-              <span aria-hidden className="text-body-s">
-                &nbsp;
-              </span>
-              <Pressable variant="primary" busy={record.isPending} onClick={submit}>
-                {t('common.save')}
-              </Pressable>
+      {/* ── record ── */}
+      <Section title={t('progress.record')}>
+        <div className="flex flex-col gap-5">
+          <SelectSheet
+            label={t('progress.metric')}
+            value={selected}
+            onChange={setMetric}
+            options={metricList.map((m) => ({ value: m.key, label: metricName(m.key) }))}
+          />
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label={unit ? `${t('progress.value')} (${unit})` : t('progress.value')}
+                inputMode="decimal"
+                value={value}
+                aria-invalid={record.isError || undefined}
+                onChange={(e) => {
+                  setValue(e.target.value);
+                  // The error belongs to the value that produced it.
+                  if (record.isError) record.reset();
+                }}
+              />
+              <DateTrigger label={t('progress.on')} value={on} onChange={setOn} />
             </div>
+            {/* Full width under the pair: in the 169 pt column the sentence would wrap to five lines. */}
+            {record.isError ? (
+              <NoticeLine tone="danger" role="alert">
+                {t('progress.outOfRange')}
+              </NoticeLine>
+            ) : null}
           </div>
-        </Surface>
-      </section>
+          <Pressable variant="primary" size="lg" className="w-full" busy={record.isPending} onClick={submit}>
+            {t('common.save')}
+          </Pressable>
+        </div>
+      </Section>
 
-      {/* ── entries ────────────────────────────────────────────────────────────────────────────
-          ONE card with hairline dividers, not one card per row. Six bordered cards in a column is
-          six boundaries drawn around things that belong to each other; the list is the object.
-          No fixed height — the list runs past the bottom edge and the page scrolls. */}
-      {rows.length > 0 ? (
-        <section className="flex flex-col gap-group">
-          <h2 className="text-title-2 text-text-1">{t('progress.entries')}</h2>
-          <Surface as="ul" pad="none" className="divide-y divide-[var(--surface-border)]">
-            {rows
-              .slice()
-              .sort((a, b) => (a.measured_on < b.measured_on ? 1 : -1))
-              .slice(0, 30)
-              .map((m) => (
-                <li key={m.id} className="flex items-center gap-tight px-4 py-2">
-                  <span className="min-w-0 flex-1">
-                    <span className="text-body-strong block truncate text-text-1">
-                      {t(`progress.metricName.${m.metric_key}`)}
+      {/* ── entries: newest first, at most 30 ── */}
+      {entries.length > 0 ? (
+        <Section title={t('progress.entries')}>
+          <RowStack>
+            {entries.map((m) => (
+              <ListRow
+                key={m.id}
+                title={metricName(m.metric_key)}
+                sub={m.measured_on}
+                control={
+                  <span className="flex items-center gap-5">
+                    <span className="flex items-baseline gap-1">
+                      <span className="text-data-l text-text-1">{formatMeasure(m.value, i18n.language)}</span>
+                      <span className="text-cap text-text-2">{unitSymbol(m.unit)}</span>
                     </span>
-                    {/* FORMATTED, like the tiles and the chart headline above it. The raw API
-                        value put `18.486 %` in this row while the tile beside it said `18,5 %` —
-                        one measurement, two readings, on one screen. `formatMeasure` is the one
-                        rule for a body measurement, so the three sites agree by construction
-                        rather than by three call sites remembering to. */}
-                    <span className="text-caption tabular-nums text-text-3">
-                      {m.measured_on} · {formatMeasure(m.value, i18n.language)}{' '}
-                      {unitSymbol(m.unit)}
-                    </span>
+                    {/* One tap and no confirm — UNDOABLE instead: every field the record mutation
+                        wants is in this row, so the toast puts the measurement back exactly. */}
+                    <Pressable
+                      variant="link"
+                      shape="icon"
+                      className="-mr-4"
+                      aria-label={t('common.delete')}
+                      onClick={() =>
+                        remove.mutate(m.id, {
+                          onSuccess: () =>
+                            toast(t('progress.measurementDeleted'), 'info', {
+                              onUndo: () =>
+                                record.mutate({
+                                  metric_key: m.metric_key,
+                                  measured_on: m.measured_on,
+                                  value: m.value,
+                                  note: m.note,
+                                }),
+                            }),
+                        })
+                      }
+                    >
+                      <X aria-hidden />
+                    </Pressable>
                   </span>
-                  {/* One tap and no confirm, like the food log — but unlike the food log it is
-                      UNDOABLE, and that is what buys the missing confirmation. Every field
-                      `useRecordMeasurement` wants is already in this row, so the toast can put the
-                      measurement back exactly as it was rather than approximately. Offering undo
-                      where the delete replays, and a confirm where it cannot, is the same rule the
-                      plan editor follows — it checks `faithful` before showing the affordance. */}
-                  <Pressable
-                    variant="ghost"
-                    shape="icon"
-                    onClick={() =>
-                      remove.mutate(m.id, {
-                        onSuccess: () =>
-                          toast(t('progress.measurementDeleted'), 'info', {
-                            onUndo: () =>
-                              record.mutate({
-                                metric_key: m.metric_key,
-                                measured_on: m.measured_on,
-                                value: m.value,
-                                note: m.note,
-                              }),
-                          }),
-                      })
-                    }
-                    aria-label={t('common.delete')}
-                  >
-                    <Trash2 className="size-icon-s" aria-hidden />
-                  </Pressable>
-                </li>
-              ))}
-          </Surface>
-        </section>
+                }
+              />
+            ))}
+          </RowStack>
+        </Section>
       ) : null}
     </>
+  );
+}
+
+/** progress-1 "Image/hero-tape": 201 wide, flush with the screen's right edge (x 201 on the 402 frame). */
+const TAPE_WIDTH = 201;
+const TAPE_LEFT = 177;
+const TAPE_GUTTER = 24;
+
+/**
+ * The hero: eyebrow, the giant reading with its unit, and the tape glowing out of the black on the
+ * right, its top 1 above the eyebrow, "kg" in its black corner. The frame's "83,1" ends exactly where
+ * the tape begins; a wider reading ("105,1" chest, "100,3" weight) would run into the coil, so the
+ * tape starts no earlier than the digits' ink ends and slides out past the screen edge instead
+ * (the scaffold clips it). Measured on the laid-out figure, so it holds at 360 / 402 / 430 too.
+ */
+function HeroFigure({ label, value, unit }: { label: string; value: string; unit: string }) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [left, setLeft] = useState(TAPE_LEFT);
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const digits = box?.querySelector<HTMLElement>('[data-kit="numeral"] > span');
+    if (!box || !digits) return;
+    const measure = () => {
+      const inkEnd = digits.getBoundingClientRect().right - box.getBoundingClientRect().left;
+      // flush with the screen's right edge, whatever the gutter (24, or 16 below 376 pt)
+      const flush = document.documentElement.clientWidth - box.getBoundingClientRect().left - TAPE_WIDTH;
+      // ...but never past the column's own gutter on a desktop-wide window
+      const column = box.clientWidth + TAPE_GUTTER - TAPE_WIDTH;
+      setLeft(Math.round(Math.max(Math.min(flush, column), inkEnd)));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, [value, unit]);
+
+  return (
+    <div ref={boxRef} className="relative">
+      <span aria-hidden className="absolute -top-px left-[var(--tape-x)]" style={{ '--tape-x': `${left}px` } as CSSProperties}>
+        <Pic slot="hero-tape" width={TAPE_WIDTH} priority bleed />
+      </span>
+      <StatBlock label={label} className="relative">
+        <Numeral size="giant" value={value} unit={unit} />
+      </StatBlock>
+    </div>
   );
 }
 
@@ -427,139 +390,92 @@ function PhotosTab() {
   const remove = useDeletePhoto();
   const [on, setOn] = useState(todayLocal);
   /*
-   * A CONFIRM RATHER THAN AN UNDO, and the choice is forced rather than preferred.
-   *
-   * `useUploadPhoto` takes a `File`. Once the row is deleted the browser no longer holds the
-   * original, so there is nothing to replay — the undo the measurements list gets is not available
-   * here at any price. The friction has to come before the action instead of after it.
-   *
-   * It is also the delete that deserves it most. A food entry is re-added in ten seconds and a
-   * measurement is four fields; a photograph of your body on a particular day cannot be retaken.
-   * The comment on the food log reasons that a 44px control at the far edge is enough because the
-   * cost of a mistake is small — true there, and the premise does not travel.
+   * A CONFIRM RATHER THAN AN UNDO, and the choice is forced: `useUploadPhoto` takes a `File`, and
+   * once the row is deleted the browser no longer holds the original, so there is nothing to
+   * replay. A photograph of your body on a particular day cannot be retaken either.
    */
   const [confirmPhoto, setConfirmPhoto] = useState<PhotoRow | null>(null);
 
+  const list = photos.data?.photos ?? [];
+  const empty = !photos.isLoading && list.length === 0;
+
   return (
     <>
-      <section className="flex flex-col gap-group">
-        <h2 className="text-title-2 text-text-1">{t('progress.addPhoto')}</h2>
+      {/* progress-3: the subject line and its sentence FIRST, then the add section. */}
+      {empty ? (
+        <div className="flex flex-col gap-2">
+          <h2 className="text-display-xl text-text-1">{t('progress.noPhotosTitle')}</h2>
+          <p className="text-body text-text-2">{t('progress.noPhotosBody')}</p>
+        </div>
+      ) : null}
 
-        <Surface className="flex flex-col gap-group">
-          {/* SAID BEFORE THE UPLOAD, not after, and before any control on the card. Someone about
-              to photograph their body deserves to know who can see it before they choose the file,
-              and the answer is nobody by default. */}
-          <p className="text-body-s text-text-2">{t('progress.photoPrivacyNote')}</p>
-
-          <div className="flex flex-wrap items-start gap-tight">
-            <Field
-              label={t('progress.on')}
-              type="date"
-              value={on}
-              onChange={(e) => setOn(e.target.value)}
-              leading={<CalendarDays className="size-icon-s" />}
-              className="min-w-[144px] flex-1"
-            />
-            {/* Same label-height spacer as the record form, for the same reason. */}
-            <div className="flex shrink-0 flex-col gap-tight">
-              <span aria-hidden className="text-body-s">
-                &nbsp;
-              </span>
-              <label className="text-body-s flex min-h-[var(--control-h)] cursor-pointer items-center justify-center rounded-button border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 px-4 text-text-1">
-                {t('progress.chooseFile')}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) upload.mutate({ file, taken_on: on });
-                    e.target.value = '';
-                  }}
-                />
-              </label>
-            </div>
+      <Section title={t('progress.addPhoto')} rule={empty}>
+        <div className="flex flex-col gap-5">
+          {/* SAID BEFORE THE UPLOAD, before any control: who can see it is nobody by default. */}
+          <p className="text-body text-text-1">{t('progress.photoPrivacyNote')}</p>
+          <DateTrigger label={t('progress.on')} value={on} onChange={setOn} />
+          <div className="flex flex-col gap-2">
+            {/* Choosing a file uploads it at once — there is no save step. */}
+            <FilePick
+              size="lg"
+              className="w-full"
+              accept="image/jpeg,image/png,image/webp"
+              busy={upload.isPending}
+              onFiles={([file]) => {
+                if (file) upload.mutate({ file, taken_on: on });
+              }}
+            >
+              {t('progress.chooseFile')}
+            </FilePick>
             {upload.isPending ? (
-              <span className="text-body-s self-center text-text-3">{t('common.saving')}</span>
+              <NoticeLine role="status">{t('common.saving')}</NoticeLine>
+            ) : upload.isError ? (
+              <NoticeLine tone="danger" role="alert">
+                {t('progress.uploadFailed')}
+              </NoticeLine>
             ) : null}
           </div>
-
-          {upload.isError ? (
-            <p className="text-caption flex items-center gap-tight text-danger" role="alert">
-              <AlertCircle className="size-icon-s shrink-0" aria-hidden />
-              {t('progress.uploadFailed')}
-            </p>
-          ) : null}
-        </Surface>
-      </section>
+        </div>
+      </Section>
 
       {photos.isLoading ? (
-        <div className="grid grid-cols-3 gap-tight" role="status" aria-busy>
+        <div role="status" aria-busy className="grid grid-cols-3 gap-2">
+          <span className="sr-only">{t('common.loading')}</span>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="aspect-square rounded-card" />
+            <Skeleton key={i} className="aspect-square" />
           ))}
         </div>
-      ) : (photos.data?.photos ?? []).length === 0 ? (
-        <EmptyState icon={Camera} title={t('progress.noPhotosTitle')} body={t('progress.noPhotosBody')} />
-      ) : (
-        <ul className="grid grid-cols-3 gap-tight">
-          {(photos.data?.photos ?? []).map((p) => (
-            <li key={p.id} className="relative">
-              <img
-                // The gated route, never a static path. The key is not the permission.
+      ) : list.length > 0 ? (
+        <ul className="grid grid-cols-3 gap-x-2 gap-y-4">
+          {list.map((p) => (
+            <li key={p.id} className="flex min-w-0 flex-col gap-1">
+              {/* The gated route, never a static path: the key is not the permission. The
+                  member's own photos keep their colour. Nothing is laid over the picture. */}
+              <UserPhoto
                 src={`/api/v1/progress-media/${p.storage_key}`}
                 alt={t('progress.photoAlt', { date: p.taken_on })}
-                loading="lazy"
-                className="aspect-square w-full rounded-card object-cover"
+                ratio={1}
               />
-              {/* SOLID, not a veil: this pill sits on a photograph, and an alpha fill over an
-                  unknown image is a date you can read on some of them. */}
-              <span className="text-micro-legacy absolute bottom-1 left-1 rounded-chip bg-surface-0 px-2 py-1 text-text-2">
-                {p.taken_on}
-              </span>
-              {/* BACKED, for the reason the date pill two lines up is backed: this control sits
-                  on an arbitrary photograph, and a ghost button over an unknown image is a delete
-                  you can see on some of them. The date got that treatment and the destructive
-                  control beside it did not. */}
-              <Pressable
-                variant="ghost"
-                shape="icon"
-                className="absolute right-1 top-1 rounded-full bg-surface-0 text-text-1"
-                onClick={() => setConfirmPhoto(p)}
-                aria-label={t('common.delete')}
-              >
-                <Trash2 className="size-icon-s" aria-hidden />
-              </Pressable>
+              <span className="text-data text-text-2">{p.taken_on}</span>
+              <TextLink tone="danger" className="self-start" onClick={() => setConfirmPhoto(p)}>
+                {t('common.delete')}
+              </TextLink>
             </li>
           ))}
         </ul>
-      )}
+      ) : null}
 
-      <Sheet
+      <ConfirmSheet
         open={confirmPhoto !== null}
         onClose={() => setConfirmPhoto(null)}
         title={t('progress.deletePhotoTitle')}
-      >
-        <div className="flex flex-col gap-group">
-          <p className="text-body-s text-text-2">{t('progress.deletePhotoBody')}</p>
-          {/* Cancel first and Cancel wider: the destructive option is never the one the thumb
-              lands on by default, and it is never styled as the primary action. */}
-          <div className="flex gap-tight">
-            <Pressable variant="secondary" className="flex-1" onClick={() => setConfirmPhoto(null)}>
-              {t('common.cancel')}
-            </Pressable>
-            <Pressable
-              variant="danger"
-              onClick={() => {
-                if (confirmPhoto) remove.mutate(confirmPhoto.id);
-                setConfirmPhoto(null);
-              }}
-            >
-              {t('common.delete')}
-            </Pressable>
-          </div>
-        </div>
-      </Sheet>
+        message={t('progress.deletePhotoBody')}
+        confirmLabel={t('common.delete')}
+        onConfirm={() => {
+          if (confirmPhoto) remove.mutate(confirmPhoto.id);
+          setConfirmPhoto(null);
+        }}
+      />
     </>
   );
 }
@@ -567,179 +483,106 @@ function PhotosTab() {
 /* ── SHARING ────────────────────────────────────────────────────────────────────────────────── */
 
 function SharingTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const shares = useShares();
   const setShare = useSetShare();
   const revoke = useRevokeShare();
   const log = useAccessLog();
+  const baseId = useId();
 
   const live = (s: { revoked_at: number | null; link_status: string }) =>
     s.revoked_at == null && s.link_status === 'active';
 
+  const list = shares.data?.shares ?? [];
+  const entries = (log.data?.entries ?? []).slice(0, 50);
+  // At most one 48 pt subject line per screen: with several coaches every name takes `display`.
+  const nameClass = list.length === 1 ? 'text-display-xl' : 'text-display';
+
   return (
     <>
-      <section className="flex flex-col gap-group">
-        <SectionHeading icon={ShieldCheck} title={t('progress.whoCanSee')} />
-
-        <Surface className="flex flex-col gap-group">
-          <p className="text-body-s text-text-2">{t('progress.sharingNote')}</p>
-
-          {(shares.data?.shares ?? []).length === 0 ? (
-            <p className="text-body-s text-text-3">{t('progress.noShares')}</p>
-          ) : (
-            <ul className="flex flex-col gap-tight">
-              {(shares.data?.shares ?? []).map((s) => (
-                <Surface as="li" key={s.id} elevation="inset" rim={false} className="flex flex-col gap-tight">
-                  <div className="text-body-s flex items-center justify-between gap-tight text-text-1">
-                    <span className="truncate">
-                      {personLabel({ email: s.coach_email, display_name: s.coach_display_name })}
-                    </span>
-                    {/* An archived link is shown as ENDED rather than hidden, because "I revoked
-                        it" and "they left" are different facts and the client is entitled to
-                        both. */}
-                    {s.link_status !== 'active' ? (
-                      <span className="text-micro-legacy shrink-0 rounded-chip border-[length:var(--border-width)] border-[var(--surface-border)] px-2 py-1 uppercase text-text-3">
-                        {t('progress.linkEnded')}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="flex flex-col">
-                    <Toggle
-                      label={t('progress.shareMeasurements')}
-                      checked={s.share_measurements === 1 && live(s)}
-                      disabled={s.link_status !== 'active'}
-                      onChange={(v) => setShare.mutate({ linkId: s.coach_client_id, share_measurements: v })}
-                    />
-                    <Toggle
-                      label={t('progress.sharePhotos')}
-                      checked={s.share_photos === 1 && live(s)}
-                      disabled={s.link_status !== 'active'}
-                      onChange={(v) => setShare.mutate({ linkId: s.coach_client_id, share_photos: v })}
-                    />
-                  </div>
-
-                  {live(s) && (s.share_measurements === 1 || s.share_photos === 1) ? (
-                    <Pressable
-                      variant="danger"
-                      density="compact"
-                      className="self-start"
-                      onClick={() => revoke.mutate(s.coach_client_id)}
-                    >
-                      {t('progress.revokeAll')}
-                    </Pressable>
-                  ) : null}
-                </Surface>
-              ))}
-            </ul>
-          )}
-        </Surface>
-      </section>
-
-      <section className="flex flex-col gap-group">
-        <SectionHeading icon={Eye} title={t('progress.whoLooked')} />
-
-        {(log.data?.entries ?? []).length === 0 ? (
-          <p className="text-body-s text-text-3">{t('progress.noLooks')}</p>
+      <div className="flex flex-col gap-4">
+        <SectionHeader rule={false} title={t('progress.whoCanSee')} />
+        {list.length === 0 ? (
+          <p className="text-body text-text-2">{t('progress.noShares')}</p>
         ) : (
-          <Surface as="ul" pad="none" className="divide-y divide-[var(--surface-border)]">
-            {(log.data?.entries ?? []).slice(0, 50).map((e) => (
-              <li key={e.id} className="px-4 py-2">
-                {/* THE STORED SNAPSHOT STAYS A FULL ADDRESS; THE SCREEN DOES NOT SHOW ONE.
-                    `viewer_email_snapshot` is written at access time on purpose — an audit trail
-                    of who read someone's health data has to survive that person renaming
-                    themselves or being deleted, so it cannot be a join. But the client reading
-                    this list needs to recognise a coach, not be handed a mailbox, and the same
-                    rule that took addresses off every other screen applies here (lib/person.ts).
-                    `personLabel` on a record with no name yields the local part, which is exactly
-                    the right amount: identifying, and not deliverable. */}
-                <span className="text-body-strong block truncate text-text-1">
-                  {personLabel({ email: e.viewer })}
-                </span>
-                <span className="text-caption tabular-nums text-text-3">
-                  {t(`progress.looked.${e.kind}`, { defaultValue: e.kind })} ·{' '}
-                  {new Date(e.at * 1000).toLocaleString()}
-                </span>
-              </li>
-            ))}
-          </Surface>
+          list.map((s, i) => {
+            const measId = `${baseId}-m-${s.id}`;
+            const photoId = `${baseId}-p-${s.id}`;
+            return (
+              <div key={s.id} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <h3 className={`${nameClass} break-words text-text-1`}>
+                    {personLabel({ email: s.coach_email, display_name: s.coach_display_name })}
+                    {/* An archived link is shown as ENDED rather than hidden: "I revoked it" and
+                        "they left" are different facts. */}
+                    {s.link_status !== 'active' ? (
+                      <span className="ml-2 align-middle text-micro text-text-3">{t('progress.linkEnded')}</span>
+                    ) : null}
+                  </h3>
+                  {i === 0 ? <p className="text-body text-text-2">{t('progress.sharingNote')}</p> : null}
+                </div>
+                <RowStack open as="div" role="group" aria-label={t('progress.whoCanSee')}>
+                  <ListRow
+                    title={t('progress.shareMeasurements')}
+                    titleId={measId}
+                    control={
+                      <Switch
+                        checked={s.share_measurements === 1 && live(s)}
+                        disabled={s.link_status !== 'active'}
+                        labelledBy={measId}
+                        onChange={(v) => setShare.mutate({ linkId: s.coach_client_id, share_measurements: v })}
+                      />
+                    }
+                  />
+                  <ListRow
+                    title={t('progress.sharePhotos')}
+                    titleId={photoId}
+                    control={
+                      <Switch
+                        checked={s.share_photos === 1 && live(s)}
+                        disabled={s.link_status !== 'active'}
+                        labelledBy={photoId}
+                        onChange={(v) => setShare.mutate({ linkId: s.coach_client_id, share_photos: v })}
+                      />
+                    }
+                  />
+                  {live(s) && (s.share_measurements === 1 || s.share_photos === 1) ? (
+                    <ListRow tone="danger" title={t('progress.revokeAll')} onClick={() => revoke.mutate(s.coach_client_id)} />
+                  ) : null}
+                </RowStack>
+              </div>
+            );
+          })
         )}
-      </section>
+      </div>
+
+      <Section title={t('progress.whoLooked')}>
+        {entries.length === 0 ? (
+          <p className="text-body text-text-2">{t('progress.noLooks')}</p>
+        ) : (
+          <RowStack>
+            {entries.map((e) => {
+              const at = new Date(e.at * 1000);
+              return (
+                <ListRow
+                  key={e.id}
+                  // The stored snapshot is a full address; the screen shows the local part —
+                  // identifying, and not deliverable (lib/person.ts).
+                  title={personLabel({ email: e.viewer })}
+                  sub={t(`progress.looked.${e.kind}`, { defaultValue: e.kind })}
+                  trailing={
+                    <span className="flex flex-col items-end gap-0.5 text-data">
+                      <span className="text-text-2">{at.toLocaleDateString(i18n.language)}</span>
+                      <span className="text-text-3">{at.toLocaleTimeString(i18n.language)}</span>
+                    </span>
+                  }
+                />
+              );
+            })}
+          </RowStack>
+        )}
+      </Section>
     </>
-  );
-}
-
-/**
- * The `h2` that opens `Mérés rögzítése`, `Ki láthatja` and `Ki nézte meg`.
- *
- * ═══ A BADGE IS NOT A PUCK ═════════════════════════════════════════════════════════════════════
- *
- * The three hand-written spans this replaces were `rounded-chip bg-accent-subtle`, and
- * `rounded-chip` is the pill radius in every pack but Mono — so on a square box it rendered as a
- * full circle with a 12% accent wash, pixel-identical to `SummaryTile`'s icon puck sitting 60px
- * above the first one. 05-haladas.webp draws two marks on purpose: the tile puck is a CIRCLE on an
- * accent wash and labels a number, the section badge is a rounded SQUARE on a neutral inset fill
- * with a hairline edge and opens a section.
- *
- * Every value below is measured off that mockup rather than felt:
- *   - `size-11` — the badge box is 69px there and the value field beside it is 69px tall, so the
- *     badge is exactly one `--control-h`. Absolute pixels do not transfer from that render (its
- *     field is 24 CSS px), the ratio does.
- *   - `rounded-field` — the corner runs 18px of that 69, 26% of the side. `rounded-field` is
- *     12/44 = 27%; `rounded-card` would be 16/44 = 36%, visibly rounder than the image. It is also
- *     what both existing section badges in this app already use.
- *   - `bg-surface-2` — the badge fill samples the same value as the date field's inset next to it,
- *     and `--field-bg` IS `--surface-2`.
- *
- * Local rather than shared, for the reason `features/library/SectionBadge.tsx` writes down: this
- * wants to be `ui/data/SectionHeader`, but that one still carries the accent wash — the half the
- * mockup contradicts — and `src/ui/` is being edited in parallel. Promoting this changes an import
- * path and nothing else.
- */
-function SectionHeading({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
-  return (
-    <h2 className="text-title-2 flex items-center gap-tight text-text-1">
-      <span
-        aria-hidden
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-field border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-2 text-accent"
-      >
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
-      {title}
-    </h2>
-  );
-}
-
-/**
- * The consent row: label left, accent checkbox right, whole row tappable.
- *
- * A CHECKBOX AND NOT `Switch`, on purpose. `Switch` exists and is the better control for most
- * settings, but swapping these two is a decision about a consent surface — the one place where
- * "did I turn that on" has to be answerable from memory — and it is not a side effect of a visual
- * redesign. It stays a checkbox until someone chooses otherwise on the record.
- */
-function Toggle({
-  label,
-  checked,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  disabled?: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="text-body-s flex min-h-[var(--target-min)] cursor-pointer items-center justify-between gap-tight text-text-1">
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
-        className="size-5 shrink-0 accent-[var(--accent)] disabled:opacity-45"
-      />
-    </label>
   );
 }
 

@@ -1,0 +1,110 @@
+{
+  "id": "S-progress",
+  "branch": "pulse/S-progress",
+  "verifiedOn": "pulse-redesign 8827841 (F12 stage 2, S-settings and G-shell merged), slot re-synced with pulse-sync, pulse-verify build green, 10 of 10 replay captures",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-progress (replay on M); pairs (Figma | app | difference) in C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-progress",
+  "frames": {
+    "progress-1": {
+      "verdict": "matched",
+      "how": "replay on M, no fixture. Every block stands where the frame draws it: header 72, tabs 128 (mark 170, hairline 171), eyebrow 204, giant 232 with the unit on its baseline, tape at the screen's right edge, chart head 362, plot 390-575, axis 583, rule 633, four columns 650, record section 750 (select 803, value + date 885, pill 967), entries 1055 / rows from 1108 at a 65 pitch.",
+      "differences": [
+        "data: the freeze was taken 2026-10-15, the frame drew the seed on 2026-10-08 - the last reading is 83,4 not 83,1, the change -4,6, the dates six days later; the geometry probe pairs the shifted rows with the wrong frame rows (every 'dy 65' / 'dy 259' deviation is that)",
+        "the delete x is the kit icon button (24 pt glyph, text-1, centred in its 44 frame); the frame draws a 20 pt glyph with its ink on the right edge. The button box is placed so the INK ends where the frame's does (box 16 right of the frame's box): same kit gap as R-S-auth-01",
+        "text boxes measured as the run width against the frame's fixed widths (dw only, dy -0.5): a measurement difference, not a layout one",
+        "chart hairlines are reported unmatched: TrendChart (F14) draws them inside its svg, they are on the picture where the frame draws them"
+      ]
+    },
+    "progress-2": {
+      "verdict": "matched",
+      "how": "replay on M (the demo seed's share row is in the recording); click Megosztás. Eyebrow 204, the coach name 240 (displayXL), the note 296, strong rule 356, switch rows 357 / 414 (switch on lime, off grey), revoke in danger 471, Ki nézte meg 559 / 576, log rows from 612, date over time right-aligned.",
+      "differences": [
+        "data: the viewer is coach@tracker.local, so personLabel prints 'coach' where the frame prints 'kovacs.peter'; the log times are the recording's (17:07:00) and its dates six days later",
+        "the date and time follow the app language (toLocaleDateString(i18n.language)) instead of the device locale - see deviationsQ4"
+      ]
+    },
+    "progress-3": {
+      "verdict": "matched",
+      "how": "replay on M (no photo is the live state); click Fotók. Subject line 204, sentence 260, rule 336 / eyebrow 353, privacy sentence 389, DateTrigger 453, the lime FilePick pill 535.",
+      "differences": [
+        "the date is the replay's today (2026. okt. 15.), the frame's is 2026. okt. 9.",
+        "the boxed probe counts the FilePick pill as a surface: the probe's allow-list knows btnPrimary but not filePick (request R-S-progress-02 to INT); the pill is the kit's primary look"
+      ]
+    }
+  },
+  "states": {
+    "progress-body-few": {
+      "verdict": "structure",
+      "why": "no frame; the sheet chooses Mellkas (2 readings): the hero shows the last reading with the tape pushed past the edge (the reading is wider than the frame's), the chart prints progress.notEnough, the four other metrics, the form follows the metric (Érték (cm))"
+    },
+    "progress-body-sheet": {
+      "verdict": "structure",
+      "why": "no frame; the metric picker as the kit's SelectSheet: fifteen rows, the chosen one in ink with the lime tick"
+    },
+    "progress-body-empty": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "fixture: no measurement. EmptyState (Még nincs mérés + one line), no hero, no tape; the record form stays, no entries section"
+    },
+    "progress-body-error": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "a stubbed 400 on the save: NoticeLine danger, full width under the value + date pair, aria-invalid on the value; cleared on the next keystroke (record.reset kept)"
+    },
+    "progress-body-deleted": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "stubbed DELETE: the F13 toast band says Mérés törölve with Visszavonás; the undo re-creates the row (code unchanged)"
+    },
+    "progress-sharing-empty": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "fixtures: no share, no access: what a real member without the demo seed sees - the eyebrow and progress.noShares, then Ki nézte meg and progress.noLooks"
+    },
+    "progress-offline": {
+      "verdict": "structure",
+      "why": "CDP offline on the screen: the shell's offline line over the header zone, the page keeps what it has"
+    },
+    "not captured": {
+      "verdict": "unreachable",
+      "why": "pulse-fixture-check (R26) refuses the fixtures until a recording carries the value: an ended coach link (link_status other than 'active') and a member with photos (no recording of /progress-photos holds a row). Both are built from the kit: the ended link puts 'Lezárult' (micro, text-3) after the name and turns both switches off + disabled; photos are a 3-column grid of UserPhoto (ratio 1, own colour), the raw ISO date under each and a danger 'Törlés' text link that opens the ConfirmSheet (title, body, Törlés in danger, Mégse). The test-tab loading state (skeleton blocks: eyebrow, numeral at cap height, the 185 plot) cannot be held by the capture tool."
+    }
+  },
+  "probes": "fonts, pill (one lime pill per state), overflow (360 / 402 / 430), targets, reduced motion pass on every captured state of this package; boxed fails on progress-3 only (R-S-progress-02); geometry red only for the data and measurement reasons above. progress-body-deleted.en fails targets on the toast band's \"Undo\" link (32 wide, F13 - not this package)",
+  "inventory": "the control inventory differs from the hybrid baseline by the planned swaps: the tab strip (3 tabs) -> Segmented radios; the native metric select -> the SelectSheet trigger; the native date input -> DateTrigger (still a native date input under the drawing); the label + raw file input -> FilePick; the two consent checkboxes -> Switches (role switch); the danger revoke button -> a danger ListRow button; the trash buttons -> x buttons with the same name (Törlés)",
+  "budget": {
+    "before": 59,
+    "after": 0,
+    "file": "deleted (check-pulse --fix-down S-progress)"
+  },
+  "requests": [
+    "R-S-progress-01 (open, not blocking): MacroColumns fixed tracks, so a short last row of other metrics keeps the 76.5 pt columns",
+    "R-S-progress-02 (open, not blocking): the boxed probe's allow-list should name filePick (the kit's pill look) as it names btnPrimary"
+  ],
+  "deviationsQ4": [
+    "Tabs: the hand-rolled tablist (role tab + tabpanel) is the kit Segmented (radiogroup of radios); the page section is named by the chosen tab instead of aria-labelledby a tab. Same three words, same local state, no URL.",
+    "Metric: the native select is the SelectSheet (a sheet of fifteen radio rows). Same options, same order, same effect on the chart, the unit and the columns.",
+    "Hero: the giant reading is shown whenever the selected metric has at least one reading (1-2 readings included); before, nothing but the 'not enough' sentence was shown for 1-2 readings. Adds a value, removes nothing.",
+    "Out-of-range error: a full-width danger NoticeLine under the value + date pair (plus aria-invalid on the value) instead of the message inside the 169 pt value column, which would wrap to five lines; the AlertCircle glyph is gone (the dot is the mark).",
+    "Consent: the two checkboxes are the kit Switch the frame draws (role switch, labelled by the row title). Semantics identical: apply on tap, no confirm, no optimistic state, disabled + off when the link is not active. The screen note calls checkbox vs switch an open owner decision - a one-line swap if ruled otherwise.",
+    "No coach: before, the sharing note was printed above 'Nincs edződ...'; now only the sentence (the note explains two controls that are not there).",
+    "Access log: the time is split into date over time (two mono lines, as drawn) and formatted in the app language instead of the device locale.",
+    "Photos populated (not drawn): no overlay on the photo - the date and a danger Törlés text link stand under each tile; the delete keeps its confirm sheet.",
+    "Photo upload busy: a NoticeLine status 'Mentés folyamatban' under the pill (and the pill's three dots) instead of a grey word beside the picker."
+  ],
+  "removedNotControls": [
+    "the icon badges of the three section headings, the metric icons of the summary tiles, the LineChart / Camera glyphs of the empty states, the surfaces around the chart, the form, the lists and the shares, the 'Lezárult' chip border"
+  ],
+  "proposedCopy": [],
+  "i18n": "no patch: every string is an existing progress.* / common.* key",
+  "liveSmoke": {
+    "result": "progress-1 and progress-body-empty rendered against the live backend as user@ (cookie jar refreshed, no new login), no undeclared error; geometry red only for the data reasons of progress-1",
+    "writes": []
+  },
+  "notes": [
+    "The muscle map (mannequin) is not part of any progress frame; the owner's request to put the muscle map in 1:1 belongs to F15 stage 1 (slot-8) and the screens that draw it - nothing was invented here.",
+    "The tape (hero-tape, 201 pt) is placed by measurement: it starts where the reading's ink ends and never earlier than flush with the screen's right edge, so the frame's 83,1 puts it at x 201 exactly and a wider reading pushes it out past the edge (the scaffold clips it)."
+  ],
+  "lastBuild": "pulse-verify: build green in 18 s - 10 of 10 captured (replay); --no-build reruns: 360, 430, en, de, reduced motion 10 of 10 each",
+  "differences360": "at 360 pt the four column captions (raw ISO dates) are cut with an ellipsis by MacroColumns (70 pt columns; kit truncation) - visible, kit-owned",
+  "languages": "hu, en, de captured for all ten states (assertions by i18n key; frame states overridden in states.json for that): no overflow, no key path on screen"
+}

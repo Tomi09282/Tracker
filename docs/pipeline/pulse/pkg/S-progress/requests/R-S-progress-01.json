@@ -1,0 +1,14 @@
+{
+  "id": "R-S-progress-01",
+  "from": "S-progress",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/data/MacroColumns.tsx",
+  "need": "A fixed number of tracks. progress-1 draws the other metrics as four columns of 76.5 pt, 16 apart. A member lists every other recorded metric (1 to 14 of them), so the page chunks them by four; MacroColumns shares the width between the columns it is given, so a short last row (1-3 columns) stretches past 76.5 and stops lining up with the row above.",
+  "evidence": "progress-1@2x.png y 650-718; .pulse/geometry/progress-1.json 'Macro/Kar (jobb)' [24,650,76.5,68] ... 'Macro/Derék' [301.5,650,76.5,68]; kit/data.md MacroColumns ('two to four ... share the width'); .pulse/prep/_kit-gaps.md table 13 row 'MacroColumns fixed tracks'",
+  "proposedApi": "<MacroColumns tracks={4} columns={chunk} />  (tracks?: number, default columns.length: the grid has `tracks` equal tracks and the columns fill the first ones)",
+  "proposedPatch": null,
+  "interim": "the page chunks the columns by four; a short last row stretches its columns (the seed member has exactly four others, so the drawn state is unaffected)",
+  "status": "open",
+  "resolution": null
+}

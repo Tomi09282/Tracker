@@ -1,0 +1,636 @@
+{
+  "about": "S-progress - the undrawn states of Haladás (PLAN 4.1 rule 7). Every state is replay on M (user@) unless it says otherwise; fixtures are edits over the recording of the same endpoint (R26); every write is a stub, nothing is written on user@. The one live write the package may make (a measurement on demo.toth.reka@) is not needed for any capture and is not used. Not captured, because pulse-fixture-check (R26) refuses them until a recording carries the value: an ended coach link (link_status other than active) and a member with photos (no recording of /progress-photos has a row).",
+  "states": {
+    "progress-body-few": {
+      "title": "Haladás — Test · kevés mérés (Mellkas, 2)",
+      "account": "M",
+      "route": "/progress",
+      "height": 1300,
+      "reach": "seed",
+      "why": "the metric picker moved to a metric with fewer than three readings: the hero shows the last reading, the chart says why there is no line",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "hu": "Mit mérsz Testsúly",
+              "en": "What Weight",
+              "de": "Was Gewicht"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "progress.metric"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "progress.metricName.chest"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "hu": "Mit mérsz Mellkas",
+              "en": "What Chest",
+              "de": "Was Brust"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "hu": "Mit mérsz Mellkas",
+            "en": "What Chest",
+            "de": "Was Brust"
+          }
+        }
+      ]
+    },
+    "progress-body-sheet": {
+      "title": "Haladás — Test · Mit mérsz (a sheet nyitva)",
+      "account": "M",
+      "route": "/progress",
+      "height": 1300,
+      "reach": "seed",
+      "why": "the metric picker is a sheet (pickers are sheets): fifteen metrics, the chosen one ticked. Captured 1300 tall: at 874 the field sits under the tab bar at 360 pt and a click there lands on the bar",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "hu": "Mit mérsz Testsúly",
+              "en": "What Weight",
+              "de": "Was Gewicht"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "progress.metric"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "radio",
+          "name": {
+            "key": "progress.metricName.weight"
+          },
+          "checked": true
+        }
+      ]
+    },
+    "progress-body-empty": {
+      "title": "Haladás — Test · még nincs mérés",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a member with no measurement (and today also a failed read - one state, product gap): the empty subject line, the record form stays",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/measurements",
+          "edits": [
+            {
+              "pointer": "/measurements",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "progress.emptyTitle"
+          }
+        },
+        {
+          "role": "button",
+          "name": {
+            "key": "common.save"
+          }
+        }
+      ]
+    },
+    "progress-body-error": {
+      "title": "Haladás — Test · hihetetlen érték",
+      "account": "M",
+      "route": "/progress",
+      "height": 1500,
+      "reach": "fixture",
+      "why": "a failed save shows the out-of-range sentence full width under the value and the date; the POST is a stub. The 400 is the stub; the ApiError line is the unchanged submit handler (await mutateAsync without a catch, above the return, frozen) rejecting into the console - it was there before Pulse and is declared, not hidden",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "stubs": [
+        {
+          "method": "POST",
+          "path": "/api/v1/measurements",
+          "status": 400,
+          "body": {
+            "error": "out of range",
+            "code": "VALIDATION"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "hu": "Érték (kg)",
+              "en": "Value (kg)",
+              "de": "Wert (kg)"
+            },
+            "text": "831"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "hu": "Érték (kg)",
+              "en": "Value (kg)",
+              "de": "Wert (kg)"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "progress.outOfRange"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "progress.outOfRange"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/v1/measurements",
+            "status": 400
+          }
+        ],
+        "console": [
+          "the server responded with a status of 400",
+          "ApiError: out of range"
+        ]
+      }
+    },
+    "progress-body-deleted": {
+      "title": "Haladás — Test · mérés törölve (Visszavonás)",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "fixture",
+      "why": "one tap deletes an entry, the toast band offers the undo; the DELETE is a stub and the refetch is the recording",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "stubs": [
+        {
+          "method": "DELETE",
+          "path": "/api/v1/measurements/*",
+          "status": 204
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.delete"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "text": {
+              "key": "progress.measurementDeleted"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "progress.measurementDeleted"
+          }
+        }
+      ]
+    },
+    "progress-sharing-empty": {
+      "title": "Haladás — Megosztás · nincs edző",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "fixture",
+      "why": "what a real member sees without the demo seed's share row: the two quiet sentences",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/progress-shares",
+          "edits": [
+            {
+              "pointer": "/shares",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/progress-access-log",
+          "edits": [
+            {
+              "pointer": "/entries",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.sharing"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "progress.noShares"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "progress.noShares"
+          }
+        },
+        {
+          "text": {
+            "key": "progress.noLooks"
+          }
+        }
+      ]
+    },
+    "progress-offline": {
+      "title": "Haladás — Test · offline",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "seed",
+      "why": "the network drops on the screen: the shell's offline line over the header zone, the page keeps what it has",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.body"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": [
+            "tab",
+            "radio",
+            "button"
+          ],
+          "name": {
+            "key": "progress.tab.body"
+          }
+        }
+      ]
+    }
+  },
+  "overrides": {
+    "progress-1": {
+      "why": "the same assertions by i18n key, so the frame state also runs in en / de",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.body"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.body"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.body"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "progress-2": {
+      "why": "the same click script by i18n key (en / de runs)",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.sharing"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.sharing"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.sharing"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.sharing"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.sharing"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.sharing"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.sharing"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "progress-3": {
+      "why": "the same click script by i18n key (en / de runs)",
+      "opened": {
+        "role": [
+          "tab",
+          "radio",
+          "button"
+        ],
+        "name": {
+          "key": "progress.tab.body"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.photos"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.photos"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.photos"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "progress.tab.photos"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.photos"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.photos"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "progress.tab.photos"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  }
+}
