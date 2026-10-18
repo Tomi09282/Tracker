@@ -1,0 +1,369 @@
+{
+  "package": "S-challenges",
+  "base": "1b7759f",
+  "namespaces": [
+    "challenges"
+  ],
+  "set": [
+    {
+      "key": "challenges.title",
+      "hu": "Mai dobás",
+      "en": "Today’s draw",
+      "de": "Heutige Ziehung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 title; challenges-2 back link \"‹ MAI DOBÁS\""
+    },
+    {
+      "key": "challenges.pool",
+      "hu": "Kihívások",
+      "en": "Challenges",
+      "de": "Challenges",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 header link \"Kihívások ›\"; challenges-2 title"
+    },
+    {
+      "key": "challenges.rule",
+      "hu": "Naponta egyszer kötelező: válassz egyet.",
+      "en": "Once a day, required: pick one.",
+      "de": "Einmal am Tag Pflicht: Wähle eine.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 rule line (f_app, cut)"
+    },
+    {
+      "key": "challenges.options",
+      "hu": "Három lehetőség",
+      "en": "Three options",
+      "de": "Drei Optionen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 section eyebrow"
+    },
+    {
+      "key": "challenges.reroll",
+      "hu": "Újradobás",
+      "en": "Reroll",
+      "de": "Neu ziehen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 reroll link (f_app)"
+    },
+    {
+      "key": "challenges.rerollsLeft",
+      "hu": "még {{count}} maradt ma",
+      "en": "{{count}} left today",
+      "de": "heute noch {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 \"még 1 maradt ma\""
+    },
+    {
+      "key": "challenges.noPick",
+      "hu": "Választás nélkül minden megnyitáskor visszajön.",
+      "en": "Until you pick, it comes back every time you open the app.",
+      "de": "Ohne Wahl kommt sie bei jedem Öffnen wieder.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 consequence line"
+    },
+    {
+      "key": "challenges.take",
+      "hu": "Ezt vállalom",
+      "en": "I’ll take this one",
+      "de": "Die nehme ich",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1 docked pill"
+    },
+    {
+      "key": "challenges.state.accepted",
+      "hu": "elvállalva",
+      "en": "accepted",
+      "de": "angenommen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-1 NAPI DOBÁS micro meta \"ELVÁLLALVA\"; the chosen option on challenges-1 once picked"
+    },
+    {
+      "key": "challenges.state.done",
+      "hu": "teljesítve",
+      "en": "done",
+      "de": "erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "README-ma copy \"elvállalva\" / \"teljesítve\" (ma-2: the challenge ticked)"
+    },
+    {
+      "key": "challenges.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That didn’t work. Try again.",
+      "de": "Das hat nicht geklappt. Versuch es noch einmal.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "the shared failure line (= habits.failed, settings.day.failed)"
+    },
+    {
+      "key": "challenges.noZone",
+      "hu": "A napi dobás a nap és az időzóna beállítása után indul.",
+      "en": "The daily draw starts once your day and time zone are set.",
+      "de": "Die tägliche Ziehung startet, sobald Tag und Zeitzone eingestellt sind.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state: GET /challenges/today answers draw null before the zone is set (409 TIMEZONE_REQUIRED on a draw)"
+    },
+    {
+      "key": "challenges.emptyTitle",
+      "hu": "Még nincs kihívásod",
+      "en": "No challenges yet",
+      "de": "Noch keine Challenges",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state: empty pool (state empty_pool), the ma-3 empty-state pattern \"Még nincs szokásod\""
+    },
+    {
+      "key": "challenges.emptyBody",
+      "hu": "A napi dobás a saját kihívásaid közül választ.",
+      "en": "The daily draw picks from your own challenges.",
+      "de": "Die tägliche Ziehung wählt aus deinen eigenen Challenges.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state: empty pool, on MAI DOBÁS, KIHÍVÁSOK and Ma's NAPI DOBÁS"
+    },
+    {
+      "key": "challenges.poolRule",
+      "hu": "A nagyobb súly gyakrabban kerül elő.",
+      "en": "A higher weight comes up more often.",
+      "de": "Ein höheres Gewicht kommt öfter dran.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 rule line; the weight stepper hint in the sheet"
+    },
+    {
+      "key": "challenges.active",
+      "hu": "Aktív",
+      "en": "Active",
+      "de": "Aktiv",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 section eyebrow AKTÍV"
+    },
+    {
+      "key": "challenges.archived",
+      "hu": "Archivált",
+      "en": "Archived",
+      "de": "Archiviert",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 section eyebrow ARCHIVÁLT"
+    },
+    {
+      "key": "challenges.archive",
+      "hu": "Archiválás",
+      "en": "Archive",
+      "de": "Archivieren",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 the revealed row action \"Archiválás\" (here in the challenge sheet)"
+    },
+    {
+      "key": "challenges.restore",
+      "hu": "Visszaállítás",
+      "en": "Restore",
+      "de": "Wiederherstellen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 archived rows"
+    },
+    {
+      "key": "challenges.weight",
+      "hu": "súly {{count}}",
+      "en": "weight {{count}}",
+      "de": "Gewicht {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 sub line \"Fegyelem · súly 3\""
+    },
+    {
+      "key": "challenges.category.discipline",
+      "hu": "Fegyelem",
+      "en": "Discipline",
+      "de": "Disziplin",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1/2 category"
+    },
+    {
+      "key": "challenges.category.movement",
+      "hu": "Mozgás",
+      "en": "Movement",
+      "de": "Bewegung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1/2 category"
+    },
+    {
+      "key": "challenges.category.mind",
+      "hu": "Elme",
+      "en": "Mind",
+      "de": "Geist",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-1/2 category"
+    },
+    {
+      "key": "challenges.category.connection",
+      "hu": "Kapcsolat",
+      "en": "Connection",
+      "de": "Beziehungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 category"
+    },
+    {
+      "key": "challenges.category.food",
+      "hu": "Étkezés",
+      "en": "Food",
+      "de": "Ernährung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 category"
+    },
+    {
+      "key": "challenges.new",
+      "hu": "Új kihívás",
+      "en": "New challenge",
+      "de": "Neue Challenge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the header plus of lifeos/challenges-2 (accessible name) and the sheet title; f_app pattern \"Új szokás\" / \"Új teendő\""
+    },
+    {
+      "key": "challenges.limit",
+      "hu": "Legfeljebb {{count}} aktív kihívásod lehet.",
+      "en": "You can have at most {{count}} active challenges.",
+      "de": "Du kannst höchstens {{count}} aktive Challenges haben.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state: 409 LIMIT_REACHED on a create or restore (the pool cap \"8 / 50\")"
+    },
+    {
+      "key": "challenges.deleteAsk",
+      "hu": "A belőle lett teendők megmaradnak.",
+      "en": "The tasks it became are kept.",
+      "de": "Die daraus entstandenen Aufgaben bleiben erhalten.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the delete confirmation of the challenge sheet (api.md DELETE /challenges/:id)"
+    },
+    {
+      "key": "challenges.form.editTitle",
+      "hu": "Kihívás szerkesztése",
+      "en": "Edit challenge",
+      "de": "Challenge bearbeiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the challenge sheet in edit mode (pattern habits.form.editTitle)"
+    },
+    {
+      "key": "challenges.form.name",
+      "hu": "Megnevezés",
+      "en": "Name",
+      "de": "Bezeichnung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "round B form label (event-form \"Megnevezés\")"
+    },
+    {
+      "key": "challenges.form.nameRequired",
+      "hu": "Adj nevet a kihívásnak",
+      "en": "Give the challenge a name",
+      "de": "Gib der Challenge einen Namen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the sheet's name error (pattern habits.form.nameRequired)"
+    },
+    {
+      "key": "challenges.form.category",
+      "hu": "Kategória",
+      "en": "Category",
+      "de": "Kategorie",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the sheet's category chips (the five categories of challenges-2)"
+    },
+    {
+      "key": "challenges.form.points",
+      "hu": "Érme / teljesítés",
+      "en": "Coins / completion",
+      "de": "Münzen / Erledigung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "round B habit-form \"Érme / teljesítés\""
+    },
+    {
+      "key": "challenges.form.weight",
+      "hu": "Súly",
+      "en": "Weight",
+      "de": "Gewicht",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/challenges-2 \"súly N\""
+    },
+    {
+      "key": "challenges.form.max",
+      "hu": "legfeljebb {{count}}",
+      "en": "at most {{count}}",
+      "de": "höchstens {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "README-ma copy \"legfeljebb 50\""
+    },
+    {
+      "key": "challenges.form.create",
+      "hu": "Létrehozás",
+      "en": "Create",
+      "de": "Erstellen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "f_app \"Létrehozás\" (habit-form)"
+    },
+    {
+      "key": "challenges.today.title",
+      "hu": "Napi dobás",
+      "en": "Daily draw",
+      "de": "Tägliche Ziehung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-4 and ma-1 section eyebrow NAPI DOBÁS"
+    },
+    {
+      "key": "challenges.today.hint",
+      "hu": "Koppints egyre: ma ez a küldetésed.",
+      "en": "Tap one: it becomes today’s mission.",
+      "de": "Tippe eine an: Sie ist deine heutige Mission.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-4 body line"
+    },
+    {
+      "key": "challenges.today.reroll",
+      "hu": "Újradobás · {{count}}",
+      "en": "Reroll · {{count}}",
+      "de": "Neu ziehen · {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-4 section head link \"Újradobás · 1\""
+    },
+    {
+      "key": "challenges.today.picked",
+      "hu": "Mai kihívás · {{coins}} érme",
+      "en": "Today’s challenge · {{coins}} coins",
+      "de": "Heutige Challenge · {{coins}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-1 \"Mai kihívás · +15 érme\""
+    }
+  ]
+}

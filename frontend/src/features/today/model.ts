@@ -44,7 +44,7 @@ export function dayCount(day: LifeosToday): DayCount {
   const counted = habits.filter(countsToday);
   const workoutDue = day.workout.due ? 1 : 0;
   const workoutDone = day.workout.due && day.workout.done ? 1 : 0;
-  const dueToday = (t: Task) => t.dueOn !== null && t.dueOn === day.today;
+  const dueToday = (t: Task) => t.dueOn !== null && t.dueOn === day.today && t.challengeId == null;
   const tasksOpen = day.tasks ? day.tasks.due.filter(dueToday).length : 0;
   const tasksDone = day.tasks ? day.tasks.completedToday.filter(dueToday).length : 0;
   const done = workoutDone + counted.filter(habitDone).length + tasksDone;

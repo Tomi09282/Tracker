@@ -83,6 +83,8 @@ const EXPECT_BY_VIEW = {
     ['/habits', '/'],
     ['/habits/7', '/'],
     ['/tasks', '/'],
+    ['/challenges', '/'],
+    ['/challenges/pool', '/'],
     ['/workout', '/workout'],
     ['/workout/42', '/workout'],
     ['/library', '/workout'],

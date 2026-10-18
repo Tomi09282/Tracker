@@ -1440,5 +1440,55 @@
     "atTime": "At a time",
     "allDay": "All day",
     "textRequired": "Type something, or close it."
+  },
+  "challenges": {
+    "title": "Today’s draw",
+    "pool": "Challenges",
+    "rule": "Once a day, required: pick one.",
+    "options": "Three options",
+    "reroll": "Reroll",
+    "rerollsLeft": "{{count}} left today",
+    "noPick": "Until you pick, it comes back every time you open the app.",
+    "take": "I’ll take this one",
+    "state": {
+      "accepted": "accepted",
+      "done": "done"
+    },
+    "failed": "That didn’t work. Try again.",
+    "noZone": "The daily draw starts once your day and time zone are set.",
+    "emptyTitle": "No challenges yet",
+    "emptyBody": "The daily draw picks from your own challenges.",
+    "poolRule": "A higher weight comes up more often.",
+    "active": "Active",
+    "archived": "Archived",
+    "archive": "Archive",
+    "restore": "Restore",
+    "weight": "weight {{count}}",
+    "category": {
+      "discipline": "Discipline",
+      "movement": "Movement",
+      "mind": "Mind",
+      "connection": "Connection",
+      "food": "Food"
+    },
+    "new": "New challenge",
+    "limit": "You can have at most {{count}} active challenges.",
+    "deleteAsk": "The tasks it became are kept.",
+    "form": {
+      "editTitle": "Edit challenge",
+      "name": "Name",
+      "nameRequired": "Give the challenge a name",
+      "category": "Category",
+      "points": "Coins / completion",
+      "weight": "Weight",
+      "max": "at most {{count}}",
+      "create": "Create"
+    },
+    "today": {
+      "title": "Daily draw",
+      "hint": "Tap one: it becomes today’s mission.",
+      "reroll": "Reroll · {{count}}",
+      "picked": "Today’s challenge · {{coins}} coins"
+    }
   }
 }

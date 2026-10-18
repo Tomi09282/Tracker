@@ -52,8 +52,10 @@ export function TodayTasks({
 
   if (tasks === null) return null;
 
-  const open = [...tasks.overdue, ...tasks.due];
-  const doneToday = tasks.completedToday;
+  // The picked challenge's task has its own block (NAPI DOBÁS, features/challenges/TodayDraw.tsx).
+  const own = (task: Task) => task.challengeId == null;
+  const open = [...tasks.overdue, ...tasks.due].filter(own);
+  const doneToday = tasks.completedToday.filter(own);
   const rows = open.length > 0 ? open : doneToday;
   const failed = () => toast(t('today.failed'), 'error');
 

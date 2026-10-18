@@ -62,6 +62,8 @@ export const ROUTE_META = {
   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
   '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
+  '/challenges': { parent: '/', parentLabelKey: 'nav.today' },
+  '/challenges/pool': { parent: '/challenges', parentLabelKey: 'challenges.title' },
   '/notifications': {
     parent: '/',
     parentLabelKey: 'nav.today',

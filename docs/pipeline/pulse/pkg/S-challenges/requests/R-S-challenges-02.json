@@ -1,0 +1,14 @@
+{
+  "id": "R-S-challenges-02",
+  "from": "S-challenges",
+  "kind": "screen",
+  "blocking": true,
+  "target": "frontend/src/features/today/TodayPage.tsx, frontend/src/features/today/TodayTasks.tsx, frontend/src/features/today/model.ts (owner S-ma, merged in 179ff81)",
+  "need": "Ma's NAPI DOBÁS (frames lifeos/ma-4 pending draw, lifeos/ma-1 picked teaser, ma-2 done): TodayPage mounts features/challenges/TodayDraw twice - place 'open' between the hero and MAI EDZÉS (drawn: the body line, three option rows, 'Újradobás · 1' in the head; due: draws once; empty pool: the door to the pool) and place 'settled' after FELADATOK (picked: one row, ELVÁLLALVA / TELJESÍTVE); each mount renders only its own state. TodayTasks leaves out the task a pick became (Task.challengeId) because NAPI DOBÁS shows it, and dayCount's due-today filter leaves it out too (README-ma: 'the challenge never counts'); earnedTodayMinor keeps it (REVIEW-b1 7: 'Ma eddig' includes the completed challenge, ma-2 +68). The header comment's NOT YET paragraph is updated. No hook (use*.ts) changes.",
+  "evidence": "pairs .pulse/pairs/S-challenges/ma-4.pair-*.png, ma-1.pair-*.png, ma-2.pair-*.png (built app | Figma); states ma-4-draw, ma-1-picked, ma-2-done",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-challenges/requests/R-S-challenges-02.patch",
+  "interim": "Applied to the slot's working tree only. Without it /challenges has no door on a phone (check-nav's NO_INBOUND row covers the gate) and the draw is only reachable by URL.",
+  "dependsOn": "B-rewards-challenges merged first (Task.challengeId and LifeosToday.challenge come from its shared.patch to frontend/src/lib/lifeos-api.ts; without it tsc fails on these three files)",
+  "status": "applied",
+  "appliedNote": "applied at merge-S-challenges onto S-ma-fix (67a9383): the TodayPage conflict kept S-ma-fix's onFirst / onCapture props and added the settled TodayDraw mount after TodayTasks"
+}

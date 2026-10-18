@@ -1440,5 +1440,55 @@
     "atTime": "Zu einer Uhrzeit",
     "allDay": "Ganztägig",
     "textRequired": "Schreib etwas oder schließe es."
+  },
+  "challenges": {
+    "title": "Heutige Ziehung",
+    "pool": "Challenges",
+    "rule": "Einmal am Tag Pflicht: Wähle eine.",
+    "options": "Drei Optionen",
+    "reroll": "Neu ziehen",
+    "rerollsLeft": "heute noch {{count}}",
+    "noPick": "Ohne Wahl kommt sie bei jedem Öffnen wieder.",
+    "take": "Die nehme ich",
+    "state": {
+      "accepted": "angenommen",
+      "done": "erledigt"
+    },
+    "failed": "Das hat nicht geklappt. Versuch es noch einmal.",
+    "noZone": "Die tägliche Ziehung startet, sobald Tag und Zeitzone eingestellt sind.",
+    "emptyTitle": "Noch keine Challenges",
+    "emptyBody": "Die tägliche Ziehung wählt aus deinen eigenen Challenges.",
+    "poolRule": "Ein höheres Gewicht kommt öfter dran.",
+    "active": "Aktiv",
+    "archived": "Archiviert",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen",
+    "weight": "Gewicht {{count}}",
+    "category": {
+      "discipline": "Disziplin",
+      "movement": "Bewegung",
+      "mind": "Geist",
+      "connection": "Beziehungen",
+      "food": "Ernährung"
+    },
+    "new": "Neue Challenge",
+    "limit": "Du kannst höchstens {{count}} aktive Challenges haben.",
+    "deleteAsk": "Die daraus entstandenen Aufgaben bleiben erhalten.",
+    "form": {
+      "editTitle": "Challenge bearbeiten",
+      "name": "Bezeichnung",
+      "nameRequired": "Gib der Challenge einen Namen",
+      "category": "Kategorie",
+      "points": "Münzen / Erledigung",
+      "weight": "Gewicht",
+      "max": "höchstens {{count}}",
+      "create": "Erstellen"
+    },
+    "today": {
+      "title": "Tägliche Ziehung",
+      "hint": "Tippe eine an: Sie ist deine heutige Mission.",
+      "reroll": "Neu ziehen · {{count}}",
+      "picked": "Heutige Challenge · {{coins}} Münzen"
+    }
   }
 }

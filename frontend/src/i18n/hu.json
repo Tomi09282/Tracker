@@ -1440,5 +1440,55 @@
     "atTime": "Időpontban",
     "allDay": "Egész nap",
     "textRequired": "Írj be valamit, vagy zárd be."
+  },
+  "challenges": {
+    "title": "Mai dobás",
+    "pool": "Kihívások",
+    "rule": "Naponta egyszer kötelező: válassz egyet.",
+    "options": "Három lehetőség",
+    "reroll": "Újradobás",
+    "rerollsLeft": "még {{count}} maradt ma",
+    "noPick": "Választás nélkül minden megnyitáskor visszajön.",
+    "take": "Ezt vállalom",
+    "state": {
+      "accepted": "elvállalva",
+      "done": "teljesítve"
+    },
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "noZone": "A napi dobás a nap és az időzóna beállítása után indul.",
+    "emptyTitle": "Még nincs kihívásod",
+    "emptyBody": "A napi dobás a saját kihívásaid közül választ.",
+    "poolRule": "A nagyobb súly gyakrabban kerül elő.",
+    "active": "Aktív",
+    "archived": "Archivált",
+    "archive": "Archiválás",
+    "restore": "Visszaállítás",
+    "weight": "súly {{count}}",
+    "category": {
+      "discipline": "Fegyelem",
+      "movement": "Mozgás",
+      "mind": "Elme",
+      "connection": "Kapcsolat",
+      "food": "Étkezés"
+    },
+    "new": "Új kihívás",
+    "limit": "Legfeljebb {{count}} aktív kihívásod lehet.",
+    "deleteAsk": "A belőle lett teendők megmaradnak.",
+    "form": {
+      "editTitle": "Kihívás szerkesztése",
+      "name": "Megnevezés",
+      "nameRequired": "Adj nevet a kihívásnak",
+      "category": "Kategória",
+      "points": "Érme / teljesítés",
+      "weight": "Súly",
+      "max": "legfeljebb {{count}}",
+      "create": "Létrehozás"
+    },
+    "today": {
+      "title": "Napi dobás",
+      "hint": "Koppints egyre: ma ez a küldetésed.",
+      "reroll": "Újradobás · {{count}}",
+      "picked": "Mai kihívás · {{coins}} érme"
+    }
   }
 }

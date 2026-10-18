@@ -89,6 +89,7 @@ const NO_INBOUND_BY_DESIGN = new Map([
   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
+  ['/challenges', { reason: 'MAI DOBÁS is pushed from Ma: a tap on an option of NAPI DOBÁS (frame lifeos/ma-4, features/challenges/TodayDraw.tsx on TodayPage) opens /challenges?option=<id>, a link this literal scan reads as /challenges?option=:param' }],
   [
     '/m',
     {

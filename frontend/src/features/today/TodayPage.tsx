@@ -15,6 +15,7 @@ import { TodayHero } from './TodayHero';
 import { TodayNutrition } from './TodayNutrition';
 import { TodayTasks } from './TodayTasks';
 import { TodayWorkout } from './TodayWorkout';
+import { TodayDraw } from '../challenges/TodayDraw';
 import { useLifeosToday } from './useLifeosToday';
 
 /**
@@ -29,15 +30,20 @@ import { useLifeosToday } from './useLifeosToday';
  *   ScreenHeader greet         "Szia!" + the logical day ("Hétfő, október 19."), the bell
  *   LedgerLine (8 under)       coin · "190 ÉRME · SZINT 4" · the XP bar · › — the door to Érmék
  *   TodayHero                  "MA" + the giant "3/10", "Ma eddig +18 ÉRME", the day bar, the caption
+ *   TodayDraw open             NAPI DOBÁS while the day's draw is on the table (ma-4: above MAI EDZÉS)
  *   TodayWorkout               MAI EDZÉS with THE lime pill (Indítás / Folytatás)
  *   TodayHabits                SZOKÁSOK (Összes ›): tap to log
  *   TodayTasks                 FELADATOK (Rögzítés +): tap to complete, "Kész ma · 2 ›"
+ *   TodayDraw settled          NAPI DOBÁS once picked: the teaser, "elvállalva" (ma-1: after FELADATOK)
  *   TodayNutrition             TÁPLÁLKOZÁS (Megnyitás ›): Kalória, Fehérje
  *   the library row            "Gyakorlatok" with the barbell still, last (owner, 2026-10-17)
  *
- * NOT YET: NAPI DOBÁS (the daily challenge, plan phase 4), FÓKUSZ (phase 6) and KÖVETKEZŐ (the next
- * event, phase 5) have no server yet, so they are not drawn — no teaser, no placeholder (D3: never a
- * control that does nothing). ma-4's draw is therefore not reachable; its other blocks are.
+ * NAPI DOBÁS is package S-challenges' block (features/challenges/TodayDraw.tsx, plan phase 4): it is
+ * mounted twice and each mount draws only its own state, so the block moves below FELADATOK when the
+ * pick is made. The picked challenge's task is shown there, not among FELADATOK, and never counts.
+ *
+ * NOT YET: FÓKUSZ (phase 6) and KÖVETKEZŐ (the next event, phase 5) have no server yet, so they are
+ * not drawn — no teaser, no placeholder (D3: never a control that does nothing).
  *
  * ═══ DATA ══════════════════════════════════════════════════════════════════════════════════════
  *
@@ -90,6 +96,8 @@ export function TodayPage() {
         onRetry={() => void lifeos.refetch()}
       />
 
+      {day ? <TodayDraw day={day} place="open" /> : null}
+
       <TodayWorkout pointsFull={day?.workout.due ? day.workout.pointsFull : null} />
 
       {lifeos.isPending ? (
@@ -98,6 +106,7 @@ export function TodayPage() {
         <>
           <TodayHabits habits={day.habits ?? null} timeZone={timeZone} onFirst={() => setNewHabit((n) => Math.abs(n) + 1)} />
           <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} onCapture={() => setCapturing(true)} />
+          <TodayDraw day={day} place="settled" />
         </>
       ) : null}
 

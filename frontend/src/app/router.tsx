@@ -103,6 +103,12 @@ const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) =
 const HabitDetailPage = lazy(() =>
   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
 );
+const ChallengesPage = lazy(() =>
+  import('../features/challenges/ChallengesPage').then((m) => ({ default: m.ChallengesPage })),
+);
+const ChallengePoolPage = lazy(() =>
+  import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
+);
 
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
@@ -150,6 +156,8 @@ export const router = createBrowserRouter([
       { path: 'habits', element: suspended(<HabitsPage />) },
       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
       { path: 'tasks', element: suspended(<TasksPage />) },
+      { path: 'challenges', element: suspended(<ChallengesPage />) },
+      { path: 'challenges/pool', element: suspended(<ChallengePoolPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },

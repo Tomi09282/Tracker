@@ -1,0 +1,13 @@
+{
+  "id": "R-S-challenges-01",
+  "from": "S-challenges",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs, frontend/scripts/check-nav.mjs",
+  "need": "The routes /challenges (MAI DOBÁS, frame lifeos/challenges-1) and /challenges/pool (KIHÍVÁSOK, frame lifeos/challenges-2), both under the Ma tab (challenges-1 is pushed from Ma, '‹ MA'; challenges-2 from MAI DOBÁS, '‹ MAI DOBÁS'). Data lines only: the two lazy routes (ChallengesPage / ChallengePoolPage from features/challenges/), their routeMeta rows ('/challenges' -> parent '/', label nav.today = 'Ma'; '/challenges/pool' -> parent '/challenges', label challenges.title = 'Mai dobás'), '/challenges' in the Ma tab's owns (the tab stays lit under both), the two EXPECT rows of check-nav-active, and one NO_INBOUND_BY_DESIGN row in check-nav for '/challenges': its door is Ma's NAPI DOBÁS (features/challenges/TodayDraw.tsx, R-S-challenges-02), whose option rows link to /challenges?option=<id> - a template literal the scan reads as '/challenges?option=:param', not as '/challenges'. '/challenges/pool' needs no row (TodayDraw's empty-pool head links it literally).",
+  "evidence": "kepernyok-2x/lifeos/challenges-1@2x.png, challenges-2@2x.png; figma-build/lifeos/challenges-1.part.js (screenHead('push', 'Mai dobás', { parent: 'Ma' })), challenges-2.part.js (parent 'Mai dobás'); captures in .pulse/pairs/S-challenges/ with the patch applied in the slot; check-nav and check-nav-active OK in the slot",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-challenges/requests/R-S-challenges-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there). Merged WITHOUT it the pages exist but no URL opens them: merge together with this package.",
+  "status": "applied",
+  "appliedNote": "applied at merge-S-challenges (line-ending-normalized patch; applied cleanly on aba358a)"
+}
