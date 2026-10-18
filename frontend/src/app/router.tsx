@@ -98,6 +98,10 @@ const EquipmentPage = lazy(() =>
 const DaySettingsPage = lazy(() =>
   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
 );
+const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
+const HabitDetailPage = lazy(() =>
+  import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+);
 
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
@@ -142,6 +146,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: suspended(<HomePage />) },
       { path: 'notifications', element: suspended(<NotificationsPage />) },
+      { path: 'habits', element: suspended(<HabitsPage />) },
+      { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },

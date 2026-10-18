@@ -89,6 +89,7 @@ const NO_INBOUND_BY_DESIGN = new Map([
   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
+  ['/habits', { reason: 'Szokások is pushed from Ma ("Összes ›" in the SZOKÁSOK block, frame lifeos/ma-1), which package S-today builds; drop this row when that door is merged' }],
   [
     '/m',
     {

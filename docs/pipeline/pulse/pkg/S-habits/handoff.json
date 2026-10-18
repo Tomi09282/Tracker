@@ -1,0 +1,60 @@
+{
+  "package": "S-habits",
+  "branch": "pulse/S-habits",
+  "base": "290d3ec",
+  "slot": "tracker-wt/slot-12 (slot-2 held S-profile-v2 with applied hand-ins, so it was not re-used)",
+  "build": "pulse-verify --package S-habits --port 5187: build green in 13 s (all 13 gates + tsc -b + vite build), 8 of 8 captured (replay), on pulse-redesign 290d3ec with B-habits-tasks' lifeos-api.ts (its shared.patch), G-lifeos' five kit files, this package's i18n.patch.json and R-S-habits-01 applied in the working tree; the same in German (--lang de, 8 of 8). verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant.",
+  "frames": {
+    "lifeos/habits-1": {
+      "state": "habits-1",
+      "verdict": "matched-fixture by the run's cap; structure under R26 until GET /habits is recorded",
+      "why": "Header, summary (MA 1/3 · LEGHOSSZABB ÉLŐ SOROZAT 31 NAP), both sections, every row's lead / title / sub line / streak column, the footer and the archived link sit where the frame puts them (tiles .pulse/pairs/S-habits/habits-1.pair-1/2.png; the summary and the first row are identical to 2 px at 2x). The rows from Víz down sit 4 pt lower because the app draws the ×1,25 multiplier under Víz (9 days) and Dohányzás (12 days): the rules pay ×1.25 from day 7 (api.md), the frame leaves it out. Pixel share over 8: 9.5 % (status bar, the bar, the multiplier shift). No geometry JSON exists for round B (only lifeos/admin-rules.json), so the comparison is the pair picture.",
+      "capture": ".pulse/shots/S-habits/habits-1.png",
+      "pairs": [".pulse/pairs/S-habits/habits-1.pair-1.png", ".pulse/pairs/S-habits/habits-1.pair-2.png", ".pulse/pairs/S-habits/habits-1.overview.png"]
+    },
+    "lifeos/habit-detail": {
+      "state": "habit-detail",
+      "verdict": "matched-fixture by the run's cap; structure under R26 until GET /habits/:id is recorded",
+      "why": "Hero (SOROZAT, the giant 31 + NAP, ×1,5, 1 FAGYASZTÁS, Leghosszabb 45 nap), status line, the pill, the 12-week strip (same cells, same lime run, today outlined), axis, legend, ÉRME 854, the five history rows and BEÁLLÍTÁSOK land on the frame (pixel share over 8: 5.1 %). NAPOK reads 69/77 and 90 %, the frame 69/78 and 88 %: the fixture's 77 settled days (Aug 3 .. Oct 18) are what the server counts (totals.scheduled counts settled days; today has not settled).",
+      "capture": ".pulse/shots/S-habits/habit-detail.png",
+      "pairs": [".pulse/pairs/S-habits/habit-detail.pair-1.png", ".pulse/pairs/S-habits/habit-detail.pair-2.png", ".pulse/pairs/S-habits/habit-detail.overview.png"]
+    },
+    "lifeos/habit-form": {
+      "state": "habit-form",
+      "verdict": "matched-fixture by the run's cap; structure under R26",
+      "why": "The sheet over the dimmed Szokások: title, ×, Jó / Rossz szokás, Név focused on 'Angol szavak 15 perc', Ütemezés chips with Adott napok, H-P lit, the weekend hint, Napi cél / Egység, Érme / teljesítés / Levonás mulasztásért with 'legfeljebb 50', Emlékeztető ideje + hint, Létrehozás - every line within 1-2 px at 2x (share 5.6 %). The reminder field is empty in the capture (07:30 in the frame): it is the native time input of the kit TimeTrigger and the capture tool cannot type into its segments.",
+      "capture": ".pulse/shots/S-habits/habit-form.png",
+      "pairs": [".pulse/pairs/S-habits/habit-form.pair-1.png", ".pulse/pairs/S-habits/habit-form.overview.png"]
+    }
+  },
+  "extraStates": {
+    "habits-empty": { "note": "no habit yet: lifeos/ma-3's empty state (MÉG NINCS SZOKÁSOD, 'Kezdj eggyel, például a vízzel.', '+ Első szokás' opens the sheet); no pill", "picture": ".pulse/pairs/S-habits/app-habits-empty.png" },
+    "habits-failed": { "note": "GET /habits 500: the header and the danger NoticeLine with Újra", "picture": ".pulse/pairs/S-habits/app-habits-failed.png" },
+    "habits-archived": { "note": "'Archivált szokások · 2' opens the archived habits in place, dimmed (title text-2, lead at 40 %, no tap); each opens its page where 'Visszaállítás' restores it", "picture": ".pulse/pairs/S-habits/app-habits-archived.png" },
+    "habit-detail-bad": { "note": "a bad habit relapsed today: hero 0 NAP (pending), 'Ma 1 visszaesés · −10 érme', no pill, 'Visszaestem' (danger, behind a ConfirmSheet with f_app's copy) and 'Visszavonás' (one relapse back), no Ütemezés / Emlékeztető rows", "picture": ".pulse/pairs/S-habits/app-habit-detail-bad.png" },
+    "habit-edit": { "note": "a BEÁLLÍTÁSOK row opens the same sheet in edit mode: 'Szokás szerkesztése', no kind switch, the habit's values, 'Mentés'", "picture": ".pulse/pairs/S-habits/app-habit-edit.png" }
+  },
+  "variants": "hu (8/8) and de (8/8, contact .pulse/pairs/S-habits/contact-de.png): no clipping, every German string fits.",
+  "probes": "boxed: the kit setCheck ring (CheckMark, to-do state) is counted as a bordered surface (2 per list) - the kit's own drawing, not this package's; targets: the pushed header's back link '‹ MA' is 36.6 pt wide (the kit BackControl has a 44 pt height floor but no width floor; 'MA' is the shortest parent label in the app) and the G-lifeos WeekdayChips are 26-36 pt wide (chipRow words); pill (habit-edit only): the edit sheet's 'Mentés' and the page's 'Kész mára' under the scrim are both lime while the sheet is open.",
+  "ledger": "pulse-ledger S-habits: empty - nothing counted was lost",
+  "fixtureCheck": "pulse-fixture-check S-habits: 10 problems = the 10 contract bodies of GET /habits and GET /habits/:id (expected, R26: the dev backend has no migration 032 / habit routes yet) - to be turned into edit lists once the integrator records GET /habits and GET /habits/3 for a seeded account",
+  "liveSmoke": "not run: http://localhost:3000/api/v1/habits answers 404 (B-habits-tasks is not merged / the dev backend was not restarted for 032). No live write was made.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-habits/work-package.json (add to work-packages.json screens; the slot carries it in its working tree only)",
+    "docs/pipeline/pulse/pkg/S-habits/i18n.patch.json (87 habits.* keys, hu / en / de)",
+    "docs/pipeline/pulse/pkg/S-habits/requests/R-S-habits-01.json + .patch (routes /habits and /habits/:id, routeMeta rows, home tab owns '/habits', check-nav-active EXPECT rows, check-nav NO_INBOUND row for /habits until S-today's 'Összes ›', verify-gates probe re-anchor) - blocking, applies on pulse-redesign 290d3ec"
+  ],
+  "dependsOn": "merge B-habits-tasks (its shared.patch: the Phase-3 block of frontend/src/lib/lifeos-api.ts) and G-lifeos (ui/primitives/WeekdayChips.tsx, TimeTrigger.tsx, weekdays.ts) first: this package imports both",
+  "deviations": [
+    "DEV-a: the tab bar has 5 tabs with 'Kezdőlap'; the frames draw round B's 6-tab user bar (Ma ... Naptár). The bar is INT / P1-nav's and changes when Ma (S-today) and Naptár (Phase 5) land. Under /habits the home tab is lit (owns '/habits').",
+    "DEV-b: the ×1,25 multiplier is drawn under Víz (9 days) and Dohányzás (12 days); the frame omits it although the rules pay ×1.25 from day 7 (api.md) - the app draws what the server sends.",
+    "DEV-c: habit-detail NAPOK 69/77 · 90 % vs the frame's 69/78 · 88 %: the server counts settled days only (today is not settled).",
+    "DEV-d: undrawn behaviour in the same language, from the kit: a done day on the detail page (status 'Kész · 07:40', 'Visszavonás' sets the count to 0), a counted habit part-way ('5/8 pohár'; the pill fills it to the target), a bad habit (no pill; 'Visszaestem' in danger with a ConfirmSheet, 'Visszavonás' takes one relapse back), an archived habit ('Visszaállítás' instead of 'Archiválás'), a habit not due today (no pill; the lead is 40 % and inert on the list), the archived list opened in place, edit mode of the sheet, 'Heti N×' with the kit NumberStepper, a bad habit's sheet (name, coins, f_app's explanation line), loading skeletons, failed reads / writes (danger NoticeLine / toast / the sheet's danger dot + Újra), a missing or foreign habit (404 -> the danger line with a link back to Szokások, no 'not found' copy invented).",
+    "DEV-e: the list's lead is the day's tap (f_app: +1, back to 0 from full; a plain habit toggles); everything else in the row opens the habit. A relapse is recorded only on the habit's page, behind a confirmation, because it costs coins.",
+    "DEV-f: skip (POST /habits/:id/skip) has no control: f_app does not expose one and the frames draw none; a skipped day is shown ('Kihagyva') and logging a count undoes it.",
+    "DEV-g: the coin defaults in the sheet are api.md's defaults (good 10 / bad 15, 5 per miss) and what is shown is what is sent; the client cannot read the admin rules in force.",
+    "DEV-h: doneAt times are formatted in the device's zone, not the user's LifeOS zone (the same for nearly everyone; /me/prefs is not read by these pages)."
+  ],
+  "proposedCopy": "22 proposed strings (screen-reader sentences, f_app strings adapted to one currency: Szokás szerkesztése, Típus, Adj nevet a szokásnak, Válassz legalább egy napot, Hányszor egy héten? + hint, Legalább 1, Érme / tiszta nap, Levonás alapja, the bad-habit explanation, Archiválod? + message, Visszaestem + confirmation, Tiszta, Mulasztás, Kihagyva) -> copy-to-approve.md; 63 from the frames (inventory), 2 existing sentences",
+  "status": "handoff"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "R-S-habits-01",
+  "from": "S-habits",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs, frontend/scripts/check-nav.mjs, frontend/scripts/verify-gates.mjs",
+  "need": "The routes /habits (Szokások, frame lifeos/habits-1) and /habits/:id (one habit, frame lifeos/habit-detail), both owned by the Ma tab (plan F.3: 'habits/' under Ma; README-ma: habits-1 is pushed from Ma, '‹ MA'). Five data lines: the two lazy routes (HabitsPage / HabitDetailPage exported from features/habits/), their routeMeta rows ('/habits' -> parent '/', label habits.today = 'Ma'; '/habits/:id' -> parent '/habits', label habits.title = 'Szokások'), '/habits' in the home tab's owns (the Ma tab stays lit under /habits and /habits/:id; the home tab is end-matched), the two EXPECT rows of check-nav-active, and one NO_INBOUND_BY_DESIGN row in check-nav for '/habits' until S-today's Ma page merges its 'Összes ›' door (then the row is dropped). The probe nav-active \"Értesítések without its Kezdőlap tab\" anchored on the closing bracket after '/notifications'; with '/habits' after it the anchor is gone, so the probe is re-anchored on '/onboarding', '/notifications' (same mutation, same expectation; verify:gates 78 passed in the slot).",
+  "evidence": "kepernyok-2x/lifeos/habits-1@2x.png, habit-detail@2x.png; figma-build/lifeos/habits-1.part.js (screenHead('push', 'Szokások', { parent: 'Ma' })), habit-detail.part.js (parent 'Szokások'); captures in .pulse/pairs/S-habits/ with the patch applied in the slot",
+  "proposedApi": "{ path: 'habits', element: suspended(<HabitsPage />) }, { path: 'habits/:id', element: suspended(<HabitDetailPage />) } + ROUTE_META['/habits'] = { parent: '/', parentLabelKey: 'habits.today' }, ROUTE_META['/habits/:id'] = { parent: '/habits', parentLabelKey: 'habits.title' } + home tab owns '/habits'",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-habits/requests/R-S-habits-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there), so the pages are built and captured. Merged WITHOUT it the pages exist but no URL opens them: merge together with this package. If S-today renames the home tab's label to 'Ma' (nav.today), habits.today can be replaced by that key.",
+  "status": "open"
+}

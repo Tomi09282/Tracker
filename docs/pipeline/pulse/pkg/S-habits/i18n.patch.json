@@ -1,0 +1,792 @@
+{
+  "package": "S-habits",
+  "base": "290d3ec",
+  "namespaces": [
+    "habits"
+  ],
+  "set": [
+    {
+      "key": "habits.title",
+      "hu": "Szokások",
+      "en": "Habits",
+      "de": "Gewohnheiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 title; habit-detail back link \"‹ SZOKÁSOK\""
+    },
+    {
+      "key": "habits.today",
+      "hu": "Ma",
+      "en": "Today",
+      "de": "Heute",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 back link \"‹ MA\" (routeMeta parent label) and the summary eyebrow \"MA\""
+    },
+    {
+      "key": "habits.todaySr",
+      "hu": "Ma {{done}} kész a(z) {{count}} szokásból",
+      "en": "{{done}} of {{count}} habits done today",
+      "de": "Heute {{done}} von {{count}} Gewohnheiten erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "screen-reader name of the summary figure \"1/3\" (lifeos/habits-1)"
+    },
+    {
+      "key": "habits.longestLive",
+      "hu": "Leghosszabb élő sorozat",
+      "en": "Longest live streak",
+      "de": "Längste laufende Serie",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 summary eyebrow"
+    },
+    {
+      "key": "habits.good",
+      "hu": "Jó szokások",
+      "en": "Good habits",
+      "de": "Gute Gewohnheiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 section eyebrow"
+    },
+    {
+      "key": "habits.bad",
+      "hu": "Rossz szokások",
+      "en": "Bad habits",
+      "de": "Schlechte Gewohnheiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 section eyebrow"
+    },
+    {
+      "key": "habits.new",
+      "hu": "Új szokás",
+      "en": "New habit",
+      "de": "Neue Gewohnheit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 section link \"Új szokás +\"; lifeos/habit-form sheet title"
+    },
+    {
+      "key": "habits.unitDay",
+      "hu": "nap",
+      "en": "days",
+      "de": "Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 / lifeos/habit-detail streak unit \"NAP\" (micro / eyebrow, upper case by the role)"
+    },
+    {
+      "key": "habits.unitWeek",
+      "hu": "hét",
+      "en": "weeks",
+      "de": "Wochen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 times-per-week streak unit \"4 HÉT\""
+    },
+    {
+      "key": "habits.freezes",
+      "hu": "{{count}} fagyasztás",
+      "en": "Freezes: {{count}}",
+      "de": "Serienschutz: {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 / lifeos/habit-detail \"1 FAGYASZTÁS\""
+    },
+    {
+      "key": "habits.scheduleDaily",
+      "hu": "Naponta",
+      "en": "Daily",
+      "de": "Täglich",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 sub line \"Naponta · …\"; lifeos/habit-form schedule chip; lifeos/habit-detail Ütemezés value"
+    },
+    {
+      "key": "habits.perWeek",
+      "hu": "Heti {{count}}×",
+      "en": "{{count}}× a week",
+      "de": "{{count}}× pro Woche",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 Futás \"Heti 3× · …\""
+    },
+    {
+      "key": "habits.doneAt",
+      "hu": "kész {{time}}",
+      "en": "done {{time}}",
+      "de": "erledigt {{time}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 \"Naponta · kész 07:40\""
+    },
+    {
+      "key": "habits.reminderAt",
+      "hu": "emlékeztető {{time}}",
+      "en": "reminder {{time}}",
+      "de": "Erinnerung {{time}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 \"Naponta · emlékeztető 21:30\"; lifeos/habit-detail status line"
+    },
+    {
+      "key": "habits.weekDone",
+      "hu": "{{done}}/{{target}} ezen a héten",
+      "en": "{{done}}/{{target}} this week",
+      "de": "{{done}}/{{target}} diese Woche",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 \"0/3 ezen a héten\""
+    },
+    {
+      "key": "habits.cleanFor",
+      "hu": "{{count}} napja tiszta",
+      "en": "Clean for {{count}} days",
+      "de": "Seit {{count}} Tagen clean",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 Dohányzás \"12 napja tiszta\" (f_app \"napja tiszta\")"
+    },
+    {
+      "key": "habits.relapseToday",
+      "hu": "Ma {{count}} visszaesés · {{coins}} érme",
+      "en": "{{count}} relapse today · {{coins}} coins",
+      "de": "Heute {{count}} Rückfall · {{coins}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 Esti nassolás \"Ma 1 visszaesés · −10 érme\""
+    },
+    {
+      "key": "habits.skipped",
+      "hu": "Kihagyva",
+      "en": "Skipped",
+      "de": "Ausgelassen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a good habit skipped today (f_app \"kihagyva\"; lifeos/habit-detail legend \"kihagyva\")"
+    },
+    {
+      "key": "habits.freezeRule",
+      "hu": "{{every}} nap sorozat = 1 fagyasztás, legfeljebb {{max}}",
+      "en": "{{every}}-day streak = 1 freeze, at most {{max}}",
+      "de": "{{every}} Tage Serie = 1 Serienschutz, höchstens {{max}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 footer line (figures from GET /habits rules)"
+    },
+    {
+      "key": "habits.archivedCount",
+      "hu": "Archivált szokások · {{count}}",
+      "en": "Archived habits · {{count}}",
+      "de": "Archivierte Gewohnheiten · {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habits-1 footer link \"Archivált szokások · 2 ›\""
+    },
+    {
+      "key": "habits.emptyTitle",
+      "hu": "Még nincs szokásod",
+      "en": "No habits yet",
+      "de": "Noch keine Gewohnheiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-3 SZOKÁSOK empty state \"MÉG NINCS SZOKÁSOD\" (f_app \"Még nincs szokásod\")"
+    },
+    {
+      "key": "habits.emptyBody",
+      "hu": "Kezdj eggyel, például a vízzel.",
+      "en": "Start with one, water for example.",
+      "de": "Fang mit einer an, zum Beispiel Wasser.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-3 SZOKÁSOK empty state line"
+    },
+    {
+      "key": "habits.first",
+      "hu": "Első szokás",
+      "en": "First habit",
+      "de": "Erste Gewohnheit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-3 SZOKÁSOK empty state action \"+ Első szokás\""
+    },
+    {
+      "key": "habits.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That did not work. Please try again.",
+      "de": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "copy": "existing-literal",
+      "visible": true,
+      "source": "failed read / write (the sentence is already in hu.json: settings / plans)"
+    },
+    {
+      "key": "habits.detail.streak",
+      "hu": "Sorozat",
+      "en": "Streak",
+      "de": "Serie",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail hero eyebrow \"SOROZAT\""
+    },
+    {
+      "key": "habits.detail.best",
+      "hu": "Leghosszabb {{count}} nap",
+      "en": "Longest {{count}} days",
+      "de": "Längste {{count}} Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail \"Leghosszabb 45 nap\""
+    },
+    {
+      "key": "habits.detail.notYet",
+      "hu": "Ma még nincs kész",
+      "en": "Not done yet today",
+      "de": "Heute noch nicht erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail status line"
+    },
+    {
+      "key": "habits.detail.doneAt",
+      "hu": "Kész · {{time}}",
+      "en": "Done · {{time}}",
+      "de": "Erledigt · {{time}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail history sub \"Kész · 21:40\" (used for today once done)"
+    },
+    {
+      "key": "habits.detail.coins",
+      "hu": "{{coins}} érme",
+      "en": "{{coins}} coins",
+      "de": "{{coins}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail status line \"+15 érme\""
+    },
+    {
+      "key": "habits.detail.doneToday",
+      "hu": "Kész mára",
+      "en": "Done for today",
+      "de": "Für heute erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail the pill"
+    },
+    {
+      "key": "habits.detail.relapse",
+      "hu": "Visszaestem",
+      "en": "I relapsed",
+      "de": "Rückfall",
+      "copy": "proposed",
+      "visible": true,
+      "source": "bad-habit action (f_app HabitRow \"Visszaestem\"); not drawn in round B"
+    },
+    {
+      "key": "habits.detail.relapseBody",
+      "hu": "Rögzítsem a visszaesést? Ez érmelevonással jár, és nullázza a sorozatot.",
+      "en": "Record the relapse? It costs coins and resets the streak.",
+      "de": "Rückfall eintragen? Das kostet Münzen und setzt die Serie zurück.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "relapse confirmation (f_app HabitRow, \"pontlevonással\" -> \"érmelevonással\": one currency)"
+    },
+    {
+      "key": "habits.detail.relapseYes",
+      "hu": "Igen, visszaestem",
+      "en": "Yes, I relapsed",
+      "de": "Ja, Rückfall",
+      "copy": "proposed",
+      "visible": true,
+      "source": "relapse confirmation button (f_app HabitRow)"
+    },
+    {
+      "key": "habits.detail.weeks",
+      "hu": "Elmúlt 12 hét",
+      "en": "Last 12 weeks",
+      "de": "Letzte 12 Wochen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail section eyebrow"
+    },
+    {
+      "key": "habits.detail.thisWeek",
+      "hu": "ez a hét",
+      "en": "this week",
+      "de": "diese Woche",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail strip axis \"EZ A HÉT\""
+    },
+    {
+      "key": "habits.detail.keyStreak",
+      "hu": "sorozat",
+      "en": "streak",
+      "de": "Serie",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail legend"
+    },
+    {
+      "key": "habits.detail.keyDone",
+      "hu": "kész",
+      "en": "done",
+      "de": "erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail legend"
+    },
+    {
+      "key": "habits.detail.keyMissed",
+      "hu": "kihagyva",
+      "en": "missed",
+      "de": "verpasst",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail legend"
+    },
+    {
+      "key": "habits.detail.keyToday",
+      "hu": "ma",
+      "en": "today",
+      "de": "heute",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail legend"
+    },
+    {
+      "key": "habits.detail.stripSr",
+      "hu": "Elmúlt 12 hét: {{done}} kész a(z) {{count}} napból",
+      "en": "Last 12 weeks: {{done}} of {{count}} days done",
+      "de": "Letzte 12 Wochen: {{done}} von {{count}} Tagen erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "screen-reader name of the 12-week strip (lifeos/habit-detail)"
+    },
+    {
+      "key": "habits.detail.coinsLabel",
+      "hu": "Érme",
+      "en": "Coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail ledger label \"ÉRME\" and settings row \"Érme\""
+    },
+    {
+      "key": "habits.detail.coinsNote",
+      "hu": "összesen, 12 hét",
+      "en": "total, 12 weeks",
+      "de": "gesamt, 12 Wochen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail ledger note"
+    },
+    {
+      "key": "habits.detail.coinsSr",
+      "hu": "{{coins}} érme a 12 hét alatt",
+      "en": "{{coins}} coins in 12 weeks",
+      "de": "{{coins}} Münzen in 12 Wochen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "screen-reader text of the ÉRME figure"
+    },
+    {
+      "key": "habits.detail.daysLabel",
+      "hu": "Napok",
+      "en": "Days",
+      "de": "Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail ledger label \"NAPOK\""
+    },
+    {
+      "key": "habits.detail.daysNote",
+      "hu": "kész · 12 hét",
+      "en": "done · 12 weeks",
+      "de": "erledigt · 12 Wochen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail ledger note"
+    },
+    {
+      "key": "habits.detail.daysSr",
+      "hu": "{{done}} kész a(z) {{count}} napból",
+      "en": "{{done}} of {{count}} days done",
+      "de": "{{done}} von {{count}} Tagen erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "screen-reader text of the NAPOK figure \"69/78\""
+    },
+    {
+      "key": "habits.detail.history",
+      "hu": "Előzmények",
+      "en": "History",
+      "de": "Verlauf",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail section eyebrow"
+    },
+    {
+      "key": "habits.detail.milestone",
+      "hu": "{{count}} napos bónusz",
+      "en": "{{count}}-day bonus",
+      "de": "{{count}}-Tage-Bonus",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail \"30 napos bónusz\""
+    },
+    {
+      "key": "habits.detail.freezeEarned",
+      "hu": "+1 fagyasztás",
+      "en": "+1 freeze",
+      "de": "+1 Serienschutz",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail \"+1 fagyasztás\""
+    },
+    {
+      "key": "habits.detail.settings",
+      "hu": "Beállítások",
+      "en": "Settings",
+      "de": "Einstellungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail section eyebrow"
+    },
+    {
+      "key": "habits.detail.reminder",
+      "hu": "Emlékeztető",
+      "en": "Reminder",
+      "de": "Erinnerung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail settings row"
+    },
+    {
+      "key": "habits.detail.archive",
+      "hu": "Archiválás",
+      "en": "Archive",
+      "de": "Archivieren",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail settings row (danger); the confirmation button (f_app)"
+    },
+    {
+      "key": "habits.detail.archiveTitle",
+      "hu": "Archiválod?",
+      "en": "Archive it?",
+      "de": "Archivieren?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "archive confirmation title (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.detail.archiveBody",
+      "hu": "A szokás eltűnik a napi listából, a történet megmarad.",
+      "en": "The habit leaves the daily list; its history stays.",
+      "de": "Die Gewohnheit verschwindet aus der Tagesliste, der Verlauf bleibt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "archive confirmation message (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.detail.restore",
+      "hu": "Visszaállítás",
+      "en": "Restore",
+      "de": "Wiederherstellen",
+      "copy": "existing-literal",
+      "visible": true,
+      "source": "an archived habit: POST /habits/:id/restore (hu.json already has \"Visszaállítás\")"
+    },
+    {
+      "key": "habits.outcome.done",
+      "hu": "Kész",
+      "en": "Done",
+      "de": "Erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-detail history \"Kész · …\""
+    },
+    {
+      "key": "habits.outcome.clean",
+      "hu": "Tiszta",
+      "en": "Clean",
+      "de": "Clean",
+      "copy": "proposed",
+      "visible": true,
+      "source": "bad habit clean day in the history (f_app \"napja tiszta\")"
+    },
+    {
+      "key": "habits.outcome.relapse",
+      "hu": "Visszaesés",
+      "en": "Relapse",
+      "de": "Rückfall",
+      "copy": "inventory",
+      "visible": true,
+      "source": "bad habit relapse day in the history (lifeos/habits-1 \"visszaesés\")"
+    },
+    {
+      "key": "habits.outcome.missed",
+      "hu": "Mulasztás",
+      "en": "Missed",
+      "de": "Verpasst",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a missed day in the history (f_app \"Levonás mulasztásért\")"
+    },
+    {
+      "key": "habits.outcome.skipped",
+      "hu": "Kihagyva",
+      "en": "Skipped",
+      "de": "Ausgelassen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "a skipped day in the history (lifeos/habit-detail legend \"kihagyva\")"
+    },
+    {
+      "key": "habits.outcome.frozen",
+      "hu": "Kihagyva · a fagyasztás megvédte a sorozatot",
+      "en": "Missed · a freeze kept the streak",
+      "de": "Verpasst · der Serienschutz hat die Serie gerettet",
+      "copy": "inventory",
+      "visible": true,
+      "source": "a frozen day in the history (README-ma \"Copy not from f_app\" list)"
+    },
+    {
+      "key": "habits.form.editTitle",
+      "hu": "Szokás szerkesztése",
+      "en": "Edit habit",
+      "de": "Gewohnheit bearbeiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "edit sheet title (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.form.kind",
+      "hu": "Típus",
+      "en": "Type",
+      "de": "Art",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the kind switch accessible name (f_app \"Típus\")"
+    },
+    {
+      "key": "habits.form.kindGood",
+      "hu": "Jó szokás",
+      "en": "Good habit",
+      "de": "Gute Gewohnheit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form switch"
+    },
+    {
+      "key": "habits.form.kindBad",
+      "hu": "Rossz szokás",
+      "en": "Bad habit",
+      "de": "Schlechte Gewohnheit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form switch"
+    },
+    {
+      "key": "habits.form.name",
+      "hu": "Név",
+      "en": "Name",
+      "de": "Name",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.nameRequired",
+      "hu": "Adj nevet a szokásnak",
+      "en": "Give the habit a name",
+      "de": "Gib der Gewohnheit einen Namen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "name validation (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.form.schedule",
+      "hu": "Ütemezés",
+      "en": "Schedule",
+      "de": "Zeitplan",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form group label; lifeos/habit-detail settings row"
+    },
+    {
+      "key": "habits.form.weekdays",
+      "hu": "Adott napok",
+      "en": "Set days",
+      "de": "Bestimmte Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form schedule chip"
+    },
+    {
+      "key": "habits.form.timesPerWeek",
+      "hu": "Heti N×",
+      "en": "N× a week",
+      "de": "N× pro Woche",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form schedule chip"
+    },
+    {
+      "key": "habits.form.perWeek",
+      "hu": "Hányszor egy héten?",
+      "en": "How many times a week?",
+      "de": "Wie oft pro Woche?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "times-per-week stepper (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.form.perWeekHint",
+      "hu": "Vasárnap zárásnál ellenőrizzük. Napi kihagyásért nincs levonás.",
+      "en": "Checked when Sunday closes. No deduction for a skipped day.",
+      "de": "Wird beim Abschluss am Sonntag geprüft. Kein Abzug für einen ausgelassenen Tag.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "times-per-week hint (f_app, \"esti\" dropped: the settle is start(D+1) + 6 h, README-ma fix round 1)"
+    },
+    {
+      "key": "habits.form.weekendHint",
+      "hu": "Hétvégén nem számít, és nem is von le.",
+      "en": "Weekends do not count and cost nothing.",
+      "de": "Am Wochenende zählt es nicht und kostet nichts.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form schedule hint (shown for Monday..Friday)"
+    },
+    {
+      "key": "habits.form.pickDay",
+      "hu": "Válassz legalább egy napot",
+      "en": "Choose at least one day",
+      "de": "Wähle mindestens einen Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday validation (f_app app/habit/[id].tsx)"
+    },
+    {
+      "key": "habits.form.target",
+      "hu": "Napi cél",
+      "en": "Daily target",
+      "de": "Tagesziel",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.unit",
+      "hu": "Egység",
+      "en": "Unit",
+      "de": "Einheit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.unitPlaceholder",
+      "hu": "pl. pohár",
+      "en": "e.g. glass",
+      "de": "z. B. Glas",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form placeholder"
+    },
+    {
+      "key": "habits.form.success",
+      "hu": "Érme / teljesítés",
+      "en": "Coins / completion",
+      "de": "Münzen / Erledigung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.successBad",
+      "hu": "Érme / tiszta nap",
+      "en": "Coins / clean day",
+      "de": "Münzen / cleaner Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "bad habit coins label (f_app \"Pont / tiszta nap\", Pont -> Érme as README-ma did for the good habit)"
+    },
+    {
+      "key": "habits.form.penalty",
+      "hu": "Levonás mulasztásért",
+      "en": "Deduction per miss",
+      "de": "Abzug pro Versäumnis",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.penaltyBad",
+      "hu": "Levonás alapja",
+      "en": "Deduction base",
+      "de": "Abzugsbasis",
+      "copy": "proposed",
+      "visible": true,
+      "source": "bad habit penalty label (f_app)"
+    },
+    {
+      "key": "habits.form.max",
+      "hu": "legfeljebb {{count}}",
+      "en": "at most {{count}}",
+      "de": "höchstens {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form hint \"legfeljebb 50\"; also the range error"
+    },
+    {
+      "key": "habits.form.min",
+      "hu": "Legalább 1",
+      "en": "At least 1",
+      "de": "Mindestens 1",
+      "copy": "proposed",
+      "visible": true,
+      "source": "daily target validation (f_app \"Legalább 1\")"
+    },
+    {
+      "key": "habits.form.reminder",
+      "hu": "Emlékeztető ideje",
+      "en": "Reminder time",
+      "de": "Erinnerungszeit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form field label"
+    },
+    {
+      "key": "habits.form.reminderHint",
+      "hu": "Csak az ütemezett napokon, és csak amíg nincs kipipálva.",
+      "en": "Only on scheduled days, and only until it is ticked.",
+      "de": "Nur an geplanten Tagen und nur, bis es abgehakt ist.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form hint"
+    },
+    {
+      "key": "habits.form.badExplain",
+      "hu": "A rossz szokás minden nap számít. Ha nem esel vissza, a napzárásnál jár az érme. Visszaesésnél kétszeres levonás, és nullázódik a sorozat.",
+      "en": "A bad habit counts every day. If you do not relapse, the day close pays the coins. A relapse costs double and resets the streak.",
+      "de": "Eine schlechte Gewohnheit zählt jeden Tag. Ohne Rückfall gibt es beim Tagesabschluss die Münzen. Ein Rückfall kostet doppelt und setzt die Serie zurück.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "bad habit explanation (f_app app/habit/[id].tsx, \"pont\" -> \"érme\")"
+    },
+    {
+      "key": "habits.form.create",
+      "hu": "Létrehozás",
+      "en": "Create",
+      "de": "Erstellen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/habit-form the pill"
+    }
+  ]
+}

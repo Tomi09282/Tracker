@@ -318,7 +318,7 @@ const PROBES = [
     gate: 'check:nav-active',
     label: 'Értesítések without its Kezdőlap tab is caught',
     file: NAV_TABS,
-    mutate: swap(/(owns:\s*\['\/onboarding'),\s*'\/notifications'\s*\]/, '$1]'),
+    mutate: swap(/(owns:\s*\['\/onboarding'),\s*'\/notifications'/, '$1'),
     expect: /user view on \/notifications lights exactly one tab/,
   },
   {
