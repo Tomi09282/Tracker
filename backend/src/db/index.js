@@ -4,8 +4,24 @@
 import { availableParallelism } from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import v8 from 'node:v8';
 import Piscina from 'piscina';
 import { env } from '../lib/env.js';
+
+/*
+ * ═══ A V8 FLAG, SET BEFORE THE FIRST WORKER EXISTS ════════════════════════════════════════════
+ *
+ * Measured on Node 24.16 / Windows while adding the LifeOS modules to the worker (package B-core):
+ * `pool.destroy()` SEGFAULTED the process (exit 139) every time a worker that had opened the
+ * database and held a large heap (the migration runner's ~1 MB of SQL) was terminated —
+ * `npm run migrate` printed its result and then crashed. Bisected: not the open connection
+ * (closing it first changed nothing), not any one import, not a GC in flight (waiting 2 s changed
+ * nothing). `--single-threaded-gc` and `--no-parallel-scavenge` each make it disappear; the young-
+ * generation scavenger's helper tasks race the isolate teardown of a terminated worker. Only the
+ * latter can be set at run time, and it costs nothing measurable at this heap size. It must run
+ * before the pool below creates its threads.
+ */
+v8.setFlagsFromString('--no-parallel-scavenge');
 
 // Single-process default: leave one core for the event loop, but never fewer than 2 workers or
 // one slow query starves everything. Under cluster.js set DB_POOL_THREADS=2 per process so the
@@ -119,6 +135,20 @@ export const setClientEquipment = (args) => pool.run(args, { name: 'setClientEqu
 // stitched together, and a legal artefact cannot be internally inconsistent.
 export const exportMyData = (args) => pool.run(args, { name: 'exportMyDataQuery' });
 export const deleteMyAccount = (args) => pool.run(args, { name: 'deleteMyAccountTx' });
+
+// LifeOS core (migration 031). The transactions live in ./tx/lifeos.js and are re-exported by
+// worker.js under these exact names — check-route-tx proves every name below resolves. Every coin
+// movement inside them goes through ONE postCoinEvent (cap -> event -> ledger).
+export const lifeosSettleState = (args) => pool.run(args, { name: 'lifeosSettleStateQuery' });
+export const lifeosToday = (args) => pool.run(args, { name: 'lifeosTodayQuery' });
+export const userPrefs = (args) => pool.run(args, { name: 'userPrefsQuery' });
+export const wallet = (args) => pool.run(args, { name: 'walletQuery' });
+export const pointRules = (args) => pool.run(args, { name: 'pointRulesQuery' });
+export const setUserPrefs = (args) => pool.run(args, { name: 'setUserPrefsTx' });
+export const setPointRules = (args) => pool.run(args, { name: 'setPointRulesTx' });
+export const closeLifeDay = (args) => pool.run(args, { name: 'closeLifeDayTx' });
+export const markLapsedDays = (args) => pool.run(args, { name: 'markLapsedDaysTx' });
+export const awardWorkout = (args) => pool.run(args, { name: 'awardWorkoutTx' });
 
 export const closePool = () => pool.destroy();
 

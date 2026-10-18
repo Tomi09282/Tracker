@@ -39,6 +39,7 @@ import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { assertAdmin } from '../lib/assert-admin.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
+import { ensureSettled } from '../lifeos/settle.js';
 
 const router = Router();
 
@@ -151,21 +152,25 @@ const adminLedgerQuery = z
 /* ── the wallet ─────────────────────────────────────────────────────────────────────────────── */
 
 /**
- * The balance.
+ * The balance — and, since 031, the rest of the Érmék screen's header.
  *
  * Scoped to the caller by construction: there is no wallet id in this product, so the query has
  * nothing to accept and nothing to check. A row always exists — `trg_user_opens_wallet` sees to
  * that — so a missing wallet is a bug, not a state, and 0 is the honest answer either way.
+ *
+ * THE BALANCE MAY BE BELOW ZERO (plan L3: LifeOS penalties and reversals are not capped at zero;
+ * spends are). `spendableMinor` = max(0, balance) is what a purchase can use. XP is the sum of the
+ * XP-earning LifeOS events, the level floor(sqrt(xp / 100)); `bounds` are the current level's
+ * floor and the next level's threshold, in XP. The due days settle FIRST (plan L6), so the number
+ * includes yesterday once yesterday has closed.
  */
 router.get(
   '/coins/wallet',
   requireAuth,
   readLimiter,
   asyncRoute(async (req, res) => {
-    const wallet = await db.get('SELECT balance_minor FROM coin_wallets WHERE user_id = ?', [
-      req.user.id,
-    ]);
-    res.json({ balanceMinor: wallet?.balance_minor ?? 0 });
+    await ensureSettled(req.user.id, { requestId: res.locals.requestId, log: req.log });
+    res.json(await db.wallet({ userId: req.user.id }));
   }),
 );
 
@@ -188,12 +193,24 @@ router.get(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { cursor, limit = 25 } = parsed.data;
 
+    // A LifeOS movement (ref_type 'coin_event', migration 031) carries what paid for it: the
+    // logical day, the source and — where the source has one — its title, read through the SAME
+    // owner as the ledger row (anti-IDOR: a source id never reaches another account's row).
     const entries = await db.all(
       `SELECT l.id, l.amount_minor AS amountMinor, l.reason_key AS reasonKey,
               l.ref_type AS refType, l.ref_id AS refId, l.note, l.created_at AS createdAt,
-              r.label AS reasonLabel
+              r.label AS reasonLabel,
+              e.local_date AS localDate, e.source_type AS sourceType, e.source_id AS sourceId,
+              e.reverses_event_id AS reversesEventId,
+              CASE e.source_type
+                WHEN 'workout_log' THEN (SELECT COALESCE(w.title, w.day_name_snapshot, w.plan_name_snapshot)
+                                           FROM workout_logs w
+                                          WHERE w.id = e.source_id AND w.client_user_id = l.user_id)
+              END AS sourceTitle
          FROM coin_ledger l
          JOIN coin_reasons r ON r.key = l.reason_key
+         LEFT JOIN coin_events e
+                ON l.ref_type = 'coin_event' AND e.id = l.ref_id AND e.user_id = l.user_id
         WHERE l.user_id = ? AND (? IS NULL OR l.id < ?)
         ORDER BY l.id DESC
         LIMIT ?`,

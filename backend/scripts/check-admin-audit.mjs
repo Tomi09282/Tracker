@@ -30,10 +30,9 @@
 // Run: node scripts/check-admin-audit.mjs
 import fs from 'node:fs';
 import { parseRoutes, blankComments } from './lib/parse-routes.mjs';
+import { WORKER, FACADE, workerSources, facadeToTx as readFacade } from './lib/worker-sources.mjs';
 
 const ROOT = 'src';
-const WORKER = 'src/db/worker.js';
-const FACADE = 'src/db/index.js';
 
 /**
  * Admin writes that legitimately record nothing.
@@ -55,16 +54,15 @@ for (const s of suspects) {
 
 /* ── the delegation map: which facade call runs which transaction ────────────────────────────── */
 
-const facadeSrc = fs.readFileSync(FACADE, 'utf8');
-const workerSrc = fs.readFileSync(WORKER, 'utf8');
+// worker.js AND every src/db/tx/*.js (package B0): a transaction that moved into a tx file is still
+// a transaction this gate must read, or its route reads as "delegates to something unaudited".
+// The file list and the facade map come from the helper the other worker gates share.
+const workerFiles = workerSources();
 
 // `export const setUserRole = (args) => pool.run(args, { name: 'setUserRoleTx' });`
 // Read from the facade rather than assuming the name is the facade name plus "Tx" — the assumption
 // would be a second definition of a mapping that already exists in the file above.
-const facadeToTx = new Map();
-for (const m of facadeSrc.matchAll(/export const (\w+)\s*=\s*\([^)]*\)\s*=>\s*pool\.run\([^;]*?name:\s*'(\w+)'/g)) {
-  facadeToTx.set(m[1], m[2]);
-}
+const facadeToTx = readFacade();
 
 /**
  * The body of a named worker transaction, brace-matched so a nested block cannot end it early.
@@ -82,8 +80,10 @@ for (const m of facadeSrc.matchAll(/export const (\w+)\s*=\s*\([^)]*\)\s*=>\s*po
  */
 function txBody(name) {
   const re = new RegExp(`export function ${name}\\b`);
+  const hit = workerFiles.find(({ src }) => re.test(src));
+  if (!hit) return null;
+  const workerSrc = hit.src;
   const m = re.exec(workerSrc);
-  if (!m) return null;
 
   const paren = workerSrc.indexOf('(', m.index + m[0].length);
   if (paren === -1) return null;
@@ -131,7 +131,7 @@ function reachableFrom(handler) {
       parts.push(body);
       seen.push(tx);
     } else {
-      problems.push(`${FACADE} maps db.${m[1]} to ${tx}, which is not an exported function in ${WORKER}`);
+      problems.push(`${FACADE} maps db.${m[1]} to ${tx}, which is not an exported function in ${WORKER} or src/db/tx/*.js`);
     }
   }
   return { text: parts.join('\n'), delegates: seen };

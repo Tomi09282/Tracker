@@ -5740,6 +5740,15 @@ if (seeded) {
   await call(`/api/v1/clients/${linkAsCoach}/archive`, { method: 'POST', jar: dual });
 }
 
+// --- LifeOS core (migration 031) -------------------------------------------------------------
+// The five passes (forge / replay / race / IDOR / extremes) for every Phase-2 endpoint, in their own
+// file so the LifeOS phases add sections without growing this one. Last before logout: it plants
+// past days into the smoke database, which no earlier section must see.
+if (seeded) {
+  const { lifeosCoreSmoke } = await import('./smoke/lifeos-core.js');
+  await lifeosCoreSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

@@ -55,6 +55,7 @@ const EXEMPT = new Map([
   ['meal_items', 'the same'],
   ['foods', 'a shared food library; owner_user_id marks who contributed one, and it is not personal data'],
   ['schema_migrations', 'not user data at any level'],
+  ['point_rule_sets', 'the admin-global LifeOS point rules (031); created_by marks which admin published a version — product configuration, not personal data, and SET NULL on erasure'],
 ]);
 
 const db = new Database(process.env.DB_PATH);

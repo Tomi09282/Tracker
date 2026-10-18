@@ -1,7 +1,7 @@
 ---
 type: inventory
 title: Feature inventory — Home, muscle selector, Profile, navigation, persona
-updated: 2026-10-11
+updated: 2026-10-18
 tags: [ux, inventory, pulse]
 ---
 
@@ -55,7 +55,8 @@ TRACKER is a coach→client workout and nutrition tracker, Hungarian-first (HU d
 | Member chat screen; video form-check; withdraw message | planned (backend only) | Nothing. |
 | Coins + store | live | See balance, buy Aurora or Ember (250 coins each), read the statement. |
 | Achievements | live | See 7 fixed, auto-awarded achievements and their coin rewards. |
-| Streak counter, levels / XP, leaderboard, buying coins with money | cut | Nothing. |
+| Streak counter, levels / XP, daily challenge, rewards (LifeOS) | planned (LifeOS, [[0022-lifeos-gamification-and-one-currency|ADR-0022]]) | Phase 2 backend: XP and level on `GET /coins/wallet`; streaks, challenges and rewards arrive in Phases 3-4. |
+| Leaderboard, buying coins with money | cut | Nothing. |
 | Public marketplace (read) | live (public pages outside the shell) | Browse coach posts (kind chips + search), open a post, open a coach profile. No door to it from a phone when signed in. |
 | Marketplace comments, likes, follow, in-app booking | cut | Nothing. |
 | Coach directory, report button | planned (API only) | Nothing. |
@@ -147,7 +148,7 @@ All rows below are NOT on Home today. "planned" here means: the data exists, not
 
 ### 1.5 Do not invent (Home)
 
-- Streak counter or flame — streaks are computed server-side only to unlock achievements; no endpoint returns a streak number.
+- A streak FLAME or illustration — reversed for the number itself by [[0022-lifeos-gamification-and-one-currency|ADR-0022]]: the LifeOS streak is a figure with "NAP" (design round B), built in Phase 3; never a flame.
 - Week pager, day-of-month numbers, tappable week cells, month calendar — the strip is this week only and display-only.
 - The user's e-mail, a profile photo or an avatar in the Home header — the e-mail was removed from Home; only name-based monograms exist in the product.
 - A quick-start / freestyle "Szabad edzés" button, or "add exercise to workout" — no screen triggers a title-only session and no API appends an exercise to a session.
@@ -417,7 +418,8 @@ Data sources: `GET /auth/me`, `PATCH /auth/me`, `GET /me/theme` + save, `GET /on
 | "Member since" | planned | `created_at` is in the session; nothing renders it. | no key | — |
 | Custom accent colour + gradient builder | cut | Removed from the screen; keys remain. | `settings.accentCustom` = "Egyedi szín"<br>`settings.gradient.title` = "Gradiens" | — |
 | Notification preferences | cut | None exist; notifications are in-app only. | no key | — |
-| Levels, streak counter, leaderboard, celebration toggle | cut | No levels / XP anywhere; streaks only as the condition behind two achievements; animations follow the OS reduced-motion setting only. | no key | — |
+| Levels, streak counter | planned (LifeOS, [[0022-lifeos-gamification-and-one-currency|ADR-0022]]) | Level and XP on `GET /coins/wallet` since Phase 2 (backend); the streak figure with habits in Phase 3; reached from Profil (ÉRMÉK / SZINT rows). | no key yet | — |
+| Leaderboard, celebration toggle | cut | Animations follow the OS reduced-motion setting only. | no key | — |
 
 ### 3.4 States
 
@@ -441,8 +443,8 @@ Data sources: `GET /auth/me`, `PATCH /auth/me`, `GET /me/theme` + save, `GET /on
 ### 3.5 Do not invent (Profile, coins)
 
 - Uploaded profile photo, avatar picker, camera badge, "change picture" — monograms only, for members and coaches alike.
-- Levels, XP, ranks, tiers, "progress to next level".
-- A streak counter or flame with a number, streak freeze, streak calendar.
+- Ranks, tiers. (Levels and XP are no longer in this list: [[0022-lifeos-gamification-and-one-currency|ADR-0022]] — the level is a figure with a SegmentBar on Érmék, design round B.)
+- A streak flame or a streak calendar. (The streak figure and the freeze count are LifeOS, ADR-0022, Phase 3.)
 - Leaderboards, friends, followers / following counts, a social feed on the profile.
 - Profile stats header (total workouts, PR count, streak), bio, a public member profile.
 - Daily login rewards, "X coins until …", countdown offers, limited-time deals.
@@ -544,11 +546,22 @@ Screen-specific lists are in §1.5, §2.7 and §3.5. This list covers the rest o
 - Buying coins with real money, coin payouts, cash balance — deferred; coins are earn-only.
 - Subscription paywall, pricing or billing screen, "upgrade plan", seat-usage meter — not built (only a webhook receiver and a server-side seat cap exist).
 
-**Gamification**
-- Leaderboards, rankings — deferred.
-- Streak counter, flame, streak freeze, streak-at-risk nudges — a streak is computed server-side only to unlock two achievements; no number is exposed.
-- XP, levels, ranks, badges on the avatar, daily quests — never specified. Gamification is coins plus seven fixed achievements.
-- Achievement-unlocked or coin-earned notifications, toasts, celebration overlays — not emitted.
+**Gamification** — rewritten 2026-10-18: the ban is reversed by the owner (2026-10-17), see
+[[0022-lifeos-gamification-and-one-currency|ADR-0022]]. LifeOS (the f_app port) brings full
+gamification on ONE currency: every point is a TRACKER coin.
+- XP and levels — planned, backend live since Phase 2 (B-core): `GET /coins/wallet` answers `xp`,
+  `level` and `bounds` (level = floor(sqrt(xp / 100))); XP is earned only by LifeOS awards, a reversal
+  takes it back, a penalty never does. Shown as a level figure with a SegmentBar (Érmék, design round B).
+- Negative balance ("TARTOZÁS") — planned, backend live since Phase 2: penalties may take the balance
+  below zero; spends may not (`spendableMinor` = max(0, balance)).
+- Streaks, the streak multiplier, freezes, milestones — planned for Phase 3 (habits); a figure with
+  "NAP", a lime multiplier segment, a mono freeze count. Never a flame.
+- Daily challenge, rewards, redeeming — planned for Phase 4.
+- The rules (points per action, multipliers, the 400-coin daily cap) — admin-global, edited on the
+  admin "Szabályok" page (`GET / PUT /admin/rules`, Phase 2 backend).
+- Leaderboards, rankings — still deferred.
+- Achievement-unlocked or coin-earned notifications, toasts, celebration overlays — not emitted yet;
+  LifeOS reminders and the day summary arrive as self-notifications in Phase 5.
 
 **Notifications and chat**
 - Push, e-mail or SMS notifications — deferred (in-app only).

@@ -112,6 +112,10 @@ export const EXPORT_TABLES = [
   ['coin_purchases', 'SELECT * FROM coin_purchases WHERE user_id = ?'],
   ['coin_entitlements', 'SELECT * FROM coin_entitlements WHERE user_id = ?'],
   ['achievements', 'SELECT * FROM user_achievements WHERE user_id = ?'],
+  // LifeOS core (031): the day boundary, every award / penalty / reversal, every settled day.
+  ['lifeos_prefs', 'SELECT * FROM user_prefs WHERE user_id = ?'],
+  ['coin_events', 'SELECT * FROM coin_events WHERE user_id = ?'],
+  ['daily_summaries', 'SELECT * FROM daily_summaries WHERE user_id = ?'],
   ['coach_profile', 'SELECT * FROM coach_profiles WHERE user_id = ?'],
   ['coach_posts', 'SELECT * FROM coach_posts WHERE author_user_id = ?'],
   ['exercises_authored', 'SELECT * FROM exercises WHERE owner_id = ?'],

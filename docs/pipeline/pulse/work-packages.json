@@ -1179,9 +1179,7 @@
       "owns": [
         "backend/src/auth/routes.js",
         "backend/src/chat/routes.js",
-        "backend/src/logs/routes.js",
         "backend/scripts/check-routes.mjs",
-        "backend/scripts/verify-gates.mjs",
         "docs/pipeline/pulse/pkg/B-roles/**"
       ],
       "handIn": {},
@@ -1200,19 +1198,16 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-roles): the package ran outside the plan entry list (no brief). The plan ownership table gave check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them. It also fixed a CRLF misread in check-routes (the public-router scan splits lines on \r?\n). The frontend half (useSession roles, the trainer chat list on side=coach) is the integrator's. The dev backend on :3000 needs a restart on the merged code before the live app serves roles, side and the records 403. At merge-B-q2 backend/scripts/smoke.js passed to B-q2 (B-roles is closed; one file, one owner)."
+      "notes": "Added by the integrator at merge (merge-B-roles): the package ran outside the plan entry list (no brief). The plan ownership table gave check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them. It also fixed a CRLF misread in check-routes (the public-router scan splits lines on \r?\n). The frontend half (useSession roles, the trainer chat list on side=coach) is the integrator's. The dev backend on :3000 needs a restart on the merged code before the live app serves roles, side and the records 403. At merge-B-q2 backend/scripts/smoke.js passed to B-q2 (B-roles is closed; one file, one owner). At merge-B-core backend/scripts/verify-gates.mjs and backend/src/logs/routes.js passed to B-core (B-roles is closed; one file, one owner)."
     },
     {
       "id": "B-q2",
       "title": "Q2 theme packs off sale on the backend (owner ruling 2026-10-17, .pulse/owner-answers.md, Phase 0 of the LifeOS effort): migration 030 delists the Aurora / Ember store items and retires both premium theme packs, with no compensation",
       "owns": [
         "backend/src/db/migrations/030_retire_theme_packs.sql",
-        "backend/scripts/verify-030.mjs",
         "backend/scripts/seed-smoke-store.mjs",
         "backend/scripts/verify-019.mjs",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke-run.mjs",
-        "backend/package.json",
         "docs/pipeline/pulse/pkg/B-q2/**"
       ],
       "handIn": {
@@ -1237,7 +1232,66 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-q2): the package ran outside the plan entry list (no brief). It owns smoke.js after the closed B-roles. seed-demo.mjs is unchanged: a fresh demo seed after 030 writes no Aurora purchase (demo balance 440 instead of 190). The dev backend on :3000 applies 030 only after a restart on the merged code."
+      "notes": "Added by the integrator at merge (merge-B-q2): the package ran outside the plan entry list (no brief). It owns smoke.js after the closed B-roles. seed-demo.mjs is unchanged: a fresh demo seed after 030 writes no Aurora purchase (demo balance 440 instead of 190). The dev backend on :3000 applies 030 only after a restart on the merged code. At merge-B-core backend/package.json, backend/scripts/smoke.js and backend/scripts/verify-030.mjs passed to B-core (B-q2 is closed; one file, one owner; verify-030 now accepts user_version >= 30)."
+    },
+    {
+      "id": "B-core",
+      "title": "LifeOS Phase 2 \"Core\" on the backend (approved plan abundant-booping-willow, B0 + P2; owner 2026-10-17 / 2026-10-18): the worker split (db/conn.js + db/tx/*.js), migration 031 (user_prefs, point_rule_sets, coin_events, daily_summaries, coin_reasons xp / spend, spend-covered trigger), the lazy day close, the workout award, /me/prefs, /lifeos/today, /admin/rules, the extended wallet and ledger",
+      "owns": [
+        "backend/package.json",
+        "backend/server.js",
+        "backend/scripts/check-admin-audit.mjs",
+        "backend/scripts/check-gdpr.mjs",
+        "backend/scripts/check-route-tx.mjs",
+        "backend/scripts/check-worker-tx.mjs",
+        "backend/scripts/lib/worker-sources.mjs",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/lifeos-core.js",
+        "backend/scripts/verify-030.mjs",
+        "backend/scripts/verify-031.mjs",
+        "backend/scripts/verify-gates.mjs",
+        "backend/scripts/verify-lifeos-rules.mjs",
+        "backend/src/coins/routes.js",
+        "backend/src/db/conn.js",
+        "backend/src/db/gdpr.js",
+        "backend/src/db/index.js",
+        "backend/src/db/migrations/031_lifeos_core.sql",
+        "backend/src/db/tx/lifeos.js",
+        "backend/src/db/worker.js",
+        "backend/src/lifeos/**",
+        "backend/src/logs/routes.js",
+        "backend/src/nutrition/daySql.js",
+        "backend/src/nutrition/routes.js",
+        "backend/src/plans/occurrences.js",
+        "backend/src/plans/schedule.js",
+        "docs/brain/58-Pulse/Feature inventory.md",
+        "docs/brain/60-Decisions/0022-lifeos-gamification-and-one-currency.md",
+        "docs/pipeline/pulse/pkg/B-core/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/lib/lifeos-api.ts"
+        ]
+      },
+      "dependsOn": [
+        "B-q2"
+      ],
+      "parallelGroup": "backend lane (approved plan phase 2)",
+      "size": "L",
+      "acceptance": [
+        "B0: getDb / stmt / rethrow live in backend/src/db/conn.js, worker.js re-exports them and src/db/tx/lifeos.js; check-worker-tx, check-admin-audit and check-route-tx read every worker source through scripts/lib/worker-sources.mjs, proved by four verify-gates probes that plant defects in tx files",
+        "migration 031 adds user_prefs (row per user), point_rule_sets (admin-global, append-only, seeded defaults), coin_reasons xp / spend, coin_events with exact reversals, a 400-coin daily earn cap, daily_summaries, and swaps never-negative for spend-covered (verify-031)",
+        "the lazy day close settles the kcal outcome, workout due / done and the perfect day (which needs the scheduled workout); f_app rule vectors incl. the DST days hold (verify-lifeos-rules)",
+        "GET / PATCH /me/prefs, GET /lifeos/today, GET / PUT /admin/rules (admin, audited, expectedVersion), the extended GET /coins/wallet (debt, spendable, XP, level) and /coins/ledger; every coin-moving path has its five-pass smoke section",
+        "GDPR export covers the new user tables; ADR-0022 and the Feature inventory record the reversal of the gamification ban",
+        "hand-in: frontend/src/lib/lifeos-api.ts carries the response and request types (types only)"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-core): the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The plan ownership table gives server.js, db/index.js, db/worker.js, db/conn.js, db/gdpr.js, package.json, check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them (backend/package.json, smoke.js and verify-030.mjs passed from the closed B-q2, verify-gates.mjs and logs/routes.js from the closed B-roles). db/index.js sets --no-parallel-scavenge before the pool's first worker (a worker with a large heap segfaulted npm run migrate on termination). The occurrence rule moved to the pure plans/occurrences.js; schedule.js reads user_prefs.timezone. Open for the owner: streak milestones are outside the daily cap (owner 2026-10-18) - Phase 3 implements them that way. Follow-up: the coins admin audit reconciliation does not yet check that every coin_event has its ledger row (verify-031 does). The dev backend on :3000 applies 031 only after a restart on the merged code."
     }
   ],
   "screens": [
@@ -1869,8 +1923,6 @@
         "coins"
       ],
       "owns": [
-        "frontend/src/features/coins/CoinsPage.tsx",
-        "frontend/src/features/coins/CoinBalance.tsx",
         "docs/pipeline/pulse/pkg/S-coins/**"
       ],
       "mustNotTouch": [
@@ -1902,7 +1954,7 @@
       ],
       "size": "M",
       "wave": 3,
-      "notes": "Q2 default: a theme.* store item the user does NOT own is not listed; an owned one stays as a non-purchasable row with coins.owned (\"Megvan\"); with nothing to list, coins.storeEmptyTitle. Display only — the purchase flow is untouched and never fired live. The arc and the two tiles are not drawn. E25 / E26 -> variants.json. Statement reasons stay as the server sends them. achievement.* are flat dotted top-level keys.",
+      "notes": "Q2 default: a theme.* store item the user does NOT own is not listed; an owned one stays as a non-purchasable row with coins.owned (\"Megvan\"); with nothing to list, coins.storeEmptyTitle. Display only — the purchase flow is untouched and never fired live. The arc and the two tiles are not drawn. E25 / E26 -> variants.json. Statement reasons stay as the server sends them. achievement.* are flat dotted top-level keys. At merge-B-core CoinsPage.tsx and CoinBalance.tsx passed to S-coins-xp (design round B coins; S-coins is closed; one file, one owner).",
       "i18nNamespaces": [
         "coins",
         "achievement"
@@ -2463,6 +2515,168 @@
       ],
       "fixtureFrames": [
         "style-studio-2"
+      ],
+      "liveWrites": []
+    },
+    {
+      "id": "S-coins-xp",
+      "title": "LifeOS Phase 2 (Core) screen package: the coins page refreshed to design round B (coins-1v2, coins-1v2-debt, coins-2v2) - balance with an honest debt state, spendable, LEVEL figure + XP SegmentBar, this week's day columns, the statement grouped by local day with the new reason labels; the Profil SZINT row (hand-in)",
+      "screens": [
+        "coins"
+      ],
+      "owns": [
+        "frontend/src/features/coins/CoinsPage.tsx",
+        "frontend/src/features/coins/CoinBalance.tsx",
+        "frontend/src/features/coins/WeekColumns.tsx",
+        "frontend/src/features/coins/statement.ts",
+        "docs/pipeline/pulse/pkg/S-coins-xp/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": [
+          "requests/R-S-coins-xp-01.json (SettingsPage.tsx SZINT row)"
+        ],
+        "states.json": "docs/pipeline/pulse/pkg/S-coins-xp/states.json"
+      },
+      "frames": [
+        "lifeos/coins-1v2",
+        "lifeos/coins-1v2-debt",
+        "lifeos/coins-2v2",
+        "nezetek/settings-v2-member (SZINT row only)"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/coins.md",
+      "account": "user@tracker.local",
+      "route": "/coins",
+      "dependsOn": [
+        "B-core",
+        "S-coins"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 2)",
+      "i18nNamespaces": [
+        "coins"
+      ],
+      "liveWrites": [],
+      "notes": "Ownership of CoinsPage.tsx and CoinBalance.tsx passes from the closed S-coins to this package (one file, one owner); B-core is a backend lane outside work-packages.json - drop it from dependsOn if the model refuses it. Proposed by the package itself (the orchestrator's task named the id, work-packages.json had no entry, so pulse-sync / pulse-i18n could not resolve it): the integrator adds this entry at merge. Builds against B-core's frontend/src/lib/lifeos-api.ts (B-core shared.patch) - merge B-core first. Entry added by the integrator at merge-B-core from the package's own pkg/S-coins-xp/work-package.json (as committed on pulse/S-coins-xp at that time); B-core is in foundation.",
+      "wave": 5
+    },
+    {
+      "id": "S-day-settings",
+      "title": "LifeOS Phase 2 (Core) screen package: \"Nap és időzóna\" at /settings/day, built 1:1 to design round B's settings-day-v2 on GET / PATCH /me/prefs (B-core) - the time-zone row with the once-a-day limit and its zone picker sheet, the day start as a segmented switch of figures with autosave and the one-line LifeOS explanation; the Profil row \"Nap és időzóna\" (hand-in) and the silent first-time browser-zone write on app start (hook here, mount by request)",
+      "screens": [
+        "settings-day"
+      ],
+      "owns": [
+        "frontend/src/features/settings/DaySettingsPage.tsx",
+        "frontend/src/features/settings/dayPrefs.ts",
+        "docs/pipeline/pulse/pkg/S-day-settings/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "shared.patch": [
+          "frontend/src/features/settings/SettingsPage.tsx"
+        ],
+        "requests": {
+          "R-S-day-settings-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /settings/day route)",
+          "R-S-day-settings-02": "frontend/src/ui/feedback/variants/E6Segmented.tsx (Segmented figures prop)",
+          "R-S-day-settings-03": "frontend/src/app/AppLayout.tsx (mount useTimezoneBootstrap)"
+        }
+      },
+      "frames": [
+        "lifeos/settings-day-v2"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/settings-day.md (does not exist yet: the frame README README-jutalmak-ermek-admin.md and api.md are the inventory)",
+      "account": "user@tracker.local",
+      "route": "/settings/day",
+      "dependsOn": [
+        "B-core",
+        "S-settings"
+      ],
+      "size": "S",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 2)",
+      "i18nNamespaces": [
+        "settings"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry, so pulse-sync / pulse-i18n / pulse-verify could not resolve it - the slot carried this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-core's frontend/src/lib/lifeos-api.ts (B-core shared.patch) - merge B-core first. dayPrefs.ts holds the hooks (useDayPrefs, useSaveDayPrefs, useTimezoneBootstrap) under a non-use* file name, so the frozen features/**/use*.ts glob does not need an exception. GET /me/prefs is not in the freeze (the running backend has no B-core yet): every capture of this package answers it with a contract stub (see states.json) and is reported structure, never matched, until the integrator records it. Entry added by the integrator at merge-B-core from the package's own pkg/S-day-settings/work-package.json (as committed on pulse/S-day-settings at that time); B-core is in foundation. dependsOn S-profile-v2 (merged on pulse-int, no entry of its own) is written as S-settings, the entry that owns SettingsPage.tsx.",
+      "wave": 5
+    },
+    {
+      "id": "S-admin-rules",
+      "screens": [
+        "admin-rules"
+      ],
+      "owns": [
+        "frontend/src/features/admin/RulesPage.tsx",
+        "frontend/src/features/admin/rulesModel.ts",
+        "docs/pipeline/pulse/pkg/S-admin-rules/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [],
+      "inventory": "docs/pipeline/pulse/pkg/S-admin-rules/screen.md",
+      "account": "admin@tracker.local",
+      "route": "/admin/rules",
+      "dependsOn": [
+        "B-core",
+        "S-admin"
+      ],
+      "size": "M",
+      "wave": 5,
+      "notes": "LifeOS Phase 2 (plan abundant-booping-willow): the admin-global point rules page on GET / PUT /admin/rules (B-core, migration 031) with expectedVersion and an optional note, built 1:1 to design round B frame lifeos/admin-rules (Figma 182:1279). Reached from the Szabályok door row on Moderáció (admin-view-1) and by URL; the admin bar keeps its five cells with Moderáció lit (design round A: Szabályok is a door row, not a tab). The route, the routeMeta row, the Moderáció owns entry and the door row in AdminPage.tsx arrive through pkg/S-admin-rules/shared.patch. A PUT is never fired live on the shared rule set: its outcomes are fixtures. Builds on frontend/src/lib/lifeos-api.ts (B-core shared.patch). Entry added by the integrator at merge-B-core from the package's own pkg/S-admin-rules/work-package.json (as committed on pulse/S-admin-rules at that time); B-core is in foundation.",
+      "i18nNamespaces": [
+        "adminRules"
       ],
       "liveWrites": []
     }

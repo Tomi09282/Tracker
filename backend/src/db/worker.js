@@ -4,69 +4,17 @@
 // on. Wrapping a sync call in a Promise changes nothing — the work has to leave the main
 // thread. Each worker owns exactly one encrypted connection; connections cannot be shared
 // across threads.
-import { readFileSync, mkdirSync } from 'node:fs';
+//
+// The connection, the statement cache and rethrow live in ./conn.js (package B0), shared with the
+// named transactions in ./tx/<domain>.js. Piscina resolves a task by EXPORT NAME on this module, so
+// every transaction in tx/*.js is re-exported below under the exact name the facade passes.
+import { readFileSync } from 'node:fs';
 import { EXPORT_TABLES, UNLINK_BEFORE_DELETE } from './gdpr.js';
-import { dirname } from 'node:path';
 import { randomBytes } from 'node:crypto';
-import Database from 'better-sqlite3-multiple-ciphers';
-import { deriveDbKeyHex } from '../lib/dbkey.js';
+import { getDb, stmt, rethrow } from './conn.js';
 
-let db;
-
-function getDb() {
-  if (db) return db;
-  // better-sqlite3 does not create missing parent directories — a fresh checkout would
-  // otherwise die with SQLITE_CANTOPEN at boot.
-  mkdirSync(dirname(process.env.DB_PATH), { recursive: true });
-  const conn = new Database(process.env.DB_PATH);
-  try {
-    // hexkey with a scrypt-derived raw key: no passphrase quoting pitfalls, our own strong KDF
-    // instead of the library default, and one master secret can serve several databases by
-    // varying the salt.
-    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
-    // busy_timeout BEFORE any statement and before the WAL switch: at boot several workers
-    // open lazily at once and the journal_mode change needs a lock. With the default timeout
-    // of 0 a contending worker throws SQLITE_BUSY instead of waiting.
-    conn.pragma('busy_timeout = 5000');
-    conn.prepare('SELECT 1').get(); // wrong key surfaces as SQLITE_NOTADB right here
-    conn.pragma('journal_mode = WAL');
-    conn.pragma('synchronous = NORMAL');
-    conn.pragma('foreign_keys = ON');
-  } catch (err) {
-    conn.close(); // don't leak the handle; a later call retries with a fresh connection
-    throw err;
-  }
-  // Publish only after every pragma succeeded. Caching a half-configured connection (say, with
-  // foreign_keys still OFF) would silently corrupt integrity on every subsequent call.
-  db = conn;
-  return db;
-}
-
-const statements = new Map();
-function stmt(sql) {
-  let s = statements.get(sql);
-  if (!s) {
-    s = getDb().prepare(sql);
-    statements.set(sql, s);
-  }
-  return s;
-}
-
-/**
- * Re-throw a SQLite error in a form that survives the worker boundary.
- *
- * better-sqlite3 attaches its detail to `code` and to non-enumerable Error fields, and the
- * structured clone that carries an error out of a worker keeps almost none of it — the caller
- * sees a bare `{ code: 'SQLITE_ERROR' }` with no message and no statement. That turns a typo in
- * a query into a blind hunt, which cost real time three separate times before this existed.
- */
-function rethrow(err, sql) {
-  const wrapped = new Error(
-    `${err?.code ?? 'SQLITE_ERROR'}: ${err?.message ?? 'unknown'}${sql ? ` — while running: ${sql.replace(/\s+/g, ' ').slice(0, 200)}` : ''}`,
-  );
-  wrapped.code = err?.code ?? 'SQLITE_ERROR';
-  throw wrapped;
-}
+export { getDb, stmt, rethrow } from './conn.js';
+export * from './tx/lifeos.js';
 
 export function all({ sql, params = [] }) {
   try {
@@ -1444,7 +1392,9 @@ export function adminAdjustCoinsTx({
       return { outcome: 'out_of_bounds', maxMinor: reason.max_minor };
     }
 
-    if (wallet.balance_minor + amountMinor < 0) {
+    // Only a DEBIT must be covered. Since 031 a balance can be below zero (LifeOS penalties, plan
+    // L3), and a support credit to somebody in debt must land even when it does not clear the debt.
+    if (amountMinor < 0 && wallet.balance_minor + amountMinor < 0) {
       return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, amountMinor };
     }
 
@@ -1460,10 +1410,10 @@ export function adminAdjustCoinsTx({
          FROM coin_wallets w
          JOIN users a ON a.id = ? AND a.role = 'admin'
                      AND a.session_version = ? AND a.disabled_at IS NULL
-        WHERE w.user_id = ? AND w.balance_minor + ? >= 0`,
+        WHERE w.user_id = ? AND (? > 0 OR w.balance_minor + ? >= 0)`,
     ).run(
       amountMinor, amountMinor, writeUid, requestId, note ?? null,
-      actorUserId, actorSessionVersion, targetUserId, amountMinor,
+      actorUserId, actorSessionVersion, targetUserId, amountMinor, amountMinor,
     );
     if (moved.changes === 0) {
       // Nothing was written, so committing nothing is a no-op. Every predicate was established
@@ -3348,6 +3298,13 @@ function hasSeat(coachId, clientId) {
     `SELECT 1 FROM coach_clients WHERE coach_id = ? AND client_id = ? AND status = 'active'`,
   ).get(coachId, clientId);
   if (alreadyActive) return true;
+
+  // AN ADMIN ACTING AS A TRAINER IS SEAT-EXEMPT (owner, economy sheet 2026-10-18). Roles stack on
+  // one account (plan R1), so an admin opens the trainer view without a coach_subscriptions row;
+  // without this the free tier's cap would refuse the product's own operators. Read from the
+  // database under the caller's write lock, never from a token.
+  const coach = stmt(`SELECT role FROM users WHERE id = ? AND disabled_at IS NULL`).get(coachId);
+  if (coach?.role === 'admin') return true;
 
   const tier = stmt(
     `SELECT t.client_cap AS cap

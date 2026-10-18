@@ -17,9 +17,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { blankComments } from './lib/parse-routes.mjs';
+import { workerSources } from './lib/worker-sources.mjs';
 
-const FILE = 'src/db/worker.js';
-const raw = fs.readFileSync(FILE, 'utf8');
+// EVERY worker-side file, not just worker.js: the named transactions of package B0 onwards live in
+// src/db/tx/<domain>.js (re-exported from worker.js). The list comes from the shared helper so the
+// three gates that read the worker cannot disagree about where it is.
+const problems = [];
+let transactions = 0;
+let filesScanned = 0;
+
+for (const { file: FILE, src: raw } of workerSources()) {
+filesScanned += 1;
 
 /**
  * ═══ COMMENTS ARE BLANKED BEFORE ANY OF THIS COUNTS ANYTHING ═══════════════════════════════════
@@ -56,9 +64,6 @@ function bodyEnd(from) {
   }
   return src.length;
 }
-
-const problems = [];
-let transactions = 0;
 
 const open = /conn\.transaction\(\(\)\s*=>\s*\{/g;
 let m;
@@ -119,7 +124,9 @@ while ((m = open.exec(src))) {
   }
 }
 
-console.log(`check-worker-tx: ${transactions} transaction bodies scanned`);
+}
+
+console.log(`check-worker-tx: ${transactions} transaction bodies scanned in ${filesScanned} file(s)`);
 if (problems.length) {
   console.log('');
   for (const p of problems) console.log(`  ${p}`);

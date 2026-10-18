@@ -26,6 +26,7 @@ import icsRoutes from './src/plans/ics.js';
 import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
+import lifeosRoutes from './src/lifeos/routes.js';
 import publicRoutes from './src/public/routes.js';
 import paymentWebhookRoutes from './src/payments/webhook.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
@@ -260,6 +261,7 @@ app.use('/api/v1', icsRoutes);
 app.use('/api/v1', nutritionRoutes);
 app.use('/api/v1', progressRoutes);
 app.use('/api/v1', coinRoutes);
+app.use('/api/v1', lifeosRoutes);
 
 app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));
 app.use(errorHandler(logger));

@@ -15,6 +15,7 @@ import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { evaluateInBackground } from '../coins/achievements.js';
+import { awardWorkoutInBackground } from '../lifeos/settle.js';
 import { requireAuth, requireCoach } from '../auth/middleware.js';
 // The schedule rule and the calendar-day derivation both live in ONE place now. `local_date`
 // decides which day a record belongs to, so it is never taken from the request: a phone with a
@@ -504,6 +505,9 @@ const endSession = (status) =>
     // Only on a COMPLETED session. Abandoning one is not an achievement.
     if (status === 'completed') {
       evaluateInBackground(req, { userId: req.user.id, sourceType: 'workout_log', sourceId: id });
+      // LifeOS: the workout.completed coins (migration 031), on the same fire-and-forget contract.
+      // The transaction counts the stored sets, checks the day is still open and pays at most once.
+      awardWorkoutInBackground(req, { userId: req.user.id, logId: id });
     }
 
     res.json({ status });

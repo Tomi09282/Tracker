@@ -239,7 +239,9 @@ async function run() {
 
   const version = await db.get('PRAGMA user_version');
   const ledgerRow = await db.get('SELECT version FROM schema_migrations WHERE version = 30');
-  check('the server applied 030 through its own runner', version?.user_version === 30 && ledgerRow?.version === 30, `user_version ${version?.user_version}`);
+  // `>= 30`, not `=== 30`: the runner applies every later file too (031 since package B-core), and the
+  // ledger row is what proves 030 itself ran.
+  check('the server applied 030 through its own runner', version?.user_version >= 30 && ledgerRow?.version === 30, `user_version ${version?.user_version}`);
 
   // BEFORE any request writes (a login writes refresh tokens and may audit), so a difference here
   // can only have come from the migration.

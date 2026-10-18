@@ -99,6 +99,8 @@ const TOUCHED = [
   'src/theme/routes.js',
   'src/db/gdpr.js',
   'src/chat/routes.js',
+  'src/db/tx/lifeos.js',
+  'src/db/index.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -446,6 +448,53 @@ await mutate({
   to: 'router.get(\n  `/admin/stats`,',
   gate: 'scripts/check-routes.mjs',
   expect: 'CANNOT PARSE',
+});
+
+console.log('\n── the worker is more than worker.js (package B0: src/db/tx/*.js) ──────────────');
+
+/*
+ * Since B0 the named transactions may live in src/db/tx/<domain>.js, re-exported by worker.js. The
+ * three worker gates read the worker side through scripts/lib/worker-sources.mjs. If the helper —
+ * or a gate — went back to reading worker.js alone, every probe aimed at worker.js above would
+ * still pass and a defect in a tx file would sail through. These plant the defect IN a tx file.
+ */
+await mutate({
+  label: 'a conditional return after a write inside a tx/*.js transaction is caught',
+  file: 'src/db/tx/lifeos.js',
+  // closeLifeDayTx, right after its first write (the summary INSERT): returning here would commit
+  // a settled day with none of its coins — and this is not a changes === 0 probe.
+  from: "    const day = { localDate, sourceType: 'day',",
+  to: "    if (kcalOutcome === 'no_data') return { outcome: 'closed_empty' };\n    const day = { localDate, sourceType: 'day',",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+await mutate({
+  label: 'an admin transaction in a tx/*.js file that stops auditing is caught',
+  file: 'src/db/tx/lifeos.js',
+  // setPointRulesTx, the one admin write of the LifeOS core.
+  from: "`INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'lifeos.rules.set'",
+  to: "`INSERT INTO audit_trail (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'lifeos.rules.set'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'reaches no INSERT INTO audit_log',
+});
+
+await mutate({
+  label: 'a tx file worker.js does not re-export is caught (Piscina could not find its tasks)',
+  file: 'src/db/worker.js',
+  from: "export * from './tx/lifeos.js';",
+  to: '',
+  gate: 'scripts/check-route-tx.mjs',
+  expect: 'does not re-export',
+});
+
+await mutate({
+  label: 'a facade name that matches no worker export is caught',
+  file: 'src/db/index.js',
+  from: "pool.run(args, { name: 'awardWorkoutTx' })",
+  to: "pool.run(args, { name: 'awardWorkoutsTx' })",
+  gate: 'scripts/check-route-tx.mjs',
+  expect: 'which no worker-side file exports',
 });
 
 console.log('\n── and nothing was left behind ────────────────────────────────────────────────');
