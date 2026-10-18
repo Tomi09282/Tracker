@@ -2611,13 +2611,11 @@
           "frontend/src/i18n/en.json",
           "frontend/src/i18n/de.json"
         ],
-        "shared.patch": [
-          "frontend/src/features/settings/SettingsPage.tsx"
-        ],
         "requests": {
           "R-S-day-settings-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /settings/day route)",
           "R-S-day-settings-02": "frontend/src/ui/feedback/variants/E6Segmented.tsx (Segmented figures prop)",
-          "R-S-day-settings-03": "frontend/src/app/AppLayout.tsx (mount useTimezoneBootstrap)"
+          "R-S-day-settings-03": "frontend/src/app/AppLayout.tsx (mount useTimezoneBootstrap)",
+          "R-S-day-settings-04": "frontend/src/features/settings/SettingsPage.tsx (the Profil row; filed by the integrator from the package's shared.patch, PLAN 4.4 item 4)"
         }
       },
       "frames": [

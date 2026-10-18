@@ -1,0 +1,14 @@
+{
+  "id": "R-S-day-settings-02",
+  "from": "S-day-settings",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/feedback/variants/E6Segmented.tsx",
+  "need": "The day-start switch draws FIGURES: the frame re-sets the segSwitch's texts to Geist Mono Medium 16, -1 % (settings-day-v2.body.js and round A settings-day.part.js: 'figures = mono (dataL), as \"Budapest · 04:00\" on Profil'). The kit Segmented always sets body-m (Geist sans) and className is placement only, so a screen cannot ask for it. An additive optional prop `figures` (default false) on Segmented and Segment that swaps text-body-m for text-data-l (the dataL step: mono 16 / 20, 500, -0.01em); every existing call site is unchanged.",
+  "evidence": "kepernyok-2x/lifeos/settings-day-v2@2x.png y 780-830 (00:00 / 02:00 / 04:00 / 06:00 in mono); app-kit.js dataL = [mono, Medium, 16, 20, -1]",
+  "proposedApi": "<Segmented figures … /> ; SegmentProps.figures?: boolean",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-02.patch",
+  "interim": "Applied in the slot's working tree only (DaySettingsPage passes `figures`). If rejected, drop the one `figures` attribute in DaySettingsPage.tsx: the options then render in Geist sans body-m, a named visible difference.",
+  "status": "merged",
+  "resolution": "Applied by the integrator in the same squash merge as pulse/S-day-settings (merge-S-day-settings); the patch is kept here."
+}

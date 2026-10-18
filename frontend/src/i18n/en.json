@@ -126,6 +126,17 @@
       "title": "Views",
       "coach": "Coach view",
       "admin": "Admin view"
+    },
+    "day": {
+      "title": "Day and time zone",
+      "zone": "Time zone",
+      "zoneLimit": "Can be changed once a day",
+      "start": "Day start",
+      "saved": "Saved",
+      "explain": "New day at {{start}} · yesterday stays editable until {{settle}}.",
+      "search": "Search",
+      "noResults": "No results",
+      "failed": "That didn't work. Please try again."
     }
   },
   "library": {

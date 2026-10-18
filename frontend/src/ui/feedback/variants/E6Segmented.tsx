@@ -100,6 +100,12 @@ export interface SegmentedProps<T extends string> {
   rule?: boolean;
   /** The whole control is unavailable: 40 % and out of the tab order. */
   disabled?: boolean;
+  /**
+   * The options are FIGURES ("00:00 / 02:00 / 04:00 / 06:00"), not words: each is set in `data-l`
+   * (Geist Mono Medium 16, -1 %) instead of `body-m` — Pulse System 2.2, figures are mono
+   * (frames `settings-day`, `settings-day-v2`: the segSwitch's texts re-set to mono Medium, -1 %).
+   */
+  figures?: boolean;
   /** Placement only (`self-start`, `shrink-0`, a margin). Never a colour, size or type. */
   className?: string;
 }
@@ -123,6 +129,8 @@ export interface SegmentProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
    * §4 "Filter chips"). A chip is dimmed on its own when `disabled`; a segment is dimmed by its group.
    */
   mark?: 'ink' | 'accent';
+  /** The option is a figure: `data-l` (mono) instead of `body-m` (see `SegmentedProps.figures`). */
+  figures?: boolean;
   /** The word. */
   children: ReactNode;
 }
@@ -149,7 +157,7 @@ const FORCED = [
  * a word shorter than that — the target, not the layout.
  */
 export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segment(
-  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, mark = 'ink', children, type, disabled, ...rest },
+  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, mark = 'ink', figures = false, children, type, disabled, ...rest },
   ref,
 ) {
   const inert = rest['aria-disabled'] === true || rest['aria-disabled'] === 'true';
@@ -160,7 +168,8 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
       aria-busy={busy || undefined}
       disabled={disabled}
       className={cn(
-        'relative inline-flex h-11 shrink-0 select-none items-center whitespace-nowrap text-body-m',
+        'relative inline-flex h-11 shrink-0 select-none items-center whitespace-nowrap',
+        figures ? 'text-data-l' : 'text-body-m',
         // A hug segment's BOX reaches 8 past its word on either side and gives the 16 back in
         // negative margins: the layout is the word (the next word still starts 24 after it, the
         // control is still as wide as its words), the target is the word + 16 — 44 for "Elöl",
@@ -251,6 +260,7 @@ export function Segmented<T extends string>({
   layout = 'hug',
   rule = false,
   disabled = false,
+  figures = false,
   className,
 }: SegmentedProps<T>) {
   const { t } = useTranslation();
@@ -375,6 +385,7 @@ export function Segmented<T extends string>({
             busy={phase === 'busy'}
             failed={phase === 'failed'}
             count={opt.count}
+            figures={figures}
             onClick={() => select(opt.value)}
           >
             {opt.label}

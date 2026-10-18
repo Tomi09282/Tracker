@@ -718,3 +718,11 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: no string is drawn at this place.
 - What the app does: In the approved frame, listed by the round-A README as invented copy; en 'Report' / de 'Meldung' are proposals.
 - Status: open — a copy question; nothing was invented.
+
+## DEV-086 — S-day-settings: zone sheet (opened by the zone row's chevron)
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-day-settings/i18n.patch.json`
+- Package: S-day-settings
+- The frames show: `lifeos/settings-day-v2` — no string is drawn at this place.
+- What the app does: The frame draws the row's chevron but not what it opens. Built as the kit's picker grammar (SelectSheet): sheet titled 'Időzóna', the search field, every IANA zone as a radio row (place name from the zone database in English, e.g. 'Budapest', 'Buenos Aires'; offset 'GMT+2'). No new words beyond 'Keresés' / 'Nincs találat'. Localized city names do not exist on the platform and are not invented.
+- Status: open — a copy question; nothing was invented.

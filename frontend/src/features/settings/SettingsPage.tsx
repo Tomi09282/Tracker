@@ -17,6 +17,7 @@ import { CueSettings, useCueSummary } from './CueSettings';
 import { hasRole, rolesOf, useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
 import { toCoins, useWallet } from '../coins/useCoins';
 import { useOnboarding } from '../onboarding/useOnboarding';
+import { hourLabel, useDayPrefs, zoneCity } from './dayPrefs';
 import { isValidDisplayName, personLabel } from '../../lib/person';
 
 /**
@@ -44,8 +45,9 @@ const ROLE_LABEL: Record<SessionUser['role'], string> = {
  *   2  the ledger, closed by a rule: ÉRMÉK (→ /coins). SZINT (Phase 2) and JUTALMAK (Phase 4)
  *      join it only when their data exists — never a fake figure;
  *   3  NÉZETEK (coach / admin only): the doors into the trainer and the admin view;
- *   4  BEÁLLÍTÁSOK as one-line rows: Felszerelés (→ /settings/equipment), Edzés közbeni jelzések
- *      (→ the CueSheet), Nyelv (switches inline). "Nap és időzóna" arrives in Phase 2;
+ *   4  BEÁLLÍTÁSOK as one-line rows: Nap és időzóna (→ /settings/day, LifeOS Phase 2),
+ *      Felszerelés (→ /settings/equipment), Edzés közbeni jelzések (→ the CueSheet), Nyelv
+ *      (switches inline);
  *   5  Kijelentkezés.
  *
  * The closed ledger's rule opens the next section, so the first section after it draws no rule of
@@ -60,6 +62,9 @@ export function SettingsPage() {
   const wallet = useWallet();
   const onboarding = useOnboarding();
   const cueSummary = useCueSummary();
+  // "Budapest · 04:00": the zone's place and the day start (GET /me/prefs). Until a zone is stored,
+  // or while the read is out or failed, the row names nothing — it still opens the page.
+  const dayPrefs = useDayPrefs().data;
   const [nameOpen, setNameOpen] = useState(false);
   const [cuesOpen, setCuesOpen] = useState(false);
 
@@ -156,6 +161,12 @@ export function SettingsPage() {
         {/* Right after the ledger (a member) the ledger's closing rule already opens it. */}
         <SectionHeader title={t('settings.title')} titleId="settings-settings" rule={isCoach} />
         <RowStack>
+          <ListRow
+            to="/settings/day"
+            title={t('settings.day.title')}
+            value={dayPrefs?.timezone ? `${zoneCity(dayPrefs.timezone)} · ${hourLabel(dayPrefs.dayStartHour)}` : undefined}
+            chevron
+          />
           <ListRow
             to="/settings/equipment"
             title={t('settings.equipment')}

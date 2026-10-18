@@ -126,6 +126,17 @@
       "title": "Nézetek",
       "coach": "Edzői nézet",
       "admin": "Admin nézet"
+    },
+    "day": {
+      "title": "Nap és időzóna",
+      "zone": "Időzóna",
+      "zoneLimit": "Naponta egyszer módosítható",
+      "start": "Napkezdés",
+      "saved": "Mentve",
+      "explain": "Új nap {{start}}-kor · a tegnapi {{settle}}-ig még módosítható.",
+      "search": "Keresés",
+      "noResults": "Nincs találat",
+      "failed": "Nem sikerült a művelet. Próbáld újra."
     }
   },
   "library": {

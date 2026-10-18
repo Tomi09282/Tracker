@@ -1,0 +1,23 @@
+diff --git a/frontend/src/app/AppLayout.tsx b/frontend/src/app/AppLayout.tsx
+index 626a01a..8ff473d 100644
+--- a/frontend/src/app/AppLayout.tsx
++++ b/frontend/src/app/AppLayout.tsx
+@@ -4,6 +4,7 @@ import { useView } from './useView';
+ import { ViewContext } from './viewContext';
+ import { CommandPalette } from '../ui/shell/CommandPalette';
+ import { ShellProvider } from '../ui/shell/Screen';
++import { useTimezoneBootstrap } from '../features/settings/dayPrefs';
+ 
+ /**
+  * The layout of every signed-in screen: the screen and the tab bar.
+@@ -30,6 +31,10 @@ export function AppLayout() {
+   // A view grants nothing — every route and endpoint re-checks the role on the server.
+   const view = useView();
+   const tabs = useNavTabs(view);
++  // LifeOS starts when the server knows the user's zone: the first time it is empty, the browser's
++  // zone is written once, silently (features/settings/dayPrefs.ts). A zone already stored is never
++  // touched.
++  useTimezoneBootstrap();
+ 
+   return (
+     <ViewContext.Provider value={view}>

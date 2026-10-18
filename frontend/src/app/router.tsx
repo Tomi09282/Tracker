@@ -92,6 +92,9 @@ const SettingsPage = lazy(() =>
 const EquipmentPage = lazy(() =>
   import('../features/settings/EquipmentSection').then((m) => ({ default: m.EquipmentPage })),
 );
+const DaySettingsPage = lazy(() =>
+  import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
+);
 
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
@@ -146,6 +149,7 @@ export const router = createBrowserRouter([
       { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },
       { path: 'settings/equipment', element: suspended(<EquipmentPage />) },
+      { path: 'settings/day', element: suspended(<DaySettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },
       // The admin bar's Fiókok and Piactér tabs (design round A): sections of /admin that became

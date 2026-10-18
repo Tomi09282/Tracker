@@ -58,6 +58,7 @@ export const ROUTE_META = {
   '/library/:id': { parent: '/library', parentLabelKey: 'nav.library' },
   '/coins': { parent: '/settings', parentLabelKey: 'nav.profile' },
   '/settings/equipment': { parent: '/settings', parentLabelKey: 'nav.profile' },
+  '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
   '/notifications': {
     parent: '/',
     parentLabelKey: 'nav.home',
