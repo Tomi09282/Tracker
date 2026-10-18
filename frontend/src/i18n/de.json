@@ -759,9 +759,9 @@
     "title": "Münzen",
     "balanceLabel": "{{count}} Münzen",
     "tab": {
-      "store": "Shop",
       "achievements": "Erfolge",
-      "statement": "Übersicht"
+      "statement": "Übersicht",
+      "overview": "Überblick"
     },
     "owned": "Gekauft",
     "storeEmptyTitle": "Der Shop ist leer",
@@ -786,6 +786,52 @@
           "title": "Ember",
           "description": "Ein einziger warmer Akzent."
         }
+      }
+    },
+    "debtCaption": "Im Minus",
+    "spendable": "Verfügbar: {{count}} Münzen",
+    "debtNotice": "Du bist mit {{count}} Münzen im Minus. Neue Gutschriften gleichen das zuerst aus; bis dahin kannst du nichts einlösen.",
+    "level": {
+      "label": "Stufe",
+      "xp": "{{xp}} / {{next}} XP",
+      "toNext": "Noch {{count}} XP bis Stufe {{level}}.",
+      "toNextAz": "Noch {{count}} XP bis Stufe {{level}}."
+    },
+    "week": {
+      "title": "Diese Woche",
+      "capLine": "Tageslimit {{cap}} Münzen · der gestrige Tag schließt um {{time}}."
+    },
+    "day": {
+      "today": "Heute · {{date}}",
+      "yesterday": "Gestern · {{date}}"
+    },
+    "reason": {
+      "workout": {
+        "completed": "Training erledigt"
+      },
+      "day": {
+        "kcal_hit": "Kalorienziel",
+        "kcal_over": "Strafe · Kalorien überschritten",
+        "perfect": "Perfekter Tag"
+      },
+      "task": {
+        "done": "Aufgabe erledigt",
+        "overdue": "Strafe · überfällige Aufgabe"
+      },
+      "habit": {
+        "done": "Gewohnheit erledigt",
+        "clean_day": "Sauberer Tag",
+        "missed": "Strafe · Gewohnheit verpasst"
+      },
+      "streak": {
+        "milestone": "Serien-Meilenstein"
+      },
+      "reversal": {
+        "credit": "Rückbuchung",
+        "debit": "Rückbuchung"
+      },
+      "reward": {
+        "redeem": "Belohnung eingelöst"
       }
     }
   },

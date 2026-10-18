@@ -16,6 +16,8 @@ import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { CueSettings, useCueSummary } from './CueSettings';
 import { hasRole, rolesOf, useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
 import { toCoins, useWallet } from '../coins/useCoins';
+import { readLevel, type WalletRead } from '../coins/statement';
+import { ProgressBar } from '../../ui/data/ProgressBar';
 import { useOnboarding } from '../onboarding/useOnboarding';
 import { hourLabel, useDayPrefs, zoneCity } from './dayPrefs';
 import { isValidDisplayName, personLabel } from '../../lib/person';
@@ -42,7 +44,7 @@ const ROLE_LABEL: Record<SessionUser['role'], string> = {
  *
  *   1  the identity hero: the 176 monogram, the NAME LINE (name + chevron, the only target that
  *      opens the NameSheet), the address and ONE micro line of the roles the account holds;
- *   2  the ledger, closed by a rule: ÉRMÉK (→ /coins). SZINT (Phase 2) and JUTALMAK (Phase 4)
+ *   2  the ledger, closed by a rule: ÉRMÉK (→ /coins). SZINT (Phase 2, shown once the wallet carries a level) and JUTALMAK (Phase 4)
  *      join it only when their data exists — never a fake figure;
  *   3  NÉZETEK (coach / admin only): the doors into the trainer and the admin view;
  *   4  BEÁLLÍTÁSOK as one-line rows: Nap és időzóna (→ /settings/day, LifeOS Phase 2),
@@ -60,6 +62,8 @@ export function SettingsPage() {
   const { data: user, isPending, isError } = useSession();
   const logout = useLogout();
   const wallet = useWallet();
+  // SZINT (LifeOS Phase 2): read from the wallet's 031 fields; null on a server that sends no level.
+  const level = readLevel(wallet.data as WalletRead | undefined);
   const onboarding = useOnboarding();
   const cueSummary = useCueSummary();
   // "Budapest · 04:00": the zone's place and the day start (GET /me/prefs). Until a zone is stored,
@@ -138,6 +142,17 @@ export function SettingsPage() {
             failed={wallet.isError}
             busy={wallet.isPending}
           />
+          {/* SZINT (LifeOS Phase 2, settings-v2-member): the level and a 120 pt bar of the way to the
+              next one in the middle column. Only when the wallet carries a level - an older server
+              sends none, and a level that is not known is not drawn (never a fake figure). */}
+          {level ? (
+            <LedgerRow
+              to="/coins"
+              label={t('coins.level.label')}
+              note={<ProgressBar value={level.progress} label={t('coins.level.xp', { xp: level.xp, next: level.next })} className="mb-0.5 w-30" />}
+              value={level.level}
+            />
+          ) : null}
         </RowStack>
       </div>
 

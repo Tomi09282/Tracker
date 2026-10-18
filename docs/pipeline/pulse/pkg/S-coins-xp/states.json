@@ -1,0 +1,1045 @@
+{
+  "about": "S-coins-xp - the coins page on design round B (lifeos/coins-1v2, coins-1v2-debt, coins-2v2). The dev backend runs pulse-redesign without B-core (GET /coins/wallet answers { balanceMinor } only), so every frame state is the recording of user@ with an edit list that adds the wallet fields of migration 031 exactly as docs/pipeline/pulse/pkg/B-core/api.md defines them, with the frame's figures (level 4, 2158 / 2500 XP, the frame's week, cap 400, settle 10:00, today 2026-10-18): matched-fixture, never matched. The store is answered as after migration 030 (no item listed). coins-2v2's statement uses the reason keys of api.md, including the ones reserved for Phases 3-6 (task, habit, streak, reversal) and P4's reward.redeem; sourceTitle carries the item's name on those rows - api.md fixes it only for workout.completed, so that is a forward assumption, named in the hand-in.",
+  "overrides": {},
+  "states": {
+    "coins-xp-overview": {
+      "title": "Érmék - Áttekintés (coins-1v2)",
+      "frame": "lifeos/coins-1v2",
+      "account": "M",
+      "route": "/coins",
+      "height": 1158,
+      "reach": "fixture",
+      "why": "design round B overview: balance, spendable, level + XP bar, this week, the cap line",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/spendableMinor",
+              "add": true,
+              "value": 19000
+            },
+            {
+              "pointer": "/xp",
+              "add": true,
+              "value": 2158
+            },
+            {
+              "pointer": "/level",
+              "add": true,
+              "value": 4
+            },
+            {
+              "pointer": "/bounds",
+              "add": true,
+              "value": {
+                "levelFloorXp": 1600,
+                "nextLevelXp": 2500
+              }
+            },
+            {
+              "pointer": "/dailyEarnCapMinor",
+              "add": true,
+              "value": 40000
+            },
+            {
+              "pointer": "/todayEarnedMinor",
+              "add": true,
+              "value": 4000
+            },
+            {
+              "pointer": "/today",
+              "add": true,
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/week",
+              "add": true,
+              "value": [
+                {
+                  "date": "2026-10-12",
+                  "netMinor": 5300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-13",
+                  "netMinor": 9300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-14",
+                  "netMinor": 6800,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-15",
+                  "netMinor": 15700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-16",
+                  "netMinor": 2200,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-17",
+                  "netMinor": 5700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-18",
+                  "netMinor": 4000,
+                  "future": false
+                }
+              ]
+            },
+            {
+              "pointer": "/settleTime",
+              "add": true,
+              "value": "10:00"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": []
+            }
+          ]
+        }
+      ]
+    },
+    "coins-xp-debt": {
+      "title": "Érmék - Áttekintés, mínuszban (coins-1v2-debt)",
+      "frame": "lifeos/coins-1v2-debt",
+      "account": "M",
+      "route": "/coins",
+      "height": 1232,
+      "reach": "fixture",
+      "why": "a balance below zero: TARTOZÁS over the size of the debt, spendable 0, the warn line, a week with losses",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": -3500
+            },
+            {
+              "pointer": "/spendableMinor",
+              "add": true,
+              "value": 0
+            },
+            {
+              "pointer": "/xp",
+              "add": true,
+              "value": 2158
+            },
+            {
+              "pointer": "/level",
+              "add": true,
+              "value": 4
+            },
+            {
+              "pointer": "/bounds",
+              "add": true,
+              "value": {
+                "levelFloorXp": 1600,
+                "nextLevelXp": 2500
+              }
+            },
+            {
+              "pointer": "/dailyEarnCapMinor",
+              "add": true,
+              "value": 40000
+            },
+            {
+              "pointer": "/todayEarnedMinor",
+              "add": true,
+              "value": 400
+            },
+            {
+              "pointer": "/today",
+              "add": true,
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/week",
+              "add": true,
+              "value": [
+                {
+                  "date": "2026-10-12",
+                  "netMinor": -1500,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-13",
+                  "netMinor": 1000,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-14",
+                  "netMinor": -2500,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-15",
+                  "netMinor": -500,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-16",
+                  "netMinor": 600,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-17",
+                  "netMinor": -2000,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-18",
+                  "netMinor": 400,
+                  "future": false
+                }
+              ]
+            },
+            {
+              "pointer": "/settleTime",
+              "add": true,
+              "value": "10:00"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": []
+            }
+          ]
+        }
+      ]
+    },
+    "coins-xp-statement": {
+      "title": "Érmék - Kimutatás (coins-2v2)",
+      "frame": "lifeos/coins-2v2",
+      "account": "M",
+      "route": "/coins",
+      "height": 1871,
+      "reach": "fixture",
+      "why": "the statement grouped by logical day with the new reason labels",
+      "opened": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "coins.tab.statement"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "coins.tab.statement"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": {
+                  "key": "coins.tab.statement"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.statement"
+            },
+            "pressed": true
+          }
+        ]
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/spendableMinor",
+              "add": true,
+              "value": 19000
+            },
+            {
+              "pointer": "/xp",
+              "add": true,
+              "value": 2158
+            },
+            {
+              "pointer": "/level",
+              "add": true,
+              "value": 4
+            },
+            {
+              "pointer": "/bounds",
+              "add": true,
+              "value": {
+                "levelFloorXp": 1600,
+                "nextLevelXp": 2500
+              }
+            },
+            {
+              "pointer": "/dailyEarnCapMinor",
+              "add": true,
+              "value": 40000
+            },
+            {
+              "pointer": "/todayEarnedMinor",
+              "add": true,
+              "value": 4000
+            },
+            {
+              "pointer": "/today",
+              "add": true,
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/week",
+              "add": true,
+              "value": [
+                {
+                  "date": "2026-10-12",
+                  "netMinor": 5300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-13",
+                  "netMinor": 9300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-14",
+                  "netMinor": 6800,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-15",
+                  "netMinor": 15700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-16",
+                  "netMinor": 2200,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-17",
+                  "netMinor": 5700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-18",
+                  "netMinor": 4000,
+                  "future": false
+                }
+              ]
+            },
+            {
+              "pointer": "/settleTime",
+              "add": true,
+              "value": "10:00"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/store",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/ledger",
+          "edits": [
+            {
+              "pointer": "/entries",
+              "value": [
+                {
+                  "id": 900,
+                  "amountMinor": -8000,
+                  "reasonKey": "reward.redeem",
+                  "refType": "coin_event",
+                  "refId": 900,
+                  "note": null,
+                  "createdAt": 1792317600,
+                  "reasonLabel": "Reward redeemed",
+                  "localDate": "2026-10-18",
+                  "sourceType": "reward",
+                  "sourceId": 900,
+                  "sourceTitle": "Kávé a kedvenc helyen",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 899,
+                  "amountMinor": 3000,
+                  "reasonKey": "workout.completed",
+                  "refType": "coin_event",
+                  "refId": 899,
+                  "note": null,
+                  "createdAt": 1792317600,
+                  "reasonLabel": "Workout completed",
+                  "localDate": "2026-10-18",
+                  "sourceType": "workout_log",
+                  "sourceId": 899,
+                  "sourceTitle": "Felsőtest – húzás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 898,
+                  "amountMinor": 1000,
+                  "reasonKey": "task.done",
+                  "refType": "coin_event",
+                  "refId": 898,
+                  "note": null,
+                  "createdAt": 1792317600,
+                  "reasonLabel": "Task done",
+                  "localDate": "2026-10-18",
+                  "sourceType": "task",
+                  "sourceId": 898,
+                  "sourceTitle": "Kazán szerviz időpont",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 897,
+                  "amountMinor": 2000,
+                  "reasonKey": "day.kcal_hit",
+                  "refType": "coin_event",
+                  "refId": 897,
+                  "note": null,
+                  "createdAt": 1792231200,
+                  "reasonLabel": "Calorie goal hit",
+                  "localDate": "2026-10-17",
+                  "sourceType": "day",
+                  "sourceId": null,
+                  "sourceTitle": null,
+                  "reversesEventId": null
+                },
+                {
+                  "id": 896,
+                  "amountMinor": 1900,
+                  "reasonKey": "habit.clean_day",
+                  "refType": "coin_event",
+                  "refId": 896,
+                  "note": null,
+                  "createdAt": 1792231200,
+                  "reasonLabel": "Clean day",
+                  "localDate": "2026-10-17",
+                  "sourceType": "habit",
+                  "sourceId": 896,
+                  "sourceTitle": "Nincs telefon az ágyban",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 895,
+                  "amountMinor": 1300,
+                  "reasonKey": "habit.done",
+                  "refType": "coin_event",
+                  "refId": 895,
+                  "note": null,
+                  "createdAt": 1792231200,
+                  "reasonLabel": "Habit done",
+                  "localDate": "2026-10-17",
+                  "sourceType": "habit",
+                  "sourceId": 895,
+                  "sourceTitle": "Reggeli nyújtás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 894,
+                  "amountMinor": 1000,
+                  "reasonKey": "habit.done",
+                  "refType": "coin_event",
+                  "refId": 894,
+                  "note": null,
+                  "createdAt": 1792231200,
+                  "reasonLabel": "Habit done",
+                  "localDate": "2026-10-17",
+                  "sourceType": "habit",
+                  "sourceId": 894,
+                  "sourceTitle": "2 liter víz",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 893,
+                  "amountMinor": -500,
+                  "reasonKey": "habit.missed",
+                  "refType": "coin_event",
+                  "refId": 893,
+                  "note": null,
+                  "createdAt": 1792231200,
+                  "reasonLabel": "Habit missed",
+                  "localDate": "2026-10-17",
+                  "sourceType": "habit",
+                  "sourceId": 893,
+                  "sourceTitle": "Esti olvasás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 892,
+                  "amountMinor": 2000,
+                  "reasonKey": "task.done",
+                  "refType": "coin_event",
+                  "refId": 892,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Task done",
+                  "localDate": "2026-10-16",
+                  "sourceType": "task",
+                  "sourceId": 892,
+                  "sourceTitle": "Garázs kipakolása",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 891,
+                  "amountMinor": -2000,
+                  "reasonKey": "reversal.debit",
+                  "refType": "coin_event",
+                  "refId": 891,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Reversal",
+                  "localDate": "2026-10-16",
+                  "sourceType": "task",
+                  "sourceId": 891,
+                  "sourceTitle": "Garázs kipakolása",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 890,
+                  "amountMinor": 1900,
+                  "reasonKey": "habit.clean_day",
+                  "refType": "coin_event",
+                  "refId": 890,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Clean day",
+                  "localDate": "2026-10-16",
+                  "sourceType": "habit",
+                  "sourceId": 890,
+                  "sourceTitle": "Nincs telefon az ágyban",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 889,
+                  "amountMinor": 1300,
+                  "reasonKey": "habit.done",
+                  "refType": "coin_event",
+                  "refId": 889,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Habit done",
+                  "localDate": "2026-10-16",
+                  "sourceType": "habit",
+                  "sourceId": 889,
+                  "sourceTitle": "Reggeli nyújtás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 888,
+                  "amountMinor": 1000,
+                  "reasonKey": "habit.done",
+                  "refType": "coin_event",
+                  "refId": 888,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Habit done",
+                  "localDate": "2026-10-16",
+                  "sourceType": "habit",
+                  "sourceId": 888,
+                  "sourceTitle": "2 liter víz",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 887,
+                  "amountMinor": -500,
+                  "reasonKey": "habit.missed",
+                  "refType": "coin_event",
+                  "refId": 887,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Habit missed",
+                  "localDate": "2026-10-16",
+                  "sourceType": "habit",
+                  "sourceId": 887,
+                  "sourceTitle": "Esti olvasás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 886,
+                  "amountMinor": -1000,
+                  "reasonKey": "day.kcal_over",
+                  "refType": "coin_event",
+                  "refId": 886,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Calories over the goal",
+                  "localDate": "2026-10-16",
+                  "sourceType": "day",
+                  "sourceId": null,
+                  "sourceTitle": null,
+                  "reversesEventId": null
+                },
+                {
+                  "id": 885,
+                  "amountMinor": -500,
+                  "reasonKey": "task.overdue",
+                  "refType": "coin_event",
+                  "refId": 885,
+                  "note": null,
+                  "createdAt": 1792144800,
+                  "reasonLabel": "Task overdue",
+                  "localDate": "2026-10-16",
+                  "sourceType": "task",
+                  "sourceId": 885,
+                  "sourceTitle": "Műszaki vizsga időpont",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 884,
+                  "amountMinor": 2500,
+                  "reasonKey": "day.perfect",
+                  "refType": "coin_event",
+                  "refId": 884,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Perfect day",
+                  "localDate": "2026-10-15",
+                  "sourceType": "day",
+                  "sourceId": null,
+                  "sourceTitle": null,
+                  "reversesEventId": null
+                },
+                {
+                  "id": 883,
+                  "amountMinor": 5000,
+                  "reasonKey": "streak.milestone",
+                  "refType": "coin_event",
+                  "refId": 883,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Streak milestone",
+                  "localDate": "2026-10-15",
+                  "sourceType": "habit",
+                  "sourceId": 883,
+                  "sourceTitle": "Reggeli nyújtás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 882,
+                  "amountMinor": 3000,
+                  "reasonKey": "workout.completed",
+                  "refType": "coin_event",
+                  "refId": 882,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Workout completed",
+                  "localDate": "2026-10-15",
+                  "sourceType": "workout_log",
+                  "sourceId": 882,
+                  "sourceTitle": "Láb",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 881,
+                  "amountMinor": 2000,
+                  "reasonKey": "day.kcal_hit",
+                  "refType": "coin_event",
+                  "refId": 881,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Calorie goal hit",
+                  "localDate": "2026-10-15",
+                  "sourceType": "day",
+                  "sourceId": null,
+                  "sourceTitle": null,
+                  "reversesEventId": null
+                },
+                {
+                  "id": 880,
+                  "amountMinor": 1300,
+                  "reasonKey": "habit.done",
+                  "refType": "coin_event",
+                  "refId": 880,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Habit done",
+                  "localDate": "2026-10-15",
+                  "sourceType": "habit",
+                  "sourceId": 880,
+                  "sourceTitle": "Reggeli nyújtás",
+                  "reversesEventId": null
+                },
+                {
+                  "id": 879,
+                  "amountMinor": 1900,
+                  "reasonKey": "habit.clean_day",
+                  "refType": "coin_event",
+                  "refId": 879,
+                  "note": null,
+                  "createdAt": 1792058400,
+                  "reasonLabel": "Clean day",
+                  "localDate": "2026-10-15",
+                  "sourceType": "habit",
+                  "sourceId": 879,
+                  "sourceTitle": "Nincs telefon az ágyban",
+                  "reversesEventId": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "settings-xp-level": {
+      "title": "Profil - SZINT sor (settings-v2-member)",
+      "frame": "nezetek/settings-v2-member",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the Profil SZINT row (request R-S-coins-xp-01 (SettingsPage.tsx)): the level figure and the 120 pt bar of the way to the next level, from the wallet fields of 031",
+      "arrived": {
+        "role": "button",
+        "name": "Kijelentkezés"
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/spendableMinor",
+              "add": true,
+              "value": 19000
+            },
+            {
+              "pointer": "/xp",
+              "add": true,
+              "value": 2158
+            },
+            {
+              "pointer": "/level",
+              "add": true,
+              "value": 4
+            },
+            {
+              "pointer": "/bounds",
+              "add": true,
+              "value": {
+                "levelFloorXp": 1600,
+                "nextLevelXp": 2500
+              }
+            },
+            {
+              "pointer": "/dailyEarnCapMinor",
+              "add": true,
+              "value": 40000
+            },
+            {
+              "pointer": "/todayEarnedMinor",
+              "add": true,
+              "value": 4000
+            },
+            {
+              "pointer": "/today",
+              "add": true,
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/week",
+              "add": true,
+              "value": [
+                {
+                  "date": "2026-10-12",
+                  "netMinor": 5300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-13",
+                  "netMinor": 9300,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-14",
+                  "netMinor": 6800,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-15",
+                  "netMinor": 15700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-16",
+                  "netMinor": 2200,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-17",
+                  "netMinor": 5700,
+                  "future": false
+                },
+                {
+                  "date": "2026-10-18",
+                  "netMinor": 4000,
+                  "future": false
+                }
+              ]
+            },
+            {
+              "pointer": "/settleTime",
+              "add": true,
+              "value": "10:00"
+            }
+          ]
+        }
+      ]
+    },
+    "coins-xp-older-server": {
+      "title": "Érmék - Áttekintés, a mai szerver (nincs szint, nincs hét)",
+      "account": "M",
+      "route": "/coins",
+      "height": 874,
+      "reach": "seed",
+      "why": "the recording as it is: a wallet without the 031 fields draws no level, no week and no spendable caption - nothing is invented as a zero (the freeze predates migration 030, so its store still lists the owned Aurora pack)",
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "coins.tab.overview"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  }
+}

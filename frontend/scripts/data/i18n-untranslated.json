@@ -17,6 +17,7 @@
     "nutrition.slash": "punctuation",
     "nutrition.resultMeta": "unit symbols and the protein abbreviation, no words",
     "coaching.nutrition.itemLine": "unit symbols; the live format (decimal point, glued unit) is kept 1:1 until the owner rules (client-detail-2 board note)",
-    "adminRules.unit.pct": "unit symbol"
+    "adminRules.unit.pct": "unit symbol",
+    "coins.level.xp": "two figures and the unit XP, the same in every language"
   }
 }

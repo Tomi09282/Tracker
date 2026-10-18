@@ -37,17 +37,29 @@ import { toCoins } from './useCoins';
  * Not a zero. A zero balance and an unknown balance are different facts; a wallet that shows 0
  * when it could not reach the server has told the user something false about their money. The
  * giant is an em dash in the pending tone.
+ *
+ * ═══ A BALANCE BELOW ZERO IS SAID, NOT HIDDEN (coins-1v2-debt) ═════════════════════════════════
+ *
+ * Penalties may take the balance below zero (LifeOS L3); spending never can. The display face
+ * draws digits only, so the eyebrow changes instead of the figure growing a minus: "TARTOZÁS" over
+ * the size of the debt ("35" for a balance of -35), with "Elkölthető: 0 érme" under it — and the
+ * page states what the debt means in a warn line. Never clamped to a friendly zero.
+ *
+ * The caption under the figure is the spendable amount (coins-1v2 "Elkölthető: 190 érme"), drawn
+ * only when the server sends it.
  */
 export interface CoinBalanceProps {
   /** The wallet's balance in minor units, once it is known. */
   balanceMinor?: number;
+  /** What a purchase can use, max(0, balance) — the caption; absent from an older server, then not drawn. */
+  spendableMinor?: number;
   state: 'loading' | 'error' | 'ready';
 }
 
 /** The coin's box against the stage (frame: 210,136 with the stage at 24,178; right pin -20). */
 const COIN = 'pointer-events-none absolute -right-5 -top-[42px]';
 
-export function CoinBalance({ balanceMinor, state }: CoinBalanceProps) {
+export function CoinBalance({ balanceMinor, spendableMinor, state }: CoinBalanceProps) {
   const { t } = useTranslation();
   const value = state === 'ready' ? (balanceMinor ?? 0) : null;
 
@@ -66,7 +78,9 @@ export function CoinBalance({ balanceMinor, state }: CoinBalanceProps) {
     return () => clearTimeout(timer);
   }, [value]);
 
-  const coins = value === null ? null : toCoins(value);
+  const debt = value !== null && value < 0;
+  // The figure is the SIZE of the balance; its sign is the eyebrow's job (TARTOZÁS).
+  const coins = value === null ? null : Math.abs(toCoins(value));
   const signed = delta === null ? null : `${delta > 0 ? '+' : ''}${toCoins(delta)}`;
 
   return (
@@ -82,8 +96,15 @@ export function CoinBalance({ balanceMinor, state }: CoinBalanceProps) {
       <StatBlock
         className="relative"
         label={
-          signed !== null && delta !== null ? <span className={delta > 0 ? 'text-accent' : undefined}>{signed}</span> : t('coins.balanceCaption')
+          signed !== null && delta !== null ? (
+            <span className={delta > 0 ? 'text-accent' : undefined}>{signed}</span>
+          ) : debt ? (
+            t('coins.debtCaption')
+          ) : (
+            t('coins.balanceCaption')
+          )
         }
+        caption={state === 'ready' && spendableMinor !== undefined ? t('coins.spendable', { count: toCoins(spendableMinor) }) : undefined}
       >
         {state === 'loading' ? (
           // A numeral is one block at its cap height: the ink box of the drawn "190".

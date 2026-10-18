@@ -759,9 +759,9 @@
     "title": "Érmék",
     "balanceLabel": "{{count}} érme",
     "tab": {
-      "store": "Bolt",
       "achievements": "Eredmények",
-      "statement": "Kimutatás"
+      "statement": "Kimutatás",
+      "overview": "Áttekintés"
     },
     "owned": "Megvan",
     "storeEmptyTitle": "A bolt üres",
@@ -786,6 +786,52 @@
           "title": "Ember",
           "description": "Egyetlen meleg kiemelés."
         }
+      }
+    },
+    "debtCaption": "Tartozás",
+    "spendable": "Elkölthető: {{count}} érme",
+    "debtNotice": "Mínuszban vagy {{count}} érmével. Az új jóváírások előbb ezt egyenlítik ki; addig nem tudsz beváltani.",
+    "level": {
+      "label": "Szint",
+      "xp": "{{xp}} / {{next}} XP",
+      "toNext": "Még {{count}} XP a {{level}}. szintig.",
+      "toNextAz": "Még {{count}} XP az {{level}}. szintig."
+    },
+    "week": {
+      "title": "Ezen a héten",
+      "capLine": "Napi plafon {{cap}} érme · a tegnapi nap {{time}}-kor zárul."
+    },
+    "day": {
+      "today": "Ma · {{date}}",
+      "yesterday": "Tegnap · {{date}}"
+    },
+    "reason": {
+      "workout": {
+        "completed": "Edzés kész"
+      },
+      "day": {
+        "kcal_hit": "Kalória cél",
+        "kcal_over": "Büntetés · kalória túllépve",
+        "perfect": "Tökéletes nap"
+      },
+      "task": {
+        "done": "Feladat kész",
+        "overdue": "Büntetés · lejárt feladat"
+      },
+      "habit": {
+        "done": "Szokás teljesítve",
+        "clean_day": "Tiszta nap",
+        "missed": "Büntetés · szokás kimaradt"
+      },
+      "streak": {
+        "milestone": "Sorozat-mérföldkő"
+      },
+      "reversal": {
+        "credit": "Visszavonás",
+        "debit": "Visszavonás"
+      },
+      "reward": {
+        "redeem": "Jutalom beváltva"
       }
     }
   },

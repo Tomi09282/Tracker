@@ -759,9 +759,9 @@
     "title": "Coins",
     "balanceLabel": "{{count}} coins",
     "tab": {
-      "store": "Store",
       "achievements": "Achievements",
-      "statement": "Statement"
+      "statement": "Statement",
+      "overview": "Overview"
     },
     "owned": "Owned",
     "storeEmptyTitle": "The store is empty",
@@ -786,6 +786,52 @@
           "title": "Ember",
           "description": "A single warm accent."
         }
+      }
+    },
+    "debtCaption": "In debt",
+    "spendable": "Spendable: {{count}} coins",
+    "debtNotice": "You are {{count}} coins in debt. New credits pay this off first; until then you cannot redeem anything.",
+    "level": {
+      "label": "Level",
+      "xp": "{{xp}} / {{next}} XP",
+      "toNext": "{{count}} XP to level {{level}}.",
+      "toNextAz": "{{count}} XP to level {{level}}."
+    },
+    "week": {
+      "title": "This week",
+      "capLine": "Daily cap {{cap}} coins · yesterday closes at {{time}}."
+    },
+    "day": {
+      "today": "Today · {{date}}",
+      "yesterday": "Yesterday · {{date}}"
+    },
+    "reason": {
+      "workout": {
+        "completed": "Workout done"
+      },
+      "day": {
+        "kcal_hit": "Calorie goal",
+        "kcal_over": "Penalty · calories over",
+        "perfect": "Perfect day"
+      },
+      "task": {
+        "done": "Task done",
+        "overdue": "Penalty · overdue task"
+      },
+      "habit": {
+        "done": "Habit done",
+        "clean_day": "Clean day",
+        "missed": "Penalty · habit missed"
+      },
+      "streak": {
+        "milestone": "Streak milestone"
+      },
+      "reversal": {
+        "credit": "Reversal",
+        "debit": "Reversal"
+      },
+      "reward": {
+        "redeem": "Reward redeemed"
       }
     }
   },
