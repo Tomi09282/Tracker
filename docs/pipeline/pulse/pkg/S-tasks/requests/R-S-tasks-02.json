@@ -1,0 +1,13 @@
+{
+  "id": "R-S-tasks-02",
+  "from": "S-tasks",
+  "kind": "kit",
+  "blocking": true,
+  "target": "frontend/src/ui/primitives/DateTrigger.tsx",
+  "need": "An additive, optional prop glyph?: 'calendar' | 'chevron' on the field variant of the kit DateTrigger. 'calendar' (the default) keeps today's drawing (the 20 pt calendar glyph before the day, progress-1), so no existing caller changes. 'chevron' drops the leading glyph and puts the 16 pt chevron in text-2 at the right end, 10 after the day: round B's task-form and capture draw the Dátum field this way ('Vas, október 25.' + glyph/down at x 173, 16 x 16).",
+  "evidence": "kepernyok-2x/lifeos/task-form@2x.png and capture@2x.png; .pulse/geometry/lifeos/task-form.json node 3153 'glyph/down' (173, 496, 16, 16) and capture.json node 1048; pairs in .pulse/pairs/S-tasks/",
+  "proposedApi": "<DateTrigger variant='field' glyph='chevron' ... />",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-tasks/requests/R-S-tasks-02.patch",
+  "interim": "Applied to the slot's working tree only. Merged without it the build breaks (TaskSheet / CaptureSheet pass glyph): merge together with this package.",
+  "status": "open"
+}

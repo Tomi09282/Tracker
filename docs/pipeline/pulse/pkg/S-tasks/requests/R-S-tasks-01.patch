@@ -1,0 +1,69 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index c713640..8b7a133 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -82,6 +82,7 @@ const EXPECT_BY_VIEW = {
+     ['/notifications', '/'],
+     ['/habits', '/'],
+     ['/habits/7', '/'],
++    ['/tasks', '/'],
+     ['/workout', '/workout'],
+     ['/workout/42', '/workout'],
+     ['/library', '/workout'],
+diff --git a/frontend/scripts/check-nav.mjs b/frontend/scripts/check-nav.mjs
+index d4a43b3..cf8cdcc 100644
+--- a/frontend/scripts/check-nav.mjs
++++ b/frontend/scripts/check-nav.mjs
+@@ -89,6 +89,7 @@ const NO_INBOUND_BY_DESIGN = new Map([
+   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
+   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
+   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
++  ['/tasks', { reason: 'Feladatok is pushed from Ma (tasks-1 "‹ MA"; doors: the FELADATOK head of the Ma page and "Kész ma · N ›", frame lifeos/ma-1), which package S-ma builds; drop this row when that door is merged' }],
+   ['/habits', { reason: 'Szokások is pushed from Ma ("Összes ›" in the SZOKÁSOK block, frame lifeos/ma-1), which package S-today builds; drop this row when that door is merged' }],
+   [
+     '/m',
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 8b848eb..1f15573 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   user: [
+     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+     // lighting anything. `owns` is the exception list `end` cannot express.
+-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications', '/habits'] },
++    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index b349233..c57a218 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -61,6 +61,7 @@ export const ROUTE_META = {
+   '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
++  '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
+   '/notifications': {
+     parent: '/',
+     parentLabelKey: 'nav.home',
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 62555ba..c7a2642 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -98,6 +98,7 @@ const EquipmentPage = lazy(() =>
+ const DaySettingsPage = lazy(() =>
+   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
+ );
++const TasksPage = lazy(() => import('../features/tasks/TasksPage').then((m) => ({ default: m.TasksPage })));
+ const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
+ const HabitDetailPage = lazy(() =>
+   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+@@ -148,6 +149,7 @@ export const router = createBrowserRouter([
+       { path: 'notifications', element: suspended(<NotificationsPage />) },
+       { path: 'habits', element: suspended(<HabitsPage />) },
+       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
++      { path: 'tasks', element: suspended(<TasksPage />) },
+       { path: 'library', element: suspended(<LibraryPage />) },
+       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+       { path: 'nutrition', element: suspended(<NutritionPage />) },

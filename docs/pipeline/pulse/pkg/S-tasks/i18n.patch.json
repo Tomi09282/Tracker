@@ -1,0 +1,571 @@
+{
+  "package": "S-tasks",
+  "base": "290d3ec",
+  "namespaces": [
+    "tasks",
+    "capture"
+  ],
+  "set": [
+    {
+      "key": "tasks.title",
+      "hu": "Feladatok",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 page title 'Feladatok' (frame (design round B, approved 2026-10-18)); also the tab switch's accessible name"
+    },
+    {
+      "key": "tasks.tab.today",
+      "hu": "Ma",
+      "en": "Today",
+      "de": "Heute",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 tab 'Ma' and the header back label '‹ MA' (frame (design round B, approved 2026-10-18)); routeMeta parentLabelKey of /tasks (R-S-tasks-01)"
+    },
+    {
+      "key": "tasks.tab.upcoming",
+      "hu": "Közelgő",
+      "en": "Upcoming",
+      "de": "Demnächst",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 tab 'Közelgő' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.tab.overdue",
+      "hu": "Lejárt",
+      "en": "Overdue",
+      "de": "Überfällig",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 tab 'Lejárt' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.tab.anytime",
+      "hu": "Bármikor",
+      "en": "Anytime",
+      "de": "Jederzeit",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 tab 'Bármikor' (frame (design round B, approved 2026-10-18)); also capture's no-deadline chip (DEV-S-tasks-02)"
+    },
+    {
+      "key": "tasks.tab.done",
+      "hu": "Kész",
+      "en": "Done",
+      "de": "Erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 tab 'Kész' (frame (design round B, approved 2026-10-18)); also the row check's accessible name 'Kész: <title>'"
+    },
+    {
+      "key": "tasks.overdueCharged",
+      "hu": "{{n}} lejárt teendő · {{coins}} érme levonva",
+      "en": "Overdue: {{n}} · {{coins}} coins deducted",
+      "de": "Überfällig: {{n}} · {{coins}} Münzen abgezogen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 notice '1 lejárt teendő · −5 érme levonva' (frame (design round B, approved 2026-10-18)); coins = the sum of overduePenaltyMinor"
+    },
+    {
+      "key": "tasks.overdueCount",
+      "hu": "{{n}} lejárt teendő",
+      "en": "Overdue: {{n}}",
+      "de": "Überfällig: {{n}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the first half of lifeos/tasks-1's notice, while no settled day has charged the overdue tasks yet"
+    },
+    {
+      "key": "tasks.overdueOpen",
+      "hu": "Megnézem",
+      "en": "View",
+      "de": "Ansehen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 notice action 'Megnézem ›' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.todayHead",
+      "hu": "Ma, {{date}}",
+      "en": "Today, {{date}}",
+      "de": "Heute, {{date}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 section head 'Ma, október 19.' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.add",
+      "hu": "Új teendő",
+      "en": "New task",
+      "de": "Neue Aufgabe",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 section link 'Új teendő +' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.doneToday",
+      "hu": "Kész ma",
+      "en": "Done today",
+      "de": "Heute erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 section head 'Kész ma' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.lateRule",
+      "hu": "Késve teljesítve az érme fele jár.",
+      "en": "Completed late, a task pays half.",
+      "de": "Verspätet erledigt, gibt es die Hälfte.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 closing line (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.dueToday",
+      "hu": "ma",
+      "en": "today",
+      "de": "heute",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row 'Kiválogatni a téli ruhákat' due 'ma' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.priority.low",
+      "hu": "Alacsony",
+      "en": "Low",
+      "de": "Niedrig",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row tag 'ALACSONY' and task-form 'Alacsony · 5' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.priority.mid",
+      "hu": "Közepes",
+      "en": "Medium",
+      "de": "Mittel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row tag 'KÖZEPES' and task-form 'Közepes · 10' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.priority.high",
+      "hu": "Fontos",
+      "en": "High",
+      "de": "Wichtig",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row tag 'FONTOS' and task-form 'Fontos · 20' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.priorityValue",
+      "hu": "{{label}} · {{coins}}",
+      "en": "{{label}} · {{coins}}",
+      "de": "{{label}} · {{coins}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form priority cell 'Közepes · 10' (frame (design round B, approved 2026-10-18))",
+      "untranslated": {
+        "reason": "a template of two placeholders and a middle dot: no words to translate"
+      }
+    },
+    {
+      "key": "tasks.repeat.daily",
+      "hu": "naponta",
+      "en": "daily",
+      "de": "täglich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row repeat word, as 'hetente' (frame (design round B, approved 2026-10-18); f_app 'Naponta')"
+    },
+    {
+      "key": "tasks.repeat.weekly",
+      "hu": "hetente",
+      "en": "weekly",
+      "de": "wöchentlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row repeat word 'hetente' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeat.monthly",
+      "hu": "havonta",
+      "en": "monthly",
+      "de": "monatlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/tasks-1 row repeat word, as 'hetente' (frame (design round B, approved 2026-10-18); f_app 'Havonta')"
+    },
+    {
+      "key": "tasks.repeatKind.none",
+      "hu": "Nincs",
+      "en": "None",
+      "de": "Keine",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form recurrence chip 'Nincs' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeatKind.daily",
+      "hu": "Naponta",
+      "en": "Daily",
+      "de": "Täglich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form recurrence chip 'Naponta' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeatKind.weekly",
+      "hu": "Hetente",
+      "en": "Weekly",
+      "de": "Wöchentlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form recurrence chip 'Hetente' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeatKind.monthly",
+      "hu": "Havonta",
+      "en": "Monthly",
+      "de": "Monatlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form recurrence chip 'Havonta' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeatLabel",
+      "hu": "Ismétlődés",
+      "en": "Repeat",
+      "de": "Wiederholung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form group label 'Ismétlődés' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.repeatInterval",
+      "hu": "Hány naponta?",
+      "en": "Every how many days?",
+      "de": "Alle wie viele Tage?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): RecurrencePicker 'Hány naponta?' (the daily number, not drawn in round B)"
+    },
+    {
+      "key": "tasks.repeatMonthDay",
+      "hu": "A hónap hányadikán?",
+      "en": "Which day of the month?",
+      "de": "Am wievielten des Monats?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): RecurrencePicker 'A hónap hányadikán?' (the monthly number, not drawn in round B)"
+    },
+    {
+      "key": "tasks.repeatNeedsDue",
+      "hu": "Ismétlődő teendőhöz kell határidő",
+      "en": "A repeating task needs a deadline",
+      "de": "Eine wiederkehrende Aufgabe braucht eine Frist",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): task form error 'Ismétlődő teendőhöz kell határidő' (api.md: recurrence needs dueOn)"
+    },
+    {
+      "key": "tasks.summary.everyDay",
+      "hu": "Minden nap",
+      "en": "Every day",
+      "de": "Jeden Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): describeRecurrence 'minden nap', capitalised as the frame's summary line"
+    },
+    {
+      "key": "tasks.summary.everyN",
+      "hu": "{{n}} naponta",
+      "en": "Every {{n}} days",
+      "de": "Alle {{n}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): describeRecurrence '<n> naponta'"
+    },
+    {
+      "key": "tasks.summary.weekdays",
+      "hu": "Hétköznap",
+      "en": "Weekdays",
+      "de": "Werktags",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): describeRecurrence 'hétköznap', capitalised"
+    },
+    {
+      "key": "tasks.summary.weekly",
+      "hu": "Minden {{days}}",
+      "en": "Every {{days}}",
+      "de": "Jeden {{days}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form summary 'Minden vasárnap 20:00' (frame (design round B, approved 2026-10-18)); days = the long weekday names (Intl)"
+    },
+    {
+      "key": "tasks.summary.monthly",
+      "hu": "Minden hónap {{day}}.",
+      "en": "Monthly on day {{day}}",
+      "de": "Monatlich am {{day}}.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): describeRecurrence 'minden hónap <d>.', capitalised"
+    },
+    {
+      "key": "tasks.newTitle",
+      "hu": "Új teendő",
+      "en": "New task",
+      "de": "Neue Aufgabe",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form sheet title 'Új teendő' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.editTitle",
+      "hu": "Teendő szerkesztése",
+      "en": "Edit task",
+      "de": "Aufgabe bearbeiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): task screen title 'Teendő szerkesztése' (editing is not drawn in round B; Q4 keeps it)"
+    },
+    {
+      "key": "tasks.fieldTitle",
+      "hu": "Cím",
+      "en": "Title",
+      "de": "Titel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form field label 'Cím' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.priorityLabel",
+      "hu": "Fontosság",
+      "en": "Priority",
+      "de": "Priorität",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form group label 'Fontosság' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.dueLabel",
+      "hu": "Határidő",
+      "en": "Deadline",
+      "de": "Frist",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form group label 'Határidő' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.due.none",
+      "hu": "Nincs",
+      "en": "None",
+      "de": "Keine",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form deadline chip 'Nincs' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.due.today",
+      "hu": "Ma",
+      "en": "Today",
+      "de": "Heute",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form deadline chip 'Ma' and capture 'Ma' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.due.tomorrow",
+      "hu": "Holnap",
+      "en": "Tomorrow",
+      "de": "Morgen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form deadline chip 'Holnap' and capture 'Holnap' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.due.date",
+      "hu": "Dátum",
+      "en": "Date",
+      "de": "Datum",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form deadline chip 'Dátum' and capture 'Dátum' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.date",
+      "hu": "Dátum",
+      "en": "Date",
+      "de": "Datum",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form and capture field label 'Dátum' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.dueTime",
+      "hu": "Határidő ideje",
+      "en": "Due time",
+      "de": "Fällig um",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form field label 'Határidő ideje' (frame (design round B, approved 2026-10-18)); also capture's time field for a task (capture's 'Kezdés' is the event's)"
+    },
+    {
+      "key": "tasks.notes",
+      "hu": "Jegyzet",
+      "en": "Note",
+      "de": "Notiz",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form field label 'Jegyzet' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.optional",
+      "hu": "opcionális",
+      "en": "optional",
+      "de": "optional",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form Jegyzet placeholder 'opcionális' (frame (design round B, approved 2026-10-18)); also the empty time field"
+    },
+    {
+      "key": "tasks.create",
+      "hu": "Létrehozás",
+      "en": "Create",
+      "de": "Erstellen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/task-form pill 'Létrehozás' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.titleRequired",
+      "hu": "Adj címet a teendőnek",
+      "en": "Give the task a title",
+      "de": "Gib der Aufgabe einen Titel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): task form error 'Adj címet a teendőnek'"
+    },
+    {
+      "key": "tasks.dateRequired",
+      "hu": "Válassz napot",
+      "en": "Choose a day",
+      "de": "Wähle einen Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): 'Válassz napot fent' / 'Válassz legalább egy napot' (the Dátum chip with no day chosen)"
+    },
+    {
+      "key": "tasks.deleteTitle",
+      "hu": "Törlöd?",
+      "en": "Delete it?",
+      "de": "Löschen?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): delete confirm title 'Törlöd?'"
+    },
+    {
+      "key": "tasks.deleteBody",
+      "hu": "A teendő eltűnik a listából.",
+      "en": "The task disappears from the list.",
+      "de": "Die Aufgabe verschwindet aus der Liste.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): delete confirm message 'A teendő eltűnik a listából.'"
+    },
+    {
+      "key": "tasks.emptyTitle",
+      "hu": "Nincs teendő",
+      "en": "No tasks",
+      "de": "Keine Aufgaben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/ma-3 FELADATOK empty title 'Nincs teendő' (frame (design round B, approved 2026-10-18)); f_app 'Nincs teendő'"
+    },
+    {
+      "key": "tasks.emptyBody",
+      "hu": "Rögzíts bármit, határidővel együtt.",
+      "en": "Capture anything, with a deadline.",
+      "de": "Halte alles fest, mit Frist.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/ma-3 FELADATOK empty line (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "tasks.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "Something went wrong. Try again.",
+      "de": "Das hat nicht geklappt. Versuche es erneut.",
+      "copy": "existing-literal",
+      "visible": true,
+      "source": "existing hu.json sentence (e.g. settings.day.failed) reused for every refused task write / read"
+    },
+    {
+      "key": "capture.title",
+      "hu": "Van valami a fejedben?",
+      "en": "Anything on your mind?",
+      "de": "Etwas im Kopf?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture sheet title (frame (design round B, approved 2026-10-18)); f_app 'Van valami a fejedben?'"
+    },
+    {
+      "key": "capture.what",
+      "hu": "Mi az?",
+      "en": "What is it?",
+      "de": "Was ist es?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture field label 'Mi az?' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "capture.example",
+      "hu": "pl. felhívni anyát · vacsora pénteken",
+      "en": "e.g. call mum · dinner on Friday",
+      "de": "z. B. Mama anrufen · Abendessen am Freitag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture field hint (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "capture.when",
+      "hu": "Mikor?",
+      "en": "When?",
+      "de": "Wann?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture group label 'Mikor?' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "capture.atTime",
+      "hu": "Időpontban",
+      "en": "At a time",
+      "de": "Zu einer Uhrzeit",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture switch 'Időpontban' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "capture.allDay",
+      "hu": "Egész nap",
+      "en": "All day",
+      "de": "Ganztägig",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/capture switch 'Egész nap' (frame (design round B, approved 2026-10-18))"
+    },
+    {
+      "key": "capture.textRequired",
+      "hu": "Írj be valamit, vagy zárd be.",
+      "en": "Type something, or close it.",
+      "de": "Schreib etwas oder schließe es.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "f_app Hungarian copy (plan: 'f_app's Hungarian copy adapted for hu -> copy-to-approve.md'): capture error 'Írj be valamit, vagy zárd be.'"
+    }
+  ]
+}

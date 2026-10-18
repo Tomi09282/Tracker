@@ -1,0 +1,103 @@
+{
+  "package": "S-tasks",
+  "branch": "pulse/S-tasks",
+  "base": "1b7759f",
+  "build": "pulse-verify --package S-tasks --port 5187: build green in 19 s (13 gates + tsc -b + vite build) - 9 of 9 captured (replay), on pulse-redesign 1b7759f merged in, with the i18n patch and requests R-S-tasks-01 / -02 applied in the working tree",
+  "verifyGates": "verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant (with every hand-in applied)",
+  "frames": {
+    "lifeos/tasks-1": {
+      "state": "tasks-1",
+      "verdict": "matched-fixture",
+      "geometry": "84 compared, 61 matched, 15 deviating, 7 unmatched. The 15 deviating are 8 fixed-width Figma text boxes whose x / y agree within 0.5 pt (only the width differs: Figma box vs hugging text), the Segmented frame (354 fill vs 326 hug, same x / y) and the six bottom-bar labels. The 7 unmatched are the six-cell LifeOS bar (deviation 1). The one slot difference is 'hétfőnként' vs 'hetente' (deviation 5).",
+      "capture": ".pulse/shots/S-tasks/tasks-1.png",
+      "pairs": [
+        ".pulse/pairs/S-tasks/tasks-1.frame-app-diff-1.png",
+        ".pulse/pairs/S-tasks/tasks-1.frame-app-diff-2.png"
+      ]
+    },
+    "lifeos/task-form": {
+      "state": "task-form",
+      "verdict": "matched-fixture",
+      "geometry": "78 compared, 59 matched, 9 deviating, 10 unmatched. Deviating: the page head behind the sheet (the same two width-only cases as tasks-1), the bottom-bar labels, the weekday 'V' (2.4 pt left, WeekdayChips kit spacing) and the summary line (1 pt right, the kit sheet's 25 pt content edge). Unmatched: the bar rasters, the blinking caret, and the two marks / one underline the probe reads inside kit components.",
+      "capture": ".pulse/shots/S-tasks/task-form.png",
+      "pairs": [
+        ".pulse/pairs/S-tasks/task-form.frame-app-diff-1.png"
+      ]
+    },
+    "lifeos/capture": {
+      "state": "capture",
+      "verdict": "matched-fixture",
+      "geometry": "82 compared, 6 matched, 26 deviating, 50 unmatched. By design: the frame draws the sheet over Ma (Szia!, coins, the 3 / 10 figure, 22 unmatched) and with 'Hova? Feladat / Esemény', which is hidden until Phase 5. Everything under it therefore sits 108 pt lower, and the Esemény-only 'Kezdés' / 'Emlékeztető' are absent (deviations 2-4). Read against the frame shifted by 108 pt, the field, the chips, Időpontban / Egész nap and the date / time pair line up within 1 pt.",
+      "capture": ".pulse/shots/S-tasks/capture.png",
+      "pairs": [
+        ".pulse/pairs/S-tasks/capture.frame-app-diff-1.png"
+      ]
+    }
+  },
+  "extraStates": {
+    "tasks-upcoming": {
+      "verdict": "structure",
+      "note": "Közelgő tab: rows grouped by day under display-face day heads (fixture)",
+      "capture": ".pulse/pairs/S-tasks/app-tasks-upcoming.png"
+    },
+    "tasks-overdue": {
+      "verdict": "structure",
+      "note": "Lejárt tab, reached through 'Megnézem': overdue rows with the late-completion line",
+      "capture": ".pulse/pairs/S-tasks/app-tasks-overdue.png"
+    },
+    "tasks-done": {
+      "verdict": "structure",
+      "note": "Kész tab: completed rows (check in lime, title text-3, paid coins)",
+      "capture": ".pulse/pairs/S-tasks/app-tasks-done.png"
+    },
+    "tasks-empty": {
+      "verdict": "structure",
+      "note": "no task: 'Nincs teendő' + 'Rögzíts bármit, határidővel együtt.'; also reached LIVE for user@ (see liveSmoke)",
+      "capture": ".pulse/pairs/S-tasks/app-tasks-empty.png"
+    },
+    "tasks-load-failed": {
+      "verdict": "structure",
+      "note": "GET /tasks 500: danger NoticeLine with Újra, no fake rows",
+      "capture": ".pulse/pairs/S-tasks/app-tasks-load-failed.png"
+    },
+    "task-edit": {
+      "verdict": "structure",
+      "note": "an existing task in TaskSheet: values filled, Mentés plus the delete text action",
+      "capture": ".pulse/pairs/S-tasks/app-task-edit.png"
+    }
+  },
+  "variants": "hu / en / de, width 360 / 430, reduced motion + focus walk: 9 of 9 states in every run (.pulse/shots/S-tasks/v_360, v_430, v_en, v_de, v_rm; contact sheets in .pulse/pairs/S-tasks/contact-*.png). The fonts, one-pill, boxed, overflow and reduced-motion probes pass everywhere. The only failing probe besides geometry is targets, and only on kit controls (deviation 6). The sheet states' arrival assertions are now per language and per width: the date field drops the weekday at 360 pt.",
+  "fixtureCheck": "pulse-fixture-check S-tasks: 8 problems = the 8 contract bodies of GET /api/v1/tasks. The endpoint has no recording in the freeze, and a live recording for user@ would be an empty list, which cannot carry the frame's rows. Every body is instead checked by pkg/S-tasks/fixture-schema-check.mjs ('8 fixture(s) written; constraints: OK') and by tsc --strict against B-habits-tasks' TasksResponse (exit 0), the same shape as the S-coins-xp ruling of 2026-10-18.",
+  "ledger": "pulse-ledger S-tasks: empty - nothing counted was lost (motion-reduce: 0 -> 2)",
+  "i18n": "pulse-i18n check S-tasks: set 62, change 0, remove 0, copy questions 0; check-i18n OK - 3 languages, 1013 keys each",
+  "liveSmoke": "pulse-verify --live --no-fixtures with user@'s cached jar, against http://localhost:3000, which now has migration 032 (GET /tasks answers). /tasks renders the real empty state; task-form and capture open and are filled. 65 requests, 0 failed, 0 console errors. The data-dependent states (rows, Megnézem, edit) cannot arrive on an account with no tasks; that is expected. No write was made: no state submits.",
+  "requests": [
+    "R-S-tasks-01 (blocking, nav): /tasks route + routeMeta + home owns + check-nav-active EXPECT + check-nav NO_INBOUND row, re-made on 1b7759f next to the merged S-habits rows (the verify-gates line is no longer needed)",
+    "R-S-tasks-02 (blocking, kit): DateTrigger glyph='chevron' (additive, default unchanged)"
+  ],
+  "deviations": "pkg/S-tasks/deviations.md (7 rows)",
+  "proposed": {
+    "note": "61 set entries carry copy=proposed and go to copy-to-approve.md at the merge (pulse-i18n apply). 48 of them are the words of the three frames. The 13 below are not drawn: 12 are f_app's Hungarian copy, as the plan says, and 1 is the first half of the tasks-1 notice.",
+    "notInAFrame": [
+      "tasks.overdueCount = {{n}} lejárt teendő",
+      "tasks.repeatInterval = Hány naponta?",
+      "tasks.repeatMonthDay = A hónap hányadikán?",
+      "tasks.repeatNeedsDue = Ismétlődő teendőhöz kell határidő",
+      "tasks.summary.everyN = {{n}} naponta",
+      "tasks.summary.weekdays = Hétköznap",
+      "tasks.summary.monthly = Minden hónap {{day}}.",
+      "tasks.editTitle = Teendő szerkesztése",
+      "tasks.titleRequired = Adj címet a teendőnek",
+      "tasks.dateRequired = Válassz napot",
+      "tasks.deleteTitle = Törlöd?",
+      "tasks.deleteBody = A teendő eltűnik a listából.",
+      "capture.textRequired = Írj be valamit, vagy zárd be."
+    ]
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-tasks/i18n.patch.json",
+    "docs/pipeline/pulse/pkg/S-tasks/requests/R-S-tasks-01.patch",
+    "docs/pipeline/pulse/pkg/S-tasks/requests/R-S-tasks-02.patch",
+    "docs/pipeline/pulse/pkg/S-tasks/states.json"
+  ]
+}

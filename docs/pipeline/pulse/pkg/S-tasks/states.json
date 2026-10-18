@@ -1,0 +1,3702 @@
+{
+  "about": "S-tasks - Feladatok (/tasks, design round B frame lifeos/tasks-1), the task sheet (lifeos/task-form) and the capture sheet (lifeos/capture), plus the undrawn tabs and states. GET /tasks is not in the freeze (the dev backend has no migration 032): every state answers it with a contract body in the exact TasksResponse shape, checked by fixture-schema-check.mjs, so a verdict reaches matched-fixture at best until the integrator records it (then the bodies become edit lists). The clock is Monday 19 October 2026 14:00 (the frames' seed day). Nothing is written live: no write fires in any state.",
+  "states": {
+    "tasks-1": {
+      "frame": "lifeos/tasks-1",
+      "title": "Feladatok — Ma (a keret)",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 1030,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "lifeos/tasks-1: Monday 19 October 14:00, the frame's seed - 4 open tasks due today, 2 completed today, one overdue task charged -5 at the last settle",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "arrived": {
+        "text": "Befizetni a villanyszámlát"
+      }
+    },
+    "task-form": {
+      "frame": "lifeos/task-form",
+      "title": "Új teendő — kitöltve, hetente vasárnap (a keret)",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "lifeos/task-form: 'Új teendő +' opens the sheet; the title typed, Dátum chosen, 25 October and 20:00 typed into the native fields, Hetente chosen (the anchor's Sunday is the weekday)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "tasks.add"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "tasks.fieldTitle"
+            },
+            "text": "Heti menü és bevásárlólista"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "tasks.fieldTitle"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^óra"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^perc"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "text": "20:00"
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "text": { "hu": "október 25.", "en": "October 25", "de": "25. Oktober" }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.repeatKind.weekly"
+            }
+          },
+          "arrived": {
+            "text": { "hu": "Minden vasárnap 20:00", "en": "Every Sunday 20:00", "de": "Jeden Sonntag 20:00" }
+          }
+        },
+        {
+          "click": {
+            "role": "textbox",
+            "name": {
+              "key": "tasks.fieldTitle"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "tasks.fieldTitle"
+            },
+            "focused": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "capture": {
+      "frame": "lifeos/capture",
+      "title": "Rögzítés — feladat dátummal és időponttal",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks?capture=1",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "lifeos/capture with the destination the product has in Phase 3 (a task): the words typed, Dátum, Wednesday 21 October, Időpontban, 10:00. The frame's Esemény choice (its 'Kezdés' and reminder hint) needs the Phase-5 event route and is not reachable; behind the sheet stands Feladatok, not Ma (S-ma mounts the sheet on Ma)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            },
+            "text": "Fogorvos szerdán 10-kor"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            },
+            "checked": true
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^óra"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^perc"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "text": "10:00"
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "text": { "hu": "október 21.", "en": "October 21", "de": "21. Oktober" }
+          }
+        },
+        {
+          "click": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            },
+            "focused": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "tasks-upcoming": {
+      "title": "Feladatok — Közelgő",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "undrawn tab: the next 7 days under a head per day (weekday, date), the time on the rows",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.tab.upcoming"
+            }
+          },
+          "arrived": {
+            "text": "Feladni a csomagot"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "Feladni a csomagot"
+      }
+    },
+    "tasks-overdue": {
+      "title": "Feladatok — Lejárt",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "undrawn tab (the notice's 'Megnézem ›' opens it): the open tasks past their day, the day and the late pay in danger",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "tasks.overdueOpen"
+            }
+          },
+          "arrived": {
+            "text": "Visszavinni a könyvtári könyvet"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "key": "tasks.tab.overdue"
+        },
+        "checked": true
+      }
+    },
+    "tasks-done": {
+      "title": "Feladatok — Kész",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "undrawn tab: the last 7 days of completions under a head per day",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.tab.done"
+            }
+          },
+          "arrived": {
+            "text": "Új cipőfűző"
+          }
+        }
+      ],
+      "arrived": {
+        "text": "Új cipőfűző"
+      }
+    },
+    "tasks-empty": {
+      "title": "Feladatok — üres",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "undrawn: no task at all - the day head with 'Új teendő +' and ma-3's empty words",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [],
+            "overdue": [],
+            "anytime": [],
+            "completedToday": [],
+            "upcoming": [],
+            "done": [],
+            "templates": [],
+            "openCount": 0,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "tasks.emptyTitle"
+        }
+      }
+    },
+    "tasks-load-failed": {
+      "title": "Feladatok — nem tölthető be",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "GET /tasks refused: the header and the tabs stay, a danger line with 'Újra' (no fake rows)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/tasks",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "task-edit": {
+      "title": "Teendő szerkesztése — egy ismétlődő teendő szabálya",
+      "account": "M",
+      "probes": {
+        "boxedAllow": [
+          "btnPrimary",
+          "pill",
+          "uiSwitch",
+          "sheet",
+          "badgeCount",
+          "skel",
+          "segBar",
+          "progressBar",
+          "macroCol",
+          "stepper",
+          "toast",
+          "noticeLine",
+          "monogramMark",
+          "pic",
+          "tabBar",
+          "setCheck",
+          "bottomSheet"
+        ]
+      },
+      "route": "/tasks",
+      "height": 874,
+      "clock": "2026-10-19T14:00:00+02:00",
+      "reach": "fixture",
+      "why": "undrawn (Q4: editing stays): the row 'Felhívni anyát' opens its weekly rule - every value filled, Mentés, and Törlés as a danger link",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "due": [
+              {
+                "id": 101,
+                "title": "Befizetni a villanyszámlát",
+                "notes": null,
+                "priority": 3,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "17:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 2000,
+                "lateNow": false,
+                "payoutNowMinor": 2000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 102,
+                "title": "Bevásárlás: zab, tojás, túró",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "19:00",
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 103,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 201,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 104,
+                "title": "Kiválogatni a téli ruhákat",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "overdue": [
+              {
+                "id": 107,
+                "title": "Visszavinni a könyvtári könyvet",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-17",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": "2026-10-17",
+                "valueMinor": 1000,
+                "lateNow": true,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": -500
+              }
+            ],
+            "anytime": [
+              {
+                "id": 111,
+                "title": "Kitakarítani a garázst",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "completedToday": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "upcoming": [
+              {
+                "id": 108,
+                "title": "Feladni a csomagot",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 109,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-20",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": false,
+                "parentTaskId": 203,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": 500,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 110,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-26",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": 1000,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "done": [
+              {
+                "id": 105,
+                "title": "Fogorvos – időpontot kérni",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": null,
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792393920,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 106,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-19",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": false,
+                "parentTaskId": 202,
+                "completedAt": 1792391400,
+                "completedOn": "2026-10-19",
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 1000,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 112,
+                "title": "Új cipőfűző",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-18",
+                "dueTime": null,
+                "recurrence": null,
+                "isTemplate": false,
+                "parentTaskId": null,
+                "completedAt": 1792341600,
+                "completedOn": "2026-10-18",
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": 500,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "templates": [
+              {
+                "id": 201,
+                "title": "Felhívni anyát",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "20:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 202,
+                "title": "Heti terv átnézése",
+                "notes": null,
+                "priority": 2,
+                "points": null,
+                "dueOn": "2026-10-12",
+                "dueTime": "09:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 1
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 1000,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              },
+              {
+                "id": 203,
+                "title": "Kivinni a szelektívet",
+                "notes": null,
+                "priority": 1,
+                "points": null,
+                "dueOn": "2026-10-13",
+                "dueTime": "07:00",
+                "recurrence": {
+                  "type": "weekly",
+                  "weekdayMask": 2
+                },
+                "isTemplate": true,
+                "parentTaskId": null,
+                "completedAt": null,
+                "completedOn": null,
+                "overdueOn": null,
+                "valueMinor": 500,
+                "lateNow": false,
+                "payoutNowMinor": null,
+                "paidMinor": null,
+                "overduePenaltyMinor": null
+              }
+            ],
+            "openCount": 9,
+            "limits": {
+              "open": 300
+            }
+          },
+          "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Felhívni anyát"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.delete"
+        }
+      }
+    }
+  }
+}

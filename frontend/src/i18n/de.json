@@ -1361,5 +1361,83 @@
       "badExplain": "Eine schlechte Gewohnheit zählt jeden Tag. Ohne Rückfall gibt es beim Tagesabschluss die Münzen. Ein Rückfall kostet doppelt und setzt die Serie zurück.",
       "create": "Erstellen"
     }
+  },
+  "tasks": {
+    "title": "Aufgaben",
+    "tab": {
+      "today": "Heute",
+      "upcoming": "Demnächst",
+      "overdue": "Überfällig",
+      "anytime": "Jederzeit",
+      "done": "Erledigt"
+    },
+    "overdueCharged": "Überfällig: {{n}} · {{coins}} Münzen abgezogen",
+    "overdueCount": "Überfällig: {{n}}",
+    "overdueOpen": "Ansehen",
+    "todayHead": "Heute, {{date}}",
+    "add": "Neue Aufgabe",
+    "doneToday": "Heute erledigt",
+    "lateRule": "Verspätet erledigt, gibt es die Hälfte.",
+    "dueToday": "heute",
+    "priority": {
+      "low": "Niedrig",
+      "mid": "Mittel",
+      "high": "Wichtig"
+    },
+    "priorityValue": "{{label}} · {{coins}}",
+    "repeat": {
+      "daily": "täglich",
+      "weekly": "wöchentlich",
+      "monthly": "monatlich"
+    },
+    "repeatKind": {
+      "none": "Keine",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich"
+    },
+    "repeatLabel": "Wiederholung",
+    "repeatInterval": "Alle wie viele Tage?",
+    "repeatMonthDay": "Am wievielten des Monats?",
+    "repeatNeedsDue": "Eine wiederkehrende Aufgabe braucht eine Frist",
+    "summary": {
+      "everyDay": "Jeden Tag",
+      "everyN": "Alle {{n}} Tage",
+      "weekdays": "Werktags",
+      "weekly": "Jeden {{days}}",
+      "monthly": "Monatlich am {{day}}."
+    },
+    "newTitle": "Neue Aufgabe",
+    "editTitle": "Aufgabe bearbeiten",
+    "fieldTitle": "Titel",
+    "priorityLabel": "Priorität",
+    "dueLabel": "Frist",
+    "due": {
+      "none": "Keine",
+      "today": "Heute",
+      "tomorrow": "Morgen",
+      "date": "Datum"
+    },
+    "date": "Datum",
+    "dueTime": "Fällig um",
+    "notes": "Notiz",
+    "optional": "optional",
+    "create": "Erstellen",
+    "titleRequired": "Gib der Aufgabe einen Titel",
+    "dateRequired": "Wähle einen Tag",
+    "deleteTitle": "Löschen?",
+    "deleteBody": "Die Aufgabe verschwindet aus der Liste.",
+    "emptyTitle": "Keine Aufgaben",
+    "emptyBody": "Halte alles fest, mit Frist.",
+    "failed": "Das hat nicht geklappt. Versuche es erneut."
+  },
+  "capture": {
+    "title": "Etwas im Kopf?",
+    "what": "Was ist es?",
+    "example": "z. B. Mama anrufen · Abendessen am Freitag",
+    "when": "Wann?",
+    "atTime": "Zu einer Uhrzeit",
+    "allDay": "Ganztägig",
+    "textRequired": "Schreib etwas oder schließe es."
   }
 }

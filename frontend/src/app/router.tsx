@@ -98,6 +98,7 @@ const EquipmentPage = lazy(() =>
 const DaySettingsPage = lazy(() =>
   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
 );
+const TasksPage = lazy(() => import('../features/tasks/TasksPage').then((m) => ({ default: m.TasksPage })));
 const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
 const HabitDetailPage = lazy(() =>
   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
@@ -148,6 +149,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: suspended(<NotificationsPage />) },
       { path: 'habits', element: suspended(<HabitsPage />) },
       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+      { path: 'tasks', element: suspended(<TasksPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },

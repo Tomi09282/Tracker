@@ -1,0 +1,51 @@
+diff --git a/frontend/src/ui/primitives/DateTrigger.tsx b/frontend/src/ui/primitives/DateTrigger.tsx
+index 0f20121..9d4c16f 100644
+--- a/frontend/src/ui/primitives/DateTrigger.tsx
++++ b/frontend/src/ui/primitives/DateTrigger.tsx
+@@ -21,6 +21,12 @@ export interface DateTriggerProps {
+    * day in `cap-m` `text-1` and a 16 pt chevron, 44 high, as wide as its words.
+    */
+   variant?: DateTriggerVariant;
++  /**
++   * `field` only: where the glyph stands. `calendar` (the default): the 20 pt calendar glyph 10
++   * before the day (`progress-1`). `chevron`: no leading glyph, the 16 pt chevron in `text-2` flush
++   * with the right edge, 10 after the day (round B `task-form` / `capture` "Dátum": a picker field).
++   */
++  glyph?: 'calendar' | 'chevron';
+   /** How the day is written. Default: `field` "2026. okt. 9.", `inline` "Péntek, október 9." in the app's language. */
+   format?: (value: string, locale: string) => string;
+   /** Shown while there is no day (`field` only), in `text-3`. */
+@@ -89,6 +95,7 @@ export const DateTrigger = forwardRef<HTMLInputElement, DateTriggerProps>(functi
+     min,
+     max,
+     variant = 'field',
++    glyph = 'calendar',
+     format,
+     placeholder,
+     hint,
+@@ -183,15 +190,22 @@ export const DateTrigger = forwardRef<HTMLInputElement, DateTriggerProps>(functi
+       className={className}
+     >
+       <div className={cn('relative flex h-11 items-start gap-2.5', fieldLine({ disabled, error: !!error }))}>
+-        <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-5 [&_svg]:stroke-[1.75]">
+-          <Calendar />
+-        </span>
++        {glyph === 'calendar' ? (
++          <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-5 [&_svg]:stroke-[1.75]">
++            <Calendar />
++          </span>
++        ) : null}
+         <span
+           aria-hidden
+           className={cn('flex h-11 min-w-0 flex-1 items-center truncate text-body', disabled ? 'text-text-3' : text ? 'text-text-1' : 'text-text-3')}
+         >
+           {text || placeholder}
+         </span>
++        {glyph === 'chevron' ? (
++          <span aria-hidden className="flex h-11 shrink-0 items-center text-text-2 [&_svg]:size-4 [&_svg]:stroke-[1.75]">
++            <ChevronDown />
++          </span>
++        ) : null}
+         {native}
+       </div>
+     </FieldFrame>

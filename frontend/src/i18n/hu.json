@@ -1361,5 +1361,83 @@
       "badExplain": "A rossz szokás minden nap számít. Ha nem esel vissza, a napzárásnál jár az érme. Visszaesésnél kétszeres levonás, és nullázódik a sorozat.",
       "create": "Létrehozás"
     }
+  },
+  "tasks": {
+    "title": "Feladatok",
+    "tab": {
+      "today": "Ma",
+      "upcoming": "Közelgő",
+      "overdue": "Lejárt",
+      "anytime": "Bármikor",
+      "done": "Kész"
+    },
+    "overdueCharged": "{{n}} lejárt teendő · {{coins}} érme levonva",
+    "overdueCount": "{{n}} lejárt teendő",
+    "overdueOpen": "Megnézem",
+    "todayHead": "Ma, {{date}}",
+    "add": "Új teendő",
+    "doneToday": "Kész ma",
+    "lateRule": "Késve teljesítve az érme fele jár.",
+    "dueToday": "ma",
+    "priority": {
+      "low": "Alacsony",
+      "mid": "Közepes",
+      "high": "Fontos"
+    },
+    "priorityValue": "{{label}} · {{coins}}",
+    "repeat": {
+      "daily": "naponta",
+      "weekly": "hetente",
+      "monthly": "havonta"
+    },
+    "repeatKind": {
+      "none": "Nincs",
+      "daily": "Naponta",
+      "weekly": "Hetente",
+      "monthly": "Havonta"
+    },
+    "repeatLabel": "Ismétlődés",
+    "repeatInterval": "Hány naponta?",
+    "repeatMonthDay": "A hónap hányadikán?",
+    "repeatNeedsDue": "Ismétlődő teendőhöz kell határidő",
+    "summary": {
+      "everyDay": "Minden nap",
+      "everyN": "{{n}} naponta",
+      "weekdays": "Hétköznap",
+      "weekly": "Minden {{days}}",
+      "monthly": "Minden hónap {{day}}."
+    },
+    "newTitle": "Új teendő",
+    "editTitle": "Teendő szerkesztése",
+    "fieldTitle": "Cím",
+    "priorityLabel": "Fontosság",
+    "dueLabel": "Határidő",
+    "due": {
+      "none": "Nincs",
+      "today": "Ma",
+      "tomorrow": "Holnap",
+      "date": "Dátum"
+    },
+    "date": "Dátum",
+    "dueTime": "Határidő ideje",
+    "notes": "Jegyzet",
+    "optional": "opcionális",
+    "create": "Létrehozás",
+    "titleRequired": "Adj címet a teendőnek",
+    "dateRequired": "Válassz napot",
+    "deleteTitle": "Törlöd?",
+    "deleteBody": "A teendő eltűnik a listából.",
+    "emptyTitle": "Nincs teendő",
+    "emptyBody": "Rögzíts bármit, határidővel együtt.",
+    "failed": "Nem sikerült a művelet. Próbáld újra."
+  },
+  "capture": {
+    "title": "Van valami a fejedben?",
+    "what": "Mi az?",
+    "example": "pl. felhívni anyát · vacsora pénteken",
+    "when": "Mikor?",
+    "atTime": "Időpontban",
+    "allDay": "Egész nap",
+    "textRequired": "Írj be valamit, vagy zárd be."
   }
 }

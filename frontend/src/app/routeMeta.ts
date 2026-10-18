@@ -61,6 +61,7 @@ export const ROUTE_META = {
   '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+  '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
   '/notifications': {
     parent: '/',
     parentLabelKey: 'nav.today',

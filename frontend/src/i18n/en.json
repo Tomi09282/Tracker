@@ -1361,5 +1361,83 @@
       "badExplain": "A bad habit counts every day. If you do not relapse, the day close pays the coins. A relapse costs double and resets the streak.",
       "create": "Create"
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "tab": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "overdue": "Overdue",
+      "anytime": "Anytime",
+      "done": "Done"
+    },
+    "overdueCharged": "Overdue: {{n}} · {{coins}} coins deducted",
+    "overdueCount": "Overdue: {{n}}",
+    "overdueOpen": "View",
+    "todayHead": "Today, {{date}}",
+    "add": "New task",
+    "doneToday": "Done today",
+    "lateRule": "Completed late, a task pays half.",
+    "dueToday": "today",
+    "priority": {
+      "low": "Low",
+      "mid": "Medium",
+      "high": "High"
+    },
+    "priorityValue": "{{label}} · {{coins}}",
+    "repeat": {
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly"
+    },
+    "repeatKind": {
+      "none": "None",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "repeatLabel": "Repeat",
+    "repeatInterval": "Every how many days?",
+    "repeatMonthDay": "Which day of the month?",
+    "repeatNeedsDue": "A repeating task needs a deadline",
+    "summary": {
+      "everyDay": "Every day",
+      "everyN": "Every {{n}} days",
+      "weekdays": "Weekdays",
+      "weekly": "Every {{days}}",
+      "monthly": "Monthly on day {{day}}"
+    },
+    "newTitle": "New task",
+    "editTitle": "Edit task",
+    "fieldTitle": "Title",
+    "priorityLabel": "Priority",
+    "dueLabel": "Deadline",
+    "due": {
+      "none": "None",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "date": "Date"
+    },
+    "date": "Date",
+    "dueTime": "Due time",
+    "notes": "Note",
+    "optional": "optional",
+    "create": "Create",
+    "titleRequired": "Give the task a title",
+    "dateRequired": "Choose a day",
+    "deleteTitle": "Delete it?",
+    "deleteBody": "The task disappears from the list.",
+    "emptyTitle": "No tasks",
+    "emptyBody": "Capture anything, with a deadline.",
+    "failed": "Something went wrong. Try again."
+  },
+  "capture": {
+    "title": "Anything on your mind?",
+    "what": "What is it?",
+    "example": "e.g. call mum · dinner on Friday",
+    "when": "When?",
+    "atTime": "At a time",
+    "allDay": "All day",
+    "textRequired": "Type something, or close it."
   }
 }
