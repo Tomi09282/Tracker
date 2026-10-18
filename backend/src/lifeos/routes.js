@@ -5,6 +5,7 @@
 //   GET   /lifeos/today    settle what is due, then the logical day, the wallet and today's workout
 //   GET   /admin/rules     the point rules in force (admin)
 //   PUT   /admin/rules     append a new rule set (admin, DB re-check, audit, expectedVersion)
+//   /habits, /tasks        Phase 3 (migration 032): habit-routes.js and task-routes.js, mounted below
 //
 // ═══ THE ROUTES CARRY NO AUTHORITY ═════════════════════════════════════════════════════════════
 //
@@ -24,6 +25,8 @@ import { requireAuth, requireRole } from '../auth/middleware.js';
 import { isValidTimeZone, TIMEZONE_RE } from './dates.js';
 import { pointRulesSchema, DEFAULT_RULES, RULE_RANGES } from './rules.js';
 import { ensureSettled, invalidateSettled } from './settle.js';
+import habitRoutes from './habit-routes.js';
+import taskRoutes from './task-routes.js';
 
 const router = Router();
 
@@ -227,5 +230,10 @@ router.put(
     }
   }),
 );
+
+/* ── Phase 3: habits and tasks (migration 032) ──────────────────────────────────────────────── */
+
+router.use(habitRoutes);
+router.use(taskRoutes);
 
 export default router;

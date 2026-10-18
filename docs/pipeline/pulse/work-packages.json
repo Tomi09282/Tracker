@@ -1238,27 +1238,14 @@
       "id": "B-core",
       "title": "LifeOS Phase 2 \"Core\" on the backend (approved plan abundant-booping-willow, B0 + P2; owner 2026-10-17 / 2026-10-18): the worker split (db/conn.js + db/tx/*.js), migration 031 (user_prefs, point_rule_sets, coin_events, daily_summaries, coin_reasons xp / spend, spend-covered trigger), the lazy day close, the workout award, /me/prefs, /lifeos/today, /admin/rules, the extended wallet and ledger",
       "owns": [
-        "backend/package.json",
         "backend/server.js",
         "backend/scripts/check-admin-audit.mjs",
         "backend/scripts/check-gdpr.mjs",
         "backend/scripts/check-route-tx.mjs",
-        "backend/scripts/check-worker-tx.mjs",
-        "backend/scripts/lib/worker-sources.mjs",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke/lifeos-core.js",
         "backend/scripts/verify-030.mjs",
         "backend/scripts/verify-031.mjs",
-        "backend/scripts/verify-gates.mjs",
-        "backend/scripts/verify-lifeos-rules.mjs",
-        "backend/src/coins/routes.js",
-        "backend/src/db/conn.js",
-        "backend/src/db/gdpr.js",
-        "backend/src/db/index.js",
         "backend/src/db/migrations/031_lifeos_core.sql",
-        "backend/src/db/tx/lifeos.js",
-        "backend/src/db/worker.js",
-        "backend/src/lifeos/**",
         "backend/src/logs/routes.js",
         "backend/src/nutrition/daySql.js",
         "backend/src/nutrition/routes.js",
@@ -1291,7 +1278,89 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-core): the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The plan ownership table gives server.js, db/index.js, db/worker.js, db/conn.js, db/gdpr.js, package.json, check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them (backend/package.json, smoke.js and verify-030.mjs passed from the closed B-q2, verify-gates.mjs and logs/routes.js from the closed B-roles). db/index.js sets --no-parallel-scavenge before the pool's first worker (a worker with a large heap segfaulted npm run migrate on termination). The occurrence rule moved to the pure plans/occurrences.js; schedule.js reads user_prefs.timezone. Open for the owner: streak milestones are outside the daily cap (owner 2026-10-18) - Phase 3 implements them that way. Follow-up: the coins admin audit reconciliation does not yet check that every coin_event has its ledger row (verify-031 does). The dev backend on :3000 applies 031 only after a restart on the merged code."
+      "notes": "Added by the integrator at merge (merge-B-core): the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The plan ownership table gives server.js, db/index.js, db/worker.js, db/conn.js, db/gdpr.js, package.json, check-*.mjs and smoke.js to INT; this package was given them explicitly, and no other entry lists them (backend/package.json, smoke.js and verify-030.mjs passed from the closed B-q2, verify-gates.mjs and logs/routes.js from the closed B-roles). db/index.js sets --no-parallel-scavenge before the pool's first worker (a worker with a large heap segfaulted npm run migrate on termination). The occurrence rule moved to the pure plans/occurrences.js; schedule.js reads user_prefs.timezone. Open for the owner: streak milestones are outside the daily cap (owner 2026-10-18) - Phase 3 implements them that way. Follow-up: the coins admin audit reconciliation does not yet check that every coin_event has its ledger row (verify-031 does). The dev backend on :3000 applies 031 only after a restart on the merged code. At merge-B-habits-tasks backend/package.json, backend/scripts/check-worker-tx.mjs, backend/scripts/lib/worker-sources.mjs, backend/scripts/smoke.js, backend/scripts/verify-gates.mjs, backend/scripts/verify-lifeos-rules.mjs, backend/src/coins/routes.js, backend/src/db/conn.js, backend/src/db/gdpr.js, backend/src/db/index.js, backend/src/db/tx/lifeos.js, backend/src/db/worker.js, backend/src/lifeos/** passed to B-habits-tasks (B-core is closed; one file, one owner)."
+    },
+    {
+      "id": "G-lifeos",
+      "title": "LifeOS kit gaps (approved plan, design round B: calendar-1, task-form, habit-form, event-form, focus-2): DayRail, TimeTrigger, RecurrencePicker, WeekdayChips (+ weekdays.ts), Countdown, with specimens and a kit page",
+      "owns": [
+        "frontend/src/ui/data/Countdown.tsx",
+        "frontend/src/ui/primitives/DayRail.tsx",
+        "frontend/src/ui/primitives/RecurrencePicker.tsx",
+        "frontend/src/ui/primitives/TimeTrigger.tsx",
+        "frontend/src/ui/primitives/WeekdayChips.tsx",
+        "frontend/src/ui/primitives/weekdays.ts",
+        "frontend/src/features/playground/kit/lifeos.tsx",
+        "docs/pipeline/pulse/kit/lifeos.md",
+        "docs/pipeline/pulse/pkg/G-lifeos/**"
+      ],
+      "dependsOn": [
+        "F12"
+      ],
+      "parallelGroup": "kit-gap lane (approved plan phases 3-6, parallel with the LifeOS screens)",
+      "size": "M",
+      "acceptance": [
+        "every addition is a new file: no existing call site changes its look",
+        "kit page docs/pipeline/pulse/kit/lifeos.md and specimens in features/playground/kit/lifeos.tsx; Figma | app pairs against calendar-1, task-form, habit-form, event-form, focus-2"
+      ],
+      "verify": [
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (integration worktree, clean tree)",
+        "the kit board capture of the lifeos specimens"
+      ],
+      "notes": "Added by the integrator at merge-B-habits-tasks, ahead of the lane's own merge, because S-habits and S-tasks depend on it (pulse-owns-check refuses a dependency on an unknown id). Built from the branch pulse/G-lifeos (head 0a1fe53) diff: the lane has no work-package.json and ran outside the plan entry list. pulse-sync, pulse-merge-check and pulse-progress did not know the id before this entry."
+    },
+    {
+      "id": "B-habits-tasks",
+      "title": "LifeOS Phase 3 \"Habits + tasks + Ma\" on the backend (approved plan abundant-booping-willow, Phase 3; owner 2026-10-18: streak milestones 7 / 30 / 100 = 25 / 100 / 500 outside the daily cap): migration 032 (habits, habit_logs, habit_day_results, tasks, settled-day and owner-match triggers, streak.milestone reason), the habit and task domain, the named habit / task transactions, the full closeLifeDayTx, the /habits and /tasks routes, GET /lifeos/today with habits and tasks, GDPR",
+      "owns": [
+        "backend/package.json",
+        "backend/scripts/check-worker-tx.mjs",
+        "backend/scripts/lib/worker-sources.mjs",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/lifeos-habits-tasks.js",
+        "backend/scripts/verify-032.mjs",
+        "backend/scripts/verify-day-close.mjs",
+        "backend/scripts/verify-gates.mjs",
+        "backend/scripts/verify-lifeos-rules.mjs",
+        "backend/src/coins/routes.js",
+        "backend/src/db/conn.js",
+        "backend/src/db/gdpr.js",
+        "backend/src/db/index.js",
+        "backend/src/db/lifeos-items.js",
+        "backend/src/db/lifeos-ledger.js",
+        "backend/src/db/migrations/032_lifeos_habits_tasks.sql",
+        "backend/src/db/tx/lifeos.js",
+        "backend/src/db/tx/lifeos-habits.js",
+        "backend/src/db/tx/lifeos-tasks.js",
+        "backend/src/db/worker.js",
+        "backend/src/lifeos/**",
+        "docs/pipeline/pulse/pkg/B-habits-tasks/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/lib/lifeos-api.ts"
+        ]
+      },
+      "dependsOn": [
+        "B-core"
+      ],
+      "parallelGroup": "backend lane (approved plan phase 3)",
+      "size": "L",
+      "acceptance": [
+        "migration 032 adds habits, habit_logs, habit_day_results and tasks; triggers refuse edits on a settled day and an owner mismatch; streak.milestone is a cap-exempt reason (verify-032)",
+        "closeLifeDayTx settles freezes, misses, partial days, the relapse cap, the times-per-week quota, the streak and its milestones outside the daily cap, overdue tasks and the perfect day (verify-day-close, verify-lifeos-rules)",
+        "GET / POST / PATCH /habits, /habits/:id, archive / restore, log / skip / relapse; GET / POST / PATCH / DELETE /tasks and complete / reopen; GET /lifeos/today carries habits and tasks; every coin-moving path has its five-pass smoke section (smoke/lifeos-habits-tasks.js)",
+        "check-worker-tx counts a call to a writing helper (db/lifeos-ledger.js, db/lifeos-items.js) as a write, proved by two verify-gates probes",
+        "GDPR export covers the new user tables",
+        "hand-in: frontend/src/lib/lifeos-api.ts carries the Phase-3 types, LifeosToday.habits / .tasks (types only)"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-habits-tasks) from the package's own pkg/B-habits-tasks/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 13 paths passed from the closed B-core. The Piscina pool now waits with atomics 'async' and every worker closes its connection before termination (the default sync wait segfaulted migrate / seeds / smoke on termination); B-core's --no-parallel-scavenge flag is removed. Habit reminder_time is stored and served but sends nothing until Phase 5 (materializeRemindersTx). seed-demo.mjs has no habits / tasks yet (a request for the seed script's owner, needed by the round-B captures). The dev backend on :3000 applies 032 and the pool change only after a restart on the merged code."
     }
   ],
   "screens": [
@@ -1301,9 +1370,6 @@
         "home"
       ],
       "owns": [
-        "frontend/src/features/home/HomePage.tsx",
-        "frontend/src/features/home/WeekStrip.tsx",
-        "frontend/src/features/home/HomeNutrition.tsx",
         "frontend/src/features/chat/NotificationBell.tsx",
         "docs/pipeline/pulse/pkg/S-home/**"
       ],
@@ -1338,7 +1404,7 @@
       ],
       "size": "M",
       "wave": 1,
-      "notes": "Calibration screen: compared with _jovahagyott-v1-home@2x.png; its independent review is part of Gate A. home-1 (the approved frame — a state the seed cannot reach) and home-2 (a Friday session) are fixtures edited from recordings: verdict matched-fixture. home-3 is demo.nagy.balazs@ on the recording. Keep navigate(/library), both /workout links, the /nutrition link, the bell -> /notifications. Add the permanent library row (D2): a ListRow under the today block, label nav.library; it is in no frame and is masked when comparing with the approved frame. Undrawn states composed from the kit; a failed week read prints an em dash + Újra, never 0. NotificationBell keeps its export and props. May remove nutrition.card.targetCaption if HomeNutrition.tsx stops reading it (its only consumer).",
+      "notes": "Calibration screen: compared with _jovahagyott-v1-home@2x.png; its independent review is part of Gate A. home-1 (the approved frame — a state the seed cannot reach) and home-2 (a Friday session) are fixtures edited from recordings: verdict matched-fixture. home-3 is demo.nagy.balazs@ on the recording. Keep navigate(/library), both /workout links, the /nutrition link, the bell -> /notifications. Add the permanent library row (D2): a ListRow under the today block, label nav.library; it is in no frame and is masked when comparing with the approved frame. Undrawn states composed from the kit; a failed week read prints an em dash + Újra, never 0. NotificationBell keeps its export and props. May remove nutrition.card.targetCaption if HomeNutrition.tsx stops reading it (its only consumer). At merge-B-habits-tasks HomePage.tsx, WeekStrip.tsx and HomeNutrition.tsx passed to S-ma (the Ma page replaces the Kezdőlap; S-home is closed; one file, one owner).",
       "i18nNamespaces": [
         "home"
       ],
@@ -2677,6 +2743,191 @@
         "adminRules"
       ],
       "liveWrites": []
+    },
+    {
+      "id": "S-habits",
+      "title": "LifeOS Phase 3 (Habits + tasks + Ma) screen package: Szokások at /habits (pushed from Ma), one habit at /habits/:id and the create / edit sheet (frame habit-form), built 1:1 to design round B's lifeos/habits-1, habit-detail and habit-form on the B-habits-tasks API (GET /habits, GET /habits/:id, POST /habits, PATCH /habits/:id, archive / restore, log / skip / relapse)",
+      "screens": [
+        "habits",
+        "habit-detail",
+        "habit-form"
+      ],
+      "owns": [
+        "frontend/src/features/habits/**",
+        "docs/pipeline/pulse/pkg/S-habits/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-habits-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /habits and /habits/:id routes, parent Ma = '/')"
+        }
+      },
+      "frames": [
+        "lifeos/habits-1",
+        "lifeos/habit-detail",
+        "lifeos/habit-form"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/habits.md does not exist yet: TRACKER-mockups/5-pulse/figma-build/lifeos/README-ma.md and pkg/B-habits-tasks/api.md are the inventory",
+      "account": "user@tracker.local",
+      "route": "/habits",
+      "dependsOn": [
+        "B-habits-tasks",
+        "G-lifeos",
+        "B-core"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 3)",
+      "i18nNamespaces": [
+        "habits"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-habits-tasks' Phase-3 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' WeekdayChips / TimeTrigger (ui/primitives) - merge both first; the slot holds both applied locally and uncommitted. habitsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 032 / habit routes yet: every capture of this package answers GET /habits and GET /habits/:id with contract bodies (states.json) and is reported matched-fixture at best until the integrator records them. Entry added by the integrator at merge-B-habits-tasks from the package's own pkg/S-habits/work-package.json (as committed on pulse/S-habits cab20d3).",
+      "wave": 6
+    },
+    {
+      "id": "S-tasks",
+      "title": "LifeOS Phase 3 screen package: Feladatok at /tasks (pushed from Ma, frame lifeos/tasks-1) with the five-tab Segmented filter Ma / Közelgő / Lejárt / Bármikor / Kész, task rows that complete / reopen on the check and open the task sheet on the row; TaskSheet (frame lifeos/task-form: Cím, Fontosság, Határidő, Dátum + Határidő ideje, the G-lifeos RecurrencePicker, Jegyzet, one lime pill; edit and delete of an existing task); CaptureSheet (frame lifeos/capture: one field routed to a task through POST /tasks; Esemény hidden until the Phase-5 event route) for the Ma page to mount",
+      "screens": [
+        "tasks",
+        "task-form",
+        "capture"
+      ],
+      "owns": [
+        "frontend/src/features/tasks/**",
+        "frontend/src/features/capture/**",
+        "docs/pipeline/pulse/pkg/S-tasks/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-tasks-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /tasks route)",
+          "R-S-tasks-02": "frontend/src/ui/primitives/DateTrigger.tsx (additive glyph prop: the trailing chevron of task-form / capture)"
+        }
+      },
+      "frames": [
+        "lifeos/tasks-1",
+        "lifeos/task-form",
+        "lifeos/capture"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/tasks.md does not exist: the frame README figma-build/lifeos/README-ma.md (tasks-1, task-form, capture rows) and docs/pipeline/pulse/pkg/B-habits-tasks/api.md are the inventory",
+      "account": "user@tracker.local",
+      "route": "/tasks",
+      "dependsOn": [
+        "B-habits-tasks",
+        "G-lifeos"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 3)",
+      "i18nNamespaces": [
+        "tasks",
+        "capture"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' RecurrencePicker / TimeTrigger / weekdays.ts - merge both first; the slot holds them as uncommitted interim copies. tasksData.ts holds the hooks under a non-use* file name. GET /tasks is not in the freeze (the running dev backend has no migration 032): every capture answers it with a contract body checked against TasksResponse (fixture-schema-check.mjs) - matched-fixture at best until recorded. CaptureSheet is exported for S-ma (the Ma page's FELADATOK 'Rögzítés +'); /tasks?capture=1 opens it over Feladatok until Ma mounts it. Entry added by the integrator at merge-B-habits-tasks from the package's own pkg/S-tasks/work-package.json (as committed on pulse/S-tasks a3aaa56).",
+      "wave": 6
+    },
+    {
+      "id": "S-ma",
+      "title": "LifeOS Phase 3 screen package: the Ma page (TodayPage at /) replaces the Kezdőlap, built 1:1 to design round B's lifeos/ma-1..ma-4 - greet header + bell, the ledger line ÉRME · SZINT -> /coins, the hero MA a/b with the day SegmentBar and 'Ma eddig', MAI EDZÉS with the one lime pill, SZOKÁSOK rows (tap to log, counted habit, bad habit clean / relapse, streak figure + multiplier + freezes), FELADATOK rows (tap to complete / reopen, 'Rögzítés +'), TÁPLÁLKOZÁS (compact), the Gyakorlatok row last; NAPI DOBÁS (Phase 4), FÓKUSZ (Phase 6) and KÖVETKEZŐ (Phase 5) are not drawn yet",
+      "screens": [
+        "today"
+      ],
+      "owns": [
+        "frontend/src/features/today/**",
+        "frontend/src/features/home/HomePage.tsx",
+        "frontend/src/features/home/WeekStrip.tsx",
+        "frontend/src/features/home/HomeNutrition.tsx",
+        "docs/pipeline/pulse/pkg/S-ma/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-ma-01": "blocking: index route -> TodayPage, first user tab labelled nav.today, routeMeta / Notifications / palette read nav.today, verify-gates i18n probe on nav.today (shared.patch); nav.today set + nav.home removed (i18n.patch.json); features/home/useToday.ts deleted (requests/R-S-ma-01.patch)",
+          "R-S-ma-02": "after S-tasks: Rögzítés opens the capture sheet over Ma (requests/R-S-ma-02.patch, on TodayPage.tsx)",
+          "R-S-ma-03": "backend, non-blocking: GET /lifeos/today carries the rule figures the frames quote"
+        },
+        "states.json": "docs/pipeline/pulse/pkg/S-ma/states.json",
+        "shared.patch": "docs/pipeline/pulse/pkg/S-ma/shared.patch"
+      },
+      "frames": [
+        "lifeos/ma-1",
+        "lifeos/ma-2",
+        "lifeos/ma-3",
+        "lifeos/ma-4"
+      ],
+      "inventory": "C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/figma-build/lifeos/README-ma.md + docs/pipeline/pulse/pkg/B-habits-tasks/api.md (no Screens/today.md yet)",
+      "account": "user@tracker.local",
+      "route": "/",
+      "dependsOn": [
+        "B-core",
+        "B-habits-tasks",
+        "S-home"
+      ],
+      "size": "L",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 3)",
+      "i18nNamespaces": [
+        "today",
+        "nav"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, the integrator adds it at merge. Ownership of HomePage.tsx, WeekStrip.tsx and HomeNutrition.tsx passes from the closed S-home to this package, which deletes them (their week query and nutrition block live on in features/today/). The three new hooks are NEW files that no gate mirrors or imports: add them to frozen.except as was done for useFinishWorkout.ts. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch): merge B-habits-tasks first. The doors Összes -> /habits, Kész ma -> /tasks, Első szokás -> /habits and Rögzítés (until the capture sheet exists) -> /tasks need S-habits / S-tasks merged before or with this package. Reads the existing home.* keys (greeting, start, resume, restDay, inProgress, done, exerciseCount, todayTitle, emptyTitle, emptyBody) - they keep their namespace. frozenExcept as proposed (frontend/src/features/today/useLifeosToday.ts, frontend/src/features/today/useTodayActions.ts, frontend/src/features/today/useTodayPlan.ts) goes into frozen.except at this package's merge. Entry added by the integrator at merge-B-habits-tasks from the package's own pkg/S-ma/work-package.json (as committed on pulse/S-ma db78ed1).",
+      "wave": 6
     }
   ],
   "queue": [

@@ -1,0 +1,55 @@
+{
+  "id": "B-habits-tasks",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 3 'Habits + tasks + Ma' (backend half); owner 2026-10-18 (design round B and the economy sheet approved; streak milestones 7 / 30 / 100 = 25 / 100 / 500 are OUTSIDE the daily cap), .pulse/owner-answers.md last two sections; backend changes allowed by the owner's lifting of the backend rule for the LifeOS backend packages",
+  "owns": [
+    "backend/package.json",
+    "backend/scripts/check-worker-tx.mjs",
+    "backend/scripts/lib/worker-sources.mjs",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-habits-tasks.js",
+    "backend/scripts/verify-032.mjs",
+    "backend/scripts/verify-day-close.mjs",
+    "backend/scripts/verify-gates.mjs",
+    "backend/scripts/verify-lifeos-rules.mjs",
+    "backend/src/coins/routes.js",
+    "backend/src/db/conn.js",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/lifeos-items.js",
+    "backend/src/db/lifeos-ledger.js",
+    "backend/src/db/migrations/032_lifeos_habits_tasks.sql",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/tx/lifeos-habits.js",
+    "backend/src/db/tx/lifeos-tasks.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/**",
+    "docs/pipeline/pulse/pkg/B-habits-tasks/**"
+  ],
+  "takenFrom": {
+    "B-core (closed, merged 2b9d997)": [
+      "backend/package.json",
+      "backend/scripts/check-worker-tx.mjs",
+      "backend/scripts/lib/worker-sources.mjs",
+      "backend/scripts/smoke.js",
+      "backend/scripts/verify-gates.mjs",
+      "backend/scripts/verify-lifeos-rules.mjs",
+      "backend/src/coins/routes.js",
+      "backend/src/db/conn.js",
+      "backend/src/db/gdpr.js",
+      "backend/src/db/index.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/src/db/worker.js",
+      "backend/src/lifeos/**"
+    ]
+  },
+  "handIn": {
+    "shared.patch": ["frontend/src/lib/lifeos-api.ts"]
+  },
+  "notInScope": [
+    "every LifeOS screen (Ma replacing Kezdőlap, Szokások, szokás részletek / űrlap, Feladatok, teendő űrlap, Rögzítés) — the frontend lanes, against api.md and lifeos-api.ts",
+    "challenges, rewards (Phase 4, migration 033), calendar / events / reminders (Phase 5, 034; the capture's Esemény half), focus (Phase 6, 035)",
+    "habit reminders as self-notifications (materializeRemindersTx, Phase 5); reminder_time is stored and served",
+    "seed-demo data for the round-B captures (habits / tasks of the Monday seed) — owned by the seed script's owner; a request in forOrchestrator",
+    "work-packages.json entry — the integrator's, at merge (as for B-core)"
+  ]
+}

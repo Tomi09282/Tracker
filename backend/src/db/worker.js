@@ -11,10 +11,30 @@
 import { readFileSync } from 'node:fs';
 import { EXPORT_TABLES, UNLINK_BEFORE_DELETE } from './gdpr.js';
 import { randomBytes } from 'node:crypto';
-import { getDb, stmt, rethrow } from './conn.js';
+import { getDb, stmt, rethrow, closeDb } from './conn.js';
 
 export { getDb, stmt, rethrow } from './conn.js';
 export * from './tx/lifeos.js';
+export * from './tx/lifeos-habits.js';
+export * from './tx/lifeos-tasks.js';
+
+/**
+ * Shutdown, part one: close THIS worker's connection before the pool terminates it (see
+ * db/index.js and conn.js closeDb). The facade runs one of these per worker at once; the barrier on the shared
+ * counter keeps each worker inside its own call until all of them have arrived, so no worker takes
+ * two and none is skipped. Bounded at two seconds: a worker still busy elsewhere closes when its
+ * queued call reaches it, and a pool that cannot close cleanly is still terminated.
+ */
+export function closeConnection({ shared, threads }) {
+  const counter = new Int32Array(shared);
+  Atomics.add(counter, 0, 1);
+  Atomics.notify(counter, 0);
+  const deadline = Date.now() + 2000;
+  for (let seen = Atomics.load(counter, 0); seen < threads && Date.now() < deadline; seen = Atomics.load(counter, 0)) {
+    Atomics.wait(counter, 0, seen, 50);
+  }
+  return closeDb();
+}
 
 export function all({ sql, params = [] }) {
   try {

@@ -8,6 +8,8 @@
  * plan names (2026-03-29 and 2026-10-25, Europe/Budapest), where the port deliberately differs
  * from f_app (wall-clock day start, see dates.js), the settle moment of the economy sheet, the
  * level curve, the zod schema, and the seeded rule set in migration 031 against DEFAULT_RULES.
+ * Phase 3 adds f_app's habits / dayClose (settleHabit) / streakFreeze / recurrence /
+ * recurringTasks / tasks vectors against src/lifeos/{habits,recurrence,tasks}.js.
  *
  * Pure: no database. Run: npm run verify:lifeos-rules
  */
@@ -117,6 +119,108 @@ const sql = fs.readFileSync('src/db/migrations/031_lifeos_core.sql', 'utf8');
 const seeded = JSON.parse(/VALUES \(1, json\('([\s\S]*?)'\)/.exec(sql)[1]);
 eq('migration 031 seeds exactly DEFAULT_RULES as version 1', Object.entries(seeded).sort(), Object.entries(r.DEFAULT_RULES).sort());
 eq('every rule key has a range, and only those', Object.keys(r.RULE_RANGES).sort(), Object.keys(r.DEFAULT_RULES).sort());
+
+/* ══ Phase 3 (package B-habits-tasks): habits, the day-close settlement, recurrence, tasks ══════ */
+const h = await import('../src/lifeos/habits.js');
+const rec = await import('../src/lifeos/recurrence.js');
+const tk = await import('../src/lifeos/tasks.js');
+const R = r.DEFAULT_RULES;
+const good = (o = {}) => ({ kind: 'good', scheduleType: 'daily', weekdayMask: 127, timesPerWeek: null, targetCount: 1, pointsSuccess: 10, pointsPenalty: 5, ...o });
+const bad = (o = {}) => ({ kind: 'bad', scheduleType: 'daily', weekdayMask: 127, timesPerWeek: null, targetCount: 1, pointsSuccess: 15, pointsPenalty: 5, ...o });
+const S = (current = 0, best = current, freezes = 0, weekStreak = 0) => ({ current, best, freezes, weekStreak });
+const settle = (habit, log, state, date = '2026-09-09', weekDone = 0) => h.settleHabitDay({ habit, log, state, date, weekDone }, R);
+const coins = (x) => x.coins.map((c) => `${c.reason}:${c.points}`);
+
+console.log('\n── f_app tests/domain/habits.test.ts ──────────────────────────────────────────');
+eq('schedules by type and weekday mask (Wed 2026-09-09, Sat the 12th)', [
+  h.isScheduledOn({ scheduleType: 'daily', weekdayMask: 0 }, '2026-09-09'),
+  h.isScheduledOn({ scheduleType: 'weekdays', weekdayMask: 0b0011111 }, '2026-09-09'),
+  h.isScheduledOn({ scheduleType: 'weekdays', weekdayMask: 0b0011111 }, '2026-09-12'),
+  h.isScheduledOn({ scheduleType: 'times_per_week', weekdayMask: 0 }, '2026-09-12'),
+], [true, true, false, true]);
+eq('a ticked simple habit pays 10 at its close', coins(settle(good(), { count: 1, status: 'done' }, S())), ['habit.done:10']);
+eq('a counted habit pays proportionally: 3/8 nothing, 4/8 five, 8/8 ten', [3, 4, 8].map((count) => h.goodHabitPreview({ count, target: 8, base: 10, streak: 0 }, R)), [0, 5, 10]);
+eq('the log status follows the count', [h.goodStatusFor(7, 8), h.goodStatusFor(8, 8)], ['pending', 'done']);
+eq('the streak multiplier at a 7-day streak: 13', coins(settle(good(), { count: 1, status: 'done' }, S(7))), ['habit.done:13']);
+const sk = settle(good(), { count: 0, status: 'skipped' }, S(3));
+eq('skip: no coins, no penalty, streak kept', [sk.outcome, coins(sk), sk.state.current], ['skipped', [], 3]);
+eq('relapse: -10 per event, capped at -30', [1, 3, 4].map((count) => coins(settle(bad(), { count, status: 'relapse' }, S()))[0]), ['habit.relapse:-10', 'habit.relapse:-30', 'habit.relapse:-30']);
+eq('a clean day adds one to the bad habit streak (the clean-day count)', settle(bad(), null, S(12)).state.current, 13);
+
+console.log('\n── f_app tests/domain/dayClose.test.ts (settleHabit) ──────────────────────────');
+const ms = settle(good(), null, S(4, 9));
+eq('missed good habit: -5, streak 0, best kept', [coins(ms), ms.state], [['habit.missed:-5'], { current: 0, best: 9, freezes: 0, weekStreak: 0 }]);
+const cl = settle(bad(), null, S());
+eq('clean bad habit: +15, streak +1, counted as done', [coins(cl), cl.counted], [['habit.clean_day:15'], 'done']);
+eq('relapse resets the bad-habit streak and keeps the best', settle(bad(), { count: 1, status: 'relapse' }, S(12)).state, { current: 0, best: 12, freezes: 0, weekStreak: 0 });
+eq('skipped is excluded from the perfect day', sk.counted, 'excluded');
+eq('the 7-day milestone pays 25 (its own reason, outside the cap)', coins(settle(good(), { count: 1, status: 'done' }, S(6))), ['habit.done:10', 'streak.milestone:25']);
+eq('the 30-day milestone pays 100 and the day pays x1.25 (streak 29 before it)', coins(settle(good(), { count: 1, status: 'done' }, S(29))), ['habit.done:13', 'streak.milestone:100']);
+eq('the 100-day milestone pays 500', coins(settle(good(), { count: 1, status: 'done' }, S(99))).at(-1), 'streak.milestone:500');
+eq('a partial count pays its share and is still a miss (f_app keeps the tap credit)', coins(settle(good({ targetCount: 8 }), { count: 4, status: 'pending' }, S())), ['habit.done:5', 'habit.missed:-5']);
+const tpw = good({ scheduleType: 'times_per_week', timesPerWeek: 3 });
+const op = settle(tpw, null, S());
+eq('times-per-week, weekday, not done: open, no penalty, excluded', [op.outcome, coins(op), op.counted], ['open', [], 'excluded']);
+const sun = settle(tpw, null, S(1), '2026-09-13', 1);
+eq('times-per-week, Sunday, 1 of 3: -5 once, streak 0, quota 0', [coins(sun), sun.state.current, sun.quotaMet], [['habit.missed:-5'], 0, 0]);
+const met = settle(tpw, { count: 1, status: 'done' }, S(2, 2, 0, 3), '2026-09-13', 3);
+eq('times-per-week, Sunday, quota met: a week is counted', [met.quotaMet, met.weekStreakAfter], [1, 4]);
+
+console.log('\n── f_app tests/domain/streakFreeze.test.ts ────────────────────────────────────');
+const f30 = settle(good(), { count: 1, status: 'done' }, S(29));
+eq('the 30th day grants a freeze', [f30.state.freezes, f30.freezeEarned], [1, 1]);
+eq('freezes are capped at maxFreezes (2)', settle(good(), { count: 1, status: 'done' }, S(59, 59, 2)).state.freezes, 2);
+const fz = settle(good(), null, S(31, 31, 1));
+eq('a miss spends the freeze: no penalty, streak kept, excluded', [fz.outcome, coins(fz), fz.state, fz.counted], ['frozen', [], { current: 31, best: 31, freezes: 0, weekStreak: 0 }, 'excluded']);
+const f0 = settle(good(), null, S(0, 0, 1));
+eq('never spends a freeze on a zero streak', [coins(f0), f0.state.freezes], [['habit.missed:-5'], 1]);
+
+console.log('\n── f_app tests/domain/recurrence.test.ts ──────────────────────────────────────');
+eq('parses and rejects rules', [
+  rec.parseRecurrence('{"type":"daily"}'),
+  rec.parseRecurrence('{"type":"weekly","weekdayMask":31}'),
+  rec.parseRecurrence('{"type":"monthly","day":31}'),
+  rec.parseRecurrence('{"type":"weekly","weekdayMask":0}'),
+  rec.parseRecurrence('{"type":"monthly","day":0}'),
+  rec.parseRecurrence('{"type":"daily","interval":0}'),
+  rec.parseRecurrence('not json'),
+  rec.parseRecurrence(null),
+], [{ type: 'daily' }, { type: 'weekly', weekdayMask: 31 }, { type: 'monthly', day: 31 }, null, null, null, null, null]);
+eq('serializes canonically', [rec.serializeRecurrence({ type: 'daily', interval: 3 }), rec.serializeRecurrence(null)], ['{"type":"daily","interval":3}', null]);
+eq('an unknown key in a rule is refused (.strict())', rec.recurrenceSchema.safeParse({ type: 'daily', every: 2 }).success, false);
+const r3 = { type: 'daily', interval: 3 };
+eq('daily with interval counts from the anchor', [rec.occursOn(r3, '2026-09-01', '2026-09-01'), rec.occursOn(r3, '2026-09-01', '2026-09-02'), rec.occursOn(r3, '2026-09-01', '2026-09-04'), rec.occursOn(r3, '2026-09-01', '2026-08-29')], [true, false, true, false]);
+eq('... occurrencesBetween respects the anchor', rec.occurrencesBetween(r3, '2026-09-01', '2026-08-30', '2026-09-08'), ['2026-09-01', '2026-09-04', '2026-09-07']);
+const mw = { type: 'weekly', weekdayMask: 0b0000101 };
+eq('weekly uses the Monday-based mask', [rec.occurrencesBetween(mw, '2026-09-07', '2026-09-07', '2026-09-13'), rec.nextOccurrence(mw, '2026-09-07', '2026-09-09')], [['2026-09-07', '2026-09-09'], '2026-09-14']);
+const m31 = { type: 'monthly', day: 31 };
+eq('monthly clamps to short months', [rec.occursOn(m31, '2026-01-31', '2026-02-28'), rec.occursOn(m31, '2026-01-31', '2026-03-31'), rec.occursOn(m31, '2026-01-31', '2026-04-30'), rec.occursOn(m31, '2026-01-31', '2026-04-29'), rec.nextOccurrence(m31, '2026-01-31', '2026-01-31')], [true, true, true, false, '2026-02-28']);
+
+console.log('\n── f_app tests/domain/recurringTasks.test.ts (the materializer plan) ──────────');
+eq('a daily template owes today .. today + 7', tk.daysToMaterialize({ rule: { type: 'daily' }, anchor: '2026-09-09', today: '2026-09-09', existingDays: [] }).length, 8);
+eq('... and nothing once they exist (idempotent)', tk.daysToMaterialize({ rule: { type: 'daily' }, anchor: '2026-09-09', today: '2026-09-09', existingDays: ['2026-09-09', '2026-09-10', '2026-09-11', '2026-09-12', '2026-09-13', '2026-09-14', '2026-09-15', '2026-09-16'] }), []);
+eq('weekly respects the mask and the anchor (Thursdays from the 10th)', tk.daysToMaterialize({ rule: { type: 'weekly', weekdayMask: 0b0001000 }, anchor: '2026-09-10', today: '2026-09-09', existingDays: [] }), ['2026-09-10']);
+eq('a deleted occurrence is not re-created (it still has its day)', tk.daysToMaterialize({ rule: { type: 'daily' }, anchor: '2026-09-09', today: '2026-09-12', existingDays: ['2026-09-12'] })[0], '2026-09-13');
+
+console.log('\n── f_app tests/domain/tasks.test.ts ───────────────────────────────────────────');
+const T = (o) => ({ id: 1, priority: 2, points: null, dueOn: null, dueTime: null, recurrence: null, completedOn: null, ...o });
+eq('on time by priority, late halves, the override is respected', [tk.taskPayout(T({ priority: 3 }), false, R), tk.taskPayout(T({}), true, R), tk.taskPayout(T({ points: 50 }), false, R)], [20, 5, 50]);
+eq('a 02:30 due time on the logical 9th falls on the calendar 10th (00:30Z)', new Date(tk.taskDueInstant({ dueOn: '2026-09-09', dueTime: '02:30' }, TZ, 4)).toISOString(), '2026-09-10T00:30:00.000Z');
+eq('late after the due instant, on time before', [tk.isLate(T({ dueOn: '2026-09-09', dueTime: '16:00' }), Date.parse('2026-09-09T10:00:00Z'), TZ, 4), tk.isLate(T({ dueOn: '2026-09-08', dueTime: '10:00' }), Date.parse('2026-09-09T10:00:00Z'), TZ, 4)], [false, true]);
+eq('a date-only task is late from the next logical day; an undated one never', [tk.isLate(T({ dueOn: '2026-09-09' }), Date.parse('2026-09-09T21:00:00Z'), TZ, 4), tk.isLate(T({ dueOn: '2026-09-09' }), Date.parse('2026-09-10T03:00:00Z'), TZ, 4), tk.isLate(T({}), Date.parse('2030-01-01T00:00:00Z'), TZ, 4)], [false, true, false]);
+const list = [
+  T({ id: 1, dueOn: '2026-09-09', dueTime: '18:00' }),
+  T({ id: 2, dueOn: '2026-09-09', dueTime: '06:00', priority: 1 }),
+  T({ id: 3, dueOn: '2026-09-07', dueTime: '12:00' }),
+  T({ id: 4, priority: 3 }),
+  T({ id: 5, dueOn: '2026-09-10' }),
+  T({ id: 6, completedOn: '2026-09-09' }),
+  T({ id: 7, dueOn: '2026-09-09', recurrence: '{"type":"daily"}' }),
+  T({ id: 8, dueOn: '2026-09-09' }),
+];
+const bk = tk.bucketTasks(list, '2026-09-09');
+eq('buckets a day: due by time (date-only last), overdue, anytime, completed; templates never', [bk.due.map((t) => t.id), bk.overdue.map((t) => t.id), bk.anytime.map((t) => t.id), bk.completed.map((t) => t.id)], [[2, 1, 8], [3], [4], [6]]);
+eq('the item caps (plan L8): 20 live habits, 300 open tasks', [r.LIFEOS_LIMITS.habits, r.LIFEOS_LIMITS.openTasks], [20, 300]);
 
 console.log(`\n${failed ? 'PROBE FAILED' : 'PROBE OK'} — ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

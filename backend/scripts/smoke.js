@@ -5747,6 +5747,9 @@ if (seeded) {
 if (seeded) {
   const { lifeosCoreSmoke } = await import('./smoke/lifeos-core.js');
   await lifeosCoreSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  // Phase 3 (migration 032): habits, tasks and the full day close, the same five passes.
+  const { lifeosHabitsTasksSmoke } = await import('./smoke/lifeos-habits-tasks.js');
+  await lifeosHabitsTasksSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

@@ -469,6 +469,32 @@ await mutate({
   expect: 'conditional return AFTER a write',
 });
 
+/*
+ * Package B-habits-tasks: a write through a shared helper (postCoinEvent, settleHabitsOn, ...) is
+ * a write. The first probe returns on a refused-looking condition right after the task's coins
+ * were posted (the UPDATE and the award already ran — the exemption must not apply); the second
+ * one plants the return in a transaction whose body holds no `.run(` at all.
+ */
+await mutate({
+  label: 'a conditional return after a helper write (postCoinEvent) in a tx/*.js transaction is caught',
+  file: 'src/db/tx/lifeos-tasks.js',
+  from: "    return { outcome: 'completed', late, event, task: viewOf(userId, taskId, prefs, rules, now) };",
+  to: "    if (!event) return { outcome: 'capped' };\n    return { outcome: 'completed', late, event, task: viewOf(userId, taskId, prefs, rules, now) };",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+await mutate({
+  label: 'a transaction whose ONLY write is a helper call (materializeFor) is still checked',
+  file: 'src/db/tx/lifeos-tasks.js',
+  // materializeRecurringTasksTx: its only write is materializeFor -> INSERT; a return planted
+  // after it must be seen although the transaction body holds no `.run(` at all.
+  from: "    const created = materializeFor(userId, today);\n",
+  to: "    const created = materializeFor(userId, today);\n    if (created.length === 0) return { outcome: 'nothing' };\n",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
 await mutate({
   label: 'an admin transaction in a tx/*.js file that stops auditing is caught',
   file: 'src/db/tx/lifeos.js',

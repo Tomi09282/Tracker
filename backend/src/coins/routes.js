@@ -206,6 +206,9 @@ router.get(
                 WHEN 'workout_log' THEN (SELECT COALESCE(w.title, w.day_name_snapshot, w.plan_name_snapshot)
                                            FROM workout_logs w
                                           WHERE w.id = e.source_id AND w.client_user_id = l.user_id)
+                WHEN 'task' THEN (SELECT t.title FROM tasks t WHERE t.id = e.source_id AND t.user_id = l.user_id)
+                WHEN 'habit_day' THEN (SELECT h.name FROM habit_day_results r JOIN habits h ON h.id = r.habit_id
+                                        WHERE r.id = e.source_id AND r.user_id = l.user_id AND h.user_id = l.user_id)
               END AS sourceTitle
          FROM coin_ledger l
          JOIN coin_reasons r ON r.key = l.reason_key

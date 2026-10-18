@@ -4,24 +4,25 @@
 import { availableParallelism } from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import v8 from 'node:v8';
 import Piscina from 'piscina';
 import { env } from '../lib/env.js';
 
 /*
- * ═══ A V8 FLAG, SET BEFORE THE FIRST WORKER EXISTS ════════════════════════════════════════════
+ * ═══ WHY THE WORKERS WAIT ASYNCHRONOUSLY, AND CLOSE THEIR CONNECTIONS BEFORE THEY GO ══════════
  *
- * Measured on Node 24.16 / Windows while adding the LifeOS modules to the worker (package B-core):
- * `pool.destroy()` SEGFAULTED the process (exit 139) every time a worker that had opened the
- * database and held a large heap (the migration runner's ~1 MB of SQL) was terminated —
- * `npm run migrate` printed its result and then crashed. Bisected: not the open connection
- * (closing it first changed nothing), not any one import, not a GC in flight (waiting 2 s changed
- * nothing). `--single-threaded-gc` and `--no-parallel-scavenge` each make it disappear; the young-
- * generation scavenger's helper tasks race the isolate teardown of a terminated worker. Only the
- * latter can be set at run time, and it costs nothing measurable at this heap size. It must run
- * before the pool below creates its threads.
+ * Terminating the pool segfaulted the process on Windows (exit 139 / 0xC0000005) once a worker had
+ * used its better-sqlite3 connection: `npm run migrate`, the seed scripts, and `npm run smoke`'s
+ * setup steps died AFTER finishing their work. Package B-core set
+ * `v8.setFlagsFromString('--no-parallel-scavenge')` here for it; package B-habits-tasks measured
+ * that this did not hold (with the flag: every teardown after one query against a migrated
+ * database crashed, 9 of 9; migrate still crashed on the pre-032 code) — and V8 does not support
+ * changing a flag after the VM has started. Bisected instead: the crash is the terminate of a
+ * worker that sits blocked in Atomics.wait (Piscina's default `atomics: 'sync'` idle wait).
+ * With `atomics: 'async'` (Atomics.waitAsync, the thread is not blocked) every run was clean:
+ * migrate -> seed-dev-users -> seed-exercises -> seed-demo, 4 of 4 chains, where seed-exercises
+ * had crashed 6 of 6. closePool() also lets every worker close its own connection first (a clean
+ * WAL checkpoint, no native handle alive at terminate).
  */
-v8.setFlagsFromString('--no-parallel-scavenge');
 
 // Single-process default: leave one core for the event loop, but never fewer than 2 workers or
 // one slow query starves everything. Under cluster.js set DB_POOL_THREADS=2 per process so the
@@ -35,6 +36,9 @@ const pool = new Piscina({
   // the database.
   minThreads: threads,
   maxThreads: threads,
+  // 'async', not Piscina's default 'sync': see the block above. An idle worker waits for its next
+  // task with Atomics.waitAsync instead of blocking its thread in Atomics.wait.
+  atomics: 'async',
 });
 
 export const all = (sql, params = []) => pool.run({ sql, params }, { name: 'all' });
@@ -150,7 +154,40 @@ export const closeLifeDay = (args) => pool.run(args, { name: 'closeLifeDayTx' })
 export const markLapsedDays = (args) => pool.run(args, { name: 'markLapsedDaysTx' });
 export const awardWorkout = (args) => pool.run(args, { name: 'awardWorkoutTx' });
 
-export const closePool = () => pool.destroy();
+// LifeOS habits and tasks (migration 032): ./tx/lifeos-habits.js and ./tx/lifeos-tasks.js, re-exported
+// by worker.js. Habits pay at the day close (closeLifeDayTx), tasks on completion (completeTaskTx).
+export const habits = (args) => pool.run(args, { name: 'habitsQuery' });
+export const habit = (args) => pool.run(args, { name: 'habitQuery' });
+export const createHabit = (args) => pool.run(args, { name: 'createHabitTx' });
+export const updateHabit = (args) => pool.run(args, { name: 'updateHabitTx' });
+export const archiveHabit = (args) => pool.run(args, { name: 'archiveHabitTx' });
+export const setHabitCount = (args) => pool.run(args, { name: 'setHabitCountTx' });
+export const skipHabit = (args) => pool.run(args, { name: 'skipHabitTx' });
+export const recordRelapse = (args) => pool.run(args, { name: 'recordRelapseTx' });
+export const tasks = (args) => pool.run(args, { name: 'tasksQuery' });
+export const task = (args) => pool.run(args, { name: 'taskQuery' });
+export const createTask = (args) => pool.run(args, { name: 'createTaskTx' });
+export const updateTask = (args) => pool.run(args, { name: 'updateTaskTx' });
+export const deleteTask = (args) => pool.run(args, { name: 'deleteTaskTx' });
+export const completeTask = (args) => pool.run(args, { name: 'completeTaskTx' });
+export const reopenTask = (args) => pool.run(args, { name: 'reopenTaskTx' });
+export const materializeRecurringTasks = (args) => pool.run(args, { name: 'materializeRecurringTasksTx' });
+
+/**
+ * Drain and destroy the pool — but every worker closes its own connection FIRST (worker.js
+ * closeConnection): terminating a worker with an open better-sqlite3 handle segfaulted the process
+ * (conn.js closeDb has the measurement). One call per thread, all at once, held together by a
+ * shared counter so each worker runs exactly one. A failure there never blocks the shutdown.
+ */
+export async function closePool() {
+  const shared = new SharedArrayBuffer(4);
+  try {
+    await Promise.all(Array.from({ length: threads }, () => pool.run({ shared, threads }, { name: 'closeConnection' })));
+  } catch {
+    /* a worker that could not close is terminated below all the same */
+  }
+  return pool.destroy();
+}
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);
 

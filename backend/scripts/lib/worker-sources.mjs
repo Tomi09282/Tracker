@@ -25,6 +25,63 @@ export function workerFiles() {
   return files;
 }
 
+/**
+ * Every worker-side module, tx files AND the helper modules they share (src/db/*.js except the
+ * facade): the helpers hold no transaction of their own, but they WRITE inside their callers'
+ * (package B-habits-tasks: lifeos-ledger.js postCoinEvent, lifeos-items.js settleHabitsOn, ...).
+ */
+export function workerHelperFiles() {
+  const files = workerFiles();
+  for (const f of fs.readdirSync('src/db').filter((n) => n.endsWith('.js')).sort()) {
+    const rel = `src/db/${f}`;
+    if (rel !== FACADE && !files.includes(rel)) files.push(rel);
+  }
+  return files;
+}
+
+/**
+ * The names of worker-side functions that WRITE: their body runs a statement (`.run(`) or calls
+ * another function that does (transitively). A transaction that calls one has written as surely
+ * as one that runs the INSERT itself — check-worker-tx counts the call as a write.
+ * `blank` removes comments first (the caller passes the shared blankComments).
+ */
+export function writingFunctions(blank = (t) => t) {
+  const bodies = new Map();
+  for (const file of workerHelperFiles()) {
+    const src = blank(fs.readFileSync(path.resolve(file), 'utf8'));
+    for (const m of src.matchAll(/(?:^|\n)(?:export\s+)?function\s+(\w+)\s*\([^)]*\)\s*\{/g)) {
+      const start = m.index + m[0].length - 1;
+      let depth = 0;
+      let end = src.length;
+      for (let i = start; i < src.length; i += 1) {
+        if (src[i] === '{') depth += 1;
+        else if (src[i] === '}') {
+          depth -= 1;
+          if (depth === 0) {
+            end = i;
+            break;
+          }
+        }
+      }
+      bodies.set(m[1], src.slice(start, end));
+    }
+  }
+  const writers = new Set([...bodies].filter(([, b]) => /\.run\(/.test(b)).map(([n]) => n));
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const [name, body] of bodies) {
+      if (writers.has(name)) continue;
+      if ([...writers].some((w) => new RegExp(`\\b${w}\\(`).test(body))) {
+        writers.add(name);
+        grew = true;
+      }
+    }
+  }
+  // A transaction's own export is not a helper; only what a body CALLS matters, so the exported
+  // transactions stay in the set harmlessly (no transaction calls another).
+  return writers;
+}
+
 /** [{ file, src }] — the raw text of each worker-side file. */
 export function workerSources() {
   return workerFiles().map((file) => ({ file, src: fs.readFileSync(path.resolve(file), 'utf8') }));

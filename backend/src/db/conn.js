@@ -44,6 +44,20 @@ export function getDb() {
   return db;
 }
 
+/**
+ * Close this worker's connection (and drop its statement cache) — called by the pool's shutdown on
+ * EVERY worker before Piscina terminates it (db/index.js closePool): a clean WAL checkpoint, and no
+ * native handle left alive when the thread is torn down.
+ */
+export function closeDb() {
+  statements.clear();
+  if (!db) return false;
+  const conn = db;
+  db = undefined;
+  conn.close();
+  return true;
+}
+
 const statements = new Map();
 export function stmt(sql) {
   let s = statements.get(sql);

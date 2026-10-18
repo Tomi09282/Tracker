@@ -1,0 +1,33 @@
+{
+  "id": "B-habits-tasks",
+  "status": "done",
+  "changes": [
+    "migration 032: habits (good / bad, daily / weekdays / times-per-week, count + unit, coins 0..50 per item, reminder, start day frozen, clientKey idempotency), habit_logs (the edit window: a settled day refuses every insert / update, owner match), habit_day_results (immutable per habit per settled day: outcome, streak, best, freezes, week streak, quota, milestone, freeze earned — streaks are derived from it, no mutable counters), tasks (one-off / recurring template / instance with UNIQUE (template, day), logical due day + optional wall-clock time, completion day, overdue once, settled completions locked), coin_reasons.cap_exempt with the 031 cap trigger recreated so streak.milestone is outside the daily cap",
+    "src/lifeos/habits.js (f_app settleHabit as a pure function: freeze, miss, partial >= 50 %, relapse cap, times-per-week Sunday quota, streak, milestones, freezes earned), tasks.js (lateness incl. the 02:30 rule, payout, day buckets, the materializer plan), recurrence.js (RRULE-light + its strict zod schema)",
+    "src/db/lifeos-ledger.js (postCoinEvent with cap-exempt reasons, reverseCoinEvent, the edit window, prefs / rules reads — moved out of tx/lifeos.js so three tx files share them without becoming Piscina tasks), src/db/lifeos-items.js (habit / task views, settleHabitsOn, settleTasksOn, lapseHabits, lapseTasks, materializeFor, dropOpenInstances)",
+    "tx/lifeos-habits.js: habitsQuery, habitQuery, createHabitTx, updateHabitTx, archiveHabitTx, setHabitCountTx, skipHabitTx, recordRelapseTx; tx/lifeos-tasks.js: tasksQuery, taskQuery, createTaskTx, updateTaskTx, deleteTaskTx, completeTaskTx, reopenTaskTx, materializeRecurringTasksTx",
+    "the full closeLifeDayTx: habits, overdue tasks (once), kcal, workout, the perfect day (a counted habit or the scheduled workout anchors it; every habit, task and the workout done; kcal held), summary row last; markLapsedDaysTx resets streaks (lapsed rows) and marks gap-overdue tasks without a penalty; ensureSettled materializes recurring tasks after the closes",
+    "routes (habit-routes.js, task-routes.js, mounted by lifeos/routes.js): GET /habits, GET /habits/:id, POST /habits, PATCH /habits/:id, POST /habits/:id/archive | restore | log | skip | relapse, GET /tasks, GET /tasks/:id, POST /tasks, PATCH /tasks/:id, DELETE /tasks/:id, POST /tasks/:id/complete | reopen; GET /lifeos/today gains habits and tasks; GET /coins/ledger names task / habit sources",
+    "the pool waits with atomics: 'async' and every worker closes its connection before termination: with Piscina's default 'sync' wait, terminating a worker segfaulted npm run migrate, the seed scripts and the smoke setup (seed-exercises 6 of 6 crashed, 0 of 4 chains after); B-core's run-time V8 flag (--no-parallel-scavenge) is removed — it did not hold (9 of 9 teardowns crashed with it once the worker grew) and V8 does not support it",
+    "check-worker-tx counts a call to a writing helper (transitively computed from the worker-side sources) as a write; verify-gates: the tx/*.js probe now needs that (the day close writes through helpers), plus two new probes (a return after postCoinEvent; a transaction whose only write is a helper call)",
+    "GDPR export: habits, habit_logs, habit_day_results, tasks"
+  ],
+  "tests": {
+    "verify:032": "75 passed — every 032 guard refused once with its own message next to its accepted twin; the cap-exempt milestone at the trigger level; TIMEZONE_REQUIRED, the replayed key, the 20-habit / 300-task caps (the materializer stops at the cap), wrong kind, archived, IDOR on every habit and task transaction",
+    "verify:day-close": "110 passed — time-travel through the real transactions: f_app dayClose / streakFreeze / tasks / recurringTasks scenarios, the milestone above a 10-coin cap, the multiplier, partial counts, the edit window and its triggers, DST 2026-03-29 and 2026-10-25 (settle moments, a 7-day streak across the short day, the repeated 02:30, a 02:30 due time), a returning user after 12 days (5 lapsed, 7 closed, streak reset, gap tasks unpenalised), every event has its ledger row and every wallet equals its ledger",
+    "verify:lifeos-rules": "108 passed (40 new f_app vectors: habits, settleHabit, streakFreeze, recurrence, recurringTasks, tasks)",
+    "smoke": "667 passed, 0 failed (44 new: the five passes for habit create / log / relapse, task create / complete / reopen, the HTTP day close)",
+    "check:all": "every step green on a throwaway migrated + seeded DB except the known pre-existing verify-015 'Túró Rudi' FTS red; the steps after it run one by one: all green (verify:gates 29)",
+    "frontend build": "npm run build green with shared.patch applied (tsc + every gate)"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/B-habits-tasks/shared.patch (frontend/src/lib/lifeos-api.ts: the Phase-3 types, LifeosToday.habits / .tasks, ledger source comments; types only)"
+  ],
+  "followUps": [
+    "the dev backend on :3000 applies 032 (and the atomics change) only after a restart on the merged code",
+    "work-packages.json has no B-habits-tasks entry; the integrator adds one at merge (owns.json lists the files taken from the closed B-core)",
+    "seed-demo.mjs has no habits / tasks yet: the round-B captures (ma-1, habits-1, habit-detail, tasks-1) need the Monday seed of README-ma",
+    "habit reminders (reminder_time) are stored but deliver nothing until Phase 5's materializeRemindersTx"
+  ],
+  "reverified": "2026-10-18 on 3f1c982 (pulse-redesign 290d3ec merged in): smoke 667 passed 0 failed; check:all red only at verify:015 (the known Túró Rudi FTS probe, 29 passed 1 failed), every later step run one by one green (019 56, 021 38, 022 44, 023 12, 024 37, 025 7, rekey 12, markdown 50, last-admin 6, gates 29, seats 20, equipment 28, 030 31, 031 82, lifeos-rules 108, 032 75, day-close 110); pulse-verify --package B-habits-tasks: build green in 14 s with shared.patch applied, tool self-check ok"
+}

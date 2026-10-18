@@ -7,6 +7,7 @@
 //   1. lifeosSettleState  — one read: which days are due (dates.js dueDays, from the worker clock).
 //   2. markLapsedDays     — one transaction for every day OLDER than the 7-day catch-up window.
 //   3. closeLifeDay x <=7 — one transaction PER day, oldest first, stopping at the first refusal.
+//   4. materializeRecurringTasks — one transaction: the recurring tasks of today .. today + 7.
 //
 // Every transaction re-decides due-ness under its own write lock, so this file can be wrong about
 // timing and still not mint: the worst it can do is ask for a day that is not due and be refused.
@@ -47,6 +48,9 @@ export async function ensureSettled(userId, { requestId = 'settle', log = null }
         return; // not memoised: the next request tries again
       }
     }
+    // Recurring tasks roll forward with the day (f_app closePendingDays -> materializeRecurringTasks):
+    // tomorrow's instance appears once today is the new today.
+    await db.materializeRecurringTasks({ userId });
     if (memo.size >= MEMO_MAX) memo.clear();
     memo.set(userId, state.nextSettleAt);
   } catch (err) {

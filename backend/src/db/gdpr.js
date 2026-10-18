@@ -116,6 +116,12 @@ export const EXPORT_TABLES = [
   ['lifeos_prefs', 'SELECT * FROM user_prefs WHERE user_id = ?'],
   ['coin_events', 'SELECT * FROM coin_events WHERE user_id = ?'],
   ['daily_summaries', 'SELECT * FROM daily_summaries WHERE user_id = ?'],
+  // LifeOS habits and tasks (032): what they wanted to do, what they said each day, what each
+  // settled day decided, and their tasks (client_key is their own idempotency key, not a secret).
+  ['habits', 'SELECT * FROM habits WHERE user_id = ?'],
+  ['habit_logs', 'SELECT * FROM habit_logs WHERE user_id = ?'],
+  ['habit_day_results', 'SELECT * FROM habit_day_results WHERE user_id = ?'],
+  ['tasks', 'SELECT * FROM tasks WHERE user_id = ?'],
   ['coach_profile', 'SELECT * FROM coach_profiles WHERE user_id = ?'],
   ['coach_posts', 'SELECT * FROM coach_posts WHERE author_user_id = ?'],
   ['exercises_authored', 'SELECT * FROM exercises WHERE owner_id = ?'],

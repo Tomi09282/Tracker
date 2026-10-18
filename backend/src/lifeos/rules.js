@@ -125,6 +125,8 @@ export const pointRulesSchema = z
  */
 export const LIFEOS_LIMITS = Object.freeze({
   habits: 20,
+  // Every habit ever kept, archived ones included: a create / archive loop cannot grow the table.
+  habitsTotal: 100,
   openTasks: 300,
   challengePool: 50,
   rewards: 100,

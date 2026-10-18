@@ -17,6 +17,8 @@
 //     inserts into coin_events or coin_ledger.
 //   * "Now" is the worker's own clock — never a value from a request.
 import { getDb, stmt, rethrow } from '../conn.js';
+import { activeEvent, earnedOn, lastSettled, postCoinEvent, readPrefs, readRules } from '../lifeos-ledger.js';
+import { habitViews, lapseHabits, lapseTasks, settleHabitsOn, settleTasksOn, taskLists } from '../lifeos-items.js';
 import {
   addDaysToKey,
   calendarKeyFor,
@@ -42,47 +44,6 @@ import { expandOccurrences, workoutDueOn } from '../../plans/occurrences.js';
 import { DAY_KCAL_EATEN_SQL, DAY_TARGETS_SQL } from '../../nutrition/daySql.js';
 
 /* ══ shared reads (helpers, not tasks: NOT exported, so Piscina cannot be asked to run them) ══ */
-
-function readPrefs(userId) {
-  return stmt(
-    `SELECT p.timezone, p.timezone_set_at AS timezoneSetAt, p.day_start_hour AS dayStartHour,
-            p.lifeos_started_on AS startedOn, p.kcal_tolerance_pct AS kcalTolerancePct
-       FROM user_prefs p JOIN users u ON u.id = p.user_id AND u.disabled_at IS NULL
-      WHERE p.user_id = ?`,
-  ).get(userId);
-}
-
-/** The rule set in force: the newest row. Parsed with the same schema that admitted it. */
-function readRules() {
-  const row = stmt('SELECT id, rules_json FROM point_rule_sets ORDER BY id DESC LIMIT 1').get();
-  if (!row) throw new Error('lifeos: no point rule set exists (migration 031 seeds version 1)');
-  return { version: row.id, rules: parseStoredRules(row.rules_json) };
-}
-
-function lastSettled(userId) {
-  return stmt('SELECT MAX(local_date) AS d FROM daily_summaries WHERE user_id = ?').get(userId).d;
-}
-
-/** Coins EARNED on a logical day: positive originals that have not been reversed. */
-function earnedOn(userId, localDate) {
-  return stmt(
-    `SELECT COALESCE(SUM(e.amount_minor), 0) AS n FROM coin_events e
-      WHERE e.user_id = ? AND e.local_date = ? AND e.amount_minor > 0
-        AND e.reverses_event_id IS NULL
-        AND NOT EXISTS (SELECT 1 FROM coin_events x WHERE x.reverses_event_id = e.id)`,
-  ).get(userId, localDate).n;
-}
-
-/** The live (not reversed) original event for one thing, if any. */
-function activeEvent(userId, reasonKey, sourceType, sourceId) {
-  return stmt(
-    `SELECT e.id, e.amount_minor AS amountMinor, e.seq FROM coin_events e
-      WHERE e.user_id = ? AND e.reason_key = ? AND e.source_type = ? AND e.source_id = ?
-        AND e.reverses_event_id IS NULL
-        AND NOT EXISTS (SELECT 1 FROM coin_events x WHERE x.reverses_event_id = e.id)
-      ORDER BY e.seq DESC LIMIT 1`,
-  ).get(userId, reasonKey, sourceType, sourceId);
-}
 
 /** Every scheduled occurrence in a window, read under the caller's lock and expanded by THE rule. */
 function loadOccurrences(userId, fromDate, days) {
@@ -164,74 +125,6 @@ function walletView(userId, prefs, rules, nowMs) {
     week,
     settleTime: `${String(settleHour).padStart(2, '0')}:00`,
   };
-}
-
-/* ══ postCoinEvent — the ONLY writer of coin_events and of LifeOS ledger rows ════════════════════ */
-
-/**
- * cap -> event -> ledger, inside the caller's transaction. Returns the event, or null when nothing
- * was written (a zero amount, or an earn with no room left under the daily cap).
- *
- *   * THE CAP: an earn (positive, not a reversal) is trimmed to the room left today under the rule
- *     set in force. trg_coin_event_daily_cap is the backstop; it never fires on this path.
- *   * ONE LIVE AWARD PER THING: if the thing already has a live original, that is a caller defect
- *     (every caller checks first, under the same lock) — THROW, so the transaction rolls back.
- *   * THE LEDGER ROW IS READ FROM THE EVENT, not from the arguments, so the two cannot disagree;
- *     trg_coin_ledger_ref_truthful proves it again. A ledger insert that writes no row THROWS.
- *
- * Penalties are NOT capped and may take the balance below zero (plan L3); they are not spends, so
- * trg_coin_ledger_spend_covered lets them through.
- */
-function postCoinEvent({
-  userId, reasonKey, amountMinor, localDate, sourceType, sourceId,
-  rules, rulesVersion, requestId, note = null,
-}) {
-  if (!Number.isInteger(amountMinor) || amountMinor === 0) return null;
-
-  let amount = amountMinor;
-  let capped = false;
-  if (amount > 0) {
-    const room = pointsToMinor(rules.dailyEarnCap) - earnedOn(userId, localDate);
-    if (room <= 0) return null;
-    if (amount > room) {
-      amount = room;
-      capped = true;
-    }
-  }
-
-  if (activeEvent(userId, reasonKey, sourceType, sourceId)) {
-    throw new Error(`postCoinEvent: ${reasonKey} for ${sourceType} ${sourceId} is already live`);
-  }
-  const seq = stmt(
-    `SELECT COALESCE(MAX(seq) + 1, 0) AS n FROM coin_events
-      WHERE user_id = ? AND reason_key = ? AND source_type = ? AND source_id = ?
-        AND reverses_event_id IS NULL`,
-  ).get(userId, reasonKey, sourceType, sourceId).n;
-
-  const ev = stmt(
-    `INSERT INTO coin_events
-       (user_id, reason_key, amount_minor, xp_minor, local_date, source_type, source_id, seq,
-        rules_version, request_id, note)
-     SELECT ?, r.key, ?, CASE WHEN r.xp = 1 THEN ? ELSE 0 END, ?, ?, ?, ?, ?, ?, ?
-       FROM coin_reasons r WHERE r.key = ? AND r.active = 1`,
-  ).run(
-    userId, amount, amount, localDate, sourceType, sourceId, seq,
-    rulesVersion, requestId, capped ? (note ?? 'capped') : note, reasonKey,
-  );
-  if (ev.changes !== 1) throw new Error(`postCoinEvent: reason ${reasonKey} is not live`);
-  const eventId = Number(ev.lastInsertRowid);
-
-  const led = stmt(
-    `INSERT INTO coin_ledger
-       (user_id, amount_minor, reason_key, ref_type, ref_id, idempotency_key, actor_user_id,
-        request_id, note)
-     SELECT e.user_id, e.amount_minor, e.reason_key, 'coin_event', e.id,
-            'evt:' || printf('%010d', e.id), NULL, e.request_id, e.note
-       FROM coin_events e WHERE e.id = ?`,
-  ).run(eventId);
-  if (led.changes !== 1) throw new Error('postCoinEvent: the ledger row did not follow its event');
-
-  return { eventId, reasonKey, amountMinor: amount, capped };
 }
 
 /* ══ reads ═══════════════════════════════════════════════════════════════════════════════════════ */
@@ -327,10 +220,36 @@ export function lifeosTodayQuery({ userId }) {
           logStatus: o.log_status,
         })),
       },
+      ...todayItems(userId, prefs, rules, now),
     };
   } catch (err) {
     return rethrow(err);
   }
+}
+
+/**
+ * The Phase-3 half of the Ma screen: the habits drawn on today (live ones scheduled today, plus the
+ * bad habits, which are shown every day) and today's tasks — open ones due today, overdue ones (with
+ * the penalty a settled day already took), the count completed today. Before a zone is set there
+ * is no logical today, so both are empty.
+ */
+function todayItems(userId, prefs, rules, nowMs) {
+  if (!prefs.timezone || !prefs.startedOn) {
+    return { habits: [], tasks: { due: [], overdue: [], completedToday: [], anytimeCount: 0, openCount: 0 } };
+  }
+  const today = dayKeyFor(nowMs, prefs.timezone, prefs.dayStartHour);
+  const habits = habitViews(userId, today, rules).filter((h) => !h.archived && (h.scheduledToday || h.kind === 'bad'));
+  const lists = taskLists(userId, today, prefs, rules, nowMs);
+  return {
+    habits,
+    tasks: {
+      due: lists.due,
+      overdue: lists.overdue,
+      completedToday: lists.completedToday,
+      anytimeCount: lists.anytime.length,
+      openCount: lists.openCount,
+    },
+  };
 }
 
 /** GET /coins/wallet. */
@@ -508,18 +427,22 @@ export function setPointRulesTx({
 /* ══ the day close ═══════════════════════════════════════════════════════════════════════════════ */
 
 /**
- * Settle ONE logical day (Phase 2 skeleton: kcal outcome, workout due / done, perfect day; habits
- * and tasks join in Phase 3 — their columns already exist and stay 0).
+ * Settle ONE logical day: habits (f_app settleHabit — freeze, miss, partial >= 50 %, relapse cap,
+ * the times-per-week Sunday quota, streak, milestones OUTSIDE the daily cap, freezes earned; see
+ * src/lifeos/habits.js), overdue tasks, the kcal outcome, the workout due / done, the perfect day.
+ *
+ * ORDER OF WRITES: habit results and every coin event first, the summary row LAST.
  *
  * Idempotent per (user, day): daily_summaries' PRIMARY KEY. Due-ness is decided HERE, from the
  * worker's clock and the stored prefs — never from the caller's say-so: the day must be settled
  * (start of the next day + 6 h has passed), on or after the LifeOS start, and the previous day must
  * already be settled, so days close in order and a gap cannot be skipped over.
  *
- * Perfect day = something was scheduled, all of it was done, and the kcal goal held when meals
- * were tracked against a target (perfectDayNeedsKcal). The owner's economy sheet: the perfect day
- * NEEDS the scheduled workout. With no habits yet (Phase 2), a day with no workout scheduled has
- * nothing to be perfect about.
+ * Perfect day = a habit that counts or the scheduled workout exists, every counted habit was done,
+ * every task due was completed, the scheduled workout was done (the owner's economy sheet: the
+ * perfect day NEEDS the scheduled workout), and the kcal goal held when meals were tracked against
+ * a target (perfectDayNeedsKcal). f_app requires at least one habit; here the scheduled workout
+ * anchors a day too, as Phase 2 already settled it. Tasks alone never make a perfect day.
  */
 export function closeLifeDayTx({ userId, localDate, requestId }) {
   const conn = getDb();
@@ -562,25 +485,25 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
       tolerancePct: prefs.kcalTolerancePct,
     });
 
+    // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
+    const ctx = { userId, date: localDate, rules, rulesVersion: version, requestId };
+    current = 'settle the habits (results + coins)';
+    const habits = settleHabitsOn(ctx);
+    current = 'settle the tasks (overdue + counts)';
+    const tasks = settleTasksOn(ctx);
+
     const mealsTracked = targetX10 !== null && eaten.entries > 0;
     const kcalOk = rules.perfectDayNeedsKcal !== 1 || !mealsTracked || kcalOutcome === 'hit';
-    const scheduled = workoutDue;
-    const perfect = scheduled > 0 && (!workoutDue || workoutDone === 1) && kcalOk ? 1 : 0;
-
-    // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
-    current = 'INSERT daily_summaries';
-    stmt(
-      `INSERT INTO daily_summaries
-         (user_id, local_date, status, workout_due, workout_done, kcal_target_x10, kcal_eaten_x10,
-          kcal_outcome, perfect_day, rules_version)
-       VALUES (?, ?, 'closed', ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      userId, localDate, workoutDue, workoutDone, targetX10,
-      kcalOutcome === 'no_data' ? null : eaten.kcal_eaten_x10, kcalOutcome, perfect, version,
-    );
+    // Something to be perfect ABOUT: a habit that counts or the scheduled workout. Tasks alone do
+    // not make a day perfect (f_app requires a habit; "a task due today, ticked" would otherwise
+    // be a 25-coin perfect day on demand).
+    const anchor = habits.scheduled > 0 || workoutDue === 1;
+    const allDone =
+      habits.done === habits.scheduled && tasks.done === tasks.due && (!workoutDue || workoutDone === 1);
+    const perfect = anchor && allDone && kcalOk ? 1 : 0;
 
     const day = { localDate, sourceType: 'day', sourceId: epochDay(localDate), rules, rulesVersion: version, requestId, userId };
-    const events = [];
+    const events = [...habits.events, ...tasks.events];
     current = 'postCoinEvent (kcal)';
     if (kcalOutcome === 'hit') {
       events.push(postCoinEvent({ ...day, reasonKey: 'day.kcal_hit', amountMinor: pointsToMinor(rules.kcalGoalHit) }));
@@ -592,12 +515,31 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
       events.push(postCoinEvent({ ...day, reasonKey: 'day.perfect', amountMinor: pointsToMinor(rules.perfectDay) }));
     }
 
+    // LAST: the summary. A habit result cannot be added to a day whose summary exists
+    // (trg_habit_result_settled), and this primary key rolls a concurrent second close back whole.
+    current = 'INSERT daily_summaries';
+    stmt(
+      `INSERT INTO daily_summaries
+         (user_id, local_date, status, workout_due, workout_done, kcal_target_x10, kcal_eaten_x10,
+          kcal_outcome, habits_scheduled, habits_done, tasks_due, tasks_done, perfect_day, rules_version)
+       VALUES (?, ?, 'closed', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      userId, localDate, workoutDue, workoutDone, targetX10,
+      kcalOutcome === 'no_data' ? null : eaten.kcal_eaten_x10, kcalOutcome,
+      habits.scheduled, habits.done, tasks.due, tasks.done, perfect, version,
+    );
+
     return {
       outcome: 'closed',
       localDate,
       workoutDue: workoutDue === 1,
       workoutDone: workoutDone === 1,
       kcalOutcome,
+      habitsScheduled: habits.scheduled,
+      habitsDone: habits.done,
+      tasksDue: tasks.due,
+      tasksDone: tasks.done,
+      tasksOverdue: tasks.overdue,
       perfectDay: perfect === 1,
       events: events.filter(Boolean),
     };
@@ -611,8 +553,10 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
 }
 
 /**
- * Lapse every day OLDER than the catch-up window (plan L6): a row, no coins, no penalty. Which days
- * is decided here from the stored state, not taken from the caller. At most 3660 rows per call.
+ * Lapse every day OLDER than the catch-up window (plan L6): a row, no coins, no penalty — and the
+ * streaks reset: one 'lapsed' habit result per live habit on the LAST lapsed day (written before
+ * that day's summary), and the tasks that went overdue inside the gap are marked without a penalty.
+ * Which days is decided here from the stored state, not taken from the caller. At most 3660 rows.
  */
 export function markLapsedDaysTx({ userId }) {
   const conn = getDb();
@@ -625,15 +569,21 @@ export function markLapsedDaysTx({ userId }) {
     const settledThrough = settledThroughFor(Date.now(), prefs.timezone, prefs.dayStartHour);
     const { lapse } = dueDays({ lastClosed: lastSettled(userId), startedOn: prefs.startedOn, settledThrough });
     const days = lapse.slice(0, 3660);
+    if (days.length === 0) return { outcome: 'applied', lapsed: [], habits: 0, tasks: 0 };
     const { version } = readRules();
+    const lastLapsed = days[days.length - 1];
 
     // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
+    current = 'INSERT habit_day_results (lapsed)';
+    const habits = lapseHabits({ userId, lastLapsed, rulesVersion: version });
+    current = 'UPDATE tasks (overdue inside the gap, no penalty)';
+    const tasks = lapseTasks({ userId, lastLapsed });
     current = 'INSERT daily_summaries (lapsed)';
     const ins = stmt(
       `INSERT INTO daily_summaries (user_id, local_date, status, rules_version) VALUES (?, ?, 'lapsed', ?)`,
     );
     for (const d of days) ins.run(userId, d, version);
-    return { outcome: 'applied', lapsed: days };
+    return { outcome: 'applied', lapsed: days, habits, tasks };
   });
 
   try {
