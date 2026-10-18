@@ -1367,24 +1367,17 @@
       "id": "B-rewards-challenges",
       "title": "LifeOS Phase 4 \"Rewards + challenges\" on the backend (approved plan abundant-booping-willow, Phase 4; owner 2026-10-18: design round B and the economy sheet approved): migration 033 (challenges, challenge_draws, tasks.challenge_id, rewards, reward_redemptions, trg_coin_ledger_ref_truthful with the reward.redeem clause, reward.redeem a spend), the weighted daily draw / one reroll / mandatory pick and the redeem as named worker transactions, the /challenges and /rewards routes, the draw state on GET /lifeos/today, item caps, GDPR",
       "owns": [
-        "backend/package.json",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke/lifeos-rewards-challenges.js",
         "backend/scripts/verify-033.mjs",
         "backend/src/coins/routes.js",
-        "backend/src/db/gdpr.js",
-        "backend/src/db/index.js",
         "backend/src/db/lifeos-items.js",
         "backend/src/db/lifeos-rewards-items.js",
         "backend/src/db/migrations/033_lifeos_rewards_challenges.sql",
-        "backend/src/db/tx/lifeos.js",
         "backend/src/db/tx/lifeos-rewards.js",
-        "backend/src/db/worker.js",
         "backend/src/lifeos/challenges.js",
         "backend/src/lifeos/challenge-routes.js",
         "backend/src/lifeos/rewards.js",
         "backend/src/lifeos/reward-routes.js",
-        "backend/src/lifeos/routes.js",
         "backend/src/lifeos/rules.js",
         "docs/pipeline/pulse/pkg/B-rewards-challenges/**"
       ],
@@ -1410,7 +1403,57 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-rewards-challenges) from the package's own pkg/B-rewards-challenges/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 10 paths passed from the closed B-habits-tasks. Every edit in files B-calendar (034) and B-focus (035) also extend is an additive block, so their merges are a union of blocks. rerollChallengeTx keeps the f_app drawChallenges semantics (exclude the previous hand, fall back to the whole unaccepted pool when fewer than three remain), so a reroll from a small pool may repeat options; a stricter rule would be an owner choice. Seed-demo has no challenge pool / reward shop yet (a request for the seed script's owner). The dev backend on :3000 applies 033 only after a restart on the merged code."
+      "notes": "Added by the integrator at merge (merge-B-rewards-challenges) from the package's own pkg/B-rewards-challenges/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 10 paths passed from the closed B-habits-tasks. Every edit in files B-calendar (034) and B-focus (035) also extend is an additive block, so their merges are a union of blocks. rerollChallengeTx keeps the f_app drawChallenges semantics (exclude the previous hand, fall back to the whole unaccepted pool when fewer than three remain), so a reroll from a small pool may repeat options; a stricter rule would be an owner choice. Seed-demo has no challenge pool / reward shop yet (a request for the seed script's owner). The dev backend on :3000 applies 033 only after a restart on the merged code. At merge-B-calendar backend/package.json, backend/scripts/smoke.js, backend/src/db/gdpr.js, backend/src/db/index.js, backend/src/db/tx/lifeos.js, backend/src/db/worker.js and backend/src/lifeos/routes.js passed to B-calendar (B-rewards-challenges is closed; one file, one owner)."
+    },
+    {
+      "id": "B-calendar",
+      "title": "LifeOS Phase 5 \"Calendar\" on the backend (approved plan abundant-booping-willow, Phase 5, backend half; owner 2026-10-18: design round B approved, the calendar pays nothing): migration 034 (events, event_reminders, reminder_deliveries with their guard triggers and the dedupe index), the pure read-time occurrence engine (DST-safe, f_app semantics), GET /calendar, GET / POST / PATCH / DELETE /events, reminders without push materialized on GET /lifeos/today and the unread-count poll, nextEvent on GET /lifeos/today, GDPR",
+      "owns": [
+        "backend/package.json",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/lifeos-calendar.js",
+        "backend/scripts/verify-034.mjs",
+        "backend/src/db/gdpr.js",
+        "backend/src/db/index.js",
+        "backend/src/db/lifeos-calendar.js",
+        "backend/src/db/migrations/034_lifeos_calendar.sql",
+        "backend/src/db/tx/lifeos.js",
+        "backend/src/db/tx/lifeos-events.js",
+        "backend/src/db/worker.js",
+        "backend/src/lifeos/event-routes.js",
+        "backend/src/lifeos/event-times.js",
+        "backend/src/lifeos/events.js",
+        "backend/src/lifeos/occurrences.js",
+        "backend/src/lifeos/reminders.js",
+        "backend/src/lifeos/routes.js",
+        "backend/src/notifications/routes.js",
+        "docs/pipeline/pulse/pkg/B-calendar/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/lib/lifeos-api.ts"
+        ]
+      },
+      "dependsOn": [
+        "B-rewards-challenges",
+        "B-habits-tasks",
+        "B-core"
+      ],
+      "parallelGroup": "backend lane (approved plan phase 5)",
+      "size": "L",
+      "acceptance": [
+        "migration 034 adds events, event_reminders and reminder_deliveries; every guard trigger refuses with its own message next to its accepted twin; the dedupe unique index holds (verify-034)",
+        "occurrences are expanded at read time: a timed recurring event keeps its local start across DST, an all-day event is a run of local dates (verify-034 DST vectors 2026-03-29 / 2026-10-25 Europe/Budapest)",
+        "GET /calendar?from&days<=42, GET /events/:id, POST /events (idempotent replay), PATCH /events/:id, DELETE /events/:id; 409 TIMEZONE_REQUIRED, 409 LIMIT_REACHED, 404 for another account (smoke/lifeos-calendar.js five-pass sections)",
+        "reminders without push: GET /lifeos/today and GET /notifications/unread-count run materializeRemindersTx (memoised, never fails the read); GET /lifeos/today carries nextEvent; GDPR export covers the new user tables",
+        "hand-in: frontend/src/lib/lifeos-api.ts carries the Phase-5 types and LifeosToday.nextEvent (types only)"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-calendar) from the package's own pkg/B-calendar/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. owns.json names B-habits-tasks as the source of the shared paths, but at merge-B-rewards-challenges seven of them had already passed to B-rewards-challenges (backend/package.json, backend/scripts/smoke.js, backend/src/db/gdpr.js, backend/src/db/index.js, backend/src/db/tx/lifeos.js, backend/src/db/worker.js, backend/src/lifeos/routes.js), so they pass from the closed B-rewards-challenges here; backend/src/notifications/routes.js had no owner (F5 notifications, pre-Pulse). owns.json's backend/src/lifeos/** is written as the explicit list of the lifeos files this package added or changed, so later lifeos files are not pattern-owned by a closed package. Every edit in a file B-rewards-challenges (033) also extended was an additive block, merged as a union. Editing or deleting one occurrence of a recurring event and Web Push are out of scope. seed-demo has no calendar events (a request for the seed script's owner). The dev backend on :3000 applies 034 only after a restart on the merged code."
     }
   ],
   "screens": [
@@ -3101,6 +3144,69 @@
       "liveWrites": [],
       "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-rewards-challenges first; the slot holds it applied and uncommitted. rewardsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 033: every capture answers GET /rewards and GET /rewards/:id with contract bodies (states.json) - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-rewards/work-package.json (as committed on pulse/S-rewards).",
       "wave": 7
+    },
+    {
+      "id": "S-calendar",
+      "title": "LifeOS Phase 5 (Calendar) screen package: Naptár at /calendar (the user bar's fourth tab: DayRail week + the chosen day's agenda of events, the plan's workout and TEENDŐK), one event at /calendar/events/:id and the create / edit sheet (frame event-form), built 1:1 to design round B's lifeos/calendar-1, calendar-2, event-detail and event-form on the B-calendar API (GET /calendar, GET / POST / PATCH / DELETE /events); with requests for the final 6-tab user bar, the capture sheet's Esemény half and Ma's KÖVETKEZŐ",
+      "screens": [
+        "calendar",
+        "event-detail",
+        "event-form"
+      ],
+      "owns": [
+        "frontend/src/features/calendar/**",
+        "docs/pipeline/pulse/pkg/S-calendar/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-calendar-01": "frontend/src/app/router.tsx, routeMeta.ts, navTabs.ts, frontend/src/assets/pulse/navIcons.ts, frontend/scripts/check-nav.mjs, check-nav-active.mjs, the three bundles (nav.calendar): the routes /calendar and /calendar/events/:id, the final 6-tab user bar Ma · Edzés · Étkezés · Naptár · Haladás · Profil with the placeholder medal raster",
+          "R-S-calendar-02": "frontend/src/features/capture/CaptureSheet.tsx, frontend/src/features/tasks/formParts.tsx (S-tasks): the capture sheet's Hova? Feladat / Esemény switch, the event half writes POST /events",
+          "R-S-calendar-03": "frontend/src/features/today/TodayPage.tsx (S-ma): Ma mounts the package's NextEventSection (KÖVETKEZŐ, GET /lifeos/today nextEvent)"
+        }
+      },
+      "frames": [
+        "lifeos/calendar-1",
+        "lifeos/calendar-2",
+        "lifeos/event-detail",
+        "lifeos/event-form"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/calendar.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-naptar-fokusz-kihivas.md and pkg/B-calendar/api.md are the inventory",
+      "account": "user@tracker.local",
+      "route": "/calendar",
+      "dependsOn": [
+        "B-calendar",
+        "G-lifeos",
+        "S-tasks",
+        "S-ma"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 5)",
+      "i18nNamespaces": [
+        "calendar"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries it in its WORKING TREE only): the integrator adds it at merge. Builds against B-calendar's Phase-5 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and imports S-tasks' TaskSheet / tasksData (the '+ Teendő' and the TEENDŐK rows): merge B-calendar, S-tasks and S-ma first. calendarApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 034: every state answers GET /calendar and GET /events/:id with contract bodies and is matched-fixture at best. Entry added by the integrator at merge-B-calendar from the package's own pkg/S-calendar/work-package.json (as committed on pulse/S-calendar a9db0e8).",
+      "wave": 8
     }
   ],
   "queue": [

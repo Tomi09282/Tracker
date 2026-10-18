@@ -41,46 +41,11 @@ import {
   workoutPoints,
   RULE_KEYS,
 } from '../../lifeos/rules.js';
-import { expandOccurrences, workoutDueOn } from '../../plans/occurrences.js';
+import { workoutDueOn } from '../../plans/occurrences.js';
+import { loadOccurrences, nextEventFor, workoutDoneOn, workoutView } from '../lifeos-calendar.js';
 import { DAY_KCAL_EATEN_SQL, DAY_TARGETS_SQL } from '../../nutrition/daySql.js';
 
 /* ══ shared reads (helpers, not tasks: NOT exported, so Piscina cannot be asked to run them) ══ */
-
-/** Every scheduled occurrence in a window, read under the caller's lock and expanded by THE rule. */
-function loadOccurrences(userId, fromDate, days) {
-  const planFilter = `client_user_id = ? AND archived_at IS NULL AND status = 'active'
-                      AND starts_on IS NOT NULL AND (ends_on IS NULL OR ends_on >= ?)`;
-  const plans = stmt(
-    `SELECT id, name, cycle_days, starts_on, ends_on FROM workout_plans WHERE ${planFilter}`,
-  ).all(userId, fromDate);
-  if (!plans.length) return [];
-  const planDays = stmt(
-    `SELECT d.id, d.plan_id, d.day_index, d.slot, d.name, d.is_rest, d.est_minutes, d.start_time,
-            (SELECT COUNT(*) FROM workout_plan_exercises px
-               JOIN workout_plan_blocks b ON b.id = px.block_id
-              WHERE b.day_id = d.id) AS exercise_count
-       FROM workout_plan_days d
-      WHERE d.plan_id IN (SELECT id FROM workout_plans WHERE ${planFilter})
-      ORDER BY d.day_index, d.slot`,
-  ).all(userId, fromDate);
-  const exceptions = stmt(
-    `SELECT day_id, occurrence_date, action, moved_to_date FROM workout_plan_day_exceptions
-      WHERE plan_id IN (SELECT id FROM workout_plans WHERE ${planFilter})`,
-  ).all(userId, fromDate);
-  const logs = stmt(
-    `SELECT plan_day_id, occurrence_date, id, status FROM workout_logs
-      WHERE client_user_id = ? AND occurrence_date IS NOT NULL AND occurrence_date >= ?`,
-  ).all(userId, fromDate);
-  return expandOccurrences({ plans, planDays, exceptions, logs }, fromDate, days);
-}
-
-function workoutDoneOn(userId, localDate) {
-  return stmt(
-    `SELECT 1 FROM workout_logs WHERE client_user_id = ? AND local_date = ? AND status = 'completed' LIMIT 1`,
-  ).get(userId, localDate)
-    ? 1
-    : 0;
-}
 
 /** The moment the NEXT day settles, for the per-process memo in src/lifeos/settle.js. */
 function nextSettleAt(settledThrough, prefs) {
@@ -208,19 +173,10 @@ export function lifeosTodayQuery({ userId }) {
         due: workoutDueOn(occurrences, workoutDate),
         done: Boolean(workoutDoneOn(userId, workoutDate)),
         pointsFull: rules.workoutComplete,
-        occurrences: occurrences.map((o) => ({
-          planId: o.plan_id,
-          planName: o.plan_name,
-          dayId: o.day_id,
-          dayName: o.day_name,
-          isRest: Boolean(o.is_rest),
-          estMinutes: o.est_minutes,
-          startTime: o.start_time,
-          exerciseCount: o.exercise_count,
-          logId: o.log_id,
-          logStatus: o.log_status,
-        })),
+        occurrences: occurrences.map(workoutView),
       },
+      // Phase 5 (034): Ma's KÖVETKEZŐ line — the next event that starts after now, within 7 days.
+      nextEvent: prefs.startedOn ? nextEventFor(userId, prefs, now) : null,
       ...todayItems(userId, prefs, rules, now),
       // Phase 4 (033): the day's challenge draw — read only; the client draws on 'due'.
       challenge: tz && prefs.startedOn ? drawState(userId, dayKeyFor(now, tz, prefs.dayStartHour)) : null,

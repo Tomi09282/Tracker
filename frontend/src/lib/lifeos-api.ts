@@ -131,6 +131,8 @@ export interface LifeosToday {
   };
   /** Phase 4: the day's challenge draw (NAPI DOBÁS); null before a zone is set. */
   challenge: ChallengeDraw | null;
+  /** Phase 5: the next event that starts after now, within 7 calendar days (KÖVETKEZŐ); null when none or before a zone. */
+  nextEvent: NextEvent | null;
 }
 
 /** The LifeOS fields GET /coins/ledger adds to each entry (null for non-LifeOS movements). */
@@ -756,3 +758,171 @@ export interface RewardRedeemRefusal {
 export interface RedemptionFulfilledBody {
   fulfilled: boolean;
 }
+
+
+/* ── Phase 5: the calendar, events and reminders (migration 034, package B-calendar) ─────────── */
+
+/** An event's repeat rule: the task engine's three shapes plus `yearly` (the first date's month and day). */
+export type EventRecurrence = Recurrence | { type: 'yearly' };
+
+/** Reminder offsets in minutes before the start (0 = at the start); the form offers 0 / 15 / 60 / 1440. */
+export type ReminderOffset = number;
+
+/**
+ * One occurrence of an event as drawn on one CALENDAR day (events follow the wall clock, not the
+ * logical day). A multi-day occurrence is listed on every day it touches.
+ */
+export interface EventOccurrence {
+  eventId: number;
+  /** The calendar day this entry is drawn on. */
+  date: DayKey;
+  /** The local date (event zone) this occurrence starts on — the recurrence's own day. */
+  occurrenceDate: DayKey;
+  title: string;
+  location: string | null;
+  allDay: boolean;
+  /** Epoch seconds. All-day: local midnight .. the midnight after the last day (exclusive). */
+  startAt: number;
+  endAt: number;
+  /** 'HH:MM' in the user's zone; null for all-day ("EGÉSZ NAP"). */
+  startTime: string | null;
+  /** null for all-day and for a zero-length event. */
+  endTime: string | null;
+  /** null for all-day. */
+  durationMinutes: number | null;
+  /** Began on an earlier calendar day / continues on a later one. */
+  startsBefore: boolean;
+  endsAfter: boolean;
+  /** The repeat rule (the repeat glyph), or null. */
+  recurrence: EventRecurrence | null;
+  untilDate: DayKey | null;
+}
+
+/** One scheduled plan day on a calendar day (the shape GET /lifeos/today uses). */
+export type CalendarWorkout = TodayWorkoutOccurrence;
+
+/** One calendar day of GET /calendar. */
+export interface CalendarDay {
+  date: DayKey;
+  /** All-day first, then by start. */
+  events: EventOccurrence[];
+  /** Plan days scheduled that day, rest days included (isRest: "Pihenőnap"). */
+  workouts: CalendarWorkout[];
+  tasks: {
+    /** Open, due that (logical) day — by time, date-only last. */
+    due: Task[];
+    /** Completed that day. */
+    completed: Task[];
+    /** Only on the logical today: open tasks due before it. */
+    overdue: Task[];
+  };
+  /** The DayRail dot: an event, a non-rest workout, or a task due / done that day. */
+  busy: boolean;
+}
+
+/** GET /calendar?from=YYYY-MM-DD&days=1..42 (defaults: the calendar today, 7). */
+export interface CalendarResponse {
+  /** A zone is set (events and tasks need it). */
+  started: boolean;
+  timezone: string | null;
+  /** The CALENDAR today in the user's zone. */
+  today: DayKey;
+  /** The LifeOS logical today (tasks); null before a zone. */
+  logicalToday: DayKey | null;
+  from: DayKey;
+  /** Inclusive. */
+  to: DayKey;
+  days: CalendarDay[];
+  /** Open undated tasks ("Bármikor"), by priority. */
+  anytime: Task[];
+  /** What a full workout pays, in points (the "+30 érme"). */
+  workoutPointsFull: number;
+}
+
+/** One event as GET /events/:id and every event write answer it. */
+export interface CalendarEvent {
+  id: number;
+  title: string;
+  notes: string | null;
+  location: string | null;
+  allDay: boolean;
+  /** The typed fields, in the event's own zone (`timezone`). */
+  date: DayKey;
+  startTime: string | null;
+  /** All-day: the last day (inclusive). Timed: the date the end falls on. */
+  endDate: DayKey;
+  endTime: string | null;
+  durationMinutes: number | null;
+  timezone: string;
+  recurrence: EventRecurrence | null;
+  untilDate: DayKey | null;
+  /** Ascending offsets in minutes. */
+  reminders: ReminderOffset[];
+  /** The FIRST occurrence, epoch seconds. */
+  startAt: number;
+  endAt: number;
+  /** The first occurrence that has not ended yet, or null. */
+  next: EventOccurrence | null;
+  /** Occurrences left from today through untilDate ("még 9 alkalom"); null without an until date. */
+  remaining: number | null;
+  /** The occurrence on `?on=YYYY-MM-DD`, when asked and there is one. */
+  occurrence: EventOccurrence | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
+ * POST /events body (.strict()). The client sends the WALL CLOCK; the server resolves the instants
+ * in the user's zone. Timed: `startTime` required; no `endTime` = zero length; an `endTime` before
+ * the start with no `endDate` ends after midnight. All-day: no times; `endDate` = the last day
+ * (inclusive). At most 14 days. `untilDate` needs `recurrence`. Capture's Esemény half sends this.
+ */
+export interface EventCreate {
+  clientKey: string;
+  title: string;
+  notes?: string | null;
+  location?: string | null;
+  allDay?: boolean;
+  date: DayKey;
+  startTime?: string;
+  endTime?: string | null;
+  endDate?: DayKey | null;
+  recurrence?: EventRecurrence | null;
+  untilDate?: DayKey | null;
+  /** At most four, no repeats, 0..10080. */
+  reminders?: ReminderOffset[];
+}
+
+/**
+ * PATCH /events/:id body (.strict(), at least one key). Time fields are merged over the stored
+ * ones; a move that names no end keeps the length. `reminders` replaces the set. Every occurrence
+ * moves (single-occurrence edits are not supported).
+ */
+export type EventPatch = Partial<Omit<EventCreate, 'clientKey'>>;
+
+/** POST /events -> 201 { event } (200 with replayed: true); GET / PATCH /events/:id -> { event }. */
+export interface EventResponse {
+  event: CalendarEvent;
+  replayed?: true;
+}
+
+/** GET /lifeos/today -> nextEvent: the next occurrence that starts within 7 days ("KÖVETKEZŐ"). */
+export interface NextEvent {
+  eventId: number;
+  date: DayKey;
+  title: string;
+  location: string | null;
+  allDay: boolean;
+  startAt: number;
+  endAt: number;
+  startTime: string | null;
+  endTime: string | null;
+  recurring: boolean;
+}
+
+/**
+ * The self-notifications the reminders write (GET /notifications): `type` is one of these, `title`
+ * the item's own name, `body` its time ("10:00–10:45 · Klinika", "21:30", "15:00"), `link_path`
+ * `/calendar/events/<id>`, `/habits/<id>` or `/tasks`.
+ */
+export type ReminderNotificationType = 'lifeos.event' | 'lifeos.habit' | 'lifeos.task';

@@ -5753,6 +5753,9 @@ if (seeded) {
   // Phase 4 (migration 033): the daily challenge draw and the reward shop, the same five passes.
   const { lifeosRewardsChallengesSmoke } = await import('./smoke/lifeos-rewards-challenges.js');
   await lifeosRewardsChallengesSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  const { lifeosCalendarSmoke } = await import('./smoke/lifeos-calendar.js');
+  await lifeosCalendarSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

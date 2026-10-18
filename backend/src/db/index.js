@@ -194,6 +194,14 @@ export const updateReward = (args) => pool.run(args, { name: 'updateRewardTx' })
 export const setRewardArchived = (args) => pool.run(args, { name: 'setRewardArchivedTx' });
 export const redeemReward = (args) => pool.run(args, { name: 'redeemRewardTx' });
 export const setRedemptionFulfilled = (args) => pool.run(args, { name: 'setRedemptionFulfilledTx' });
+// LifeOS calendar (migration 034): ./tx/lifeos-events.js, re-exported by worker.js. The calendar
+// moves no coins; materializeRemindersTx is the one write a read triggers (src/lifeos/reminders.js).
+export const calendar = (args) => pool.run(args, { name: 'calendarQuery' });
+export const event = (args) => pool.run(args, { name: 'eventQuery' });
+export const createEvent = (args) => pool.run(args, { name: 'createEventTx' });
+export const updateEvent = (args) => pool.run(args, { name: 'updateEventTx' });
+export const deleteEvent = (args) => pool.run(args, { name: 'deleteEventTx' });
+export const materializeReminders = (args) => pool.run(args, { name: 'materializeRemindersTx' });
 
 /**
  * Drain and destroy the pool — but every worker closes its own connection FIRST (worker.js

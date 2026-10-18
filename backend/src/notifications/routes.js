@@ -16,6 +16,7 @@ import rateLimit from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth } from '../auth/middleware.js';
+import { ensureReminders } from '../lifeos/reminders.js';
 
 const router = Router();
 
@@ -83,6 +84,9 @@ router.get(
   '/notifications/unread-count',
   requireAuth,
   asyncRoute(async (req, res) => {
+    // LifeOS reminders without push (034): the poll is when a due reminder becomes a notification
+    // (memoised per user, never throws; src/lifeos/reminders.js).
+    await ensureReminders(req.user.id, { log: req.log });
     const row = await db.get(
       `SELECT COUNT(*) AS unread FROM (
          SELECT n.id FROM notifications n

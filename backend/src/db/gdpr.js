@@ -128,6 +128,11 @@ export const EXPORT_TABLES = [
   ['challenge_draws', 'SELECT * FROM challenge_draws WHERE user_id = ?'],
   ['rewards', 'SELECT * FROM rewards WHERE user_id = ?'],
   ['reward_redemptions', 'SELECT * FROM reward_redemptions WHERE user_id = ?'],
+  // LifeOS calendar (034): their events, the reminder offsets they chose, and the record of every
+  // reminder the server delivered to them (the dedupe; client_key is their own idempotency key).
+  ['events', 'SELECT * FROM events WHERE user_id = ?'],
+  ['event_reminders', 'SELECT * FROM event_reminders WHERE user_id = ?'],
+  ['reminder_deliveries', 'SELECT * FROM reminder_deliveries WHERE user_id = ?'],
   ['coach_profile', 'SELECT * FROM coach_profiles WHERE user_id = ?'],
   ['coach_posts', 'SELECT * FROM coach_posts WHERE author_user_id = ?'],
   ['exercises_authored', 'SELECT * FROM exercises WHERE owner_id = ?'],

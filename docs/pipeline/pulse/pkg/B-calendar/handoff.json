@@ -1,0 +1,31 @@
+{
+  "id": "B-calendar",
+  "status": "done",
+  "changes": [
+    "migration 034: events (title / notes / location bounded, all_day, the FIRST occurrence as start_at / end_at epoch seconds plus start_local 'YYYY-MM-DDTHH:MM' and tz, recurrence_json daily / weekly / monthly / yearly, until_date, client_key idempotency, duration <= 14 days, all-day = whole local days, owner and key frozen), event_reminders (0..10080 minutes, UNIQUE per event, at most 4 by trigger, owner match, replaced never edited), reminder_deliveries (event / habit / task subject, exactly one, fire_at = occurrence_at - offset, THE dedupe unique index, owner and self-notification triggers, immutable)",
+    "src/lifeos/occurrences.js (pure, f_app events.ts + the reminder half of notifications.ts): read-time expansion - a timed recurring event keeps its LOCAL start and its elapsed length (DST-safe through dates.js instantFor), an all-day event is a run of local dates, a timed occurrence is on every viewer calendar day its [start, end) touches, events follow the calendar day; nextOccurrence, upcomingInstance, remainingOccurrences; dueEventReminders (6 h window, the occurrence not over, only the latest due offset delivered, the others recorded as superseded)",
+    "src/lifeos/event-times.js (pure, worker side, no zod: limits, the stored rule reader, the wall clock -> instants conversion, the PATCH merge that keeps the length) and src/lifeos/events.js (route side: the .strict() zod schemas, re-exports event-times.js)",
+    "src/db/lifeos-calendar.js (worker-side shared reads: events touching a window, offsets, nextEventFor, and loadOccurrences / workoutDoneOn / workoutView moved here from tx/lifeos.js so the calendar and the day close read THE same workout rule); src/db/tx/lifeos-events.js: calendarQuery, eventQuery, createEventTx, updateEventTx, deleteEventTx, materializeRemindersTx",
+    "routes (src/lifeos/event-routes.js, mounted by lifeos/routes.js): GET /calendar?from&days<=42 (event occurrences + scheduled workouts incl. rest days + tasks due / completed / overdue + anytime, a busy flag per day), GET /events/:id?on, POST /events (201, replay 200), PATCH /events/:id, DELETE /events/:id (204); 409 TIMEZONE_REQUIRED, 409 LIMIT_REACHED (500 events), 404 for another account's event",
+    "reminders without push (src/lifeos/reminders.js): GET /lifeos/today and GET /notifications/unread-count run materializeRemindersTx (memoised 2 min per user and process, never fails the read): event offsets, habit reminder times (good habits scheduled on an unsettled logical day, not done / skipped), tasks due within 60 minutes; self-notifications lifeos.event / lifeos.habit / lifeos.task with the user's own words and clock figures only; at most 20 per run; deliveries pruned after 14 days",
+    "GET /lifeos/today gains nextEvent (the next occurrence that starts after now within 7 calendar days)",
+    "GDPR export: events, event_reminders, reminder_deliveries"
+  ],
+  "tests": {
+    "verify:034": "120 passed - every 034 guard refused with its own message next to its accepted twin; f_app events vectors; DST 2026-03-29 and 2026-10-25 Europe/Budapest (weekly local time kept, the 02:30 gap and the doubled 02:30, 23 / 25-hour all-day days); the worker's hand-written rule reader equals the zod schema on 26 shapes; zone required, replay, bounds, the 501st event, IDOR; the calendar merge (calendar-1 / calendar-2 data); nextEvent; reminders: window, supersede, THE DEDUPE, habits, tasks, no zone",
+    "smoke": "686 passed, 0 failed (19 new: calendar and reminders, the five passes FORGE / REPLAY / RACE / IDOR / EXTREMES)",
+    "check:all": "every step green on a throwaway migrated DB (seed-demo needs seed-exercises first); on a migrated + seeded DB the only red is the known pre-existing verify-015 'Túró Rudi' probe (29 / 1), check-gdpr and verify-gates (29) green",
+    "frontend build": "npm run build green with shared.patch applied (tsc + every gate)"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/B-calendar/shared.patch (frontend/src/lib/lifeos-api.ts: the Phase-5 types and LifeosToday.nextEvent; types only)"
+  ],
+  "followUps": [
+    "the dev backend on :3000 applies 034 only after a restart on the merged code",
+    "work-packages.json has no B-calendar entry; the integrator adds one at merge (owns.json lists the files taken from the closed B-habits-tasks and the unowned notifications/routes.js)",
+    "recorded GET /lifeos/today fixtures predate nextEvent (the type says NextEvent | null; a replay answers undefined) - the Ma lane re-records or edits its stubs",
+    "seed-demo.mjs has no calendar events: the round-B captures (calendar-1, calendar-2, event-detail, Ma's KÖVETKEZŐ) need the week of README-calendar seeded",
+    "the bell's type map has no glyph for lifeos.event / lifeos.habit / lifeos.task (fallback)",
+    "the Windows pool-teardown crash (exit 139 in pool.destroy) is load-sensitive: loading the events zod schemas into the workers raised it from 0 / 10 to 4-8 / 10 runs; worker-side modules should stay free of request schemas"
+  ]
+}

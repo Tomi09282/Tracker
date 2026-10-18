@@ -18,6 +18,7 @@ export * from './tx/lifeos.js';
 export * from './tx/lifeos-habits.js';
 export * from './tx/lifeos-tasks.js';
 export * from './tx/lifeos-rewards.js';
+export * from './tx/lifeos-events.js';
 
 /**
  * Shutdown, part one: close THIS worker's connection before the pool terminates it (see

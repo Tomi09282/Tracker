@@ -30,6 +30,8 @@ import habitRoutes from './habit-routes.js';
 import taskRoutes from './task-routes.js';
 import challengeRoutes from './challenge-routes.js';
 import rewardRoutes from './reward-routes.js';
+import eventRoutes from './event-routes.js';
+import { ensureReminders } from './reminders.js';
 
 const router = Router();
 
@@ -166,6 +168,8 @@ router.get(
   asyncRoute(async (req, res) => {
     if (!emptyQuery.safeParse(req.query).success) return sendError(res, 400, ERR.VALIDATION);
     await ensureSettled(req.user.id, { requestId: res.locals.requestId, log: req.log });
+    // Reminders without push (034): due ones become notifications before Ma answers.
+    await ensureReminders(req.user.id, { log: req.log });
     const today = await db.lifeosToday({ userId: req.user.id });
     if (!today) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     res.json(today);
@@ -240,5 +244,6 @@ router.use(habitRoutes);
 router.use(taskRoutes);
 router.use(challengeRoutes);
 router.use(rewardRoutes);
+router.use(eventRoutes);
 
 export default router;
