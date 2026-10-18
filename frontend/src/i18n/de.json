@@ -1003,6 +1003,137 @@
       "admin": "Admin"
     }
   },
+  "adminRules": {
+    "title": "Regeln",
+    "defaults": "Standardwerte",
+    "version": "Version {{version}}",
+    "intro": "Die Regeln gelten für alle Nutzer.",
+    "coin": "Münzen",
+    "section": {
+      "habit": "Gewohnheiten",
+      "task": "Aufgaben",
+      "workout": "Training",
+      "focus": "Fokus",
+      "challenge": "Herausforderung",
+      "kcal": "Kalorien",
+      "perfectDay": "Perfekter Tag",
+      "streak": "Serien-Multiplikatoren",
+      "freeze": "Freezes",
+      "dailyCap": "Tageslimit",
+      "save": "Speichern"
+    },
+    "rule": {
+      "habitSuccess": {
+        "title": "Erledigt",
+        "sub": "Start je Gewohnheit, Münzen"
+      },
+      "habitPenalty": {
+        "title": "Ausgelassen",
+        "sub": "Strafe, Münzen"
+      },
+      "badHabitCleanDay": {
+        "title": "Sauberer Tag",
+        "sub": "bei Laster, Münzen"
+      },
+      "badHabitRelapseFactor": {
+        "title": "Rückfall",
+        "sub": "Strafmultiplikator"
+      },
+      "badHabitRelapseDailyCap": {
+        "title": "Rückfall-Limit",
+        "sub": "je Gewohnheit und Tag, Münzen"
+      },
+      "partialHabitMin": {
+        "title": "Teilweise erledigt",
+        "sub": "zahlt ab hier anteilig"
+      },
+      "taskLow": {
+        "title": "Niedrig"
+      },
+      "taskMid": {
+        "title": "Mittel"
+      },
+      "taskHigh": {
+        "title": "Hoch"
+      },
+      "taskLate": {
+        "title": "Verspätet erledigt",
+        "sub": "so viel zahlt es nach der Frist"
+      },
+      "taskOverdue": {
+        "title": "Überfällige Aufgabe",
+        "sub": "einmalige Strafe, Münzen"
+      },
+      "workoutComplete": {
+        "title": "Volles Training",
+        "sub": "pro Training, Münzen"
+      },
+      "workoutFull": {
+        "title": "Gilt als voll",
+        "sub": "Anteil der Sätze"
+      },
+      "workoutHalf": {
+        "title": "Teilweises Training",
+        "sub": "halbe Gutschrift ab diesem Anteil"
+      },
+      "focusPerHour": {
+        "title": "Pro Stunde",
+        "sub": "anteilig"
+      },
+      "focusCheckin": {
+        "title": "Bestätigung",
+        "sub": "Bonus · „Noch dran?“"
+      },
+      "challenge": {
+        "title": "Tägliche Herausforderung",
+        "sub": "Standard für neue Herausforderungen"
+      },
+      "kcalHit": {
+        "title": "Ziel erreicht"
+      },
+      "kcalMissed": {
+        "title": "Ziel überschritten",
+        "sub": "Strafe"
+      },
+      "perfectDay": {
+        "title": "Bonus",
+        "sub": "Gewohnheiten, Aufgaben, Training, Kalorien"
+      },
+      "streakTier": {
+        "title": "Ab Tag {{days}}",
+        "sub": "Multiplikator · auf ganze Münzen gerundet"
+      },
+      "milestone": {
+        "title": "{{days}}-Tage-Meilenstein",
+        "sub": "Bonus, Münzen"
+      },
+      "freezeEvery": {
+        "title": "Häufigkeit",
+        "sub": "1 Freeze alle so viele Tage"
+      },
+      "maxFreezes": {
+        "title": "Höchstens",
+        "sub": "in Reserve"
+      },
+      "dailyCap": {
+        "title": "Einnahmen pro Tag",
+        "sub": "pro Nutzer"
+      }
+    },
+    "unit": {
+      "pct": "%",
+      "days": "Tage",
+      "count": "Stk."
+    },
+    "savedValue": "gespeichert {{value}}",
+    "changes": "{{count}} ungespeichert",
+    "note": "Notiz",
+    "noteHint": "Kommt mit Version {{version}} ins Audit-Log.",
+    "appliesFrom": "Gilt ab dem nächsten Tagesabschluss.",
+    "failed": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "stale": "Die Änderung ging nicht durch. Lade neu, um den tatsächlichen Stand zu sehen.",
+    "savedToast": "Gespeichert"
+  },
   "public": {
     "specialty": {
       "strength": "Kraft",

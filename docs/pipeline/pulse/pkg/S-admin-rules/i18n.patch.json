@@ -1,0 +1,600 @@
+{
+  "package": "S-admin-rules",
+  "base": "2b9d99729f0ee9b2fc4495cbb01df6d17f10beb3",
+  "namespaces": [
+    "adminRules"
+  ],
+  "set": [
+    {
+      "key": "adminRules.title",
+      "hu": "Szabályok",
+      "en": "Rules",
+      "de": "Regeln",
+      "after": "adminUsers",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the display title"
+    },
+    {
+      "key": "adminRules.defaults",
+      "hu": "Alapértékek",
+      "en": "Defaults",
+      "de": "Standardwerte",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Button/text · Alapértékek on the back row"
+    },
+    {
+      "key": "adminRules.version",
+      "hu": "{{version}}. verzió",
+      "en": "Version {{version}}",
+      "de": "Version {{version}}",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), '7. verzió' at the head of the version line (ink); the name and the date follow from the server"
+    },
+    {
+      "key": "adminRules.intro",
+      "hu": "A szabályok minden felhasználóra érvényesek.",
+      "en": "The rules apply to every user.",
+      "de": "Die Regeln gelten für alle Nutzer.",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the intro line"
+    },
+    {
+      "key": "adminRules.coin",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the 'érme' on the right of the pure-coin sections' eyebrows (Fókusz, Kihívás, Kalória, Tökéletes nap, Napi plafon) and the sub line 'érme' of Alacsony / Közepes / Magas"
+    },
+    {
+      "key": "adminRules.section.habit",
+      "hu": "Szokás",
+      "en": "Habits",
+      "de": "Gewohnheiten",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Szokás"
+    },
+    {
+      "key": "adminRules.section.task",
+      "hu": "Feladat",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Feladat"
+    },
+    {
+      "key": "adminRules.section.workout",
+      "hu": "Edzés",
+      "en": "Workout",
+      "de": "Training",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Edzés"
+    },
+    {
+      "key": "adminRules.section.focus",
+      "hu": "Fókusz",
+      "en": "Focus",
+      "de": "Fokus",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Fókusz"
+    },
+    {
+      "key": "adminRules.section.challenge",
+      "hu": "Kihívás",
+      "en": "Challenge",
+      "de": "Herausforderung",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Kihívás"
+    },
+    {
+      "key": "adminRules.section.kcal",
+      "hu": "Kalória",
+      "en": "Calories",
+      "de": "Kalorien",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Kalória"
+    },
+    {
+      "key": "adminRules.section.perfectDay",
+      "hu": "Tökéletes nap",
+      "en": "Perfect day",
+      "de": "Perfekter Tag",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Tökéletes nap"
+    },
+    {
+      "key": "adminRules.section.streak",
+      "hu": "Sorozat-szorzók",
+      "en": "Streak multipliers",
+      "de": "Serien-Multiplikatoren",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Sorozat-szorzók"
+    },
+    {
+      "key": "adminRules.section.freeze",
+      "hu": "Fagyasztás",
+      "en": "Freezes",
+      "de": "Freezes",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Fagyasztás"
+    },
+    {
+      "key": "adminRules.section.dailyCap",
+      "hu": "Napi plafon",
+      "en": "Daily cap",
+      "de": "Tageslimit",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Napi plafon"
+    },
+    {
+      "key": "adminRules.section.save",
+      "hu": "Mentés",
+      "en": "Save",
+      "de": "Speichern",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Section/Mentés"
+    },
+    {
+      "key": "adminRules.rule.habitSuccess.title",
+      "hu": "Teljesítés",
+      "en": "Completion",
+      "de": "Erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Teljesítés (habitSuccess)"
+    },
+    {
+      "key": "adminRules.rule.habitSuccess.sub",
+      "hu": "alapérték új szokáshoz, érme",
+      "en": "default for a new habit, coins",
+      "de": "Start je Gewohnheit, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.habitPenalty.title",
+      "hu": "Kihagyás",
+      "en": "Missed",
+      "de": "Ausgelassen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Kihagyás (habitPenalty)"
+    },
+    {
+      "key": "adminRules.rule.habitPenalty.sub",
+      "hu": "büntetés, érme",
+      "en": "penalty, coins",
+      "de": "Strafe, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.badHabitCleanDay.title",
+      "hu": "Tiszta nap",
+      "en": "Clean day",
+      "de": "Sauberer Tag",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Tiszta nap (badHabitCleanDay)"
+    },
+    {
+      "key": "adminRules.rule.badHabitCleanDay.sub",
+      "hu": "rossz szokásnál, érme",
+      "en": "for a bad habit, coins",
+      "de": "bei Laster, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.badHabitRelapseFactor.title",
+      "hu": "Visszaesés",
+      "en": "Relapse",
+      "de": "Rückfall",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Visszaesés (badHabitRelapseFactorBp)"
+    },
+    {
+      "key": "adminRules.rule.badHabitRelapseFactor.sub",
+      "hu": "büntetés-szorzó",
+      "en": "penalty multiplier",
+      "de": "Strafmultiplikator",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.badHabitRelapseDailyCap.title",
+      "hu": "Visszaesés plafonja",
+      "en": "Relapse cap",
+      "de": "Rückfall-Limit",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Visszaesés plafonja (badHabitRelapseDailyCap)"
+    },
+    {
+      "key": "adminRules.rule.badHabitRelapseDailyCap.sub",
+      "hu": "szokásonként naponta, érme",
+      "en": "per habit per day, coins",
+      "de": "je Gewohnheit und Tag, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.partialHabitMin.title",
+      "hu": "Részleges teljesítés",
+      "en": "Partial completion",
+      "de": "Teilweise erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Szokás · Részleges teljesítés (partialHabitMinPct)"
+    },
+    {
+      "key": "adminRules.rule.partialHabitMin.sub",
+      "hu": "ettől fizet arányosan",
+      "en": "pays pro rata from here",
+      "de": "zahlt ab hier anteilig",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.taskLow.title",
+      "hu": "Alacsony",
+      "en": "Low",
+      "de": "Niedrig",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Feladat · Alacsony (taskLow)"
+    },
+    {
+      "key": "adminRules.rule.taskMid.title",
+      "hu": "Közepes",
+      "en": "Medium",
+      "de": "Mittel",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Feladat · Közepes (taskMid)"
+    },
+    {
+      "key": "adminRules.rule.taskHigh.title",
+      "hu": "Magas",
+      "en": "High",
+      "de": "Hoch",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Feladat · Magas (taskHigh)"
+    },
+    {
+      "key": "adminRules.rule.taskLate.title",
+      "hu": "Késve teljesítve",
+      "en": "Done late",
+      "de": "Verspätet erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Feladat · Késve teljesítve (taskLatePct)"
+    },
+    {
+      "key": "adminRules.rule.taskLate.sub",
+      "hu": "ennyit fizet a határidő után",
+      "en": "what it pays after the due date",
+      "de": "so viel zahlt es nach der Frist",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.taskOverdue.title",
+      "hu": "Lejárt feladat",
+      "en": "Overdue task",
+      "de": "Überfällige Aufgabe",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Feladat · Lejárt feladat (taskOverdue)"
+    },
+    {
+      "key": "adminRules.rule.taskOverdue.sub",
+      "hu": "egyszeri büntetés, érme",
+      "en": "one-time penalty, coins",
+      "de": "einmalige Strafe, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.workoutComplete.title",
+      "hu": "Teljes edzés",
+      "en": "Full workout",
+      "de": "Volles Training",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Edzés · Teljes edzés (workoutComplete)"
+    },
+    {
+      "key": "adminRules.rule.workoutComplete.sub",
+      "hu": "edzésenként, érme",
+      "en": "per workout, coins",
+      "de": "pro Training, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.workoutFull.title",
+      "hu": "Teljesnek számít",
+      "en": "Counts as full",
+      "de": "Gilt als voll",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Edzés · Teljesnek számít (workoutFullPct)"
+    },
+    {
+      "key": "adminRules.rule.workoutFull.sub",
+      "hu": "a sorozatok aránya",
+      "en": "share of the sets",
+      "de": "Anteil der Sätze",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.workoutHalf.title",
+      "hu": "Részleges edzés",
+      "en": "Partial workout",
+      "de": "Teilweises Training",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Edzés · Részleges edzés (workoutHalfPct)"
+    },
+    {
+      "key": "adminRules.rule.workoutHalf.sub",
+      "hu": "fél jóváírás ettől az aránytól",
+      "en": "half credit from this share",
+      "de": "halbe Gutschrift ab diesem Anteil",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.focusPerHour.title",
+      "hu": "Óránként",
+      "en": "Per hour",
+      "de": "Pro Stunde",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Fókusz · Óránként (focusPointsPerHour)"
+    },
+    {
+      "key": "adminRules.rule.focusPerHour.sub",
+      "hu": "arányosan",
+      "en": "pro rata",
+      "de": "anteilig",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the rule part of its sub line 'mentve 20 · arányosan'"
+    },
+    {
+      "key": "adminRules.rule.focusCheckin.title",
+      "hu": "Visszaigazolás",
+      "en": "Check-in",
+      "de": "Bestätigung",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Fókusz · Visszaigazolás (focusCheckinPoint)"
+    },
+    {
+      "key": "adminRules.rule.focusCheckin.sub",
+      "hu": "bónusz · „Még rajta vagy?”",
+      "en": "bonus · “Still on it?”",
+      "de": "Bonus · „Noch dran?“",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.challenge.title",
+      "hu": "Napi kihívás",
+      "en": "Daily challenge",
+      "de": "Tägliche Herausforderung",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Kihívás · Napi kihívás (challengePoints)"
+    },
+    {
+      "key": "adminRules.rule.challenge.sub",
+      "hu": "alapérték új kihíváshoz",
+      "en": "default for a new challenge",
+      "de": "Standard für neue Herausforderungen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.kcalHit.title",
+      "hu": "Cél teljesítve",
+      "en": "Goal met",
+      "de": "Ziel erreicht",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Kalória · Cél teljesítve (kcalGoalHit)"
+    },
+    {
+      "key": "adminRules.rule.kcalMissed.title",
+      "hu": "Cél túllépve",
+      "en": "Goal exceeded",
+      "de": "Ziel überschritten",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Kalória · Cél túllépve (kcalGoalMissed)"
+    },
+    {
+      "key": "adminRules.rule.kcalMissed.sub",
+      "hu": "büntetés",
+      "en": "penalty",
+      "de": "Strafe",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.perfectDay.title",
+      "hu": "Bónusz",
+      "en": "Bonus",
+      "de": "Bonus",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Tökéletes nap · Bónusz (perfectDay)"
+    },
+    {
+      "key": "adminRules.rule.perfectDay.sub",
+      "hu": "szokás, feladat, edzés, kalória",
+      "en": "habits, tasks, workout, calories",
+      "de": "Gewohnheiten, Aufgaben, Training, Kalorien",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.streakTier.title",
+      "hu": "{{days}} naptól",
+      "en": "From day {{days}}",
+      "de": "Ab Tag {{days}}",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Sorozat-szorzók · 7 naptól and 30 naptól (the days are streakTier1Days / streakTier2Days of the set in force)"
+    },
+    {
+      "key": "adminRules.rule.streakTier.sub",
+      "hu": "szorzó · egészre kerekítve",
+      "en": "multiplier · rounded to whole coins",
+      "de": "Multiplikator · auf ganze Münzen gerundet",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), their sub line"
+    },
+    {
+      "key": "adminRules.rule.milestone.title",
+      "hu": "{{days}} napos mérföldkő",
+      "en": "{{days}}-day milestone",
+      "de": "{{days}}-Tage-Meilenstein",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Sorozat-szorzók · 7 / 30 / 100 napos mérföldkő (the days are milestone1..3Days)"
+    },
+    {
+      "key": "adminRules.rule.milestone.sub",
+      "hu": "bónusz, érme",
+      "en": "bonus, coins",
+      "de": "Bonus, Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), their sub line"
+    },
+    {
+      "key": "adminRules.rule.freezeEvery.title",
+      "hu": "Gyakoriság",
+      "en": "Frequency",
+      "de": "Häufigkeit",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Fagyasztás · Gyakoriság (freezeEvery)"
+    },
+    {
+      "key": "adminRules.rule.freezeEvery.sub",
+      "hu": "ennyi naponként 1 fagyasztás",
+      "en": "1 freeze every this many days",
+      "de": "1 Freeze alle so viele Tage",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.maxFreezes.title",
+      "hu": "Legfeljebb",
+      "en": "At most",
+      "de": "Höchstens",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Fagyasztás · Legfeljebb (maxFreezes)"
+    },
+    {
+      "key": "adminRules.rule.maxFreezes.sub",
+      "hu": "tartalékban",
+      "en": "in reserve",
+      "de": "in Reserve",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.rule.dailyCap.title",
+      "hu": "Bevétel naponta",
+      "en": "Earnings per day",
+      "de": "Einnahmen pro Tag",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Rule/Napi plafon · Bevétel naponta (dailyEarnCap)"
+    },
+    {
+      "key": "adminRules.rule.dailyCap.sub",
+      "hu": "felhasználónként",
+      "en": "per user",
+      "de": "pro Nutzer",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), its sub line"
+    },
+    {
+      "key": "adminRules.unit.pct",
+      "hu": "%",
+      "en": "%",
+      "de": "%",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the '%' after a percentage figure",
+      "untranslated": {
+        "reason": "unit symbol"
+      }
+    },
+    {
+      "key": "adminRules.unit.days",
+      "hu": "nap",
+      "en": "days",
+      "de": "Tage",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the 'nap' after Gyakoriság's figure"
+    },
+    {
+      "key": "adminRules.unit.count",
+      "hu": "db",
+      "en": "pcs",
+      "de": "Stk.",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the 'db' after Legfeljebb's figure"
+    },
+    {
+      "key": "adminRules.savedValue",
+      "hu": "mentve {{value}}",
+      "en": "saved {{value}}",
+      "de": "gespeichert {{value}}",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the edited row's 'mentve 20' (the value in force)"
+    },
+    {
+      "key": "adminRules.changes",
+      "hu": "{{count}} módosítás",
+      "en": "{{count}} unsaved",
+      "de": "{{count}} ungespeichert",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Status/edited '1 módosítás' on the MENTÉS head"
+    },
+    {
+      "key": "adminRules.note",
+      "hu": "Megjegyzés",
+      "en": "Note",
+      "de": "Notiz",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), Field/Megjegyzés"
+    },
+    {
+      "key": "adminRules.noteHint",
+      "hu": "A {{version}}. verzióval az audit naplóba kerül.",
+      "en": "Goes into the audit log with version {{version}}.",
+      "de": "Kommt mit Version {{version}} ins Audit-Log.",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the field's hint 'A 8. verzióval az audit naplóba kerül.' (the next version)"
+    },
+    {
+      "key": "adminRules.appliesFrom",
+      "hu": "A következő napzárástól érvényes.",
+      "en": "Applies from the next day close.",
+      "de": "Gilt ab dem nächsten Tagesabschluss.",
+      "copy": "inventory",
+      "source": "frame lifeos/admin-rules (Figma 190:1936 = 182:1279 after fix round 2, design round B, approved 2026-10-18), the closing line under the pill"
+    },
+    {
+      "key": "adminRules.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That didn't work. Please try again.",
+      "de": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "copy": "inventory",
+      "source": "undrawn states (failed read, failed write): the string of auth.errors.generic / workout.loadFailed in hu.json, with their en / de"
+    },
+    {
+      "key": "adminRules.stale",
+      "hu": "A módosítás nem ment át. Frissítsd az oldalt, és nézd meg, mi az aktuális állapot.",
+      "en": "The change did not go through. Reload to see where things actually stand.",
+      "de": "Die Änderung ging nicht durch. Lade neu, um den tatsächlichen Stand zu sehen.",
+      "copy": "inventory",
+      "source": "undrawn state (409 RULES_STALE: another admin published first): the string of studio.failed in hu.json, with its en / de"
+    },
+    {
+      "key": "adminRules.savedToast",
+      "hu": "Mentve",
+      "en": "Saved",
+      "de": "Gespeichert",
+      "copy": "inventory",
+      "source": "undrawn outcome (a new version is published): the string of compose.toast.saved in hu.json, with its en / de"
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}

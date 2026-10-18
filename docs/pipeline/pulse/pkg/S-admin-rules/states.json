@@ -1,0 +1,559 @@
+{
+  "about": "S-admin-rules - the admin rules page (/admin/rules, LifeOS Phase 2, design round B frame lifeos/admin-rules). GET /admin/rules fixtures are edit lists over the admin@ recording made at merge-S-admin-rules after migration 031 (R-S-admin-rules-03). That recording is the seeded version 1, whose createdByName is null, so the version line shows no author until a named version is recorded (the frame draws Takács Dániel). PUT outcomes are status stubs with the error envelope only: nothing is ever written to the shared rule set. Accounts: A = admin@ (every state but one), M = user@ (forbidden).",
+  "states": {
+    "admin-rules": {
+      "frame": "lifeos/admin-rules",
+      "title": "Szabályok — egy módosítás, megjegyzéssel (design round B)",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 3132,
+      "reach": "fixture",
+      "why": "lifeos/admin-rules: version 7 in force; Fókusz · Óránként stepped 20 -> 25 (five ArrowUp on its spinbutton) and the note typed, as the frame draws it",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "edits": [
+            {
+              "pointer": "/current/version",
+              "value": 7
+            },
+            {
+              "pointer": "/current/note",
+              "value": "Kihívás alapérték 15"
+            },
+            {
+              "pointer": "/current/createdAt",
+              "value": 1792153920
+            }
+          ],
+          "why": "free-hand body in B-core's exact shape (api.md, backend/src/lifeos/routes.js + rules.js on pulse/B-core): the dev backend on :3000 runs pulse-redesign without migration 031, so GET /admin/rules answers 404 and cannot be recorded yet (R26 cannot check it — see handoff.json). Values: f_app DEFAULT_RULES + the 400 cap, version 7 by the persona Takács Dániel at 2026-10-16 14:32 (the frame)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            },
+            "text": "Fókusz 20 → 25 / óra: több mélymunka."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "adminRules.title"
+        }
+      }
+    },
+    "admin-rules-clean": {
+      "title": "Szabályok — nincs módosítás",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 3132,
+      "reach": "fixture",
+      "why": "the page as it opens: the set in force, no edit, no status on MENTÉS, the pill disabled",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "edits": [
+            {
+              "pointer": "/current/version",
+              "value": 7
+            },
+            {
+              "pointer": "/current/note",
+              "value": "Kihívás alapérték 15"
+            },
+            {
+              "pointer": "/current/createdAt",
+              "value": 1792153920
+            }
+          ],
+          "why": "free-hand body in B-core's exact shape (api.md, backend/src/lifeos/routes.js + rules.js on pulse/B-core): the dev backend on :3000 runs pulse-redesign without migration 031, so GET /admin/rules answers 404 and cannot be recorded yet (R26 cannot check it — see handoff.json). Values: f_app DEFAULT_RULES + the 400 cap, version 7 by the persona Takács Dániel at 2026-10-16 14:32 (the frame)."
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "adminRules.title"
+        }
+      }
+    },
+    "admin-rules-failed": {
+      "title": "Szabályok — a beolvasás nem sikerült",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /admin/rules fails (500): the header stays, the danger notice with Újra stands where the rules would",
+      "stubs": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "status": 500,
+          "body": {},
+          "why": "a failed read; its body holds only the error envelope"
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/rules",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "admin-rules-stale": {
+      "title": "Szabályok — közben más publikált (409)",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 3132,
+      "reach": "fixture",
+      "why": "the frame state, then Mentés: PUT answers 409 RULES_STALE (another admin published version 8 first); the warn notice with Újra, the edits kept",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "edits": [
+            {
+              "pointer": "/current/version",
+              "value": 7
+            },
+            {
+              "pointer": "/current/note",
+              "value": "Kihívás alapérték 15"
+            },
+            {
+              "pointer": "/current/createdAt",
+              "value": 1792153920
+            }
+          ],
+          "why": "free-hand body in B-core's exact shape (api.md, backend/src/lifeos/routes.js + rules.js on pulse/B-core): the dev backend on :3000 runs pulse-redesign without migration 031, so GET /admin/rules answers 404 and cannot be recorded yet (R26 cannot check it — see handoff.json). Values: f_app DEFAULT_RULES + the 400 cap, version 7 by the persona Takács Dániel at 2026-10-16 14:32 (the frame)."
+        }
+      ],
+      "stubs": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/rules",
+          "status": 409,
+          "body": {
+            "error": "the rules changed since you loaded them",
+            "code": "RULES_STALE",
+            "requestId": "x"
+          },
+          "why": "the 409 of B-core (api.md); its currentVersion is left out: the page does not read it, and the envelope check allows error, code, requestId only"
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/rules",
+            "status": 409
+          }
+        ],
+        "console": [
+          "409"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            },
+            "text": "Fókusz 20 → 25 / óra: több mélymunka."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "adminRules.stale"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "adminRules.title"
+        }
+      }
+    },
+    "admin-rules-save-failed": {
+      "title": "Szabályok — a mentés nem sikerült",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 3132,
+      "reach": "fixture",
+      "why": "the frame state, then Mentés: PUT fails (500); the danger notice, the draft kept",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "edits": [
+            {
+              "pointer": "/current/version",
+              "value": 7
+            },
+            {
+              "pointer": "/current/note",
+              "value": "Kihívás alapérték 15"
+            },
+            {
+              "pointer": "/current/createdAt",
+              "value": 1792153920
+            }
+          ],
+          "why": "free-hand body in B-core's exact shape (api.md, backend/src/lifeos/routes.js + rules.js on pulse/B-core): the dev backend on :3000 runs pulse-redesign without migration 031, so GET /admin/rules answers 404 and cannot be recorded yet (R26 cannot check it — see handoff.json). Values: f_app DEFAULT_RULES + the 400 cap, version 7 by the persona Takács Dániel at 2026-10-16 14:32 (the frame)."
+        }
+      ],
+      "stubs": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/rules",
+          "status": 500,
+          "body": {
+            "error": "internal",
+            "code": "INTERNAL",
+            "requestId": "x"
+          },
+          "why": "a failed write"
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/rules",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "key": "adminRules.rule.focusPerHour.title"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            },
+            "text": "Fókusz 20 → 25 / óra: több mélymunka."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "adminRules.note"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "adminRules.failed"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "adminRules.title"
+        }
+      }
+    },
+    "admin-rules-defaults": {
+      "title": "Szabályok — Alapértékek egy eltérő készleten",
+      "account": "A",
+      "route": "/admin/rules",
+      "height": 3132,
+      "reach": "fixture",
+      "why": "version 7 differs from the defaults on two rules (Óránként 25, Bevétel naponta 300); Alapértékek lays the defaults over the draft: two edits, nothing saved",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/rules",
+          "edits": [
+            {
+              "pointer": "/current/version",
+              "value": 7
+            },
+            {
+              "pointer": "/current/rules/focusPointsPerHour",
+              "value": 25
+            },
+            {
+              "pointer": "/current/rules/dailyEarnCap",
+              "value": 300
+            },
+            {
+              "pointer": "/current/note",
+              "value": "Kihívás alapérték 15"
+            },
+            {
+              "pointer": "/current/createdAt",
+              "value": 1792153920
+            }
+          ],
+          "why": "free-hand body in B-core's exact shape (api.md, backend/src/lifeos/routes.js + rules.js on pulse/B-core): the dev backend on :3000 runs pulse-redesign without migration 031, so GET /admin/rules answers 404 and cannot be recorded yet (R26 cannot check it — see handoff.json). Values: f_app DEFAULT_RULES + the 400 cap, version 7 by the persona Takács Dániel at 2026-10-16 14:32 (the frame)."
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "adminRules.defaults"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "adminRules.title"
+        }
+      }
+    },
+    "admin-rules-forbidden": {
+      "title": "Szabályok — nem admin",
+      "account": "M",
+      "route": "/admin/rules",
+      "height": 874,
+      "reach": "recorded",
+      "why": "a member opens /admin/rules: the admin refusal (AdminForbidden); no rules read is fired",
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "admin.forbiddenTitle"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "admin-rules-loading": "the stub answers at once (pulse-shot has no delayed answer); the skeleton (three sections of ListRowSkeleton under a strong rule) is checked in code only",
+    "admin-rules-published": "the PUT /admin/rules 200 answer has no recording (R26), and a publish is never fired live on the shared dev rule set; the publish path (setQueryData of res.current, the edits and the note clear, the Mentve toast) is checked in code only until a PUT answer is recorded (integrator, merge-S-admin-rules)"
+  }
+}

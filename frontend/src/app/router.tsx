@@ -56,6 +56,9 @@ const AdminAccountsPage = lazy(() =>
 const AdminMarketplacePage = lazy(() =>
   import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
 );
+const RulesPage = lazy(() =>
+  import('../features/admin/RulesPage').then((m) => ({ default: m.RulesPage })),
+);
 const PlaygroundPage = lazy(() =>
   import('../features/playground/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
 );
@@ -156,6 +159,9 @@ export const router = createBrowserRouter([
       // routes, so each has a URL, a lit tab and a way in from the bar.
       { path: 'admin/accounts', element: suspended(<AdminAccountsPage />) },
       { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
+      // LifeOS Phase 2: the admin-global point rules, pushed from Moderáció's "Szabályok" door row
+      // (design round A: a door, not a tab — the admin bar keeps Moderáció lit).
+      { path: 'admin/rules', element: suspended(<RulesPage />) },
       // Its own route rather than a tab on the admin page: the studio is a full-width workspace
       // with its own list column, and folding it into a tab would force both into one layout.
       { path: 'admin/styles', element: suspended(<StyleStudioPage />) },

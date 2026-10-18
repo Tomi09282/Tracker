@@ -1,0 +1,134 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 3aead8f..f5037f4 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -104,6 +104,7 @@ const EXPECT_BY_VIEW = {
+   admin: [
+     ['/admin', '/admin'],
+     ['/admin/styles', '/admin'],
++    ['/admin/rules', '/admin'],
+     ['/admin/accounts', '/admin/accounts'],
+     ['/admin/marketplace', '/admin/marketplace'],
+     ['/notifications', '/admin'],
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index c09f89a..26e0e23 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -119,8 +119,8 @@ export function isTabActive(
+  *   user     Kezdőlap · Edzés · Étkezés · Haladás · Profil — the SAME five for every role. The
+  *            trainer and admin views are entered from Profil (its NÉZETEK rows), not from a tab.
+  *   trainer  ↩ Tag | Kliensek · Tervek · Pult
+- *   admin    ↩ Tag · ↩ Edző | Moderáció · Fiókok · Piactér   (Szabályok arrives in Phase 2, as a
+- *            door row on Moderáció — not a tab)
++ *   admin    ↩ Tag · ↩ Edző | Moderáció · Fiókok · Piactér   (Szabályok, /admin/rules, is a door
++ *            row on Moderáció — not a tab; Moderáció stays lit under it)
+  *
+  * The bar renders whatever it is given: there is no runtime clamp, because a clamp hides the
+  * failure it was written to catch. `check-nav.mjs` asserts the counts and the switch order.
+@@ -151,8 +151,9 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   admin: [
+     { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
+     { kind: 'switch', key: 'switch-trainer', to: '/coach', view: 'trainer', icon: 'switch-trainer', labelKey: 'nav.switch.trainer', nameKey: 'nav.switch.trainerName' },
+-    // The style studio's only door is on Moderáció (its header link), so it belongs here.
+-    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/notifications'] },
++    // The style studio's only door is on Moderáció (its header link), and so is the point rules'
++    // (its "Szabályok" door row), so both belong here.
++    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/admin/rules', '/notifications'] },
+     { key: 'accounts', to: '/admin/accounts', icon: 'accounts', labelKey: 'nav.accounts' },
+     { key: 'market', to: '/admin/marketplace', icon: 'market', labelKey: 'nav.marketplace' },
+   ],
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 43d1816..d65bf4c 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -66,6 +66,7 @@ export const ROUTE_META = {
+       admin: { parent: '/admin', parentLabelKey: 'nav.moderation' },
+     },
+   },
++  '/admin/rules': { parent: '/admin', parentLabelKey: 'nav.moderation' },
+   '/coach/clients/:id': { parent: '/coach', parentLabelKey: 'coaching.title' },
+   '/coach/clients/:id/chat': { parent: '/coach', parentLabelKey: 'coaching.title' },
+   '/coach/plans/:id': { parent: '/coach/plans', parentLabelKey: 'plans.title' },
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7e844d3..212b807 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -56,6 +56,9 @@ const AdminAccountsPage = lazy(() =>
+ const AdminMarketplacePage = lazy(() =>
+   import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
+ );
++const RulesPage = lazy(() =>
++  import('../features/admin/RulesPage').then((m) => ({ default: m.RulesPage })),
++);
+ const PlaygroundPage = lazy(() =>
+   import('../features/playground/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
+ );
+@@ -152,6 +155,9 @@ export const router = createBrowserRouter([
+       // routes, so each has a URL, a lit tab and a way in from the bar.
+       { path: 'admin/accounts', element: suspended(<AdminAccountsPage />) },
+       { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
++      // LifeOS Phase 2: the admin-global point rules, pushed from Moderáció's "Szabályok" door row
++      // (design round A: a door, not a tab — the admin bar keeps Moderáció lit).
++      { path: 'admin/rules', element: suspended(<RulesPage />) },
+       // Its own route rather than a tab on the admin page: the studio is a full-width workspace
+       // with its own list column, and folding it into a tab would force both into one layout.
+       { path: 'admin/styles', element: suspended(<StyleStudioPage />) },
+diff --git a/frontend/src/features/admin/AdminPage.tsx b/frontend/src/features/admin/AdminPage.tsx
+index d300388..0355a0c 100644
+--- a/frontend/src/features/admin/AdminPage.tsx
++++ b/frontend/src/features/admin/AdminPage.tsx
+@@ -10,6 +10,7 @@ import { StatBlock } from '../../ui/data/StatBlock';
+ import { Numeral } from '../../ui/data/Numeral';
+ import { SplitBar, SplitLegend, type SplitPart } from '../../ui/data/SplitBar';
+ import { LedgerRow } from '../../ui/data/LedgerRow';
++import { ListRow } from '../../ui/data/ListRow';
+ import { RowStack } from '../../ui/data/RowStack';
+ import { SectionHeader } from '../../ui/data/SectionHeader';
+ import { hasRole, useSession } from '../auth/useSession';
+@@ -167,8 +168,7 @@ function ModerationHeader({ pending }: { pending?: number }) {
+  *
+  * Fiókok and Piactér are tabs of the admin bar now (`AdminAccountsPage`, `AdminMarketplacePage`);
+  * the local section switch is gone. The frame's "Szabályok" door row under the ledger leads to
+- * `/admin/rules`, which arrives in Phase 2 — it is not drawn until there is a page behind it (D3:
+- * no control that does nothing).
++ * `/admin/rules` (Phase 2, the admin-global point rules).
+  */
+ export function AdminPage() {
+   const { t } = useTranslation();
+@@ -188,21 +188,21 @@ export function AdminPage() {
+     <Screen top="push" width="wide">
+       <AdminHeader title={t('admin.section.moderation')} />
+ 
+-      {stats.isPending ? (
+-        <FiguresSkeleton />
+-      ) : stats.data ? (
+-        <>
+-          <UserSplit users={stats.data.users} />
+-          {/* Two counts on one ledger line, not tappable: what the library and the uploads hold. */}
+-          <RowStack open close>
+-            <LedgerRow
+-              label={t('admin.unit.exercise')}
+-              value={stats.data.exercises.total}
+-              pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
+-            />
+-          </RowStack>
+-        </>
+-      ) : null}
++      {stats.isPending ? <FiguresSkeleton /> : stats.data ? <UserSplit users={stats.data.users} /> : null}
++
++      {/* One closed stack (admin-view-1): the two counts on one ledger line, not tappable — what
++          the library and the uploads hold — and under it the door to the point rules,
++          "Szabályok ›" (/admin/rules, S-admin-rules). The door stays when the figures fail. */}
++      <RowStack open close>
++        {stats.data ? (
++          <LedgerRow
++            label={t('admin.unit.exercise')}
++            value={stats.data.exercises.total}
++            pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
++          />
++        ) : null}
++        <ListRow title={t('adminRules.title')} to="/admin/rules" chevron />
++      </RowStack>
+ 
+       {/* The queue as a section of its own (admin-view-1): its head opens on the closed ledger's
+           rule, so it draws no second one. The queue AND the decision live here. See the header

@@ -67,6 +67,7 @@ export const ROUTE_META = {
       admin: { parent: '/admin', parentLabelKey: 'nav.moderation' },
     },
   },
+  '/admin/rules': { parent: '/admin', parentLabelKey: 'nav.moderation' },
   '/coach/clients/:id': { parent: '/coach', parentLabelKey: 'coaching.title' },
   '/coach/clients/:id/chat': { parent: '/coach', parentLabelKey: 'coaching.title' },
   '/coach/plans/:id': { parent: '/coach/plans', parentLabelKey: 'plans.title' },

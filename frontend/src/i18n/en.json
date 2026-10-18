@@ -1003,6 +1003,137 @@
       "admin": "Admin"
     }
   },
+  "adminRules": {
+    "title": "Rules",
+    "defaults": "Defaults",
+    "version": "Version {{version}}",
+    "intro": "The rules apply to every user.",
+    "coin": "coins",
+    "section": {
+      "habit": "Habits",
+      "task": "Tasks",
+      "workout": "Workout",
+      "focus": "Focus",
+      "challenge": "Challenge",
+      "kcal": "Calories",
+      "perfectDay": "Perfect day",
+      "streak": "Streak multipliers",
+      "freeze": "Freezes",
+      "dailyCap": "Daily cap",
+      "save": "Save"
+    },
+    "rule": {
+      "habitSuccess": {
+        "title": "Completion",
+        "sub": "default for a new habit, coins"
+      },
+      "habitPenalty": {
+        "title": "Missed",
+        "sub": "penalty, coins"
+      },
+      "badHabitCleanDay": {
+        "title": "Clean day",
+        "sub": "for a bad habit, coins"
+      },
+      "badHabitRelapseFactor": {
+        "title": "Relapse",
+        "sub": "penalty multiplier"
+      },
+      "badHabitRelapseDailyCap": {
+        "title": "Relapse cap",
+        "sub": "per habit per day, coins"
+      },
+      "partialHabitMin": {
+        "title": "Partial completion",
+        "sub": "pays pro rata from here"
+      },
+      "taskLow": {
+        "title": "Low"
+      },
+      "taskMid": {
+        "title": "Medium"
+      },
+      "taskHigh": {
+        "title": "High"
+      },
+      "taskLate": {
+        "title": "Done late",
+        "sub": "what it pays after the due date"
+      },
+      "taskOverdue": {
+        "title": "Overdue task",
+        "sub": "one-time penalty, coins"
+      },
+      "workoutComplete": {
+        "title": "Full workout",
+        "sub": "per workout, coins"
+      },
+      "workoutFull": {
+        "title": "Counts as full",
+        "sub": "share of the sets"
+      },
+      "workoutHalf": {
+        "title": "Partial workout",
+        "sub": "half credit from this share"
+      },
+      "focusPerHour": {
+        "title": "Per hour",
+        "sub": "pro rata"
+      },
+      "focusCheckin": {
+        "title": "Check-in",
+        "sub": "bonus · “Still on it?”"
+      },
+      "challenge": {
+        "title": "Daily challenge",
+        "sub": "default for a new challenge"
+      },
+      "kcalHit": {
+        "title": "Goal met"
+      },
+      "kcalMissed": {
+        "title": "Goal exceeded",
+        "sub": "penalty"
+      },
+      "perfectDay": {
+        "title": "Bonus",
+        "sub": "habits, tasks, workout, calories"
+      },
+      "streakTier": {
+        "title": "From day {{days}}",
+        "sub": "multiplier · rounded to whole coins"
+      },
+      "milestone": {
+        "title": "{{days}}-day milestone",
+        "sub": "bonus, coins"
+      },
+      "freezeEvery": {
+        "title": "Frequency",
+        "sub": "1 freeze every this many days"
+      },
+      "maxFreezes": {
+        "title": "At most",
+        "sub": "in reserve"
+      },
+      "dailyCap": {
+        "title": "Earnings per day",
+        "sub": "per user"
+      }
+    },
+    "unit": {
+      "pct": "%",
+      "days": "days",
+      "count": "pcs"
+    },
+    "savedValue": "saved {{value}}",
+    "changes": "{{count}} unsaved",
+    "note": "Note",
+    "noteHint": "Goes into the audit log with version {{version}}.",
+    "appliesFrom": "Applies from the next day close.",
+    "failed": "That didn't work. Please try again.",
+    "stale": "The change did not go through. Reload to see where things actually stand.",
+    "savedToast": "Saved"
+  },
   "public": {
     "specialty": {
       "strength": "Strength",

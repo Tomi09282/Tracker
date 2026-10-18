@@ -105,6 +105,7 @@ const EXPECT_BY_VIEW = {
   admin: [
     ['/admin', '/admin'],
     ['/admin/styles', '/admin'],
+    ['/admin/rules', '/admin'],
     ['/admin/accounts', '/admin/accounts'],
     ['/admin/marketplace', '/admin/marketplace'],
     ['/notifications', '/admin'],

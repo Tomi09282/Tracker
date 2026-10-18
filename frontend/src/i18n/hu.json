@@ -1003,6 +1003,137 @@
       "admin": "Admin"
     }
   },
+  "adminRules": {
+    "title": "Szabályok",
+    "defaults": "Alapértékek",
+    "version": "{{version}}. verzió",
+    "intro": "A szabályok minden felhasználóra érvényesek.",
+    "coin": "érme",
+    "section": {
+      "habit": "Szokás",
+      "task": "Feladat",
+      "workout": "Edzés",
+      "focus": "Fókusz",
+      "challenge": "Kihívás",
+      "kcal": "Kalória",
+      "perfectDay": "Tökéletes nap",
+      "streak": "Sorozat-szorzók",
+      "freeze": "Fagyasztás",
+      "dailyCap": "Napi plafon",
+      "save": "Mentés"
+    },
+    "rule": {
+      "habitSuccess": {
+        "title": "Teljesítés",
+        "sub": "alapérték új szokáshoz, érme"
+      },
+      "habitPenalty": {
+        "title": "Kihagyás",
+        "sub": "büntetés, érme"
+      },
+      "badHabitCleanDay": {
+        "title": "Tiszta nap",
+        "sub": "rossz szokásnál, érme"
+      },
+      "badHabitRelapseFactor": {
+        "title": "Visszaesés",
+        "sub": "büntetés-szorzó"
+      },
+      "badHabitRelapseDailyCap": {
+        "title": "Visszaesés plafonja",
+        "sub": "szokásonként naponta, érme"
+      },
+      "partialHabitMin": {
+        "title": "Részleges teljesítés",
+        "sub": "ettől fizet arányosan"
+      },
+      "taskLow": {
+        "title": "Alacsony"
+      },
+      "taskMid": {
+        "title": "Közepes"
+      },
+      "taskHigh": {
+        "title": "Magas"
+      },
+      "taskLate": {
+        "title": "Késve teljesítve",
+        "sub": "ennyit fizet a határidő után"
+      },
+      "taskOverdue": {
+        "title": "Lejárt feladat",
+        "sub": "egyszeri büntetés, érme"
+      },
+      "workoutComplete": {
+        "title": "Teljes edzés",
+        "sub": "edzésenként, érme"
+      },
+      "workoutFull": {
+        "title": "Teljesnek számít",
+        "sub": "a sorozatok aránya"
+      },
+      "workoutHalf": {
+        "title": "Részleges edzés",
+        "sub": "fél jóváírás ettől az aránytól"
+      },
+      "focusPerHour": {
+        "title": "Óránként",
+        "sub": "arányosan"
+      },
+      "focusCheckin": {
+        "title": "Visszaigazolás",
+        "sub": "bónusz · „Még rajta vagy?”"
+      },
+      "challenge": {
+        "title": "Napi kihívás",
+        "sub": "alapérték új kihíváshoz"
+      },
+      "kcalHit": {
+        "title": "Cél teljesítve"
+      },
+      "kcalMissed": {
+        "title": "Cél túllépve",
+        "sub": "büntetés"
+      },
+      "perfectDay": {
+        "title": "Bónusz",
+        "sub": "szokás, feladat, edzés, kalória"
+      },
+      "streakTier": {
+        "title": "{{days}} naptól",
+        "sub": "szorzó · egészre kerekítve"
+      },
+      "milestone": {
+        "title": "{{days}} napos mérföldkő",
+        "sub": "bónusz, érme"
+      },
+      "freezeEvery": {
+        "title": "Gyakoriság",
+        "sub": "ennyi naponként 1 fagyasztás"
+      },
+      "maxFreezes": {
+        "title": "Legfeljebb",
+        "sub": "tartalékban"
+      },
+      "dailyCap": {
+        "title": "Bevétel naponta",
+        "sub": "felhasználónként"
+      }
+    },
+    "unit": {
+      "pct": "%",
+      "days": "nap",
+      "count": "db"
+    },
+    "savedValue": "mentve {{value}}",
+    "changes": "{{count}} módosítás",
+    "note": "Megjegyzés",
+    "noteHint": "A {{version}}. verzióval az audit naplóba kerül.",
+    "appliesFrom": "A következő napzárástól érvényes.",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "stale": "A módosítás nem ment át. Frissítsd az oldalt, és nézd meg, mi az aktuális állapot.",
+    "savedToast": "Mentve"
+  },
   "public": {
     "specialty": {
       "strength": "Erő",

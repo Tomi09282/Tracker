@@ -1,0 +1,12 @@
+{
+  "id": "R-S-admin-rules-03",
+  "from": "S-admin-rules",
+  "kind": "fixture",
+  "blocking": false,
+  "target": ".pulse/rec/admin",
+  "need": "After B-core merges and the dev backend restarts with migration 031: record GET /api/v1/admin/rules for admin@ (--record --only-missing), so the states can become edit lists over a recording (R26). Until then the stub bodies are free-hand in B-core shape and pulse-fixture-check refuses them (7 problems, all the unrecorded-endpoint rule)",
+  "evidence": "pulse-fixture-check --file pkg/S-admin-rules/states.json",
+  "interim": "free-hand stub bodies copied from backend/src/lifeos/rules.js (DEFAULT_RULES, RULE_RANGES)",
+  "status": "done",
+  "resolution": "recorded at merge-S-admin-rules: .pulse/rec/admin/GET_admin_rules_99d510ba24.json (seeded version 1, createdByName null); the GET stubs became edit lists over it; the published state moved to notCapturable (no PUT 200 recording)"
+}

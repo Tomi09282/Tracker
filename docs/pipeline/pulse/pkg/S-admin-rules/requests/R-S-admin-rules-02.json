@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-rules-02",
+  "from": "S-admin-rules",
+  "kind": "asset",
+  "blocking": false,
+  "target": "frontend/src/ui/tokens/fonts.css",
+  "need": "Geist Mono weight 600 (@fontsource/geist-mono 600, latin + latin-ext): the edited rule value is Geist Mono SemiBold in lifeos/admin-rules; today the browser synthesises it from 500",
+  "evidence": ".pulse/pairs/S-admin-rules/admin-rules.pair-2.png (Oránként 25)",
+  "proposedApi": "two @font-face blocks for weight 600",
+  "interim": "font-semibold on the 500 face (synthetic, slightly heavier)",
+  "status": "open",
+  "resolution": null
+}

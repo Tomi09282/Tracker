@@ -119,8 +119,8 @@ export function isTabActive(
  *   user     Kezdőlap · Edzés · Étkezés · Haladás · Profil — the SAME five for every role. The
  *            trainer and admin views are entered from Profil (its NÉZETEK rows), not from a tab.
  *   trainer  ↩ Tag | Kliensek · Tervek · Pult
- *   admin    ↩ Tag · ↩ Edző | Moderáció · Fiókok · Piactér   (Szabályok arrives in Phase 2, as a
- *            door row on Moderáció — not a tab)
+ *   admin    ↩ Tag · ↩ Edző | Moderáció · Fiókok · Piactér   (Szabályok, /admin/rules, is a door
+ *            row on Moderáció — not a tab; Moderáció stays lit under it)
  *
  * The bar renders whatever it is given: there is no runtime clamp, because a clamp hides the
  * failure it was written to catch. `check-nav.mjs` asserts the counts and the switch order.
@@ -151,8 +151,9 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
   admin: [
     { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
     { kind: 'switch', key: 'switch-trainer', to: '/coach', view: 'trainer', icon: 'switch-trainer', labelKey: 'nav.switch.trainer', nameKey: 'nav.switch.trainerName' },
-    // The style studio's only door is on Moderáció (its header link), so it belongs here.
-    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/notifications'] },
+    // The style studio's only door is on Moderáció (its header link), and so is the point rules'
+    // (its "Szabályok" door row), so both belong here.
+    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/admin/rules', '/notifications'] },
     { key: 'accounts', to: '/admin/accounts', icon: 'accounts', labelKey: 'nav.accounts' },
     { key: 'market', to: '/admin/marketplace', icon: 'market', labelKey: 'nav.marketplace' },
   ],

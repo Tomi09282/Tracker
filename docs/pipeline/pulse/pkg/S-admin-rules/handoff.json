@@ -1,0 +1,163 @@
+{
+  "package": "S-admin-rules",
+  "frame": "lifeos/admin-rules (Figma 190:1936, fix round 2 of 182:1279)",
+  "base": "2b9d997 (pulse-redesign, B-core merged)",
+  "verdicts": {
+    "admin-rules": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules.png",
+      "tiles": [
+        ".pulse/pairs/S-admin-rules/admin-rules.pair-1.png",
+        ".pulse/pairs/S-admin-rules/admin-rules.pair-2.png",
+        ".pulse/pairs/S-admin-rules/admin-rules.pair-3.png",
+        ".pulse/pairs/S-admin-rules/admin-rules.pair-4.png"
+      ],
+      "geometry": {
+        "counts": {
+          "layers": 450,
+          "chrome": 5,
+          "structural": 156,
+          "vectors": 0,
+          "clipped": 0,
+          "masked": 0,
+          "compared": 289,
+          "matched": 229,
+          "sameSlotOtherString": 0,
+          "deviating": 60,
+          "styleMismatches": 0,
+          "unmatched": 0
+        },
+        "note": "229 of 289 compared layers matched; the 60 deviating are text boxes whose only difference is WIDTH (Figma fixed-width text frames 186 / 354 wide vs the DOM measuring the hugging text run); dx 0 and dy <= 0.5 on all of them"
+      },
+      "fixture": "free-hand GET /admin/rules body in B-core shape (R26 cannot check it: endpoint unrecorded, dev backend without 031)"
+    },
+    "admin-view-1 (door row)": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-admin-rules/door/admin-view-1.png",
+      "tile": ".pulse/pairs/S-admin-rules/admin-view-1-door.pair-1.png",
+      "note": "S-admin state with the shared.patch applied: the Szabályok row under the ledger as round A draws it"
+    }
+  },
+  "extraStates": {
+    "admin-rules-clean": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-clean.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": true,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-failed": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-failed.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": false,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-published": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-published.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": true,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-stale": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-stale.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": false,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-save-failed": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-save-failed.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": true,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-defaults": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-defaults.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": true,
+        "reducedMotion": null
+      }
+    },
+    "admin-rules-forbidden": {
+      "verdict": "structure (fixture outcome)",
+      "capture": ".pulse/shots/S-admin-rules/admin-rules-forbidden.png",
+      "probes": {
+        "fonts": true,
+        "pill": true,
+        "boxed": true,
+        "overflow": true,
+        "targets": true,
+        "reducedMotion": null
+      }
+    }
+  },
+  "notCapturable": {
+    "admin-rules-loading": "no delayed stub in pulse-shot; skeleton checked in code"
+  },
+  "probes": {
+    "admin-rules": {
+      "fonts": true,
+      "pill": true,
+      "boxed": true,
+      "overflow": true,
+      "targets": true,
+      "reducedMotion": null,
+      "geometry": false
+    }
+  },
+  "variants": {
+    "en": "8/8 captured",
+    "de": "8/8 captured",
+    "w360": "8/8 captured",
+    "scrollEnd": "8/8, last content 734 above the bar at 782",
+    "reducedMotion": "8/8"
+  },
+  "liveSmoke": "not run: the dev backend on :3000 has no /admin/rules (404) until B-core merges and the backend restarts with migration 031; no write is ever made live (PUT outcomes are stubs)",
+  "writesLive": [],
+  "i18n": {
+    "patch": "i18n.patch.json",
+    "namespace": "adminRules",
+    "keys": 73,
+    "copy": "all inventory (frame strings or existing hu.json strings); no proposed copy",
+    "checkI18n": "OK 918 keys each with the patch applied"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-admin-rules/i18n.patch.json",
+    "docs/pipeline/pulse/pkg/S-admin-rules/requests/R-S-admin-rules-01.patch (request R-S-admin-rules-01: route, routeMeta row, Moderacio owns /admin/rules, check-nav-active row, the door row in AdminPage.tsx)"
+  ],
+  "deviations": "deviations.md",
+  "build": "pulse-verify: build green in 15 s - 8 of 8 captured (replay)"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-rules-01",
+  "from": "S-admin-rules",
+  "kind": "nav",
+  "blocking": false,
+  "target": "docs/pipeline/pulse/work-packages.json; frontend/src/app/{router.tsx,routeMeta.ts,navTabs.ts}; frontend/scripts/check-nav-active.mjs; frontend/src/features/admin/AdminPage.tsx (S-admin)",
+  "need": "Registration is done (merge-B-core); apply requests/R-S-admin-rules-01.patch at the merge (a screen package may not hand in a shared.patch, PLAN 4.4 item 4; the work-packages note that names pkg/S-admin-rules/shared.patch should name this file): the /admin/rules route, its routeMeta row (parent /admin, nav.moderation), Moderacio owns /admin/rules, the check-nav-active EXPECT row, and the Szabalyok door row on Moderacio (AdminPage.tsx, owned by S-admin: one ListRow under the ledger in the same closed stack, as admin-view-1 draws it). No sixth admin tab: round A / B draw five cells.",
+  "evidence": ".pulse/pairs/S-admin-rules/admin-view-1-door.pair-1.png; check-nav-active OK 166 assertions with the patch",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-admin-rules/requests/R-S-admin-rules-01.patch",
+  "interim": "the patch is applied by hand in slot-5 for the build and the captures, and reverse-applied after them (git apply -R), so the tree stays clean",
+  "status": "applied",
+  "resolution": "applied by the integrator at merge-S-admin-rules (git apply --3way onto pulse-int 30817c1, all five files clean); verify:gates 78 passed"
+}

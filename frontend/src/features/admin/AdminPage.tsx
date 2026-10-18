@@ -10,6 +10,7 @@ import { StatBlock } from '../../ui/data/StatBlock';
 import { Numeral } from '../../ui/data/Numeral';
 import { SplitBar, SplitLegend, type SplitPart } from '../../ui/data/SplitBar';
 import { LedgerRow } from '../../ui/data/LedgerRow';
+import { ListRow } from '../../ui/data/ListRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { hasRole, useSession } from '../auth/useSession';
@@ -167,8 +168,7 @@ function ModerationHeader({ pending }: { pending?: number }) {
  *
  * Fiókok and Piactér are tabs of the admin bar now (`AdminAccountsPage`, `AdminMarketplacePage`);
  * the local section switch is gone. The frame's "Szabályok" door row under the ledger leads to
- * `/admin/rules`, which arrives in Phase 2 — it is not drawn until there is a page behind it (D3:
- * no control that does nothing).
+ * `/admin/rules` (Phase 2, the admin-global point rules).
  */
 export function AdminPage() {
   const { t } = useTranslation();
@@ -188,21 +188,21 @@ export function AdminPage() {
     <Screen top="push" width="wide">
       <AdminHeader title={t('admin.section.moderation')} />
 
-      {stats.isPending ? (
-        <FiguresSkeleton />
-      ) : stats.data ? (
-        <>
-          <UserSplit users={stats.data.users} />
-          {/* Two counts on one ledger line, not tappable: what the library and the uploads hold. */}
-          <RowStack open close>
-            <LedgerRow
-              label={t('admin.unit.exercise')}
-              value={stats.data.exercises.total}
-              pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
-            />
-          </RowStack>
-        </>
-      ) : null}
+      {stats.isPending ? <FiguresSkeleton /> : stats.data ? <UserSplit users={stats.data.users} /> : null}
+
+      {/* One closed stack (admin-view-1): the two counts on one ledger line, not tappable — what
+          the library and the uploads hold — and under it the door to the point rules,
+          "Szabályok ›" (/admin/rules, S-admin-rules). The door stays when the figures fail. */}
+      <RowStack open close>
+        {stats.data ? (
+          <LedgerRow
+            label={t('admin.unit.exercise')}
+            value={stats.data.exercises.total}
+            pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
+          />
+        ) : null}
+        <ListRow title={t('adminRules.title')} to="/admin/rules" chevron />
+      </RowStack>
 
       {/* The queue as a section of its own (admin-view-1): its head opens on the closed ledger's
           rule, so it draws no second one. The queue AND the decision live here. See the header

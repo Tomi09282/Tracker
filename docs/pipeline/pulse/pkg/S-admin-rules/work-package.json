@@ -1,0 +1,41 @@
+{
+  "id": "S-admin-rules",
+  "screens": [
+    "admin-rules"
+  ],
+  "owns": [
+    "frontend/src/features/admin/RulesPage.tsx",
+    "frontend/src/features/admin/rulesModel.ts",
+    "docs/pipeline/pulse/pkg/S-admin-rules/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "frames": [],
+  "inventory": "docs/pipeline/pulse/pkg/S-admin-rules/screen.md",
+  "account": "admin@tracker.local",
+  "route": "/admin/rules",
+  "dependsOn": [
+    "B-core",
+    "S-admin"
+  ],
+  "size": "M",
+  "wave": 5,
+  "notes": "LifeOS Phase 2 (plan abundant-booping-willow): the admin-global point rules page on GET / PUT /admin/rules (B-core, migration 031) with expectedVersion and an optional note, built 1:1 to design round B frame lifeos/admin-rules (Figma 182:1279). Reached from the Szabályok door row on Moderáció (admin-view-1) and by URL; the admin bar keeps its five cells with Moderáció lit (design round A: Szabályok is a door row, not a tab). The route, the routeMeta row, the Moderáció owns entry and the door row in AdminPage.tsx arrive through requests/R-S-admin-rules-01.patch. A PUT is never fired live on the shared rule set: its outcomes are fixtures. Builds on frontend/src/lib/lifeos-api.ts (B-core shared.patch).",
+  "i18nNamespaces": [
+    "adminRules"
+  ],
+  "liveWrites": []
+}
