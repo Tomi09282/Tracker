@@ -53,6 +53,7 @@ import {
   writeFileAtomic,
 } from './pulse-owns-check.mjs';
 import { applyPatch } from './pulse-i18n.mjs';
+import { portForSlot } from './lib/pulse-ports.mjs';
 import { applyDeltas } from './pulse-variants.mjs';
 
 /** Paths a tool patches in a slot and the integrator owns — the fixed half of the restore list. */
@@ -132,11 +133,13 @@ function clearDeadLocks(unit) {
   return holdsOwn;
 }
 
-/** A preview somebody left listening on this slot's own port (518<n>). Only ever a node process, only this port. */
+/** A preview somebody left listening on this slot's own port (lib/pulse-ports.mjs: 5180 + n up to slot-8, 5200 + n from slot-9).
+ * Only ever a node process, only this port. */
 function clearStrayPreview(holdsOwn) {
-  const n = /\/slot-(\d)$/.exec(tree().root)?.[1];
+  const n = /\/slot-(\d{1,2})$/.exec(tree().root)?.[1];
   if (!n) return say('  1  not a slot-<n> worktree — no preview port to clear');
-  const port = 5180 + Number(n);
+  const port = portForSlot(n);
+  if (!port) return say(`  1  slot-${n} has no preview port — nothing to clear`);
   let pids = [];
   if (process.platform === 'win32') {
     const out = spawnSync('netstat', ['-ano', '-p', 'TCP'], { encoding: 'utf8', windowsHide: true }).stdout ?? '';

@@ -27,6 +27,7 @@ import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { PREVIEW_PORTS, PREVIEW_PORT_RANGES } from './lib/pulse-ports.mjs';
 
 // ───────────────────────────────────────────────────────────────────────────── paths
 
@@ -40,8 +41,8 @@ export const CHROME =
 export const FRAME_PNG_DIR =
   process.env.PULSE_FRAME_PNGS || 'C:/Users/Petike/Documents/TRACKER-mockups/5-pulse/kepernyok-2x';
 export const DEFAULT_API = process.env.PULSE_API || 'http://localhost:3000';
-/** Ports a preview may be started on, and the only ports this tool will ever free. */
-export const PREVIEW_PORTS = [5180, 5181, 5182, 5183, 5184, 5185, 5186, 5187, 5188, 5189];
+/** Ports a preview may be started on, and the only ports this tool will ever free (lib/pulse-ports.mjs). */
+export { PREVIEW_PORTS, PREVIEW_PORT_RANGES };
 
 let pulseDirCache = null;
 /**
@@ -462,7 +463,7 @@ export function listenersOnPort(port) {
 
 /** Frees a PREVIEW port. Refuses every other port: 3000 and 5173 belong to the owner's stack. */
 export function killListenerOnPort(port) {
-  if (!PREVIEW_PORTS.includes(port)) throw new Error(`refusing to free port ${port}: only ${PREVIEW_PORTS[0]}-${PREVIEW_PORTS.at(-1)} are preview ports`);
+  if (!PREVIEW_PORTS.includes(port)) throw new Error(`refusing to free port ${port}: only ${PREVIEW_PORT_RANGES} are preview ports`);
   const killed = [];
   for (const pid of listenersOnPort(port)) {
     try {
@@ -481,7 +482,7 @@ export function killListenerOnPort(port) {
  * the pid we hold IS the server and stopping it leaves nothing behind).
  */
 export async function startPreview(frontendDir, port, { timeoutMs = 30000 } = {}) {
-  if (!PREVIEW_PORTS.includes(port)) throw new Error(`preview port must be one of ${PREVIEW_PORTS.join(', ')}`);
+  if (!PREVIEW_PORTS.includes(port)) throw new Error(`preview port must be in ${PREVIEW_PORT_RANGES}`);
   const vite = path.join(frontendDir, 'node_modules', 'vite', 'bin', 'vite.js');
   if (!fs.existsSync(vite)) throw new Error(`no vite in ${frontendDir} (run npm ci there)`);
   if (!fs.existsSync(path.join(frontendDir, 'dist', 'index.html'))) throw new Error(`no build in ${frontendDir}/dist (run the build first)`);
@@ -3130,7 +3131,7 @@ Feed      --replay (default) | --live | --record [--only-missing | --rerecord]
           --smoke                    only states with no click script and no fixture (the live smoke)
 Where     --base <origin>            the app (default http://localhost:<port>)
           --serve <frontend dir>     start "vite preview" of that tree on --port for this run
-          --port <5180-5189>         default 5180
+          --port <5180-5189|5209-5229>  default 5180 (slot-1..8 -> 5181-5188, int -> 5189, slot-9..29 -> 5209-5229)
           --api <origin>             the backend, for the login (default ${DEFAULT_API})
 Viewport  --width 402|360|430|1280|1300  --height <pt>  --scale <n>  --insets 0 | <top>,<bottom>
           --scroll-end               402 x 874, scrolled to the end (tall frames)

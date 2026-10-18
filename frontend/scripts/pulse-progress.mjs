@@ -55,6 +55,7 @@ import {
   tree,
   writeFileAtomic,
 } from './pulse-owns-check.mjs';
+import { MAX_SLOT, portForSlot } from './lib/pulse-ports.mjs';
 
 export const STATUSES = ['todo', 'claimed', 'in_progress', 'handoff', 'integrating', 'merged', 'in_review', 'changes_requested', 'accepted', 'blocked'];
 export const VERDICTS = ['todo', 'in_progress', 'structure', 'pending-F15', 'matched-fixture', 'matched'];
@@ -290,7 +291,7 @@ function cmdClaim(argv, model) {
   const unit = resolveId(argv[0], model);
   const owner = flag(argv, '--owner');
   const slot = Number(flag(argv, '--slot'));
-  if (!unit || !owner || !Number.isInteger(slot) || slot < 1 || slot > 9) fail(2, 'usage: claim <id> --owner <who> --slot <1..9> [--force]');
+  if (!unit || !owner || !Number.isInteger(slot) || slot < 1 || slot > MAX_SLOT) fail(2, `usage: claim <id> --owner <who> --slot <1..${MAX_SLOT}> [--force]`);
   const { previous, next, now } = loadLive(model);
   const entry = next.packages[unit.id];
   const force = argv.includes('--force');
@@ -308,7 +309,7 @@ function cmdClaim(argv, model) {
     owner,
     slot,
     worktree: `${t.main}-wt/slot-${slot}`,
-    port: 5180 + slot,
+    port: portForSlot(slot),
     branch: unit.branch,
     updated: now,
   });

@@ -9,7 +9,7 @@
  * wait for a login window and the wait for the lock itself happen BEFORE the lock is held, and
  * the preview and the lock are released in `finally`, whatever went wrong.
  *
- *   node scripts/pulse-verify.mjs --package <id> [--port 518<n>] [capture options of pulse-shot]
+ *   node scripts/pulse-verify.mjs --package <id> [--port <slot port>] [capture options of pulse-shot]
  *   node scripts/pulse-verify.mjs --package <id> --baseline      the "before": the BASE build, no build here
  *   node scripts/pulse-verify.mjs --clean                        dead locks and stray previews
  *
@@ -26,6 +26,7 @@ import path from 'node:path';
 import {
   FRONTEND_DIR, PREVIEW_PORTS, getAccess, killListenerOnPort, listenersOnPort, parseArgs, planRun, pulseDir, run, selfTest, sleep, startPreview, writeFileAtomic,
 } from './pulse-shot.mjs';
+import { PREVIEW_PORT_RANGES, portForTree } from './lib/pulse-ports.mjs';
 
 const LOCKS = () => path.join(pulseDir(), 'locks');
 const HEARTBEAT_MS = 20 * 1000;
@@ -162,11 +163,9 @@ function baseTree() {
 }
 
 function slotPort() {
-  // …/tracker-wt/slot-3/frontend -> 5183; the integration worktree -> 5189; anything else must say --port
-  const m = /[\\/]slot-(\d)[\\/]/.exec(FRONTEND_DIR + path.sep);
-  if (m) return 5180 + Number(m[1]);
-  if (/[\\/]tracker-wt[\\/]int[\\/]/.test(FRONTEND_DIR + path.sep)) return 5189;
-  return null;
+  // slot-3 -> 5183, slot-12 -> 5212 (5180 + n up to 8, 5200 + n from 9); the integration worktree -> 5189;
+  // anything else must say --port
+  return portForTree(FRONTEND_DIR + path.sep);
 }
 
 async function main() {
@@ -189,8 +188,8 @@ async function main() {
   if (!opts.pkg && !opts.all && !opts.states.length) throw new Error('name what to verify: --package <id>, --all or state keys');
   const label = opts.pkg || (opts.all ? 'all' : opts.states.join('+'));
   opts.port = opts.port || slotPort();
-  if (!opts.port) throw new Error('this tree is not a slot: give --port 5180-5189');
-  if (!PREVIEW_PORTS.includes(opts.port)) throw new Error(`--port must be one of ${PREVIEW_PORTS.join(', ')}`);
+  if (!opts.port) throw new Error(`this tree is not a slot: give --port ${PREVIEW_PORT_RANGES}`);
+  if (!PREVIEW_PORTS.includes(opts.port)) throw new Error(`--port must be in ${PREVIEW_PORT_RANGES}`);
   if (opts.serve || opts.base) throw new Error('pulse-verify serves the build itself: --serve and --base belong to pulse-shot');
 
   const serveDir = opts.baseline ? baseTree() : FRONTEND_DIR;
