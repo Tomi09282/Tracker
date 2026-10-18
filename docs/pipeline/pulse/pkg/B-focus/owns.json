@@ -1,0 +1,41 @@
+{
+  "id": "B-focus",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 6 'Focus + statistics' (backend half: B.1-B.10); owner 2026-10-18 (design round B and the economy sheet approved), .pulse/owner-answers.md last sections; backend changes allowed by the owner's lifting of the backend rule for the LifeOS backend packages",
+  "owns": [
+    "backend/package.json",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-focus.js",
+    "backend/scripts/verify-035.mjs",
+    "backend/src/coins/routes.js",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/lifeos-focus-views.js",
+    "backend/src/db/migrations/035_lifeos_focus.sql",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/tx/lifeos-focus.js",
+    "backend/src/db/tx/lifeos-stats.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/**",
+    "docs/pipeline/pulse/pkg/B-focus/**"
+  ],
+  "takenFrom": {
+    "B-habits-tasks (closed, merged 4c3e668)": [
+      "backend/package.json",
+      "backend/scripts/smoke.js",
+      "backend/src/coins/routes.js",
+      "backend/src/db/gdpr.js",
+      "backend/src/db/index.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/src/db/worker.js",
+      "backend/src/lifeos/**"
+    ]
+  },
+  "handIn": {
+    "shared.patch": ["frontend/src/lib/lifeos-api.ts"]
+  },
+  "notInScope": [
+    "the focus screens (focus-1 / -2 / -3), Ma's FÓKUSZ block and Haladás > Napok — the frontend lanes, against api.md and lifeos-api.ts",
+    "challenges, rewards (Phase 4, migration 033), calendar / events / reminders (Phase 5, 034)",
+    "work-packages.json entry — the integrator's, at merge (as for B-core and B-habits-tasks)"
+  ]
+}

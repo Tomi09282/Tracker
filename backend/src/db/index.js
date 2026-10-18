@@ -172,6 +172,18 @@ export const deleteTask = (args) => pool.run(args, { name: 'deleteTaskTx' });
 export const completeTask = (args) => pool.run(args, { name: 'completeTaskTx' });
 export const reopenTask = (args) => pool.run(args, { name: 'reopenTaskTx' });
 export const materializeRecurringTasks = (args) => pool.run(args, { name: 'materializeRecurringTasksTx' });
+// LifeOS focus sessions (migration 035): ./tx/lifeos-focus.js. Only finishFocusTx moves coins (one
+// focus.finish event through postCoinEvent); a check-in raises the count the finish pays for.
+export const focusCurrent = (args) => pool.run(args, { name: 'focusCurrentQuery' });
+export const focusSession = (args) => pool.run(args, { name: 'focusQuery' });
+export const focusList = (args) => pool.run(args, { name: 'focusListQuery' });
+export const startFocus = (args) => pool.run(args, { name: 'startFocusTx' });
+export const checkinFocus = (args) => pool.run(args, { name: 'checkinFocusTx' });
+export const finishFocus = (args) => pool.run(args, { name: 'finishFocusTx' });
+export const cancelFocus = (args) => pool.run(args, { name: 'cancelFocusTx' });
+// LifeOS statistics (Haladás > Napok): ./tx/lifeos-stats.js — two reads, each one snapshot.
+export const lifeosDays = (args) => pool.run(args, { name: 'lifeosDaysQuery' });
+export const lifeosStats = (args) => pool.run(args, { name: 'lifeosStatsQuery' });
 
 // LifeOS challenges and rewards (migration 033): ./tx/lifeos-rewards.js, re-exported by worker.js.
 // The draw is made in the worker (crypto.randomInt); a pick creates a task, which pays on completion;

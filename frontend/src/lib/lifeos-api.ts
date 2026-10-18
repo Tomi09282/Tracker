@@ -4,6 +4,8 @@
  * backend package B-habits-tasks (docs/pipeline/pulse/pkg/B-habits-tasks/api.md). The daily challenge
  * draw and the reward shop: migration 033, backend package B-rewards-challenges
  * (docs/pipeline/pulse/pkg/B-rewards-challenges/api.md).
+ * Focus sessions and the statistics: migration 035, backend package B-focus
+ * (docs/pipeline/pulse/pkg/B-focus/api.md).
  *
  * Mirrors the server's zod schemas and worker answers (backend/src/lifeos/*routes.js,
  * backend/src/db/tx/lifeos*.js).
@@ -92,7 +94,7 @@ export interface TodayWorkoutOccurrence {
   logStatus: 'in_progress' | 'completed' | 'abandoned' | null;
 }
 
-/** GET /lifeos/today (Phase-2 and Phase-3 fields; challenge, focus and nutrition join later). */
+/** GET /lifeos/today (Phase-2 to Phase-6 fields; nutrition joins later). */
 export interface LifeosToday {
   /** A zone is set and LifeOS has a start day. */
   started: boolean;
@@ -133,16 +135,18 @@ export interface LifeosToday {
   challenge: ChallengeDraw | null;
   /** Phase 5: the next event that starts after now, within 7 calendar days (KÖVETKEZŐ); null when none or before a zone. */
   nextEvent: NextEvent | null;
+  /** Phase 6: Ma's FÓKUSZ block — the open focus block and today's paid focus. Empty before a zone. */
+  focus: TodayFocus;
 }
 
 /** The LifeOS fields GET /coins/ledger adds to each entry (null for non-LifeOS movements). */
 export interface LifeosLedgerFields {
   localDate: DayKey | null;
   /** 'workout_log' | 'day' (Phase 2), 'task' | 'habit_day' (Phase 3), 'reward' (Phase 4: a
-   *  reward.redeem spend, sourceId = the reward, sourceTitle = the name on the receipt). */
+   *  reward.redeem spend, sourceId = the reward, sourceTitle = the name on the receipt), 'focus' (Phase 6). */
   sourceType: string | null;
   sourceId: number | null;
-  /** The workout's title, the task's title or the habit's name; null for day-level movements. */
+  /** The workout's title, the task's title, the habit's name or the focus block's title; null for day-level movements. */
   sourceTitle: string | null;
   /** Set on a reversal: the event it undoes. */
   reversesEventId: number | null;
@@ -926,3 +930,280 @@ export interface NextEvent {
  * `/calendar/events/<id>`, `/habits/<id>` or `/tasks`.
  */
 export type ReminderNotificationType = 'lifeos.event' | 'lifeos.habit' | 'lifeos.task';
+
+/* ── Phase 6: focus sessions and the statistics (migration 035, package B-focus) ──────────────── */
+
+/**
+ * planned (starts later) · active (running) · ended (ran out, waiting for Befejezés / Feladás) ·
+ * done (finished and paid) · cancelled (Feladás, paid nothing).
+ */
+export type FocusStatus = 'planned' | 'active' | 'ended' | 'done' | 'cancelled';
+
+/**
+ * One focus block (GET /focus/current, /focus/:id, every focus write). Times are epoch SECONDS;
+ * startTime / endTime are the user's wall clock ('HH:MM'). Amounts are minor units.
+ */
+export interface FocusSession {
+  id: number;
+  /** "Min dolgozol?" */
+  title: string;
+  status: FocusStatus;
+  startsAt: number;
+  endsAt: number;
+  /** focus-1 / focus-2 "21:10" · "22:00". */
+  startTime: string | null;
+  endTime: string | null;
+  plannedMinutes: number;
+  /** Whole minutes spent (to now while open, to the close when closed): focus-2 "15 / 50 perc". */
+  elapsedMinutes: number;
+  /** The countdown (focus-2 "34:42"); the whole plan while planned, 0 when closed. */
+  remainingSeconds: number;
+  /** "Rajta vagy még?" every N minutes; 0 = none. */
+  checkinMinutes: number;
+  /** focus-2 ELLENŐRZÉS "1 / 3": checkinsDone / checkinsMax. */
+  checkinsDone: number;
+  checkinsMax: number;
+  /** A check-in can be counted right now (the lime "Rajta vagyok" pill is live). */
+  checkinDue: boolean;
+  /** When the next check-in becomes answerable (epoch s), null when none is left. */
+  nextCheckinAt: number | null;
+  lastCheckinAt: number | null;
+  /** The whole plan with every check-in answered (focus-1 "Várhatóan +23 érme"). */
+  expectedMinor: number;
+  /** What Befejezés would pay now (null while planned or closed); the daily coin cap may trim it. */
+  payoutNowMinor: number | null;
+  closedAt: number | null;
+  /** The logical day of the finish / cancel. */
+  closedOn: DayKey | null;
+  /** done only: the minutes and check-ins the award paid for (focus-3 "50 PERC", "3 / 3"). */
+  paidMinutes: number | null;
+  paidCheckins: number | null;
+  /** done only: the coins credited (focus-3 "+23 jóváírva"); 0 when nothing was paid. */
+  awardedMinor: number | null;
+  /** done only: the 400-coin daily cap trimmed the award. */
+  capped: boolean;
+}
+
+/** The rules a focus screen draws its estimates with (admin-global, see PointRules). */
+export interface FocusRules {
+  pointsPerHour: number;
+  checkinPoint: number;
+  /** Paid focus minutes per logical day (a finish beyond it pays for the minutes left). */
+  maxMinutesPerDay: number;
+  minCheckinGapMinutes: number;
+  minMinutes: number;
+  maxMinutes: number;
+  maxCheckinMinutes: number;
+}
+
+/** GET /focus/current. Before a zone is set: started false, session null. */
+export interface FocusCurrentResponse {
+  started: boolean;
+  today: DayKey | null;
+  /** The server's clock (epoch s) — correct the countdown against it. */
+  now?: number;
+  session: FocusSession | null;
+  /** Focus minutes already paid today. */
+  todayMinutes: number;
+  rules: FocusRules;
+}
+
+/** GET /focus — the open block first, then the newest closed ones (at most 50 closed). */
+export interface FocusListResponse {
+  started: boolean;
+  today?: DayKey;
+  now?: number;
+  sessions: FocusSession[];
+}
+
+/** GET /focus/:id and POST /focus/:id/cancel. */
+export interface FocusSessionResponse {
+  now?: number;
+  session: FocusSession;
+  /** cancel only: it was cancelled already. */
+  already?: true;
+}
+
+/** POST /focus body (.strict()). */
+export interface FocusStart {
+  /** 8..64 of [A-Za-z0-9_-]; the same key answers the first session whatever the body. */
+  clientKey: string;
+  /** 1..120 characters. */
+  title: string;
+  /** 5..720 (focus-1: 25 / 50 / 60 / 90 / 120). */
+  minutes: number;
+  /** 0 = none, else 5..180 (focus-1: 0 / 10 / 15 / 30). */
+  checkinMinutes: number;
+  /** A PLANNED start, epoch seconds: now .. now + 24 h (absent = now; the past is refused). */
+  startAt?: number;
+}
+
+/** POST /focus -> 201 { session } (200 with replayed: true). */
+export interface FocusStartResponse {
+  session: FocusSession;
+  replayed?: true;
+}
+
+/** POST /focus/:id/checkin (empty body). counted false = not due yet / within 5 minutes of the last. */
+export interface FocusCheckinResponse {
+  session: FocusSession;
+  counted: boolean;
+  reason?: 'not_due' | 'too_soon';
+}
+
+/** POST /focus/:id/finish (empty body). `already` = it was finished; nothing paid again. */
+export interface FocusFinishResponse {
+  session: FocusSession;
+  awardedMinor: number;
+  capped: boolean;
+  already?: true;
+}
+
+/** The 409 codes of the focus routes (plus TIMEZONE_REQUIRED and LIMIT_REACHED as LifeosRefusal). */
+export type FocusRefusalCode =
+  | 'TIMEZONE_REQUIRED'
+  | 'LIMIT_REACHED'
+  | 'FOCUS_OPEN'
+  | 'FOCUS_NOT_STARTED'
+  | 'FOCUS_NOT_ACTIVE'
+  | 'FOCUS_NO_CHECKINS'
+  | 'FOCUS_CLOSED';
+
+export interface FocusRefusal {
+  error: string;
+  code: FocusRefusalCode;
+  /** FOCUS_OPEN: the open session; FOCUS_NOT_ACTIVE: the session as it stands. */
+  session?: FocusSession;
+  /** LIMIT_REACHED: sessions per logical day (48). */
+  limit?: number;
+  requestId: string;
+}
+
+/** GET /lifeos/today.focus — Ma's FÓKUSZ block. */
+export interface TodayFocus {
+  /** The open block (planned: "Következő blokk · 25 perc · +8 érme · 14:00"; active; ended). */
+  current: FocusSession | null;
+  /** Paid focus minutes, finished blocks and focus coins of the logical today. */
+  todayMinutes: number;
+  todaySessions: number;
+  todayEarnedMinor: number;
+  maxMinutesPerDay: number;
+}
+
+/** closed | lapsed (settled) · open (not settled yet) · before_start · future. */
+export type LifeosDayStatus = 'closed' | 'lapsed' | 'open' | 'before_start' | 'future';
+
+/** One logical day (GET /lifeos/days). Settled facts are null on days that have not settled. */
+export interface LifeosDay {
+  date: DayKey;
+  status: LifeosDayStatus;
+  /** Net of every LifeOS movement of the day, reversals included. */
+  netMinor: number;
+  earnedMinor: number;
+  /** Positive: the coins lost (penalties, reversals of earns). */
+  lostMinor: number;
+  /** Penalties of the day (negative movements that are not reversals). */
+  penalties: number;
+  perfect: boolean;
+  workoutDue: boolean | null;
+  workoutDone: boolean | null;
+  kcalTarget: number | null;
+  kcalEaten: number | null;
+  kcalOutcome: 'hit' | 'over' | 'under' | 'no_data' | null;
+  habitsScheduled: number | null;
+  habitsDone: number | null;
+  tasksDue: number | null;
+  tasksDone: number | null;
+  /** Paid focus minutes of blocks finished that day. */
+  focusMinutes: number;
+}
+
+/** GET /lifeos/days?from&to (both or neither; at most 92 days; default: the last 14). */
+export interface LifeosDaysResponse {
+  started: boolean;
+  today: DayKey | null;
+  startedOn?: DayKey | null;
+  from: DayKey | null;
+  to: DayKey | null;
+  days: LifeosDay[];
+}
+
+/** A habit's settled day on the Napok SegmentBar (lit = done, half = partial / frozen, off = missed). */
+export type HabitCellState = 'done' | 'partial' | 'frozen' | 'missed' | 'relapse' | 'skipped' | 'open' | 'lapsed' | 'none';
+
+/** GET /lifeos/stats?days=7..28 (14)&weeks=1..12 (4) — Haladás > Napok in one answer. */
+export interface LifeosStatsResponse {
+  started: boolean;
+  today: DayKey | null;
+  startedOn?: DayKey | null;
+  /** EZEN A HÉTEN: "490 érme · átlag 70 / nap · előző hét 339". */
+  week: {
+    from: DayKey;
+    to: DayKey;
+    netMinor: number;
+    /** net / days elapsed this week (Monday..today), rounded. */
+    avgPerDayMinor: number;
+    daysElapsed: number;
+    prevWeekNetMinor: number;
+  } | null;
+  /** The day columns, oldest first, the last one today. */
+  days: Array<Pick<LifeosDay, 'date' | 'status' | 'netMinor' | 'earnedMinor' | 'lostMinor' | 'perfect'>>;
+  /** HETEK, newest first: "42. hét · okt. 12–18. · 1 tökéletes nap · +490". */
+  weeks: Array<{
+    weekStart: DayKey;
+    weekEnd: DayKey;
+    isoYear: number;
+    isoWeek: number;
+    netMinor: number;
+    earnedMinor: number;
+    lostMinor: number;
+    perfectDays: number;
+    penalties: number;
+    /** The week holding today. */
+    current: boolean;
+  }>;
+  /** SZOKÁSOK over the settled window (the days before today): "okt. 5–17.". */
+  habits: {
+    from: DayKey;
+    to: DayKey;
+    rows: Array<{
+      id: number;
+      name: string;
+      kind: HabitKind;
+      scheduleType: HabitSchedule;
+      /** "12 NAP" · "×1,25" · freezes. */
+      streak: HabitStreak;
+      cells: Array<{ date: DayKey; state: HabitCellState }>;
+    }>;
+  } | null;
+  /** KALÓRIA over the same window: "4 nap a cél fölött a 13-ból · −10 érme naponta". */
+  kcal: {
+    from: DayKey;
+    to: DayKey;
+    /** The newest target in the window ("cél 2200 kcal"), null without a nutrition plan. */
+    targetKcal: number | null;
+    days: Array<{ date: DayKey; targetKcal: number | null; eatenKcal: number | null; outcome: LifeosDay['kcalOutcome'] }>;
+    overDays: number;
+    hitDays: number;
+    trackedDays: number;
+    windowDays: number;
+    /** What a day over the target costs (rules.kcalGoalMissed) and a hit pays (rules.kcalGoalHit). */
+    penaltyMinor: number;
+    rewardMinor: number;
+  } | null;
+  /** f_app overview(). */
+  overview: {
+    xp: number;
+    level: number;
+    bounds: { levelFloorXp: number; nextLevelXp: number };
+    balanceMinor: number;
+    spendableMinor: number;
+    daysTracked: number;
+    perfectDays: number;
+    workouts: number;
+    focusSessions: number;
+    focusMinutes: number;
+    bestStreak: { habitId: number; name: string; days: number } | null;
+    activeStreaks: Array<{ habitId: number; name: string; streak: number; freezes: number }>;
+  };
+}

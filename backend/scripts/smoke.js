@@ -5756,6 +5756,9 @@ if (seeded) {
 
   const { lifeosCalendarSmoke } = await import('./smoke/lifeos-calendar.js');
   await lifeosCalendarSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  const { lifeosFocusSmoke } = await import('./smoke/lifeos-focus.js');
+  await lifeosFocusSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

@@ -211,6 +211,7 @@ router.get(
                 WHEN 'task' THEN (SELECT t.title FROM tasks t WHERE t.id = e.source_id AND t.user_id = l.user_id)
                 WHEN 'habit_day' THEN (SELECT h.name FROM habit_day_results r JOIN habits h ON h.id = r.habit_id
                                         WHERE r.id = e.source_id AND r.user_id = l.user_id AND h.user_id = l.user_id)
+                WHEN 'focus' THEN (SELECT f.title FROM focus_sessions f WHERE f.id = e.source_id AND f.user_id = l.user_id)
               END END AS sourceTitle
          FROM coin_ledger l
          JOIN coin_reasons r ON r.key = l.reason_key

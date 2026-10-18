@@ -7,6 +7,8 @@
 //   PUT   /admin/rules     append a new rule set (admin, DB re-check, audit, expectedVersion)
 //   /habits, /tasks        Phase 3 (migration 032): habit-routes.js and task-routes.js, mounted below
 //   /challenges, /rewards  Phase 4 (migration 033): challenge-routes.js and reward-routes.js, mounted below
+//   /focus                 Phase 6 (migration 035): focus-routes.js, mounted below
+//   /lifeos/days, /stats   Phase 6: stats-routes.js (Haladás > Napok), mounted below
 //
 // ═══ THE ROUTES CARRY NO AUTHORITY ═════════════════════════════════════════════════════════════
 //
@@ -32,6 +34,8 @@ import challengeRoutes from './challenge-routes.js';
 import rewardRoutes from './reward-routes.js';
 import eventRoutes from './event-routes.js';
 import { ensureReminders } from './reminders.js';
+import focusRoutes from './focus-routes.js';
+import statsRoutes from './stats-routes.js';
 
 const router = Router();
 
@@ -245,5 +249,10 @@ router.use(taskRoutes);
 router.use(challengeRoutes);
 router.use(rewardRoutes);
 router.use(eventRoutes);
+
+/* ── Phase 6: focus sessions (migration 035) and the statistics ──────────────────────────────── */
+
+router.use(focusRoutes);
+router.use(statsRoutes);
 
 export default router;

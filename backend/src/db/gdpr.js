@@ -133,6 +133,8 @@ export const EXPORT_TABLES = [
   ['events', 'SELECT * FROM events WHERE user_id = ?'],
   ['event_reminders', 'SELECT * FROM event_reminders WHERE user_id = ?'],
   ['reminder_deliveries', 'SELECT * FROM reminder_deliveries WHERE user_id = ?'],
+  // LifeOS focus sessions (035): their blocks, check-ins and what each finish paid for.
+  ['focus_sessions', 'SELECT * FROM focus_sessions WHERE user_id = ?'],
   ['coach_profile', 'SELECT * FROM coach_profiles WHERE user_id = ?'],
   ['coach_posts', 'SELECT * FROM coach_posts WHERE author_user_id = ?'],
   ['exercises_authored', 'SELECT * FROM exercises WHERE owner_id = ?'],

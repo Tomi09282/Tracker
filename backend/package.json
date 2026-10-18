@@ -23,7 +23,7 @@
     "verify:021": "node scripts/verify-021.mjs",
     "verify:022": "node scripts/verify-022.mjs",
     "verify:markdown": "node scripts/verify-markdown.mjs",
-    "check:all": "npm run check:modules && npm run check:routes && npm run check:admin-audit && npm run check:worker-tx && npm run check:route-tx && npm run check:body-writes && npm run check:gdpr && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:024 && npm run verify:025 && npm run verify:rekey && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates && npm run verify:seats && npm run verify:equipment && npm run verify:030 && npm run verify:031 && npm run verify:lifeos-rules && npm run verify:032 && npm run verify:day-close && npm run verify:033 && npm run verify:034",
+    "check:all": "npm run check:modules && npm run check:routes && npm run check:admin-audit && npm run check:worker-tx && npm run check:route-tx && npm run check:body-writes && npm run check:gdpr && npm run verify:schema && npm run verify:migrations && npm run verify:013 && npm run verify:015 && npm run verify:019 && npm run verify:021 && npm run verify:022 && npm run verify:023 && npm run verify:024 && npm run verify:025 && npm run verify:rekey && npm run verify:markdown && npm run verify:last-admin && npm run verify:gates && npm run verify:seats && npm run verify:equipment && npm run verify:030 && npm run verify:031 && npm run verify:lifeos-rules && npm run verify:032 && npm run verify:day-close && npm run verify:033 && npm run verify:034 && npm run verify:035",
     "verify:023": "node scripts/verify-023.mjs",
     "check:body-writes": "node scripts/check-body-writes.mjs",
     "verify:gates": "node scripts/verify-gates.mjs",
@@ -55,7 +55,8 @@
     "verify:032": "node scripts/verify-032.mjs",
     "verify:day-close": "node scripts/verify-day-close.mjs",
     "verify:033": "node scripts/verify-033.mjs",
-    "verify:034": "node scripts/verify-034.mjs"
+    "verify:034": "node scripts/verify-034.mjs",
+    "verify:035": "node scripts/verify-035.mjs"
   },
   "author": "",
   "license": "ISC",

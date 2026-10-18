@@ -44,6 +44,7 @@ import {
 import { workoutDueOn } from '../../plans/occurrences.js';
 import { loadOccurrences, nextEventFor, workoutDoneOn, workoutView } from '../lifeos-calendar.js';
 import { DAY_KCAL_EATEN_SQL, DAY_TARGETS_SQL } from '../../nutrition/daySql.js';
+import { todayFocusFor } from '../lifeos-focus-views.js';
 
 /* ══ shared reads (helpers, not tasks: NOT exported, so Piscina cannot be asked to run them) ══ */
 
@@ -180,6 +181,8 @@ export function lifeosTodayQuery({ userId }) {
       ...todayItems(userId, prefs, rules, now),
       // Phase 4 (033): the day's challenge draw — read only; the client draws on 'due'.
       challenge: tz && prefs.startedOn ? drawState(userId, dayKeyFor(now, tz, prefs.dayStartHour)) : null,
+      // Phase 6: Ma's FÓKUSZ block (migration 035).
+      focus: todayFocusFor(userId, prefs, rules, now),
     };
   } catch (err) {
     return rethrow(err);

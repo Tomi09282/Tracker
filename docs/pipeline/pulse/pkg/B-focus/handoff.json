@@ -1,0 +1,27 @@
+{
+  "id": "B-focus",
+  "status": "done",
+  "changes": [
+    "migration 035: focus_sessions (title 1..120, planned 5..720 min, check-in interval 0 or 5..180, starts_at within now-120 s .. now+24 h, status open / done / cancelled, check-in count and last check-in, paid minutes / check-ins / award, closed_on day, clientKey idempotency) with the unique partial index one unfinished session per user; triggers: the paced check-in (never above floor(elapsed / interval), never within 5 minutes of the last), a closed session is history, the focus.finish coin event must match the session it pays for (amount = worth, same day); reason focus.finish",
+    "src/lifeos/focus.js (pure f_app focus.ts: status, elapsed, checkinsMax, checkinsAllowed = floor(elapsed / interval), the 5-minute de-dup verdict, focusPoints = round(minutes x 20 / 60) + 2 per check-in, the payout trimmed by FOCUS_MAX_MINUTES_PER_DAY = 480, expected points), src/lifeos/stats.js (window bounds)",
+    "src/db/lifeos-focus-views.js (session view, today's focus block), tx/lifeos-focus.js: focusCurrentQuery, focusQuery, focusListQuery, startFocusTx (TIMEZONE_REQUIRED, FOCUS_OPEN, 48 sessions per logical day, replayed key), checkinFocusTx (counted / not_due / too_soon, no coin), finishFocusTx (pays the elapsed minutes capped at the plan and the day's room + the check-ins through postCoinEvent, once; already on replay), cancelFocusTx (pays nothing)",
+    "tx/lifeos-stats.js: lifeosDaysQuery (GET /lifeos/days?from&to, at most 92 days, default 14) and lifeosStatsQuery (GET /lifeos/stats?days&weeks: week block, day columns, HETEK rows, habit bars, kcal window, overview) - ports of f_app pointsHistory, weeklyPoints, habitHeatmap, kcalHistory, overview; each one worker call, one snapshot",
+    "routes (focus-routes.js, stats-routes.js mounted by lifeos/routes.js): GET /focus, GET /focus/current, GET /focus/:id, POST /focus, POST /focus/:id/checkin | finish | cancel, GET /lifeos/days, GET /lifeos/stats; .strict() zod on body / params / query, per-IP + per-account limits; GET /lifeos/today gains focus; GET /coins/ledger names focus sources",
+    "GDPR export: focus_sessions"
+  ],
+  "tests": {
+    "verify:035": "93 passed, 0 failed - every 035 guard refused once next to its accepted twin, design round B's block (21:10 -> 22:00, 1 / 3 at 15 min, +23), the daily minute cap, cancel pays nothing, the statistics over a time-travelled fortnight",
+    "smoke": "702 passed, 0 failed (35 new: focus FORGE / REPLAY / RACE / IDOR / EXTREMES for start, check-in, finish, cancel; the statistics FORGE / IDOR)",
+    "check:all": "every step green except the known pre-existing verify-015 'Túró Rudi' FTS red (29 passed 1 failed); the later steps run one by one: 019 56, 021 38, 022 44, 023 12, 024 37, 025 7, rekey 12, markdown 50, last-admin 6, gates 29, seats 20, equipment 28, 030 31, 031 82, lifeos-rules 108, 032 75, day-close 110, 035 93",
+    "frontend build": "npm run build green with shared.patch applied (under the heavy-2 lock)"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/B-focus/shared.patch (frontend/src/lib/lifeos-api.ts: the Phase-6 types, LifeosToday.focus, ledger source comments; types only)"
+  ],
+  "followUps": [
+    "work-packages.json has no B-focus entry; the integrator adds one at merge from owns.json (pulse-sync cannot resolve the id until then, so the slot was synced with the equivalent plain merge)",
+    "the dev backend on :3000 applies 035 only after a restart on the merged code",
+    "FOCUS_MAX_MINUTES_PER_DAY (480) is a server constant served as rules.maxMinutesPerDay, not an admin point rule; making it tunable needs a rule key plus a Szabályok label (S-admin-rules)",
+    "migration 033 / 034 (Phase 4 / 5) are not on pulse-redesign yet; 035 does not depend on them, but backend/src/lifeos/**, db/index.js, db/worker.js, db/gdpr.js, smoke.js and package.json are touched by those packages too - merge order is the integrator's"
+  ]
+}
