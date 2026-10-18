@@ -1,0 +1,68 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index c713640..1b0b4e4 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -88,6 +88,7 @@ const EXPECT_BY_VIEW = {
+     ['/library/1467', '/workout'],
+     ['/nutrition', '/nutrition'],
+     ['/progress', '/progress'],
++    ['/progress/days', '/progress'],
+     ['/settings', '/settings'],
+     ['/coins', '/settings'],
+     ['/settings/equipment', '/settings'],
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 62555ba..f192719 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -68,6 +68,9 @@ const NutritionPage = lazy(() =>
+ const ProgressPage = lazy(() =>
+   import('../features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
+ );
++const DaysPage = lazy(() =>
++  import('../features/progress/DaysPage').then((m) => ({ default: m.DaysPage })),
++);
+ const CoinsPage = lazy(() =>
+   import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
+ );
+@@ -152,6 +155,7 @@ export const router = createBrowserRouter([
+       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+       { path: 'nutrition', element: suspended(<NutritionPage />) },
+       { path: 'progress', element: suspended(<ProgressPage />) },
++      { path: 'progress/days', element: suspended(<DaysPage />) },
+       { path: 'coins', element: suspended(<CoinsPage />) },
+       { path: 'compose', element: suspended(<ComposePage />) },
+       { path: 'compose/profile', element: suspended(<ProfileEditorPage />) },
+diff --git a/frontend/src/features/progress/ProgressPage.tsx b/frontend/src/features/progress/ProgressPage.tsx
+index 277a823..258b34a 100644
+--- a/frontend/src/features/progress/ProgressPage.tsx
++++ b/frontend/src/features/progress/ProgressPage.tsx
+@@ -1,4 +1,5 @@
+ import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
++import { useLocation, useNavigate } from 'react-router';
+ import { useTranslation } from 'react-i18next';
+ import { X } from 'lucide-react';
+ import { Screen } from '../../ui/shell/Screen';
+@@ -70,7 +71,10 @@ import {
+  */
+ export function ProgressPage() {
+   const { t } = useTranslation();
+-  const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
++  const navigate = useNavigate();
++  // Napok is its own route (/progress/days): its switch comes back here with the chosen view.
++  const back = (useLocation().state as { tab?: unknown } | null)?.tab;
++  const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>(back === 'photos' || back === 'sharing' ? back : 'body');
+ 
+   return (
+     <Screen top="root">
+@@ -81,9 +85,10 @@ export function ProgressPage() {
+           layout="cells"
+           label={t('progress.title')}
+           value={tab}
+-          onChange={setTab}
++          onChange={(v) => (v === 'days' ? navigate('/progress/days', { replace: true }) : setTab(v))}
+           options={[
+             { value: 'body', label: t('progress.tab.body') },
++            { value: 'days', label: t('progressDays.tab') },
+             { value: 'photos', label: t('progress.tab.photos') },
+             { value: 'sharing', label: t('progress.tab.sharing') },
+           ]}

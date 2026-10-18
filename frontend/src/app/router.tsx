@@ -68,6 +68,9 @@ const NutritionPage = lazy(() =>
 const ProgressPage = lazy(() =>
   import('../features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
 );
+const DaysPage = lazy(() =>
+  import('../features/progress/DaysPage').then((m) => ({ default: m.DaysPage })),
+);
 const CoinsPage = lazy(() =>
   import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
 );
@@ -172,6 +175,7 @@ export const router = createBrowserRouter([
       { path: 'calendar', element: suspended(<CalendarPage />) },
       { path: 'calendar/events/:id', element: suspended(<EventDetailPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
+      { path: 'progress/days', element: suspended(<DaysPage />) },
       { path: 'coins', element: suspended(<CoinsPage />) },
       { path: 'rewards', element: suspended(<RewardsPage />) },
       { path: 'rewards/:id', element: suspended(<RewardDetailPage />) },

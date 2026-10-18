@@ -93,6 +93,7 @@ const EXPECT_BY_VIEW = {
     ['/calendar', '/calendar'],
     ['/calendar/events/12', '/calendar'],
     ['/progress', '/progress'],
+    ['/progress/days', '/progress'],
     ['/settings', '/settings'],
     ['/coins', '/settings'],
     ['/rewards', '/settings'],

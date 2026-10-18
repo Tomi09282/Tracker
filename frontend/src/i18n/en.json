@@ -1668,5 +1668,32 @@
     "next": {
       "title": "Next"
     }
+  },
+  "progressDays": {
+    "tab": "Days",
+    "week": {
+      "label": "This week",
+      "caption": "avg {{avg}} / day · last week {{prev}}"
+    },
+    "coins": "coins",
+    "weeks": {
+      "label": "Weeks",
+      "title": "Week {{week}}",
+      "perfect": "perfect days: {{count}}",
+      "penalties": "penalties: {{count}}"
+    },
+    "legend": {
+      "done": "done",
+      "partial": "partly",
+      "missed": "missed"
+    },
+    "kcal": {
+      "target": "goal {{kcal}} kcal",
+      "over": "over goal: {{n}}",
+      "ofBack": "of {{n}} days",
+      "ofFront": "of {{n}} days",
+      "perDay": "{{coins}} coins per day"
+    },
+    "failed": "That did not work. Please try again."
   }
 }

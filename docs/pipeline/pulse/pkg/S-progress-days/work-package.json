@@ -1,0 +1,56 @@
+{
+  "id": "S-progress-days",
+  "title": "LifeOS Phase 6 screen package: Haladás > Napok (DaysPage at /progress/days), built 1:1 to design round B's lifeos/progress-days on the B-focus statistics API (GET /lifeos/stats): this week's coins (EZEN A HÉTEN), the 14 day columns, HETEK, the habit consistency rows (SZOKÁSOK) and the kcal history (KALÓRIA); the door is the 'Napok' option of the Haladás page switch",
+  "screens": [
+    "progress-days"
+  ],
+  "owns": [
+    "frontend/src/features/progress/DaysPage.tsx",
+    "frontend/src/features/progress/days/**",
+    "docs/pipeline/pulse/pkg/S-progress-days/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "frontend/src/features/progress/ProgressPage.tsx",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "requests": {
+      "R-S-progress-days-01": "frontend/src/app/router.tsx, frontend/scripts/check-nav-active.mjs, frontend/src/features/progress/ProgressPage.tsx (the /progress/days route under the Haladás tab, and the door: the Napok cell of the Haladás switch, plus coming back to Fotók / Megosztás through location state) - requests/R-S-progress-days-01.json + .patch"
+    }
+  },
+  "frames": [
+    "lifeos/progress-days"
+  ],
+  "inventory": "docs/brain/58-Pulse/Screens/progress-days.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/progress-days.body.js and docs/pipeline/pulse/pkg/B-focus/api.md (GET /lifeos/stats) are the inventory",
+  "account": "user@tracker.local",
+  "route": "/progress/days",
+  "dependsOn": [
+    "B-focus",
+    "S-habits",
+    "S-progress"
+  ],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 6)",
+  "i18nNamespaces": [
+    "progressDays"
+  ],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch, applied locally and uncommitted in the slot): merge B-focus first. The hooks live in features/progress/days/daysApi.ts (a non-use* file name, so the frozen features/**/use*.ts glob needs no exception). Imports the merged S-habits streak parts (features/habits/HabitRow.tsx MultiplierLine, FreezeLine; habitFormat.ts) as S-ma does. The running dev backend has no migration 035 / stats route yet: every capture answers GET /lifeos/stats with a contract body (states.json) and is reported matched-fixture at best until the integrator records it. Reads GET /lifeos/stats only: it carries every block of the frame in one settled snapshot; GET /lifeos/days (per-day detail) is not needed by this frame."
+}

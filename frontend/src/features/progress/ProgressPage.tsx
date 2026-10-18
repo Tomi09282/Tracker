@@ -1,4 +1,5 @@
 import { type CSSProperties, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { Screen } from '../../ui/shell/Screen';
@@ -70,7 +71,10 @@ import {
  */
 export function ProgressPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
+  const navigate = useNavigate();
+  // Napok is its own route (/progress/days): its switch comes back here with the chosen view.
+  const back = (useLocation().state as { tab?: unknown } | null)?.tab;
+  const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>(back === 'photos' || back === 'sharing' ? back : 'body');
 
   return (
     <Screen top="root">
@@ -81,9 +85,10 @@ export function ProgressPage() {
           layout="cells"
           label={t('progress.title')}
           value={tab}
-          onChange={setTab}
+          onChange={(v) => (v === 'days' ? navigate('/progress/days', { replace: true }) : setTab(v))}
           options={[
             { value: 'body', label: t('progress.tab.body') },
+            { value: 'days', label: t('progressDays.tab') },
             { value: 'photos', label: t('progress.tab.photos') },
             { value: 'sharing', label: t('progress.tab.sharing') },
           ]}

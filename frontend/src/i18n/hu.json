@@ -1668,5 +1668,32 @@
     "next": {
       "title": "Következő"
     }
+  },
+  "progressDays": {
+    "tab": "Napok",
+    "week": {
+      "label": "Ezen a héten",
+      "caption": "átlag {{avg}} / nap · előző hét {{prev}}"
+    },
+    "coins": "érme",
+    "weeks": {
+      "label": "Hetek",
+      "title": "{{week}}. hét",
+      "perfect": "{{count}} tökéletes nap",
+      "penalties": "{{count}} büntetés"
+    },
+    "legend": {
+      "done": "teljesítve",
+      "partial": "részben",
+      "missed": "kihagyva"
+    },
+    "kcal": {
+      "target": "cél {{kcal}} kcal",
+      "over": "{{n}} nap a cél fölött",
+      "ofBack": "a {{n}}-ból",
+      "ofFront": "a {{n}}-ből",
+      "perDay": "{{coins}} érme naponta"
+    },
+    "failed": "Nem sikerült a művelet. Próbáld újra."
   }
 }

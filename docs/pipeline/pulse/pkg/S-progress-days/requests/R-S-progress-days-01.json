@@ -1,0 +1,12 @@
+{
+  "id": "R-S-progress-days-01",
+  "from": "S-progress-days",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/scripts/check-nav-active.mjs, frontend/src/features/progress/ProgressPage.tsx",
+  "need": "The route /progress/days (Haladás > Napok, frame lifeos/progress-days) and its door. router.tsx: the lazy DaysPage (exported from features/progress/DaysPage.tsx) and the child route 'progress/days'. No routeMeta row: Napok is a root view of the Haladás tab (the frame draws the root header 'Haladás', no back link), and the Haladás tab is not end-matched, so it stays lit under /progress/days with no navTabs change; check-nav-active gets the EXPECT row ['/progress/days', '/progress']. ProgressPage.tsx (S-progress, closed): the page switch gains the 'Napok' cell in the frame's order (Test · Napok · Fotók · Megosztás, progressDays.tab); choosing it navigates to /progress/days with replace (a switch is not a history step); the page opens on the view a location state { tab: 'photos' | 'sharing' } names, which is how Napok's own switch comes back to Fotók / Megosztás (anything else opens Test, as today). The navigate('/progress/days') literal is the door check-nav counts.",
+  "evidence": "kepernyok-2x/lifeos/progress-days@2x.png (the four-cell switch); figma-build/lifeos/progress-days.part.js segSwitch(['Test','Napok','Fotók','Megosztás'], 1); captures progress-door, progress-door-open (click Napok -> /progress/days) and progress-days-back (click Fotók -> /progress with Fotók selected) in .pulse/pairs/S-progress-days/ with the patch applied in the slot; verify-gates --allow-dirty 78 passed, 0 failed",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-progress-days/requests/R-S-progress-days-01.patch",
+  "interim": "Applied to the slot working tree only (never committed there). Merged WITHOUT it DaysPage exists but no URL opens it: merge together with this package. The patch reads progressDays.tab, which this package's i18n.patch.json adds.",
+  "status": "open"
+}
