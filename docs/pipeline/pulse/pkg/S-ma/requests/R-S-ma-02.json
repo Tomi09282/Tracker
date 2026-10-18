@@ -9,6 +9,6 @@
   "proposedApi": "const [capturing, setCapturing] = useState(false); <TodayTasks onCapture={{ onClick: () => setCapturing(true) }} />; <CaptureSheet open={capturing} onClose={() => setCapturing(false)} />",
   "proposedPatch": "docs/pipeline/pulse/pkg/S-ma/requests/R-S-ma-02.patch (applies on pulse/S-ma HEAD; checked with git apply --check)",
   "interim": "TodayPage's capture prop defaults to { to: '/tasks' }.",
-  "status": "open",
-  "resolution": null
+  "status": "resolved",
+  "resolution": "Applied in the fix round on branch pulse/S-ma-fix directly in TodayPage.tsx / TodayTasks.tsx (owned by S-ma) after S-tasks merged (05b830a); the CaptureSheet mounts at the first tap. No patch to apply."
 }

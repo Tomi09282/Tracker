@@ -33,8 +33,11 @@ import { useLogHabit, useRelapse } from './useTodayActions';
  * it too), and the toast that confirms the relapse carries "Visszavonás" (count − 1). Every count
  * is absolute, so a retried tap lands on the same state. Habits pay when the day settles, so the
  * coins on the row are the server's preview. A failed write keeps the row as it was and says so.
+ *
+ * Nothing yet (ma-3): "+ Első szokás" opens the new-habit sheet over Ma (`onFirst`, S-habits'
+ * HabitSheet) — the habit is made in one step, not behind a second tap on Szokások.
  */
-export function TodayHabits({ habits, timeZone }: { habits: Habit[] | null; timeZone: string | null }) {
+export function TodayHabits({ habits, timeZone, onFirst }: { habits: Habit[] | null; timeZone: string | null; onFirst: () => void }) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const log = useLogHabit();
@@ -86,7 +89,7 @@ export function TodayHabits({ habits, timeZone }: { habits: Habit[] | null; time
             title={t('today.habits.emptyTitle')}
             body={t('today.habits.emptyBody')}
             action={t('today.habits.first')}
-            to="/habits"
+            onClick={onFirst}
           />
         </Section>
       ) : (

@@ -19,7 +19,7 @@ import { coins, signed, type DayCount } from './model';
  * The caption is the day in words: the perfect-day line (a lime tick and "Tökéletes nap") when
  * every counted item is done (ma-2), "Ma egy tétel: az edzésed" when the workout is the only item
  * (ma-3), otherwise the mono count line (ma-1, ma-4). "Ma eddig" stands only when today has moved
- * coins (ma-3 / ma-4 draw none). A failed read prints the dash and the danger line with "Újra" (never 0 / 0).
+ * coins (ma-3 / ma-4 draw none). A failed read prints the label and the danger line with "Újra" (never 0 / 0).
  */
 export interface TodayHeroProps {
   count: DayCount | null;
@@ -48,14 +48,21 @@ export function TodayHero({ count, earnedMinor, pending, failed, onRetry }: Toda
 
   if (failed || !count) {
     return (
-      <div className="flex flex-col gap-5">
-        <StatBlock label={label}>
-          <Numeral size="giant" tone="pending" value="—" />
-        </StatBlock>
+      // No giant figure: the display face's em dash at giant size is a solid slab that reads as a
+      // loading bar. The label stays, and the danger line says what happened; "Újra" keeps its
+      // 44 pt box but sets its words at the box's right edge, so they end on the gutter.
+      <div className="flex flex-col gap-2">
+        <p className="text-eyebrow text-text-2" style={{ fontFamily: 'var(--font-display)' }}>
+          {label}
+        </p>
         <NoticeLine
           tone="danger"
           role="alert"
-          action={<TextLink className="min-w-11" onClick={onRetry}>{t('common.retry')}</TextLink>}
+          action={
+            <TextLink className="min-w-11 justify-end" onClick={onRetry}>
+              {t('common.retry')}
+            </TextLink>
+          }
         >
           {t('today.failed')}
         </NoticeLine>

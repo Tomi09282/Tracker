@@ -30,7 +30,9 @@ import { useCompleteTask, useReopenTask } from './useTodayActions';
  * exactly while its day is open — after that the server refuses with DAY_LOCKED and the toast says
  * it failed). The row's coin figure is the server's: what completing it now pays, or what it paid.
  *
- * "Rögzítés +" and the empty state's "+ Rögzítés" open where a task is captured: `onCapture`.
+ * "Rögzítés +" and the empty state's "+ Rögzítés" open the capture sheet over Ma (`onCapture`,
+ * S-tasks' CaptureSheet, frame lifeos/capture); "Kész ma · N ›" opens Feladatok (/tasks), whose
+ * first tab lists KÉSZ MA.
  */
 export function TodayTasks({
   tasks,
@@ -41,7 +43,7 @@ export function TodayTasks({
   tasks: LifeosToday['tasks'] | null;
   today: string | null;
   timeZone: string | null;
-  onCapture: CaptureDoor;
+  onCapture: () => void;
 }) {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -61,30 +63,11 @@ export function TodayTasks({
   };
   const busyId = (complete.isPending ? complete.variables : undefined) ?? (reopen.isPending ? reopen.variables : undefined);
 
-  const captureLink = (lead: boolean) => {
-    const label = t('today.tasks.capture');
-    const glyph = <Plus />;
-    if ('to' in onCapture) {
-      return lead ? (
-        <TextLink text="body" to={onCapture.to} lead={glyph} className="self-start">
-          {label}
-        </TextLink>
-      ) : (
-        <TextLink to={onCapture.to} trail={glyph}>
-          {label}
-        </TextLink>
-      );
-    }
-    return lead ? (
-      <TextLink text="body" onClick={onCapture.onClick} lead={glyph} className="self-start">
-        {label}
-      </TextLink>
-    ) : (
-      <TextLink onClick={onCapture.onClick} trail={glyph}>
-        {label}
-      </TextLink>
-    );
-  };
+  const captureLink = (
+    <TextLink trail={<Plus />} aria-haspopup="dialog" onClick={onCapture}>
+      {t('today.tasks.capture')}
+    </TextLink>
+  );
 
   if (rows.length === 0) {
     return (
@@ -93,14 +76,14 @@ export function TodayTasks({
           title={t('today.tasks.emptyTitle')}
           body={t('today.tasks.emptyBody')}
           action={t('today.tasks.capture')}
-          {...('to' in onCapture ? { to: onCapture.to } : { onClick: onCapture.onClick })}
+          onClick={onCapture}
         />
       </Section>
     );
   }
 
   return (
-    <Section title={t('today.tasks.title')} trailing={captureLink(false)}>
+    <Section title={t('today.tasks.title')} trailing={captureLink}>
       <div className="flex flex-col gap-4">
         <RowStack>
           {rows.map((task) => (
@@ -116,9 +99,6 @@ export function TodayTasks({
     </Section>
   );
 }
-
-/** Where "Rögzítés" goes: a route, or a sheet the page opens. */
-export type CaptureDoor = { to: string } | { onClick: () => void };
 
 const PRIORITY = { 1: 'today.task.low', 2: 'today.task.mid', 3: 'today.task.high' } as const;
 const WEEKDAY_WORD = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;

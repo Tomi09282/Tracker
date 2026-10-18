@@ -16,20 +16,15 @@ import { TextLink } from '../../ui/primitives/TextLink';
  * item pays ("+10 érme / nap · 7 nap után ×1,25") — quotes the admin rules, which no member route
  * returns; it is left out rather than printed from constants (see the package's deviations).
  */
-export function TodayEmpty({ title, body, action, to, onClick }: { title: string; body: string; action: string; to?: string; onClick?: () => void }) {
+export function TodayEmpty({ title, body, action, onClick }: { title: string; body: string; action: string; onClick: () => void }) {
   return (
     <div data-kit="emptyState" className="flex flex-col gap-2">
       <h3 className="text-display break-words text-text-1">{title}</h3>
       <p className="text-body text-text-2">{body}</p>
-      {to !== undefined ? (
-        <TextLink text="body" to={to} lead={<Plus />} className="self-start">
-          {action}
-        </TextLink>
-      ) : (
-        <TextLink text="body" onClick={onClick} lead={<Plus />} className="self-start">
-          {action}
-        </TextLink>
-      )}
+      {/* Both of Ma's empty actions open a sheet over the page (the new habit, the capture). */}
+      <TextLink text="body" onClick={onClick} lead={<Plus />} aria-haspopup="dialog" className="self-start">
+        {action}
+      </TextLink>
     </div>
   );
 }

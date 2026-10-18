@@ -230,7 +230,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 2000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 12,
@@ -250,7 +251,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 1000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 13,
@@ -273,7 +275,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 1000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 14,
@@ -293,7 +296,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 500,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "overdue": [],
@@ -316,7 +320,8 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 500,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 16,
@@ -336,12 +341,18 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 500,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "anytimeCount": 0,
                 "openCount": 4
               },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
               "add": true
             }
           ]
@@ -702,7 +713,8 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 1000,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 22,
@@ -725,12 +737,18 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 500,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "anytimeCount": 0,
                 "openCount": 0
               },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
               "add": true
             }
           ]
@@ -959,6 +977,11 @@
                 "anytimeCount": 0,
                 "openCount": 0
               },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
               "add": true
             }
           ]
@@ -1310,7 +1333,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 2000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 32,
@@ -1330,7 +1354,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 1000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 33,
@@ -1353,7 +1378,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 500,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "overdue": [],
@@ -1361,6 +1387,11 @@
                 "anytimeCount": 0,
                 "openCount": 3
               },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
               "add": true
             }
           ]
@@ -1685,7 +1716,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 2000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 12,
@@ -1705,7 +1737,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 1000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 13,
@@ -1728,7 +1761,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 1000,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 14,
@@ -1748,7 +1782,8 @@
                     "lateNow": false,
                     "payoutNowMinor": 500,
                     "paidMinor": null,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "overdue": [],
@@ -1771,7 +1806,8 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 500,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   },
                   {
                     "id": 16,
@@ -1791,12 +1827,18 @@
                     "lateNow": false,
                     "payoutNowMinor": null,
                     "paidMinor": 500,
-                    "overduePenaltyMinor": null
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
                   }
                 ],
                 "anytimeCount": 0,
                 "openCount": 4
               },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
               "add": true
             }
           ]
@@ -1908,6 +1950,447 @@
         "text": {
           "key": "today.habit.relapseConfirm"
         }
+      }
+    },
+    "ma-capture-sheet": {
+      "title": "Ma — Rögzítés: a gyors rögzítés lapja Ma fölött",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "clock": "2026-10-19T09:00:00+02:00",
+      "reach": "fixture",
+      "why": "FELADATOK \"+ Rögzítés\" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: an empty TasksResponse, schema-checked like the rest",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 100
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [],
+                "overdue": [],
+                "completedToday": [],
+                "anytimeCount": 0,
+                "openCount": 0
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Teljes test – alap"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 6
+            },
+            {
+              "pointer": "/days/0/plan_name",
+              "value": "Kezdő terv – 1. hét"
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/tasks",
+          "body": {
+            "started": false,
+            "today": "2026-10-19",
+            "due": [],
+            "overdue": [],
+            "anytime": [],
+            "completedToday": [],
+            "upcoming": [],
+            "done": [],
+            "templates": [],
+            "openCount": 0
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "today.tasks.capture"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "capture.title"
+        }
+      }
+    },
+    "ma-habit-sheet": {
+      "title": "Ma — Első szokás: az új szokás lapja Ma fölött",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "clock": "2026-10-19T09:00:00+02:00",
+      "reach": "fixture",
+      "why": "SZOKÁSOK \"+ Első szokás\" opens the S-habits new-habit sheet (frame lifeos/habit-form) over Ma in one tap (fix round; it was a door to the Szokások list)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 100
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [],
+                "overdue": [],
+                "completedToday": [],
+                "anytimeCount": 0,
+                "openCount": 0
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": null,
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Teljes test – alap"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 6
+            },
+            {
+              "pointer": "/days/0/plan_name",
+              "value": "Kezdő terv – 1. hét"
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "scroll": "end",
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "today.habits.first"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "today.habits.first"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
       }
     },
     "ma-failed": {

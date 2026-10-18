@@ -70,6 +70,7 @@ const task = (o) => ({
   payoutNowMinor: o.completedAt ? null : o.value,
   paidMinor: o.completedAt ? o.value : null,
   overduePenaltyMinor: null,
+  challengeId: null, // B-rewards-challenges (033): Task.challengeId is required; Ma picks no challenge yet
 });
 
 /* ── edit helpers ─────────────────────────────────────────────────────────────────────────────── */
@@ -100,6 +101,7 @@ function lifeos({ today, balance, xp, level, floor, next, earned, due, done, hab
       set('/workout/done', done),
       add('/habits', habits),
       add('/tasks', tasks),
+      add('/challenge', null), // B-rewards-challenges (033): no draw drawn on Ma yet (NAPI DOBÁS is not on the page)
     ],
   };
 }
@@ -368,6 +370,46 @@ const relapseSheet = {
   arrived: { text: { key: 'today.habit.relapseConfirm' } },
 };
 
+/* The two sheets Ma opens from its empty sections (fix round: "Rögzítés" was a door to /tasks, "Első
+   szokás" a door to Szokások). Both open over ma-3's page. */
+const captureSheet = {
+  title: 'Ma — Rögzítés: a gyors rögzítés lapja Ma fölött',
+  account: 'M',
+  route: '/',
+  height: 874,
+  clock: ma3.clock,
+  reach: 'fixture',
+  why: 'FELADATOK "+ Rögzítés" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: an empty TasksResponse, schema-checked like the rest',
+  fixtures: [
+    ...ma3.fixtures,
+    {
+      method: 'GET',
+      path: '/api/v1/tasks',
+      body: { started: false, today: MON, due: [], overdue: [], anytime: [], completedToday: [], upcoming: [], done: [], templates: [], openCount: 0 },
+    },
+  ],
+  steps: [{ click: { role: 'button', name: { key: 'today.tasks.capture' } }, arrived: { role: 'dialog' } }],
+  arrived: { text: { key: 'capture.title' } },
+};
+
+const habitSheet = {
+  title: 'Ma — Első szokás: az új szokás lapja Ma fölött',
+  account: 'M',
+  route: '/',
+  height: 874,
+  clock: ma3.clock,
+  reach: 'fixture',
+  why: 'SZOKÁSOK "+ Első szokás" opens the S-habits new-habit sheet (frame lifeos/habit-form) over Ma in one tap (fix round; it was a door to the Szokások list)',
+  fixtures: ma3.fixtures,
+  // At 874 pt the link sits under the fixed tab bar (inside the viewport, so the tool would not
+  // scroll and its click would land on the bar): scroll to the end first, as a thumb would.
+  steps: [
+    { scroll: 'end', arrived: { role: 'button', name: { key: 'today.habits.first' } } },
+    { click: { role: 'button', name: { key: 'today.habits.first' } }, arrived: { role: 'dialog' } },
+  ],
+  arrived: { role: 'dialog' },
+};
+
 const failed = {
   title: 'Ma — a LifeOS-olvasás nem sikerült',
   account: 'M',
@@ -405,6 +447,8 @@ const states = {
     'ma-3': ma3,
     'ma-4': ma4,
     'ma-relapse-sheet': relapseSheet,
+    'ma-capture-sheet': captureSheet,
+    'ma-habit-sheet': habitSheet,
     'ma-failed': failed,
     'ma-live-session': liveSession,
   },

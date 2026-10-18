@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CaptureSheet } from '../capture/CaptureSheet';
 import { NotificationBell } from '../chat/NotificationBell';
+import { HabitSheet } from '../habits/HabitSheet';
 import { ListRow } from '../../ui/data/ListRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { Pic } from '../../ui/media/Pic';
@@ -10,7 +13,7 @@ import { dayCount, dayLabel, earnedTodayMinor } from './model';
 import { TodayHabits, TodayHabitsSkeleton } from './TodayHabits';
 import { TodayHero } from './TodayHero';
 import { TodayNutrition } from './TodayNutrition';
-import { TodayTasks, type CaptureDoor } from './TodayTasks';
+import { TodayTasks } from './TodayTasks';
 import { TodayWorkout } from './TodayWorkout';
 import { useLifeosToday } from './useLifeosToday';
 
@@ -46,11 +49,17 @@ import { useLifeosToday } from './useLifeosToday';
  * A failed LifeOS read: the ledger line and the hero print the dash (the danger line with "Újra" under
  * the hero) and the habit / task sections wait — the session, the food and the library still work.
  *
- * "Rögzítés" goes to the tasks page (`capture`, default `/tasks`) until S-tasks' capture sheet is
- * merged; request R-S-ma-02 then opens the sheet over Ma instead.
+ * THE SHEETS OVER MA: "Rögzítés +" / "+ Rögzítés" open the capture sheet (S-tasks' CaptureSheet,
+ * frame lifeos/capture; request R-S-ma-02) and "+ Első szokás" the new-habit sheet (S-habits'
+ * HabitSheet, frame lifeos/habit-form). Both re-read GET /lifeos/today when they write, so the new
+ * row appears on Ma. The habit sheet mounts per opening (`key`) so every new habit starts blank
+ * with its own idempotency key.
  */
-export function TodayPage({ capture = { to: '/tasks' } }: { capture?: CaptureDoor }) {
+export function TodayPage() {
   const { t, i18n } = useTranslation();
+  // null until the first "Rögzítés": the sheet reads GET /tasks (the logical today), which Ma never needs otherwise.
+  const [capturing, setCapturing] = useState<boolean | null>(null);
+  const [newHabit, setNewHabit] = useState(0);
   const lifeos = useLifeosToday();
   const day = lifeos.data;
 
@@ -87,8 +96,8 @@ export function TodayPage({ capture = { to: '/tasks' } }: { capture?: CaptureDoo
         <TodayHabitsSkeleton />
       ) : day ? (
         <>
-          <TodayHabits habits={day.habits ?? null} timeZone={timeZone} />
-          <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} onCapture={capture} />
+          <TodayHabits habits={day.habits ?? null} timeZone={timeZone} onFirst={() => setNewHabit((n) => Math.abs(n) + 1)} />
+          <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} onCapture={() => setCapturing(true)} />
         </>
       ) : null}
 
@@ -105,6 +114,10 @@ export function TodayPage({ capture = { to: '/tasks' } }: { capture?: CaptureDoo
           chevron
         />
       </RowStack>
+
+      {capturing !== null ? <CaptureSheet open={capturing} onClose={() => setCapturing(false)} /> : null}
+      {/* newHabit > 0: the sheet is open; closing negates it, so the closed sheet keeps its key while it slides out. */}
+      <HabitSheet key={Math.abs(newHabit)} open={newHabit > 0} onClose={() => setNewHabit((n) => -Math.abs(n))} />
     </Screen>
   );
 }

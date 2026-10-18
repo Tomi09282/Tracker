@@ -5,6 +5,7 @@
 //                         was taken at 04:50, before B-habits-tasks) and startedOn / settledThrough
 //                         (user@ has not started LifeOS, so every recording has null there)
 //   GET /my-plans/today   est_minutes / start_time (user@'s plan day has neither, so the recordings hold null)
+//   GET /tasks            the capture sheet's read (ma-capture-sheet): an empty TasksResponse
 //   GET /nutrition-log/*  built `from` the recorded day 2026-10-15 of the same route (the checker keys
 //                         the endpoint by its full path, so another date reads as "not recorded")
 //
@@ -65,11 +66,12 @@ const TYPES = [
   { re: /^\/api\/v1\/lifeos\/today$/, type: 'LifeosToday' },
   { re: /^\/api\/v1\/my-plans\/today$/, type: 'PlanToday' },
   { re: /^\/api\/v1\/nutrition-log\/\d{4}-\d{2}-\d{2}$/, type: 'NutritionDay' },
+  { re: /^\/api\/v1\/tasks$/, type: 'TasksResponse' },
 ];
 
 const problems = [];
 const ts = [
-  "import type { LifeosToday } from '../src/lib/lifeos-api';",
+  "import type { LifeosToday, TasksResponse } from '../src/lib/lifeos-api';",
   "import type { TodayDay } from '../src/features/today/useTodayPlan';",
   "import type { NutritionDay } from '../src/features/nutrition/useNutrition';",
   // the recorded day carries two fields the page does not read (date, log_status): kept, typed as recorded
