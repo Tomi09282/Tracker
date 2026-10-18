@@ -1360,7 +1360,8 @@
       "reminderHint": "Nur an geplanten Tagen und nur, bis es abgehakt ist.",
       "badExplain": "Eine schlechte Gewohnheit zählt jeden Tag. Ohne Rückfall gibt es beim Tagesabschluss die Münzen. Ein Rückfall kostet doppelt und setzt die Serie zurück.",
       "create": "Erstellen"
-    }
+    },
+    "gone": "Diese Gewohnheit ist nicht verfügbar"
   },
   "tasks": {
     "title": "Aufgaben",

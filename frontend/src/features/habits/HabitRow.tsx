@@ -46,10 +46,14 @@ export function FigUnit({
 }) {
   const unitInk = quiet ? 'text-text-3' : 'text-text-2';
   if (size === 'dataL') {
+    // Ink-tight like every figure of the kit (`figUnit` builds `numeral(num, 'dataL')`): the figure
+    // and its unit are trimmed to cap height and baseline, so the box is the digits' ink and the
+    // two bottoms are one baseline. A plain 20 pt line box here put the multiplier 4.5 pt too low
+    // and made the streak column 9 pt taller than the frame's (review S-habits, D2).
     return (
-      <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
-        <span className={cn('text-data-l', quiet ? 'text-text-3' : 'text-text-1')}>{value}</span>
-        <span className={cn(unitClass, unitInk)}>{unit}</span>
+      <span className="inline-flex items-end gap-1 whitespace-nowrap">
+        <span className={cn('text-data-l [text-box:trim-both_cap_alphabetic]', quiet ? 'text-text-3' : 'text-text-1')}>{value}</span>
+        <span className={cn(unitClass, unitInk, '[text-box:trim-both_cap_alphabetic]')}>{unit}</span>
       </span>
     );
   }
@@ -79,14 +83,18 @@ export function FreezeLine({ count }: { count: number }) {
   return <span className="text-micro text-text-2">{t('habits.freezes', { count })}</span>;
 }
 
-/** The right column of a row: streak figure, then the multiplier (above ×1) and the freezes (when held). */
+/**
+ * The right column of a row: streak figure, then the multiplier (above ×1, good habits — the frames
+ * draw a bad habit's streak alone, and so does Ma's row) and the freezes (when held). The habit's
+ * page still shows a bad habit's multiplier in its hero.
+ */
 export function StreakColumn({ habit }: { habit: Habit }) {
   const { t } = useTranslation();
   const s = streakOf(habit);
   return (
     <span className="flex shrink-0 flex-col items-end gap-1.5">
       <FigUnit value={s.value} unit={s.weeks ? t('habits.unitWeek') : t('habits.unitDay')} quiet={s.value === 0} />
-      {habit.streak.multiplierBp > 10000 ? <MultiplierLine bp={habit.streak.multiplierBp} /> : null}
+      {habit.kind === 'good' && habit.streak.multiplierBp > 10000 ? <MultiplierLine bp={habit.streak.multiplierBp} /> : null}
       {habit.streak.freezes > 0 ? <FreezeLine count={habit.streak.freezes} /> : null}
     </span>
   );
@@ -199,8 +207,10 @@ export function HabitRow({ habit, to, dim = false }: { habit: Habit; to: string;
         aria-busy={log.isPending || undefined}
         aria-disabled={!canLog || undefined}
         onClick={tap}
+        // `flex`: the setCheck picture is an inline-block, and inside an inline button it stood on a
+        // text line whose descent made the lead ~5 pt taller than 44 (every ring / tick row ran long).
         className={cn(
-          'shrink-0 cursor-pointer rounded-full transition-opacity duration-[var(--duration-instant)] ease-[var(--ease-standard)]',
+          'flex shrink-0 cursor-pointer rounded-full transition-opacity duration-[var(--duration-instant)] ease-[var(--ease-standard)]',
           'active:opacity-[var(--pressed-opacity)] aria-busy:opacity-[var(--pressed-opacity)]',
           'aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:active:opacity-40',
         )}
@@ -209,7 +219,7 @@ export function HabitRow({ habit, to, dim = false }: { habit: Habit; to: string;
       </button>
     );
   } else if (dim) {
-    lead = <span className="opacity-40">{lead}</span>;
+    lead = <span className="flex shrink-0 opacity-40">{lead}</span>;
   }
 
   return (

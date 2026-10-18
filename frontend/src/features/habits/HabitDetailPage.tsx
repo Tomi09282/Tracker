@@ -61,9 +61,10 @@ export function HabitDetailPage() {
       <ScreenHeader kind="push" title={data?.habit.name ?? (notFound ? undefined : '')} />
       {notFound ? (
         // A habit that is not there and another account's habit are the same 404 (anti-IDOR): one
-        // honest line and the way back to the list — nothing to retry.
+        // honest line in the app's "not available" form and the way back to the list — nothing to
+        // retry, so no "Próbáld újra" (review S-habits, D7).
         <NoticeLine tone="danger" role="alert" action={<TextLink to="/habits">{t('habits.title')}</TextLink>}>
-          {t('habits.failed')}
+          {t('habits.gone')}
         </NoticeLine>
       ) : detail.isError && !data ? (
         <NoticeLine

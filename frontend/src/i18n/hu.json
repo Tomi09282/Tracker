@@ -1360,7 +1360,8 @@
       "reminderHint": "Csak az ütemezett napokon, és csak amíg nincs kipipálva.",
       "badExplain": "A rossz szokás minden nap számít. Ha nem esel vissza, a napzárásnál jár az érme. Visszaesésnél kétszeres levonás, és nullázódik a sorozat.",
       "create": "Létrehozás"
-    }
+    },
+    "gone": "Ez a szokás nem érhető el"
   },
   "tasks": {
     "title": "Feladatok",

@@ -4088,6 +4088,299 @@
           "key": "common.save"
         }
       }
+    },
+    "habit-gone": {
+      "title": "Szokás — nem érhető el (404)",
+      "account": "M",
+      "route": "/habits/99",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a habit that is not there, or another account's (the same 404, anti-IDOR): the danger line 'Ez a szokás nem érhető el' with the way back to Szokások, nothing to retry (review S-habits D7)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/habits",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "habits": [
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": {
+                  "date": "2026-10-19",
+                  "count": 1,
+                  "status": "done",
+                  "doneAt": 1792388400
+                },
+                "weekDone": null,
+                "previewMinor": 1300,
+                "fullMinor": 1300,
+                "kind": "good",
+                "scheduleType": "daily",
+                "id": 1,
+                "name": "Olvasás 20 perc",
+                "sortOrder": 1,
+                "streak": {
+                  "current": 14,
+                  "best": 14,
+                  "freezes": 0,
+                  "multiplierBp": 12500,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 8,
+                "unit": "pohár",
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": {
+                  "date": "2026-10-19",
+                  "count": 5,
+                  "status": "pending",
+                  "doneAt": null
+                },
+                "weekDone": null,
+                "previewMinor": 813,
+                "fullMinor": 1300,
+                "kind": "good",
+                "scheduleType": "daily",
+                "id": 2,
+                "name": "Víz",
+                "sortOrder": 2,
+                "streak": {
+                  "current": 9,
+                  "best": 12,
+                  "freezes": 0,
+                  "multiplierBp": 12500,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": "21:30",
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": null,
+                "weekDone": null,
+                "previewMinor": 0,
+                "fullMinor": 1500,
+                "kind": "good",
+                "scheduleType": "daily",
+                "id": 3,
+                "name": "Nyújtás 10 perc",
+                "sortOrder": 3,
+                "streak": {
+                  "current": 31,
+                  "best": 45,
+                  "freezes": 1,
+                  "multiplierBp": 15000,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": 3,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": null,
+                "weekDone": 0,
+                "previewMinor": 0,
+                "fullMinor": 1000,
+                "kind": "good",
+                "scheduleType": "times_per_week",
+                "id": 4,
+                "name": "Futás",
+                "sortOrder": 4,
+                "streak": {
+                  "current": 0,
+                  "best": 6,
+                  "freezes": 0,
+                  "multiplierBp": 10000,
+                  "weekStreak": 4
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 15,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": null,
+                "weekDone": null,
+                "previewMinor": 0,
+                "fullMinor": 1900,
+                "kind": "bad",
+                "scheduleType": "daily",
+                "id": 5,
+                "name": "Dohányzás",
+                "sortOrder": 5,
+                "streak": {
+                  "current": 12,
+                  "best": 40,
+                  "freezes": 0,
+                  "multiplierBp": 12500,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 15,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": false,
+                "scheduledToday": true,
+                "log": {
+                  "date": "2026-10-19",
+                  "count": 1,
+                  "status": "relapse",
+                  "doneAt": null
+                },
+                "weekDone": null,
+                "previewMinor": -1000,
+                "fullMinor": 1500,
+                "kind": "bad",
+                "scheduleType": "daily",
+                "id": 6,
+                "name": "Esti nassolás",
+                "sortOrder": 6,
+                "streak": {
+                  "current": 0,
+                  "best": 9,
+                  "freezes": 0,
+                  "multiplierBp": 10000,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": true,
+                "scheduledToday": false,
+                "log": null,
+                "weekDone": null,
+                "previewMinor": 0,
+                "fullMinor": 1000,
+                "kind": "good",
+                "scheduleType": "daily",
+                "id": 7,
+                "name": "Meditáció",
+                "sortOrder": 7,
+                "streak": {
+                  "current": 0,
+                  "best": 21,
+                  "freezes": 0,
+                  "multiplierBp": 10000,
+                  "weekStreak": null
+                }
+              },
+              {
+                "weekdayMask": 127,
+                "timesPerWeek": null,
+                "targetCount": 1,
+                "unit": null,
+                "pointsSuccess": 10,
+                "pointsPenalty": 5,
+                "reminderTime": null,
+                "startedOn": "2026-08-03",
+                "archived": true,
+                "scheduledToday": false,
+                "log": null,
+                "weekDone": null,
+                "previewMinor": 0,
+                "fullMinor": 1000,
+                "kind": "good",
+                "scheduleType": "daily",
+                "id": 8,
+                "name": "Hideg zuhany",
+                "sortOrder": 8,
+                "streak": {
+                  "current": 0,
+                  "best": 5,
+                  "freezes": 0,
+                  "multiplierBp": 10000,
+                  "weekStreak": null
+                }
+              }
+            ],
+            "rules": {
+              "freezeEvery": 30,
+              "maxFreezes": 2,
+              "partialHabitMinPct": 50
+            },
+            "limits": {
+              "live": 20
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/habits/99",
+          "status": 404,
+          "body": {
+            "error": "not found",
+            "code": "not_found",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "habits.gone"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/habits/99",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      }
     }
   }
 }

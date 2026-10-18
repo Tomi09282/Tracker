@@ -1360,7 +1360,8 @@
       "reminderHint": "Only on scheduled days, and only until it is ticked.",
       "badExplain": "A bad habit counts every day. If you do not relapse, the day close pays the coins. A relapse costs double and resets the streak.",
       "create": "Create"
-    }
+    },
+    "gone": "This habit is not available"
   },
   "tasks": {
     "title": "Tasks",
