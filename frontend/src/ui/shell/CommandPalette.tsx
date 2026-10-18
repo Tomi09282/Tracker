@@ -79,7 +79,7 @@ export function CommandPalette({ commands, inline = false }: CommandPaletteProps
     });
 
     const base: Command[] = [
-      go('home', t('nav.home'), '/', 'kezdolap today ma'),
+      go('home', t('nav.today'), '/', 'kezdolap today ma'),
       go('library', t('nav.library'), '/library', 'exercise gyakorlat'),
       go('nutrition', t('nav.nutrition'), '/nutrition', 'food meal etel taplalkozas'),
       go('progress', t('nav.progress'), '/progress', 'measurement meres suly weight'),

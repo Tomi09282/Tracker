@@ -688,7 +688,7 @@
       "arrived": {
         "role": "link",
         "name": {
-          "key": "nav.home"
+          "key": "nav.today"
         }
       }
     }

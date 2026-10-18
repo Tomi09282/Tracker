@@ -11,8 +11,8 @@ import { ScreenSkeleton } from '../ui/feedback/ScreenSkeleton';
 const AuthPage = lazy(() =>
   import('../features/auth/AuthPage').then((m) => ({ default: m.AuthPage })),
 );
-const HomePage = lazy(() =>
-  import('../features/home/HomePage').then((m) => ({ default: m.HomePage })),
+const TodayPage = lazy(() =>
+  import('../features/today/TodayPage').then((m) => ({ default: m.TodayPage })),
 );
 const LibraryPage = lazy(() =>
   import('../features/library/LibraryPage').then((m) => ({ default: m.LibraryPage })),
@@ -144,7 +144,7 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: suspended(<HomePage />) },
+      { index: true, element: suspended(<TodayPage />) },
       { path: 'notifications', element: suspended(<NotificationsPage />) },
       { path: 'habits', element: suspended(<HabitsPage />) },
       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },

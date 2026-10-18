@@ -133,7 +133,8 @@
       "account": "M",
       "route": "/",
       "height": 874,
-      "reach": "fixture",
+      "reach": "superseded",
+      "superseded": "LifeOS Phase 3 (S-ma, merged 2026-10-18): Ma (features/today/TodayPage, design round B lifeos/ma-1..ma-4) replaced the Kezdőlap at /, so this state now captures Ma and is held to structure only; the Ma states are in docs/pipeline/pulse/pkg/S-ma/states.json.",
       "fixture": "home-1",
       "clock": "2026-10-09T15:00:00+02:00",
       "why": "the seed always leaves user@ mid-session, so \"edzésnap, Indítás\" cannot be reached without ending the session (a write) — and only a Friday carries the drawn day",
@@ -153,7 +154,8 @@
       "account": "M",
       "route": "/",
       "height": 874,
-      "reach": "seed",
+      "reach": "superseded",
+      "superseded": "LifeOS Phase 3 (S-ma, merged 2026-10-18): Ma (features/today/TodayPage, design round B lifeos/ma-1..ma-4) replaced the Kezdőlap at /, so this state now captures Ma and is held to structure only; the Ma states are in docs/pipeline/pulse/pkg/S-ma/states.json.",
       "drawn": "fixture",
       "why": "the in-progress state itself is what the seed leaves; the DRAWN session (Friday, \"Felsőtest – húzás\") is only there when the freeze is taken on a Friday — otherwise S-home adds a fixture (frontend/scripts/fixtures/home-2.json) and names it here",
       "arrived": {
@@ -173,7 +175,8 @@
       "account": "N",
       "route": "/",
       "height": 874,
-      "reach": "seed",
+      "reach": "superseded",
+      "superseded": "LifeOS Phase 3 (S-ma, merged 2026-10-18): Ma (features/today/TodayPage, design round B lifeos/ma-1..ma-4) replaced the Kezdőlap at /, so this state now captures Ma and is held to structure only; the Ma states are in docs/pipeline/pulse/pkg/S-ma/states.json.",
       "arrived": {
         "text": "Ma nincs betervezve edzés"
       },

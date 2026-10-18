@@ -53,7 +53,7 @@
   "nav": {
     "nutritionShort": "Étkezés",
     "profile": "Profil",
-    "home": "Kezdőlap",
+    "today": "Ma",
     "library": "Gyakorlatok",
     "settings": "Beállítások",
     "admin": "Admin",
@@ -86,15 +86,84 @@
     "todayTitle": "Mai edzés",
     "emptyTitle": "Ma nincs betervezve edzés",
     "emptyBody": "Ha van aktív terved, a mai napja itt jelenik meg.",
-    "browseLibrary": "Gyakorlatok böngészése",
     "inProgress": "Edzés folyamatban",
     "resume": "Folytatás",
     "start": "Indítás",
     "done": "Kész",
     "restDay": "Pihenőnap",
-    "exerciseCount": "{{count}} gyakorlat",
-    "nothingScheduled": "Nincs betervezve",
-    "weeklyWorkouts": "Heti edzés"
+    "exerciseCount": "{{count}} gyakorlat"
+  },
+  "today": {
+    "hero": {
+      "label": "Ma",
+      "earned": "Ma eddig",
+      "done": "kész",
+      "half": "félúton",
+      "left": "hátra",
+      "onlyWorkout": "Ma egy tétel: az edzésed",
+      "perfect": "Tökéletes nap",
+      "sr": "Ma {{done}} kész a {{total}} tételből"
+    },
+    "ledger": {
+      "coins": "érme",
+      "level": "szint",
+      "levelBar": "Szint előrehaladása"
+    },
+    "coinUnit": "érme",
+    "coins": "{{value}} érme",
+    "tomorrow": "Holnap: {{name}}",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "habits": {
+      "title": "Szokások",
+      "all": "Összes",
+      "emptyTitle": "Még nincs szokásod",
+      "emptyBody": "Kezdj eggyel, például a vízzel.",
+      "first": "Első szokás"
+    },
+    "habit": {
+      "done": "Kész",
+      "reminder": "Emlékeztető {{time}}",
+      "pending": "Ma még nincs kész",
+      "clean": "{{count}} napja tiszta",
+      "relapsed": "Ma {{count}} visszaesés",
+      "skipped": "Kihagyva",
+      "weekly": "Heti {{count}}× · {{done}}/{{count}} ezen a héten",
+      "days": "nap",
+      "weeks": "hét",
+      "freezes": "{{count}} fagyasztás",
+      "addOne": "{{name}}: {{count}}/{{target}}, koppints még egyért",
+      "relapseAsk": "Rögzítsem a visszaesést? Ez érmelevonással jár, és nullázza a sorozatot.",
+      "relapseConfirm": "Igen, visszaestem",
+      "relapseLogged": "Visszaesés rögzítve"
+    },
+    "tasks": {
+      "title": "Feladatok",
+      "capture": "Rögzítés",
+      "doneToday": "Kész ma · {{count}}",
+      "emptyTitle": "Nincs teendő",
+      "emptyBody": "Rögzíts bármit, határidővel együtt."
+    },
+    "task": {
+      "low": "Alacsony",
+      "mid": "Közepes",
+      "high": "Fontos",
+      "today": "ma",
+      "todayAt": "ma {{time}}",
+      "doneAt": "kész {{time}}",
+      "daily": "naponta",
+      "weekly": "hetente",
+      "monthly": "havonta",
+      "every": {
+        "mon": "hétfőnként",
+        "tue": "keddenként",
+        "wed": "szerdánként",
+        "thu": "csütörtökönként",
+        "fri": "péntekenként",
+        "sat": "szombatonként",
+        "sun": "vasárnaponként"
+      }
+    },
+    "librarySub": "Könyvtár · keresés izom és eszköz szerint"
   },
   "settings": {
     "title": "Beállítások",

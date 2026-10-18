@@ -1,0 +1,2050 @@
+{
+  "about": "S-ma - the Ma page (TodayPage at /, design round B frames lifeos/ma-1..ma-4) and its undrawn states. Account M = user@tracker.local. Written by make-states.mjs (edit that file, not this one). GET /lifeos/today is the B-core recording; its Phase-3 keys habits / tasks are fixture additions (no 032 recording yet), schema-checked by fixture-schema-check.mjs against lib/lifeos-api.ts. Nothing is written live: every tap of the frames is a capture of a still state.",
+  "states": {
+    "ma-1": {
+      "title": "Ma — edzésnap (a keret)",
+      "frame": "lifeos/ma-1",
+      "account": "M",
+      "route": "/",
+      "height": 2248,
+      "clock": "2026-10-19T13:20:00+02:00",
+      "reach": "fixture",
+      "why": "the frame day (Monday 19 October): no session running, the plan day \"Felsőtest – húzás\", 4 habits and 6 tasks of the README-ma seed. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2158
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 1000
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792388400
+                  },
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 5,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 9,
+                    "best": 9,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 500,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 31,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "relapse",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 4,
+                    "best": 4,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": -1000,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 11,
+                    "title": "Befizetni a villanyszámlát",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "17:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 12,
+                    "title": "Bevásárlás: zab, tojás, túró",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "19:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 13,
+                    "title": "Felhívni anyát",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "20:00",
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 9
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 113,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 14,
+                    "title": "Kiválogatni a téli ruhákat",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 15,
+                    "title": "Kivinni a szemetet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792390200,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 16,
+                    "title": "Időpontot foglalni a fodrászhoz",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792395000,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 4
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1240
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 86
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "home.start"
+        }
+      }
+    },
+    "ma-2": {
+      "title": "Ma — pihenőnap, minden kész",
+      "frame": "lifeos/ma-2",
+      "account": "M",
+      "route": "/",
+      "height": 1748,
+      "clock": "2026-10-20T21:10:00+02:00",
+      "reach": "fixture",
+      "why": "the rest day after ma-1: 3 good habits done, 2 bad habits clean, the 2 Tuesday tasks done, tomorrow \"Alsótest – guggolás 18:00\" from the week window. The daily challenge (Phase 4) is not on Ma yet, so \"Ma eddig\" lacks its +15 and the NAPI DOBÁS block is not drawn",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 24500
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 24500
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2239
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 1500
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": false
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792474500
+                  },
+                  "streak": {
+                    "current": 15,
+                    "best": 15,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 8,
+                    "status": "done",
+                    "doneAt": 1792518000
+                  },
+                  "streak": {
+                    "current": 10,
+                    "best": 10,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1000,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792523100
+                  },
+                  "streak": {
+                    "current": 33,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1500,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 5,
+                  "name": "Dohányzás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 5,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 13,
+                    "best": 13,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 1,
+                    "best": 1,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 21,
+                    "title": "Feladni a csomagot a Foxpostnál",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792492800,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 1000,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 22,
+                    "title": "Kivinni a szelektívet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 2
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 122,
+                    "completedAt": 1792515900,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 0
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Pihenőnap"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 1
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/week",
+          "query": {
+            "from": "2026-10-21",
+            "days": "1"
+          },
+          "from": {
+            "path": "/api/v1/my-plans/week?days=7&from=2026-10-12"
+          },
+          "edits": [
+            {
+              "pointer": "/from",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days",
+              "value": 1
+            },
+            {
+              "pointer": "/occurrences",
+              "value": [
+                {
+                  "date": "2026-10-21",
+                  "day_id": 5,
+                  "day_name": "Alsótest – guggolás",
+                  "slot": 0,
+                  "is_rest": 0,
+                  "est_minutes": 70,
+                  "start_time": "18:00",
+                  "exercise_count": 6,
+                  "plan_id": 1,
+                  "plan_name": "Felső/alsó szplit – 12 hetes blokk",
+                  "log_id": null,
+                  "log_status": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-20",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 2480
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 176
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "today.hero.perfect"
+        }
+      }
+    },
+    "ma-3": {
+      "title": "Ma — új felhasználó",
+      "frame": "lifeos/ma-3",
+      "account": "M",
+      "route": "/",
+      "height": 1470,
+      "clock": "2026-10-19T09:00:00+02:00",
+      "reach": "fixture",
+      "why": "a brand-new member: 0 coins, level 0, only the onboarding plan's workout (\"Teljes test – alap\"); no habits, no tasks — the two empty sections. The frame's pay lines under the empty states quote the admin rules and are not drawn",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 0
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 100
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [],
+                "overdue": [],
+                "completedToday": [],
+                "anytimeCount": 0,
+                "openCount": 0
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Teljes test – alap"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 6
+            },
+            {
+              "pointer": "/days/0/plan_name",
+              "value": "Kezdő terv – 1. hét"
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "today.habits.emptyTitle"
+        }
+      }
+    },
+    "ma-4": {
+      "title": "Ma — szerda reggel, még semmi kész",
+      "frame": "lifeos/ma-4",
+      "account": "M",
+      "route": "/",
+      "height": 1790,
+      "clock": "2026-10-21T07:30:00+02:00",
+      "reach": "fixture",
+      "why": "the frame's day without its subject: the pending daily draw (NAPI DOBÁS above MAI EDZÉS) is Phase 4 and cannot be reached; every other block (hero 0/7, the Wednesday workout, 5 habits, 3 tasks) is drawn. Ma then continues with TÁPLÁLKOZÁS and the library row, which the frame crops",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 36200
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 36200
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2356
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 15,
+                    "best": 15,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-21",
+                    "count": 1,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 10,
+                    "best": 10,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 33,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 5,
+                  "name": "Dohányzás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 5,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 2,
+                    "best": 2,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 31,
+                    "title": "Elküldeni a heti riportot",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": "12:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 32,
+                    "title": "Felhívni a szerelőt a kazán miatt",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": "16:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 33,
+                    "title": "Megöntözni a növényeket",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": null,
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 4
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 133,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [],
+                "anytimeCount": 0,
+                "openCount": 3
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Alsótest – guggolás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 6
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-21",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "home.start"
+        }
+      }
+    },
+    "ma-relapse-sheet": {
+      "title": "Ma — visszaesés megerősítése",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "clock": "2026-10-19T13:20:00+02:00",
+      "reach": "fixture",
+      "why": "a bad habit's row asks before it logs a relapse (it costs coins and ends the streak; f_app confirms it too): the kit ConfirmSheet over Ma",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2158
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 2000
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792388400
+                  },
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 5,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 9,
+                    "best": 9,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 500,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 31,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 5,
+                  "name": "Dohányzás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 5,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 12,
+                    "best": 12,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 11,
+                    "title": "Befizetni a villanyszámlát",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "17:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 12,
+                    "title": "Bevásárlás: zab, tojás, túró",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "19:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 13,
+                    "title": "Felhívni anyát",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "20:00",
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 9
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 113,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 14,
+                    "title": "Kiválogatni a téli ruhákat",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 15,
+                    "title": "Kivinni a szemetet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792390200,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null
+                  },
+                  {
+                    "id": 16,
+                    "title": "Időpontot foglalni a fodrászhoz",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792395000,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 4
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1240
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 86
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Dohányzás"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "today.habit.relapseConfirm"
+        }
+      }
+    },
+    "ma-failed": {
+      "title": "Ma — a LifeOS-olvasás nem sikerült",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "clock": "2026-10-19T13:20:00+02:00",
+      "reach": "fixture",
+      "why": "GET /lifeos/today answers 500: the ledger line and the hero print the dash, \"Újra\" under the hero; the session, the food and the library row still work",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "status": 500,
+          "body": {}
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1240
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 86
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/lifeos/today",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "ma-live-session": {
+      "title": "Ma — futó edzés (Folytatás)",
+      "account": "M",
+      "route": "/",
+      "height": 874,
+      "reach": "seed",
+      "why": "the seed leaves user@ mid-session: MAI EDZÉS shows the running session with \"Folytatás\"; GET /lifeos/today as recorded from the B-core backend (no habits / tasks yet), so SZOKÁSOK / FELADATOK are not drawn and the hero counts the workout alone",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "home.resume"
+        }
+      }
+    }
+  }
+}

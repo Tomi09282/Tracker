@@ -53,7 +53,7 @@
   "nav": {
     "nutritionShort": "Essen",
     "profile": "Profil",
-    "home": "Start",
+    "today": "Heute",
     "library": "Übungen",
     "settings": "Einstellungen",
     "admin": "Admin",
@@ -86,15 +86,84 @@
     "todayTitle": "Heutiges Training",
     "emptyTitle": "Heute nichts geplant",
     "emptyBody": "Wenn du einen aktiven Plan hast, erscheint die heutige Einheit hier.",
-    "browseLibrary": "Übungen durchsuchen",
     "inProgress": "Training läuft",
     "resume": "Fortsetzen",
     "start": "Starten",
     "done": "Erledigt",
     "restDay": "Ruhetag",
-    "exerciseCount": "{{count}} Übungen",
-    "nothingScheduled": "Nichts geplant",
-    "weeklyWorkouts": "Wöchentliches Training"
+    "exerciseCount": "{{count}} Übungen"
+  },
+  "today": {
+    "hero": {
+      "label": "Heute",
+      "earned": "Heute bisher",
+      "done": "erledigt",
+      "half": "halb",
+      "left": "offen",
+      "onlyWorkout": "Heute ein Punkt: dein Training",
+      "perfect": "Perfekter Tag",
+      "sr": "Heute {{done}} von {{total}} erledigt"
+    },
+    "ledger": {
+      "coins": "Münzen",
+      "level": "Level",
+      "levelBar": "Level-Fortschritt"
+    },
+    "coinUnit": "Münzen",
+    "coins": "{{value}} Münzen",
+    "tomorrow": "Morgen: {{name}}",
+    "failed": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "habits": {
+      "title": "Gewohnheiten",
+      "all": "Alle",
+      "emptyTitle": "Noch keine Gewohnheiten",
+      "emptyBody": "Fang mit einer an, zum Beispiel Wasser.",
+      "first": "Erste Gewohnheit"
+    },
+    "habit": {
+      "done": "Erledigt",
+      "reminder": "Erinnerung {{time}}",
+      "pending": "Heute noch nicht erledigt",
+      "clean": "Seit {{count}} Tagen sauber",
+      "relapsed": "Heute {{count}} Rückfall",
+      "skipped": "Ausgelassen",
+      "weekly": "{{count}}× pro Woche · {{done}}/{{count}} diese Woche",
+      "days": "Tage",
+      "weeks": "Wochen",
+      "freezes": "{{count}} Serienschutz",
+      "addOne": "{{name}}: {{count}}/{{target}}, tippen für eins mehr",
+      "relapseAsk": "Rückfall eintragen? Das kostet Münzen und setzt die Serie zurück.",
+      "relapseConfirm": "Ja, Rückfall",
+      "relapseLogged": "Rückfall eingetragen"
+    },
+    "tasks": {
+      "title": "Aufgaben",
+      "capture": "Erfassen",
+      "doneToday": "Heute erledigt · {{count}}",
+      "emptyTitle": "Nichts zu tun",
+      "emptyBody": "Erfasse alles, mit Frist."
+    },
+    "task": {
+      "low": "Niedrig",
+      "mid": "Mittel",
+      "high": "Hoch",
+      "today": "heute",
+      "todayAt": "heute {{time}}",
+      "doneAt": "erledigt {{time}}",
+      "daily": "täglich",
+      "weekly": "wöchentlich",
+      "monthly": "monatlich",
+      "every": {
+        "mon": "montags",
+        "tue": "dienstags",
+        "wed": "mittwochs",
+        "thu": "donnerstags",
+        "fri": "freitags",
+        "sat": "samstags",
+        "sun": "sonntags"
+      }
+    },
+    "librarySub": "Bibliothek · Suche nach Muskel und Gerät"
   },
   "settings": {
     "title": "Einstellungen",

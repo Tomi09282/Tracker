@@ -155,10 +155,10 @@ export function NotificationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unread.length, online]);
 
-  // The frame names the parent ("KEZDŐLAP"); the step stays the history, because the bell is also
+  // The frame names the parent ("KEZDŐLAP", since LifeOS Phase 3 the Ma page); the step stays the history, because the bell is also
   // on the coach dashboard and a fixed link would send a coach to the member's Home.
   const header = (
-    <ScreenHeader kind="push" title={t('notifications.title')} back={{ onClick: () => navigate(-1), label: t('nav.home') }} />
+    <ScreenHeader kind="push" title={t('notifications.title')} back={{ onClick: () => navigate(-1), label: t('nav.today') }} />
   );
 
   if (isPending) {

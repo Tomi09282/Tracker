@@ -1,0 +1,14 @@
+{
+  "id": "R-S-ma-03",
+  "from": "S-ma",
+  "kind": "backend",
+  "blocking": false,
+  "target": "backend: GET /lifeos/today (B-core / B-habits-tasks follow-up); frontend/src/lib/lifeos-api.ts",
+  "need": "Three lines of the frames quote admin point rules that a member cannot read: ma-2 'Tökéletes nap · +25 érme napzáráskor' (rules.perfectDay), ma-3 '+10 érme / nap · 7 nap után ×1,25' (rules.habitSuccess, streakTier1Days, streakTier1MultBp) and '+5–20 érme teendőnként' (rules.taskLow, taskHigh). GET /admin/rules is admin-only and GET /habits carries only freezeEvery / maxFreezes / partialHabitMinPct. Typing the numbers into the page would be fake data the moment an admin changes a rule (D3, R22), so the page draws the lines without the figures (perfect day) or not at all (the two empty-state micro lines).",
+  "evidence": "frames lifeos/ma-2, ma-3; geometry .pulse/shots/S-ma/ma-3.geometry.json unmatched '+10 érme / nap · 7 nap után ×1,25', '+5–20 érme teendőnként'",
+  "proposedApi": "GET /lifeos/today adds rules: { perfectDay, habitSuccess, taskLow, taskHigh, streakTier1Days, streakTier1MultBp } (whole coins / days / basis points, the rule set in force)",
+  "proposedPatch": null,
+  "interim": "Perfect-day line without the amount; the two empty-state micro lines are not drawn. With the field, S-ma adds the three strings (copy is in the frames) in a follow-up.",
+  "status": "open",
+  "resolution": null
+}

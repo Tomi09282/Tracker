@@ -53,7 +53,7 @@
   "nav": {
     "nutritionShort": "Food",
     "profile": "Profile",
-    "home": "Home",
+    "today": "Today",
     "library": "Exercises",
     "settings": "Settings",
     "admin": "Admin",
@@ -86,15 +86,84 @@
     "todayTitle": "Today's workout",
     "emptyTitle": "Nothing scheduled today",
     "emptyBody": "If you have an active plan, today's session shows up here.",
-    "browseLibrary": "Browse exercises",
     "inProgress": "Workout in progress",
     "resume": "Resume",
     "start": "Start",
     "done": "Done",
     "restDay": "Rest day",
-    "exerciseCount": "{{count}} exercises",
-    "nothingScheduled": "Nothing scheduled",
-    "weeklyWorkouts": "Weekly workouts"
+    "exerciseCount": "{{count}} exercises"
+  },
+  "today": {
+    "hero": {
+      "label": "Today",
+      "earned": "So far today",
+      "done": "done",
+      "half": "halfway",
+      "left": "to go",
+      "onlyWorkout": "One item today: your workout",
+      "perfect": "Perfect day",
+      "sr": "Today {{done}} of {{total}} done"
+    },
+    "ledger": {
+      "coins": "coins",
+      "level": "level",
+      "levelBar": "Level progress"
+    },
+    "coinUnit": "coins",
+    "coins": "{{value}} coins",
+    "tomorrow": "Tomorrow: {{name}}",
+    "failed": "That didn't work. Please try again.",
+    "habits": {
+      "title": "Habits",
+      "all": "All",
+      "emptyTitle": "No habits yet",
+      "emptyBody": "Start with one, water for example.",
+      "first": "First habit"
+    },
+    "habit": {
+      "done": "Done",
+      "reminder": "Reminder {{time}}",
+      "pending": "Not done yet today",
+      "clean": "Clean for {{count}} days",
+      "relapsed": "{{count}} relapse today",
+      "skipped": "Skipped",
+      "weekly": "{{count}}× a week · {{done}}/{{count}} this week",
+      "days": "days",
+      "weeks": "weeks",
+      "freezes": "{{count}} freezes",
+      "addOne": "{{name}}: {{count}}/{{target}}, tap to add one",
+      "relapseAsk": "Log the relapse? It costs coins and resets the streak.",
+      "relapseConfirm": "Yes, I relapsed",
+      "relapseLogged": "Relapse logged"
+    },
+    "tasks": {
+      "title": "Tasks",
+      "capture": "Capture",
+      "doneToday": "Done today · {{count}}",
+      "emptyTitle": "Nothing to do",
+      "emptyBody": "Capture anything, with its deadline."
+    },
+    "task": {
+      "low": "Low",
+      "mid": "Medium",
+      "high": "High",
+      "today": "today",
+      "todayAt": "today {{time}}",
+      "doneAt": "done {{time}}",
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly",
+      "every": {
+        "mon": "every Monday",
+        "tue": "every Tuesday",
+        "wed": "every Wednesday",
+        "thu": "every Thursday",
+        "fri": "every Friday",
+        "sat": "every Saturday",
+        "sun": "every Sunday"
+      }
+    },
+    "librarySub": "Library · search by muscle and equipment"
   },
   "settings": {
     "title": "Settings",

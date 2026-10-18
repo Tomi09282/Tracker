@@ -1,0 +1,14 @@
+{
+  "id": "R-S-ma-02",
+  "from": "S-ma",
+  "kind": "cross-package",
+  "blocking": false,
+  "target": "frontend/src/features/today/TodayPage.tsx (owned by S-ma; the patch waits for S-tasks)",
+  "need": "'Rögzítés +' (and the empty state's '+ Rögzítés') opens the capture sheet over Ma, as the frames and plan F.3 say. The sheet is S-tasks' features/capture/CaptureSheet.tsx ({ open, onClose }), not merged yet. Until then the link is a door to /tasks (S-tasks' page; S-tasks is not merged either, so before both land it opens the not-found fallback - merge S-tasks before or with S-ma).",
+  "evidence": "frames lifeos/ma-1, ma-3 ('Rögzítés +'), lifeos/capture; S-tasks slot-13 CaptureSheet signature",
+  "proposedApi": "const [capturing, setCapturing] = useState(false); <TodayTasks onCapture={{ onClick: () => setCapturing(true) }} />; <CaptureSheet open={capturing} onClose={() => setCapturing(false)} />",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-ma/requests/R-S-ma-02.patch (applies on pulse/S-ma HEAD; checked with git apply --check)",
+  "interim": "TodayPage's capture prop defaults to { to: '/tasks' }.",
+  "status": "open",
+  "resolution": null
+}

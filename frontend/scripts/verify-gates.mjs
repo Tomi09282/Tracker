@@ -158,10 +158,11 @@ const PROBES = [
     gate: 'check:nav',
     label: 'a screen that loses its only link is caught',
     file: 'src/features/settings/SettingsPage.tsx',
-    // Every door in the file: the profile's ledger opens /coins from two rows (ÉRMÉK and
-    // EREDMÉNYEK), and the screen only loses its way in when both are gone.
-    mutate: swap(/\bto\s*=\s*"\/coins"/g, 'to="/settings"'),
-    expect: /"\/coins" is a route nobody links to/,
+    // Felszerelés has one door, the BEÁLLÍTÁSOK row of Profil. (Until S-ma this probe took away
+    // the profile's two /coins rows; Ma's ledger line is a second door to Érmék now, so /coins no
+    // longer loses its way in through this file alone.)
+    mutate: swap(/\bto\s*=\s*"\/settings\/equipment"/g, 'to="/settings"'),
+    expect: /"\/settings\/equipment" is a route nobody links to/,
   },
   {
     id: 'nav/way-back-is-not-a-door',
@@ -550,8 +551,8 @@ const PROBES = [
     gate: 'check:i18n',
     label: 'a key deleted from one bundle is caught',
     file: 'src/i18n/de.json',
-    mutate: editJson((doc) => (doc.nav && 'home' in doc.nav ? delete doc.nav.home : false)),
-    expect: /de: missing 1 key\(s\) — nav\.home/,
+    mutate: editJson((doc) => (doc.nav && 'today' in doc.nav ? delete doc.nav.today : false)),
+    expect: /de: missing 1 key\(s\) — nav\.today/,
   },
   {
     id: 'i18n/dead-key',

@@ -1,0 +1,195 @@
+diff --git a/frontend/scripts/check-nav.mjs b/frontend/scripts/check-nav.mjs
+index d4a43b3..13e42b9 100644
+--- a/frontend/scripts/check-nav.mjs
++++ b/frontend/scripts/check-nav.mjs
+@@ -89,7 +89,6 @@ const NO_INBOUND_BY_DESIGN = new Map([
+   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
+   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
+   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
+-  ['/habits', { reason: 'Szokások is pushed from Ma ("Összes ›" in the SZOKÁSOK block, frame lifeos/ma-1), which package S-today builds; drop this row when that door is merged' }],
+   [
+     '/m',
+     {
+diff --git a/frontend/scripts/verify-gates.mjs b/frontend/scripts/verify-gates.mjs
+index 033196c..ba065fb 100644
+--- a/frontend/scripts/verify-gates.mjs
++++ b/frontend/scripts/verify-gates.mjs
+@@ -158,10 +158,11 @@ const PROBES = [
+     gate: 'check:nav',
+     label: 'a screen that loses its only link is caught',
+     file: 'src/features/settings/SettingsPage.tsx',
+-    // Every door in the file: the profile's ledger opens /coins from two rows (ÉRMÉK and
+-    // EREDMÉNYEK), and the screen only loses its way in when both are gone.
+-    mutate: swap(/\bto\s*=\s*"\/coins"/g, 'to="/settings"'),
+-    expect: /"\/coins" is a route nobody links to/,
++    // Felszerelés has one door, the BEÁLLÍTÁSOK row of Profil. (Until S-ma this probe took away
++    // the profile's two /coins rows; Ma's ledger line is a second door to Érmék now, so /coins no
++    // longer loses its way in through this file alone.)
++    mutate: swap(/\bto\s*=\s*"\/settings\/equipment"/g, 'to="/settings"'),
++    expect: /"\/settings\/equipment" is a route nobody links to/,
+   },
+   {
+     id: 'nav/way-back-is-not-a-door',
+@@ -550,8 +551,8 @@ const PROBES = [
+     gate: 'check:i18n',
+     label: 'a key deleted from one bundle is caught',
+     file: 'src/i18n/de.json',
+-    mutate: editJson((doc) => (doc.nav && 'home' in doc.nav ? delete doc.nav.home : false)),
+-    expect: /de: missing 1 key\(s\) — nav\.home/,
++    mutate: editJson((doc) => (doc.nav && 'today' in doc.nav ? delete doc.nav.today : false)),
++    expect: /de: missing 1 key\(s\) — nav\.today/,
+   },
+   {
+     id: 'i18n/dead-key',
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 8b848eb..208ccd8 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   user: [
+     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+     // lighting anything. `owns` is the exception list `end` cannot express.
+-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications', '/habits'] },
++    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index b349233..773a6c5 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -63,7 +63,7 @@ export const ROUTE_META = {
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/notifications': {
+     parent: '/',
+-    parentLabelKey: 'nav.home',
++    parentLabelKey: 'nav.today',
+     byView: {
+       trainer: { parent: '/coach', parentLabelKey: 'nav.clients' },
+       admin: { parent: '/admin', parentLabelKey: 'nav.moderation' },
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 62555ba..a754a27 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -11,8 +11,8 @@ import { ScreenSkeleton } from '../ui/feedback/ScreenSkeleton';
+ const AuthPage = lazy(() =>
+   import('../features/auth/AuthPage').then((m) => ({ default: m.AuthPage })),
+ );
+-const HomePage = lazy(() =>
+-  import('../features/home/HomePage').then((m) => ({ default: m.HomePage })),
++const TodayPage = lazy(() =>
++  import('../features/today/TodayPage').then((m) => ({ default: m.TodayPage })),
+ );
+ const LibraryPage = lazy(() =>
+   import('../features/library/LibraryPage').then((m) => ({ default: m.LibraryPage })),
+@@ -144,7 +144,7 @@ export const router = createBrowserRouter([
+       </RequireAuth>
+     ),
+     children: [
+-      { index: true, element: suspended(<HomePage />) },
++      { index: true, element: suspended(<TodayPage />) },
+       { path: 'notifications', element: suspended(<NotificationsPage />) },
+       { path: 'habits', element: suspended(<HabitsPage />) },
+       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+diff --git a/frontend/src/features/chat/NotificationsPage.tsx b/frontend/src/features/chat/NotificationsPage.tsx
+index ce18485..febe3f8 100644
+--- a/frontend/src/features/chat/NotificationsPage.tsx
++++ b/frontend/src/features/chat/NotificationsPage.tsx
+@@ -155,10 +155,10 @@ export function NotificationsPage() {
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [unread.length, online]);
+ 
+-  // The frame names the parent ("KEZDŐLAP"); the step stays the history, because the bell is also
++  // The frame names the parent ("KEZDŐLAP", since LifeOS Phase 3 the Ma page); the step stays the history, because the bell is also
+   // on the coach dashboard and a fixed link would send a coach to the member's Home.
+   const header = (
+-    <ScreenHeader kind="push" title={t('notifications.title')} back={{ onClick: () => navigate(-1), label: t('nav.home') }} />
++    <ScreenHeader kind="push" title={t('notifications.title')} back={{ onClick: () => navigate(-1), label: t('nav.today') }} />
+   );
+ 
+   if (isPending) {
+diff --git a/frontend/src/features/home/useToday.ts b/frontend/src/features/home/useToday.ts
+deleted file mode 100644
+index ea40963..0000000
+--- a/frontend/src/features/home/useToday.ts
++++ /dev/null
+@@ -1,27 +0,0 @@
+-import { useQuery } from '@tanstack/react-query';
+-import { apiWithRefresh } from '../../lib/api';
+-
+-export interface TodayDay {
+-  day_id: number;
+-  day_name: string;
+-  plan_id: number;
+-  plan_name: string;
+-  is_rest: 0 | 1;
+-  est_minutes: number | null;
+-  /** 'HH:MM' wall clock, or null for "no particular time". */
+-  start_time: string | null;
+-  slot: number;
+-  exercise_count: number;
+-  /** Set once this occurrence has been trained — the card must not still say "start". */
+-  log_id: number | null;
+-}
+-
+-export function useToday() {
+-  return useQuery({
+-    queryKey: ['today'],
+-    queryFn: () => apiWithRefresh<{ date: string; days: TodayDay[] }>('/my-plans/today'),
+-    // The answer changes at midnight in the user's timezone, not on a timer. Refetching on focus
+-    // covers the case that actually happens: the phone was asleep and it is now tomorrow.
+-    refetchOnWindowFocus: true,
+-  });
+-}
+diff --git a/frontend/src/i18n/de.json b/frontend/src/i18n/de.json
+index 9b399d4..86e525d 100644
+--- a/frontend/src/i18n/de.json
++++ b/frontend/src/i18n/de.json
+@@ -53,7 +53,7 @@
+   "nav": {
+     "nutritionShort": "Essen",
+     "profile": "Profil",
+-    "home": "Start",
++    "today": "Heute",
+     "library": "Übungen",
+     "settings": "Einstellungen",
+     "admin": "Admin",
+diff --git a/frontend/src/i18n/en.json b/frontend/src/i18n/en.json
+index e71c454..3238048 100644
+--- a/frontend/src/i18n/en.json
++++ b/frontend/src/i18n/en.json
+@@ -53,7 +53,7 @@
+   "nav": {
+     "nutritionShort": "Food",
+     "profile": "Profile",
+-    "home": "Home",
++    "today": "Today",
+     "library": "Exercises",
+     "settings": "Settings",
+     "admin": "Admin",
+diff --git a/frontend/src/i18n/hu.json b/frontend/src/i18n/hu.json
+index 2a3bd37..b89dc85 100644
+--- a/frontend/src/i18n/hu.json
++++ b/frontend/src/i18n/hu.json
+@@ -53,7 +53,7 @@
+   "nav": {
+     "nutritionShort": "Étkezés",
+     "profile": "Profil",
+-    "home": "Kezdőlap",
++    "today": "Ma",
+     "library": "Gyakorlatok",
+     "settings": "Beállítások",
+     "admin": "Admin",
+diff --git a/frontend/src/ui/shell/CommandPalette.tsx b/frontend/src/ui/shell/CommandPalette.tsx
+index 450607a..e59bcf9 100644
+--- a/frontend/src/ui/shell/CommandPalette.tsx
++++ b/frontend/src/ui/shell/CommandPalette.tsx
+@@ -79,7 +79,7 @@ export function CommandPalette({ commands, inline = false }: CommandPaletteProps
+     });
+ 
+     const base: Command[] = [
+-      go('home', t('nav.home'), '/', 'kezdolap today ma'),
++      go('home', t('nav.today'), '/', 'kezdolap today ma'),
+       go('library', t('nav.library'), '/library', 'exercise gyakorlat'),
+       go('nutrition', t('nav.nutrition'), '/nutrition', 'food meal etel taplalkozas'),
+       go('progress', t('nav.progress'), '/progress', 'measurement meres suly weight'),

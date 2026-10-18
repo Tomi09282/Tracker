@@ -1,0 +1,491 @@
+{
+  "package": "S-ma",
+  "base": "290d3ec1270e8a1500ef9a930115890f351490f5",
+  "namespaces": [
+    "today"
+  ],
+  "set": [
+    {
+      "key": "today.hero.label",
+      "hu": "Ma",
+      "en": "Today",
+      "de": "Heute",
+      "after": "home",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), the hero eyebrow \"MA\""
+    },
+    {
+      "key": "today.hero.earned",
+      "hu": "Ma eddig",
+      "en": "So far today",
+      "de": "Heute bisher",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 / ma-2, \"Ma eddig\" over the coins of the day"
+    },
+    {
+      "key": "today.hero.done",
+      "hu": "kész",
+      "en": "done",
+      "de": "erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 / ma-4 caption \"3 kész · 1 félúton · 6 hátra\""
+    },
+    {
+      "key": "today.hero.half",
+      "hu": "félúton",
+      "en": "halfway",
+      "de": "halb",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 caption"
+    },
+    {
+      "key": "today.hero.left",
+      "hu": "hátra",
+      "en": "to go",
+      "de": "offen",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 / ma-4 caption"
+    },
+    {
+      "key": "today.hero.onlyWorkout",
+      "hu": "Ma egy tétel: az edzésed",
+      "en": "One item today: your workout",
+      "de": "Heute ein Punkt: dein Training",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 caption"
+    },
+    {
+      "key": "today.hero.perfect",
+      "hu": "Tökéletes nap",
+      "en": "Perfect day",
+      "de": "Perfekter Tag",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-2 \"Tökéletes nap · +25 érme napzáráskor\" (the amount is left out: no member route returns the rules)"
+    },
+    {
+      "key": "today.hero.sr",
+      "hu": "Ma {{done}} kész a {{total}} tételből",
+      "en": "Today {{done}} of {{total}} done",
+      "de": "Heute {{done}} von {{total}} erledigt",
+      "copy": "proposed",
+      "visible": false,
+      "source": "screen-reader words of the giant fraction \"3/10\" (Fraction srText)"
+    },
+    {
+      "key": "today.ledger.coins",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), the ledger line \"190 ÉRME · SZINT 4\" (upper case is CSS)"
+    },
+    {
+      "key": "today.ledger.level",
+      "hu": "szint",
+      "en": "level",
+      "de": "Level",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), the ledger line"
+    },
+    {
+      "key": "today.ledger.levelBar",
+      "hu": "Szint előrehaladása",
+      "en": "Level progress",
+      "de": "Level-Fortschritt",
+      "copy": "proposed",
+      "visible": false,
+      "source": "accessible name of the 56 pt XP bar on the ledger line (ProgressBar label)"
+    },
+    {
+      "key": "today.coinUnit",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 / ma-2, the unit \"ÉRME\" after \"+18\""
+    },
+    {
+      "key": "today.coins",
+      "hu": "{{value}} érme",
+      "en": "{{value}} coins",
+      "de": "{{value}} Münzen",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), \"+30 érme\" (workout), \"+13 érme\" (habit), \"−10 érme\" (relapse)"
+    },
+    {
+      "key": "today.tomorrow",
+      "hu": "Holnap: {{name}}",
+      "en": "Tomorrow: {{name}}",
+      "de": "Morgen: {{name}}",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-2 \"Holnap: Alsótest – guggolás · 18:00\""
+    },
+    {
+      "key": "today.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That didn't work. Please try again.",
+      "de": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "copy": "inventory",
+      "source": "hu.json settings.day.failed / adminRules.failed (the same sentence): a habit or task write that failed"
+    },
+    {
+      "key": "today.habits.title",
+      "hu": "Szokások",
+      "en": "Habits",
+      "de": "Gewohnheiten",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), section eyebrow SZOKÁSOK"
+    },
+    {
+      "key": "today.habits.all",
+      "hu": "Összes",
+      "en": "All",
+      "de": "Alle",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), \"Összes ›\" in the SZOKÁSOK head"
+    },
+    {
+      "key": "today.habits.emptyTitle",
+      "hu": "Még nincs szokásod",
+      "en": "No habits yet",
+      "de": "Noch keine Gewohnheiten",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 empty state (f_app \"Még nincs szokásod\")"
+    },
+    {
+      "key": "today.habits.emptyBody",
+      "hu": "Kezdj eggyel, például a vízzel.",
+      "en": "Start with one, water for example.",
+      "de": "Fang mit einer an, zum Beispiel Wasser.",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 empty state line"
+    },
+    {
+      "key": "today.habits.first",
+      "hu": "Első szokás",
+      "en": "First habit",
+      "de": "Erste Gewohnheit",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 \"+ Első szokás\""
+    },
+    {
+      "key": "today.habit.done",
+      "hu": "Kész",
+      "en": "Done",
+      "de": "Erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"Kész · 07:40 · +13 érme\""
+    },
+    {
+      "key": "today.habit.reminder",
+      "hu": "Emlékeztető {{time}}",
+      "en": "Reminder {{time}}",
+      "de": "Erinnerung {{time}}",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"Emlékeztető 21:30\""
+    },
+    {
+      "key": "today.habit.pending",
+      "hu": "Ma még nincs kész",
+      "en": "Not done yet today",
+      "de": "Heute noch nicht erledigt",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-4 Olvasás \"Ma még nincs kész\""
+    },
+    {
+      "key": "today.habit.clean",
+      "hu": "{{count}} napja tiszta",
+      "en": "Clean for {{count}} days",
+      "de": "Seit {{count}} Tagen sauber",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-2 / ma-4 \"13 napja tiszta\" (f_app \"napja tiszta\")"
+    },
+    {
+      "key": "today.habit.relapsed",
+      "hu": "Ma {{count}} visszaesés",
+      "en": "{{count}} relapse today",
+      "de": "Heute {{count}} Rückfall",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"Ma 1 visszaesés · −10 érme\""
+    },
+    {
+      "key": "today.habit.skipped",
+      "hu": "Kihagyva",
+      "en": "Skipped",
+      "de": "Ausgelassen",
+      "copy": "inventory",
+      "source": "f_app HabitRow \"kihagyva\" (a skipped habit); README-ma \"Kihagyva · …\""
+    },
+    {
+      "key": "today.habit.weekly",
+      "hu": "Heti {{count}}× · {{done}}/{{count}} ezen a héten",
+      "en": "{{count}}× a week · {{done}}/{{count}} this week",
+      "de": "{{count}}× pro Woche · {{done}}/{{count}} diese Woche",
+      "copy": "inventory",
+      "source": "frame lifeos/habits-1 Futás \"Heti 3× · 0/3 ezen a héten\" (a times-per-week habit shown on Ma)"
+    },
+    {
+      "key": "today.habit.days",
+      "hu": "nap",
+      "en": "days",
+      "de": "Tage",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), the streak unit \"NAP\" (upper case is CSS)"
+    },
+    {
+      "key": "today.habit.weeks",
+      "hu": "hét",
+      "en": "weeks",
+      "de": "Wochen",
+      "copy": "inventory",
+      "source": "frame lifeos/habits-1 \"4 HÉT\" (a times-per-week streak)"
+    },
+    {
+      "key": "today.habit.freezes",
+      "hu": "{{count}} fagyasztás",
+      "en": "{{count}} freezes",
+      "de": "{{count}} Serienschutz",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"1 FAGYASZTÁS\""
+    },
+    {
+      "key": "today.habit.addOne",
+      "hu": "{{name}}: {{count}}/{{target}}, koppints még egyért",
+      "en": "{{name}}: {{count}}/{{target}}, tap to add one",
+      "de": "{{name}}: {{count}}/{{target}}, tippen für eins mehr",
+      "copy": "proposed",
+      "visible": false,
+      "source": "accessible name of a counted habit row (the tap adds one, f_app)"
+    },
+    {
+      "key": "today.habit.relapseAsk",
+      "hu": "Rögzítsem a visszaesést? Ez érmelevonással jár, és nullázza a sorozatot.",
+      "en": "Log the relapse? It costs coins and resets the streak.",
+      "de": "Rückfall eintragen? Das kostet Münzen und setzt die Serie zurück.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the relapse confirmation sheet: f_app HabitRow confirm \"Rögzítsem a visszaesést? Ez pontlevonással jár és nullázza a sorozatot.\" with pont -> érme (one currency)"
+    },
+    {
+      "key": "today.habit.relapseConfirm",
+      "hu": "Igen, visszaestem",
+      "en": "Yes, I relapsed",
+      "de": "Ja, Rückfall",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the confirm link of that sheet (f_app \"Igen, visszaestem\")"
+    },
+    {
+      "key": "today.habit.relapseLogged",
+      "hu": "Visszaesés rögzítve",
+      "en": "Relapse logged",
+      "de": "Rückfall eingetragen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the toast after a relapse, with \"Visszavonás\" (common.undo)"
+    },
+    {
+      "key": "today.tasks.title",
+      "hu": "Feladatok",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), section eyebrow FELADATOK"
+    },
+    {
+      "key": "today.tasks.capture",
+      "hu": "Rögzítés",
+      "en": "Capture",
+      "de": "Erfassen",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18), \"Rögzítés +\" and ma-3 \"+ Rögzítés\""
+    },
+    {
+      "key": "today.tasks.doneToday",
+      "hu": "Kész ma · {{count}}",
+      "en": "Done today · {{count}}",
+      "de": "Heute erledigt · {{count}}",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"Kész ma · 2 ›\""
+    },
+    {
+      "key": "today.tasks.emptyTitle",
+      "hu": "Nincs teendő",
+      "en": "Nothing to do",
+      "de": "Nichts zu tun",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 (f_app \"Nincs teendő\")"
+    },
+    {
+      "key": "today.tasks.emptyBody",
+      "hu": "Rögzíts bármit, határidővel együtt.",
+      "en": "Capture anything, with its deadline.",
+      "de": "Erfasse alles, mit Frist.",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-3 empty state line"
+    },
+    {
+      "key": "today.task.low",
+      "hu": "Alacsony",
+      "en": "Low",
+      "de": "Niedrig",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) priority tag ALACSONY (f_app)"
+    },
+    {
+      "key": "today.task.mid",
+      "hu": "Közepes",
+      "en": "Medium",
+      "de": "Mittel",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) priority tag KÖZEPES (f_app)"
+    },
+    {
+      "key": "today.task.high",
+      "hu": "Fontos",
+      "en": "High",
+      "de": "Hoch",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) priority tag FONTOS (f_app)"
+    },
+    {
+      "key": "today.task.today",
+      "hu": "ma",
+      "en": "today",
+      "de": "heute",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) due \"ma\""
+    },
+    {
+      "key": "today.task.todayAt",
+      "hu": "ma {{time}}",
+      "en": "today {{time}}",
+      "de": "heute {{time}}",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) due \"ma 17:00\""
+    },
+    {
+      "key": "today.task.doneAt",
+      "hu": "kész {{time}}",
+      "en": "done {{time}}",
+      "de": "erledigt {{time}}",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-2 \"kész 12:40\""
+    },
+    {
+      "key": "today.task.daily",
+      "hu": "naponta",
+      "en": "daily",
+      "de": "täglich",
+      "copy": "inventory",
+      "source": "frame lifeos/task-form recurrence words (Naponta / Hetente / Havonta, f_app), lower case as the rows print them"
+    },
+    {
+      "key": "today.task.weekly",
+      "hu": "hetente",
+      "en": "weekly",
+      "de": "wöchentlich",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1 \"hetente\""
+    },
+    {
+      "key": "today.task.monthly",
+      "hu": "havonta",
+      "en": "monthly",
+      "de": "monatlich",
+      "copy": "inventory",
+      "source": "frame lifeos/task-form recurrence word Havonta"
+    },
+    {
+      "key": "today.task.every.mon",
+      "hu": "hétfőnként",
+      "en": "every Monday",
+      "de": "montags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18): one weekday as in ma-2 \"keddenként\" / ma-4 \"szerdánként\""
+    },
+    {
+      "key": "today.task.every.tue",
+      "hu": "keddenként",
+      "en": "every Tuesday",
+      "de": "dienstags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-2 \"keddenként\""
+    },
+    {
+      "key": "today.task.every.wed",
+      "hu": "szerdánként",
+      "en": "every Wednesday",
+      "de": "mittwochs",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-4 \"szerdánként\""
+    },
+    {
+      "key": "today.task.every.thu",
+      "hu": "csütörtökönként",
+      "en": "every Thursday",
+      "de": "donnerstags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18): one weekday, as ma-2 / ma-4"
+    },
+    {
+      "key": "today.task.every.fri",
+      "hu": "péntekenként",
+      "en": "every Friday",
+      "de": "freitags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18): one weekday, as ma-2 / ma-4"
+    },
+    {
+      "key": "today.task.every.sat",
+      "hu": "szombatonként",
+      "en": "every Saturday",
+      "de": "samstags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18): one weekday, as ma-2 / ma-4"
+    },
+    {
+      "key": "today.task.every.sun",
+      "hu": "vasárnaponként",
+      "en": "every Sunday",
+      "de": "sonntags",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18): one weekday, as ma-2 / ma-4"
+    },
+    {
+      "key": "today.librarySub",
+      "hu": "Könyvtár · keresés izom és eszköz szerint",
+      "en": "Library · search by muscle and equipment",
+      "de": "Bibliothek · Suche nach Muskel und Gerät",
+      "copy": "inventory",
+      "source": "frame lifeos/ma-1..ma-4 (design round B, approved 2026-10-18) ma-1..ma-3, the Gyakorlatok row's sub line"
+    }
+  ],
+  "change": [],
+  "remove": [
+    {
+      "key": "home.weeklyWorkouts",
+      "reason": "its only consumer, features/home/WeekStrip.tsx, is deleted by this package (Ma draws MA a/b, not the weekly hero)"
+    },
+    {
+      "key": "home.nothingScheduled",
+      "reason": "its only consumer, features/home/WeekStrip.tsx, is deleted by this package"
+    },
+    {
+      "key": "home.browseLibrary",
+      "reason": "its only consumer, features/home/HomePage.tsx (the empty state pill), is deleted by this package; Ma ends with the Gyakorlatok row"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "hero caption, ma-2",
+      "frame": "lifeos/ma-2",
+      "note": "\"Tökéletes nap · +25 érme napzáráskor\": the amount is the admin rule perfectDay, which no member route returns (GET /admin/rules is admin-only), so the line reads \"Tökéletes nap\" alone. A rules read for members (or the amount on GET /lifeos/today) would bring it back."
+    },
+    {
+      "where": "empty states, ma-3",
+      "frame": "lifeos/ma-3",
+      "note": "\"+10 érme / nap · 7 nap után ×1,25\" and \"+5–20 érme teendőnként\" quote the admin rules; left out for the same reason."
+    }
+  ]
+}
