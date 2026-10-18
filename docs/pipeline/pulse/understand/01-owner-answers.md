@@ -71,3 +71,13 @@ guessed picture.
 
 The 100-day milestone (500 coins) is above the 400-coin daily cap. Answer: **streak milestones (7 / 30 / 100 days:
 25 / 100 / 500) are OUTSIDE the daily earn cap** - they are rare and cannot be farmed. Everything else stays capped.
+
+## Orchestrator ruling, 2026-10-18 — S-coins-xp ledger fixture (extends the S-workout fixture ruling)
+
+pulse-merge-check refused the coins-2v2 ledger fixture because it sets the 031 fields (localDate, sourceType,
+sourceId, sourceTitle) that every pre-031 recording has as null. RULING: same as the S-workout ruling - a fixture
+value is ALLOWED when it is schema-checked against the real response type (here the B-core types in
+frontend/src/lib/lifeos-api.ts / docs/pipeline/pulse/pkg/B-core/api.md declare these fields), the frame is reported
+"matched-fixture", and product code never reads a fixture. Prefer re-recording GET /coins/ledger on the merged
+backend (pulse-shot --record --only-missing) when a real 031 ledger with LifeOS entries exists; otherwise merge on
+the schema check.
