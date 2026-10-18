@@ -130,6 +130,13 @@ export const LIFEOS_LIMITS = Object.freeze({
   openTasks: 300,
   challengePool: 50,
   rewards: 100,
+  // Phase 4 (migration 033): every challenge / reward ever kept, archived and deleted ones included,
+  // so a create / delete loop cannot grow the tables; the most a reward may cost (whole coins — the
+  // reward.redeem reason's ceiling, 1000000 minor); the most a challenge pays (the task override cap).
+  challengesTotal: 200,
+  rewardsTotal: 300,
+  rewardCostMax: 10000,
+  challengePointsMax: 50,
 });
 
 /** One coin = 100 minor units (019); one point = one coin (plan L2). */

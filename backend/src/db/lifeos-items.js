@@ -232,7 +232,7 @@ export function lapseHabits({ userId, lastLapsed, rulesVersion }) {
 const TASK_COLS = `t.id, t.title, t.notes, t.priority, t.points, t.due_on AS dueOn, t.due_time AS dueTime,
   t.recurrence, t.parent_task_id AS parentTaskId, t.occurrence_on AS occurrenceOn,
   t.completed_at AS completedAt, t.completed_on AS completedOn, t.overdue_on AS overdueOn,
-  t.deleted_at AS deletedAt, t.created_at AS createdAt,
+  t.deleted_at AS deletedAt, t.created_at AS createdAt, t.challenge_id AS challengeId,
   (SELECT p.recurrence FROM tasks p WHERE p.id = t.parent_task_id AND p.user_id = t.user_id) AS parentRecurrence,
   (SELECT e.amount_minor FROM coin_events e
     WHERE e.user_id = t.user_id AND e.reason_key = 'task.done' AND e.source_type = 'task' AND e.source_id = t.id
@@ -275,6 +275,8 @@ export function taskView(t, prefs, rules, nowMs) {
     payoutNowMinor: t.completedAt ? null : pointsToMinor(taskPayout(t, Boolean(late), rules)),
     paidMinor: t.paidMinor ?? null,
     overduePenaltyMinor: t.overduePenaltyMinor ?? null,
+    // Phase 4 (033): the challenge this task was picked from (MAI DOBÁS), or null.
+    challengeId: t.challengeId ?? null,
   };
 }
 

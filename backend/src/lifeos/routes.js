@@ -6,6 +6,7 @@
 //   GET   /admin/rules     the point rules in force (admin)
 //   PUT   /admin/rules     append a new rule set (admin, DB re-check, audit, expectedVersion)
 //   /habits, /tasks        Phase 3 (migration 032): habit-routes.js and task-routes.js, mounted below
+//   /challenges, /rewards  Phase 4 (migration 033): challenge-routes.js and reward-routes.js, mounted below
 //
 // ═══ THE ROUTES CARRY NO AUTHORITY ═════════════════════════════════════════════════════════════
 //
@@ -27,6 +28,8 @@ import { pointRulesSchema, DEFAULT_RULES, RULE_RANGES } from './rules.js';
 import { ensureSettled, invalidateSettled } from './settle.js';
 import habitRoutes from './habit-routes.js';
 import taskRoutes from './task-routes.js';
+import challengeRoutes from './challenge-routes.js';
+import rewardRoutes from './reward-routes.js';
 
 const router = Router();
 
@@ -235,5 +238,7 @@ router.put(
 
 router.use(habitRoutes);
 router.use(taskRoutes);
+router.use(challengeRoutes);
+router.use(rewardRoutes);
 
 export default router;

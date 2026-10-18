@@ -173,6 +173,28 @@ export const completeTask = (args) => pool.run(args, { name: 'completeTaskTx' })
 export const reopenTask = (args) => pool.run(args, { name: 'reopenTaskTx' });
 export const materializeRecurringTasks = (args) => pool.run(args, { name: 'materializeRecurringTasksTx' });
 
+// LifeOS challenges and rewards (migration 033): ./tx/lifeos-rewards.js, re-exported by worker.js.
+// The draw is made in the worker (crypto.randomInt); a pick creates a task, which pays on completion;
+// a redemption is the one LifeOS spend (redeemRewardTx: the balance guard is inside the INSERT).
+export const challenges = (args) => pool.run(args, { name: 'challengesQuery' });
+export const challenge = (args) => pool.run(args, { name: 'challengeQuery' });
+export const challengeToday = (args) => pool.run(args, { name: 'challengeTodayQuery' });
+export const createChallenge = (args) => pool.run(args, { name: 'createChallengeTx' });
+export const updateChallenge = (args) => pool.run(args, { name: 'updateChallengeTx' });
+export const setChallengeArchived = (args) => pool.run(args, { name: 'setChallengeArchivedTx' });
+export const deleteChallenge = (args) => pool.run(args, { name: 'deleteChallengeTx' });
+export const drawChallenge = (args) => pool.run(args, { name: 'drawChallengeTx' });
+export const rerollChallenge = (args) => pool.run(args, { name: 'rerollChallengeTx' });
+export const pickChallenge = (args) => pool.run(args, { name: 'pickChallengeTx' });
+export const rewards = (args) => pool.run(args, { name: 'rewardsQuery' });
+export const reward = (args) => pool.run(args, { name: 'rewardQuery' });
+export const redemptions = (args) => pool.run(args, { name: 'redemptionsQuery' });
+export const createReward = (args) => pool.run(args, { name: 'createRewardTx' });
+export const updateReward = (args) => pool.run(args, { name: 'updateRewardTx' });
+export const setRewardArchived = (args) => pool.run(args, { name: 'setRewardArchivedTx' });
+export const redeemReward = (args) => pool.run(args, { name: 'redeemRewardTx' });
+export const setRedemptionFulfilled = (args) => pool.run(args, { name: 'setRedemptionFulfilledTx' });
+
 /**
  * Drain and destroy the pool — but every worker closes its own connection FIRST (worker.js
  * closeConnection): terminating a worker with an open better-sqlite3 handle segfaulted the process

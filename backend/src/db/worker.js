@@ -17,6 +17,7 @@ export { getDb, stmt, rethrow } from './conn.js';
 export * from './tx/lifeos.js';
 export * from './tx/lifeos-habits.js';
 export * from './tx/lifeos-tasks.js';
+export * from './tx/lifeos-rewards.js';
 
 /**
  * Shutdown, part one: close THIS worker's connection before the pool terminates it (see

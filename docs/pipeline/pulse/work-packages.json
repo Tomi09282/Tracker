@@ -1317,27 +1317,25 @@
       "id": "B-habits-tasks",
       "title": "LifeOS Phase 3 \"Habits + tasks + Ma\" on the backend (approved plan abundant-booping-willow, Phase 3; owner 2026-10-18: streak milestones 7 / 30 / 100 = 25 / 100 / 500 outside the daily cap): migration 032 (habits, habit_logs, habit_day_results, tasks, settled-day and owner-match triggers, streak.milestone reason), the habit and task domain, the named habit / task transactions, the full closeLifeDayTx, the /habits and /tasks routes, GET /lifeos/today with habits and tasks, GDPR",
       "owns": [
-        "backend/package.json",
         "backend/scripts/check-worker-tx.mjs",
         "backend/scripts/lib/worker-sources.mjs",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke/lifeos-habits-tasks.js",
         "backend/scripts/verify-032.mjs",
         "backend/scripts/verify-day-close.mjs",
         "backend/scripts/verify-gates.mjs",
         "backend/scripts/verify-lifeos-rules.mjs",
-        "backend/src/coins/routes.js",
         "backend/src/db/conn.js",
-        "backend/src/db/gdpr.js",
-        "backend/src/db/index.js",
-        "backend/src/db/lifeos-items.js",
         "backend/src/db/lifeos-ledger.js",
         "backend/src/db/migrations/032_lifeos_habits_tasks.sql",
-        "backend/src/db/tx/lifeos.js",
         "backend/src/db/tx/lifeos-habits.js",
         "backend/src/db/tx/lifeos-tasks.js",
-        "backend/src/db/worker.js",
-        "backend/src/lifeos/**",
+        "backend/src/lifeos/dates.js",
+        "backend/src/lifeos/habit-routes.js",
+        "backend/src/lifeos/habits.js",
+        "backend/src/lifeos/recurrence.js",
+        "backend/src/lifeos/settle.js",
+        "backend/src/lifeos/task-routes.js",
+        "backend/src/lifeos/tasks.js",
         "docs/pipeline/pulse/pkg/B-habits-tasks/**"
       ],
       "handIn": {
@@ -1363,7 +1361,56 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-habits-tasks) from the package's own pkg/B-habits-tasks/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 13 paths passed from the closed B-core. The Piscina pool now waits with atomics 'async' and every worker closes its connection before termination (the default sync wait segfaulted migrate / seeds / smoke on termination); B-core's --no-parallel-scavenge flag is removed. Habit reminder_time is stored and served but sends nothing until Phase 5 (materializeRemindersTx). seed-demo.mjs has no habits / tasks yet (a request for the seed script's owner, needed by the round-B captures). The dev backend on :3000 applies 032 and the pool change only after a restart on the merged code."
+      "notes": "Added by the integrator at merge (merge-B-habits-tasks) from the package's own pkg/B-habits-tasks/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 13 paths passed from the closed B-core. The Piscina pool now waits with atomics 'async' and every worker closes its connection before termination (the default sync wait segfaulted migrate / seeds / smoke on termination); B-core's --no-parallel-scavenge flag is removed. Habit reminder_time is stored and served but sends nothing until Phase 5 (materializeRemindersTx). seed-demo.mjs has no habits / tasks yet (a request for the seed script's owner, needed by the round-B captures). The dev backend on :3000 applies 032 and the pool change only after a restart on the merged code. At merge-B-rewards-challenges backend/package.json, backend/scripts/smoke.js, backend/src/coins/routes.js, backend/src/db/gdpr.js, backend/src/db/index.js, backend/src/db/lifeos-items.js, backend/src/db/tx/lifeos.js, backend/src/db/worker.js, backend/src/lifeos/routes.js, backend/src/lifeos/rules.js passed to B-rewards-challenges (B-habits-tasks is closed; one file, one owner), and backend/src/lifeos/** became the explicit list of the lifeos files that stay here (dates.js, habit-routes.js, habits.js, recurrence.js, settle.js, task-routes.js, tasks.js), so the new lifeos files of the Phase-4/5/6 packages are not pattern-owned by a closed package."
+    },
+    {
+      "id": "B-rewards-challenges",
+      "title": "LifeOS Phase 4 \"Rewards + challenges\" on the backend (approved plan abundant-booping-willow, Phase 4; owner 2026-10-18: design round B and the economy sheet approved): migration 033 (challenges, challenge_draws, tasks.challenge_id, rewards, reward_redemptions, trg_coin_ledger_ref_truthful with the reward.redeem clause, reward.redeem a spend), the weighted daily draw / one reroll / mandatory pick and the redeem as named worker transactions, the /challenges and /rewards routes, the draw state on GET /lifeos/today, item caps, GDPR",
+      "owns": [
+        "backend/package.json",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/lifeos-rewards-challenges.js",
+        "backend/scripts/verify-033.mjs",
+        "backend/src/coins/routes.js",
+        "backend/src/db/gdpr.js",
+        "backend/src/db/index.js",
+        "backend/src/db/lifeos-items.js",
+        "backend/src/db/lifeos-rewards-items.js",
+        "backend/src/db/migrations/033_lifeos_rewards_challenges.sql",
+        "backend/src/db/tx/lifeos.js",
+        "backend/src/db/tx/lifeos-rewards.js",
+        "backend/src/db/worker.js",
+        "backend/src/lifeos/challenges.js",
+        "backend/src/lifeos/challenge-routes.js",
+        "backend/src/lifeos/rewards.js",
+        "backend/src/lifeos/reward-routes.js",
+        "backend/src/lifeos/routes.js",
+        "backend/src/lifeos/rules.js",
+        "docs/pipeline/pulse/pkg/B-rewards-challenges/**"
+      ],
+      "handIn": {
+        "shared.patch": [
+          "frontend/src/lib/lifeos-api.ts"
+        ]
+      },
+      "dependsOn": [
+        "B-habits-tasks",
+        "B-core"
+      ],
+      "parallelGroup": "backend lane (approved plan phase 4)",
+      "size": "L",
+      "acceptance": [
+        "migration 033 adds challenges, challenge_draws, tasks.challenge_id, rewards and reward_redemptions; trg_coin_ledger_ref_truthful knows reward.redeem; reward.redeem is a spend (verify-033)",
+        "draw / reroll / pick and redeem are named worker transactions: crypto.randomInt inside the worker, one reroll, the pick creates a task due at the end of the logical day, redeem refuses ALREADY_REDEEMED / COOLDOWN / INSUFFICIENT before any write with the balance guard inside the INSERT (verify-033, smoke/lifeos-rewards-challenges.js five-pass sections)",
+        "GET /lifeos/today carries the draw state; GDPR export covers the new user tables",
+        "hand-in: frontend/src/lib/lifeos-api.ts carries the Phase-4 types (types only)"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree; verify:015 is the one accepted pre-existing red)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "npm run build (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-rewards-challenges) from the package's own pkg/B-rewards-challenges/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. 10 paths passed from the closed B-habits-tasks. Every edit in files B-calendar (034) and B-focus (035) also extend is an additive block, so their merges are a union of blocks. rerollChallengeTx keeps the f_app drawChallenges semantics (exclude the previous hand, fall back to the whole unaccepted pool when fewer than three remain), so a reroll from a small pool may repeat options; a stricter rule would be an owner choice. Seed-demo has no challenge pool / reward shop yet (a request for the seed script's owner). The dev backend on :3000 applies 033 only after a restart on the merged code."
     }
   ],
   "screens": [
@@ -2935,6 +2982,125 @@
         "frontend/src/features/today/useTodayActions.ts",
         "frontend/src/features/today/useTodayPlan.ts"
       ]
+    },
+    {
+      "id": "S-challenges",
+      "title": "LifeOS Phase 4 screen package: MAI DOBÁS at /challenges (frame lifeos/challenges-1: the daily draw of up to three challenges as a single-choice list, one reroll, the mandatory pick with the one lime pill 'Ezt vállalom') and KIHÍVÁSOK at /challenges/pool (frame lifeos/challenges-2: AKTÍV n / 50 with the five-segment weight and the coin value, ARCHIVÁLT with Visszaállítás, the header plus opening the challenge sheet for create / edit / archive / delete), on the B-rewards-challenges API; the Ma page's NAPI DOBÁS block (frames lifeos/ma-4 pending draw, lifeos/ma-1 picked teaser) is exported as TodayDraw for S-ma's TodayPage to mount",
+      "screens": [
+        "challenges",
+        "challenges-pool"
+      ],
+      "owns": [
+        "frontend/src/features/challenges/**",
+        "docs/pipeline/pulse/pkg/S-challenges/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-challenges-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /challenges and /challenges/pool routes, parent Ma = '/')",
+          "R-S-challenges-02": "frontend/src/features/today/TodayPage.tsx, TodayTasks.tsx, model.ts (S-ma, merged): mount TodayDraw twice (place 'open' above MAI EDZÉS for ma-4, 'settled' after FELADATOK for ma-1); FELADATOK and the MA a/b count leave out the task a pick became (challengeId), which NAPI DOBÁS shows"
+        },
+        "states.json": "docs/pipeline/pulse/pkg/S-challenges/states.json"
+      },
+      "frames": [
+        "lifeos/challenges-1",
+        "lifeos/challenges-2",
+        "lifeos/ma-4"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/challenges.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-naptar-fokusz-kihivas.md (challenges-1, challenges-2), README-ma.md (ma-1, ma-4) and docs/pipeline/pulse/pkg/B-rewards-challenges/api.md are the inventory",
+      "account": "user@tracker.local",
+      "route": "/challenges",
+      "dependsOn": [
+        "B-rewards-challenges",
+        "B-core",
+        "S-ma"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 4)",
+      "i18nNamespaces": [
+        "challenges"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only): the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge it first; the slot holds it applied locally and uncommitted. challengesApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 033: every capture answers the challenge reads with contract bodies (states.json) checked against the lifeos-api types - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-challenges/work-package.json (as committed on pulse/S-challenges).",
+      "wave": 7
+    },
+    {
+      "id": "S-rewards",
+      "title": "LifeOS Phase 4 screen package: Jutalmak at /rewards (pushed from Profil, Profil lit), one reward at /rewards/:id and the create / edit sheet, built 1:1 to design round B's lifeos/rewards-1 (ELKÖLTHETŐ hero, JUTALOMBOLT by cost with the 4 pt progress to each cost and the status line with the quiet Beváltás link), reward-detail (description, ÁR hero, the terms rows, the status line, the one pill Beváltás · N érme, BEVÁLTÁSOK with the Teljesítve check, Archiválás) and reward-form (Név, Leírás, Ár (érme) + hint, Beváltható Többször / Egyszer, Pihenő NumberStepper, Létrehozás) on the B-rewards-challenges API (GET /rewards, GET /rewards/:id, POST /rewards, PATCH /rewards/:id, archive / restore, redeem, redemptions/:id/fulfilled); Profil's JUTALMAK ledger row with 'N elérhető' is handed in for SettingsPage.tsx",
+      "screens": [
+        "rewards",
+        "reward-detail",
+        "reward-form"
+      ],
+      "owns": [
+        "frontend/src/features/rewards/**",
+        "docs/pipeline/pulse/pkg/S-rewards/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "requests": {
+          "R-S-rewards-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /rewards and /rewards/:id routes, parent Profil = '/settings', the profile tab lit)",
+          "R-S-rewards-02": "frontend/src/features/settings/SettingsPage.tsx (S-settings): the JUTALMAK ledger row 'N elérhető' -> /rewards, shown once GET /rewards answers"
+        }
+      },
+      "frames": [
+        "lifeos/rewards-1",
+        "lifeos/reward-detail",
+        "lifeos/reward-form"
+      ],
+      "inventory": "docs/brain/58-Pulse/Screens/rewards.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-jutalmak-ermek-admin.md (rewards-1 / reward-detail / reward-form rows, the C5 copy list) and docs/pipeline/pulse/pkg/B-rewards-challenges/api.md are the inventory",
+      "account": "user@tracker.local",
+      "route": "/rewards",
+      "dependsOn": [
+        "B-rewards-challenges",
+        "B-core"
+      ],
+      "size": "M",
+      "parallelGroup": "LifeOS screen lane (approved plan phase 4)",
+      "i18nNamespaces": [
+        "rewards"
+      ],
+      "liveWrites": [],
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-rewards-challenges first; the slot holds it applied and uncommitted. rewardsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 033: every capture answers GET /rewards and GET /rewards/:id with contract bodies (states.json) - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-rewards/work-package.json (as committed on pulse/S-rewards).",
+      "wave": 7
     }
   ],
   "queue": [

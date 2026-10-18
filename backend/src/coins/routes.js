@@ -200,20 +200,26 @@ router.get(
       `SELECT l.id, l.amount_minor AS amountMinor, l.reason_key AS reasonKey,
               l.ref_type AS refType, l.ref_id AS refId, l.note, l.created_at AS createdAt,
               r.label AS reasonLabel,
-              e.local_date AS localDate, e.source_type AS sourceType, e.source_id AS sourceId,
+              COALESCE(e.local_date, rr.local_date) AS localDate,
+              COALESCE(e.source_type, CASE WHEN rr.id IS NOT NULL THEN 'reward' END) AS sourceType,
+              COALESCE(e.source_id, rr.reward_id) AS sourceId,
               e.reverses_event_id AS reversesEventId,
-              CASE e.source_type
+              CASE WHEN rr.id IS NOT NULL THEN rr.name_snapshot ELSE CASE e.source_type
                 WHEN 'workout_log' THEN (SELECT COALESCE(w.title, w.day_name_snapshot, w.plan_name_snapshot)
                                            FROM workout_logs w
                                           WHERE w.id = e.source_id AND w.client_user_id = l.user_id)
                 WHEN 'task' THEN (SELECT t.title FROM tasks t WHERE t.id = e.source_id AND t.user_id = l.user_id)
                 WHEN 'habit_day' THEN (SELECT h.name FROM habit_day_results r JOIN habits h ON h.id = r.habit_id
                                         WHERE r.id = e.source_id AND r.user_id = l.user_id AND h.user_id = l.user_id)
-              END AS sourceTitle
+              END END AS sourceTitle
          FROM coin_ledger l
          JOIN coin_reasons r ON r.key = l.reason_key
          LEFT JOIN coin_events e
                 ON l.ref_type = 'coin_event' AND e.id = l.ref_id AND e.user_id = l.user_id
+         -- Phase 4 (033): a reward spend points at its receipt; the receipt's day, reward and name
+         -- (snapshot) are read through the same owner as the ledger row.
+         LEFT JOIN reward_redemptions rr
+                ON l.ref_type = 'reward_redemption' AND rr.id = l.ref_id AND rr.user_id = l.user_id
         WHERE l.user_id = ? AND (? IS NULL OR l.id < ?)
         ORDER BY l.id DESC
         LIMIT ?`,

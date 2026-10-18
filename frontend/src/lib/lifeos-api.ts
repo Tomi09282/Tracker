@@ -1,7 +1,9 @@
 /**
  * The LifeOS API — response and request types. Core: migration 031, backend package B-core
  * (docs/pipeline/pulse/pkg/B-core/api.md). Habits, tasks and the full day close: migration 032,
- * backend package B-habits-tasks (docs/pipeline/pulse/pkg/B-habits-tasks/api.md).
+ * backend package B-habits-tasks (docs/pipeline/pulse/pkg/B-habits-tasks/api.md). The daily challenge
+ * draw and the reward shop: migration 033, backend package B-rewards-challenges
+ * (docs/pipeline/pulse/pkg/B-rewards-challenges/api.md).
  *
  * Mirrors the server's zod schemas and worker answers (backend/src/lifeos/*routes.js,
  * backend/src/db/tx/lifeos*.js).
@@ -127,12 +129,15 @@ export interface LifeosToday {
     /** Open non-template tasks (the cap of 300 counts templates too). */
     openCount: number;
   };
+  /** Phase 4: the day's challenge draw (NAPI DOBÁS); null before a zone is set. */
+  challenge: ChallengeDraw | null;
 }
 
 /** The LifeOS fields GET /coins/ledger adds to each entry (null for non-LifeOS movements). */
 export interface LifeosLedgerFields {
   localDate: DayKey | null;
-  /** 'workout_log' | 'day' (Phase 2), 'task' | 'habit_day' (Phase 3); more join in later phases. */
+  /** 'workout_log' | 'day' (Phase 2), 'task' | 'habit_day' (Phase 3), 'reward' (Phase 4: a
+   *  reward.redeem spend, sourceId = the reward, sourceTitle = the name on the receipt). */
   sourceType: string | null;
   sourceId: number | null;
   /** The workout's title, the task's title or the habit's name; null for day-level movements. */
@@ -448,6 +453,8 @@ export interface Task {
   paidMinor: number | null;
   /** The overdue penalty a settled day took (negative), or null. */
   overduePenaltyMinor: number | null;
+  /** Phase 4: the challenge this task was picked from (MAI DOBÁS), or null. */
+  challengeId: number | null;
 }
 
 /** GET /tasks: the task tabs (today, upcoming, overdue, anytime, done). */
@@ -505,4 +512,247 @@ export interface TaskReopenResponse {
   /** Negative: the coins taken back. */
   reversedMinor: number;
   already?: true;
+}
+
+/* ── Phase 4: the daily challenge draw and the reward shop (migration 033, package B-rewards-challenges) ── */
+
+/** The challenge categories (Fegyelem, Mozgás, Elme, Kapcsolat, Étkezés); the client translates them. */
+export type ChallengeCategory = 'discipline' | 'movement' | 'mind' | 'connection' | 'food';
+
+/** One challenge of the pool. */
+export interface Challenge {
+  id: number;
+  name: string;
+  category: ChallengeCategory | null;
+  /** Whole coins the picked task pays, 0..50. */
+  points: number;
+  /** Draw weight 1..5 (five segments): 2 is twice as likely as 1. */
+  weight: number;
+  /** points x 100. */
+  valueMinor: number;
+  archived: boolean;
+  /** Epoch seconds, or null. */
+  archivedAt: number | null;
+}
+
+/** GET /challenges. */
+export interface ChallengesResponse {
+  /** The draw pool (AKTÍV), by name. */
+  active: Challenge[];
+  /** ARCHIVÁLT, by name. */
+  archived: Challenge[];
+  limits: { pool: number };
+}
+
+/** POST /challenges (201 `{ challenge }`, 200 `{ challenge, replayed: true }` on a replayed key). */
+export interface ChallengeCreate {
+  clientKey: string;
+  name: string;
+  category?: ChallengeCategory | null;
+  /** Default: the admin rule challengePoints (15). */
+  points?: number;
+  /** Default 1. */
+  weight?: number;
+}
+
+/** PATCH /challenges/:id (at least one field). */
+export type ChallengePatch = Partial<Omit<ChallengeCreate, 'clientKey'>>;
+
+export interface ChallengeResponse {
+  challenge: Challenge;
+  replayed?: true;
+}
+
+/** One option of the day's draw. */
+export interface ChallengeOption extends Challenge {
+  /** This option was picked. */
+  chosen: boolean;
+}
+
+/**
+ * The day's draw (GET /lifeos/today `challenge`, GET /challenges/today `draw`, and every draw write).
+ *   empty_pool — nothing to draw from (Ma shows no NAPI DOBÁS)
+ *   due        — no draw yet today: POST /challenges/today/draw
+ *   drawn      — options on the table, nothing picked yet
+ *   picked     — the pick became a task (elvállalva; `picked.done` = teljesítve)
+ */
+export interface ChallengeDraw {
+  date: DayKey;
+  state: 'empty_pool' | 'due' | 'drawn' | 'picked';
+  /** Live challenges in the pool. */
+  poolCount: number;
+  /** Up to three (fewer with a smaller pool); empty for empty_pool / due. */
+  options: ChallengeOption[];
+  /** 1 until the day's one reroll is used ("még 1 maradt ma"). */
+  rerollsLeft: 0 | 1;
+  picked: {
+    challengeId: number;
+    taskId: number;
+    /** Epoch seconds. */
+    pickedAt: number;
+    /** The task was completed. */
+    done: boolean;
+    /** The task was deleted after the pick. */
+    taskDeleted: boolean;
+  } | null;
+}
+
+/** GET /challenges/today. */
+export interface ChallengeTodayResponse {
+  started: boolean;
+  /** null before a zone is set. */
+  draw: ChallengeDraw | null;
+}
+
+/** POST /challenges/today/draw: 201 `{ draw }` (new), 200 `{ draw, already: true }` (the day's draw). */
+export interface ChallengeDrawResponse {
+  draw: ChallengeDraw;
+  already?: true;
+}
+
+/** POST /challenges/today/reroll. */
+export interface ChallengeRerollBody {
+  rerollKey: string;
+}
+
+/** 200 `{ draw }`, or `{ draw, replayed: true }` for the same rerollKey. */
+export interface ChallengeRerollResponse {
+  draw: ChallengeDraw;
+  replayed?: true;
+}
+
+/** POST /challenges/today/pick ("Ezt vállalom"). */
+export interface ChallengePickBody {
+  challengeId: number;
+  /** The new task's idempotency key. */
+  clientKey: string;
+}
+
+/** 201 `{ task, draw }`, or 200 with `replayed: true` for the same clientKey and challenge. */
+export interface ChallengePickResponse {
+  task: Task;
+  draw: ChallengeDraw;
+  replayed?: true;
+}
+
+/** The 409 codes of the challenge routes (besides TIMEZONE_REQUIRED / LIMIT_REACHED / conflict). */
+export type ChallengeRefusalCode = 'NO_DRAW' | 'EMPTY_POOL' | 'REROLL_USED' | 'ALREADY_PICKED' | 'NOT_OFFERED';
+
+/** Why a reward cannot be redeemed now (f_app order: ALREADY_REDEEMED, COOLDOWN, INSUFFICIENT). */
+export type RewardAvailability =
+  | { ok: true }
+  | { ok: false; reason: 'ALREADY_REDEEMED' }
+  | { ok: false; reason: 'COOLDOWN'; availableOn: DayKey; daysLeft: number }
+  | { ok: false; reason: 'INSUFFICIENT'; missingMinor: number }
+  | { ok: false; reason: 'TIMEZONE_REQUIRED' };
+
+/** One reward as the shop and the detail draw it. */
+export interface Reward {
+  id: number;
+  name: string;
+  description: string | null;
+  /** Whole coins x 100. */
+  costMinor: number;
+  repeatable: boolean;
+  /** Logical days between two redemptions, or null (no limit; always null when one-time). */
+  cooldownDays: number | null;
+  archived: boolean;
+  archivedAt: number | null;
+  redeemedCount: number;
+  lastRedeemedOn: DayKey | null;
+  availability: RewardAvailability;
+  /** 0..10000: the share of the cost the spendable balance covers (the 4 pt bar). */
+  progressBp: number;
+  /** spendable − cost (negative = still missing). */
+  balanceAfterMinor: number;
+}
+
+/** GET /rewards. */
+export interface RewardsResponse {
+  started: boolean;
+  today: DayKey | null;
+  balanceMinor: number;
+  /** ELKÖLTHETŐ: max(0, balance). */
+  spendableMinor: number;
+  /** JUTALOMBOLT: live rewards by cost. */
+  items: Reward[];
+  archived: Reward[];
+  /** Profil's JUTALMAK "N elérhető", the Érmék door's "N beváltható". */
+  redeemableCount: number;
+  limits: { rewards: number; costMaxMinor: number };
+}
+
+/** One redemption (a receipt: name and cost are snapshots). */
+export interface RewardRedemption {
+  id: number;
+  rewardId: number;
+  name: string;
+  costMinor: number;
+  localDate: DayKey;
+  /** Epoch seconds. */
+  redeemedAt: number;
+  /** "Teljesítve" — bookkeeping only. */
+  fulfilled: boolean;
+  fulfilledAt: number | null;
+}
+
+/** GET /rewards/:id. */
+export interface RewardDetailResponse {
+  reward: Reward;
+  spendableMinor: number;
+  /** BEVÁLTÁSOK, newest first, at most 100. */
+  redemptions: RewardRedemption[];
+}
+
+/** GET /rewards/redemptions. */
+export interface RedemptionsResponse {
+  redemptions: RewardRedemption[];
+}
+
+/** POST /rewards. Cost in WHOLE coins (1..10000). */
+export interface RewardCreate {
+  clientKey: string;
+  name: string;
+  description?: string | null;
+  cost: number;
+  /** Default true. */
+  repeatable?: boolean;
+  /** 0 or null = no limit; must be absent / 0 / null when one-time. */
+  cooldownDays?: number | null;
+}
+
+/** PATCH /rewards/:id (at least one field). */
+export type RewardPatch = Partial<Omit<RewardCreate, 'clientKey'>>;
+
+export interface RewardResponse {
+  reward: Reward;
+  replayed?: true;
+}
+
+/** POST /rewards/:id/redeem. */
+export interface RewardRedeemBody {
+  clientKey: string;
+}
+
+/** 201, or 200 with `replayed: true` for the same clientKey. */
+export interface RewardRedeemResponse {
+  redemption: RewardRedemption;
+  balanceMinor: number;
+  spendableMinor: number;
+  replayed?: true;
+}
+
+/** A refused redeem (409). */
+export interface RewardRedeemRefusal {
+  error: string;
+  code: 'ALREADY_REDEEMED' | 'COOLDOWN' | 'INSUFFICIENT';
+  availableOn?: DayKey;
+  daysLeft?: number;
+  missingMinor?: number;
+  requestId: string;
+}
+
+/** POST /rewards/redemptions/:id/fulfilled → `{ redemption }`. */
+export interface RedemptionFulfilledBody {
+  fulfilled: boolean;
 }

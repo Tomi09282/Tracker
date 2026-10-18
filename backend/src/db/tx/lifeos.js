@@ -19,6 +19,7 @@
 import { getDb, stmt, rethrow } from '../conn.js';
 import { activeEvent, earnedOn, lastSettled, postCoinEvent, readPrefs, readRules } from '../lifeos-ledger.js';
 import { habitViews, lapseHabits, lapseTasks, settleHabitsOn, settleTasksOn, taskLists } from '../lifeos-items.js';
+import { drawState } from '../lifeos-rewards-items.js';
 import {
   addDaysToKey,
   calendarKeyFor,
@@ -221,6 +222,8 @@ export function lifeosTodayQuery({ userId }) {
         })),
       },
       ...todayItems(userId, prefs, rules, now),
+      // Phase 4 (033): the day's challenge draw — read only; the client draws on 'due'.
+      challenge: tz && prefs.startedOn ? drawState(userId, dayKeyFor(now, tz, prefs.dayStartHour)) : null,
     };
   } catch (err) {
     return rethrow(err);

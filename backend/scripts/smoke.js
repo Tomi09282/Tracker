@@ -5750,6 +5750,9 @@ if (seeded) {
   // Phase 3 (migration 032): habits, tasks and the full day close, the same five passes.
   const { lifeosHabitsTasksSmoke } = await import('./smoke/lifeos-habits-tasks.js');
   await lifeosHabitsTasksSmoke({ call, check, Jar, stamp, PASSWORD });
+  // Phase 4 (migration 033): the daily challenge draw and the reward shop, the same five passes.
+  const { lifeosRewardsChallengesSmoke } = await import('./smoke/lifeos-rewards-challenges.js');
+  await lifeosRewardsChallengesSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------
