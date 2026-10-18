@@ -142,6 +142,7 @@ export function DueFields({
   min,
   dateError,
   timeError,
+  timeHint,
   timeOptional = true,
 }: {
   date: string;
@@ -155,6 +156,8 @@ export function DueFields({
   min?: DayKey;
   dateError?: string;
   timeError?: string;
+  /** A line under the time field (capture, an event: "Emlékeztető 1 órával előtte"). */
+  timeHint?: string;
   /** An empty time is allowed (task-form: due by the end of the day): "opcionális" stands in it. */
   timeOptional?: boolean;
 }) {
@@ -181,6 +184,7 @@ export function DueFields({
           value={time}
           onChange={onTime}
           placeholder={timeOptional ? t('tasks.optional') : undefined}
+          hint={timeHint}
           error={timeError}
           className="w-[165px] min-w-0 shrink"
         />

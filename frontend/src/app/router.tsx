@@ -99,6 +99,10 @@ const DaySettingsPage = lazy(() =>
   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
 );
 const TasksPage = lazy(() => import('../features/tasks/TasksPage').then((m) => ({ default: m.TasksPage })));
+const CalendarPage = lazy(() => import('../features/calendar/CalendarPage').then((m) => ({ default: m.CalendarPage })));
+const EventDetailPage = lazy(() =>
+  import('../features/calendar/EventDetailPage').then((m) => ({ default: m.EventDetailPage })),
+);
 const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
 const HabitDetailPage = lazy(() =>
   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
@@ -165,6 +169,8 @@ export const router = createBrowserRouter([
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },
+      { path: 'calendar', element: suspended(<CalendarPage />) },
+      { path: 'calendar/events/:id', element: suspended(<EventDetailPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
       { path: 'coins', element: suspended(<CoinsPage />) },
       { path: 'rewards', element: suspended(<RewardsPage />) },

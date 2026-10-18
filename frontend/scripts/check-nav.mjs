@@ -57,7 +57,7 @@ const LOCALES = ['hu', 'en', 'de'];
  * source; this is the assertion. The member's bar is the same for every role in Phase 1; the
  * trainer and admin bars open with their switch cells.
  */
-const EXPECTED_COUNT = { user: 5, trainer: 4, admin: 5 };
+const EXPECTED_COUNT = { user: 6, trainer: 4, admin: 5 };
 
 /**
  * The switch cells each view's bar OPENS with, in order: the view each one returns to. A switch

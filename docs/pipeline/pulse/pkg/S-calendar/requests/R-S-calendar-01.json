@@ -1,0 +1,13 @@
+{
+  "id": "R-S-calendar-01",
+  "from": "S-calendar",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/src/assets/pulse/navIcons.ts, frontend/scripts/check-nav.mjs, frontend/scripts/check-nav-active.mjs, frontend/src/i18n/{hu,en,de}.json",
+  "need": "The routes /calendar (Naptár, frames lifeos/calendar-1 / -2) and /calendar/events/:id (event-detail), and the FINAL user bar of plan F.1 / round A user6: Ma · Edzés · Étkezés · Naptár · Haladás · Profil. Data lines: two lazy routes (CalendarPage / EventDetailPage from features/calendar/); routeMeta /calendar/events/:id -> parent /calendar, label nav.calendar; the calendar tab after Étkezés (key calendar, icon calendar, labelKey nav.calendar; it prefix-matches /calendar/events/*); navIcons: calendar joins PLACEHOLDER_NAV_KEYS and draws the medal raster with its lit twin (round B: \"Naptár → érem\", the frames own placeholder; lit raster, not tint, because medal ships a lit file); check-nav EXPECTED_COUNT user 5 -> 6; check-nav-active EXPECT rows /calendar and /calendar/events/12 -> /calendar; nav.calendar = Naptár / Calendar / Kalender in the three bundles (the nav namespace is the integrators).",
+  "evidence": "kepernyok-2x/lifeos/calendar-1@2x.png (the 6-cell bar, Naptár lit with the lime medal), event-detail@2x.png; figma-build/lifeos/cfk.common.js NAV6 (medal placeholder); captures in .pulse/pairs/S-calendar/ with the patch applied in the slot",
+  "proposedApi": "{ path: 'calendar', element: suspended(<CalendarPage />) }, { path: 'calendar/events/:id', element: suspended(<EventDetailPage />) }; NAV_TABS.user gains { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' }; NAV_ICON_SOURCE.calendar = { slot: 'medal', lit: 'raster', placeholder: true }",
+  "interim": "Applied to the slot working tree only (never committed there). Cut with git diff on pulse-redesign 05b830a (S-tasks and S-ma merged), so it applies on pulse-redesign as it stands. Merged WITHOUT it the calendar pages exist but no URL opens them and the bar keeps five cells: merge together with this package (and B-calendar first: lifeos-api.ts Phase-5 types).",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-01.patch",
+  "status": "open"
+}

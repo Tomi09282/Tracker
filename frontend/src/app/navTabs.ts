@@ -138,6 +138,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
     { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges'] },
     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+    { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' },
     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
     { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins', '/rewards'] },
   ],

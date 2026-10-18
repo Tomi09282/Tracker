@@ -52,6 +52,7 @@
   },
   "nav": {
     "nutritionShort": "Food",
+    "calendar": "Calendar",
     "profile": "Profile",
     "today": "Today",
     "library": "Exercises",
@@ -1553,6 +1554,119 @@
       "nameRequired": "Give the reward a name",
       "costMin": "At least 1 coin",
       "costMax": "At most {{count}} coins"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "weekLine": "{{month}} · week {{week}}",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "busyDay": "something planned",
+    "addEvent": "Event",
+    "addTask": "Task",
+    "allDay": "All day",
+    "aboutMinutes": "~{{count}} min",
+    "exerciseCount": "{{count}} exercises",
+    "workoutDone": "Done",
+    "coins": "+{{coins}} coins",
+    "workoutTag": "Workout",
+    "restDay": "Rest day – no workout scheduled.",
+    "nothing": "Nothing on this day.",
+    "failed": "That did not work.",
+    "tasks": "Tasks",
+    "openCount": "{{count}} open",
+    "noTasks": "No tasks for this day.",
+    "due": "Due {{when}}",
+    "anytime": "Anytime",
+    "taskDone": "{{title}} done",
+    "recurring": "recurring",
+    "repeat": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "rule": {
+      "daily": "every day",
+      "everyN": "every {{count}} days",
+      "weekly": "every {{days}}",
+      "weeklyTitle": "Every week on {{days}}",
+      "monthly": "every month on day {{day}}",
+      "yearly": "every year on {{date}}",
+      "on": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "reminder": {
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} d",
+      "and": "and",
+      "before": "{{list}} before",
+      "atStart": "at the start"
+    },
+    "detail": {
+      "edit": "Edit",
+      "details": "Details",
+      "notes": "Notes",
+      "bell": "A notice under the bell",
+      "until": "Until {{date}}",
+      "remaining": "{{count}} more",
+      "delete": "Delete event",
+      "deleteTitle": "Delete this event?",
+      "deleteAll": "Every occurrence is deleted.",
+      "missing": "This event cannot be found."
+    },
+    "form": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "name": "Name",
+      "kind": "Timing",
+      "atTime": "At a time",
+      "allDay": "All day",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "duration": "Duration",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} d",
+      "location": "Place",
+      "repeat": "Repeat",
+      "noRepeat": "Does not repeat",
+      "repeatKind": {
+        "none": "None",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "repeatDays": "Days",
+      "until": "Last date",
+      "reminder": "Reminder",
+      "atStart": "At start",
+      "notes": "Notes",
+      "optional": "optional",
+      "titleRequired": "Give the event a name",
+      "dateRequired": "Choose a date",
+      "startRequired": "Set a start time",
+      "spanInvalid": "At most 14 days, after the start",
+      "untilInvalid": "The last date cannot be before the first",
+      "refused": "This event cannot be saved like this."
+    },
+    "capture": {
+      "where": "Where to?",
+      "task": "Task",
+      "event": "Event",
+      "reminderHint": "Reminder 1 hour before"
+    },
+    "next": {
+      "title": "Next"
     }
   }
 }

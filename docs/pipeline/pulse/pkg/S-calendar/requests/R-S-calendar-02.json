@@ -1,0 +1,12 @@
+{
+  "id": "R-S-calendar-02",
+  "from": "S-calendar",
+  "kind": "feature",
+  "blocking": false,
+  "target": "frontend/src/features/capture/CaptureSheet.tsx, frontend/src/features/tasks/formParts.tsx (both owned by S-tasks)",
+  "need": "The capture sheet gets its approved Hova? Feladat / Esemény switch (frame lifeos/capture). Esemény writes POST /events (B-calendar api.md: \"Capture (Rögzítés · Esemény) is this call\"): Ma · Holnap · Dátum (no Bármikor - an event has a day), Időpontban / Egész nap, the start field labelled Kezdés with the hint \"Emlékeztető 1 órával előtte\" (it sets a 60-minute reminder), a timed event lasts an hour; Feladat is unchanged. DueFields gains an optional timeHint prop (one line, the field hint). The calendar half (its words, the calendar day, the POST /events body) is the package's own features/calendar/captureEvent.ts; the sheet imports it with calendarApi.ts (useCreateEvent, mintEventKey).",
+  "evidence": "kepernyok-2x/lifeos/capture@2x.png; figma-build/lifeos/capture.part.js; .pulse/pairs/S-calendar/capture-event.*",
+  "interim": "Applied to the slot working tree only. Cut with git diff on pulse-redesign 05b830a (S-tasks merged). It imports features/calendar/calendarApi.ts and captureEvent.ts, so it merges with or after S-calendar.",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-02.patch",
+  "status": "open"
+}

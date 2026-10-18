@@ -52,6 +52,7 @@
   },
   "nav": {
     "nutritionShort": "Essen",
+    "calendar": "Kalender",
     "profile": "Profil",
     "today": "Heute",
     "library": "Übungen",
@@ -1553,6 +1554,119 @@
       "nameRequired": "Gib der Belohnung einen Namen",
       "costMin": "Mindestens 1 Münze",
       "costMax": "Höchstens {{count}} Münzen"
+    }
+  },
+  "calendar": {
+    "title": "Kalender",
+    "weekLine": "{{month}} · KW {{week}}",
+    "prevWeek": "Vorherige Woche",
+    "nextWeek": "Nächste Woche",
+    "busyDay": "etwas geplant",
+    "addEvent": "Termin",
+    "addTask": "Aufgabe",
+    "allDay": "Ganztägig",
+    "aboutMinutes": "~{{count}} Min.",
+    "exerciseCount": "{{count}} Übungen",
+    "workoutDone": "Erledigt",
+    "coins": "+{{coins}} Münzen",
+    "workoutTag": "Training",
+    "restDay": "Ruhetag – kein Training geplant.",
+    "nothing": "Für diesen Tag ist nichts geplant.",
+    "failed": "Das hat nicht geklappt.",
+    "tasks": "Aufgaben",
+    "openCount": "{{count}} offen",
+    "noTasks": "Keine Aufgaben für diesen Tag.",
+    "due": "Fällig {{when}}",
+    "anytime": "Jederzeit",
+    "taskDone": "{{title}} erledigt",
+    "recurring": "wiederkehrend",
+    "repeat": {
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich"
+    },
+    "rule": {
+      "daily": "jeden Tag",
+      "everyN": "alle {{count}} Tage",
+      "weekly": "jeden {{days}}",
+      "weeklyTitle": "Jede Woche am {{days}}",
+      "monthly": "jeden Monat am {{day}}.",
+      "yearly": "jedes Jahr am {{date}}",
+      "on": {
+        "mon": "Montag",
+        "tue": "Dienstag",
+        "wed": "Mittwoch",
+        "thu": "Donnerstag",
+        "fri": "Freitag",
+        "sat": "Samstag",
+        "sun": "Sonntag"
+      }
+    },
+    "reminder": {
+      "minutes": "{{count}} Min.",
+      "hours": "{{count}} Std.",
+      "days": "{{count}} T.",
+      "and": "und",
+      "before": "{{list}} vorher",
+      "atStart": "zu Beginn"
+    },
+    "detail": {
+      "edit": "Bearbeiten",
+      "details": "Details",
+      "notes": "Notizen",
+      "bell": "Hinweis unter der Glocke",
+      "until": "Bis {{date}}",
+      "remaining": "noch {{count}} Mal",
+      "delete": "Termin löschen",
+      "deleteTitle": "Diesen Termin löschen?",
+      "deleteAll": "Alle Termine der Serie werden gelöscht.",
+      "missing": "Dieser Termin wurde nicht gefunden."
+    },
+    "form": {
+      "newTitle": "Neuer Termin",
+      "editTitle": "Termin bearbeiten",
+      "name": "Bezeichnung",
+      "kind": "Zeitpunkt",
+      "atTime": "Zu einer Uhrzeit",
+      "allDay": "Ganztägig",
+      "date": "Datum",
+      "start": "Beginn",
+      "end": "Ende",
+      "duration": "Dauer",
+      "minutes": "{{count}} Min.",
+      "hours": "{{count}} Std.",
+      "days": "{{count}} T.",
+      "location": "Ort",
+      "repeat": "Wiederholung",
+      "noRepeat": "Keine Wiederholung",
+      "repeatKind": {
+        "none": "Keine",
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich",
+        "yearly": "Jährlich"
+      },
+      "repeatDays": "Tage",
+      "until": "Letzter Termin",
+      "reminder": "Erinnerung",
+      "atStart": "Zu Beginn",
+      "notes": "Notizen",
+      "optional": "optional",
+      "titleRequired": "Gib dem Termin einen Namen",
+      "dateRequired": "Wähle ein Datum",
+      "startRequired": "Gib eine Beginnzeit an",
+      "spanInvalid": "Höchstens 14 Tage, nach dem Beginn",
+      "untilInvalid": "Der letzte Termin darf nicht vor dem ersten liegen",
+      "refused": "Dieser Termin kann so nicht gespeichert werden."
+    },
+    "capture": {
+      "where": "Wohin?",
+      "task": "Aufgabe",
+      "event": "Termin",
+      "reminderHint": "Erinnerung 1 Stunde vorher"
+    },
+    "next": {
+      "title": "Als Nächstes"
     }
   }
 }

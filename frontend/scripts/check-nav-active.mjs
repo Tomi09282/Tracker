@@ -90,6 +90,8 @@ const EXPECT_BY_VIEW = {
     ['/library', '/workout'],
     ['/library/1467', '/workout'],
     ['/nutrition', '/nutrition'],
+    ['/calendar', '/calendar'],
+    ['/calendar/events/12', '/calendar'],
     ['/progress', '/progress'],
     ['/settings', '/settings'],
     ['/coins', '/settings'],

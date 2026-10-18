@@ -52,6 +52,7 @@
   },
   "nav": {
     "nutritionShort": "Étkezés",
+    "calendar": "Naptár",
     "profile": "Profil",
     "today": "Ma",
     "library": "Gyakorlatok",
@@ -1553,6 +1554,119 @@
       "nameRequired": "Adj nevet a jutalomnak",
       "costMin": "Legalább 1 érme",
       "costMax": "Legfeljebb {{count}} érme"
+    }
+  },
+  "calendar": {
+    "title": "Naptár",
+    "weekLine": "{{month}} · {{week}}. hét",
+    "prevWeek": "Előző hét",
+    "nextWeek": "Következő hét",
+    "busyDay": "van program",
+    "addEvent": "Esemény",
+    "addTask": "Teendő",
+    "allDay": "Egész nap",
+    "aboutMinutes": "~{{count}} perc",
+    "exerciseCount": "{{count}} gyakorlat",
+    "workoutDone": "Kész",
+    "coins": "+{{coins}} érme",
+    "workoutTag": "Edzés",
+    "restDay": "Pihenőnap – nincs ütemezett edzés.",
+    "nothing": "Erre a napra nincs semmi.",
+    "failed": "Ez most nem sikerült.",
+    "tasks": "Teendők",
+    "openCount": "{{count}} nyitott",
+    "noTasks": "Erre a napra nincs teendő.",
+    "due": "Határidő {{when}}",
+    "anytime": "Bármikor",
+    "taskDone": "{{title}} kész",
+    "recurring": "ismétlődő",
+    "repeat": {
+      "daily": "Naponta",
+      "weekly": "Hetente",
+      "monthly": "Havonta"
+    },
+    "rule": {
+      "daily": "minden nap",
+      "everyN": "{{count}} naponta",
+      "weekly": "minden {{days}}",
+      "weeklyTitle": "Minden héten, {{days}}",
+      "monthly": "minden hónap {{day}}",
+      "yearly": "minden évben, {{date}}",
+      "on": {
+        "mon": "hétfőn",
+        "tue": "kedden",
+        "wed": "szerdán",
+        "thu": "csütörtökön",
+        "fri": "pénteken",
+        "sat": "szombaton",
+        "sun": "vasárnap"
+      }
+    },
+    "reminder": {
+      "minutes": "{{count}} perccel",
+      "hours": "{{count}} órával",
+      "days": "{{count}} nappal",
+      "and": "és",
+      "before": "{{list}} előtte",
+      "atStart": "kezdéskor"
+    },
+    "detail": {
+      "edit": "Szerkesztés",
+      "details": "Részletek",
+      "notes": "Jegyzet",
+      "bell": "Értesítés a csengő alatt",
+      "until": "{{date}}-ig",
+      "remaining": "még {{count}} alkalom",
+      "delete": "Esemény törlése",
+      "deleteTitle": "Törlöd az eseményt?",
+      "deleteAll": "Minden alkalma törlődik.",
+      "missing": "Ez az esemény nem található."
+    },
+    "form": {
+      "newTitle": "Új esemény",
+      "editTitle": "Esemény szerkesztése",
+      "name": "Megnevezés",
+      "kind": "Időzítés",
+      "atTime": "Időpontban",
+      "allDay": "Egész nap",
+      "date": "Dátum",
+      "start": "Kezdés",
+      "end": "Vége",
+      "duration": "Időtartam",
+      "minutes": "{{count}} perc",
+      "hours": "{{count}} óra",
+      "days": "{{count}} nap",
+      "location": "Helyszín",
+      "repeat": "Ismétlődés",
+      "noRepeat": "Nem ismétlődik",
+      "repeatKind": {
+        "none": "Nincs",
+        "daily": "Naponta",
+        "weekly": "Hetente",
+        "monthly": "Havonta",
+        "yearly": "Évente"
+      },
+      "repeatDays": "Napok",
+      "until": "Utolsó alkalom",
+      "reminder": "Emlékeztető",
+      "atStart": "Kezdéskor",
+      "notes": "Jegyzet",
+      "optional": "opcionális",
+      "titleRequired": "Adj nevet az eseménynek",
+      "dateRequired": "Válassz dátumot",
+      "startRequired": "Add meg a kezdést",
+      "spanInvalid": "Legfeljebb 14 nap, a kezdés után",
+      "untilInvalid": "Az utolsó alkalom nem lehet a kezdés előtt",
+      "refused": "Ezt az eseményt így nem lehet menteni."
+    },
+    "capture": {
+      "where": "Hova?",
+      "task": "Feladat",
+      "event": "Esemény",
+      "reminderHint": "Emlékeztető 1 órával előtte"
+    },
+    "next": {
+      "title": "Következő"
     }
   }
 }

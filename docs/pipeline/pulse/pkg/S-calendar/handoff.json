@@ -1,0 +1,90 @@
+{
+  "package": "S-calendar",
+  "branch": "pulse/S-calendar",
+  "base": "01c7931 (pulse-redesign with S-ma, S-tasks and INT-ports merged)",
+  "slot": "tracker-wt/slot-20",
+  "build": "pulse-verify --package S-calendar --port 5220: build green in 22 s (13 gates + tsc -b + vite build), 11 of 11 captured (replay), on pulse-redesign 01c7931 with B-calendar's lifeos-api.ts Phase-5 block (its shared.patch at d54312a), this package's i18n.patch.json and R-S-calendar-01..03 applied in the working tree; 10 of 11 captures byte-identical to the 05b830a run, ma-next differs only in S-ma's part above KÖVETKEZŐ. verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-calendar/i18n.patch.json (93 calendar.* keys in hu / en / de, 41 proposed; apply BEFORE R-S-calendar-01's bundle hunk)",
+    "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-01.json + .patch (routes /calendar and /calendar/events/:id, routeMeta, the final 6-tab user bar with Naptár, navIcons placeholder medal, check-nav count 6, check-nav-active rows, nav.calendar in the three bundles) - blocking",
+    "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-02.json + .patch (CaptureSheet Hova? Feladat / Esemény, formParts DueFields timeHint; S-tasks' files)",
+    "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-03.json + .patch (TodayPage mounts NextEventSection; S-ma's file)",
+    "docs/pipeline/pulse/pkg/S-calendar/work-package.json (the work-packages.json entry)"
+  ],
+  "order": "merge B-calendar first (lifeos-api.ts Phase-5 types, migration 034 + backend restart), then this branch, then i18n.patch.json, then R-S-calendar-01, -02, -03 (all three checked with git apply --check on pulse-redesign 01c7931)",
+  "dependsOn": "B-calendar (frontend/src/lib/lifeos-api.ts Phase-5 block via its shared.patch; GET /calendar, /events routes of migration 034)",
+  "frames": {
+    "lifeos/calendar-1": {
+      "state": "calendar-1",
+      "verdict": "matched-fixture",
+      "why": "Title, week line with steppers, the DayRail (mono cells, busy dots, the ink mark on the hairline), the day heading with + Esemény / + Teendő, the three agenda rows (time column, title, sub, EDZÉS tag, chevron), TEENDŐK with '2 nyitott' and the two task rows and the 6-tab bar with Naptár lit sit on the frame within 1-2 pt. GET /calendar and GET /tasks are contract bodies typed by lib/lifeos-api.ts (no migration 034 on the dev backend).",
+      "capture": ".pulse/shots/S-calendar/calendar-1.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/calendar-1.pair-1.png",
+        ".pulse/pairs/S-calendar/calendar-1.overview.png"
+      ]
+    },
+    "lifeos/calendar-2": {
+      "state": "calendar-2",
+      "verdict": "matched-fixture",
+      "why": "Saturday 24: the all-day row (EGÉSZ NAP), the weekly Úszás and the yearly birthday sub lines, the rest-day line and the tasks; the second task reads 'Hetente' without 'Bármikor' (DEV-g).",
+      "capture": ".pulse/shots/S-calendar/calendar-2.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/calendar-2.pair-1.png",
+        ".pulse/pairs/S-calendar/calendar-2.overview.png"
+      ]
+    },
+    "lifeos/event-detail": {
+      "state": "event-detail",
+      "verdict": "matched-fixture",
+      "why": "Back label, title, the date eyebrow, the 09:00 – 10:00 display with '60 perc', RÉSZLETEK (place split at ' · ' DEV-f, the rule with 'December 19-ig · még 9 alkalom', the reminders sentence), JEGYZET and 'Esemény törlése' match.",
+      "capture": ".pulse/shots/S-calendar/event-detail.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/event-detail.pair-1.png",
+        ".pulse/pairs/S-calendar/event-detail.pair-2.png",
+        ".pulse/pairs/S-calendar/event-detail.overview.png"
+      ]
+    },
+    "lifeos/event-form": {
+      "state": "event-form",
+      "verdict": "matched-fixture",
+      "why": "Every frame row is there in order; the sheet is 83 pt taller because of the Jegyzet field (DEV-a), so its top sits 83 pt higher (y 106 instead of 189) and every row above Jegyzet moves up with it; the date field carries the kit DateTrigger chevron (DEV-b).",
+      "capture": ".pulse/shots/S-calendar/event-form.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/event-form.pair-1.png",
+        ".pulse/pairs/S-calendar/event-form.overview.png"
+      ]
+    },
+    "lifeos/capture (Esemény, R-S-calendar-02)": {
+      "state": "capture-event",
+      "verdict": "matched-fixture",
+      "why": "Hova? Feladat / Esemény, Mikor? without Bármikor, Kezdés with 'Emlékeztető 1 órával előtte'; 46 of 82 geometry layers matched, the rest are S-tasks' capture body (its own pairs).",
+      "capture": ".pulse/shots/S-calendar/capture-event.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/capture-event.pair-1.png",
+        ".pulse/pairs/S-calendar/capture-event.overview.png"
+      ]
+    },
+    "lifeos/ma-1 (KÖVETKEZŐ only, R-S-calendar-03)": {
+      "state": "ma-next",
+      "verdict": "matched-fixture (section only; the rest of Ma is S-ma's)",
+      "why": "KÖVETKEZŐ with 'Naptár ›' and one row title / place / start / chevron; the frame's '· emlékeztető 18:30' is not drawn (DEV-k).",
+      "capture": ".pulse/shots/S-calendar/ma-next.png",
+      "pairs": [
+        ".pulse/pairs/S-calendar/ma-next.pair-1.png",
+        ".pulse/pairs/S-calendar/ma-next.pair-2.png",
+        ".pulse/pairs/S-calendar/ma-next.pair-3.png",
+        ".pulse/pairs/S-calendar/ma-next.overview.png"
+      ]
+    }
+  },
+  "extraStates": {
+    "calendar-empty-day": "a day with nothing: '— Erre a napra nincs semmi.' and 'Erre a napra nincs teendő.'",
+    "calendar-failed": "a failed read: the danger line with 'Újra', the rail without dots",
+    "event-detail-allday": "an all-day event: 'Egész nap' instead of the clock display",
+    "event-edit": "the sheet editing an existing event (Szerkesztés)",
+    "event-delete-confirm": "the ConfirmSheet 'Törlöd az eseményt?' with 'Minden alkalma törlődik.' (DEV-e)"
+  },
+  "probes": "'boxed' counts the kit check ring (setCheck) of the task rows, which the frames draw; capture-event 'targets' are S-tasks' Ma chips (39 pt wide), ma-next geometry is S-ma's page.",
+  "deviations": "docs/pipeline/pulse/pkg/S-calendar/deviations.md (DEV-a .. DEV-m)"
+}

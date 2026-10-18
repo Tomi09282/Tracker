@@ -22,6 +22,7 @@
  *   desk             desk + lit             hero-stopwatch (photo, cropped); lit = lime tint
  *   accounts         accounts + lit         hero-plates (photo, cropped); lit = lime tint
  *   market           market + lit           coin; lit = lime tint
+ *   calendar         calendar + lit         medal and its lit twin (round B: "Naptár → érem"); lit = raster
  *
  * ═══ THE THREE WAYS A CELL LIGHTS ══════════════════════════════════════════════════════════════
  *
@@ -37,7 +38,7 @@
 import type { PulseSlot, TabIconKey } from './slots.ts';
 
 /** The destination cells whose master is not made yet. */
-export const PLACEHOLDER_NAV_KEYS = ['plans', 'desk', 'accounts', 'market'] as const;
+export const PLACEHOLDER_NAV_KEYS = ['plans', 'desk', 'accounts', 'market', 'calendar'] as const;
 
 /** The switch cells: idle raster only, never lit. */
 export const SWITCH_ICON_KEYS = ['switch-user', 'switch-trainer'] as const;
@@ -69,6 +70,7 @@ export const NAV_ICON_SOURCE: Readonly<Record<NavIconKey | SwitchIconKey, NavIco
   desk: { slot: 'hero-stopwatch', lit: 'tint', crop: 'cover', placeholder: true },
   accounts: { slot: 'hero-plates', lit: 'tint', crop: 'cover', placeholder: true },
   market: { slot: 'coin', lit: 'tint', placeholder: true },
+  calendar: { slot: 'medal', lit: 'raster', placeholder: true },
   'switch-user': { slot: 'tab-profile', lit: 'none', placeholder: true },
   'switch-trainer': { slot: 'tab-coach', lit: 'none', placeholder: true },
 };

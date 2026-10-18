@@ -7,11 +7,16 @@ import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { DueChips, DueFields, FieldGroup, ZoneDoor, dueOnFor, type DueChoice } from '../tasks/formParts';
 import { mintClientKey, retryable, useCreateTask, useLifeosStart, useTasks } from '../tasks/tasksData';
+import { mintEventKey, retryable as eventRetryable, useCreateEvent } from '../calendar/calendarApi';
+import { captureEventBody, captureEventDay, captureWords } from '../calendar/captureEvent';
 
 /** The server's bound on a task title (`POST /tasks`, api.md). */
 const TITLE_MAX = 120;
 
 type TimeMode = 'at' | 'allDay';
+
+/** Where a capture goes (frame capture "Hova?"): a task (POST /tasks) or an event (POST /events). */
+type Target = 'task' | 'event';
 
 /**
  * "Van valami a fejedben?" — the quick capture, frame `lifeos/capture` (design round B;
@@ -19,10 +24,11 @@ type TimeMode = 'at' | 'allDay';
  * until then `/tasks?capture=1`). Its body 16 apart:
  *
  *   Mi az?        one field, focused, with the frame's example line as its hint
- *   (Hova?)       WHERE it goes. The approved frame offers Feladat / Esemény; an event needs the
- *                 Phase-5 route (`POST /events`), so in Phase 3 the only destination is a task and
- *                 a one-option switch would be a control that chooses nothing: the group is not
- *                 drawn until Esemény can work (package deviation; plan: "hide that option").
+ *   Hova?         WHERE it goes: Feladat / Esemény, an equal-cell segmented switch (S-calendar,
+ *                 plan Phase 5: the event half writes `POST /events`). Esemény offers the same Ma ·
+ *                 Holnap · Dátum (an event has a day), Időpontban / Egész nap, and the start field
+ *                 says "Emlékeztető 1 órával előtte" (the reminder it sets); an event at a time
+ *                 lasts an hour, its page edits the rest.
  *   Mikor?        Ma · Holnap · Dátum as lime-marked chips, exactly the frame's three (a task with no
  *                 deadline is made in the task sheet with "Nincs"; the fix round dropped the fourth
  *                 chip "Bármikor" the first build added). Under it: Időpontban / Egész nap (a hug
@@ -48,7 +54,10 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
   useLifeosStart(tasks.data);
   const notStarted = tasks.data !== undefined && !tasks.data.started;
   const create = useCreateTask();
+  const createEvent = useCreateEvent();
   const [clientKey] = useState(mintClientKey);
+  const [eventKey] = useState(mintEventKey);
+  const [target, setTarget] = useState<Target>('task');
   const [text, setText] = useState('');
   const [due, setDue] = useState<DueChoice>('today');
   const [mode, setMode] = useState<TimeMode>('allDay');
@@ -56,10 +65,26 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [time, setTime] = useState('');
   const [tried, setTried] = useState(false);
 
+  const words = captureWords(t);
   const textError = tried && !text.trim() ? t('capture.textRequired') : undefined;
   const dateError = tried && due === 'date' && !date ? t('tasks.dateRequired') : undefined;
+  const isEvent = target === 'event';
+  // An event at a time needs its start.
+  const startError = tried && isEvent && mode === 'at' && !time ? words.startRequired : undefined;
+  const write = isEvent ? createEvent : create;
+
+  const submitEvent = () => {
+    setTried(true);
+    if (!text.trim() || (due === 'date' && !date) || (mode === 'at' && !time)) return;
+    // An event lands on the CALENDAR day (captureEvent.ts); at a time it lasts an hour, one reminder.
+    const day = captureEventDay(due === 'none' ? 'today' : due, date);
+    createEvent.mutate(captureEventBody(eventKey, text.trim().slice(0, TITLE_MAX), day, mode === 'at' ? time : null), {
+      onSuccess: onClose,
+    });
+  };
 
   const submit = () => {
+    if (isEvent) return submitEvent();
     setTried(true);
     // "Időpontban" with no time chosen is a task due by the end of the day (as "Egész nap").
     if (!today || !text.trim() || (due === 'date' && !date)) return;
@@ -80,8 +105,16 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
       open={open}
       onClose={onClose}
       title={t('capture.title')}
-      status={create.isPending ? 'busy' : create.isError ? 'error' : 'idle'}
-      onRetry={create.isError && retryable(create.error) ? submit : undefined}
+      status={write.isPending ? 'busy' : write.isError ? 'error' : 'idle'}
+      onRetry={
+        isEvent
+          ? createEvent.isError && eventRetryable(createEvent.error)
+            ? submit
+            : undefined
+          : create.isError && retryable(create.error)
+            ? submit
+            : undefined
+      }
     >
       <Field
         label={t('capture.what')}
@@ -92,6 +125,21 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
         error={textError}
         onChange={(e) => setText(e.target.value)}
       />
+
+      <FieldGroup label={words.where}>
+        {() => (
+          <Segmented
+            layout="cells"
+            label={words.where}
+            value={target}
+            onChange={setTarget}
+            options={[
+              { value: 'task', label: words.task },
+              { value: 'event', label: words.event },
+            ]}
+          />
+        )}
+      </FieldGroup>
 
       <FieldGroup label={t('capture.when')}>
         {() => (
@@ -118,20 +166,23 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
         onTime={setTime}
         showDate={due === 'date'}
         showTime={mode === 'at'}
-        timeLabel={t('tasks.dueTime')}
+        timeLabel={isEvent ? words.start : t('tasks.dueTime')}
+        timeOptional={!isEvent}
+        timeHint={isEvent ? words.reminderHint : undefined}
+        timeError={startError}
         min={today ?? undefined}
         dateError={dateError}
       />
 
-      {create.isError ? (
+      {write.isError ? (
         <NoticeLine tone="danger" role="alert">
-          {t('tasks.failed')}
+          {isEvent ? words.failed : t('tasks.failed')}
         </NoticeLine>
       ) : null}
 
       {notStarted ? <ZoneDoor /> : null}
 
-      <Pressable variant="primary" size="lg" className="w-full" busy={create.isPending} disabled={!today} onClick={submit}>
+      <Pressable variant="primary" size="lg" className="w-full" busy={write.isPending} disabled={isEvent ? notStarted : !today} onClick={submit}>
         {t('common.save')}
       </Pressable>
     </Sheet>

@@ -1,0 +1,849 @@
+{
+  "package": "S-calendar",
+  "base": "05b830a",
+  "namespaces": [
+    "calendar"
+  ],
+  "set": [
+    {
+      "key": "calendar.title",
+      "hu": "Naptár",
+      "en": "Calendar",
+      "de": "Kalender",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/calendar-1 page title \"NAPTÁR\"; event-detail back label \"‹ NAPTÁR\"; ma-1 \"Naptár ›\""
+    },
+    {
+      "key": "calendar.weekLine",
+      "hu": "{{month}} · {{week}}. hét",
+      "en": "{{month}} · week {{week}}",
+      "de": "{{month}} · KW {{week}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 week line \"Október 2026 · 43. hét\""
+    },
+    {
+      "key": "calendar.prevWeek",
+      "hu": "Előző hét",
+      "en": "Previous week",
+      "de": "Vorherige Woche",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of the ‹ week stepper (calendar-1)"
+    },
+    {
+      "key": "calendar.nextWeek",
+      "hu": "Következő hét",
+      "en": "Next week",
+      "de": "Nächste Woche",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of the › week stepper (calendar-1)"
+    },
+    {
+      "key": "calendar.busyDay",
+      "hu": "van program",
+      "en": "something planned",
+      "de": "etwas geplant",
+      "copy": "proposed",
+      "visible": true,
+      "source": "DayRail busy dot, screen-reader suffix of a day"
+    },
+    {
+      "key": "calendar.addEvent",
+      "hu": "Esemény",
+      "en": "Event",
+      "de": "Termin",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 \"+ Esemény\""
+    },
+    {
+      "key": "calendar.addTask",
+      "hu": "Teendő",
+      "en": "Task",
+      "de": "Aufgabe",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 \"+ Teendő\""
+    },
+    {
+      "key": "calendar.allDay",
+      "hu": "Egész nap",
+      "en": "All day",
+      "de": "Ganztägig",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 time column \"EGÉSZ NAP\""
+    },
+    {
+      "key": "calendar.aboutMinutes",
+      "hu": "~{{count}} perc",
+      "en": "~{{count}} min",
+      "de": "~{{count}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 workout row \"~60 perc\""
+    },
+    {
+      "key": "calendar.exerciseCount",
+      "hu": "{{count}} gyakorlat",
+      "en": "{{count}} exercises",
+      "de": "{{count}} Übungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 workout sub \"5 gyakorlat\""
+    },
+    {
+      "key": "calendar.workoutDone",
+      "hu": "Kész",
+      "en": "Done",
+      "de": "Erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the workout row of a day whose session is logged (instead of the coin preview)"
+    },
+    {
+      "key": "calendar.coins",
+      "hu": "+{{coins}} érme",
+      "en": "+{{coins}} coins",
+      "de": "+{{coins}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 workout sub \"+30 érme\""
+    },
+    {
+      "key": "calendar.workoutTag",
+      "hu": "Edzés",
+      "en": "Workout",
+      "de": "Training",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 workout tag \"EDZÉS\""
+    },
+    {
+      "key": "calendar.restDay",
+      "hu": "Pihenőnap – nincs ütemezett edzés.",
+      "en": "Rest day – no workout scheduled.",
+      "de": "Ruhetag – kein Training geplant.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 rest-day line (also B-calendar api.md)"
+    },
+    {
+      "key": "calendar.nothing",
+      "hu": "Erre a napra nincs semmi.",
+      "en": "Nothing on this day.",
+      "de": "Für diesen Tag ist nichts geplant.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a day with no event and no workout, in the rest-day line grammar"
+    },
+    {
+      "key": "calendar.failed",
+      "hu": "Ez most nem sikerült.",
+      "en": "That did not work.",
+      "de": "Das hat nicht geklappt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a failed read or write of the calendar screens (danger line / toast)"
+    },
+    {
+      "key": "calendar.tasks",
+      "hu": "Teendők",
+      "en": "Tasks",
+      "de": "Aufgaben",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 section \"TEENDŐK\""
+    },
+    {
+      "key": "calendar.openCount",
+      "hu": "{{count}} nyitott",
+      "en": "{{count}} open",
+      "de": "{{count}} offen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 \"2 nyitott\""
+    },
+    {
+      "key": "calendar.noTasks",
+      "hu": "Erre a napra nincs teendő.",
+      "en": "No tasks for this day.",
+      "de": "Keine Aufgaben für diesen Tag.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "TEENDŐK of a day with no task"
+    },
+    {
+      "key": "calendar.due",
+      "hu": "Határidő {{when}}",
+      "en": "Due {{when}}",
+      "de": "Fällig {{when}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 \"Határidő 15:00\""
+    },
+    {
+      "key": "calendar.anytime",
+      "hu": "Bármikor",
+      "en": "Anytime",
+      "de": "Jederzeit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-1 \"Bármikor\""
+    },
+    {
+      "key": "calendar.taskDone",
+      "hu": "{{title}} kész",
+      "en": "{{title}} done",
+      "de": "{{title}} erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of a task row check"
+    },
+    {
+      "key": "calendar.recurring",
+      "hu": "ismétlődő",
+      "en": "recurring",
+      "de": "wiederkehrend",
+      "copy": "proposed",
+      "visible": true,
+      "source": "screen-reader word for the repeat glyph after a title"
+    },
+    {
+      "key": "calendar.repeat.daily",
+      "hu": "Naponta",
+      "en": "Daily",
+      "de": "Täglich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a recurring task meta (calendar-2 shows \"Hetente\")"
+    },
+    {
+      "key": "calendar.repeat.weekly",
+      "hu": "Hetente",
+      "en": "Weekly",
+      "de": "Wöchentlich",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 task meta \"Hetente\""
+    },
+    {
+      "key": "calendar.repeat.monthly",
+      "hu": "Havonta",
+      "en": "Monthly",
+      "de": "Monatlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a recurring task meta"
+    },
+    {
+      "key": "calendar.rule.daily",
+      "hu": "minden nap",
+      "en": "every day",
+      "de": "jeden Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a daily event rule in the agenda sub line"
+    },
+    {
+      "key": "calendar.rule.everyN",
+      "hu": "{{count}} naponta",
+      "en": "every {{count}} days",
+      "de": "alle {{count}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a daily rule with an interval"
+    },
+    {
+      "key": "calendar.rule.weekly",
+      "hu": "minden {{days}}",
+      "en": "every {{days}}",
+      "de": "jeden {{days}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 \"minden szombaton\""
+    },
+    {
+      "key": "calendar.rule.weeklyTitle",
+      "hu": "Minden héten, {{days}}",
+      "en": "Every week on {{days}}",
+      "de": "Jede Woche am {{days}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"Minden héten, szombaton\""
+    },
+    {
+      "key": "calendar.rule.monthly",
+      "hu": "minden hónap {{day}}",
+      "en": "every month on day {{day}}",
+      "de": "jeden Monat am {{day}}.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a monthly event rule (\"minden hónap 24-én\")"
+    },
+    {
+      "key": "calendar.rule.yearly",
+      "hu": "minden évben, {{date}}",
+      "en": "every year on {{date}}",
+      "de": "jedes Jahr am {{date}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 \"Minden évben, október 24-én\""
+    },
+    {
+      "key": "calendar.rule.on.mon",
+      "hu": "hétfőn",
+      "en": "Monday",
+      "de": "Montag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.rule.on.tue",
+      "hu": "kedden",
+      "en": "Tuesday",
+      "de": "Dienstag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.rule.on.wed",
+      "hu": "szerdán",
+      "en": "Wednesday",
+      "de": "Mittwoch",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.rule.on.thu",
+      "hu": "csütörtökön",
+      "en": "Thursday",
+      "de": "Donnerstag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.rule.on.fri",
+      "hu": "pénteken",
+      "en": "Friday",
+      "de": "Freitag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.rule.on.sat",
+      "hu": "szombaton",
+      "en": "Saturday",
+      "de": "Samstag",
+      "copy": "inventory",
+      "visible": true,
+      "source": "calendar-2 / event-detail \"szombaton\""
+    },
+    {
+      "key": "calendar.rule.on.sun",
+      "hu": "vasárnap",
+      "en": "Sunday",
+      "de": "Sonntag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "weekday in a weekly rule"
+    },
+    {
+      "key": "calendar.reminder.minutes",
+      "hu": "{{count}} perccel",
+      "en": "{{count}} min",
+      "de": "{{count}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"15 perccel\""
+    },
+    {
+      "key": "calendar.reminder.hours",
+      "hu": "{{count}} órával",
+      "en": "{{count}} h",
+      "de": "{{count}} Std.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "event-detail reminder line, hours"
+    },
+    {
+      "key": "calendar.reminder.days",
+      "hu": "{{count}} nappal",
+      "en": "{{count}} d",
+      "de": "{{count}} T.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"1 nappal\""
+    },
+    {
+      "key": "calendar.reminder.and",
+      "hu": "és",
+      "en": "and",
+      "de": "und",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"15 perccel és 1 nappal előtte\""
+    },
+    {
+      "key": "calendar.reminder.before",
+      "hu": "{{list}} előtte",
+      "en": "{{list}} before",
+      "de": "{{list}} vorher",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"… előtte\""
+    },
+    {
+      "key": "calendar.reminder.atStart",
+      "hu": "kezdéskor",
+      "en": "at the start",
+      "de": "zu Beginn",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form reminder \"Kezdéskor\" in the detail sentence"
+    },
+    {
+      "key": "calendar.detail.edit",
+      "hu": "Szerkesztés",
+      "en": "Edit",
+      "de": "Bearbeiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail header link \"Szerkesztés\""
+    },
+    {
+      "key": "calendar.detail.details",
+      "hu": "Részletek",
+      "en": "Details",
+      "de": "Details",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail section \"RÉSZLETEK\""
+    },
+    {
+      "key": "calendar.detail.notes",
+      "hu": "Jegyzet",
+      "en": "Notes",
+      "de": "Notizen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail section \"JEGYZET\""
+    },
+    {
+      "key": "calendar.detail.bell",
+      "hu": "Értesítés a csengő alatt",
+      "en": "A notice under the bell",
+      "de": "Hinweis unter der Glocke",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail reminder sub line"
+    },
+    {
+      "key": "calendar.detail.until",
+      "hu": "{{date}}-ig",
+      "en": "Until {{date}}",
+      "de": "Bis {{date}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"December 19-ig\""
+    },
+    {
+      "key": "calendar.detail.remaining",
+      "hu": "még {{count}} alkalom",
+      "en": "{{count}} more",
+      "de": "noch {{count}} Mal",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"még 9 alkalom\""
+    },
+    {
+      "key": "calendar.detail.delete",
+      "hu": "Esemény törlése",
+      "en": "Delete event",
+      "de": "Termin löschen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail danger link"
+    },
+    {
+      "key": "calendar.detail.deleteTitle",
+      "hu": "Törlöd az eseményt?",
+      "en": "Delete this event?",
+      "de": "Diesen Termin löschen?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the delete ConfirmSheet title"
+    },
+    {
+      "key": "calendar.detail.deleteAll",
+      "hu": "Minden alkalma törlődik.",
+      "en": "Every occurrence is deleted.",
+      "de": "Alle Termine der Serie werden gelöscht.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the delete ConfirmSheet line for a recurring event (api.md: no single-occurrence delete)"
+    },
+    {
+      "key": "calendar.detail.missing",
+      "hu": "Ez az esemény nem található.",
+      "en": "This event cannot be found.",
+      "de": "Dieser Termin wurde nicht gefunden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "event-detail 404 (also another account event)"
+    },
+    {
+      "key": "calendar.form.newTitle",
+      "hu": "Új esemény",
+      "en": "New event",
+      "de": "Neuer Termin",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form sheet title"
+    },
+    {
+      "key": "calendar.form.editTitle",
+      "hu": "Esemény szerkesztése",
+      "en": "Edit event",
+      "de": "Termin bearbeiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the same sheet opened by \"Szerkesztés\""
+    },
+    {
+      "key": "calendar.form.name",
+      "hu": "Megnevezés",
+      "en": "Name",
+      "de": "Bezeichnung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form field \"Megnevezés\""
+    },
+    {
+      "key": "calendar.form.kind",
+      "hu": "Időzítés",
+      "en": "Timing",
+      "de": "Zeitpunkt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of the Időpontban / Egész nap switch"
+    },
+    {
+      "key": "calendar.form.atTime",
+      "hu": "Időpontban",
+      "en": "At a time",
+      "de": "Zu einer Uhrzeit",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Időpontban\""
+    },
+    {
+      "key": "calendar.form.allDay",
+      "hu": "Egész nap",
+      "en": "All day",
+      "de": "Ganztägig",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Egész nap\""
+    },
+    {
+      "key": "calendar.form.date",
+      "hu": "Dátum",
+      "en": "Date",
+      "de": "Datum",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Dátum\""
+    },
+    {
+      "key": "calendar.form.start",
+      "hu": "Kezdés",
+      "en": "Start",
+      "de": "Beginn",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Kezdés\"; capture \"Kezdés\""
+    },
+    {
+      "key": "calendar.form.end",
+      "hu": "Vége",
+      "en": "End",
+      "de": "Ende",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Vége\" (also the last day of an all-day event)"
+    },
+    {
+      "key": "calendar.form.duration",
+      "hu": "Időtartam",
+      "en": "Duration",
+      "de": "Dauer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of the duration words row"
+    },
+    {
+      "key": "calendar.form.minutes",
+      "hu": "{{count}} perc",
+      "en": "{{count}} min",
+      "de": "{{count}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"15 perc\"; event-detail \"60 perc\""
+    },
+    {
+      "key": "calendar.form.hours",
+      "hu": "{{count}} óra",
+      "en": "{{count}} h",
+      "de": "{{count}} Std.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"1 óra\", \"2 óra\""
+    },
+    {
+      "key": "calendar.form.days",
+      "hu": "{{count}} nap",
+      "en": "{{count}} d",
+      "de": "{{count}} T.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form reminder \"1 nap\""
+    },
+    {
+      "key": "calendar.form.location",
+      "hu": "Helyszín",
+      "en": "Place",
+      "de": "Ort",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Helyszín\""
+    },
+    {
+      "key": "calendar.form.repeat",
+      "hu": "Ismétlődés",
+      "en": "Repeat",
+      "de": "Wiederholung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Ismétlődés\""
+    },
+    {
+      "key": "calendar.form.noRepeat",
+      "hu": "Nem ismétlődik",
+      "en": "Does not repeat",
+      "de": "Keine Wiederholung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Nem ismétlődik\""
+    },
+    {
+      "key": "calendar.form.repeatKind.none",
+      "hu": "Nincs",
+      "en": "None",
+      "de": "Keine",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the rule chips (task-form RecurrencePicker words)"
+    },
+    {
+      "key": "calendar.form.repeatKind.daily",
+      "hu": "Naponta",
+      "en": "Daily",
+      "de": "Täglich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the rule chips (task-form words)"
+    },
+    {
+      "key": "calendar.form.repeatKind.weekly",
+      "hu": "Hetente",
+      "en": "Weekly",
+      "de": "Wöchentlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the rule chips (task-form words)"
+    },
+    {
+      "key": "calendar.form.repeatKind.monthly",
+      "hu": "Havonta",
+      "en": "Monthly",
+      "de": "Monatlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the rule chips (task-form words)"
+    },
+    {
+      "key": "calendar.form.repeatKind.yearly",
+      "hu": "Évente",
+      "en": "Yearly",
+      "de": "Jährlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the yearly rule (calendar-2 \"Minden évben\"; api.md yearly)"
+    },
+    {
+      "key": "calendar.form.repeatDays",
+      "hu": "Napok",
+      "en": "Days",
+      "de": "Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "accessible name of the weekday chips of a weekly rule"
+    },
+    {
+      "key": "calendar.form.until",
+      "hu": "Utolsó alkalom",
+      "en": "Last date",
+      "de": "Letzter Termin",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the until date of a rule (event-detail \"December 19-ig\")"
+    },
+    {
+      "key": "calendar.form.reminder",
+      "hu": "Emlékeztető",
+      "en": "Reminder",
+      "de": "Erinnerung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Emlékeztető\""
+    },
+    {
+      "key": "calendar.form.atStart",
+      "hu": "Kezdéskor",
+      "en": "At start",
+      "de": "Zu Beginn",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-form \"Kezdéskor\""
+    },
+    {
+      "key": "calendar.form.notes",
+      "hu": "Jegyzet",
+      "en": "Notes",
+      "de": "Notizen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "event-detail \"JEGYZET\" - the field that fills it"
+    },
+    {
+      "key": "calendar.form.optional",
+      "hu": "opcionális",
+      "en": "optional",
+      "de": "optional",
+      "copy": "proposed",
+      "visible": true,
+      "source": "placeholder of an optional field (task-form word)"
+    },
+    {
+      "key": "calendar.form.titleRequired",
+      "hu": "Adj nevet az eseménynek",
+      "en": "Give the event a name",
+      "de": "Gib dem Termin einen Namen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "validation"
+    },
+    {
+      "key": "calendar.form.dateRequired",
+      "hu": "Válassz dátumot",
+      "en": "Choose a date",
+      "de": "Wähle ein Datum",
+      "copy": "proposed",
+      "visible": true,
+      "source": "validation"
+    },
+    {
+      "key": "calendar.form.startRequired",
+      "hu": "Add meg a kezdést",
+      "en": "Set a start time",
+      "de": "Gib eine Beginnzeit an",
+      "copy": "proposed",
+      "visible": true,
+      "source": "validation"
+    },
+    {
+      "key": "calendar.form.spanInvalid",
+      "hu": "Legfeljebb 14 nap, a kezdés után",
+      "en": "At most 14 days, after the start",
+      "de": "Höchstens 14 Tage, nach dem Beginn",
+      "copy": "proposed",
+      "visible": true,
+      "source": "validation (api.md: nothing lasts longer than 14 days)"
+    },
+    {
+      "key": "calendar.form.untilInvalid",
+      "hu": "Az utolsó alkalom nem lehet a kezdés előtt",
+      "en": "The last date cannot be before the first",
+      "de": "Der letzte Termin darf nicht vor dem ersten liegen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "validation (api.md: untilDate >= date)"
+    },
+    {
+      "key": "calendar.form.refused",
+      "hu": "Ezt az eseményt így nem lehet menteni.",
+      "en": "This event cannot be saved like this.",
+      "de": "Dieser Termin kann so nicht gespeichert werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "a 400 / 409 the user must change (no time zone yet, the 500-event limit, an impossible time)"
+    },
+    {
+      "key": "calendar.capture.where",
+      "hu": "Hova?",
+      "en": "Where to?",
+      "de": "Wohin?",
+      "copy": "inventory",
+      "visible": true,
+      "source": "capture \"Hova?\""
+    },
+    {
+      "key": "calendar.capture.task",
+      "hu": "Feladat",
+      "en": "Task",
+      "de": "Aufgabe",
+      "copy": "inventory",
+      "visible": true,
+      "source": "capture \"Feladat\""
+    },
+    {
+      "key": "calendar.capture.event",
+      "hu": "Esemény",
+      "en": "Event",
+      "de": "Termin",
+      "copy": "inventory",
+      "visible": true,
+      "source": "capture \"Esemény\""
+    },
+    {
+      "key": "calendar.capture.reminderHint",
+      "hu": "Emlékeztető 1 órával előtte",
+      "en": "Reminder 1 hour before",
+      "de": "Erinnerung 1 Stunde vorher",
+      "copy": "inventory",
+      "visible": true,
+      "source": "capture hint under Kezdés"
+    },
+    {
+      "key": "calendar.next.title",
+      "hu": "Következő",
+      "en": "Next",
+      "de": "Als Nächstes",
+      "copy": "inventory",
+      "visible": true,
+      "source": "ma-1 section \"KÖVETKEZŐ\""
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}

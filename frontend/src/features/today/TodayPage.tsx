@@ -10,6 +10,7 @@ import { Screen } from '../../ui/shell/Screen';
 import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { LedgerLine } from './LedgerLine';
 import { dayCount, dayLabel, earnedTodayMinor } from './model';
+import { NextEventSection } from '../calendar/NextEventSection';
 import { TodayHabits, TodayHabitsSkeleton } from './TodayHabits';
 import { TodayHero } from './TodayHero';
 import { TodayNutrition } from './TodayNutrition';
@@ -36,14 +37,19 @@ import { useLifeosToday } from './useLifeosToday';
  *   TodayTasks                 FELADATOK (Rögzítés +): tap to complete, "Kész ma · 2 ›"
  *   TodayDraw settled          NAPI DOBÁS once picked: the teaser, "elvállalva" (ma-1: after FELADATOK)
  *   TodayNutrition             TÁPLÁLKOZÁS (Megnyitás ›): Kalória, Fehérje
+ *   NextEventSection           KÖVETKEZŐ (Naptár ›): the next event within 7 days (S-calendar)
  *   the library row            "Gyakorlatok" with the barbell still, last (owner, 2026-10-17)
  *
  * NAPI DOBÁS is package S-challenges' block (features/challenges/TodayDraw.tsx, plan phase 4): it is
  * mounted twice and each mount draws only its own state, so the block moves below FELADATOK when the
  * pick is made. The picked challenge's task is shown there, not among FELADATOK, and never counts.
  *
- * NOT YET: FÓKUSZ (phase 6) and KÖVETKEZŐ (the next event, phase 5) have no server yet, so they are
- * not drawn — no teaser, no placeholder (D3: never a control that does nothing).
+ * NextEventSection (KÖVETKEZŐ, Naptár ›) is package S-calendar's block (features/calendar/
+ * NextEventSection.tsx, plan phase 5): the next event within 7 days, after TÁPLÁLKOZÁS; not drawn
+ * without one.
+ *
+ * NOT YET: FÓKUSZ (phase 6) has no server yet, so it is not drawn — no teaser, no placeholder (D3:
+ * never a control that does nothing).
  *
  * ═══ DATA ══════════════════════════════════════════════════════════════════════════════════════
  *
@@ -111,6 +117,9 @@ export function TodayPage() {
       ) : null}
 
       <TodayNutrition date={todayLocal()} />
+
+      {/* KÖVETKEZŐ (S-calendar, plan Phase 5): the next event within 7 days; not drawn without one. */}
+      <NextEventSection next={day?.nextEvent} today={todayLocal()} />
 
       {/* The permanent way to the exercise library (D2), last on Ma (owner, 2026-10-17; round B
           draws it with the barbell still and a line saying what is there). */}

@@ -130,3 +130,44 @@ by hand.
 | `rewards.form.nameRequired` | Adj nevet a jutalomnak | Give the reward a name | Gib der Belohnung einen Namen | yes | S-rewards | reward-form name error (undrawn); f_app reward/[id].tsx | [ ] |
 | `rewards.form.costMin` | Legalább 1 érme | At least 1 coin | Mindestens 1 Münze | yes | S-rewards | reward-form price error (undrawn); f_app "Legalább 1 pont", pont -> érme | [ ] |
 | `rewards.form.costMax` | Legfeljebb {{count}} érme | At most {{count}} coins | Höchstens {{count}} Münzen | yes | S-rewards | reward-form price error over api.md's 10000 (undrawn) | [ ] |
+| `calendar.prevWeek` | Előző hét | Previous week | Vorherige Woche | yes | S-calendar | accessible name of the ‹ week stepper (calendar-1) | [ ] |
+| `calendar.nextWeek` | Következő hét | Next week | Nächste Woche | yes | S-calendar | accessible name of the › week stepper (calendar-1) | [ ] |
+| `calendar.busyDay` | van program | something planned | etwas geplant | yes | S-calendar | DayRail busy dot, screen-reader suffix of a day | [ ] |
+| `calendar.workoutDone` | Kész | Done | Erledigt | yes | S-calendar | the workout row of a day whose session is logged (instead of the coin preview) | [ ] |
+| `calendar.nothing` | Erre a napra nincs semmi. | Nothing on this day. | Für diesen Tag ist nichts geplant. | yes | S-calendar | a day with no event and no workout, in the rest-day line grammar | [ ] |
+| `calendar.failed` | Ez most nem sikerült. | That did not work. | Das hat nicht geklappt. | yes | S-calendar | a failed read or write of the calendar screens (danger line / toast) | [ ] |
+| `calendar.noTasks` | Erre a napra nincs teendő. | No tasks for this day. | Keine Aufgaben für diesen Tag. | yes | S-calendar | TEENDŐK of a day with no task | [ ] |
+| `calendar.taskDone` | {{title}} kész | {{title}} done | {{title}} erledigt | yes | S-calendar | accessible name of a task row check | [ ] |
+| `calendar.recurring` | ismétlődő | recurring | wiederkehrend | yes | S-calendar | screen-reader word for the repeat glyph after a title | [ ] |
+| `calendar.repeat.daily` | Naponta | Daily | Täglich | yes | S-calendar | a recurring task meta (calendar-2 shows "Hetente") | [ ] |
+| `calendar.repeat.monthly` | Havonta | Monthly | Monatlich | yes | S-calendar | a recurring task meta | [ ] |
+| `calendar.rule.daily` | minden nap | every day | jeden Tag | yes | S-calendar | a daily event rule in the agenda sub line | [ ] |
+| `calendar.rule.everyN` | {{count}} naponta | every {{count}} days | alle {{count}} Tage | yes | S-calendar | a daily rule with an interval | [ ] |
+| `calendar.rule.monthly` | minden hónap {{day}} | every month on day {{day}} | jeden Monat am {{day}}. | yes | S-calendar | a monthly event rule ("minden hónap 24-én") | [ ] |
+| `calendar.rule.on.mon` | hétfőn | Monday | Montag | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.rule.on.tue` | kedden | Tuesday | Dienstag | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.rule.on.wed` | szerdán | Wednesday | Mittwoch | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.rule.on.thu` | csütörtökön | Thursday | Donnerstag | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.rule.on.fri` | pénteken | Friday | Freitag | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.rule.on.sun` | vasárnap | Sunday | Sonntag | yes | S-calendar | weekday in a weekly rule | [ ] |
+| `calendar.reminder.hours` | {{count}} órával | {{count}} h | {{count}} Std. | yes | S-calendar | event-detail reminder line, hours | [ ] |
+| `calendar.detail.deleteTitle` | Törlöd az eseményt? | Delete this event? | Diesen Termin löschen? | yes | S-calendar | the delete ConfirmSheet title | [ ] |
+| `calendar.detail.deleteAll` | Minden alkalma törlődik. | Every occurrence is deleted. | Alle Termine der Serie werden gelöscht. | yes | S-calendar | the delete ConfirmSheet line for a recurring event (api.md: no single-occurrence delete) | [ ] |
+| `calendar.detail.missing` | Ez az esemény nem található. | This event cannot be found. | Dieser Termin wurde nicht gefunden. | yes | S-calendar | event-detail 404 (also another account event) | [ ] |
+| `calendar.form.editTitle` | Esemény szerkesztése | Edit event | Termin bearbeiten | yes | S-calendar | the same sheet opened by "Szerkesztés" | [ ] |
+| `calendar.form.kind` | Időzítés | Timing | Zeitpunkt | yes | S-calendar | accessible name of the Időpontban / Egész nap switch | [ ] |
+| `calendar.form.duration` | Időtartam | Duration | Dauer | yes | S-calendar | accessible name of the duration words row | [ ] |
+| `calendar.form.repeatKind.none` | Nincs | None | Keine | yes | S-calendar | the rule chips (task-form RecurrencePicker words) | [ ] |
+| `calendar.form.repeatKind.daily` | Naponta | Daily | Täglich | yes | S-calendar | the rule chips (task-form words) | [ ] |
+| `calendar.form.repeatKind.weekly` | Hetente | Weekly | Wöchentlich | yes | S-calendar | the rule chips (task-form words) | [ ] |
+| `calendar.form.repeatKind.monthly` | Havonta | Monthly | Monatlich | yes | S-calendar | the rule chips (task-form words) | [ ] |
+| `calendar.form.repeatKind.yearly` | Évente | Yearly | Jährlich | yes | S-calendar | the yearly rule (calendar-2 "Minden évben"; api.md yearly) | [ ] |
+| `calendar.form.repeatDays` | Napok | Days | Tage | yes | S-calendar | accessible name of the weekday chips of a weekly rule | [ ] |
+| `calendar.form.until` | Utolsó alkalom | Last date | Letzter Termin | yes | S-calendar | the until date of a rule (event-detail "December 19-ig") | [ ] |
+| `calendar.form.optional` | opcionális | optional | optional | yes | S-calendar | placeholder of an optional field (task-form word) | [ ] |
+| `calendar.form.titleRequired` | Adj nevet az eseménynek | Give the event a name | Gib dem Termin einen Namen | yes | S-calendar | validation | [ ] |
+| `calendar.form.dateRequired` | Válassz dátumot | Choose a date | Wähle ein Datum | yes | S-calendar | validation | [ ] |
+| `calendar.form.startRequired` | Add meg a kezdést | Set a start time | Gib eine Beginnzeit an | yes | S-calendar | validation | [ ] |
+| `calendar.form.spanInvalid` | Legfeljebb 14 nap, a kezdés után | At most 14 days, after the start | Höchstens 14 Tage, nach dem Beginn | yes | S-calendar | validation (api.md: nothing lasts longer than 14 days) | [ ] |
+| `calendar.form.untilInvalid` | Az utolsó alkalom nem lehet a kezdés előtt | The last date cannot be before the first | Der letzte Termin darf nicht vor dem ersten liegen | yes | S-calendar | validation (api.md: untilDate >= date) | [ ] |
+| `calendar.form.refused` | Ezt az eseményt így nem lehet menteni. | This event cannot be saved like this. | Dieser Termin kann so nicht gespeichert werden. | yes | S-calendar | a 400 / 409 the user must change (no time zone yet, the 500-event limit, an impossible time) | [ ] |
