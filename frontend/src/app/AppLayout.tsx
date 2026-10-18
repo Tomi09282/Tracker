@@ -4,6 +4,7 @@ import { useView } from './useView';
 import { ViewContext } from './viewContext';
 import { CommandPalette } from '../ui/shell/CommandPalette';
 import { ShellProvider } from '../ui/shell/Screen';
+import { useTimezoneBootstrap } from '../features/settings/dayPrefs';
 
 /**
  * The layout of every signed-in screen: the screen and the tab bar.
@@ -30,6 +31,10 @@ export function AppLayout() {
   // A view grants nothing — every route and endpoint re-checks the role on the server.
   const view = useView();
   const tabs = useNavTabs(view);
+  // LifeOS starts the first time the server knows the user's zone: when none is stored, the
+  // browser's zone is sent once, silently (B-core api.md "The day"; dayPrefs.ts). Mounted here,
+  // once, so every signed-in screen - Ma first - has a logical today without a visit to Profil.
+  useTimezoneBootstrap();
 
   return (
     <ViewContext.Provider value={view}>

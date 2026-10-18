@@ -44,7 +44,12 @@ export function useSaveDayPrefs() {
   return useMutation({
     mutationFn: async (patch: UserPrefsPatch) =>
       (await apiWithRefresh<{ prefs: UserPrefs }>('/me/prefs', { method: 'PATCH', body: patch })).prefs,
-    onSuccess: (prefs) => qc.setQueryData(DAY_PREFS_KEY, prefs),
+    onSuccess: (prefs) => {
+      qc.setQueryData(DAY_PREFS_KEY, prefs);
+      // A new zone or day start moves the logical today (and the first one starts LifeOS): every
+      // LifeOS read (Ma, Feladatok, Szokások) answers for the new day.
+      void qc.invalidateQueries({ queryKey: ['lifeos'] });
+    },
   });
 }
 

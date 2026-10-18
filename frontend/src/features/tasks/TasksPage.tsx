@@ -22,6 +22,7 @@ import {
   monthDay,
   priorityValues,
   retryable,
+  useLifeosStart,
   useTasks,
   useToggleTask,
   weekdayMonthDay,
@@ -54,8 +55,14 @@ import {
  * read (a danger line with "Újra"), a failed check (a danger line under the tabs, "Újra" when a
  * retry can help), an empty tab ("Nincs teendő", ma-3's empty words).
  *
- * `?capture=1` opens the capture sheet over the page — the way in until the Ma page mounts it at
- * its "Rögzítés +" (package S-ma).
+ * "Rögzítés +" at the end of the back row opens the capture sheet over the page (frame
+ * `lifeos/capture` draws it over Ma, whose "Rögzítés +" opens it there: request R-S-ma-02). The
+ * frame's header has no trailing node; the door is the fix round's answer to "the capture sheet
+ * cannot be reached" (review finding 2) and is listed in the package's deviations. `?capture=1`
+ * opens the same sheet (a link from elsewhere can name it); the door sets that parameter.
+ *
+ * LifeOS starts when the server knows the user's zone: `useLifeosStart` sends the browser's zone
+ * once when none is stored (the shell's job, request R-S-tasks-fix-01) and re-reads the lists.
  */
 export function TasksPage() {
   const { t } = useTranslation();
@@ -68,8 +75,15 @@ export function TasksPage() {
 
   const data = tasks.data;
   const today = data?.today ?? null;
+  useLifeosStart(data);
   const togglingId = toggle.isPending ? toggle.variables?.id : undefined;
 
+  const setCapture = (on: boolean) => {
+    const next = new URLSearchParams(params);
+    if (on) next.set('capture', '1');
+    else next.delete('capture');
+    setParams(next, { replace: true });
+  };
   const openNew = (due: DueChoice) => setSheet({ mode: 'new', due });
   const openTask = (task: Task) => {
     // A recurring instance is edited as its rule: the server redraws the open instances from today.
@@ -96,7 +110,15 @@ export function TasksPage() {
   return (
     <Screen top="push">
       <div className="flex flex-col gap-4">
-        <ScreenHeader kind="push" title={t('tasks.title')} />
+        <ScreenHeader
+          kind="push"
+          title={t('tasks.title')}
+          trailing={
+            <TextLink trail={<Plus />} aria-haspopup="dialog" onClick={() => setCapture(true)}>
+              {t('today.tasks.capture')}
+            </TextLink>
+          }
+        />
         {/* A TAB IS A FILTER, NOT A NEW SCREEN: one route, local state (R20). */}
         {/* tasks-1 draws the filter as the hug switch (words 24 apart from the gutter, the ink mark
             under the chosen word), not as equal cells. Five words in German or English are wider
@@ -155,14 +177,7 @@ export function TasksPage() {
       )}
 
       <TaskSheet target={sheet} onClose={() => setSheet(null)} today={today} values={priorityValues(data)} />
-      <CaptureSheet
-        open={capturing}
-        onClose={() => {
-          const next = new URLSearchParams(params);
-          next.delete('capture');
-          setParams(next, { replace: true });
-        }}
-      />
+      <CaptureSheet open={capturing} onClose={() => setCapture(false)} />
     </Screen>
   );
 }

@@ -1,0 +1,17 @@
+{
+  "id": "R-S-tasks-fix-01",
+  "from": "S-tasks-fix",
+  "kind": "cross-package",
+  "blocking": true,
+  "target": "frontend/src/app/AppLayout.tsx (integrator) + frontend/src/features/settings/dayPrefs.ts (S-day-settings, closed)",
+  "need": "Mount useTimezoneBootstrap() once in the signed-in shell, so LifeOS starts for every user without a visit to 'Nap és időzóna'. Review S-tasks finding 1: every account answers GET /tasks with started:false / today:null because the hook (dayPrefs.ts:144) is mounted nowhere, so no real user can create a task. Second hunk: useSaveDayPrefs re-reads every ['lifeos'] query after a saved zone / day start, so Ma, Feladatok and Szokások get the logical today without a reload.",
+  "evidence": ".pulse/review/S-tasks/REVIEW.md finding 1 (live GET /tasks of user@, demo.kovacs.eszter@, demo.nagy.balazs@, demo.toth.reka@); grep: useTimezoneBootstrap has no caller on pulse-redesign 05b830a",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-tasks/fix/requests/R-S-tasks-fix-01.patch (git apply --check passes on pulse-redesign 05b830a)",
+  "beforeApplying": [
+    "Replay: every signed-in state will now read GET /api/v1/me/prefs. The freeze holds it only for user and admin; record it for coach, demo.coach.szilagyi.reka, demo.kovacs.eszter, demo.nagy.balazs (pulse-shot --record --only-missing on any state of those accounts), or their replays fail 'unrecorded'.",
+    "Live: an account whose zone is null will fire PATCH /me/prefs on its first live capture, which the write guard stops (blocked-write). Either let the orchestrator set the dev accounts' zone once through the real flow, or answer PATCH /me/prefs with a tool stub in live runs."
+  ],
+  "interim": "The task screens mount the same hook themselves (features/tasks/tasksData.ts useLifeosStart, called by TasksPage and CaptureSheet; the hook tries once per page load whoever mounts it, so the shell mount later is harmless) and re-read the LifeOS queries once the zone is known. Ma itself still waits for this request. While there is no logical today the task sheet and the capture sheet draw their pill OFF with the door 'Nap és időzóna ›' (no dead lime pill).",
+  "status": "applied",
+  "resolution": "Applied unchanged by the integrator at merge-S-tasks-fix onto pulse-int d295d61 (AppLayout.tsx mounts useTimezoneBootstrap once; useSaveDayPrefs invalidates [\"lifeos\"])."
+}

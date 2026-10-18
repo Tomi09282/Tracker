@@ -11,7 +11,7 @@ import { TextLink } from '../../ui/primitives/TextLink';
 import { RecurrencePicker } from '../../ui/primitives/RecurrencePicker';
 import { weekdayLong, type WeekdayIndex } from '../../ui/primitives/weekdays';
 import type { DayKey, Recurrence, Task, TaskCreate, TaskPatch, TaskPriority } from '../../lib/lifeos-api';
-import { DueChips, DueFields, FieldGroup, dueOnFor, type DueChoice } from './formParts';
+import { DueChips, DueFields, FieldGroup, ZoneDoor, dueOnFor, type DueChoice } from './formParts';
 import {
   PRIORITIES,
   PRIORITY_KEY,
@@ -239,7 +239,18 @@ function TaskSheetBody({
           </NoticeLine>
         ) : null}
 
-        <Pressable variant="primary" size="lg" className="w-full" busy={write.isPending} disabled={remove.isPending} onClick={submit}>
+        {/* No logical today = LifeOS has not started (no zone on the server): nothing can be written,
+            so the pill is off - never a lime pill that does nothing - and the door leads to the zone. */}
+        {!today ? <ZoneDoor /> : null}
+
+        <Pressable
+          variant="primary"
+          size="lg"
+          className="w-full"
+          busy={write.isPending}
+          disabled={remove.isPending || !today}
+          onClick={submit}
+        >
           {editing ? t('common.save') : t('tasks.create')}
         </Pressable>
 

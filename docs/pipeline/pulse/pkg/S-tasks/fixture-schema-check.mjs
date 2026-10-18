@@ -18,10 +18,11 @@ if (!statesFile || !outDir) {
 }
 const states = JSON.parse(fs.readFileSync(statesFile, 'utf8'));
 const problems = [];
-const ts = ["import type { TasksResponse } from '../src/lib/lifeos-api';"];
+const ts = ["import type { TasksResponse, UserPrefs } from '../src/lib/lifeos-api';"];
+let n = 0;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
-const TASK_KEYS = ['id', 'title', 'notes', 'priority', 'points', 'dueOn', 'dueTime', 'recurrence', 'isTemplate', 'parentTaskId', 'completedAt', 'completedOn', 'overdueOn', 'valueMinor', 'lateNow', 'payoutNowMinor', 'paidMinor', 'overduePenaltyMinor'];
+const TASK_KEYS = ['id', 'title', 'notes', 'priority', 'points', 'dueOn', 'dueTime', 'recurrence', 'isTemplate', 'parentTaskId', 'completedAt', 'completedOn', 'overdueOn', 'valueMinor', 'lateNow', 'payoutNowMinor', 'paidMinor', 'overduePenaltyMinor', 'challengeId'];
 const addDays = (key, n) => {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
@@ -35,6 +36,7 @@ function checkTask(where, t, today) {
   if (typeof t.title !== 'string' || t.title.length < 1 || t.title.length > 120) problems.push(`${where}: title 1..120`);
   if (t.notes !== null && (typeof t.notes !== 'string' || t.notes.length > 1000)) problems.push(`${where}: notes`);
   if (![1, 2, 3].includes(t.priority)) problems.push(`${where}: priority 1..3`);
+  if (t.challengeId !== null && !(Number.isInteger(t.challengeId) && t.challengeId >= 1)) problems.push(`${where}: challengeId (B-rewards-challenges) integer >= 1 | null`);
   if (t.points !== null && !(Number.isInteger(t.points) && t.points >= 0 && t.points <= 50)) problems.push(`${where}: points 0..50 | null`);
   if (t.dueOn !== null && !DAY.test(t.dueOn)) problems.push(`${where}: dueOn`);
   if (t.dueTime !== null && (!HHMM.test(t.dueTime) || t.dueOn === null)) problems.push(`${where}: dueTime HH:MM needs dueOn`);
@@ -65,6 +67,15 @@ for (const [key, s] of Object.entries(states.states)) {
     if (fx.method !== 'GET' || fx.path !== '/api/v1/tasks' || (fx.status ?? 200) !== 200) continue;
     const b = fx.body;
     const today = b.today;
+    n += 1;
+    const name = `${key.replace(/[^A-Za-z0-9]/g, '_')}_${n}`;
+    // B-core api.md "Before a zone is set: started false, today null" - and no task can exist yet.
+    if (b.started === false) {
+      if (today !== null) problems.push(`${key}: not started, so today is null`);
+      for (const list of ['due', 'overdue', 'anytime', 'completedToday', 'upcoming', 'done', 'templates']) if (!Array.isArray(b[list]) || b[list].length) problems.push(`${key}: not started, so ${list} is empty`);
+      ts.push(`export const ${name} = ${JSON.stringify(b)} satisfies TasksResponse;`);
+      continue;
+    }
     if (b.started !== true || !DAY.test(today)) problems.push(`${key}: started / today`);
     for (const list of ['due', 'overdue', 'anytime', 'completedToday', 'upcoming', 'done', 'templates']) {
       if (!Array.isArray(b[list])) { problems.push(`${key}: ${list} is not a list`); continue; }
@@ -83,7 +94,17 @@ for (const [key, s] of Object.entries(states.states)) {
     });
     const openListed = new Set([...b.due, ...b.overdue, ...b.anytime, ...b.upcoming].map((t) => t.id)).size;
     if (!Number.isInteger(b.openCount) || b.openCount < openListed) problems.push(`${key}: openCount ${b.openCount} < ${openListed} listed open tasks`);
-    ts.push(`export const ${key.replace(/[^A-Za-z0-9]/g, '_')} = ${JSON.stringify(b)} satisfies TasksResponse;`);
+    ts.push(`export const ${name} = ${JSON.stringify(b)} satisfies TasksResponse;`);
+  }
+  // The fix round's GET / PATCH /me/prefs answers (B-core's UserPrefs, api.md GET / PATCH /me/prefs).
+  for (const fx of s.fixtures || []) {
+    if (fx.path !== '/api/v1/me/prefs' || (fx.status ?? 200) !== 200) continue;
+    n += 1;
+    const p = fx.body?.prefs;
+    if (!p) { problems.push(`${key}: ${fx.method} /me/prefs has no prefs`); continue; }
+    if ((p.timezone === null) !== (p.today === null) || (p.timezone === null) !== (p.startedOn === null)) problems.push(`${key}: prefs timezone / today / startedOn are null together`);
+    if (![0, 2, 4, 6].includes(p.dayStartHour)) problems.push(`${key}: dayStartHour 0 | 2 | 4 | 6`);
+    ts.push(`export const ${key.replace(/[^A-Za-z0-9]/g, '_')}_${n} = ${JSON.stringify(p)} satisfies UserPrefs;`);
   }
 }
 fs.mkdirSync(outDir, { recursive: true });

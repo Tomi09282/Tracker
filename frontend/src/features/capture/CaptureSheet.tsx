@@ -5,8 +5,8 @@ import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { Field } from '../../ui/primitives/Field';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { DueChips, DueFields, FieldGroup, dueOnFor, type DueChoice } from '../tasks/formParts';
-import { mintClientKey, retryable, useCreateTask, useTasks } from '../tasks/tasksData';
+import { DueChips, DueFields, FieldGroup, ZoneDoor, dueOnFor, type DueChoice } from '../tasks/formParts';
+import { mintClientKey, retryable, useCreateTask, useLifeosStart, useTasks } from '../tasks/tasksData';
 
 /** The server's bound on a task title (`POST /tasks`, api.md). */
 const TITLE_MAX = 120;
@@ -23,13 +23,14 @@ type TimeMode = 'at' | 'allDay';
  *                 Phase-5 route (`POST /events`), so in Phase 3 the only destination is a task and
  *                 a one-option switch would be a control that chooses nothing: the group is not
  *                 drawn until Esemény can work (package deviation; plan: "hide that option").
- *   Mikor?        Ma · Holnap · Dátum as lime-marked chips, then Bármikor — a task with no deadline
- *                 (f_app's "Csak jegyzet" was exactly that: a dateless task; the frame's words for
- *                 it are tasks-1's tab "Bármikor"). Under it, for a day: Időpontban / Egész nap (a
- *                 hug segmented switch) — "Időpontban" adds the time (api.md: "Ma / Holnap / Dátum
+ *   Mikor?        Ma · Holnap · Dátum as lime-marked chips, exactly the frame's three (a task with no
+ *                 deadline is made in the task sheet with "Nincs"; the fix round dropped the fourth
+ *                 chip "Bármikor" the first build added). Under it: Időpontban / Egész nap (a hug
+ *                 segmented switch) — "Időpontban" adds the time (api.md: "Ma / Holnap / Dátum
  *                 are `dueOn`, Időpontban adds `dueTime`")
  *   Dátum + time  the pair of 165 pt fields (the date only for "Dátum", the time only "Időpontban")
- *   Mentés        THE lime pill
+ *   Mentés        THE lime pill — off, with the door "Nap és időzóna ›" above it, while LifeOS has
+ *                 not started (no zone on the server, so no logical today to write against)
  *
  * It writes `POST /tasks` with the default priority (Közepes, the server's default) — exactly the
  * call api.md names "Rögzítés · Feladat". A failed write keeps the sheet and the words: the danger
@@ -44,6 +45,8 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
   // The logical today comes from the server (the user's zone and day start), never from the device.
   const tasks = useTasks();
   const today = tasks.data?.today ?? null;
+  useLifeosStart(tasks.data);
+  const notStarted = tasks.data !== undefined && !tasks.data.started;
   const create = useCreateTask();
   const [clientKey] = useState(mintClientKey);
   const [text, setText] = useState('');
@@ -93,25 +96,17 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
       <FieldGroup label={t('capture.when')}>
         {() => (
           <div className="flex flex-col">
-            <DueChips
+            <DueChips label={t('capture.when')} choices={['today', 'tomorrow', 'date']} value={due} onChange={setDue} />
+            <Segmented
+              className="self-start"
               label={t('capture.when')}
-              choices={['today', 'tomorrow', 'date', 'none']}
-              words={{ none: t('tasks.tab.anytime') }}
-              value={due}
-              onChange={setDue}
+              value={mode}
+              onChange={setMode}
+              options={[
+                { value: 'at', label: t('capture.atTime') },
+                { value: 'allDay', label: t('capture.allDay') },
+              ]}
             />
-            {due !== 'none' ? (
-              <Segmented
-                className="self-start"
-                label={t('capture.when')}
-                value={mode}
-                onChange={setMode}
-                options={[
-                  { value: 'at', label: t('capture.atTime') },
-                  { value: 'allDay', label: t('capture.allDay') },
-                ]}
-              />
-            ) : null}
           </div>
         )}
       </FieldGroup>
@@ -122,7 +117,7 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
         time={time}
         onTime={setTime}
         showDate={due === 'date'}
-        showTime={due !== 'none' && mode === 'at'}
+        showTime={mode === 'at'}
         timeLabel={t('tasks.dueTime')}
         min={today ?? undefined}
         dateError={dateError}
@@ -133,6 +128,8 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void }) 
           {t('tasks.failed')}
         </NoticeLine>
       ) : null}
+
+      {notStarted ? <ZoneDoor /> : null}
 
       <Pressable variant="primary" size="lg" className="w-full" busy={create.isPending} disabled={!today} onClick={submit}>
         {t('common.save')}

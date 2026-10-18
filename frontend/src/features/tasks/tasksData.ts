@@ -1,7 +1,10 @@
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, apiWithRefresh } from '../../lib/api';
+import { useDayPrefs, useTimezoneBootstrap } from '../settings/dayPrefs';
 import type {
   DayKey,
+  PointRules,
   Recurrence,
   Task,
   TaskCompleteResponse,
@@ -44,6 +47,29 @@ export function useTasks() {
     queryKey: TASKS_KEY,
     queryFn: () => apiWithRefresh<TasksResponse>('/tasks'),
   });
+}
+
+/**
+ * LifeOS STARTS the first time the server knows the user's zone (B-core api.md "The day"): until
+ * then `GET /tasks` answers `started: false, today: null` and no task can be written. The silent
+ * first-time zone write (`useTimezoneBootstrap`, features/settings/dayPrefs.ts) belongs on the
+ * signed-in shell (request R-S-tasks-fix-01); until the shell mounts it, the task screens mount it
+ * themselves. It tries at most once per page load whoever mounts it, so a second mount is harmless.
+ *
+ * When the zone is known while the lists still say "not started", the LifeOS reads are re-read, so
+ * the logical today (and with it the sheets' pills) arrives without a reload.
+ */
+export function useLifeosStart(data: TasksResponse | undefined) {
+  useTimezoneBootstrap();
+  const prefs = useDayPrefs();
+  const qc = useQueryClient();
+  const zone = prefs.data?.timezone ?? null;
+  const waiting = data !== undefined && !data.started;
+  useEffect(() => {
+    // Two mounts (the page and its capture sheet) may both see the zone arrive: the second call
+    // joins the refetch already running instead of cancelling it (one request, not two).
+    if (zone && waiting) void qc.invalidateQueries({ queryKey: ['lifeos'] }, { cancelRefetch: false });
+  }, [zone, waiting, qc]);
 }
 
 /** After any write: the lists, the Ma day (`/lifeos/today`) and the wallet / ledger move together. */
@@ -133,14 +159,28 @@ export function rowCoinsMinor(task: Task): number | null {
 }
 
 /**
- * What each priority pays on time under the rules in force, read from the tasks themselves: a task
- * with no coin override (`points: null`) pays exactly its priority's rule (`valueMinor`). The
- * rules are admin-global and only an admin can read them (`GET /admin/rules`), so a priority no
- * task shows yet has no value here — the form then prints the word alone, never a guessed number.
+ * What each priority pays on time under the rules in force (task-form "Közepes · 10").
+ *
+ * 1. The server's own figures, when `GET /tasks` carries them: `rules.taskLow / taskMid / taskHigh`
+ *    in points (request R-S-tasks-fix-02 - the PointRules keys; read only when present, so the
+ *    screen works before and after the backend adds them).
+ * 2. Else read from the tasks themselves: a task with no coin override (`points: null`) pays
+ *    exactly its priority's rule (`valueMinor`).
+ *
+ * The full rule set is admin-only (`GET /admin/rules`), so a priority neither source shows has no
+ * value here - the form then prints the word alone, never a guessed number.
  */
+type TaskRuleFigures = Partial<Pick<PointRules, 'taskLow' | 'taskMid' | 'taskHigh'>>;
+const RULE_OF: Record<TaskPriority, keyof TaskRuleFigures> = { 1: 'taskLow', 2: 'taskMid', 3: 'taskHigh' };
+
 export function priorityValues(data: TasksResponse | undefined): Partial<Record<TaskPriority, number>> {
   const out: Partial<Record<TaskPriority, number>> = {};
   if (!data) return out;
+  const rules = (data as TasksResponse & { rules?: TaskRuleFigures }).rules;
+  for (const p of PRIORITIES) {
+    const points = rules?.[RULE_OF[p]];
+    if (typeof points === 'number' && Number.isInteger(points) && points >= 0) out[p] = points * 100;
+  }
   for (const list of [data.due, data.overdue, data.anytime, data.completedToday, data.upcoming, data.done, data.templates]) {
     for (const task of list) if (task.points === null && out[task.priority] === undefined) out[task.priority] = task.valueMinor;
   }

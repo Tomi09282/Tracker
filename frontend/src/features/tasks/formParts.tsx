@@ -1,6 +1,8 @@
 import { useId, useRef, useSyncExternalStore, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ChevronRight } from 'lucide-react';
 import { ChipRow, Chip } from '../../ui/primitives/ChipRow';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { DateTrigger } from '../../ui/primitives/DateTrigger';
 import { TimeTrigger } from '../../ui/primitives/TimeTrigger';
 import type { DayKey } from '../../lib/lifeos-api';
@@ -37,6 +39,21 @@ export function FieldGroup({
   );
 }
 
+/**
+ * The way out of a sheet whose pill cannot write yet: LifeOS has not started because the server
+ * knows no zone for the user (the silent zone write found no usable browser zone, or it failed).
+ * The pill stays off and this door - the Profil row's own words, "Nap és időzóna ›" - leads to the
+ * page where choosing a zone starts LifeOS. No new sentence is invented for it (PLAN R22).
+ */
+export function ZoneDoor() {
+  const { t } = useTranslation();
+  return (
+    <TextLink to="/settings/day" trail={<ChevronRight />} className="self-start">
+      {t('settings.day.title')}
+    </TextLink>
+  );
+}
+
 /** The deadline choices of both sheets: none (task-form only), today, tomorrow, a date. */
 export type DueChoice = 'none' | 'today' | 'tomorrow' | 'date';
 
@@ -50,7 +67,7 @@ export function dueOnFor(choice: DueChoice, today: DayKey, date: string): DayKey
 
 /**
  * The deadline as a lime-marked chip row (task-form "Határidő": Nincs · Ma · Holnap · Dátum;
- * capture "Mikor?": Ma · Holnap · Dátum, with Bármikor last — see CaptureSheet). One choice, so
+ * capture "Mikor?": Ma · Holnap · Dátum). One choice, so
  * the chips are radios.
  */
 export function DueChips({
@@ -58,14 +75,11 @@ export function DueChips({
   choices,
   value,
   onChange,
-  words,
 }: {
   label: string;
   choices: readonly DueChoice[];
   value: DueChoice;
   onChange: (next: DueChoice) => void;
-  /** A word in place of the default one (capture writes "Bármikor" for no deadline). */
-  words?: Partial<Record<DueChoice, string>>;
 }) {
   const { t } = useTranslation();
   const chips = useRef<(HTMLButtonElement | null)[]>([]);
@@ -94,7 +108,7 @@ export function DueChips({
             tabIndex={value === c ? 0 : -1}
             onClick={() => onChange(c)}
           >
-            {words?.[c] ?? t(`tasks.due.${c}`)}
+            {t(`tasks.due.${c}`)}
           </Chip>
         ))}
       </ChipRow>
