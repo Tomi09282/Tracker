@@ -158,7 +158,6 @@
   },
   "admin": {
     "eyebrow": "Administration",
-    "title": "Overview",
     "users": "Users",
     "moderation": "Moderation queue",
     "pendingCount": "{{count}} waiting",
@@ -172,6 +171,7 @@
     "footer": "{{sessions}} active sessions · {{events}} audit events in the last 24 hours",
     "marketplace": {
       "title": "Marketplace reports",
+      "report": "Report",
       "emptyTitle": "Nothing to decide",
       "emptyBody": "When somebody reports a post or a profile, it appears here.",
       "openLive": "Open the live page",
@@ -181,7 +181,6 @@
       "decide": "Decide",
       "upholdAndRemove": "Uphold and remove",
       "reject": "Reject",
-      "cancel": "Cancel",
       "removalReason": "Reason for removal",
       "removalReasonHint": "This goes into the audit log. The author does not see it.",
       "resolutionNote": "Internal note",
@@ -206,7 +205,6 @@
       }
     },
     "styleStudio": "Style studio",
-    "sections": "Sections",
     "section": {
       "accounts": "Accounts",
       "moderation": "Moderation",

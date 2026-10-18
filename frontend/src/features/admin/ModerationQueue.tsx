@@ -272,13 +272,12 @@ export function ModerationQueue() {
 
   const at = rows.findIndex((row) => row.id === selected);
   if (at < 0) {
+    // On a phone a row opens in place, so the "open one first" hint of the two-pane layout says
+    // nothing here (admin-view-1 drops it; design round A review, finding 4).
     return (
-      <div className="flex flex-col gap-4">
-        <RowStack close aria-label={t('admin.moderation')}>
-          {rows.map(closedRow)}
-        </RowStack>
-        {hint}
-      </div>
+      <RowStack close aria-label={t('admin.moderation')}>
+        {rows.map(closedRow)}
+      </RowStack>
     );
   }
 

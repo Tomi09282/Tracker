@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router';
 import { ExternalLink } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
 import { Pressable } from '../../ui/primitives/Pressable';
@@ -8,9 +9,13 @@ import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
 import { Chip, ChipRow } from '../../ui/primitives/ChipRow';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
-import { SectionHeader } from '../../ui/data/SectionHeader';
+import { Section, SectionHeader } from '../../ui/data/SectionHeader';
+import { Rule } from '../../ui/data/Rule';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 
 interface ReportRow {
   id: number;
@@ -29,8 +34,50 @@ interface ReportRow {
   distinctReporters: number;
 }
 
+export const REPORT_STATUSES = ['open', 'triaged', 'upheld', 'rejected'] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+
+/** The `?status=` of the page: one of the four words, `open` when absent or anything else. */
+export function reportStatusOf(raw: string | null): ReportStatus {
+  return (REPORT_STATUSES as readonly string[]).includes(raw ?? '') ? (raw as ReportStatus) : 'open';
+}
+
+/** The page's search for a status (and a report): `open` is the default and is not written. */
+export function reportSearch(status: ReportStatus, report?: number): string {
+  const params = new URLSearchParams();
+  if (status !== 'open') params.set('status', status);
+  if (report !== undefined) params.set('report', String(report));
+  const s = params.toString();
+  return s ? `?${s}` : '';
+}
+
+/** One read of the queue per status, shared by the list and the report page (same cache key). */
+function useReports(status: ReportStatus) {
+  return useQuery({
+    queryKey: ['admin-marketplace-reports', status],
+    queryFn: () =>
+      apiWithRefresh<{ reports: ReportRow[] }>(`/admin/marketplace/reports?status=${encodeURIComponent(status)}`),
+  });
+}
+
+/** "2026. 10. 15. 18:42": the instant a report was filed, to the minute, in the reader's language. */
+function useReportedAt() {
+  const { i18n } = useTranslation();
+  return (unixSeconds: number) =>
+    new Date(unixSeconds * 1000).toLocaleString(i18n.language, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+}
+
+/** A report's subject: the post's title, or the reported profile. */
+const subjectOf = (r: ReportRow) => (r.postId ? r.postTitle : `@${r.profileHandle} · ${r.profileName}`);
+
 /**
- * The marketplace moderation queue.
+ * The marketplace moderation queue (admin-view-3).
  *
  * ═══ WHAT THIS SCREEN DELIBERATELY DOES NOT SHOW ═══════════════════════════════════════════════
  *
@@ -43,59 +90,32 @@ interface ReportRow {
  * means something, and it is the reason a duplicate report from one person replays instead of
  * adding a row.
  *
- * ═══ AND WHAT IT SHOWS THAT THE LIVE PAGE NO LONGER DOES ═══════════════════════════════════════
+ * ═══ THE QUEUE IS DOORS; THE CASE IS A PAGE (design round A, fix 3) ════════════════════════════
  *
- * The snapshot is the text as it was WHEN REPORTED. An author who edits after a complaint does not
- * get to change what the moderator is looking at — and the moment a case closes, the server destroys
- * that copy, which a trigger enforces. This screen is the only place it is ever displayed.
- *
- * ═══ UNDRAWN: THE MODERATION GRAMMAR, NOTHING HIDDEN BEHIND A NEW TAP ══════════════════════════
- *
- * No frame draws this tab. It is built in the language of the Moderáció tab beside it: the eyebrow,
- * the status filter as lime-marked words (a filter changes the subject), and each report as a ruled
- * block — the subject as the row's title, the reason and the reporter count, the date in mono —
- * with the live-page link, the reporter's note and the snapshot under it. Nothing is enclosed. The
- * note and the snapshot stay visible without a tap, as before (behaviour wins, Q4); the decision is
- * the one step behind "Döntés", and its form carries this tab's only pill.
+ * The eyebrow with the count of the chosen status, the status filter as lime-marked words, and each
+ * report as one row that opens it: the subject, the reason and the reporter count, the mono date,
+ * the chevron. The snapshot, the live-page link, the reporter's note and the decision stand on the
+ * pushed report page (`MarketplaceReport`, admin-view-3-report). No pill on this page.
  */
-export function MarketplaceQueue() {
-  const { t, i18n } = useTranslation();
-  const qc = useQueryClient();
-  const [status, setStatus] = useState<'open' | 'triaged' | 'upheld' | 'rejected'>('open');
-  const [openId, setOpenId] = useState<number | null>(null);
-  const [reason, setReason] = useState('');
-  const [note, setNote] = useState('');
-
-  const queue = useQuery({
-    queryKey: ['admin-marketplace-reports', status],
-    queryFn: () =>
-      apiWithRefresh<{ reports: ReportRow[] }>(
-        `/admin/marketplace/reports?status=${encodeURIComponent(status)}`,
-      ),
-  });
-
-  const resolve = useMutation({
-    mutationFn: (v: { id: number; status: string; remove: boolean; removalReason: string | null; note: string | null }) =>
-      apiWithRefresh(`/admin/marketplace/reports/${v.id}/resolve`, {
-        method: 'POST',
-        body: { status: v.status, note: v.note, remove: v.remove, removal_reason: v.removalReason },
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['admin-marketplace-reports'] });
-      setOpenId(null);
-      setReason('');
-      setNote('');
-    },
-  });
-
-  const statuses = ['open', 'triaged', 'upheld', 'rejected'] as const;
+export function MarketplaceQueue({ status, onStatus }: { status: ReportStatus; onStatus: (s: ReportStatus) => void }) {
+  const { t } = useTranslation();
+  const reportedAt = useReportedAt();
+  const queue = useReports(status);
+  const reports = queue.data?.reports ?? [];
 
   return (
     <section className="flex flex-col gap-4" aria-label={t('admin.marketplace.title')}>
-      <SectionHeader rule={false} title={t('admin.marketplace.title')} />
-      <ChipRow label={t('admin.marketplace.title')} scroll="bleed">
-        {statuses.map((s) => (
-          <Chip key={s} selected={status === s} onClick={() => setStatus(s)}>
+      <SectionHeader
+        rule={false}
+        title={t('admin.marketplace.title')}
+        // A count only when there IS one — never a grey zero.
+        trailing={reports.length > 0 ? <span className="text-data text-text-2">{reports.length}</span> : undefined}
+      />
+      {/* 16 between the words, as admin-view-3 sets them: the four statuses then fit the 354 measure
+          (the kit line is 24 apart); a longer locale still scrolls sideways inside the line. */}
+      <ChipRow label={t('admin.marketplace.title')} scroll="bleed" className="gap-x-4">
+        {REPORT_STATUSES.map((s) => (
+          <Chip key={s} selected={status === s} onClick={() => onStatus(s)}>
             {t(`admin.marketplace.status.${s}`)}
           </Chip>
         ))}
@@ -104,112 +124,35 @@ export function MarketplaceQueue() {
       {queue.isPending ? (
         <div role="status">
           <span className="sr-only">{t('common.loading')}</span>
-          <RowStack as="div" aria-hidden>
-            {[0, 1].map((i) => (
+          <RowStack as="div" aria-hidden open>
+            {[0, 1, 2].map((i) => (
               <ListRowSkeleton key={i} sub index={i} />
             ))}
           </RowStack>
         </div>
-      ) : queue.data && queue.data.reports.length > 0 ? (
-        <RowStack close aria-label={t('admin.marketplace.title')}>
-          {queue.data.reports.map((r) => (
-            <div key={r.id} className="flex flex-col gap-4 pb-6">
-              <ListRow
-                title={r.postId ? r.postTitle : `@${r.profileHandle} · ${r.profileName}`}
-                sub={
-                  <>
-                    {/* How many DIFFERENT people, not how many reports. One person filing five
-                        times is one person, and the server makes that true by replaying their
-                        duplicates. */}
-                    <span className="block truncate">
-                      {t(`admin.marketplace.reason.${r.reason}`, { defaultValue: r.reason })}
-                      {' · '}
-                      {t('admin.marketplace.reporters', { count: r.distinctReporters })}
-                    </span>
-                    <span className="mt-0.5 block truncate text-data">
-                      {new Date(r.createdAt * 1000).toLocaleString(i18n.language)}
-                    </span>
-                  </>
-                }
-                subLines={2}
-              />
-
-              {r.postId ? (
-                <TextLink href={`/m/p/${r.postId}`} target="_blank" rel="noreferrer" lead={<ExternalLink />} className="self-start">
-                  {t('admin.marketplace.openLive')}
-                </TextLink>
-              ) : null}
-
-              {r.note ? <p className="text-body text-text-2">{r.note}</p> : null}
-
-              {/* The text AS REPORTED. The live page may say something else by now, and that is the
-                  point of keeping a copy until the case closes. */}
-              {r.snapshot ? (
-                <div className="flex flex-col gap-4">
-                  <SectionHeader rule={false} heading="h3" title={t('admin.marketplace.snapshot')} />
-                  <p className="text-body whitespace-pre-wrap text-text-1">{r.snapshot}</p>
-                  {r.snapshotTruncated === 1 ? (
-                    <p className="text-cap text-text-3">{t('admin.marketplace.snapshotTruncated')}</p>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {openId === r.id ? (
-                <div className="flex flex-col gap-6 pt-2">
-                  <Field
-                    label={t('admin.marketplace.removalReason')}
-                    value={reason}
-                    maxLength={2000}
-                    onChange={(e) => setReason(e.target.value)}
-                    hint={t('admin.marketplace.removalReasonHint')}
-                  />
-                  <Field
-                    label={t('admin.marketplace.resolutionNote')}
-                    value={note}
-                    maxLength={2000}
-                    onChange={(e) => setNote(e.target.value)}
-                  />
-                  <div className="flex flex-col items-start gap-2">
-                    {/* Upholding WITH a removal is one act on the server: the report closes and the
-                        content comes down inside one transaction, so there is no moment where the
-                        case reads as handled and the post is still public. */}
-                    <Pressable
-                      variant="primary"
-                      size="lg"
-                      className="w-full"
-                      busy={resolve.isPending}
-                      disabled={reason.trim().length === 0}
-                      onClick={() =>
-                        resolve.mutate({ id: r.id, status: 'upheld', remove: true, removalReason: reason, note: note || null })
-                      }
-                    >
-                      {t('admin.marketplace.upholdAndRemove')}
-                    </Pressable>
-                    {reason.trim().length === 0 ? (
-                      <p className="text-cap text-text-3">{t('admin.marketplace.reasonRequired')}</p>
-                    ) : null}
-                    <div className="flex items-center gap-6">
-                      <TextLink
-                        text="body"
-                        busy={resolve.isPending}
-                        onClick={() =>
-                          resolve.mutate({ id: r.id, status: 'rejected', remove: false, removalReason: null, note: note || null })
-                        }
-                      >
-                        {t('admin.marketplace.reject')}
-                      </TextLink>
-                      <TextLink text="body" tone="quiet" onClick={() => setOpenId(null)}>
-                        {t('admin.marketplace.cancel')}
-                      </TextLink>
-                    </div>
-                  </div>
-                </div>
-              ) : r.status === 'open' || r.status === 'triaged' ? (
-                <TextLink text="body" className="self-start" onClick={() => setOpenId(r.id)}>
-                  {t('admin.marketplace.decide')}
-                </TextLink>
-              ) : null}
-            </div>
+      ) : reports.length > 0 ? (
+        <RowStack open close aria-label={t('admin.marketplace.title')}>
+          {reports.map((r) => (
+            <ListRow
+              key={r.id}
+              to={{ search: reportSearch(status, r.id) }}
+              title={subjectOf(r)}
+              lines={2}
+              sub={
+                <>
+                  {/* How many DIFFERENT people, not how many reports. One person filing five times
+                      is one person, and the server makes that true by replaying their duplicates. */}
+                  <span className="block truncate">
+                    {t(`admin.marketplace.reason.${r.reason}`, { defaultValue: r.reason })}
+                    {' · '}
+                    {t('admin.marketplace.reporters', { count: r.distinctReporters })}
+                  </span>
+                  <span className="mt-0.5 block truncate text-data text-text-3">{reportedAt(r.createdAt)}</span>
+                </>
+              }
+              subLines={2}
+              chevron
+            />
           ))}
         </RowStack>
       ) : (
@@ -217,5 +160,175 @@ export function MarketplaceQueue() {
         <EmptyState title={t('admin.marketplace.emptyTitle')} body={t('admin.marketplace.emptyBody')} />
       )}
     </section>
+  );
+}
+
+/**
+ * One marketplace report, pushed from its queue row (admin-view-3-report): "‹ PIACTÉR / Bejelentés".
+ *
+ * The subject with its reason, reporter count and mono date, the live-page link; the text AS
+ * REPORTED; then DÖNTÉS — the removal reason with its hint, the internal note, the one lime pill
+ * "Helybenhagyás és eltávolítás" and "Elutasítás" as text. There is no "Mégse": the back control
+ * leaves the page, and a decided case leaves it too.
+ *
+ * ═══ AND WHAT IT SHOWS THAT THE LIVE PAGE NO LONGER DOES ═══════════════════════════════════════
+ *
+ * The snapshot is the text as it was WHEN REPORTED. An author who edits after a complaint does not
+ * get to change what the moderator is looking at — and the moment a case closes, the server destroys
+ * that copy, which a trigger enforces. This page is the only place it is ever displayed.
+ *
+ * ═══ WHY A SEARCH PARAMETER AND NOT A ROUTE ════════════════════════════════════════════════════
+ *
+ * The server has no read of one report; the case is a row of the status list it was opened from, so
+ * the page lives at `/admin/marketplace?report=<id>` (with the list's `status`) and reads the same
+ * cached list. The admin bar keeps Piactér lit, and a report that is no longer in its list (decided
+ * by somebody else, or a stale link) sends the reader back to the list.
+ */
+export function MarketplaceReport({ id, status }: { id: number; status: ReportStatus }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const reportedAt = useReportedAt();
+  const queue = useReports(status);
+  const report = queue.data?.reports.find((r) => r.id === id);
+  const [reason, setReason] = useState('');
+  const [note, setNote] = useState('');
+  const decideId = useId();
+
+  // Back to the list it was opened from: the history step when there is one inside the app (the
+  // row pushed this page), the list itself when the page was opened by its address.
+  const leave = () => {
+    if (location.key !== 'default') void navigate(-1);
+    else void navigate({ search: reportSearch(status) }, { replace: true });
+  };
+
+  const resolve = useMutation({
+    mutationFn: (v: { id: number; status: string; remove: boolean; removalReason: string | null; note: string | null }) =>
+      apiWithRefresh(`/admin/marketplace/reports/${v.id}/resolve`, {
+        method: 'POST',
+        body: { status: v.status, note: v.note, remove: v.remove, removal_reason: v.removalReason },
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['admin-marketplace-reports'] });
+      leave();
+    },
+  });
+
+  const missing = !queue.isPending && !report && !resolve.isSuccess;
+  useEffect(() => {
+    if (missing) void navigate({ search: reportSearch(status) }, { replace: true });
+  }, [missing, navigate, status]);
+
+  const decidable = report && (report.status === 'open' || report.status === 'triaged');
+
+  return (
+    <Screen top="push" width="wide">
+      <ScreenHeader
+        kind="push"
+        title={t('admin.marketplace.report')}
+        back={{ onClick: leave, label: t('admin.section.marketplace') }}
+      />
+
+      {!report ? (
+        <div role="status" className="flex flex-col gap-2">
+          <span className="sr-only">{t('common.loading')}</span>
+          <Skeleton className="h-7 w-72" />
+          <Skeleton className="h-4 w-56" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-title text-text-1">{subjectOf(report)}</h2>
+            <p className="text-cap text-text-2">
+              {t(`admin.marketplace.reason.${report.reason}`, { defaultValue: report.reason })}
+              {' · '}
+              {t('admin.marketplace.reporters', { count: report.distinctReporters })}
+            </p>
+            <p className="text-data text-text-3">{reportedAt(report.createdAt)}</p>
+            {/* The reporter's own words, when they wrote any: kept from the old queue (behaviour
+                wins, Q4); the frame's sample report has none. */}
+            {report.note ? <p className="mt-3 text-body text-text-2">{report.note}</p> : null}
+            {report.postId ? (
+              <TextLink
+                href={`/m/p/${report.postId}`}
+                target="_blank"
+                rel="noreferrer"
+                lead={<ExternalLink />}
+                className="self-start"
+              >
+                {t('admin.marketplace.openLive')}
+              </TextLink>
+            ) : null}
+          </div>
+
+          {/* The text AS REPORTED. The live page may say something else by now, and that is the
+              point of keeping a copy until the case closes. */}
+          {report.snapshot ? (
+            <Section title={t('admin.marketplace.snapshot')}>
+              <p className="text-body whitespace-pre-wrap text-text-1">{report.snapshot}</p>
+              {report.snapshotTruncated === 1 ? (
+                <p className="text-cap text-text-3">{t('admin.marketplace.snapshotTruncated')}</p>
+              ) : null}
+            </Section>
+          ) : null}
+
+          {decidable ? (
+            // admin-view-3-report draws this section 24 apart throughout (kit sect with gap 24): the
+            // strong rule, 24, the eyebrow, 24, the form — not the 16 of a default section head.
+            <section aria-labelledby={decideId} className="flex w-full flex-col gap-6">
+              <Rule strong />
+              <SectionHeader rule={false} title={t('admin.marketplace.decide')} titleId={decideId} />
+              <div className="flex flex-col gap-6">
+                <Field
+                  label={t('admin.marketplace.removalReason')}
+                  value={reason}
+                  maxLength={2000}
+                  onChange={(e) => setReason(e.target.value)}
+                  hint={t('admin.marketplace.removalReasonHint')}
+                />
+                <Field
+                  label={t('admin.marketplace.resolutionNote')}
+                  value={note}
+                  maxLength={2000}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+                <div className="flex flex-col gap-2 pt-2">
+                  {/* Upholding WITH a removal is one act on the server: the report closes and the
+                      content comes down inside one transaction, so there is no moment where the
+                      case reads as handled and the post is still public. */}
+                  <Pressable
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    busy={resolve.isPending}
+                    disabled={reason.trim().length === 0}
+                    onClick={() =>
+                      resolve.mutate({ id: report.id, status: 'upheld', remove: true, removalReason: reason, note: note || null })
+                    }
+                  >
+                    {t('admin.marketplace.upholdAndRemove')}
+                  </Pressable>
+                  {reason.trim().length === 0 ? (
+                    <p className="text-center text-cap text-text-3">{t('admin.marketplace.reasonRequired')}</p>
+                  ) : null}
+                  <TextLink
+                    text="body"
+                    className="self-center"
+                    busy={resolve.isPending}
+                    onClick={() =>
+                      resolve.mutate({ id: report.id, status: 'rejected', remove: false, removalReason: null, note: note || null })
+                    }
+                  >
+                    {t('admin.marketplace.reject')}
+                  </TextLink>
+                </div>
+              </div>
+            </section>
+          ) : null}
+        </>
+      )}
+    </Screen>
   );
 }

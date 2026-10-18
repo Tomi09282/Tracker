@@ -1,35 +1,39 @@
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '../../ui/feedback/EmptyState';
+import { useSearchParams } from 'react-router';
 import { Screen } from '../../ui/shell/Screen';
-import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { hasRole, useSession } from '../auth/useSession';
-import { MarketplaceQueue } from './MarketplaceQueue';
+import { AdminForbidden, AdminHeader } from './AdminShell';
+import { MarketplaceQueue, MarketplaceReport, reportSearch, reportStatusOf } from './MarketplaceQueue';
+
+/** A report id from the address: digits only, bounded — anything else is no report. */
+const reportIdOf = (raw: string | null) => (raw && /^[1-9]\d{0,9}$/.test(raw) ? Number(raw) : null);
 
 /**
- * PLACEHOLDER of the admin bar's "marketplace" tab (/admin/marketplace), created by the integrator in the
- * nav commit (P1-nav) so the route and the tab exist. The S-admin package owns this file and
- * rebuilds it to its frame (design round A, admin-view-3); until then it shows the
- * existing section of the admin page under a section header.
+ * Piactér (`/admin/marketplace`) — the admin bar's marketplace tab.
+ *
+ * admin-view-3: the admin header (eyebrow, the style-studio door, "Piactér"), then the report queue
+ * as one-line doors. `?report=<id>` is the pushed report page (admin-view-3-report); `?status=` is
+ * the chosen filter, kept in the address so the report page reads the list it was opened from and
+ * the way back returns to the same filter.
  *
  * The server enforces the role on every endpoint behind it; this only explains a refusal.
  */
 export function AdminMarketplacePage() {
   const { t } = useTranslation();
   const { data: user } = useSession();
-  const admin = hasRole(user, 'admin');
+  const [params, setParams] = useSearchParams();
+  const status = reportStatusOf(params.get('status'));
+  const report = reportIdOf(params.get('report'));
 
-  if (user && !admin) {
-    return (
-      <Screen top="root">
-        <EmptyState heading="h1" title={t('admin.forbiddenTitle')} body={t('admin.forbiddenBody')} />
-      </Screen>
-    );
-  }
+  if (user && !hasRole(user, 'admin')) return <AdminForbidden />;
+
+  if (report !== null) return <MarketplaceReport key={report} id={report} status={status} />;
 
   return (
     <Screen top="push" width="wide">
-      <ScreenHeader kind="section" eyebrow={t('admin.eyebrow')} title={t('admin.section.marketplace')} />
-      <MarketplaceQueue />
+      <AdminHeader title={t('admin.section.marketplace')} />
+      {/* A filter changes the subject, not the place: it replaces the address instead of pushing. */}
+      <MarketplaceQueue status={status} onStatus={(s) => setParams(new URLSearchParams(reportSearch(s)), { replace: true })} />
     </Screen>
   );
 }

@@ -158,7 +158,6 @@
   },
   "admin": {
     "eyebrow": "Verwaltung",
-    "title": "Übersicht",
     "users": "Nutzer",
     "moderation": "Moderationswarteschlange",
     "pendingCount": "{{count}} warten",
@@ -172,6 +171,7 @@
     "footer": "{{sessions}} aktive Sitzungen · {{events}} Audit-Ereignisse in den letzten 24 Stunden",
     "marketplace": {
       "title": "Marktplatz-Meldungen",
+      "report": "Meldung",
       "emptyTitle": "Nichts zu entscheiden",
       "emptyBody": "Wenn jemand einen Beitrag oder ein Profil meldet, erscheint es hier.",
       "openLive": "Live-Seite öffnen",
@@ -181,7 +181,6 @@
       "decide": "Entscheiden",
       "upholdAndRemove": "Bestätigen und entfernen",
       "reject": "Ablehnen",
-      "cancel": "Abbrechen",
       "removalReason": "Grund für die Entfernung",
       "removalReasonHint": "Das landet im Audit-Log. Der Autor sieht es nicht.",
       "resolutionNote": "Interne Notiz",
@@ -206,7 +205,6 @@
       }
     },
     "styleStudio": "Stil-Studio",
-    "sections": "Bereiche",
     "section": {
       "accounts": "Konten",
       "moderation": "Moderation",

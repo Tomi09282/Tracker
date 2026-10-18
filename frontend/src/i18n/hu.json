@@ -158,7 +158,6 @@
   },
   "admin": {
     "eyebrow": "Adminisztráció",
-    "title": "Áttekintés",
     "users": "Felhasználók",
     "moderation": "Moderációs sor",
     "pendingCount": "{{count}} várakozik",
@@ -172,6 +171,7 @@
     "footer": "{{sessions}} aktív munkamenet · {{events}} naplóesemény az elmúlt 24 órában",
     "marketplace": {
       "title": "Piactéri bejelentések",
+      "report": "Bejelentés",
       "emptyTitle": "Nincs elintézendő bejelentés",
       "emptyBody": "Ha valaki bejelent egy bejegyzést vagy profilt, itt fog megjelenni.",
       "openLive": "Élő oldal megnyitása",
@@ -181,7 +181,6 @@
       "decide": "Döntés",
       "upholdAndRemove": "Helybenhagyás és eltávolítás",
       "reject": "Elutasítás",
-      "cancel": "Mégse",
       "removalReason": "Eltávolítás indoka",
       "removalReasonHint": "Ez az indok az audit-naplóba kerül. A szerző nem látja.",
       "resolutionNote": "Belső megjegyzés",
@@ -206,7 +205,6 @@
       }
     },
     "styleStudio": "Stílus stúdió",
-    "sections": "Szakaszok",
     "section": {
       "accounts": "Fiókok",
       "moderation": "Moderáció",

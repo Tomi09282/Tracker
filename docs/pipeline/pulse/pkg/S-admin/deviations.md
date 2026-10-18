@@ -38,3 +38,28 @@ The dev DB answers 49 users (45 / 3 / 1), 1660 exercises, 4 media, other owners;
 pulse-fixture-check against 184 recordings). The `letiltva` flag of admin-3 is NOT set: no recording holds a disabled account, so a
 `disabledAt` value cannot be schema-checked (ruling 2026-10-17); the flag is drawn by the code (`text-danger`, micro upper).
 The submitted image is the seed's blank upload; the frame draws a barbell photograph (the screen note calls the photograph illustrative and the seed file a blank placeholder). A fixture cannot answer a binary body, so the photograph cannot be replayed: request R-S-admin-03. The `letiltva` flag stays unset: pulse-fixture-check refuses `disabledAt` = a number ("the recordings have null"), tried again in fix round 2.
+
+## Phase 1 — admin section routes (package S-admin-routes, design round A: admin-view-1 / -2 / -3 / -3-report)
+
+The sections of `/admin` became the admin bar's routes: `/admin` = Moderáció (`AdminPage`), `/admin/accounts` = Fiókok
+(`AdminAccountsPage`), `/admin/marketplace` = Piactér (`AdminMarketplacePage`), each under the shared `AdminHeader`
+(eyebrow, the Stílus stúdió door, the tab's name as the display title). `AdminShell`'s local section switch / rail is gone;
+the file now holds `AdminHeader` and `AdminForbidden`. Every server check is unchanged (the pages only explain a refusal).
+
+| # | Frame vs app | What the app does | Owner question? |
+|---|---|---|---|
+| 16 | admin-view-1 draws a "Szabályok ›" door row under the closed Gyakorlat / Médiafájl ledger | not drawn: `/admin/rules` arrives in Phase 2, and a row that leads nowhere is a control that does nothing (D3). Everything under the ledger therefore stands 57 pt higher than in the frame | no — it lands with Phase 2 |
+| 17 | admin-view-3-report is a pushed page | it is `/admin/marketplace?report=<id>` (with the list's `?status=`), not a route of its own: the server has no read of one report, the case is a row of the status list, and `app/router.tsx` / `routeMeta.ts` are the integrator's. The back control (`ScreenHeader back`, label Piactér) takes the history step when the row pushed the page, else replaces to the list; a report no longer in its list (decided elsewhere, stale link) sends the reader to the list | no |
+| 18 | admin-view-3-report draws the lime pill "Helybenhagyás és eltávolítás" lit with an empty reason field | the pill stays disabled until a removal reason is typed, with the existing helper line "Eltávolításhoz indok kell." under it (behaviour wins, Q4): the frame state is not reachable with an empty field | yes, if the pill should look enabled and refuse on tap instead |
+| 19 | the report page draws no reporter note | the reporter's own note, when there is one, stays on the page under the date (it was always visible before; behaviour wins). The frame state's fixture empties it | no |
+| 20 | the old in-row "Mégse" of the decision form | gone, as the frame says: the back control leaves the page (`admin.marketplace.cancel` removed) | no |
+| 21 | admin-view-3's four status words 16 apart (the kit line is 24) | `ChipRow className="gap-x-4"` on this one line so the four words fit 354 as drawn; at 360 the line scrolls sideways inside itself (bleed), as the kit allows | no |
+| 22 | admin-view-3-report's DÖNTÉS section is 24 apart throughout (kit `sect` with gap 24: rule, 24, eyebrow, 24, form) | built as a `section` of `Rule strong` + `SectionHeader rule={false}` + the form at `gap-6`; the snapshot section keeps the default 16 | no |
+| 23 | the "Válassz egy beküldést" hint under the phone queue (an admin-1 leftover, round-A review finding 4) | removed on a phone; kept in the wide two-pane layout, where it explains the empty pane | no |
+| 24 | Fiókok carried its own "FIÓKOK" eyebrow as a section of /admin | gone: the page title names the list (admin-view-2); `adminUsers.title` stays the list's accessible name | no |
+| 25 | report subjects in admin-view-3 are one line at 402 | `lines={2}`: at 360 a long subject wraps to a second line instead of losing its end | no |
+
+Keys: `admin.marketplace.report` added (hu "Bejelentés" from the frame; en "Report", de "Meldung" proposed — C5); `admin.title`,
+`admin.sections`, `admin.marketplace.cancel` removed (no reader). The state scripts in `states.json` reach each tab by its route
+(no switch click any more); four new states `admin-view-1 / -2 / -3 / -3-report` replay the frames' data by fixture
+(verdict cap `matched-fixture`).

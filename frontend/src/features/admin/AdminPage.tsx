@@ -1,26 +1,20 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, Palette, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { TextLink } from '../../ui/primitives/TextLink';
 import { Screen } from '../../ui/shell/Screen';
-import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { StatBlock } from '../../ui/data/StatBlock';
 import { Numeral } from '../../ui/data/Numeral';
 import { SplitBar, SplitLegend, type SplitPart } from '../../ui/data/SplitBar';
 import { LedgerRow } from '../../ui/data/LedgerRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { SectionHeader } from '../../ui/data/SectionHeader';
-import { Rule } from '../../ui/data/Rule';
 import { hasRole, useSession } from '../auth/useSession';
-import { MarketplaceQueue } from './MarketplaceQueue';
 import { ModerationQueue } from './ModerationQueue';
-import { AdminShell } from './AdminShell';
-import { UserSearch } from './UserSearch';
+import { AdminForbidden, AdminHeader } from './AdminShell';
 
 interface Stats {
   users: { total: number; coaches: number; admins: number; disabled: number; new_7d: number };
@@ -164,19 +158,21 @@ function ModerationHeader({ pending }: { pending?: number }) {
 }
 
 /**
- * Admin — the platform's landing screen for the one role that can change it.
+ * Moderáció (`/admin`) — the admin view's landing tab.
  *
- * admin-1: the category header with the one door to the style studio on its eyebrow row; the user
- * split as the hero; the exercise and media counts on one ledger line; the section switch; the open
- * section; the liveness footer under a strong rule. Nothing is enclosed. `Moderáció` is the section
- * that opens: its count is the only element on the screen that means "someone is waiting".
+ * admin-view-1: the category header (eyebrow, the one door to the style studio, the tab's name as
+ * the title); the user split as the hero; the exercise and media counts on one closed ledger line;
+ * the moderation queue as a section of its own; the liveness footer. Nothing is enclosed. The
+ * waiting count is the only element on the screen that means "someone is waiting".
+ *
+ * Fiókok and Piactér are tabs of the admin bar now (`AdminAccountsPage`, `AdminMarketplacePage`);
+ * the local section switch is gone. The frame's "Szabályok" door row under the ledger leads to
+ * `/admin/rules`, which arrives in Phase 2 — it is not drawn until there is a page behind it (D3:
+ * no control that does nothing).
  */
 export function AdminPage() {
   const { t } = useTranslation();
   const { data: user } = useSession();
-  // Which panel is open. Local state rather than a route: these are three views of one screen, and
-  // a URL per view would mean three routes the palette and the router both have to know about.
-  const [section, setSection] = useState('moderation');
 
   const stats = useQuery({
     queryKey: ['admin', 'stats'],
@@ -186,30 +182,11 @@ export function AdminPage() {
 
   // The server enforces this too — this is only so a non-admin sees an explanation instead of
   // a screen full of failed requests.
-  if (user && !hasRole(user, 'admin')) {
-    return (
-      <Screen top="root">
-        {/* `heading="h1"`: this IS the page for a non-admin, and a page with no `h1` is one a
-            screen-reader user cannot navigate into. */}
-        <EmptyState heading="h1" title={t('admin.forbiddenTitle')} body={t('admin.forbiddenBody')} />
-      </Screen>
-    );
-  }
+  if (user && !hasRole(user, 'admin')) return <AdminForbidden />;
 
   return (
     <Screen top="push" width="wide">
-      <ScreenHeader
-        kind="section"
-        eyebrow={t('admin.eyebrow')}
-        title={t('admin.title')}
-        trailing={
-          // A real anchor, and the only door to the studio.
-          // `-me-1.25`: the chevron's 16 pt box ends 5 past the gutter, so its INK ends on it (admin-1).
-          <TextLink to="/admin/styles" lead={<Palette />} trail={<ChevronRight />} className="-me-1.25">
-            {t('admin.styleStudio')}
-          </TextLink>
-        }
-      />
+      <AdminHeader title={t('admin.section.moderation')} />
 
       {stats.isPending ? (
         <FiguresSkeleton />
@@ -227,41 +204,19 @@ export function AdminPage() {
         </>
       ) : null}
 
-      {/*
-        Three sections behind one switch rather than three stacked on one page. The section that is
-        not open does not render, so it does not fetch either: `render` is a function for that reason.
-      */}
-      <AdminShell
-        sections={[
-          {
-            key: 'accounts',
-            render: () => <UserSearch enabled={hasRole(user, 'admin')} />,
-          },
-          {
-            key: 'moderation',
-            count: stats.data?.moderation.pending,
-            render: () => (
-              <div className="flex flex-col gap-4">
-                <ModerationHeader pending={stats.data?.moderation.pending} />
-                {/* The queue AND the decision live here. See the header comment in ModerationQueue. */}
-                <ModerationQueue />
-              </div>
-            ),
-          },
-          {
-            key: 'marketplace',
-            render: () => <MarketplaceQueue />,
-          },
-        ]}
-        active={section}
-        onSelect={setSection}
-      />
+      {/* The queue as a section of its own (admin-view-1): its head opens on the closed ledger's
+          rule, so it draws no second one. The queue AND the decision live here. See the header
+          comment in ModerationQueue. */}
+      <div className="flex flex-col gap-4">
+        <ModerationHeader pending={stats.data?.moderation.pending} />
+        <ModerationQueue />
+      </div>
 
       {stats.data ? (
-        // The last block, and kept: the cheapest liveness signal on the screen.
-        <footer className="flex flex-col gap-4">
-          <Rule strong />
-          {/* 240 wide: the sentence breaks after its second figure's word, as admin-1 draws it
+        // The last block, and kept: the cheapest liveness signal on the screen. The queue closes on
+        // its own rule, so the footer is the line alone (admin-view-1).
+        <footer>
+          {/* 240 wide: the sentence breaks after its second figure's word, as admin-view-1 draws it
               ("… · 14 naplóesemény" / "az elmúlt 24 órában"). */}
           <p className="max-w-60 text-cap text-text-2">
             {inked((m) => t('admin.footer', { sessions: m.sessions, events: m.events }), {

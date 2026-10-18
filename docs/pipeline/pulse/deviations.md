@@ -710,3 +710,11 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: `settings-v2-2` — no string is drawn at this place.
 - What the app does: the frame draws 'Hang · Rezgés' only; with every cue off the row shows no value rather than an invented word for 'off'
 - Status: open — a copy question; nothing was invented.
+
+## DEV-085 — S-admin: admin-view-3-report title 'Bejelentés'
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-admin/i18n.patch.json`
+- Package: S-admin
+- The frames show: no string is drawn at this place.
+- What the app does: In the approved frame, listed by the round-A README as invented copy; en 'Report' / de 'Meldung' are proposals.
+- Status: open — a copy question; nothing was invented.

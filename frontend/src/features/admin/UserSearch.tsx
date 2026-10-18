@@ -7,7 +7,6 @@ import { cn } from '../../lib/cn';
 import { SearchField } from '../../ui/primitives/SearchField';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { SectionHeader } from '../../ui/data/SectionHeader';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
 
@@ -77,9 +76,9 @@ export function UserSearch({ enabled }: { enabled: boolean }) {
 
   return (
     <section className="flex flex-col" aria-label={t('adminUsers.title')}>
-      <SectionHeader rule={false} title={t('adminUsers.title')} />
+      {/* The page's title names the list (admin-view-2: "Fiókok" under the admin header), so the
+          section opens on the search line; the eyebrow it carried as a section of /admin is gone. */}
       <SearchField
-        className="mt-4"
         label={t('adminUsers.search')}
         placeholder={t('adminUsers.search')}
         value={typed}
