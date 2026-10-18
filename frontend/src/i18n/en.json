@@ -100,22 +100,23 @@
     "title": "Settings",
     "account": "Account",
     "cues": {
-      "title": "Sound and vibration",
       "speech": "Spoken cues",
       "speechHint": "It announces the round and the rest.",
       "tone": "Beep",
       "toneHint": "A short tone for the countdown.",
       "haptics": "Vibration",
       "hapticsHint": "A buzz when a set is checked.",
-      "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left."
+      "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left.",
+      "row": "Workout cues",
+      "sound": "Sound"
     },
     "equipment": "Equipment",
     "equipmentHint": "What you can actually reach. Your plan is built around it.",
     "equipmentSaved": "Equipment saved",
+    "equipmentCount": "{{count}} selected",
     "displayName": "Display name",
     "displayNameHint": "Your coach sees this instead of your e-mail address.",
     "displayNamePlaceholder": "How others see you",
-    "unlockedNote": "unlocked",
     "role": {
       "user": "Member",
       "coach": "Coach",

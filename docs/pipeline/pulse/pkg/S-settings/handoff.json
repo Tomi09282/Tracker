@@ -1,55 +1,39 @@
 {
-  "id": "S-settings",
-  "branch": "pulse/S-settings",
-  "verifiedOn": "pulse-redesign a1b87e5 (S-home and S-auth merged), slot HEAD 8cd9d3e with i18n.patch.json applied by pulse-sync",
-  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-settings (replay; variants en/ de/ w360/ w430/ rm/ scroll-end/ live/); pairs in .pulse/pairs/S-settings",
+  "id": "S-profile-v2",
+  "package": "S-settings",
+  "branch": "pulse/S-profile-v2",
+  "verifiedOn": "pulse-redesign 1360558 merged into the slot; i18n.patch.json applied with pulse-i18n --ref HEAD and requests/R-S-settings-01.patch applied to the working tree only",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-settings (replay); pairs in C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-settings/v2 (pair-<frame>.png = Figma | app | difference; aligned-*.png = the part below the ledger with the app shifted by the two ledger rows Phase 1 does not build)",
   "frames": {
-    "settings-1": {
-      "verdict": "structure",
-      "why": "on the frame's data (fixture: the drawn name, address and last weight 83,1 over M's recording; 190 and 4 / 7 are recorded) the tile is identical to the frame; the geometry probe is 46 of 47 layers matched and red on one layer only, a measurement difference, so matched-fixture is not claimed",
-      "probeRed": [
-        "Field hint 'Az edződ ezt látja az e-mail-címed helyett.': the frame's text box is fixed 354 wide, the probe measures the text run (252.7); x, y, height, face, size and colour agree within 0.7 pt"
-      ],
-      "fixture": "states.json overrides.settings-1 (two edits on /auth/me, one on /measurements)"
-    },
-    "settings-2": {
-      "verdict": "structure",
-      "why": "same frame data plus the saved equipment status reached by two taps on Rúd and a 200 PATCH fixture; everything above the Megjelenés section matches box for box; the geometry probe is red for three explained reasons below",
-      "probeRed": [
-        "Megjelenés (theme packs, transparency, Téma mentése) is drawn by the frame and removed by owner decision D1: its 27 layers are unmatched and Nyelv + Kijelentkezés sit 381 pt higher",
-        "Rezgés: the frame draws the iPhone state (no navigator.vibrate: the disabled switch and the two-line 'Ez a készülék nem tud rezegni...' hint); headless Chrome has vibrate, so the capture shows the enabled switch and the one-line hint, row 64 instead of 80 - the capture tool cannot remove navigator.vibrate, so that branch is unreachable here (code path: CueSettings hapticsAvailable() false)",
-        "fixed-width text boxes (row titles 290, hints 354) measured as text runs; Smith-gép / Kábel / Húzódzkodó rúd 1.4-2.1 pt left of the frame (Geist run widths are 0.3-0.8 pt narrower per word than Figma's rounded boxes, accumulated along the chip line)"
-      ]
-    }
+    "settings-v2-1": { "verdict": "matched-fixture", "scope": "hero, name line, e-mail, role line, ÉRMÉK row, NÉZETEK rows and bar are identical to the frame; SZINT and JUTALMAK are not built (plan: Phase 2 / Phase 4 data), so NÉZETEK sits 155 pt higher - aligned-settings-v2-1-views.png matches row for row", "fixture": "states.json states.settings-v2-1 (auth/me name + address, wallet 19000 minor, onboarding equipment [2,3,5,6,10])", "geometry": "no geometry export exists for the round-A frames (.pulse/geometry has none): compared by pixels only" },
+    "settings-v2-2": { "verdict": "matched-fixture", "scope": "as settings-v2-1; BEÁLLÍTÁSOK lacks the Nap és időzóna row (Phase 2); row pitch 57 / 61 and the Kijelentkezés block match the frame (aligned-settings-v2-2-views.png 0.81 % pixels differ)" },
+    "settings-v2-member": { "verdict": "matched-fixture", "scope": "role line TAG, no NÉZETEK, BEÁLLÍTÁSOK rises; same two missing ledger rows and the missing Nap és időzóna row" },
+    "sheets": { "verdict": "matched-fixture", "scope": "the NameSheet over the dimmed page: title, close, field with the edited value, hint, Mentés pill - identical; the page under the scrim differs by the ledger rows only; the caret is not drawn in a still capture" },
+    "settings-equipment": { "verdict": "matched-fixture", "scope": "pushed header '< PROFIL / FELSZERELÉS', the 5 ESZKÖZ eyebrow with 'Felszerelés mentve', hint, the 16 words with the five lime marks: identical within 1 pt", "fixture": "onboarding equipment [2,3,5,6,10] + PATCH /onboarding 200 after two taps on Rúd" }
   },
   "states": {
-    "settings-recorded": { "verdict": "structure", "frameless": true, "why": "M's recording exactly as it is (Teszt Elek, 190, 4 / 7, 83,4 kg): the three new reads draw real data; no fixture" },
-    "settings-reads-failed": { "verdict": "structure", "frameless": true, "why": "wallet, achievements and measurements answer 500: each ledger figure is the em dash, never 0; the rest stands" },
-    "settings-equipment-error": { "verdict": "structure", "frameless": true, "why": "PATCH /onboarding 500: the danger NoticeLine with onboarding.saveError under the chips; the chip stays as tapped" },
-    "settings-name-dirty": { "verdict": "structure", "why": "no frame: the name changed, the Mentés text link on the field's line, the lime focus rule" },
-    "settings-name-invalid": { "verdict": "structure", "why": "no frame: one character, the save link disabled" },
-    "settings-admin": { "verdict": "structure", "why": "no frame: admin@ - the 'Admin felület megnyitása' row with chevron above Kijelentkezés (Q4); 0 coins, 0 / 7, no weight = dash" },
-    "settings-stale-theme": { "verdict": "structure", "why": "a stale theme pack in localStorage: the page renders plain Pulse (D1 proof)" },
-    "loading": { "verdict": "structure", "why": "the replay answers at once; the monogram skeleton, the ledger rows' busy dash and the equipment word skeletons are composed from the kit (code)" }
+    "settings-recorded": "M's recording as it is",
+    "settings-admin": "admin@'s recording: 0 coins, 0 eszköz, both NÉZETEK rows",
+    "settings-wallet-failed": "wallet and onboarding reads fail: the em dash, no equipment count",
+    "settings-cues-sheet": "the CueSheet with the three existing switches (not drawn by round A; Sheet + ListRow + Switch from the kit)",
+    "settings-name-invalid": "one character: Mentés disabled",
+    "settings-name-refused": "PATCH /auth/me 500: sheet stays open, error dot in its header, draft kept",
+    "settings-equipment-error": "PATCH /onboarding 500 on the equipment page: the danger line",
+    "settings-equipment-recorded": "M's six recorded words",
+    "settings-1 / settings-2": "the superseded frames, captured for the record (verdict structure: round A replaces them)"
   },
-  "probes": {
-    "allStates": "fonts, pill (0), boxed (0), overflow (360 / 402 / 430), targets (44), focus walk pass on all 9 states in hu; reduced-motion capture (rm/) 9 of 9; geometry red only on settings-1 / settings-2 as above",
-    "languages": "en and de: the 7 frameless states captured with no overflow, no truncation, no key path (en/_contact.en-1.png, de/_contact.de-1.png); settings-1 / settings-2 in en / de stop at the frame's Hungarian 'arrived' name (Kijelentkezés) - they render (FAILED.png shows the translated page), the frame states are Hungarian by definition",
-    "scrollEnd": "scroll-end/: at 402 x 874 scrolled to the end the last row (Kijelentkezés) clears the bar"
-  },
-  "inventory": "every state's control inventory against its baseline: -13 +3, all explained - removed: 'Vissza' (a tab root has no back control), the 7 theme radios, 'Téma mentése', the 3 transparency radios (D1), the old 'Érmék' /coins link; added: the three ledger links 'ÉRMÉK Egyenleged 190' (/coins, the same door), 'EREDMÉNYEK feloldva 4 / 7' (/coins), 'TESTSÚLY 83,1 kg' (/progress)",
-  "ledger": "pulse-ledger S-settings: empty - nothing counted was lost (focus-visible 0->0, useMotionSafe 0->0, motion-reduce 0->0, sr-only 0->0)",
-  "budget": { "before": 42, "after": 0, "file": "deleted" },
-  "requests": [],
+  "requests": ["R-S-settings-01 (nav): the /settings/equipment route + routeMeta row + check-nav-active EXPECT row; proposedPatch requests/R-S-settings-01.patch - merge it together with this package"],
   "deviationsQ4": [
-    "Admin row ('Admin felület megnyitása', /admin) - not drawn (the frame is a member); kept as a ListRow with chevron above Kijelentkezés",
-    "Name save - the frame draws the idle field; a changed name shows the 'Mentés' TextLink on the field's line (min 44 pt target)",
-    "Equipment save error - not drawn; danger NoticeLine with the questionnaire's own message"
+    "SZINT and JUTALMAK ledger rows are not drawn: their data does not exist before Phase 2 / Phase 4 (task: never fake numbers)",
+    "Nap és időzóna row is not drawn: arrives in Phase 2 (task)",
+    "Eredmények and Testsúly ledger rows of the old Profil are gone (plan Profile v2): achievements stay reachable in /coins (its Eredmények tab, via the ÉRMÉK row), weight in the Haladás tab - no capability is lost",
+    "The display name is no longer an inline field: the name line opens the NameSheet with the same logic (explicit save, server rule, disabled until changed and valid); a refused save now shows the sheet's error dot (before: nothing)",
+    "The cue switches moved from an inline section into the CueSheet opened by 'Edzés közbeni jelzések'; with every cue off the row shows no value (no word for 'off' exists in the copy)",
+    "Equipment moved to the pushed /settings/equipment page; its eyebrow is the live count ('5 eszköz') instead of 'Felszerelés'"
   ],
-  "removedNotControls": [],
-  "proposedCopy": [],
-  "i18n": "i18n.patch.json: settings.unlockedNote (hu 'feloldva' from the frame; en / de) - pulse-i18n check OK, check-i18n OK 842 keys each",
-  "keepLiteral": "to=\"/coins\" stays a literal JSX attribute in SettingsPage.tsx (verify-nav-gate)",
-  "liveSmoke": { "result": "settings-1, settings-recorded, settings-reads-failed, settings-admin, settings-stale-theme rendered against the live backend with the cached jars: 0 console errors, 0 failures", "writes": [] },
-  "lastBuild": "pulse-verify: build green in 17 s - 9 of 9 captured (replay)"
+  "proposedCopy": ["settings.equipmentCount '{{count}} eszköz' (visible)", "settings.cues.row 'Edzés közbeni jelzések' (visible)", "settings.cues.sound 'Hang' (visible)"],
+  "i18n": "pkg/S-settings/i18n.patch.json: set 3, remove 2 (settings.unlockedNote, settings.cues.title), 1 copy question; pulse-i18n check --ref HEAD OK, check-i18n 842 keys each",
+  "liveSmoke": "none: every state is replay; nothing was written to the backend",
+  "lastBuild": "pulse-verify: build green in 15 s · 15 of 15 captured (replay)",
+  "gates": "npm run verify:gates -- --allow-dirty: 78 passed, 0 failed, 7 dormant, the tree back byte for byte"
 }

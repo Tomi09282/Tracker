@@ -1,31 +1,27 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ChevronRight } from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
-import { TextLink } from '../../ui/primitives/TextLink';
+import { Pressable } from '../../ui/primitives/Pressable';
 import { Screen } from '../../ui/shell/Screen';
 import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
 import { LedgerRow } from '../../ui/data/LedgerRow';
-import { Fraction } from '../../ui/data/Numeral';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow } from '../../ui/data/ListRow';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { Sparkline } from '../../ui/feedback/Sparkline';
-import type { TrendPoint } from '../../ui/feedback/TrendChart';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { Pic } from '../../ui/media/Pic';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
-import { CueSettings } from './CueSettings';
-import { EquipmentSection } from './EquipmentSection';
-import { hasRole, useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
-import { toCoins, useAchievements, useWallet } from '../coins/useCoins';
-import { useMeasurements } from '../progress/useProgress';
+import { CueSettings, useCueSummary } from './CueSettings';
+import { hasRole, rolesOf, useSession, useLogout, useSetDisplayName, type SessionUser } from '../auth/useSession';
+import { toCoins, useWallet } from '../coins/useCoins';
+import { useOnboarding } from '../onboarding/useOnboarding';
 import { isValidDisplayName, personLabel } from '../../lib/person';
 
 /**
- * The role, in the user's own language. `SettingsPage` used to print `user.role` raw, so a
- * Hungarian member read the English word "user" on the one line of the screen that is about them.
- * A lookup rather than a template literal so a role the bundle has no label for is a type error
- * here instead of a raw key rendered on screen.
+ * The role, in the user's own language. A lookup rather than a template literal so a role the
+ * bundle has no label for is a type error here instead of a raw key rendered on screen.
  *
  * Settings-owned keys, not `adminUsers.role.*`: that group is the ADMIN TABLE's vocabulary, where
  * `user` is the row's role column and reads `Felhasználó`. On your own account the word is `Tag` —
@@ -37,244 +33,229 @@ const ROLE_LABEL: Record<SessionUser['role'], string> = {
   admin: 'settings.role.admin',
 };
 
-/** The metric the ledger's third row shows — the one the Haladás tab opens on for most people. */
-const WEIGHT = 'weight';
-
 /**
- * The trend in the weight row lands its end dot 16 pt before the figure (`settings-1.body.js`:
- * `sw = clamp(70, 120, figureInk.left - 16 - 112)`). The figure's ink cannot be measured before it
- * is drawn, so it is estimated from the glyphs of a 48 pt Big Shoulders `num` figure (no tabular
- * figures: "1" is about 13 wide, "," 10, every other digit 24). With the unit after it the figure
- * ends on x 315 of the row, so the frame's "83,1" (71) leaves 118.
- */
-const GLYPH_W: Record<string, number> = { '1': 13, ',': 10, '.': 10 };
-const sparkWidth = (figure: string) => {
-  const ink = [...figure].reduce((sum, ch) => sum + (GLYPH_W[ch] ?? 24), 0);
-  return Math.max(70, Math.min(118, 189 - ink));
-};
-
-/**
- * Profil — frames `settings-1` (the first view) and `settings-2` (the whole page).
+ * Profil v2 — design round A, frames `settings-v2-1` (coach + admin, first view), `settings-v2-2`
+ * (the whole page), `settings-v2-member` (a plain member) and `sheets` (the NameSheet).
  *
- * The page is a person first and settings second: the monogram is the screen's one hero, the
- * three facts about you are a ledger (balance, achievements, weight — every row a door), and
- * "Beállítások" is a heading half-way down, where the settings begin. Nothing is enclosed: the
- * grouping is the rules, the eyebrows and the 32 between blocks.
+ * Rows that open things instead of a page of fields (plan "Profile v2"):
  *
- * There is no appearance section. Pulse is the only look (owner decision D1): the theme picker,
- * the transparency choice and the client theme engine behind them are gone, and nothing here reads
- * a stored theme or asks the server for one. The admin row stays for admins (owner answer Q4).
+ *   1  the identity hero: the 176 monogram, the NAME LINE (name + chevron, the only target that
+ *      opens the NameSheet), the address and ONE micro line of the roles the account holds;
+ *   2  the ledger, closed by a rule: ÉRMÉK (→ /coins). SZINT (Phase 2) and JUTALMAK (Phase 4)
+ *      join it only when their data exists — never a fake figure;
+ *   3  NÉZETEK (coach / admin only): the doors into the trainer and the admin view;
+ *   4  BEÁLLÍTÁSOK as one-line rows: Felszerelés (→ /settings/equipment), Edzés közbeni jelzések
+ *      (→ the CueSheet), Nyelv (switches inline). "Nap és időzóna" arrives in Phase 2;
+ *   5  Kijelentkezés.
  *
- * A tab root: no back control and no top title — the monogram starts where the frame puts it.
+ * The closed ledger's rule opens the next section, so the first section after it draws no rule of
+ * its own (`afterLedger` of the round-A common script). Sections stand 32 apart (the screen's gap).
+ *
+ * There is no appearance section (owner decision D1). A tab root: no back control, no top title.
  */
 export function SettingsPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: user, isPending, isError } = useSession();
   const logout = useLogout();
-
-  // The three facts of the ledger. Each read is on its own: a failed one prints the dash in ITS
-  // row (never a 0) and the other two still stand.
   const wallet = useWallet();
-  const achievements = useAchievements();
-  const measurements = useMeasurements();
+  const onboarding = useOnboarding();
+  const cueSummary = useCueSummary();
+  const [nameOpen, setNameOpen] = useState(false);
+  const [cuesOpen, setCuesOpen] = useState(false);
 
-  // THE DOT HAS TO MEAN SOMETHING. A mark permanently drawn on the monogram is a claim the
-  // product makes about the account with nothing behind it. There is no `email_verified` on the
-  // session, so the only true statement available is "this session is live and healthy" — which
-  // is exactly what a resolved, non-null /auth/me is. A failed session read drops the dot.
+  // THE DOT HAS TO MEAN SOMETHING: "this session is live and healthy" — a resolved, non-null
+  // /auth/me. A failed session read drops the dot.
   const sessionHealthy = !isPending && !isError && user != null;
-
-  const unlocked = useMemo(() => {
-    const list = achievements.data?.achievements;
-    if (!list) return undefined;
-    return { done: list.filter((a) => a.unlockedAt != null).length, total: list.length };
-  }, [achievements.data]);
-
-  // Weight readings, oldest first (x is time: an out-of-order row would draw the line doubling back).
-  const weight = useMemo(() => {
-    const rows = (measurements.data?.measurements ?? []).filter((m) => m.metric_key === WEIGHT);
-    if (!rows.length) return undefined;
-    const sorted = [...rows].sort((a, b) => (a.measured_on < b.measured_on ? -1 : a.measured_on > b.measured_on ? 1 : 0));
-    const series: TrendPoint[] = sorted.map((m) => ({ date: m.measured_on, value: m.value }));
-    const last = sorted[sorted.length - 1];
-    return { series, value: last.value, unit: last.unit === 'pct' ? '%' : last.unit };
-  }, [measurements.data]);
-
-  const weightFigure = weight ? weight.value.toLocaleString(i18n.language, { maximumFractionDigits: 1 }) : '';
+  const isCoach = hasRole(user, 'coach');
+  const equipment = onboarding.data?.profile?.equipment;
 
   return (
     <Screen top="root">
-      {/* The person and the settings' first field are one block: 36 between the two halves
-          (`settings-1.body.js` "Profile" gap), 32 between every section after it (the screen's). */}
-      <div className="mt-4 flex flex-col gap-9">
-        <div className="flex flex-col gap-6">
-          {/* The account block keeps `Fiók` as an ACCESSIBLE name: the identity is its visible
-              heading, and a screen-reader user otherwise meets an unnamed cluster. */}
-          <section aria-label={t('settings.account')} className="flex flex-col gap-7">
-            {isPending ? (
-              <>
-                <MonogramSkeleton size={176} className="self-start" />
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-5 w-40" />
-                  <Skeleton className="h-4 w-56" />
+      {/* "Me": the identity and the ledger, 24 apart (round-A `profileTop`). */}
+      <div className="mt-4 flex flex-col gap-6">
+        {/* The account block keeps `Fiók` as an ACCESSIBLE name: the identity is its visible
+            heading, and a screen-reader user otherwise meets an unnamed cluster. */}
+        <section aria-label={t('settings.account')} className="flex flex-col gap-7">
+          {isPending ? (
+            <>
+              <MonogramSkeleton size={176} className="self-start" />
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-56" />
+              </div>
+            </>
+          ) : (
+            <>
+              {user ? <Monogram person={user} size={176} dot={sessionHealthy} className="self-start" /> : null}
+              {/* On a failed session read the lines stay EMPTY rather than showing a placeholder
+                  account. This is the one screen that prints the address in full: it is your own. */}
+              <div className="flex flex-col gap-1">
+                {user ? (
+                  // THE NAME LINE IS THE ONLY TARGET (round-A review finding 13): hug width, 44
+                  // tall by its padding, while it takes the title's 28 in the column (-my-2).
+                  <Pressable
+                    variant="link"
+                    aria-haspopup="dialog"
+                    aria-label={`${t('settings.displayName')}: ${personLabel(user)}`}
+                    onClick={() => setNameOpen(true)}
+                    className="-my-2 max-w-full gap-1.5 self-start py-2"
+                  >
+                    <span className="min-w-0 truncate text-title text-text-1">{personLabel(user)}</span>
+                    <ChevronRight aria-hidden className="text-text-3" />
+                  </Pressable>
+                ) : (
+                  <p aria-hidden className="h-7" />
+                )}
+                <div className="flex items-baseline justify-between gap-4">
+                  <p className="min-w-0 truncate text-body text-text-2">{user?.email}</p>
+                  {user ? (
+                    <span className="shrink-0 text-micro text-text-2">
+                      {rolesOf(user)
+                        .map((role) => t(ROLE_LABEL[role]))
+                        .join(' · ')}
+                    </span>
+                  ) : null}
                 </div>
-              </>
-            ) : (
-              <>
-                {user ? <Monogram person={user} size={176} dot={sessionHealthy} className="self-start" /> : null}
-                {/* On a failed session read the lines stay EMPTY rather than showing a
-                    placeholder account — a wrong identity here is worse than a missing one.
-                    This is the one screen that prints the address in full: it is your own. */}
-                <div className="flex flex-col gap-1">
-                  <p className="text-title text-text-1">{user ? personLabel(user) : ''}</p>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <p className="min-w-0 truncate text-body text-text-2">{user?.email}</p>
-                    {user ? <span className="shrink-0 text-micro text-text-2">{t(ROLE_LABEL[user.role])}</span> : null}
-                  </div>
-                </div>
-              </>
-            )}
-          </section>
+              </div>
+            </>
+          )}
+        </section>
 
-          {/* THE WALLET'S ONLY DOOR ON A PHONE is the first ledger row: /coins has no tab, and
-              the command palette that lists it is desktop-only. check-nav asserts the link and
-              verify-nav-gate anchors on the literal attribute below. */}
-          <RowStack open close>
-            <LedgerRow
-              to="/coins"
-              label={t('nav.coins')}
-              labelTrail={<Pic slot="coin" width={22} />}
-              note={t('coins.balanceCaption')}
-              value={wallet.data ? toCoins(wallet.data.balanceMinor) : undefined}
-              failed={wallet.isError}
-              busy={wallet.isPending}
-            />
-            <LedgerRow
-              to="/coins"
-              label={t('coins.tab.achievements')}
-              note={t('settings.unlockedNote')}
-              // No srText: the row's note already says "feloldva", so the link reads
-              // "Eredmények feloldva 4 / 7" instead of naming the word twice.
-              value={unlocked ? <Fraction value={unlocked.done} of={unlocked.total} /> : undefined}
-              failed={achievements.isError}
-              busy={achievements.isPending}
-            />
-            <LedgerRow
-              to="/progress"
-              label={t('progress.metricName.weight')}
-              note={
-                weight && weight.series.length >= 3 ? (
-                  <Sparkline series={weight.series} width={sparkWidth(weightFigure)} height={28} />
-                ) : undefined
-              }
-              value={weight ? weightFigure : undefined}
-              unit={weight?.unit}
-              failed={measurements.isError}
-              busy={measurements.isPending}
-            />
-          </RowStack>
-        </div>
-
-        {/* NÉZETEK — the doors to the trainer and the admin view (design round A, settings-v2-1).
-            The member's bar is the same five tabs for every role, so these rows are the ONLY way
-            into /coach and /admin on a phone: check-nav holds both as REQUIRED_DOORS of this file.
-            A view grants nothing; each route re-checks the role on the server. */}
-        {hasRole(user, 'coach') ? (
-          <section aria-labelledby="settings-views" className="flex flex-col gap-group">
-            <SectionHeader title={t('settings.views.title')} titleId="settings-views" />
-            <RowStack>
-              <ListRow
-                to="/coach"
-                lead={<Pic slot="tab-coach" width={32} />}
-                leadSlot
-                title={t('settings.views.coach')}
-                chevron
-              />
-              {hasRole(user, 'admin') ? (
-                <ListRow
-                  to="/admin"
-                  lead={<Pic slot="tab-admin" width={32} />}
-                  leadSlot
-                  title={t('settings.views.admin')}
-                  chevron
-                />
-              ) : null}
-            </RowStack>
-          </section>
-        ) : null}
-
-        <div className="flex flex-col gap-4">
-          <h1 className="text-display text-text-1">{t('settings.title')}</h1>
-          {/* NAMING YOURSELF IS THE ONLY WAY THE NAME EVER GETS SET: `users.display_name` is NULL
-              for everybody until somebody types here. */}
-          {user ? <DisplayNameField user={user} /> : null}
-        </div>
+        {/* THE WALLET'S ONLY DOOR ON A PHONE is the first ledger row: /coins has no tab. check-nav
+            asserts the link and verify-nav-gate anchors on the literal attribute below. */}
+        <RowStack open close>
+          <LedgerRow
+            to="/coins"
+            label={t('nav.coins')}
+            labelTrail={<Pic slot="coin" width={22} />}
+            note={t('coins.balanceCaption')}
+            value={wallet.data ? toCoins(wallet.data.balanceMinor) : undefined}
+            failed={wallet.isError}
+            busy={wallet.isPending}
+          />
+        </RowStack>
       </div>
 
-      <EquipmentSection />
+      {/* NÉZETEK — the doors to the trainer and the admin view. The member's bar is the same five
+          tabs for every role, so these rows are the ONLY way into /coach and /admin on a phone:
+          check-nav holds both as REQUIRED_DOORS of this file. A view grants nothing; each route
+          re-checks the role on the server. */}
+      {isCoach ? (
+        <section aria-labelledby="settings-views" className="flex flex-col gap-group">
+          <SectionHeader title={t('settings.views.title')} titleId="settings-views" rule={false} />
+          <RowStack>
+            <ListRow to="/coach" lead={<ViewIcon slot="tab-coach" />} leadSlot title={t('settings.views.coach')} chevron />
+            {hasRole(user, 'admin') ? (
+              <ListRow to="/admin" lead={<ViewIcon slot="tab-admin" />} leadSlot title={t('settings.views.admin')} chevron />
+            ) : null}
+          </RowStack>
+        </section>
+      ) : null}
 
-      <CueSettings />
+      <section aria-labelledby="settings-settings" className="flex flex-col gap-group">
+        {/* Right after the ledger (a member) the ledger's closing rule already opens it. */}
+        <SectionHeader title={t('settings.title')} titleId="settings-settings" rule={isCoach} />
+        <RowStack>
+          <ListRow
+            to="/settings/equipment"
+            title={t('settings.equipment')}
+            value={equipment ? t('settings.equipmentCount', { count: equipment.length }) : undefined}
+            chevron
+          />
+          <ListRow
+            onClick={() => setCuesOpen(true)}
+            aria-haspopup="dialog"
+            title={t('settings.cues.row')}
+            value={cueSummary || undefined}
+            chevron
+          />
+          {/* Applies at once and lives on this device. */}
+          <ListRow title={t('common.language')} control={<LanguageToggle />} />
+        </RowStack>
+      </section>
 
-      {/* Applies at once and lives on this device: the choice sits in the section head. */}
-      <SectionHeader title={t('common.language')} trailing={<LanguageToggle />} />
-
-      {/* Sign-out: one tap, no confirmation, busy while it runs. It renders even while the
-          session loads, because it depends on there BEING a session, not on its contents. */}
+      {/* Sign-out: one tap, no confirmation, busy while it runs. It renders even while the session
+          loads, because it depends on there BEING a session, not on its contents. */}
       <RowStack open>
         <ListRow title={t('auth.logout')} tone="danger" busy={logout.isPending} onClick={() => logout.mutate()} />
       </RowStack>
+
+      {user ? <NameSheet user={user} open={nameOpen} onClose={() => setNameOpen(false)} /> : null}
+      <Sheet open={cuesOpen} onClose={() => setCuesOpen(false)} title={t('settings.cues.row')}>
+        <CueSettings />
+      </Sheet>
     </Screen>
   );
 }
 
 /**
- * The name editor — an underline field.
- *
- * Its own component: this is the only part of the screen that owns unsaved text, and unsaved text
- * must not be lost to an unrelated re-render.
- *
- * ═══ WHY A SAVE AND NOT AN AUTOSAVE ════════════════════════════════════════════════════════════
- *
- * A single 120-character field is not the plan editor: the server rejects anything under two
- * characters, so an autosave would fire a failing request on the first keystroke of every name.
- * The save is explicit, and it only appears once something has actually changed — as a text link
- * on the field's line (the frame draws the idle field; Pulse has one pill per screen and a link is
- * the second action's look).
+ * A NÉZETEK row's raster: 32 pt, CENTRED in the row's 48 pt lead slot (round-A `viewRow`: "Icon
+ * slot" 48 x 44, centre-aligned), so its ink starts 8 pt in and the title stays on the slot grid.
  */
-function DisplayNameField({ user }: { user: SessionUser }) {
+function ViewIcon({ slot }: { slot: 'tab-coach' | 'tab-admin' }) {
+  return (
+    <span className="flex w-full justify-center">
+      <Pic slot={slot} width={32} />
+    </span>
+  );
+}
+
+/**
+ * The NameSheet — frame `sheets`: "Megjelenített név", the underline field focused on the name,
+ * its hint, and the sheet's one lime pill "Mentés" (the page under the scrim has none).
+ *
+ * The logic is the old `DisplayNameField`'s: an explicit save (the server rejects anything under
+ * two characters, so an autosave would fire a failing request on the first keystroke), enabled
+ * only when the text changed and is valid by the server's rule (code points, not UTF-16 units).
+ * A success closes the sheet; a refusal keeps it open with the error dot in its header. The draft
+ * starts from the stored name every time the sheet opens, so a cancelled edit never lingers.
+ */
+function NameSheet({ user, open, onClose }: { user: SessionUser; open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const save = useSetDisplayName();
   const [draft, setDraft] = useState(user.display_name ?? '');
+  const input = useRef<HTMLInputElement>(null);
+  const reset = save.reset;
+
+  useEffect(() => {
+    if (!open) return;
+    setDraft(user.display_name ?? '');
+    reset();
+    // The sheet takes the focus for itself when it opens; the field takes it one frame later, as
+    // the frame draws it (caret, lime line).
+    const id = requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(id);
+  }, [open, user.display_name, reset]);
 
   const trimmed = draft.trim();
-  const current = user.display_name ?? '';
-  const dirty = trimmed !== current;
-  // The server's rule (code points, not UTF-16 units), so the save is disabled instead of refused.
+  const dirty = trimmed !== (user.display_name ?? '');
   const valid = isValidDisplayName(draft);
 
   return (
-    <Field
-      label={t('settings.displayName')}
-      hint={t('settings.displayNameHint')}
-      placeholder={t('settings.displayNamePlaceholder')}
-      value={draft}
-      maxLength={120}
-      autoComplete="name"
-      onChange={(e) => setDraft(e.target.value)}
-      trailing={
-        dirty ? (
-          // min-w-11: "Save" (en) is 30 pt of ink; the target still has to be 44 wide, and the
-          // word stays on the field's end.
-          <TextLink
-            className="min-w-11 justify-end"
-            disabled={!valid}
-            busy={save.isPending}
-            onClick={() => save.mutate(trimmed.length ? trimmed : null)}
-          >
-            {t('common.save')}
-          </TextLink>
-        ) : undefined
-      }
-    />
+    <Sheet open={open} onClose={onClose} title={t('settings.displayName')} status={save.isError ? 'error' : 'idle'}>
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!dirty || !valid) return;
+          save.mutate(trimmed.length ? trimmed : null, { onSuccess: onClose });
+        }}
+      >
+        <Field
+          ref={input}
+          label={t('settings.displayName')}
+          labelHidden
+          hint={t('settings.displayNameHint')}
+          placeholder={t('settings.displayNamePlaceholder')}
+          value={draft}
+          maxLength={120}
+          autoComplete="name"
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <Pressable type="submit" variant="primary" size="lg" className="w-full" busy={save.isPending} disabled={!dirty || !valid}>
+          {t('common.save')}
+        </Pressable>
+      </form>
+    </Sheet>
   );
 }

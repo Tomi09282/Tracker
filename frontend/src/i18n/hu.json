@@ -100,22 +100,23 @@
     "title": "Beállítások",
     "account": "Fiók",
     "cues": {
-      "title": "Hangok és rezgés",
       "speech": "Beszédhang",
       "speechHint": "Bemondja a kört és a pihenőt.",
       "tone": "Sípszó",
       "toneHint": "Rövid hang a visszaszámláláshoz.",
       "haptics": "Rezgés",
       "hapticsHint": "Rezgés a sorozat pipálásakor.",
-      "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés."
+      "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés.",
+      "row": "Edzés közbeni jelzések",
+      "sound": "Hang"
     },
     "equipment": "Felszerelés",
     "equipmentHint": "Amit el tudsz érni. Az edzésterved ehhez igazodik.",
     "equipmentSaved": "Felszerelés mentve",
+    "equipmentCount": "{{count}} eszköz",
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
     "displayNamePlaceholder": "Ahogy mások látnak",
-    "unlockedNote": "feloldva",
     "role": {
       "user": "Tag",
       "coach": "Edző",

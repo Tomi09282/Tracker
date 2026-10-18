@@ -702,3 +702,11 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - What the app does: Not drawn by any frame, built in the same language: the in-flight state (the chosen row holds its pressed level, the other row is inert, the sheet header shows the three dots) and the failed state (sheet stays open, danger dot + Újra repeating the same choice). No new copy.
 - Why: PLAN 4.1 rule 7: undrawn states are built from the kit; a failed end must never look like one that worked.
 - Status: closed - built from the kit, no new copy.
+
+## DEV-084 — S-settings: Profil, the Edzés közbeni jelzések row value when every cue is off
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-settings/i18n.patch.json`
+- Package: S-settings
+- The frames show: `settings-v2-2` — no string is drawn at this place.
+- What the app does: the frame draws 'Hang · Rezgés' only; with every cue off the row shows no value rather than an invented word for 'off'
+- Status: open — a copy question; nothing was invented.

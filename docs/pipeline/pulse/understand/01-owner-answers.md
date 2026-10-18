@@ -66,3 +66,8 @@ guessed picture.
   take the balance below zero (shown as debt), spends may not; a day settles 6 h after the next day starts; at most
   7 days of catch-up; the perfect day needs the scheduled workout; Pult (/compose) is a trainer tab; an admin acting
   as a trainer is seat-exempt (no client cap).
+
+## Owner, 2026-10-18 — streak milestones vs the daily cap
+
+The 100-day milestone (500 coins) is above the 400-coin daily cap. Answer: **streak milestones (7 / 30 / 100 days:
+25 / 100 / 500) are OUTSIDE the daily earn cap** - they are rare and cannot be farmed. Everything else stays capped.

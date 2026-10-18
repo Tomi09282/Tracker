@@ -5,6 +5,8 @@ import { ChipRow } from '../../ui/primitives/ChipRow';
 import { Toggle } from '../../ui/primitives/Toggle';
 import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { cn } from '../../lib/cn';
 import { useOnboarding, useDraftSave } from '../onboarding/useOnboarding';
 import { sameSet } from '../../lib/equipment';
@@ -13,7 +15,28 @@ import { sameSet } from '../../lib/equipment';
 const LOADING_WORDS = [['w-24', 'w-8', 'w-20'], ['w-16', 'w-8', 'w-12', 'w-16'], ['w-20', 'w-12', 'w-28']];
 
 /**
- * The client's own equipment list, after onboarding — the "Felszerelés" section of `settings-2`.
+ * "Felszerelés", pushed from Profil — frame `settings-equipment` (design round A).
+ *
+ * Profil v2 is rows that open things: its "Felszerelés · 5 eszköz" row leads here, and this page
+ * holds the list the old Profil printed inline. The way back is the row of `app/routeMeta.ts`
+ * (`/settings/equipment` → Profil), so the header names its parent and the Profil tab stays lit.
+ *
+ * Composition, as `settings-equipment.body.js`: the pushed header (64 under the inset), 32, the
+ * section without a rule whose eyebrow is the COUNT ("5 eszköz", the same words as the Profil
+ * row's value) with the autosave status at its end, 16, the hint, 16, the equipment words.
+ */
+export function EquipmentPage() {
+  const { t } = useTranslation();
+  return (
+    <Screen top="push">
+      <ScreenHeader kind="push" title={t('settings.equipment')} />
+      <EquipmentSection />
+    </Screen>
+  );
+}
+
+/**
+ * The client's own equipment list, after onboarding — the body of `EquipmentPage`.
  *
  * The route `/onboarding` was always live and unguarded once complete, and `PATCH /onboarding`
  * always took `equipment`. What was missing was a door, so the answer given once on step three
@@ -81,7 +104,10 @@ export function EquipmentSection() {
 
   return (
     <Section
-      title={t('settings.equipment')}
+      // The eyebrow is the count, live with the taps (the overlay), as the frame draws "5 ESZKÖZ".
+      // Until the list arrives there is no count to state: the eyebrow names the list instead.
+      title={isPending ? t('settings.equipment') : t('settings.equipmentCount', { count: current.length })}
+      rule={false}
       trailing={
         <span role="status" aria-live="polite" className="inline-flex items-baseline gap-1.5 text-cap text-text-2">
           {status ? (
@@ -93,26 +119,25 @@ export function EquipmentSection() {
         </span>
       }
     >
-      <div className="flex flex-col gap-1">
-        <p className="text-cap text-text-3">{t('settings.equipmentHint')}</p>
-        {isPending ? (
-          <div role="status" aria-label={t('common.loading')}>
-            {LOADING_WORDS.map((line, i) => (
-              <div key={i} aria-hidden className="flex h-11 items-center gap-6">
-                {line.map((w, j) => (
-                  <Skeleton key={j} className={cn('h-4', w)} />
-                ))}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <ChipRow wrap label={t('settings.equipment')}>
-            {options.map((eq) => (
-              <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
-            ))}
-          </ChipRow>
-        )}
-      </div>
+      {/* Hint and words are the section's own children: 16 apart, as the frame stacks them. */}
+      <p className="text-cap text-text-3">{t('settings.equipmentHint')}</p>
+      {isPending ? (
+        <div role="status" aria-label={t('common.loading')}>
+          {LOADING_WORDS.map((line, i) => (
+            <div key={i} aria-hidden className="flex h-11 items-center gap-6">
+              {line.map((w, j) => (
+                <Skeleton key={j} className={cn('h-4', w)} />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <ChipRow wrap label={t('settings.equipment')}>
+          {options.map((eq) => (
+            <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
+          ))}
+        </ChipRow>
+      )}
       {/* A failed save is not silent: a refusal that renders nothing reads as a success. The key is
           the questionnaire's own, since it says the same true thing here: the answer is kept and
           will be retried. */}

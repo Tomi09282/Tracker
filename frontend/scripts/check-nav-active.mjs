@@ -88,6 +88,7 @@ const EXPECT_BY_VIEW = {
     ['/progress', '/progress'],
     ['/settings', '/settings'],
     ['/coins', '/settings'],
+    ['/settings/equipment', '/settings'],
   ],
   trainer: [
     ['/coach', '/coach'],

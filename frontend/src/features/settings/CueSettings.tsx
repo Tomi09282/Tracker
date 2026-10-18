@@ -12,14 +12,15 @@ import {
   hapticsAvailable,
   type CueChannel,
 } from '../../features/workout/cues';
-import { Section } from '../../ui/data/SectionHeader';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow } from '../../ui/data/ListRow';
 import { Switch } from '../../ui/primitives/Switch';
 
 /**
- * Which cues the workout player is allowed to emit on THIS device — the "Hangok és rezgés"
- * section of `settings-2`: three rows on the gutter, a switch at the end of each.
+ * Which cues the workout player is allowed to emit on THIS device — the three switches behind
+ * Profil's "Edzés közbeni jelzések" row (design round A, `settings-v2-2`): the row opens a sheet
+ * and the sheet holds these rows, on the gutter, a switch at the end of each. The row's value
+ * ("Hang · Rezgés") is `useCueSummary` below, read from the same store.
  *
  * Three switches rather than one, because they fail differently. The synthetic voice is the one
  * people actually want gone — it is grating in a gym, and on a device with no voice installed for
@@ -83,6 +84,21 @@ function CueRow({
   );
 }
 
+/**
+ * The row's one-line value: "Hang" when the voice or the beep may sound, "Rezgés" when the device
+ * may vibrate (and can), joined by " · " — the words the frame draws. Nothing on = no value: the
+ * row then says nothing rather than inventing a word for "off".
+ */
+export function useCueSummary(): string {
+  const { t } = useTranslation();
+  const cues = useCues();
+  const words: string[] = [];
+  if (cues.speech || cues.tone) words.push(t('settings.cues.sound'));
+  if (cues.haptics && hapticsAvailable()) words.push(t('settings.cues.haptics'));
+  return words.join(' · ');
+}
+
+/** The three rows, as the sheet's body. Named as one group by the sheet's title. */
 export function CueSettings() {
   const { t, i18n } = useTranslation();
 
@@ -91,33 +107,31 @@ export function CueSettings() {
   const haptics = hapticsAvailable();
 
   return (
-    <Section title={t('settings.cues.title')}>
-      <RowStack as="div" role="group" aria-label={t('settings.cues.title')}>
-        <CueRow
-          channel="speech"
-          label={t('settings.cues.speech')}
-          hint={t('settings.cues.speechHint')}
-          available={speechAvailable()}
-          onPreview={() => speak(t('workout.interval.spokenWork', { round: 1, total: 8 }), i18n.language)}
-        />
-        <CueRow
-          channel="tone"
-          label={t('settings.cues.tone')}
-          hint={t('settings.cues.toneHint')}
-          available
-          onPreview={() => {
-            unlockAudio();
-            tone(1320, 260);
-          }}
-        />
-        <CueRow
-          channel="haptics"
-          label={t('settings.cues.haptics')}
-          hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
-          available={haptics}
-          onPreview={() => vibrate('intervalWork')}
-        />
-      </RowStack>
-    </Section>
+    <RowStack as="div" role="group" aria-label={t('settings.cues.row')}>
+      <CueRow
+        channel="speech"
+        label={t('settings.cues.speech')}
+        hint={t('settings.cues.speechHint')}
+        available={speechAvailable()}
+        onPreview={() => speak(t('workout.interval.spokenWork', { round: 1, total: 8 }), i18n.language)}
+      />
+      <CueRow
+        channel="tone"
+        label={t('settings.cues.tone')}
+        hint={t('settings.cues.toneHint')}
+        available
+        onPreview={() => {
+          unlockAudio();
+          tone(1320, 260);
+        }}
+      />
+      <CueRow
+        channel="haptics"
+        label={t('settings.cues.haptics')}
+        hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
+        available={haptics}
+        onPreview={() => vibrate('intervalWork')}
+      />
+    </RowStack>
   );
 }

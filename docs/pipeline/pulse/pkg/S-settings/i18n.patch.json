@@ -1,19 +1,55 @@
 {
   "package": "S-settings",
-  "base": "ba1fa062c1c69483721aeb0b811f202dfbda4274",
+  "base": "bdfa1b9c600fe9a9582c31c28811e681074a3d48",
   "namespaces": ["settings"],
   "set": [
     {
-      "key": "settings.unlockedNote",
-      "hu": "feloldva",
-      "en": "unlocked",
-      "de": "freigeschaltet",
-      "after": "settings.displayNamePlaceholder",
-      "copy": "inventory",
-      "source": "frame settings-1, Ledger row/Eredmények note 'feloldva' (the word of coins.unlockedCount '{{done}} / {{total}} feloldva'); understand/screens.md #7: one new key in 3 bundles"
+      "key": "settings.equipmentCount",
+      "hu": "{{count}} eszköz",
+      "en": "{{count}} selected",
+      "de": "{{count}} ausgewählt",
+      "after": "settings.equipmentSaved",
+      "copy": "proposed",
+      "visible": true,
+      "source": "design round A (S-profile-v2): settings-v2-2 / settings-v2-member row value 'Felszerelés · 5 eszköz' and the settings-equipment section eyebrow '5 ESZKÖZ' (nezetek/README.md: a brief string, C5). en/de avoid a plural form: the bundles have no plural keys"
+    },
+    {
+      "key": "settings.cues.row",
+      "hu": "Edzés közbeni jelzések",
+      "en": "Workout cues",
+      "de": "Signale beim Training",
+      "after": "settings.cues.hapticsUnavailable",
+      "copy": "proposed",
+      "visible": true,
+      "source": "design round A (S-profile-v2): settings-v2-2 row 'Edzés közbeni jelzések' - the row and the title of the CueSheet it opens (nezetek/README.md: a brief string, C5); replaces settings.cues.title as the name of the three switches"
+    },
+    {
+      "key": "settings.cues.sound",
+      "hu": "Hang",
+      "en": "Sound",
+      "de": "Ton",
+      "after": "settings.cues.row",
+      "copy": "proposed",
+      "visible": true,
+      "source": "design round A (S-profile-v2): settings-v2-2 row value 'Hang · Rezgés' - 'Hang' while the voice or the beep may sound; 'Rezgés' is settings.cues.haptics (nezetek/README.md: a brief string, C5)"
     }
   ],
   "change": [],
-  "remove": [],
-  "copyQuestions": []
+  "remove": [
+    {
+      "key": "settings.unlockedNote",
+      "reason": "its only consumer was the Eredmények ledger row of SettingsPage.tsx, which Profile v2 removes (plan: Eredmények moves inside /coins, where coins.tab.achievements already shows them)"
+    },
+    {
+      "key": "settings.cues.title",
+      "reason": "its only consumer was the section head of CueSettings.tsx; the three switches now live in the CueSheet named by settings.cues.row"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "Profil, the Edzés közbeni jelzések row value when every cue is off",
+      "frame": "settings-v2-2",
+      "note": "the frame draws 'Hang · Rezgés' only; with every cue off the row shows no value rather than an invented word for 'off'"
+    }
+  ]
 }

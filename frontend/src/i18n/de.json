@@ -100,22 +100,23 @@
     "title": "Einstellungen",
     "account": "Konto",
     "cues": {
-      "title": "Ton und Vibration",
       "speech": "Sprachansagen",
       "speechHint": "Sie sagt die Runde und die Pause an.",
       "tone": "Signalton",
       "toneHint": "Ein kurzer Ton für den Countdown.",
       "haptics": "Vibration",
       "hapticsHint": "Ein Vibrieren beim Abhaken eines Satzes.",
-      "hapticsUnavailable": "Dieses Gerät kann nicht vibrieren — auf dem iPhone bleibt der Signalton der einzige nicht-visuelle Hinweis."
+      "hapticsUnavailable": "Dieses Gerät kann nicht vibrieren — auf dem iPhone bleibt der Signalton der einzige nicht-visuelle Hinweis.",
+      "row": "Signale beim Training",
+      "sound": "Ton"
     },
     "equipment": "Ausrüstung",
     "equipmentHint": "Was du tatsächlich erreichen kannst. Dein Plan richtet sich danach.",
     "equipmentSaved": "Ausrüstung gespeichert",
+    "equipmentCount": "{{count}} ausgewählt",
     "displayName": "Anzeigename",
     "displayNameHint": "Dein Coach sieht das anstelle deiner E-Mail-Adresse.",
     "displayNamePlaceholder": "Wie andere dich sehen",
-    "unlockedNote": "freigeschaltet",
     "role": {
       "user": "Mitglied",
       "coach": "Coach",

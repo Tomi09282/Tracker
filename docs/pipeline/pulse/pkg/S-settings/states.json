@@ -1,8 +1,8 @@
 {
-  "about": "S-settings - the undrawn states of Profil (/settings, PLAN 4.1 rule 7) and the frame data of settings-1 / settings-2. Every fixture is a list of edits over the recording of the same endpoint, or a mutation outcome with an empty body (R26). Every state is replay. Accounts: M = user@ (the member of both frames), A = admin@ (the admin row). Nothing is written live by this package.",
+  "about": "S-settings / S-profile-v2 - Profil v2 (design round A, frames in kepernyok-2x/nezetek/) and its undrawn states. Every fixture is a list of edits over the recording of the same endpoint, or a mutation outcome with an empty body (R26). Every state is replay; nothing is written live. Accounts: M = user@ (a member), A = admin@ (roles user + coach + admin, derived by rolesOf from the recorded role). The frame data is Takács Dániel, takacs.daniel@pelda.hu, 190 coins and the five equipment words Rúd, Kézisúlyzó, Gép, Kábel, Húzódzkodó rúd (= \"5 eszköz\").",
   "overrides": {
     "settings-1": {
-      "why": "The frame is drawn for Takács Dániel (takacs.daniel@pelda.hu, 83,1 kg); the recording of M is Teszt Elek (user@tracker.local, last weight 83,436 kg on 2026-10-14). The edits set only the drawn name, address and the last weight, so the monogram, the name line and the figure can be compared box for box; balance (190) and 4 / 7 are M's recorded values. The state on the plain recording is settings-recorded. Verdict matched-fixture.",
+      "why": "SUPERSEDED by design round A (settings-v2-*): the old first view (with Eredmények, Testsúly and the inline name field) is no longer the design. Captured on the frame data for the record only; verdict structure.",
       "fixtures": [
         {
           "method": "GET",
@@ -20,18 +20,18 @@
         },
         {
           "method": "GET",
-          "path": "/api/v1/measurements",
+          "path": "/api/v1/coins/wallet",
           "edits": [
             {
-              "pointer": "/measurements/41/value",
-              "value": 83.1
+              "pointer": "/balanceMinor",
+              "value": 19000
             }
           ]
         }
       ]
     },
     "settings-2": {
-      "why": "The same frame data as settings-1, and the frame draws the equipment status 'Felszerelés mentve' in the section head - a state that exists only after a tap. The script taps Rúd twice (the selection ends where the recording has it), lets the 700 ms autosave run, and the PATCH /onboarding is answered 200 by a fixture: nothing reaches the server. Verdict matched-fixture.",
+      "why": "SUPERSEDED by design round A (settings-v2-2 + settings-equipment): the inline sections of the old page are rows that open things now. Captured for the record only; verdict structure.",
       "fixtures": [
         {
           "method": "GET",
@@ -49,11 +49,318 @@
         },
         {
           "method": "GET",
-          "path": "/api/v1/measurements",
+          "path": "/api/v1/coins/wallet",
           "edits": [
             {
-              "pointer": "/measurements/41/value",
-              "value": 83.1
+              "pointer": "/balanceMinor",
+              "value": 19000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "states": {
+    "settings-v2-1": {
+      "title": "Profil v2 — első nézet, edző + admin",
+      "frame": "nezetek/settings-v2-1",
+      "account": "A",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "frame settings-v2-1 on admin@ (roles TAG · EDZŐ · ADMIN) with the drawn name, address and 190 coins (edits over the recording). SZINT and JUTALMAK are not built until Phase 2 / 4 (no data exists): verdict matched-fixture at best, with that named difference.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "role": "link",
+          "name": {
+            "key": "settings.views.admin"
+          }
+        }
+      ]
+    },
+    "settings-v2-2": {
+      "title": "Profil v2 — teljes oldal, edző + admin",
+      "frame": "nezetek/settings-v2-2",
+      "account": "A",
+      "route": "/settings",
+      "height": 1313,
+      "reach": "fixture",
+      "why": "frame settings-v2-2 (1313 tall) on the same data; Nap és időzóna (Phase 2), SZINT and JUTALMAK are not built, so everything below the ledger sits higher",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "text": "5 eszköz"
+        }
+      ]
+    },
+    "settings-v2-member": {
+      "title": "Profil v2 — tag",
+      "frame": "nezetek/settings-v2-member",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "frame settings-v2-member on user@ with the drawn name and address; role line TAG, no NÉZETEK; 190 coins is the recording",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "text": "5 eszköz"
+        }
+      ]
+    },
+    "sheets": {
+      "title": "Profil v2 — NameSheet",
+      "frame": "nezetek/sheets",
+      "account": "A",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "frame sheets: a tap on the name line opens the NameSheet, the name is edited to \"Takács Dani\" so Mentés is enabled; it is not pressed (PATCH /auth/me is never fired)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/auth/me",
+          "edits": [
+            {
+              "pointer": "/user/display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/user/email",
+              "value": "takacs.daniel@pelda.hu"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/balanceMinor",
+              "value": 19000
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Megjelenített név: Takács Dániel"
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "text": "Takács Dani"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        }
+      }
+    },
+    "settings-equipment": {
+      "title": "Felszerelés (Profilból)",
+      "frame": "nezetek/settings-equipment",
+      "account": "M",
+      "route": "/settings/equipment",
+      "height": 874,
+      "reach": "fixture",
+      "why": "frame settings-equipment: the five drawn words selected and the status \"Felszerelés mentve\", which exists only after a tap: Rúd twice (the selection ends as drawn), the 700 ms autosave runs and PATCH /onboarding is answered 200 by a fixture - nothing reaches the server",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/equipment",
+              "value": [
+                2,
+                3,
+                5,
+                6,
+                10
+              ]
             }
           ]
         },
@@ -95,17 +402,20 @@
             }
           }
         }
-      ]
-    }
-  },
-  "states": {
+      ],
+      "arrived": {
+        "text": {
+          "key": "settings.equipmentSaved"
+        }
+      }
+    },
     "settings-recorded": {
-      "title": "Profil — a felvett adatokkal",
+      "title": "Profil v2 — a felvett adatokkal (tag)",
       "account": "M",
       "route": "/settings",
-      "height": 2026,
+      "height": 874,
       "reach": "seed",
-      "why": "both frames' state on M's recording exactly as it is (Teszt Elek, 190, 4 / 7, 83,4 kg) - the proof that the three new reads draw real data",
+      "why": "the member's page on M's recording as it is (Teszt Elek, 190, six equipment words, Hang · Rezgés)",
       "arrived": {
         "role": "button",
         "name": {
@@ -113,13 +423,35 @@
         }
       }
     },
-    "settings-reads-failed": {
-      "title": "Profil — az érme, eredmény és mérés olvasás nem sikerült",
+    "settings-admin": {
+      "title": "Profil v2 — admin fiók a felvett adatokkal",
+      "account": "A",
+      "route": "/settings",
+      "height": 1313,
+      "reach": "seed",
+      "why": "admin@'s recording as it is: 0 coins, no equipment (0 eszköz), both NÉZETEK rows",
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "auth.logout"
+          }
+        },
+        {
+          "role": "link",
+          "name": {
+            "key": "settings.views.coach"
+          }
+        }
+      ]
+    },
+    "settings-wallet-failed": {
+      "title": "Profil v2 — az egyenleg olvasása nem sikerült",
       "account": "M",
       "route": "/settings",
       "height": 874,
       "reach": "fixture",
-      "why": "the three new reads fail: each ledger figure prints the em dash, never 0, and the rest of the screen stands",
+      "why": "the wallet read fails: the ÉRMÉK figure prints the em dash, never 0, and the rest of the page stands; the onboarding read fails too: the Felszerelés row shows no count instead of a wrong one",
       "fixtures": [
         {
           "method": "GET",
@@ -129,13 +461,7 @@
         },
         {
           "method": "GET",
-          "path": "/api/v1/coins/achievements",
-          "status": 500,
-          "body": {}
-        },
-        {
-          "method": "GET",
-          "path": "/api/v1/measurements",
+          "path": "/api/v1/onboarding",
           "status": 500,
           "body": {}
         }
@@ -147,11 +473,7 @@
             "status": 500
           },
           {
-            "path": "/api/v1/coins/achievements",
-            "status": 500
-          },
-          {
-            "path": "/api/v1/measurements",
+            "path": "/api/v1/onboarding",
             "status": 500
           }
         ],
@@ -171,13 +493,159 @@
         }
       ]
     },
-    "settings-equipment-error": {
-      "title": "Profil — a felszerelés mentése nem sikerült",
+    "settings-cues-sheet": {
+      "title": "Profil v2 — Edzés közbeni jelzések sheet",
       "account": "M",
       "route": "/settings",
-      "height": 2026,
+      "height": 874,
+      "reach": "replay",
+      "why": "the row opens the CueSheet with the three existing switches (Beszédhang, Sípszó, Rezgés) and their hints - not drawn by round A; built from the kit (Sheet + ListRow + Switch)",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Edzés közbeni jelzések Hang · Rezgés"
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "switch",
+        "name": {
+          "key": "settings.cues.speech"
+        }
+      }
+    },
+    "settings-name-invalid": {
+      "title": "Profil v2 — NameSheet, túl rövid név",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "replay",
+      "why": "one character is under the server's 2-character floor: Mentés is there and disabled",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Megjelenített név: Teszt Elek"
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "text": "T"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        },
+        "disabled": true
+      }
+    },
+    "settings-name-refused": {
+      "title": "Profil v2 — NameSheet, a mentést a szerver elutasította",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
       "reach": "fixture",
-      "why": "an equipment tap whose autosave is refused: the danger line with the questionnaire's own message, the chip stays as the user left it",
+      "why": "Mentés is pressed and the server refuses (fixture 500, nothing written): the sheet stays open with the error dot in its header and the draft kept",
+      "fixtures": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/auth/me",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": "Megjelenített név: Teszt Elek"
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "text": "Teszt Elek Jr"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "advance": 300,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        }
+      }
+    },
+    "settings-equipment-error": {
+      "title": "Felszerelés — a mentés nem sikerült",
+      "account": "M",
+      "route": "/settings/equipment",
+      "height": 874,
+      "reach": "fixture",
+      "why": "an equipment tap whose autosave is refused: the danger line with the questionnaire's own message, the word stays as the user left it",
       "fixtures": [
         {
           "method": "PATCH",
@@ -224,112 +692,17 @@
         }
       }
     },
-    "settings-name-dirty": {
-      "title": "Profil — a név megváltozott, mentés látszik",
+    "settings-equipment-recorded": {
+      "title": "Felszerelés — a felvett adatokkal",
       "account": "M",
-      "route": "/settings",
-      "height": 874,
-      "reach": "replay",
-      "why": "the save control appears only once the text differs from the saved name; it is not pressed (PATCH /auth/me is never fired)",
-      "steps": [
-        {
-          "type": {
-            "role": "textbox",
-            "name": {
-              "key": "settings.displayName"
-            },
-            "text": "Teszt Elek Jr"
-          },
-          "arrived": {
-            "role": "button",
-            "name": {
-              "key": "common.save"
-            }
-          }
-        }
-      ],
-      "arrived": {
-        "role": "button",
-        "name": {
-          "key": "common.save"
-        }
-      }
-    },
-    "settings-name-invalid": {
-      "title": "Profil — túl rövid név, a mentés tiltva",
-      "account": "M",
-      "route": "/settings",
-      "height": 874,
-      "reach": "replay",
-      "why": "one character is under the server's 2-character floor: the save control is there and disabled",
-      "steps": [
-        {
-          "type": {
-            "role": "textbox",
-            "name": {
-              "key": "settings.displayName"
-            },
-            "text": "T"
-          },
-          "arrived": {
-            "role": "button",
-            "name": {
-              "key": "common.save"
-            },
-            "disabled": true
-          }
-        }
-      ],
-      "arrived": {
-        "role": "button",
-        "name": {
-          "key": "common.save"
-        },
-        "disabled": true
-      }
-    },
-    "settings-admin": {
-      "title": "Profil — admin fiók, az admin sor",
-      "account": "A",
-      "route": "/settings",
-      "height": 2026,
-      "reach": "seed",
-      "why": "the admin row (the second door to /admin, owner Q4: it stays) is drawn for admins only",
-      "arrived": [
-        {
-          "role": "button",
-          "name": {
-            "key": "auth.logout"
-          }
-        },
-        {
-          "role": "link",
-          "name": {
-            "key": "settings.openAdmin"
-          }
-        }
-      ]
-    },
-    "settings-stale-theme": {
-      "title": "Profil — régi témacsomag a böngészőben",
-      "account": "M",
-      "route": "/settings",
+      "route": "/settings/equipment",
       "height": 874,
       "reach": "seed",
-      "why": "dev-verify 7: a browser that still holds an old tracker.theme (a paid pack, a custom accent, transparency) renders plain Pulse",
-      "localStorage": {
-        "tracker.theme": {
-          "pack": "aurora",
-          "accent": "#ff3366",
-          "gradient": null,
-          "transparency": "full"
-        }
-      },
+      "why": "M's six recorded words, no status yet (nothing was tapped)",
       "arrived": {
-        "role": "button",
-        "name": {
-          "key": "auth.logout"
-        }
+        "role": "checkbox",
+        "name": "Pad",
+        "checked": true
       }
     }
   }
