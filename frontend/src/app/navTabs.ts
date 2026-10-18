@@ -139,7 +139,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
-    { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
+    { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins', '/rewards'] },
   ],
   trainer: [
     { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },

@@ -1,0 +1,13 @@
+{
+  "id": "R-S-rewards-01",
+  "from": "S-rewards",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs",
+  "need": "The routes /rewards (Jutalmak, frame lifeos/rewards-1) and /rewards/:id (one reward, frame lifeos/reward-detail), both under the Profil tab (plan 'LifeOS frontend': rewards/ reached from Profil; README-jutalmak-ermek-admin: rewards-1 is pushed from Profil, Profil lit, '‹ PROFIL'). Data lines only: the two lazy routes (RewardsPage / RewardDetailPage exported from features/rewards/), their routeMeta rows ('/rewards' -> parent '/settings', label nav.profile = 'Profil'; '/rewards/:id' -> parent '/rewards', label rewards.title = 'Jutalmak'), '/rewards' in the profile tab's owns (next to '/coins'; the tab prefix-matches, so /rewards/:id is lit too), and the two EXPECT rows of check-nav-active. The inbound link is the Profil JUTALMAK row of R-S-rewards-02, so check-nav needs no NO_INBOUND row once both are merged.",
+  "evidence": "kepernyok-2x/lifeos/rewards-1@2x.png, reward-detail@2x.png; figma-build/lifeos/c.common.js rewardsPage (screenHead('push', 'Jutalmak', { parent: 'Profil' })), reward-detail.part.js (parent 'Jutalmak'); captures in .pulse/pairs/S-rewards/ with the patch applied in the slot",
+  "proposedApi": "{ path: 'rewards', element: suspended(<RewardsPage />) }, { path: 'rewards/:id', element: suspended(<RewardDetailPage />) } + ROUTE_META['/rewards'] = { parent: '/settings', parentLabelKey: 'nav.profile' }, ROUTE_META['/rewards/:id'] = { parent: '/rewards', parentLabelKey: 'rewards.title' } + profile tab owns ['/coins', '/rewards']",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-rewards/requests/R-S-rewards-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there), so the pages are built and captured. Merged WITHOUT it the pages exist but no URL opens them: merge together with this package (and with B-rewards-challenges first: the pages import its Phase-4 types).",
+  "status": "open"
+}

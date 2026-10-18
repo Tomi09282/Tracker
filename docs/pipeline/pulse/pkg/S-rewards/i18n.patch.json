@@ -1,0 +1,534 @@
+{
+  "package": "S-rewards",
+  "base": "05b830a",
+  "namespaces": [
+    "rewards"
+  ],
+  "set": [
+    {
+      "key": "rewards.title",
+      "hu": "Jutalmak",
+      "en": "Rewards",
+      "de": "Belohnungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 title; reward-detail back link \"‹ JUTALMAK\"; Profil ledger row JUTALMAK (settings-v2-*)"
+    },
+    {
+      "key": "rewards.available",
+      "hu": "elérhető",
+      "en": "available",
+      "de": "verfügbar",
+      "copy": "inventory",
+      "visible": true,
+      "source": "Profil ledger row JUTALMAK note \"elérhető\" (nezetek.common.js ledgerRow)"
+    },
+    {
+      "key": "rewards.new",
+      "hu": "Új jutalom",
+      "en": "New reward",
+      "de": "Neue Belohnung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form sheet title; the rewards-1 header \"+\" (its accessible name, README \"Új jutalom\")"
+    },
+    {
+      "key": "rewards.spendable",
+      "hu": "Elkölthető",
+      "en": "Spendable",
+      "de": "Verfügbar",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 hero eyebrow ELKÖLTHETŐ"
+    },
+    {
+      "key": "rewards.coinUnit",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 / reward-detail hero unit \"érme\""
+    },
+    {
+      "key": "rewards.xpNote",
+      "hu": "A beváltás nem csökkenti az XP-t és a szintet.",
+      "en": "Redeeming does not lower your XP or level.",
+      "de": "Das Einlösen senkt weder XP noch Level.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 hero caption"
+    },
+    {
+      "key": "rewards.shop",
+      "hu": "Jutalombolt",
+      "en": "Reward shop",
+      "de": "Belohnungsshop",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 section eyebrow JUTALOMBOLT"
+    },
+    {
+      "key": "rewards.byCost",
+      "hu": "ár szerint",
+      "en": "by cost",
+      "de": "nach Preis",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 section head trailing words"
+    },
+    {
+      "key": "rewards.status.ok",
+      "hu": "beváltható",
+      "en": "redeemable",
+      "de": "einlösbar",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line"
+    },
+    {
+      "key": "rewards.status.cooldown",
+      "hu": "pihen · még {{count}} nap",
+      "en": "resting · {{count}} more days",
+      "de": "Pause · noch {{count}} Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line \"pihen · még 7 nap\""
+    },
+    {
+      "key": "rewards.status.redeemed",
+      "hu": "beváltva",
+      "en": "redeemed",
+      "de": "eingelöst",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line \"beváltva · egyszeri\""
+    },
+    {
+      "key": "rewards.status.short",
+      "hu": "még {{count}} érme",
+      "en": "{{count}} more coins",
+      "de": "noch {{count}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line \"még 410 érme\""
+    },
+    {
+      "key": "rewards.once",
+      "hu": "egyszeri",
+      "en": "one-time",
+      "de": "einmalig",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line \"beváltva · egyszeri\""
+    },
+    {
+      "key": "rewards.redeemedCount",
+      "hu": "{{count}}× beváltva",
+      "en": "redeemed {{count}}×",
+      "de": "{{count}}× eingelöst",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line \"4× beváltva\""
+    },
+    {
+      "key": "rewards.redeem",
+      "hu": "Beváltás",
+      "en": "Redeem",
+      "de": "Einlösen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "rewards-1 status line text link"
+    },
+    {
+      "key": "rewards.progressSr",
+      "hu": "Út a(z) {{name}} árához",
+      "en": "Progress to the cost of {{name}}",
+      "de": "Fortschritt bis zum Preis von {{name}}",
+      "copy": "proposed",
+      "visible": false,
+      "source": "screen-reader name of a reward row's 4 pt bar (rewards-1)"
+    },
+    {
+      "key": "rewards.confirmBody",
+      "hu": "Beváltod {{count}} érméért?",
+      "en": "Redeem it for {{count}} coins?",
+      "de": "Für {{count}} Münzen einlösen?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the redeem confirmation (README: \"opens the confirm sheet\"); f_app rewards.tsx \"Beváltod {cost} pontért?\", pont -> érme"
+    },
+    {
+      "key": "rewards.confirmYes",
+      "hu": "Beváltom",
+      "en": "Redeem",
+      "de": "Einlösen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the redeem confirmation action; f_app rewards.tsx confirmText \"Beváltom\""
+    },
+    {
+      "key": "rewards.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That did not work. Try again.",
+      "de": "Das hat nicht geklappt. Versuch es noch einmal.",
+      "copy": "existing-literal",
+      "visible": true,
+      "source": "the same sentence as habits.failed (a failed read or write)"
+    },
+    {
+      "key": "rewards.emptyTitle",
+      "hu": "Üres a bolt",
+      "en": "The shop is empty",
+      "de": "Der Shop ist leer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "empty JUTALOMBOLT (undrawn); f_app rewards.tsx EmptyState title"
+    },
+    {
+      "key": "rewards.emptyBody",
+      "hu": "Tűzz ki célokat: mozi 600, új ruha 2000, kirándulás 5000. Az érméiddel váltod be.",
+      "en": "Set yourself goals: a film 600, new clothes 2000, a trip 5000. You redeem them with your coins.",
+      "de": "Setz dir Ziele: Kino 600, neue Kleidung 2000, ein Ausflug 5000. Du löst sie mit deinen Münzen ein.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "empty JUTALOMBOLT (undrawn); f_app rewards.tsx EmptyState body, pont -> érme"
+    },
+    {
+      "key": "rewards.archivedCount",
+      "hu": "Archivált jutalmak · {{count}}",
+      "en": "Archived rewards · {{count}}",
+      "de": "Archivierte Belohnungen · {{count}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the footer link to the archived rewards (undrawn; as habits.archivedCount)"
+    },
+    {
+      "key": "rewards.edit",
+      "hu": "Szerkesztés",
+      "en": "Edit",
+      "de": "Bearbeiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail header text link"
+    },
+    {
+      "key": "rewards.price",
+      "hu": "Ár",
+      "en": "Price",
+      "de": "Preis",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail hero eyebrow ÁR"
+    },
+    {
+      "key": "rewards.many",
+      "hu": "többször",
+      "en": "repeatedly",
+      "de": "mehrmals",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail terms row value \"többször\""
+    },
+    {
+      "key": "rewards.onceValue",
+      "hu": "egyszer",
+      "en": "once",
+      "de": "einmal",
+      "copy": "proposed",
+      "visible": true,
+      "source": "reward-detail terms row value for a one-time reward (undrawn; the form's \"Egyszer\")"
+    },
+    {
+      "key": "rewards.days",
+      "hu": "{{count}} nap",
+      "en": "{{count}} days",
+      "de": "{{count}} Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail terms row value \"3 nap\""
+    },
+    {
+      "key": "rewards.noLimit",
+      "hu": "nincs korlát",
+      "en": "no limit",
+      "de": "keine Grenze",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form hint \"0 = nincs korlát\"; the terms row value for no pihenő"
+    },
+    {
+      "key": "rewards.redeemedSoFar",
+      "hu": "Beváltva eddig",
+      "en": "Redeemed so far",
+      "de": "Bisher eingelöst",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail terms row"
+    },
+    {
+      "key": "rewards.times",
+      "hu": "{{count}}×",
+      "en": "{{count}}×",
+      "de": "{{count}}×",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail terms row value \"4×\"",
+      "untranslated": {
+        "reason": "a count with the multiplication sign: the same in every language"
+      }
+    },
+    {
+      "key": "rewards.statusOk",
+      "hu": "Beváltható",
+      "en": "Redeemable",
+      "de": "Einlösbar",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail status line"
+    },
+    {
+      "key": "rewards.afterRedeem",
+      "hu": "elkölthető {{spendable}} érme, utána {{after}}",
+      "en": "{{spendable}} coins to spend, {{after}} after",
+      "de": "{{spendable}} Münzen verfügbar, danach {{after}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail status line \"· elkölthető 190 érme, utána 110\""
+    },
+    {
+      "key": "rewards.redeemCost",
+      "hu": "Beváltás · {{count}} érme",
+      "en": "Redeem · {{count}} coins",
+      "de": "Einlösen · {{count}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail pill"
+    },
+    {
+      "key": "rewards.redemptions",
+      "hu": "Beváltások",
+      "en": "Redemptions",
+      "de": "Einlösungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail section eyebrow BEVÁLTÁSOK"
+    },
+    {
+      "key": "rewards.fulfilled",
+      "hu": "Teljesítve",
+      "en": "Fulfilled",
+      "de": "Erfüllt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail section head trailing word"
+    },
+    {
+      "key": "rewards.costLine",
+      "hu": "{{count}} érme",
+      "en": "{{count}} coins",
+      "de": "{{count}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail redemption sub line \"80 érme\""
+    },
+    {
+      "key": "rewards.notYet",
+      "hu": "még nem kaptad meg",
+      "en": "not received yet",
+      "de": "noch nicht erhalten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail redemption sub line \"80 érme · még nem kaptad meg\""
+    },
+    {
+      "key": "rewards.fulfilledNote",
+      "hu": "A teljesítés csak a te jelölésed: érmét nem mozgat.",
+      "en": "Fulfilled is only your own mark: it moves no coins.",
+      "de": "Erfüllt ist nur deine Markierung: Es bewegt keine Münzen.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail line under BEVÁLTÁSOK"
+    },
+    {
+      "key": "rewards.archive",
+      "hu": "Archiválás",
+      "en": "Archive",
+      "de": "Archivieren",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail danger text link"
+    },
+    {
+      "key": "rewards.archiveNote",
+      "hu": "Eltűnik a boltból, a beváltások megmaradnak.",
+      "en": "It leaves the shop; the redemptions stay.",
+      "de": "Sie verschwindet aus dem Shop, die Einlösungen bleiben.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-detail line under Archiválás"
+    },
+    {
+      "key": "rewards.archiveTitle",
+      "hu": "Archiválod?",
+      "en": "Archive it?",
+      "de": "Archivieren?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the archive confirmation (README: \"→ ConfirmSheet\"); f_app reward/[id].tsx"
+    },
+    {
+      "key": "rewards.archiveBody",
+      "hu": "A jutalom eltűnik a boltból, a beváltások megmaradnak.",
+      "en": "The reward leaves the shop; the redemptions stay.",
+      "de": "Die Belohnung verschwindet aus dem Shop, die Einlösungen bleiben.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the archive confirmation message; f_app reward/[id].tsx"
+    },
+    {
+      "key": "rewards.restore",
+      "hu": "Visszaállítás",
+      "en": "Restore",
+      "de": "Wiederherstellen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "an archived reward's action (undrawn; the api.md word, as habits.detail.restore)"
+    },
+    {
+      "key": "rewards.form.editTitle",
+      "hu": "Jutalom szerkesztése",
+      "en": "Edit reward",
+      "de": "Belohnung bearbeiten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form in edit mode (README: title \"Jutalom szerkesztése\")"
+    },
+    {
+      "key": "rewards.form.name",
+      "hu": "Név",
+      "en": "Name",
+      "de": "Name",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form field label"
+    },
+    {
+      "key": "rewards.form.description",
+      "hu": "Leírás",
+      "en": "Description",
+      "de": "Beschreibung",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form field label"
+    },
+    {
+      "key": "rewards.form.cost",
+      "hu": "Ár (érme)",
+      "en": "Price (coins)",
+      "de": "Preis (Münzen)",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form field label"
+    },
+    {
+      "key": "rewards.form.costHint",
+      "hu": "Kicsi 80–150 · közepes 300–600 · nagy 1500+",
+      "en": "Small 80–150 · medium 300–600 · large 1500+",
+      "de": "Klein 80–150 · mittel 300–600 · groß 1500+",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form price hint"
+    },
+    {
+      "key": "rewards.form.repeatable",
+      "hu": "Beváltható",
+      "en": "Redeemable",
+      "de": "Einlösbar",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form label; reward-detail terms row \"Beváltható\""
+    },
+    {
+      "key": "rewards.form.many",
+      "hu": "Többször",
+      "en": "Repeatedly",
+      "de": "Mehrmals",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form segmented option"
+    },
+    {
+      "key": "rewards.form.once",
+      "hu": "Egyszer",
+      "en": "Once",
+      "de": "Einmal",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form segmented option"
+    },
+    {
+      "key": "rewards.form.cooldown",
+      "hu": "Pihenő két beváltás között",
+      "en": "Rest between two redemptions",
+      "de": "Pause zwischen zwei Einlösungen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form stepper label; reward-detail terms row"
+    },
+    {
+      "key": "rewards.form.days",
+      "hu": "nap",
+      "en": "days",
+      "de": "Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form stepper unit \"7 nap\""
+    },
+    {
+      "key": "rewards.form.cooldownHint",
+      "hu": "0 = nincs korlát",
+      "en": "0 = no limit",
+      "de": "0 = keine Grenze",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form stepper hint"
+    },
+    {
+      "key": "rewards.form.create",
+      "hu": "Létrehozás",
+      "en": "Create",
+      "de": "Erstellen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "reward-form pill"
+    },
+    {
+      "key": "rewards.form.nameRequired",
+      "hu": "Adj nevet a jutalomnak",
+      "en": "Give the reward a name",
+      "de": "Gib der Belohnung einen Namen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "reward-form name error (undrawn); f_app reward/[id].tsx"
+    },
+    {
+      "key": "rewards.form.costMin",
+      "hu": "Legalább 1 érme",
+      "en": "At least 1 coin",
+      "de": "Mindestens 1 Münze",
+      "copy": "proposed",
+      "visible": true,
+      "source": "reward-form price error (undrawn); f_app \"Legalább 1 pont\", pont -> érme"
+    },
+    {
+      "key": "rewards.form.costMax",
+      "hu": "Legfeljebb {{count}} érme",
+      "en": "At most {{count}} coins",
+      "de": "Höchstens {{count}} Münzen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "reward-form price error over api.md's 10000 (undrawn)"
+    }
+  ]
+}

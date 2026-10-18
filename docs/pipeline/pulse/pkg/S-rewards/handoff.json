@@ -1,0 +1,53 @@
+{
+  "package": "S-rewards",
+  "branch": "pulse/S-rewards",
+  "base": "05b830a (pulse-redesign with S-ma and S-tasks, merged into the branch)",
+  "slot": "tracker-wt/slot-18 (new worktree; previews on port 5188 - pulse-shot only accepts 5180-5189, so the task's 5218 could not be used)",
+  "build": "pulse-verify --package S-rewards --port 5188 on the merged tree: build green in 15 s (all gates + tsc -b + vite build), 8 of 8 captured (replay); the same with --lang de, 8 of 8; npm run verify:gates -- --allow-dirty: 78 passed, 0 failed, 7 dormant. Applied in the working tree only: B-rewards-challenges' shared.patch (lib/lifeos-api.ts Phase 4), this package's i18n.patch.json, R-S-rewards-01, R-S-rewards-02 and the work-package entry.",
+  "frames": {
+    "lifeos/rewards-1": {
+      "state": "rewards-1",
+      "verdict": "matched-fixture (GET /rewards is a contract body: the dev backend has no migration 033)",
+      "why": "Header (‹ PROFIL, JUTALMAK, the 44 pt +), ELKÖLTHETŐ with the giant 190 and 'érme' on its baseline, the XP line, the JUTALOMBOLT head with 'ár szerint', and every reward row (name, coin + mono cost, the 4 pt bar: full / full at 50 % for the resting ones, the status line with the lime dot and 'Beváltás') sit within 1 pt of the frame. Geometry: 52 compared, 45 matched, 7 deviating = Figma's fixed-width text boxes (the title 354, the names 285-294, the stat block 354) against the app's hugging boxes - left, top and height agree within 1 pt; 1 style 'mismatch' = the status run's first characters are ink and the rest text-2 (the probe reads the outer run). Pixel share over 8: 7.9 % (status bar, the 5-tab bar, the fade).",
+      "capture": ".pulse/shots/S-rewards/rewards-1.png",
+      "pairs": [".pulse/pairs/S-rewards/rewards-1.pair-1.png", ".pulse/pairs/S-rewards/rewards-1.overview.png", ".pulse/pairs/S-rewards/rewards-1.geometry.json"]
+    },
+    "lifeos/reward-detail": {
+      "state": "reward-detail",
+      "verdict": "matched-fixture (GET /rewards/:id is a contract body)",
+      "why": "Header with Szerkesztés, the description, ÁR 80 érme, the three terms rows (többször, '3 nap' and '4×' in mono), the status line, the one pill 'Beváltás · 80 érme', BEVÁLTÁSOK with 'Teljesítve', the four redemptions (ring / lime ticks), the closing line, Archiválás in danger and its line - each within 1 pt. Geometry: 55 compared, 39 matched, 16 deviating = fixed-width Figma text boxes vs hugging spans (every left / top / height within 1 pt); 1 style = the mixed-colour status run. Pixel share 6.3 %.",
+      "capture": ".pulse/shots/S-rewards/reward-detail.png",
+      "pairs": [".pulse/pairs/S-rewards/reward-detail.pair-1.png", ".pulse/pairs/S-rewards/reward-detail.pair-2.png", ".pulse/pairs/S-rewards/reward-detail.overview.png", ".pulse/pairs/S-rewards/reward-detail.geometry.json"]
+    },
+    "lifeos/reward-form": {
+      "state": "reward-form",
+      "verdict": "matched-fixture (the page under the sheet reads the GET /rewards contract body)",
+      "why": "The sheet over the dimmed Jutalmak: title, ×, Név focused with 'Pizza a barátokkal' (lime underline), Leírás, Ár (érme) 300 with the price hint, Beváltható with Többször / Egyszer, 'Pihenő két beváltás között' 7 nap with − and + on the edge and '0 = nincs korlát', Létrehozás. Geometry: 40 compared, 34 matched, 4 deviating (the kit sheet's fields stand 1 pt in from the gutter because of the sheet's 1 pt stroke; two compound frames paired by kit name) and 2 unmatched (the caret, which blinks and is not in the capture; Leírás' underline, drawn by the kit TextArea under another node). Pixel share 4.6 %.",
+      "capture": ".pulse/shots/S-rewards/reward-form.png",
+      "pairs": [".pulse/pairs/S-rewards/reward-form.pair-1.png", ".pulse/pairs/S-rewards/reward-form.overview.png", ".pulse/pairs/S-rewards/reward-form.geometry.json"]
+    }
+  },
+  "geometry": "No geometry JSON existed for these round-B frames: read-only use_figma walks of 189:257, 189:619 and 189:952 (fix-round-2 nodes, README-jutalmak-ermek-admin) were decoded by pkg/S-rewards/geometry/decode.mjs into .pulse/geometry/lifeos/{rewards-1,reward-detail,reward-form}.json (the raw walks are committed as *.a.json). Nothing in the Figma file was changed.",
+  "extraStates": {
+    "rewards-empty": { "note": "no reward: the JUTALOMBOLT head, f_app's 'Üres a bolt' and its line (pont -> érme), 'Új jutalom +' opens the sheet; no pill", "picture": ".pulse/pairs/S-rewards/app-rewards-empty.png" },
+    "rewards-debt": { "note": "balance −35: ELKÖLTHETŐ 0, the Érmék debt line (coins.debtNotice), every reward 'még N érme' with an empty bar, no Beváltás", "picture": ".pulse/pairs/S-rewards/app-rewards-debt.png" },
+    "rewards-failed": { "note": "GET /rewards 500: the header and the danger NoticeLine with Újra", "picture": ".pulse/pairs/S-rewards/app-rewards-failed.png" },
+    "reward-redeem": { "note": "the pill opens the kit ConfirmSheet: the reward's name, 'Beváltod 80 érméért?', 'Beváltom' (ink), 'Mégse'; nothing is written by the capture", "picture": ".pulse/pairs/S-rewards/app-reward-redeem.png" },
+    "reward-detail-resting": { "note": "a resting reward: no pill, the status line 'pihen · még 7 nap · 3× beváltva', today's redemption still open (ring)", "picture": ".pulse/pairs/S-rewards/app-reward-detail-resting.png" }
+  },
+  "variants": "hu (8/8, .pulse/pairs/S-rewards/contact-hu.png) and de (8/8, .pulse/pairs/S-rewards/contact-de.png): no clipping; the German status lines and the pill fit.",
+  "probes": "boxed (reward-detail, reward-redeem, reward-detail-resting): the kit setCheck ring (CheckMark, not fulfilled) is counted as a bordered surface - the kit's own drawing, as in S-habits. targets: pass (the whole reward row is its link, 'Beváltás' a sibling control). geometry: see frames.",
+  "ledger": "pulse-ledger S-rewards: empty - nothing counted was lost",
+  "fixtureCheck": "pulse-fixture-check --file pkg/S-rewards/states.json: 7 problems = the 7 contract bodies of GET /rewards and GET /rewards/:id (the 500 of rewards-failed is a status outcome) (expected, R26: the dev backend answers /api/v1/rewards 404 - no migration 033) - to become edit lists once the integrator records GET /rewards and GET /rewards/1 for a seeded account",
+  "liveSmoke": "not run: http://localhost:3000/api/v1/rewards answers 404 (B-rewards-challenges is not merged / the dev backend has no 033). No live write was made.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-rewards/work-package.json (add to work-packages.json screens; the slot carries it in its working tree only)",
+    "docs/pipeline/pulse/pkg/S-rewards/i18n.patch.json (58 rewards.* keys, hu / en / de; rewards.times untranslated by reason)",
+    "docs/pipeline/pulse/pkg/S-rewards/requests/R-S-rewards-01.json + .patch (routes /rewards and /rewards/:id, routeMeta rows, profile tab owns '/rewards', check-nav-active EXPECT rows) - blocking, applies on pulse-redesign 05b830a",
+    "docs/pipeline/pulse/pkg/S-rewards/requests/R-S-rewards-02.json + .patch (SettingsPage.tsx: the Profil JUTALMAK ledger row 'N elérhető' -> /rewards through RewardsLedgerRow) - blocking (it is /rewards' inbound link for check-nav), applies on pulse-redesign 05b830a"
+  ],
+  "dependsOn": "merge B-rewards-challenges first (its shared.patch: the Phase-4 block of frontend/src/lib/lifeos-api.ts); this package imports Reward, RewardsResponse, RewardDetailResponse, RewardCreate, RewardPatch, RewardRedeemResponse, RewardRedemption from it",
+  "deviations": "pkg/S-rewards/deviations.md",
+  "proposedCopy": "pkg/S-rewards/copy-to-approve.md",
+  "status": "handoff"
+}

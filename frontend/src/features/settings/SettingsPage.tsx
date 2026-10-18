@@ -20,6 +20,8 @@ import { readLevel, type WalletRead } from '../coins/statement';
 import { ProgressBar } from '../../ui/data/ProgressBar';
 import { useOnboarding } from '../onboarding/useOnboarding';
 import { hourLabel, useDayPrefs, zoneCity } from './dayPrefs';
+import { useRewards } from '../rewards/rewardsApi';
+import { RewardsLedgerRow } from '../rewards/RewardsLedgerRow';
 import { isValidDisplayName, personLabel } from '../../lib/person';
 
 /**
@@ -64,6 +66,9 @@ export function SettingsPage() {
   const wallet = useWallet();
   // SZINT (LifeOS Phase 2): read from the wallet's 031 fields; null on a server that sends no level.
   const level = readLevel(wallet.data as WalletRead | undefined);
+  // JUTALMAK (LifeOS Phase 4): "N elérhető" is GET /rewards' redeemableCount; a server without the
+  // shop (no migration 033) answers 404 and the row is not drawn.
+  const rewards = useRewards();
   const onboarding = useOnboarding();
   const cueSummary = useCueSummary();
   // "Budapest · 04:00": the zone's place and the day start (GET /me/prefs). Until a zone is stored,
@@ -152,6 +157,9 @@ export function SettingsPage() {
               note={<ProgressBar value={level.progress} label={t('coins.level.xp', { xp: level.xp, next: level.next })} className="mb-0.5 w-30" />}
               value={level.level}
             />
+          ) : null}
+          {rewards.data ? (
+            <RewardsLedgerRow count={rewards.data.redeemableCount} />
           ) : null}
         </RowStack>
       </div>

@@ -19,6 +19,7 @@
     "coaching.nutrition.itemLine": "unit symbols; the live format (decimal point, glued unit) is kept 1:1 until the owner rules (client-detail-2 board note)",
     "adminRules.unit.pct": "unit symbol",
     "coins.level.xp": "two figures and the unit XP, the same in every language",
-    "tasks.priorityValue": "a template of two placeholders and a middle dot: no words to translate"
+    "tasks.priorityValue": "a template of two placeholders and a middle dot: no words to translate",
+    "rewards.times": "a count with the multiplication sign: the same in every language"
   }
 }

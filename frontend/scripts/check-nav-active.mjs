@@ -93,6 +93,8 @@ const EXPECT_BY_VIEW = {
     ['/progress', '/progress'],
     ['/settings', '/settings'],
     ['/coins', '/settings'],
+    ['/rewards', '/settings'],
+    ['/rewards/7', '/settings'],
     ['/settings/equipment', '/settings'],
     ['/settings/day', '/settings'],
   ],

@@ -109,6 +109,10 @@ const ChallengesPage = lazy(() =>
 const ChallengePoolPage = lazy(() =>
   import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
 );
+const RewardsPage = lazy(() => import('../features/rewards/RewardsPage').then((m) => ({ default: m.RewardsPage })));
+const RewardDetailPage = lazy(() =>
+  import('../features/rewards/RewardDetailPage').then((m) => ({ default: m.RewardDetailPage })),
+);
 
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
@@ -163,6 +167,8 @@ export const router = createBrowserRouter([
       { path: 'nutrition', element: suspended(<NutritionPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
       { path: 'coins', element: suspended(<CoinsPage />) },
+      { path: 'rewards', element: suspended(<RewardsPage />) },
+      { path: 'rewards/:id', element: suspended(<RewardDetailPage />) },
       { path: 'compose', element: suspended(<ComposePage />) },
       { path: 'compose/profile', element: suspended(<ProfileEditorPage />) },
       { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },

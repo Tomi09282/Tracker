@@ -1,0 +1,970 @@
+{
+  "about": "S-rewards - Jutalmak (/rewards), one reward (/rewards/:id) and the reward sheet, design round B frames lifeos/rewards-1, reward-detail, reward-form, and their undrawn states. The running dev backend has no migration 033 (B-rewards-challenges is not merged), so GET /rewards and GET /rewards/:id are answered by contract bodies typed by lib/lifeos-api.ts (B-rewards-challenges' Phase-4 block) carrying the round's Sunday seed (README-jutalmak-ermek-admin fix round 2: spendable 190; Kávé 80 ok 4x, Desszert 80 pihen 7, Lustálkodós 120 pihen 4, Esti sorozat 150 ok, Hétvége Tihanyban 500 egyszeri, Mozi 600, Új futócipő 2500); every other request replays the freeze of account M. Nothing is written: no state fires a write. When the integrator records GET /rewards for a seeded account, these bodies become edit lists over the recording.",
+  "states": {
+    "rewards-1": {
+      "title": "Jutalmak — a keret (vasárnap, október 18.)",
+      "frame": "lifeos/rewards-1",
+      "account": "M",
+      "route": "/rewards",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the frame state: ELKÖLTHETŐ 190, the seven rewards by cost (two redeemable, two resting, one redeemed once, two saving up). GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "balanceMinor": 19000,
+            "spendableMinor": 19000,
+            "items": [
+              {
+                "id": 1,
+                "name": "Kávé a kedvenc helyen",
+                "description": "Egy flat white és egy kifli a sarki kávézóban, laptop nélkül.",
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 3,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 4,
+                "lastRedeemedOn": "2026-10-14",
+                "availability": {
+                  "ok": true
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 11000
+              },
+              {
+                "id": 2,
+                "name": "Desszert a cukrászdában",
+                "description": null,
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 3,
+                "lastRedeemedOn": "2026-10-18",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-25",
+                  "daysLeft": 7
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 11000
+              },
+              {
+                "id": 3,
+                "name": "Lustálkodós reggel",
+                "description": null,
+                "costMinor": 12000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 2,
+                "lastRedeemedOn": "2026-10-15",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-22",
+                  "daysLeft": 4
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 7000
+              },
+              {
+                "id": 4,
+                "name": "Esti sorozat, telefon nélkül",
+                "description": null,
+                "costMinor": 15000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": true
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 4000
+              },
+              {
+                "id": 5,
+                "name": "Hétvége Tihanyban",
+                "description": null,
+                "costMinor": 50000,
+                "repeatable": false,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 1,
+                "lastRedeemedOn": "2026-09-12",
+                "availability": {
+                  "ok": false,
+                  "reason": "ALREADY_REDEEMED"
+                },
+                "progressBp": 3800,
+                "balanceAfterMinor": -31000
+              },
+              {
+                "id": 6,
+                "name": "Mozi",
+                "description": null,
+                "costMinor": 60000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 41000
+                },
+                "progressBp": 3166,
+                "balanceAfterMinor": -41000
+              },
+              {
+                "id": 7,
+                "name": "Új futócipő",
+                "description": null,
+                "costMinor": 250000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 231000
+                },
+                "progressBp": 760,
+                "balanceAfterMinor": -231000
+              }
+            ],
+            "archived": [],
+            "redeemableCount": 2,
+            "limits": {
+              "rewards": 100,
+              "costMaxMinor": 1000000
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "rewards.byCost"
+        }
+      }
+    },
+    "reward-detail": {
+      "title": "Kávé a kedvenc helyen — a keret",
+      "frame": "lifeos/reward-detail",
+      "account": "M",
+      "route": "/rewards/1",
+      "height": 1336,
+      "reach": "fixture",
+      "why": "the frame state: the description, ÁR 80, többször · 3 nap · 4×, redeemable with 190 -> 110, the pill, four redemptions (the latest not fulfilled), Archiválás. GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards/1",
+          "body": {
+            "reward": {
+              "id": 1,
+              "name": "Kávé a kedvenc helyen",
+              "description": "Egy flat white és egy kifli a sarki kávézóban, laptop nélkül.",
+              "costMinor": 8000,
+              "repeatable": true,
+              "cooldownDays": 3,
+              "archived": false,
+              "archivedAt": null,
+              "redeemedCount": 4,
+              "lastRedeemedOn": "2026-10-14",
+              "availability": {
+                "ok": true
+              },
+              "progressBp": 10000,
+              "balanceAfterMinor": 11000
+            },
+            "spendableMinor": 19000,
+            "redemptions": [
+              {
+                "id": 14,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-14",
+                "redeemedAt": 1791991800,
+                "fulfilled": false,
+                "fulfilledAt": null
+              },
+              {
+                "id": 11,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-09",
+                "redeemedAt": 1791559800,
+                "fulfilled": true,
+                "fulfilledAt": 1791562200
+              },
+              {
+                "id": 9,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-03",
+                "redeemedAt": 1791041400,
+                "fulfilled": true,
+                "fulfilledAt": 1791043800
+              },
+              {
+                "id": 6,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-09-26",
+                "redeemedAt": 1790436600,
+                "fulfilled": true,
+                "fulfilledAt": 1790439000
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "rewards.fulfilledNote"
+        }
+      }
+    },
+    "reward-form": {
+      "title": "Új jutalom — a lap (Pizza a barátokkal, 300, Többször, 7 nap)",
+      "frame": "lifeos/reward-form",
+      "account": "M",
+      "route": "/rewards",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the frame state: the sheet over Jutalmak, Név typed and focused, Leírás, Ár 300 with the hint, Többször, Pihenő 7 nap, Létrehozás. GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "balanceMinor": 19000,
+            "spendableMinor": 19000,
+            "items": [
+              {
+                "id": 1,
+                "name": "Kávé a kedvenc helyen",
+                "description": "Egy flat white és egy kifli a sarki kávézóban, laptop nélkül.",
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 3,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 4,
+                "lastRedeemedOn": "2026-10-14",
+                "availability": {
+                  "ok": true
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 11000
+              },
+              {
+                "id": 2,
+                "name": "Desszert a cukrászdában",
+                "description": null,
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 3,
+                "lastRedeemedOn": "2026-10-18",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-25",
+                  "daysLeft": 7
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 11000
+              },
+              {
+                "id": 3,
+                "name": "Lustálkodós reggel",
+                "description": null,
+                "costMinor": 12000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 2,
+                "lastRedeemedOn": "2026-10-15",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-22",
+                  "daysLeft": 4
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 7000
+              },
+              {
+                "id": 4,
+                "name": "Esti sorozat, telefon nélkül",
+                "description": null,
+                "costMinor": 15000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": true
+                },
+                "progressBp": 10000,
+                "balanceAfterMinor": 4000
+              },
+              {
+                "id": 5,
+                "name": "Hétvége Tihanyban",
+                "description": null,
+                "costMinor": 50000,
+                "repeatable": false,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 1,
+                "lastRedeemedOn": "2026-09-12",
+                "availability": {
+                  "ok": false,
+                  "reason": "ALREADY_REDEEMED"
+                },
+                "progressBp": 3800,
+                "balanceAfterMinor": -31000
+              },
+              {
+                "id": 6,
+                "name": "Mozi",
+                "description": null,
+                "costMinor": 60000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 41000
+                },
+                "progressBp": 3166,
+                "balanceAfterMinor": -41000
+              },
+              {
+                "id": 7,
+                "name": "Új futócipő",
+                "description": null,
+                "costMinor": 250000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 231000
+                },
+                "progressBp": 760,
+                "balanceAfterMinor": -231000
+              }
+            ],
+            "archived": [],
+            "redeemableCount": 2,
+            "limits": {
+              "rewards": 100,
+              "costMaxMinor": 1000000
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "hu": "Új jutalom",
+              "en": "New reward",
+              "de": "Neue Belohnung"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "hu": "Leírás",
+              "en": "Description",
+              "de": "Beschreibung"
+            },
+            "text": "Péntek este, a Római-parton."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "hu": "Leírás",
+              "en": "Description",
+              "de": "Beschreibung"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "hu": "Ár (érme)",
+              "en": "Price (coins)",
+              "de": "Preis (Münzen)"
+            },
+            "text": "300"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "hu": "Ár (érme)",
+              "en": "Price (coins)",
+              "de": "Preis (Münzen)"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "spinbutton"
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "hu": "Név",
+              "en": "Name",
+              "de": "Name"
+            },
+            "text": "Pizza a barátokkal"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "hu": "Név",
+              "en": "Name",
+              "de": "Name"
+            },
+            "focused": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "hu": "Név",
+          "en": "Name",
+          "de": "Name"
+        },
+        "focused": true
+      }
+    },
+    "rewards-empty": {
+      "title": "Jutalmak — üres a bolt",
+      "account": "M",
+      "route": "/rewards",
+      "height": 874,
+      "reach": "fixture",
+      "why": "no reward yet: \"Üres a bolt\", f_app's line, \"Új jutalom +\". GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "balanceMinor": 19000,
+            "spendableMinor": 19000,
+            "items": [],
+            "archived": [],
+            "redeemableCount": 0,
+            "limits": {
+              "rewards": 100,
+              "costMaxMinor": 1000000
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "rewards.emptyTitle"
+        }
+      }
+    },
+    "rewards-debt": {
+      "title": "Jutalmak — mínuszban (tartozás 35)",
+      "account": "M",
+      "route": "/rewards",
+      "height": 874,
+      "reach": "fixture",
+      "why": "an account in debt (coins-1v2-debt's −35): spendable 0, the Érmék debt line, every reward \"még N érme\" and none redeemable. GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "balanceMinor": -3500,
+            "spendableMinor": 0,
+            "items": [
+              {
+                "id": 1,
+                "name": "Kávé a kedvenc helyen",
+                "description": "Egy flat white és egy kifli a sarki kávézóban, laptop nélkül.",
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 3,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 4,
+                "lastRedeemedOn": "2026-10-14",
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 8000
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -8000
+              },
+              {
+                "id": 2,
+                "name": "Desszert a cukrászdában",
+                "description": null,
+                "costMinor": 8000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 3,
+                "lastRedeemedOn": "2026-10-18",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-25",
+                  "daysLeft": 7
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -8000
+              },
+              {
+                "id": 3,
+                "name": "Lustálkodós reggel",
+                "description": null,
+                "costMinor": 12000,
+                "repeatable": true,
+                "cooldownDays": 7,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 2,
+                "lastRedeemedOn": "2026-10-15",
+                "availability": {
+                  "ok": false,
+                  "reason": "COOLDOWN",
+                  "availableOn": "2026-10-22",
+                  "daysLeft": 4
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -12000
+              },
+              {
+                "id": 4,
+                "name": "Esti sorozat, telefon nélkül",
+                "description": null,
+                "costMinor": 15000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 15000
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -15000
+              },
+              {
+                "id": 5,
+                "name": "Hétvége Tihanyban",
+                "description": null,
+                "costMinor": 50000,
+                "repeatable": false,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 1,
+                "lastRedeemedOn": "2026-09-12",
+                "availability": {
+                  "ok": false,
+                  "reason": "ALREADY_REDEEMED"
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -50000
+              },
+              {
+                "id": 6,
+                "name": "Mozi",
+                "description": null,
+                "costMinor": 60000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 60000
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -60000
+              },
+              {
+                "id": 7,
+                "name": "Új futócipő",
+                "description": null,
+                "costMinor": 250000,
+                "repeatable": true,
+                "cooldownDays": null,
+                "archived": false,
+                "archivedAt": null,
+                "redeemedCount": 0,
+                "lastRedeemedOn": null,
+                "availability": {
+                  "ok": false,
+                  "reason": "INSUFFICIENT",
+                  "missingMinor": 250000
+                },
+                "progressBp": 0,
+                "balanceAfterMinor": -250000
+              }
+            ],
+            "archived": [],
+            "redeemableCount": 0,
+            "limits": {
+              "rewards": 100,
+              "costMaxMinor": 1000000
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "rewards.byCost"
+        }
+      }
+    },
+    "rewards-failed": {
+      "title": "Jutalmak — a lekérés nem sikerült",
+      "account": "M",
+      "route": "/rewards",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a failed read: the danger line with \"Újra\" (GET /rewards answered 500)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards",
+          "status": 500,
+          "body": {
+            "error": "Internal error",
+            "code": "internal",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/rewards",
+            "status": 500
+          }
+        ]
+      }
+    },
+    "reward-redeem": {
+      "title": "Kávé a kedvenc helyen — a beváltás megerősítése",
+      "account": "M",
+      "route": "/rewards/1",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the pill opens the confirmation (undrawn; f_app's \"Beváltod 80 érméért?\" / \"Beváltom\"). Nothing is written: the capture stops at the open sheet. GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards/1",
+          "body": {
+            "reward": {
+              "id": 1,
+              "name": "Kávé a kedvenc helyen",
+              "description": "Egy flat white és egy kifli a sarki kávézóban, laptop nélkül.",
+              "costMinor": 8000,
+              "repeatable": true,
+              "cooldownDays": 3,
+              "archived": false,
+              "archivedAt": null,
+              "redeemedCount": 4,
+              "lastRedeemedOn": "2026-10-14",
+              "availability": {
+                "ok": true
+              },
+              "progressBp": 10000,
+              "balanceAfterMinor": 11000
+            },
+            "spendableMinor": 19000,
+            "redemptions": [
+              {
+                "id": 14,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-14",
+                "redeemedAt": 1791991800,
+                "fulfilled": false,
+                "fulfilledAt": null
+              },
+              {
+                "id": 11,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-09",
+                "redeemedAt": 1791559800,
+                "fulfilled": true,
+                "fulfilledAt": 1791562200
+              },
+              {
+                "id": 9,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-10-03",
+                "redeemedAt": 1791041400,
+                "fulfilled": true,
+                "fulfilledAt": 1791043800
+              },
+              {
+                "id": 6,
+                "rewardId": 1,
+                "name": "Kávé a kedvenc helyen",
+                "costMinor": 8000,
+                "localDate": "2026-09-26",
+                "redeemedAt": 1790436600,
+                "fulfilled": true,
+                "fulfilledAt": 1790439000
+              }
+            ]
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "hu": "Beváltás · 80 érme",
+              "en": "Redeem · 80 coins",
+              "de": "Einlösen · 80 Münzen"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "reward-detail-resting": {
+      "title": "Desszert a cukrászdában — pihen",
+      "account": "M",
+      "route": "/rewards/2",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a resting reward (undrawn): no pill, the status line \"pihen · még 7 nap · 3× beváltva\", every redemption fulfilled. GET /rewards* is answered by a contract body typed by lib/lifeos-api.ts (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards/2",
+          "body": {
+            "reward": {
+              "id": 2,
+              "name": "Desszert a cukrászdában",
+              "description": null,
+              "costMinor": 8000,
+              "repeatable": true,
+              "cooldownDays": 7,
+              "archived": false,
+              "archivedAt": null,
+              "redeemedCount": 3,
+              "lastRedeemedOn": "2026-10-18",
+              "availability": {
+                "ok": false,
+                "reason": "COOLDOWN",
+                "availableOn": "2026-10-25",
+                "daysLeft": 7
+              },
+              "progressBp": 10000,
+              "balanceAfterMinor": 11000
+            },
+            "spendableMinor": 19000,
+            "redemptions": [
+              {
+                "id": 15,
+                "rewardId": 2,
+                "name": "Desszert a cukrászdában",
+                "costMinor": 8000,
+                "localDate": "2026-10-18",
+                "redeemedAt": 1792337400,
+                "fulfilled": false,
+                "fulfilledAt": null
+              },
+              {
+                "id": 10,
+                "rewardId": 2,
+                "name": "Desszert a cukrászdában",
+                "costMinor": 8000,
+                "localDate": "2026-10-04",
+                "redeemedAt": 1791127800,
+                "fulfilled": true,
+                "fulfilledAt": 1791130200
+              },
+              {
+                "id": 5,
+                "rewardId": 2,
+                "name": "Desszert a cukrászdában",
+                "costMinor": 8000,
+                "localDate": "2026-09-20",
+                "redeemedAt": 1789918200,
+                "fulfilled": true,
+                "fulfilledAt": 1789920600
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "rewards.fulfilledNote"
+        }
+      }
+    }
+  }
+}
