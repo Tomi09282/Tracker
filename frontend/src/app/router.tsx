@@ -116,6 +116,7 @@ const ChallengesPage = lazy(() =>
 const ChallengePoolPage = lazy(() =>
   import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
 );
+const FocusPage = lazy(() => import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })));
 const RewardsPage = lazy(() => import('../features/rewards/RewardsPage').then((m) => ({ default: m.RewardsPage })));
 const RewardDetailPage = lazy(() =>
   import('../features/rewards/RewardDetailPage').then((m) => ({ default: m.RewardDetailPage })),
@@ -167,6 +168,7 @@ export const router = createBrowserRouter([
       { path: 'habits', element: suspended(<HabitsPage />) },
       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
       { path: 'tasks', element: suspended(<TasksPage />) },
+      { path: 'focus', element: suspended(<FocusPage />) },
       { path: 'challenges', element: suspended(<ChallengesPage />) },
       { path: 'challenges/pool', element: suspended(<ChallengePoolPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },

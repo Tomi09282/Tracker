@@ -1,0 +1,76 @@
+{
+  "package": "S-focus",
+  "branch": "pulse/S-focus",
+  "base": "05b830a (pulse-redesign with S-ma and S-tasks merged)",
+  "slot": "tracker-wt/slot-21",
+  "build": "pulse-verify --package S-focus --port 5184: build green in 16 s (13 gates + tsc -b + vite build), 11 of 11 captured (replay), on pulse-redesign 05b830a with B-focus' lifeos-api.ts Phase-6 block (its shared.patch at 272616b), this package's i18n.patch.json, R-S-focus-01 (re-cut on 05b830a) and R-S-focus-02 applied in the working tree; every capture equals the 179ff81 one (9 byte-identical, focus-give-up 68 px and focus-2's tile 3 px at channel delta 1). verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-focus/i18n.patch.json (38 focus.* keys in hu / en / de, 12 proposed, 2 copy questions)",
+    "docs/pipeline/pulse/pkg/S-focus/requests/R-S-focus-01.json + .patch (route /focus, routeMeta parent Ma, home tab owns /focus, check-nav-active row)",
+    "docs/pipeline/pulse/pkg/S-focus/requests/R-S-focus-02.json + .patch (TodayPage mounts TodayFocus, Ma's FÓKUSZ block)",
+    "docs/pipeline/pulse/pkg/S-focus/requests/R-S-focus-03.json (Fraction 'complete' prop, no patch: kit decision)",
+    "docs/pipeline/pulse/pkg/S-focus/work-package.json (the work-packages.json entry, wave 7)"
+  ],
+  "dependsOn": "B-focus must merge first (frontend/src/lib/lifeos-api.ts Phase-6 types via its shared.patch; the backend routes of migration 035)",
+  "frames": {
+    "lifeos/focus-1": {
+      "state": "focus-1",
+      "verdict": "matched-fixture",
+      "why": "Header, field, both sections (rule, eyebrow, the '21:10 → 22:00' head, chips with the lime mark), the reward line and the docked pill land on the geometry (27 matched; deviations are only hug-vs-fill widths and the last two chips 2-3 pt left). GET /focus/current is a contract body (no migration 035 on the dev backend).",
+      "capture": ".pulse/shots/S-focus/focus-1.png",
+      "pairs": [
+        ".pulse/pairs/S-focus/focus-1.pair-1.png",
+        ".pulse/pairs/S-focus/focus-1.overview.png"
+      ]
+    },
+    "lifeos/focus-2": {
+      "state": "focus-2",
+      "verdict": "matched-fixture",
+      "why": "Live line, title, the kit Countdown 34:42, the lime progress line at 0.306, start · 15 / 50 perc · end, ELLENŐRZÉS 1 / 3, the ask line, the pill and the docked Befejezés / Feladás sit on the frame (23 matched; the countdown's 5 'style' notes are the kit's single-glyph cells without the frame's -1 % tracking).",
+      "capture": ".pulse/shots/S-focus/focus-2.png",
+      "pairs": [
+        ".pulse/pairs/S-focus/focus-2.pair-1.png",
+        ".pulse/pairs/S-focus/focus-2.overview.png"
+      ]
+    },
+    "lifeos/focus-3": {
+      "state": "focus-3",
+      "verdict": "matched-fixture",
+      "why": "Reached by the real tap on Befejezés (the POST /focus/41/finish outcome is a fixture schema-checked against FocusFinishResponse). Header, stat block (50 + PERC), the closed ledger (ÉRME jóváírva + coin +23, ELLENŐRZÉS 15 percenként 3/3, SZINT XP bar 4), the sum line and the pill match; the 3/3 slash and denominator are the kit Fraction's pending tone (R-S-focus-03).",
+      "capture": ".pulse/shots/S-focus/focus-3.png",
+      "pairs": [
+        ".pulse/pairs/S-focus/focus-3.pair-1.png",
+        ".pulse/pairs/S-focus/focus-3.overview.png"
+      ]
+    },
+    "lifeos/ma-1 (FÓKUSZ block only)": {
+      "state": "ma-focus",
+      "verdict": "matched-fixture (section only; the rest of Ma is S-ma's)",
+      "why": "Ma's own ma-1 fixtures with the Phase-6 focus field added: FÓKUSZ, 'ma 50 perc' with the figure in ink, the planned row 'Mélymunka – szakdolgozat / Következő blokk · 25 perc · +8 érme / 14:00 ›' line up with the frame crop.",
+      "capture": ".pulse/shots/S-focus/ma-focus.png",
+      "pairs": [
+        ".pulse/pairs/S-focus/ma-focus.pair-1.png"
+      ]
+    }
+  },
+  "extraStates": {
+    "focus-waiting": "running, check-in not due: the pill off, 1 / 3 done",
+    "focus-no-checkins": "running without check-ins: no ELLENŐRZÉS section",
+    "focus-planned": "a planned block: dot off, 'Következő blokk · 14:00', the whole plan in the pending tone, only Feladás",
+    "focus-ended": "ran out while closed: 00:00, the line full, 'Lejárt az idő', Befejezés / Feladás",
+    "focus-give-up": "the kit ConfirmSheet behind Feladás",
+    "focus-no-zone": "started false: the info line with the door to 'Nap és időzóna', the pill off",
+    "focus-failed": "GET /focus/current 500: the danger line with Újra"
+  },
+  "fixtures": "Every GET /focus/current body and the finish outcome are contract bodies: pulse-fixture-check refuses them as free-hand (no recording exists before migration 035). They were type-checked against FocusCurrentResponse / FocusFinishResponse with tsc --strict (10 bodies, 0 errors; a negative control with an extra key fails). GET /coins/wallet is an edit list over the freeze of M. Product code never reads a fixture.",
+  "probes": "targets: the kit ScreenHeader back control 'Ma' is 36.6 wide (the frame's own 36), not this package's file; boxed on ma-focus: S-ma's check rings; geometry: only hug-vs-fill widths, the 6-tab bar of the frame vs the 5-tab bar of the app, and the kit items above.",
+  "deviations": [
+    "focus-2 '1 / 3': while a check-in is due the head names the prompt being asked (done + 1), once answered it is the count done, so a tap never moves the figure; the frame's state (15:18 in, the pill live) is the first prompt with 0 done (api.md reads '1 / 3' as checkinsDone, which would make the frame's live pill impossible at 15 minutes).",
+    "The pill 'Rajta vagyok' is OFF (disabled) while no check-in is due, and the ask line + pill are drawn only while the block runs (planned / ran-out blocks cannot check in).",
+    "A planned block shows only Feladás: the server refuses to finish a block that has not started (FOCUS_NOT_STARTED).",
+    "focus-3 lives in the page's state only: a finished block is history, the next visit is the setup; Bezárás goes to Ma (replace).",
+    "focus-1's '21:10 → 22:00' is the device clock corrected to the server's now, in the browser's zone."
+  ],
+  "liveSmoke": "none - no write was made; the dev backend has no migration 035",
+  "proposedCopy": "12 proposed strings (focus.ruleNoCheckin, noZone, limit, startFailed, failed, ended, left (not visible), giveUpTitle, giveUpBody, writeFailed, sumNoCheckin, capped) - see i18n.patch.json"
+}

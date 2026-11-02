@@ -1,0 +1,13 @@
+{
+  "id": "R-S-focus-03",
+  "from": "S-focus",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/data/Numeral.tsx (Fraction)",
+  "need": "focus-3's ELLENŐRZÉS '3/3' is a COMPLETE fraction: numerator, slash and denominator all text-1 (README-naptar-fokusz-kihivas.md item 10: fraction(a, b, 'num', 6, P.t1, P.t1); the kit default keeps the pending text-3 whole). Fraction has no way to say so.",
+  "evidence": "kepernyok-2x/lifeos/focus-3@2x.png y 457-505 (the 3/3 is all ink); .pulse/pairs/S-focus/focus-3.overview.png (the app draws the slash and the 3 in text-3)",
+  "proposedApi": "<Fraction value={3} of={3} complete />  — complete?: boolean: slash and whole in the part's ink (text-1)",
+  "proposedPatch": null,
+  "interim": "The kit Fraction as is: the slash and the denominator are text-3 on focus-3 (named in the package differences).",
+  "status": "open"
+}

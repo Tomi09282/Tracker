@@ -726,3 +726,19 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: `lifeos/settings-day-v2` — no string is drawn at this place.
 - What the app does: The frame draws the row's chevron but not what it opens. Built as the kit's picker grammar (SelectSheet): sheet titled 'Időzóna', the search field, every IANA zone as a radio row (place name from the zone database in English, e.g. 'Budapest', 'Buenos Aires'; offset 'GMT+2'). No new words beyond 'Keresés' / 'Nincs találat'. Localized city names do not exist on the platform and are not invented.
 - Status: open — a copy question; nothing was invented.
+
+## DEV-087 — S-focus: Fókusz, the ConfirmSheet behind "Feladás"
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-focus/i18n.patch.json`
+- Package: S-focus
+- The frames show: `lifeos/focus-2` — no string is drawn at this place.
+- What the app does: the body script names the sheet ("Feladás → ConfirmSheet") but draws no words for it: title and message are proposed (focus.giveUpTitle / giveUpBody)
+- Status: open — a copy question; nothing was invented.
+
+## DEV-088 — S-focus: Fókusz, focus-3 SZINT row
+
+- Source: PLAN.md R22 — a `copyQuestions` entry of `docs/pipeline/pulse/pkg/S-focus/i18n.patch.json`
+- Package: S-focus
+- The frames show: `lifeos/focus-3` — no string is drawn at this place.
+- What the app does: the XP bar is the level progress of the wallet after the finish (readLevel of coins/statement.ts); the frame layer name "74 % to level 5 (+23 XP)" is not drawn as words
+- Status: open — a copy question; nothing was invented.

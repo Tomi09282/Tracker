@@ -1,0 +1,13 @@
+{
+  "id": "R-S-focus-01",
+  "from": "S-focus",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs",
+  "need": "The route /focus (Fókusz, frames lifeos/focus-1..3), pushed from Ma and owned by the Ma tab (focus-1 / focus-3: '‹ MA', the user bar with Ma lit; focus-2: the bar with Ma lit). Four data lines: the lazy route (FocusPage exported from features/focus/FocusPage.tsx) after /tasks, its routeMeta row ('/focus' -> parent '/', label nav.today = 'Ma', S-ma's tab label), '/focus' in the home tab's owns, and the check-nav-active EXPECT row ['/focus', '/']. No check-nav row is needed: the inbound door is TodayFocus's 'to=\"/focus\"' (features/focus/TodayFocus.tsx, mounted by R-S-focus-02). The verify-gates nav-active probe anchors on \"owns: ['/onboarding', '/notifications'\" and still finds it.",
+  "evidence": "kepernyok-2x/lifeos/focus-1@2x.png, focus-3@2x.png (back \"‹ MA\", Ma lit); figma-build/lifeos/focus-1.body.js (screenHead push, parent Ma; userChrome(root, \"today\")); captures .pulse/shots/S-focus/ and .pulse/pairs/S-focus/ with the patch applied in the slot; check:nav and check:nav-active green with it",
+  "proposedApi": "{ path: 'focus', element: suspended(<FocusPage />) } + ROUTE_META['/focus'] = { parent: '/', parentLabelKey: 'nav.today' } + home tab owns '/focus'",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-focus/requests/R-S-focus-01.patch",
+  "interim": "Applied to the slot working tree only (never committed there), so the page is built and captured. Merged WITHOUT it the page exists but no URL opens it: merge together with this package. Re-cut on pulse-redesign 05b830a (after S-tasks): each line sits after the matching /tasks line and applies with plain git apply.",
+  "status": "open"
+}

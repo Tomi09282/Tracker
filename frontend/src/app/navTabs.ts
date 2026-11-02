@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
   user: [
     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
     // lighting anything. `owns` is the exception list `end` cannot express.
-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges'] },
+    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges', '/focus'] },
     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
     { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' },
