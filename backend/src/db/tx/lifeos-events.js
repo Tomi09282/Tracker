@@ -10,7 +10,7 @@
 // triggers (GET /lifeos/today, the bell's unread poll): it turns due reminders into
 // self-notifications exactly once, deduplicated by reminder_deliveries' unique key.
 import { getDb, stmt, rethrow } from '../conn.js';
-import { isSettledDay, readPrefs, readRules } from '../lifeos-ledger.js';
+import { isSettledDay, readStartedPrefs, readRules } from '../lifeos-ledger.js';
 import { logRow, taskRow, taskView } from '../lifeos-items.js';
 import {
   countEvents,
@@ -102,7 +102,7 @@ function outOfRange({ date, untilDate }, today) {
  */
 export function calendarQuery({ userId, from = null, days = 7 }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const now = Date.now();
     const tz = prefs.timezone ?? 'UTC';
@@ -180,7 +180,7 @@ export function calendarQuery({ userId, from = null, days = 7 }) {
 /** GET /events/:id (optionally the occurrence on a calendar day). */
 export function eventQuery({ userId, eventId, on = null }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return null;
     const ev = eventById(userId, eventId);
     return ev ? eventView(userId, ev, Date.now(), prefs.timezone, on) : null;
@@ -203,7 +203,7 @@ export function createEventTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const tz = prefs.timezone;
@@ -276,7 +276,7 @@ export function updateEventTx({ userId, eventId, patch }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     current = 'SELECT the event (owned)';
     const ev = eventById(userId, eventId);
@@ -394,7 +394,7 @@ export function materializeRemindersTx({ userId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'skipped', delivered: 0 };
     const tz = prefs.timezone;
     const now = Date.now();

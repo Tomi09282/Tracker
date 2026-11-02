@@ -10,7 +10,7 @@
 // them. They run inside the caller's transaction and never open one of their own. Like conn.js,
 // this module must never be imported from the main thread (it would open the database there).
 import { stmt } from './conn.js';
-import { settledThroughFor } from '../lifeos/dates.js';
+import { dayKeyFor, settledThroughFor } from '../lifeos/dates.js';
 import { parseStoredRules, pointsToMinor } from '../lifeos/rules.js';
 
 /** The user's day boundary (null for a disabled or unknown account). */
@@ -21,6 +21,33 @@ export function readPrefs(userId) {
        FROM user_prefs p JOIN users u ON u.id = p.user_id AND u.disabled_at IS NULL
       WHERE p.user_id = ?`,
   ).get(userId);
+}
+
+/**
+ * The user's day boundary, STARTING LifeOS on the way when a zone is stored but no start day is
+ * (package B-lifeos-polish). Accounts whose zone arrived without PATCH /me/prefs — migration 031's
+ * backfill from onboarding, the seeded dev accounts — had a zone and lifeos_started_on NULL, so every
+ * LifeOS read answered started:false and every write TIMEZONE_REQUIRED, with nothing on the client
+ * able to fix it. Every LifeOS read and write reads its prefs through this instead of readPrefs:
+ *
+ *   * The start day is the user's logical TODAY by the worker clock (the same rule PATCH /me/prefs
+ *     uses), so there is no catch-up at all: no day before it ever settles, nothing is buried.
+ *   * Idempotent and race-free: the UPDATE only fills a NULL (trg_user_prefs_started_once is the
+ *     backstop), so two requests starting at once write the same day once.
+ *   * Inside the caller's transaction when it has one (a write starts LifeOS in the same IMMEDIATE
+ *     transaction that needs it); in a read it is a single autocommitted statement. A refusal later
+ *     in the caller's transaction still keeps the start — it is a state the user is owed, not a
+ *     partial payout (ADR-0005 is about writes a refusal must undo).
+ */
+export function readStartedPrefs(userId, nowMs = Date.now()) {
+  const prefs = readPrefs(userId);
+  if (!prefs?.timezone || prefs.startedOn) return prefs;
+  const startOn = dayKeyFor(nowMs, prefs.timezone, prefs.dayStartHour);
+  stmt(
+    `UPDATE user_prefs SET lifeos_started_on = ?, updated_at = unixepoch()
+      WHERE user_id = ? AND lifeos_started_on IS NULL AND timezone IS NOT NULL`,
+  ).run(startOn, userId);
+  return readPrefs(userId);
 }
 
 /** The rule set in force: the newest row. Parsed with the same schema that admitted it. */
@@ -108,6 +135,12 @@ export function postCoinEvent({
   rules, rulesVersion, requestId, note = null,
 }) {
   if (!Number.isInteger(amountMinor) || amountMinor === 0) return null;
+  // A SETTLED DAY TAKES NO NEW EVENT (security review LifeOS 02 / 02b). The day close writes its
+  // events BEFORE its summary row, so it never meets this; every other caller refuses a settled day
+  // first, so reaching it is a defect — throw, and the caller's transaction rolls back whole.
+  if (isSettledDay(userId, localDate)) {
+    throw new Error(`postCoinEvent: ${reasonKey} on ${localDate}, a day that has settled`);
+  }
 
   let amount = amountMinor;
   let capped = false;

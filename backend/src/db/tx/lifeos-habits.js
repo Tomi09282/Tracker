@@ -14,7 +14,7 @@
 //     (the edit window, plan L4; trg_habit_log_settled_* is the backstop).
 //   * "Now" is the worker's clock; the day a write lands on defaults to the user's logical today.
 import { getDb, stmt, rethrow } from '../conn.js';
-import { editWindow, readPrefs, readRules } from '../lifeos-ledger.js';
+import { editWindow, readStartedPrefs, readRules } from '../lifeos-ledger.js';
 import { countAllHabits, countLiveHabits, habitDetail, habitRow, habitView, habitViews, logRow } from '../lifeos-items.js';
 import { dayKeyFor } from '../../lifeos/dates.js';
 import { goodStatusFor, isScheduledOn } from '../../lifeos/habits.js';
@@ -29,7 +29,7 @@ function todayFor(prefs, nowMs) {
 /** GET /habits: every habit with its streak, today's log and preview. */
 export function habitsQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     if (!prefs.timezone || !prefs.startedOn) return { started: false, today: null, habits: [], limits: { live: LIFEOS_LIMITS.habits } };
     const { rules } = readRules();
@@ -49,7 +49,7 @@ export function habitsQuery({ userId }) {
 /** GET /habits/:id: the habit, its last 12 weeks of settled days and their coins. */
 export function habitQuery({ userId, habitId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return null;
     const { rules } = readRules();
     return habitDetail(userId, habitId, todayFor(prefs, Date.now()), rules);
@@ -73,7 +73,7 @@ export function createHabitTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!prefs.timezone || !prefs.startedOn) return { outcome: 'timezone_required' };
 
@@ -142,7 +142,7 @@ export function updateHabitTx({ userId, habitId, patch }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the habit (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { outcome: 'timezone_required' };
     const h = habitRow(userId, habitId);
     if (!h) return { outcome: 'missing' };
@@ -201,7 +201,7 @@ export function archiveHabitTx({ userId, habitId, archived }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the habit (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { outcome: 'timezone_required' };
     const h = habitRow(userId, habitId);
     if (!h) return { outcome: 'missing' };
@@ -235,7 +235,7 @@ export function archiveHabitTx({ userId, habitId, archived }) {
  * a refusal outcome or what the write needs.
  */
 function logGuard(userId, habitId, localDate) {
-  const prefs = readPrefs(userId);
+  const prefs = readStartedPrefs(userId);
   if (!prefs?.timezone || !prefs.startedOn) return { refuse: { outcome: 'timezone_required' } };
   const h = habitRow(userId, habitId);
   if (!h) return { refuse: { outcome: 'missing' } };

@@ -18,7 +18,7 @@
 // Migration 035's triggers re-prove every one of these rules (the plan frozen, the check-in pace,
 // the paid minutes within the clock, the event within the session's worth).
 import { getDb, stmt, rethrow } from '../conn.js';
-import { postCoinEvent, readPrefs, readRules } from '../lifeos-ledger.js';
+import { isSettledDay, postCoinEvent, readStartedPrefs, readRules } from '../lifeos-ledger.js';
 import {
   focusByClientKey,
   focusRow,
@@ -65,7 +65,7 @@ function viewOf(userId, s, prefs, rules, nowMs, nowSec) {
  */
 export function focusCurrentQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const { rules } = readRules();
     if (!started(prefs)) return { started: false, today: null, session: null, todayMinutes: 0, rules: focusRulesView(rules) };
@@ -89,7 +89,7 @@ export function focusCurrentQuery({ userId }) {
 /** GET /focus/:id — one session of this account (focus-3 re-opened, or any history row). */
 export function focusQuery({ userId, sessionId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return null;
     const s = focusRow(userId, sessionId);
     if (!s) return null;
@@ -104,7 +104,7 @@ export function focusQuery({ userId, sessionId }) {
 /** GET /focus — the open session and the newest closed ones (at most 50). */
 export function focusListQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     if (!started(prefs)) return { started: false, sessions: [] };
     const { rules } = readRules();
@@ -142,7 +142,7 @@ export function startFocusTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const { version, rules } = readRules();
@@ -201,7 +201,7 @@ export function checkinFocusTx({ userId, sessionId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the session (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const s = focusRow(userId, sessionId);
     if (!s) return { outcome: 'missing' };
@@ -250,7 +250,7 @@ export function finishFocusTx({ userId, sessionId, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the session (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const s = focusRow(userId, sessionId);
     if (!s) return { outcome: 'missing' };
@@ -261,6 +261,8 @@ export function finishFocusTx({ userId, sessionId, requestId }) {
     if (status === 'cancelled') return { outcome: 'closed' };
     if (status === 'planned') return { outcome: 'not_started' };
     const today = dayKeyFor(nowMs, prefs.timezone, prefs.dayStartHour);
+    // Never onto a settled day (security review LifeOS 02b): see setUserPrefsTx.
+    if (isSettledDay(userId, today)) return { outcome: 'locked' };
     const pay = focusPayout(s, nowSec, paidMinutesOn(userId, today), rules);
 
     // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
@@ -311,7 +313,7 @@ export function cancelFocusTx({ userId, sessionId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the session (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const s = focusRow(userId, sessionId);
     if (!s) return { outcome: 'missing' };

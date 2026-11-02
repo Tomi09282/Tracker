@@ -17,7 +17,7 @@
 //     inserts into coin_events or coin_ledger.
 //   * "Now" is the worker's own clock — never a value from a request.
 import { getDb, stmt, rethrow } from '../conn.js';
-import { activeEvent, earnedOn, lastSettled, postCoinEvent, readPrefs, readRules } from '../lifeos-ledger.js';
+import { activeEvent, earnedOn, lastSettled, postCoinEvent, readPrefs, readRules, readStartedPrefs } from '../lifeos-ledger.js';
 import { habitViews, lapseHabits, lapseTasks, settleHabitsOn, settleTasksOn, taskLists } from '../lifeos-items.js';
 import { drawState } from '../lifeos-rewards-items.js';
 import {
@@ -40,6 +40,7 @@ import {
   pointsToMinor,
   workoutPoints,
   RULE_KEYS,
+  taskPointRules,
 } from '../../lifeos/rules.js';
 import { workoutDueOn } from '../../plans/occurrences.js';
 import { loadOccurrences, nextEventFor, workoutDoneOn, workoutView } from '../lifeos-calendar.js';
@@ -101,7 +102,7 @@ function walletView(userId, prefs, rules, nowMs) {
  */
 export function lifeosSettleStateQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { started: false };
     const now = Date.now();
     const settledThrough = settledThroughFor(now, prefs.timezone, prefs.dayStartHour);
@@ -150,7 +151,7 @@ export function userPrefsQuery({ userId }) {
 /** GET /lifeos/today (Phase-2 fields). One read snapshot. */
 export function lifeosTodayQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const { version, rules } = readRules();
     const now = Date.now();
@@ -168,11 +169,13 @@ export function lifeosTodayQuery({ userId }) {
       today: tz ? dayKeyFor(now, tz, prefs.dayStartHour) : null,
       settledThrough: prefs.startedOn && settledThrough && settledThrough >= prefs.startedOn ? settledThrough : null,
       rulesVersion: version,
+      // B-lifeos-polish: the capture sheet's priority picker ("Alacsony 5 / Közepes 10 / Fontos 20").
+      taskRules: taskPointRules(rules),
       wallet: walletView(userId, prefs, rules, now),
       workout: {
         date: workoutDate,
         due: workoutDueOn(occurrences, workoutDate),
-        done: Boolean(workoutDoneOn(userId, workoutDate)),
+        done: Boolean(workoutDoneOn(userId, workoutDate, rules.workoutHalfPct)),
         pointsFull: rules.workoutComplete,
         occurrences: occurrences.map(workoutView),
       },
@@ -217,7 +220,7 @@ function todayItems(userId, prefs, rules, nowMs) {
 /** GET /coins/wallet. */
 export function walletQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     const { rules } = readRules();
     return walletView(userId, prefs, rules, Date.now());
   } catch (err) {
@@ -274,6 +277,26 @@ export function setUserPrefsTx({ userId, timezone, dayStartHour, requestId, ip =
     const nextTz = tzChanged ? timezone : prefs.timezone;
     const nextDsh = dshChanged ? dayStartHour : prefs.dayStartHour;
     const startOn = !prefs.startedOn && nextTz ? dayKeyFor(now, nextTz, nextDsh) : null;
+
+    // NEVER BACK ONTO A SETTLED DAY (security review LifeOS, attacks 02 / 02b / 11): a zone switch
+    // westwards, or a day-start change across a DST night, can make the new logical "today" a day
+    // that already has its daily_summaries row (or was already settled by the clock under the old
+    // boundary, or lies before the LifeOS start). Every write keyed on "today" — a focus payout, a
+    // task completion, a challenge draw — would then land on a closed day and use its spent cap
+    // again. The change is refused until the new boundary's today is past every settled day; the
+    // answer says when that is.
+    if (prefs.startedOn && nextTz && (tzChanged || dshChanged)) {
+      const newToday = dayKeyFor(now, nextTz, nextDsh);
+      const floors = [lastSettled(userId), addDaysToKey(prefs.startedOn, -1)];
+      if (prefs.timezone) floors.push(settledThroughFor(now, prefs.timezone, prefs.dayStartHour));
+      const floor = floors.filter(Boolean).sort().pop();
+      if (newToday <= floor) {
+        return {
+          outcome: 'day_settled',
+          changeableAt: dayStartInstant(addDaysToKey(floor, 1), nextTz, nextDsh).getTime(),
+        };
+      }
+    }
 
     // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
     current = 'UPDATE user_prefs';
@@ -412,7 +435,7 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { outcome: 'not_started' };
     if (localDate < prefs.startedOn) return { outcome: 'not_due' };
     const settledThrough = settledThroughFor(Date.now(), prefs.timezone, prefs.dayStartHour);
@@ -435,7 +458,7 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
 
     current = 'SELECT the workout';
     const workoutDue = workoutDueOn(loadOccurrences(userId, localDate, 1), localDate) ? 1 : 0;
-    const workoutDone = workoutDoneOn(userId, localDate);
+    const workoutDone = workoutDoneOn(userId, localDate, rules.workoutHalfPct);
 
     current = 'SELECT the nutrition';
     const target = stmt(DAY_TARGETS_SQL).get(localDate, userId, localDate);
@@ -450,7 +473,12 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
     // ── from here on, nothing may conditionally return (ADR-0005) ──────────────────────────────
     const ctx = { userId, date: localDate, rules, rulesVersion: version, requestId };
     current = 'settle the habits (results + coins)';
-    const habits = settleHabitsOn(ctx);
+    // A habit archived during the day still settles it (security review LifeOS 12).
+    const bounds = {
+      dayStart: Math.floor(dayStartInstant(localDate, prefs.timezone, prefs.dayStartHour).getTime() / 1000),
+      nextDayStart: Math.floor(dayStartInstant(addDaysToKey(localDate, 1), prefs.timezone, prefs.dayStartHour).getTime() / 1000),
+    };
+    const habits = settleHabitsOn({ ...ctx, bounds });
     current = 'settle the tasks (overdue + counts)';
     const tasks = settleTasksOn(ctx);
 
@@ -459,7 +487,10 @@ export function closeLifeDayTx({ userId, localDate, requestId }) {
     // Something to be perfect ABOUT: a habit that counts or the scheduled workout. Tasks alone do
     // not make a day perfect (f_app requires a habit; "a task due today, ticked" would otherwise
     // be a 25-coin perfect day on demand).
-    const anchor = habits.scheduled > 0 || workoutDue === 1;
+    // Security review LifeOS 05(a): the anchor is something the user DID — a good habit that counts or
+    // the scheduled workout. A bad habit is clean by default, so "one bad habit, nothing else" was a
+    // 25-coin perfect day every day with zero effort. Bad habits still count for "every habit".
+    const anchor = habits.goodScheduled > 0 || workoutDue === 1;
     const allDone =
       habits.done === habits.scheduled && tasks.done === tasks.due && (!workoutDue || workoutDone === 1);
     const perfect = anchor && allDone && kcalOk ? 1 : 0;
@@ -526,7 +557,7 @@ export function markLapsedDaysTx({ userId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { outcome: 'not_started', lapsed: [] };
     const settledThrough = settledThroughFor(Date.now(), prefs.timezone, prefs.dayStartHour);
     const { lapse } = dueDays({ lastClosed: lastSettled(userId), startedOn: prefs.startedOn, settledThrough });
@@ -574,7 +605,7 @@ export function awardWorkoutTx({ userId, logId, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs?.timezone || !prefs.startedOn) return { outcome: 'not_started' };
 
     current = 'SELECT the log';

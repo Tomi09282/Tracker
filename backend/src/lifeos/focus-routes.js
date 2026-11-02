@@ -95,6 +95,8 @@ function refuse(res, r) {
       return res.status(409).json({ error: 'this focus session has no check-ins', code: 'FOCUS_NO_CHECKINS', requestId: rid });
     case 'closed':
       return res.status(409).json({ error: 'this focus session is already closed', code: 'FOCUS_CLOSED', requestId: rid });
+    case 'locked':
+      return res.status(409).json({ error: 'this day has settled and can no longer be edited', code: 'DAY_LOCKED', requestId: rid });
     case 'invalid':
       return sendError(res, 400, ERR.VALIDATION, 'invalid input');
     default:

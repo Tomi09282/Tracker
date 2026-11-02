@@ -14,11 +14,11 @@
 // balance may go below zero). The coin_events seq rule allows a second award for the same task only
 // after the first was reversed, so complete / reopen / complete pays once, never twice.
 import { getDb, stmt, rethrow } from '../conn.js';
-import { activeEvent, editWindow, postCoinEvent, readPrefs, readRules, reverseCoinEvent } from '../lifeos-ledger.js';
+import { activeEvent, editWindow, isSettledDay, postCoinEvent, readStartedPrefs, readRules, reverseCoinEvent } from '../lifeos-ledger.js';
 import { countOpenTasks, dropOpenInstances, materializeFor, taskLists, taskRow, taskView } from '../lifeos-items.js';
 import { addDaysToKey, dayKeyFor } from '../../lifeos/dates.js';
 import { serializeRecurrence } from '../../lifeos/recurrence.js';
-import { LIFEOS_LIMITS, pointsToMinor } from '../../lifeos/rules.js';
+import { LIFEOS_LIMITS, pointsToMinor, taskPointRules } from '../../lifeos/rules.js';
 import { isLate, taskPayout } from '../../lifeos/tasks.js';
 
 /** A due day further than this is refused: it bounds what a client can park in the table. */
@@ -42,12 +42,14 @@ function viewOf(userId, taskId, prefs, rules, nowMs) {
 /** GET /tasks: the Feladatok tabs (Ma, Közelgő, Lejárt, Bármikor, Kész) and the templates. */
 export function tasksQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
-    if (!started(prefs)) return { started: false, today: null, due: [], overdue: [], anytime: [], completedToday: [], upcoming: [], done: [], templates: [], openCount: 0 };
-    const { rules } = readRules();
+    // The priority picker's numbers (B-lifeos-polish): the admin rules, also before a zone exists.
+    const { version, rules } = readRules();
+    const taskRules = taskPointRules(rules);
+    if (!started(prefs)) return { started: false, today: null, due: [], overdue: [], anytime: [], completedToday: [], upcoming: [], done: [], templates: [], openCount: 0, rulesVersion: version, taskRules };
     const now = Date.now();
-    return { started: true, ...taskLists(userId, todayFor(prefs, now), prefs, rules, now), limits: { open: LIFEOS_LIMITS.openTasks } };
+    return { started: true, ...taskLists(userId, todayFor(prefs, now), prefs, rules, now), limits: { open: LIFEOS_LIMITS.openTasks }, rulesVersion: version, taskRules };
   } catch (err) {
     return rethrow(err);
   }
@@ -56,7 +58,7 @@ export function tasksQuery({ userId }) {
 /** GET /tasks/:id. */
 export function taskQuery({ userId, taskId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return null;
     const { rules } = readRules();
     return viewOf(userId, taskId, prefs, rules, Date.now());
@@ -79,7 +81,7 @@ export function createTaskTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const { rules } = readRules();
@@ -139,7 +141,7 @@ export function updateTaskTx({ userId, taskId, patch }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the task (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const t = taskRow(userId, taskId);
     if (!t) return { outcome: 'missing' };
@@ -205,7 +207,7 @@ export function deleteTaskTx({ userId, taskId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the task (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const t = taskRow(userId, taskId);
     if (!t) return { outcome: 'missing' };
@@ -249,7 +251,7 @@ export function completeTaskTx({ userId, taskId, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the task (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const t = taskRow(userId, taskId);
     if (!t) return { outcome: 'missing' };
@@ -258,6 +260,9 @@ export function completeTaskTx({ userId, taskId, requestId }) {
     if (t.recurrence !== null) return { outcome: 'template' };
     if (t.completedAt !== null) return { outcome: 'already', task: taskView(t, prefs, rules, now) };
     const today = todayFor(prefs, now);
+    // Never onto a settled day (security review LifeOS 02): only reachable through a boundary change
+    // that setUserPrefsTx now refuses; kept as the transaction's own refusal (postCoinEvent throws).
+    if (isSettledDay(userId, today)) return { outcome: 'locked' };
     const late = isLate(t, now, prefs.timezone, prefs.dayStartHour);
     const points = taskPayout(t, late, rules);
     const live = activeEvent(userId, 'task.done', 'task', taskId);
@@ -304,7 +309,7 @@ export function reopenTaskTx({ userId, taskId, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the task (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const t = taskRow(userId, taskId);
     if (!t) return { outcome: 'missing' };
@@ -347,7 +352,7 @@ export function materializeRecurringTasksTx({ userId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!started(prefs)) return { outcome: 'not_started', created: 0 };
     const today = todayFor(prefs, Date.now());
 

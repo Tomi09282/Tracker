@@ -234,6 +234,13 @@ run(`INSERT INTO workout_plan_days (plan_id, day_index, name) VALUES (?, 0, 'Pus
 logFood(day3, 2000);
 if (day3 <= settledThrough) {
   const wl = Number(run(`INSERT INTO workout_logs (client_user_id, local_date, status, started_at, completed_at, title) VALUES (?, ?, 'completed', unixepoch() - 3600, unixepoch(), 'Push')`, dave, day3).lastInsertRowid);
+  // B-lifeos-polish (security review LifeOS 07): a completed log with no working set done is not a
+  // done workout — an empty freestyle session must not stand in for the scheduled one.
+  const { workoutDoneOn } = await import('../src/db/lifeos-calendar.js');
+  check("an EMPTY completed log does not count as the day's workout (security review 07)", workoutDoneOn(dave, day3, DEFAULT_RULES.workoutHalfPct) === 0);
+  const lex3 = Number(run(`INSERT INTO workout_log_exercises (log_id, client_user_id, exercise_name_snapshot, position) VALUES (?, ?, 'probe', 0)`, wl, dave).lastInsertRowid);
+  run(`INSERT INTO workout_log_sets (log_exercise_id, log_id, client_user_id, local_date, set_index, completed_at, reps) VALUES (?, ?, ?, ?, 1, unixepoch(), 8)`, lex3, wl, dave, day3);
+  check('the same log with its working set done counts', workoutDoneOn(dave, day3, DEFAULT_RULES.workoutHalfPct) === 1);
   check('a completed workout on a settled day pays nothing (awardWorkoutTx: settled)', tx.awardWorkoutTx({ userId: dave, logId: wl, requestId: 'probe' }).outcome === 'settled');
   c = tx.closeLifeDayTx({ userId: dave, localDate: day3, requestId: 'probe' });
   check('day 3: the scheduled workout was done and the kcal goal hit -> perfect day', c.outcome === 'closed' && c.workoutDue && c.workoutDone && c.perfectDay, JSON.stringify(c).slice(0, 90));

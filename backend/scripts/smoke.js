@@ -44,6 +44,20 @@ let failed = 0;
  * gates and coherence triggers still police it. The body goes through the REAL parser: a
  * hand-built tree would let the assertions pass over a document the product cannot produce.
  */
+/** One planted statement against the server's own database file (the triggers still police it). */
+async function plantSql(sql, ...params) {
+  const { default: Database } = await import('better-sqlite3-multiple-ciphers');
+  const { deriveDbKeyHex } = await import('../src/lib/dbkey.js');
+  const conn = new Database(process.env.DB_PATH);
+  try {
+    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+    conn.pragma('busy_timeout = 5000');
+    return conn.prepare(sql).run(...params);
+  } finally {
+    conn.close();
+  }
+}
+
 async function seedPublicCorpus() {
   try {
     const { default: Database } = await import('better-sqlite3-multiple-ciphers');
@@ -4608,6 +4622,9 @@ if (seeded) {
       method: 'POST', jar: lifter, body: { title: 'coin probe' },
     });
     const logId = started.json?.logId;
+    // B-lifeos-polish (security review LifeOS 08): a freestyle session counts once it ran ten
+    // minutes (or a working set was done) — planted: the session began twelve minutes ago.
+    await plantSql('UPDATE workout_logs SET started_at = started_at - 720 WHERE id = ?', logId);
     const finished = await call(`/api/v1/workouts/${logId}/finish`, { method: 'POST', jar: lifter, body: {} });
     await new Promise((r) => setTimeout(r, 900));
 
@@ -4636,6 +4653,7 @@ if (seeded) {
     const second = await call('/api/v1/workouts/start', {
       method: 'POST', jar: lifter, body: { title: 'coin probe 2' },
     });
+    await plantSql('UPDATE workout_logs SET started_at = started_at - 720 WHERE id = ?', second.json?.logId);
     await call(`/api/v1/workouts/${second.json?.logId}/finish`, { method: 'POST', jar: lifter, body: {} });
     await new Promise((r) => setTimeout(r, 900));
 
@@ -5759,6 +5777,10 @@ if (seeded) {
 
   const { lifeosFocusSmoke } = await import('./smoke/lifeos-focus.js');
   await lifeosFocusSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  // B-lifeos-polish: the security review's regressions and the polish round's fields.
+  const { lifeosPolishSmoke } = await import('./smoke/lifeos-polish.js');
+  await lifeosPolishSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

@@ -151,6 +151,13 @@ router.patch(
           changeableAt: r.changeableAt,
           requestId: res.locals.requestId,
         });
+      case 'day_settled':
+        return res.status(409).json({
+          error: 'that change would move today onto a day that has already settled',
+          code: 'DAY_SETTLED',
+          changeableAt: r.changeableAt,
+          requestId: res.locals.requestId,
+        });
       case 'missing':
         return sendError(res, 404, ERR.NOT_FOUND, 'not found');
       default:

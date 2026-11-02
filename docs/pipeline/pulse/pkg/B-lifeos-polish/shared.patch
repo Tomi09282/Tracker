@@ -1,0 +1,87 @@
+diff --git a/frontend/src/lib/lifeos-api.ts b/frontend/src/lib/lifeos-api.ts
+index 764593e..04aaccf 100644
+--- a/frontend/src/lib/lifeos-api.ts
++++ b/frontend/src/lib/lifeos-api.ts
+@@ -50,6 +50,35 @@ export interface TimezoneTooSoonError {
+   requestId: string;
+ }
+ 
++/**
++ * PATCH /me/prefs 409 (B-lifeos-polish): the new zone or day start would make a day that has
++ * already settled (or was settled by the clock, or lies before the LifeOS start) the new "today".
++ * `changeableAt` (epoch ms) is the first moment the same change goes through.
++ */
++export interface DaySettledError {
++  error: string;
++  code: 'DAY_SETTLED';
++  changeableAt: number;
++  requestId: string;
++}
++
++/**
++ * The task point rules in force (B-lifeos-polish), as the priority picker and the capture sheet
++ * print them ("Alacsony 5 / Közepes 10 / Fontos 20"): the admin rule set, in minor units.
++ */
++export interface TaskPointRules {
++  /** priority 1 (Alacsony) */
++  lowMinor: number;
++  /** priority 2 (Közepes) */
++  midMinor: number;
++  /** priority 3 (Fontos) */
++  highMinor: number;
++  /** A late completion pays this share, 0..100. */
++  latePct: number;
++  /** The one-time penalty when a dated task goes overdue at the day close. */
++  overdueMinor: number;
++}
++
+ /** One day of the current Monday..Sunday week on the wallet. */
+ export interface WalletWeekDay {
+   date: DayKey;
+@@ -106,6 +135,8 @@ export interface LifeosToday {
+   /** The newest settled day (>= startedOn), or null when none has settled yet. */
+   settledThrough: DayKey | null;
+   rulesVersion: number;
++  /** B-lifeos-polish: the capture sheet's priority picker. */
++  taskRules: TaskPointRules;
+   wallet: LifeosWallet;
+   workout: {
+     /** The CALENDAR date a workout started now is logged on (workout_logs.local_date). */
+@@ -478,6 +509,10 @@ export interface TasksResponse {
+   templates: Task[];
+   openCount: number;
+   limits?: { open: number };
++  /** B-lifeos-polish: the rule set the values were computed with, and the priority picker's rules
++   *  (present before a zone too). */
++  rulesVersion: number;
++  taskRules: TaskPointRules;
+ }
+ 
+ /** POST /tasks body (.strict()). Capture sends the same. */
+@@ -600,6 +635,12 @@ export interface ChallengeDraw {
+     done: boolean;
+     /** The task was deleted after the pick. */
+     taskDeleted: boolean;
++    /** B-lifeos-polish: Ma's picked teaser ("Lift helyett lépcső egész nap · Mai kihívás · +15 érme"). */
++    title: string | null;
++    /** The task's full value (its points). */
++    valueMinor: number | null;
++    /** What the task paid (null while open, or when the pay was reversed). */
++    paidMinor: number | null;
+   } | null;
+ }
+ 
+@@ -922,6 +963,13 @@ export interface NextEvent {
+   startTime: string | null;
+   endTime: string | null;
+   recurring: boolean;
++  /** B-lifeos-polish: the reminder offsets, minutes before the start, ascending ([] = none). */
++  reminders: number[];
++  /**
++   * B-lifeos-polish (ma-1 "Trattoria Toscana · emlékeztető 18:30"): the reminder that fires first —
++   * the largest offset — as epoch seconds and as the wall-clock time in the user's zone.
++   */
++  firstReminder: { minutesBefore: number; at: number; time: string } | null;
+ }
+ 
+ /**

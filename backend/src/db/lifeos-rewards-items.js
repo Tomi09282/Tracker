@@ -90,8 +90,13 @@ export function drawState(userId, today) {
   let picked = null;
   if (d.pickedTaskId !== null) {
     const t = stmt(
-      `SELECT id, title, points, completed_at AS completedAt, deleted_at AS deletedAt
-         FROM tasks WHERE id = ? AND user_id = ?`,
+      `SELECT t.id, t.title, t.points, t.completed_at AS completedAt, t.deleted_at AS deletedAt,
+              (SELECT e.amount_minor FROM coin_events e
+                WHERE e.user_id = t.user_id AND e.reason_key = 'task.done' AND e.source_type = 'task'
+                  AND e.source_id = t.id AND e.reverses_event_id IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM coin_events x WHERE x.reverses_event_id = e.id)
+                ORDER BY e.seq DESC LIMIT 1) AS paidMinor
+         FROM tasks t WHERE t.id = ? AND t.user_id = ?`,
     ).get(d.pickedTaskId, userId);
     picked = {
       challengeId: d.pickedChallengeId,
@@ -99,6 +104,12 @@ export function drawState(userId, today) {
       pickedAt: d.pickedAt,
       done: Boolean(t?.completedAt),
       taskDeleted: Boolean(t?.deletedAt),
+      // B-lifeos-polish: Ma's picked teaser (ma-1 "Lift helyett lépcső egész nap · Mai kihívás ·
+      // +15 érme") straight from the draw, without matching the task lists: the task's title, its
+      // full value, and what it paid (null while open or when the pay was reversed).
+      title: t?.title ?? null,
+      valueMinor: t && t.points !== null ? pointsToMinor(t.points) : null,
+      paidMinor: t?.paidMinor ?? null,
     };
   }
   return {

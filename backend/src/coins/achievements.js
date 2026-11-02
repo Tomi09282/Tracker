@@ -67,6 +67,17 @@ function streakFrom(dates, today) {
   return n;
 }
 
+/**
+ * A completed log counts as a session when a working set was done, or — a freestyle session has
+ * no sets to tick, and it is first-class here — when it ran at least ten minutes by the server's
+ * own clocks (started_at / completed_at, never a client value). Only one session runs at a time
+ * (/workouts/start resumes the open one), so the hundred sessions of .sessions.100 cost a hundred
+ * real ten-minute blocks, not a minute of start / finish pairs. A constant fragment, no input in it.
+ */
+const REAL_SESSION = `(w.completed_at - w.started_at >= 600 OR EXISTS (SELECT 1 FROM workout_log_sets s
+   WHERE s.log_id = w.id AND s.client_user_id = w.client_user_id AND s.voided_at IS NULL
+     AND s.set_kind <> 'warmup' AND s.completed_at IS NOT NULL))`;
+
 /** The client's local calendar day, from the most recent thing they logged. */
 const todayFor = async (userId) => {
   const row = await db.get(
@@ -88,9 +99,13 @@ const todayFor = async (userId) => {
 async function earnedKeys(userId) {
   const keys = [];
 
+  // A SESSION IS A WORKOUT THAT HAPPENED (security review LifeOS, attack 08; REAL_SESSION above).
+  // "Any completed log" counted an empty freestyle session started and finished in one second, so
+  // 100 empty start / finish pairs unlocked workout.first / .sessions.10 / .sessions.100 (325
+  // coins, outside every cap) in under a minute.
   const sessions = await db.get(
-    `SELECT COUNT(*) AS n FROM workout_logs
-      WHERE client_user_id = ? AND status = 'completed'`,
+    `SELECT COUNT(*) AS n FROM workout_logs w
+      WHERE w.client_user_id = ? AND w.status = 'completed' AND ${REAL_SESSION}`,
     [userId],
   );
   if (sessions.n >= 1) keys.push('workout.first');
@@ -114,9 +129,9 @@ async function earnedKeys(userId) {
   const today = await todayFor(userId);
   if (today) {
     const trained = await db.all(
-      `SELECT DISTINCT local_date AS d FROM workout_logs
-        WHERE client_user_id = ? AND status = 'completed'
-          AND local_date >= date(?, '-45 days')
+      `SELECT DISTINCT w.local_date AS d FROM workout_logs w
+        WHERE w.client_user_id = ? AND w.status = 'completed' AND ${REAL_SESSION}
+          AND w.local_date >= date(?, '-45 days')
         ORDER BY d DESC`,
       [userId, today],
     );

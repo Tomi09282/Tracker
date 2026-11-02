@@ -21,7 +21,7 @@
 //                      (plan L3) even if every check above were defeated.
 import { randomInt } from 'node:crypto';
 import { getDb, stmt, rethrow } from '../conn.js';
-import { readPrefs, readRules } from '../lifeos-ledger.js';
+import { readStartedPrefs, readRules } from '../lifeos-ledger.js';
 import { countOpenTasks, taskRow, taskView } from '../lifeos-items.js';
 import {
   acceptedOn, challengeRow, challengeView, countAllChallenges, countLiveRewards, countAllRewards,
@@ -49,7 +49,7 @@ const cryptoInt = (max) => randomInt(max);
 /** GET /challenges: the pool (AKTÍV "8 / 50") and the archived ones (ARCHIVÁLT). */
 export function challengesQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const rows = stmt(
       `SELECT c.id, c.name, c.category, c.points, c.weight, c.archived_at AS archivedAt
@@ -79,7 +79,7 @@ export function challengeQuery({ userId, challengeId }) {
 /** GET /challenges/today: the day's draw (also inside GET /lifeos/today). */
 export function challengeTodayQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     if (!started(prefs)) return { started: false, draw: null };
     return { started: true, draw: drawState(userId, todayFor(prefs, Date.now())) };
@@ -102,7 +102,7 @@ export function createChallengeTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
 
@@ -249,7 +249,7 @@ export function drawChallengeTx({ userId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const today = todayFor(prefs, Date.now());
@@ -287,7 +287,7 @@ export function rerollChallengeTx({ userId, rerollKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const today = todayFor(prefs, Date.now());
@@ -344,7 +344,7 @@ export function pickChallengeTx({ userId, challengeId, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const { rules } = readRules();
@@ -403,7 +403,7 @@ export function pickChallengeTx({ userId, challengeId, clientKey }) {
 /** GET /rewards: the shop (ELKÖLTHETŐ, JUTALOMBOLT by cost, the archived ones), the redeemable count. */
 export function rewardsQuery({ userId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const today = started(prefs) ? todayFor(prefs, Date.now()) : null;
     return { started: Boolean(today), today, ...rewardShop(userId, today), limits: { rewards: LIFEOS_LIMITS.rewards, costMaxMinor: pointsToMinor(LIFEOS_LIMITS.rewardCostMax) } };
@@ -415,7 +415,7 @@ export function rewardsQuery({ userId }) {
 /** GET /rewards/:id: one reward and its redemptions (BEVÁLTÁSOK, newest first, at most 100). */
 export function rewardQuery({ userId, rewardId }) {
   try {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const r = rewardRow(userId, rewardId);
     if (!r) return null;
@@ -461,7 +461,7 @@ export function createRewardTx({ userId, input, clientKey }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const today = todayFor(prefs, Date.now());
@@ -499,7 +499,7 @@ export function updateRewardTx({ userId, rewardId, patch }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the reward (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     const r = rewardRow(userId, rewardId);
     if (!r) return { outcome: 'missing' };
@@ -539,7 +539,7 @@ export function setRewardArchivedTx({ userId, rewardId, archived }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT the reward (owned)';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     const r = rewardRow(userId, rewardId);
     if (!r) return { outcome: 'missing' };
@@ -585,7 +585,7 @@ export function redeemRewardTx({ userId, rewardId, clientKey, requestId }) {
 
   const tx = conn.transaction(() => {
     current = 'SELECT prefs';
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return { outcome: 'missing' };
     if (!started(prefs)) return { outcome: 'timezone_required' };
     const today = todayFor(prefs, Date.now());

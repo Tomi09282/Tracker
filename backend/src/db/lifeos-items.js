@@ -26,12 +26,26 @@ export function habitRow(userId, habitId) {
 }
 
 /** Live habits that exist on `date`, in display order (f_app activeHabitsOn). */
-function liveHabitsOn(userId, date) {
+/**
+ * The habits a day settles. With `bounds` ({ dayStart, nextDayStart }, epoch seconds of the logical
+ * day's start and of the next one) it also takes an ARCHIVED habit that was still live when the day
+ * ended (archived after the next day began — the close had not run yet), and one archived DURING the
+ * day that has a log on it (a relapse, a partial count, a skip). Security review LifeOS, attack 12:
+ * archive after a relapse or a miss, let the day close without the habit, restore — the streak
+ * "jumped over" the bad day with no penalty. Archiving during a day with nothing logged still
+ * leaves that day out (the same as Kihagyás, which already excuses a day). Without `bounds` only
+ * live habits (the lapse of a gap).
+ */
+function liveHabitsOn(userId, date, bounds = null) {
+  const never = Number.MAX_SAFE_INTEGER;
   return stmt(
     `SELECT ${HABIT_COLS} FROM habits h
-      WHERE h.user_id = ? AND h.archived_at IS NULL AND h.started_on <= ?
+      WHERE h.user_id = ? AND h.started_on <= ?
+        AND (h.archived_at IS NULL OR h.archived_at >= ?
+             OR (h.archived_at >= ? AND EXISTS (SELECT 1 FROM habit_logs l
+                   WHERE l.habit_id = h.id AND l.user_id = h.user_id AND l.local_date = ?)))
       ORDER BY h.sort_order, h.id`,
-  ).all(userId, date);
+  ).all(userId, date, bounds?.nextDayStart ?? never, bounds?.dayStart ?? never, date);
 }
 
 export function countLiveHabits(userId) {
@@ -157,15 +171,41 @@ export function habitDetail(userId, habitId, today, rules) {
 /* ══ habits: the day close ════════════════════════════════════════════════════════════════════ */
 
 /**
+ * STREAK MILESTONES ARE RARE PER ACCOUNT, NOT PER HABIT (security review LifeOS, attack 01).
+ * The owner put milestones outside the daily cap because "they are rare and cannot be farmed"
+ * (2026-10-18). Per habit they were neither: twenty bad habits — clean by default, so zero effort —
+ * crossed 100 days together and paid 20 x 500 coins on one day, and staggered habits would pay one
+ * every day. So a tier pays at most ONCE PER ACCOUNT per window as long as the tier itself: the
+ * 7-day milestone at most once in any 7 logical days, the 30-day once in 30, the 100-day once in
+ * 100 — whichever habit crosses it first. The result row still records the milestone it reached
+ * (milestone_days); only the coin is withheld. A reversed payout does not count.
+ */
+function milestonePaidWithin(userId, milestoneDays, date) {
+  if (!milestoneDays) return false;
+  return Boolean(
+    stmt(
+      `SELECT 1 FROM coin_events e
+         JOIN habit_day_results r ON r.id = e.source_id AND r.user_id = e.user_id
+        WHERE e.user_id = ? AND e.reason_key = 'streak.milestone' AND e.source_type = 'habit_day'
+          AND r.milestone_days = ? AND e.local_date > ? AND e.local_date <= ?
+          AND e.reverses_event_id IS NULL
+          AND NOT EXISTS (SELECT 1 FROM coin_events x WHERE x.reverses_event_id = e.id)
+        LIMIT 1`,
+    ).get(userId, milestoneDays, addDaysToKey(date, -milestoneDays), date),
+  );
+}
+
+/**
  * Settle every live habit scheduled on `date`: one immutable result row each (its id is the source
  * of that day's coin events), then the coins. Returns f_app's perfect-day counts and the events.
  * Runs inside closeLifeDayTx, BEFORE the day's summary row (trg_habit_result_settled).
  */
-export function settleHabitsOn({ userId, date, rules, rulesVersion, requestId }) {
+export function settleHabitsOn({ userId, date, rules, rulesVersion, requestId, bounds = null }) {
   let scheduled = 0;
   let done = 0;
+  let goodScheduled = 0;
   const events = [];
-  for (const h of liveHabitsOn(userId, date)) {
+  for (const h of liveHabitsOn(userId, date, bounds)) {
     if (!isScheduledOn(h, date)) continue;
     const log = logRow(userId, h.id, date) ?? null;
     const state = stateBefore(userId, h.id, date);
@@ -183,6 +223,7 @@ export function settleHabitsOn({ userId, date, rules, rulesVersion, requestId })
     );
     const resultId = Number(ins.lastInsertRowid);
     for (const c of r.coins) {
+      if (c.reason === 'streak.milestone' && milestonePaidWithin(userId, r.milestoneDays, date)) continue;
       const ev = postCoinEvent({
         userId,
         reasonKey: c.reason,
@@ -199,9 +240,10 @@ export function settleHabitsOn({ userId, date, rules, rulesVersion, requestId })
     }
     if (r.counted === 'excluded') continue;
     scheduled += 1;
+    if (h.kind === 'good') goodScheduled += 1;
     if (r.counted === 'done') done += 1;
   }
-  return { scheduled, done, events };
+  return { scheduled, done, goodScheduled, events };
 }
 
 /**

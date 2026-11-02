@@ -214,6 +214,8 @@ const archiveHandler = (archived) =>
   asyncRoute(async (req, res) => {
     const p = idParam.safeParse(req.params);
     if (!p.success || !emptyBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+    // The days that are due close BEFORE the archive moves (security review LifeOS 12).
+    await settle(req, res);
     const r = await db.archiveHabit({ userId: req.user.id, habitId: p.data.id, archived });
     if (r.outcome === 'applied' || r.outcome === 'unchanged') return res.json({ habit: r.habit });
     return refuse(res, r);

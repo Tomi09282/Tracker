@@ -7,7 +7,7 @@
 // be asked to run by name. Every statement is prepared, bound and ownership-scoped (`user_id = ?`).
 // Nothing here writes.
 import { stmt } from './conn.js';
-import { addDaysToKey, calendarKeyFor, instantFor } from '../lifeos/dates.js';
+import { addDaysToKey, calendarKeyFor, instantFor, localTime } from '../lifeos/dates.js';
 import { parseEventRecurrence } from '../lifeos/event-times.js';
 import { MAX_EVENT_DAYS, nextOccurrence } from '../lifeos/occurrences.js';
 import { expandOccurrences } from '../plans/occurrences.js';
@@ -105,6 +105,7 @@ export function nextEventFor(userId, prefs, nowMs) {
   const events = eventsTouching(userId, today, addDaysToKey(today, 7), tz);
   const next = nextOccurrence(events, nowMs, tz, 7);
   if (!next) return null;
+  const offsets = eventOffsets(userId, next.eventId);
   return {
     eventId: next.eventId,
     date: next.date,
@@ -116,7 +117,17 @@ export function nextEventFor(userId, prefs, nowMs) {
     startTime: next.startTime,
     endTime: next.endTime,
     recurring: next.recurrence !== null,
+    // B-lifeos-polish (frame ma-1 "Trattoria Toscana · emlékeztető 18:30", S-calendar review DEV-k):
+    // the event's reminder offsets (ascending, minutes before the start) and the FIRST one to fire —
+    // the largest offset — as an instant and as the wall-clock time in the user's zone.
+    reminders: offsets,
+    firstReminder: offsets.length ? reminderAt(next.startAt, Math.max(...offsets), tz) : null,
   };
+}
+
+function reminderAt(startAt, minutesBefore, tz) {
+  const at = startAt - minutesBefore * 60;
+  return { minutesBefore, at, time: localTime(at * 1000, tz) };
 }
 
 /* ══ scheduled workouts (moved from src/db/tx/lifeos.js so the calendar reads THE same rule) ══ */
@@ -149,10 +160,26 @@ export function loadOccurrences(userId, fromDate, days) {
   return expandOccurrences({ plans, planDays, exceptions, logs }, fromDate, days);
 }
 
-export function workoutDoneOn(userId, localDate) {
+/**
+ * Was a workout DONE on the date (the perfect day's "scheduled workout", Ma's tick)? A completed log
+ * whose working sets (not warm-ups, not voided) were done to at least `halfPct` (the rule set's
+ * workoutHalfPct — the share that starts paying) and at least one of them. Security review LifeOS,
+ * attack 07: "any completed log" let an empty freestyle session, started and finished in one second,
+ * stand in for the scheduled workout.
+ */
+export function workoutDoneOn(userId, localDate, halfPct = 50) {
   return stmt(
-    `SELECT 1 FROM workout_logs WHERE client_user_id = ? AND local_date = ? AND status = 'completed' LIMIT 1`,
-  ).get(userId, localDate)
+    `SELECT 1 FROM workout_logs w
+      WHERE w.client_user_id = ? AND w.local_date = ? AND w.status = 'completed'
+        AND EXISTS (
+          SELECT 1 FROM workout_log_sets s
+           WHERE s.log_id = w.id AND s.client_user_id = w.client_user_id
+             AND s.voided_at IS NULL AND s.set_kind <> 'warmup'
+           GROUP BY s.log_id
+          HAVING SUM(CASE WHEN s.completed_at IS NOT NULL THEN 1 ELSE 0 END) >= 1
+             AND SUM(CASE WHEN s.completed_at IS NOT NULL THEN 1 ELSE 0 END) * 100 >= ? * COUNT(*))
+      LIMIT 1`,
+  ).get(userId, localDate, halfPct)
     ? 1
     : 0;
 }

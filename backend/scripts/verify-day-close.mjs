@@ -269,6 +269,27 @@ console.log('\n── the perfect day ──────────────
   const s = close(u, D8);
   check('an open task due that day spoils the perfect day', s.perfectDay === false && s.tasksDue === 1 && s.tasksDone === 0);
 }
+{
+  // B-lifeos-polish (security review LifeOS 05a): a bad habit is clean by default, so a day whose
+  // only counted habit is a clean bad habit is NOT a perfect day — the clean day still pays.
+  at('2026-09-08T10:00:00Z');
+  const u = account('lazy-perfect');
+  habit(u, { kind: 'bad', name: 'smoke' });
+  advanceDays(1);
+  const s = close(u, D8);
+  check('one clean bad habit and nothing else is not a perfect day (zero effort)', s.perfectDay === false && s.habitsScheduled === 1 && s.habitsDone === 1, JSON.stringify({ p: s.perfectDay, a: s.habitsScheduled, b: s.habitsDone }));
+  check('...the clean day itself still pays (15)', earned(u, D8) === 15, `${earned(u, D8)}`);
+}
+{
+  at('2026-09-08T10:00:00Z');
+  const u = account('good-and-bad-perfect');
+  const g = habit(u, { kind: 'good', name: 'read' });
+  habit(u, { kind: 'bad', name: 'smoke' });
+  tap(u, g, D8);
+  advanceDays(1);
+  const s = close(u, D8);
+  check('a good habit done and a clean bad habit = perfect day', s.perfectDay === true && s.habitsScheduled === 2, JSON.stringify({ p: s.perfectDay, a: s.habitsScheduled }));
+}
 
 console.log('\n── times-per-week: the Sunday quota ───────────────────────────────────────────');
 {

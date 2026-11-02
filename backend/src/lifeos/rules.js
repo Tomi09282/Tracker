@@ -270,3 +270,19 @@ export function levelProgress(xpPoints) {
   const level = levelFor(xpPoints);
   return { level, floorXp: level * level * 100, nextXp: (level + 1) * (level + 1) * 100 };
 }
+
+/**
+ * The task point rules the screens print (frame tasks-1 / task-form "Alacsony 5 / Közepes 10 /
+ * Fontos 20", capture's priority picker): the admin rule set in force, in minor units, plus the late
+ * share and the overdue penalty. GET /tasks and GET /lifeos/today carry it (B-lifeos-polish), so no
+ * client hard-codes a number the admin can change.
+ */
+export function taskPointRules(rules) {
+  return {
+    lowMinor: pointsToMinor(rules.taskLow),
+    midMinor: pointsToMinor(rules.taskMid),
+    highMinor: pointsToMinor(rules.taskHigh),
+    latePct: rules.taskLatePct,
+    overdueMinor: pointsToMinor(rules.taskOverdue),
+  };
+}

@@ -15,7 +15,7 @@
 // where it is cheap and exact (kcal from the shared nutrition SQL, the workout done flag, focus).
 // Every number is keyed on the caller's user id; LifeOS data is private (plan L10).
 import { getDb, stmt, rethrow } from '../conn.js';
-import { readPrefs, readRules } from '../lifeos-ledger.js';
+import { readStartedPrefs, readRules } from '../lifeos-ledger.js';
 import { habitViews } from '../lifeos-items.js';
 import { addDaysToKey, dayKeyFor, dayRange, weekdayIndex } from '../../lifeos/dates.js';
 import { evaluateKcal, levelProgress, pointsToMinor } from '../../lifeos/rules.js';
@@ -133,7 +133,7 @@ function dayRows(userId, prefs, from, to, today) {
 export function lifeosDaysQuery({ userId, from = null, to = null }) {
   const conn = getDb();
   const read = conn.transaction(() => {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     if (!started(prefs)) return { started: false, today: null, startedOn: null, from, to, days: [] };
     const today = dayKeyFor(Date.now(), prefs.timezone, prefs.dayStartHour);
@@ -163,7 +163,7 @@ export function lifeosDaysQuery({ userId, from = null, to = null }) {
 export function lifeosStatsQuery({ userId, days, weeks }) {
   const conn = getDb();
   const read = conn.transaction(() => {
-    const prefs = readPrefs(userId);
+    const prefs = readStartedPrefs(userId);
     if (!prefs) return null;
     const { rules } = readRules();
     const overview = overviewOf(userId);
