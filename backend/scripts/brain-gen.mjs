@@ -176,6 +176,16 @@ const routers = [
   ['/api/v1', '../src/public/compose.js'],
   ['/api/v1', '../src/public/compose-media.js'],
   ['/api/v1', '../src/public/moderation.js'],
+  // LifeOS: routes.js holds /me/prefs, /lifeos/today and /admin/rules itself and mounts the rest
+  // with router.use(), which this walk does not descend into — so each sub-router is listed too.
+  ['/api/v1', '../src/lifeos/routes.js'],
+  ['/api/v1', '../src/lifeos/habit-routes.js'],
+  ['/api/v1', '../src/lifeos/task-routes.js'],
+  ['/api/v1', '../src/lifeos/challenge-routes.js'],
+  ['/api/v1', '../src/lifeos/reward-routes.js'],
+  ['/api/v1', '../src/lifeos/event-routes.js'],
+  ['/api/v1', '../src/lifeos/focus-routes.js'],
+  ['/api/v1', '../src/lifeos/stats-routes.js'],
 ];
 
 // Cross-check against server.js so adding a router without adding it here is caught here,

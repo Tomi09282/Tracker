@@ -1,8 +1,8 @@
 ---
 type: table
 table: users
-summary: 12 columns, 19 rows
-rows: 19
+summary: 13 columns, 3 rows
+rows: 3
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-11-03.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -26,6 +26,7 @@ tags: [data-model, generated]
 | `updated_at` | INTEGER | NOT NULL, default unixepoch() |
 | `must_change_credentials` | INTEGER | NOT NULL, default 0 |
 | `created_by` | INTEGER | → users.id |
+| `display_name` | TEXT |  |
 
 ## Foreign keys
 
@@ -40,6 +41,7 @@ tags: [data-model, generated]
 ## Triggers
 
 - `trg_user_delete_keeps_exercises`
+- `trg_user_opens_prefs`
 - `trg_user_opens_wallet`
 - `users_updated_at`
 
@@ -47,5 +49,6 @@ tags: [data-model, generated]
 
 - `role IN ('user', 'coach', 'admin'`
 - `must_change_credentials IN (0, 1`
+- `length(display_name`
 
 Back to [[ERD]].

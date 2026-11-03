@@ -4,46 +4,54 @@ title: LifeOS — index
 tags: [index, lifeos]
 ---
 
-# LifeOS effort — where it stands (2026-10-18)
+# LifeOS effort — where it stands (2026-11-03)
 
 The owner asked to port the features of `github.com/kytrack/f_app` ("LifeOS") into TRACKER in the Pulse design, with
-stackable roles (one account; trainer / admin views entered from Profil, "back to …" switch icons first in the bar)
-and an easy-to-use Profil. The approved plan: [[59-LifeOS/LifeOS Plan]].
+stackable roles (one account; trainer / admin views entered from Profil, "back to …" switch cells first in the bar)
+and an easy-to-use Profil. The approved plan: [[59-LifeOS/LifeOS Plan]]. The owner's report:
+`docs/pipeline/pulse/LIFEOS-REPORT.md`.
 
 ## Owner decisions
 - Port everything: habits + tasks + day close · calendar + events · focus + quick capture · points + rewards + daily challenge.
-- Full gamification (streaks, multipliers, freezes, XP, levels, penalties) — reverses the earlier "no streak / XP" record.
-- One currency: coins. Economy: 1 point = 1 coin, daily earn cap 400, penalties may cause debt, spends may not,
-  a day settles 6 h after the next day starts, ≤ 7 days catch-up, the perfect day needs the workout.
-- User bar: Ma · Edzés · Étkezés · Naptár · Haladás · Profil. Trainer: ↩ Tag · Ügyfelek · Tervek · Pult.
-  Admin: ↩ Tag · ↩ Edző · Moderáció · Fiókok · Piactér · Szabályok.
-- Theme packs delisted without compensation. Master: the merge is prepared locally after the Pulse closing; the owner pushes.
+- Full gamification (streaks, multipliers, freezes, XP, levels, penalties) — reverses the earlier "no streak / XP" record
+  ([[60-Decisions/0022-lifeos-gamification-and-one-currency]]).
+- One currency: coins. Economy: 1 point = 1 coin, daily earn cap 400 (streak milestones 7 / 30 / 100 days are outside
+  the cap), penalties may cause debt, spends may not, a day settles 6 h after the next day starts, ≤ 7 days catch-up,
+  the perfect day needs the workout.
+- User bar: Ma · Edzés · Étkezés · Naptár · Haladás · Profil. Trainer: Tag · Kliensek · Tervek · Pult.
+  Admin: Tag · Edző · Moderáció · Fiókok · Piactér (Szabályok is reached from Moderáció).
+- Theme packs delisted without compensation. Master: the merge is prepared locally; the owner pushes.
 
-## Progress
-State on `pulse-int` / `pulse-redesign` at `290d3ec` (2026-10-18). "Merged" means the step's `pulse(<id>)` commit is
-on the branch; "handed in" means the package is done in its slot and waits for the integrator.
+## Decisions recorded
+- [[60-Decisions/0022-lifeos-gamification-and-one-currency]] — the economy sheet, one currency.
+- [[60-Decisions/0023-views-are-derived-from-the-url]] — which bar a screen shows.
+- [[60-Decisions/0024-the-logical-day-boundary]] — the user's day, the lazy settle.
+- [[60-Decisions/0025-penalties-may-cause-debt-spends-may-not]] — the negative balance.
 
-| Step | Packages | State |
-|---|---|---|
-| Pulse closing (sweep fixes, F19 cleanup 1–7, docs) | sweep-pre, sweep-fix, F19:1–7 | merged |
-| Design round A (bars, Profil v2, admin pages, workout finish) | — | approved by the owner |
-| Design round B (LifeOS screens, ~30 frames) | — | approved by the owner |
-| Backend roles (`roles[]`, chat side filter) | B-roles | merged |
-| Phase 1 nav (views, switch cells, re-pointed gates) | P1-nav | merged |
-| Phase 1 screens: workout finish, Profil v2, admin section routes | S-workout-finish, S-profile-v2, S-admin-routes | merged |
-| Theme-pack delisting (migration 030) | B-q2 | merged |
-| Master merge prepared locally (owner pushes) | C0-master-merge-prep | done — branch `merge/pulse-into-master`, see `docs/pipeline/pulse/MASTER-MERGE.md` |
-| Equipment stills | A-equipment | waiting — the 7 images are not generated yet |
-| Phase 2 core (031: coin events, day boundary, day close, XP / level, admin rules) | B-core | merged |
-| Phase 2 screens: Nap és időzóna, admin Szabályok | S-day-settings, S-admin-rules | merged |
-| Phase 2 screen: coins / XP | S-coins-xp | handed in; merge blocked on the coins-2v2 ledger fixture (orchestrator ruling of 2026-10-18 allows a schema-checked fixture) |
-| Phase 3 backend (032 habits + tasks, full day close) | B-habits-tasks | handed in, not merged yet |
-| Phase 3 kit (LifeOS components) | G-lifeos | handed in, not merged yet |
-| Phase 3 screens: Szokások / Feladatok / Ma | S-habits, S-tasks, S-ma | S-habits handed in; S-tasks and S-ma in progress |
-| Phase 4 rewards + challenges (033) | — | next |
-| Phase 5 calendar (034) | B-calendar | waiting for B-habits-tasks on `pulse-redesign` |
-| Phase 6 focus + Haladás + closing (035) | B-focus | waiting for B-habits-tasks on `pulse-redesign` |
+## State: every package is merged
+On `pulse-int` / `pulse-redesign` (2026-11-03). Data model: the generated notes in `20-Data-Model` (`coin_events`,
+`point_rule_sets`, `user_prefs`, `daily_summaries`, `habits`, `habit_logs`, `habit_day_results`, `tasks`,
+`challenges`, `challenge_draws`, `rewards`, `reward_redemptions`, `events`, `event_reminders`,
+`reminder_deliveries`, `focus_sessions`); API: `30-API/Endpoints.md` (229 endpoints, the LifeOS routers included).
+
+| Phase | Packages | Migration | State |
+|---|---|---|---|
+| 1 Nav + roles | B-roles, P1-nav, S-workout-finish, S-profile-v2, S-admin-routes | — | merged |
+| Q2 theme packs | B-q2 | 030 | merged |
+| 2 Core (coin events, day boundary, XP, admin rules) | B-core, S-day-settings, S-admin-rules, S-coins-xp | 031 | merged |
+| 3 Habits + tasks + Ma | B-habits-tasks, G-lifeos, S-habits, S-tasks, S-ma (+ three fix packages) | 032 | merged |
+| 4 Rewards + challenges | B-rewards-challenges, S-rewards, S-challenges | 033 | merged |
+| 5 Calendar | B-calendar, S-calendar | 034 | merged |
+| 6 Focus + Haladás > Napok | B-focus, S-focus, S-progress-days | 035 | merged |
+| Security review + polish | B-lifeos-polish, S-lifeos-polish | — | merged |
+| Closing (regression, end to end, docs, report) | LifeOS-closing | — | merged |
+
+The closing regression (2026-11-03): frontend build and verify:gates green (78 passed); backend check:all green on a
+throwaway DB migrated to 35, smoke 806 passed 0 failed; roles, widths and the end-to-end walk in the owner's report;
+pictures under `.pulse/final-lifeos/` (git-ignored). Open findings: `docs/pipeline/pulse/review/lifeos-open.md`.
 
 ## Waiting on the owner
-- 8 new tab icons (prompts: `TRACKER-mockups/5-pulse/kepek-forras/pulse/icons-extra/WEB-PROMPTOK-IKONOK.md`).
-- 7 equipment stills (prompts: `.../equipment-extra/WEB-PROMPTOK.md`).
+- 8 new tab icons and 7 equipment stills, generated on the Higgsfield web (prompts under
+  `TRACKER-mockups/5-pulse/kepek-forras/pulse/`).
+- The master push (`docs/pipeline/pulse/MASTER-MERGE.md`; refresh the merge branch first), migrations 030–035 agreed
+  with the other developer, and the usage terms of the 49 AI-generated images before the first push.

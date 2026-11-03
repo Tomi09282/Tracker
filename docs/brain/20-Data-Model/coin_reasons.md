@@ -1,8 +1,8 @@
 ---
 type: table
 table: coin_reasons
-summary: 6 columns, 4 rows
-rows: 4
+summary: 9 columns, 19 rows
+rows: 19
 tags: [data-model, generated]
 ---
 
@@ -10,7 +10,7 @@ tags: [data-model, generated]
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-11-03.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -20,6 +20,9 @@ tags: [data-model, generated]
 | `max_minor` | INTEGER | NOT NULL |
 | `active` | INTEGER | NOT NULL, default 1 |
 | `label` | TEXT | NOT NULL |
+| `xp` | INTEGER | NOT NULL, default 0 |
+| `spend` | INTEGER | NOT NULL, default 0 |
+| `cap_exempt` | INTEGER | NOT NULL, default 0 |
 
 
 ## Indexes
@@ -35,5 +38,8 @@ tags: [data-model, generated]
 - `typeof(max_minor`
 - `active IN (0, 1`
 - `length(trim(label`
+- `xp IN (0, 1`
+- `spend IN (0, 1`
+- `cap_exempt IN (0, 1`
 
 Back to [[ERD]].
