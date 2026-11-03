@@ -1492,6 +1492,19 @@
       "hint": "Tippe eine an: Sie ist deine heutige Mission.",
       "reroll": "Neu ziehen · {{count}}",
       "picked": "Heutige Challenge · {{coins}} Münzen"
+    },
+    "starter": {
+      "add": "Starter-Challenges hinzufügen",
+      "s01": "Mach morgens dein Bett",
+      "s02": "Zehn Minuten aufräumen",
+      "s03": "Zwanzig Minuten spazieren gehen",
+      "s04": "Zehn Liegestütze",
+      "s05": "Lies zehn Seiten",
+      "s06": "Fünf Minuten ruhig atmen",
+      "s07": "Ruf einen Freund an",
+      "s08": "Schreib eine nette Nachricht",
+      "s09": "Trink zwei Gläser Wasser",
+      "s10": "Koch heute zu Hause"
     }
   },
   "rewards": {

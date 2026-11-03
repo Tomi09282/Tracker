@@ -17,6 +17,7 @@ import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { plusCoins, poolSub } from './challengeFormat';
 import { refusalOf, useArchiveChallenge, useChallenges } from './challengesApi';
 import { ChallengeSheet } from './ChallengeSheet';
+import { StarterAction } from './StarterAction';
 import { WeightBar } from './WeightBar';
 
 /**
@@ -37,7 +38,8 @@ import { WeightBar } from './WeightBar';
  * so archiving is the sheet's action — the same words, one tap further (pkg deviations).
  *
  * Undrawn states, in the same language: loading (rows), a failed read (danger line with "Újra"), an
- * empty pool (the empty state with "+ Új kihívás"), no archived challenge (the section is left out),
+ * empty pool (the empty state with the one pill "Kezdő kihívások hozzáadása" - ten small ones, opt-in, finding O2 -
+ * and the text link "+ Új kihívás"), no archived challenge (the section is left out),
  * a refused restore (the cap of 50 reached: a toast says so).
  */
 export function ChallengePoolPage() {
@@ -97,9 +99,12 @@ export function ChallengePoolPage() {
           title={t('challenges.emptyTitle')}
           body={t('challenges.emptyBody')}
           action={
-            <TextLink text="body" lead={<Plus aria-hidden />} onClick={newChallenge} aria-haspopup="dialog">
-              {t('challenges.new')}
-            </TextLink>
+            <>
+              <StarterAction variant="pill" />
+              <TextLink text="body" lead={<Plus aria-hidden />} onClick={newChallenge} aria-haspopup="dialog" className="mt-2">
+                {t('challenges.new')}
+              </TextLink>
+            </>
           }
         />
       ) : (

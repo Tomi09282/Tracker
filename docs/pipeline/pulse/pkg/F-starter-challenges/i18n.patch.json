@@ -1,0 +1,108 @@
+{
+  "package": "F-starter-challenges",
+  "base": "8a70da3",
+  "namespaces": [
+    "challenges"
+  ],
+  "set": [
+    {
+      "key": "challenges.starter.add",
+      "hu": "Kezdő kihívások hozzáadása",
+      "en": "Add starter challenges",
+      "de": "Starter-Challenges hinzufügen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the one action, on the empty pool and on Ma’s empty NAPI DOBÁS"
+    },
+    {
+      "key": "challenges.starter.s01",
+      "hu": "Ágyazz be reggel",
+      "en": "Make your bed in the morning",
+      "de": "Mach morgens dein Bett",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s01 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s02",
+      "hu": "Tíz perc rendrakás",
+      "en": "Ten minutes of tidying",
+      "de": "Zehn Minuten aufräumen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s02 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s03",
+      "hu": "Húsz perc séta",
+      "en": "A twenty-minute walk",
+      "de": "Zwanzig Minuten spazieren gehen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s03 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s04",
+      "hu": "Tíz fekvőtámasz",
+      "en": "Ten push-ups",
+      "de": "Zehn Liegestütze",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s04 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s05",
+      "hu": "Olvass tíz oldalt",
+      "en": "Read ten pages",
+      "de": "Lies zehn Seiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s05 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s06",
+      "hu": "Öt perc csendes légzés",
+      "en": "Five minutes of quiet breathing",
+      "de": "Fünf Minuten ruhig atmen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s06 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s07",
+      "hu": "Hívj fel egy barátot",
+      "en": "Call a friend",
+      "de": "Ruf einen Freund an",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s07 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s08",
+      "hu": "Írj egy kedves üzenetet",
+      "en": "Send a kind message",
+      "de": "Schreib eine nette Nachricht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s08 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s09",
+      "hu": "Igyál két pohár vizet",
+      "en": "Drink two glasses of water",
+      "de": "Trink zwei Gläser Wasser",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s09 (user data, written into the pool in the current language)"
+    },
+    {
+      "key": "challenges.starter.s10",
+      "hu": "Főzz ma otthon",
+      "en": "Cook at home today",
+      "de": "Koch heute zu Hause",
+      "copy": "proposed",
+      "visible": true,
+      "source": "finding O2 (docs/pipeline/pulse/review/lifeos-open.md): opt-in starter list on the empty pool: the name of starter s10 (user data, written into the pool in the current language)"
+    }
+  ]
+}

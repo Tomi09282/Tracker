@@ -11,6 +11,7 @@ import { useToast } from '../../ui/feedback/ToastHost';
 import { CheckMark } from '../../ui/primitives/CheckMark';
 import { TextLink } from '../../ui/primitives/TextLink';
 import { categoryLabel, plusCoins } from './challengeFormat';
+import { StarterAction } from './StarterAction';
 import { DRAW_KEY, newClientKey, refusalOf, useChallengeTask, useDraw, useReroll } from './challengesApi';
 
 /** The draw is still on the table (drawn / due / an empty pool): NAPI DOBÁS stands above MAI EDZÉS (ma-4). */
@@ -138,6 +139,7 @@ export function TodayDraw({ day, place }: TodayDrawProps) {
         }
       >
         <p className="text-body text-text-2">{t('challenges.emptyBody')}</p>
+        <StarterAction variant="link" />
       </Section>
     );
   }

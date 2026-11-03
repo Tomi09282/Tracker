@@ -1492,6 +1492,19 @@
       "hint": "Tap one: it becomes today’s mission.",
       "reroll": "Reroll · {{count}}",
       "picked": "Today’s challenge · {{coins}} coins"
+    },
+    "starter": {
+      "add": "Add starter challenges",
+      "s01": "Make your bed in the morning",
+      "s02": "Ten minutes of tidying",
+      "s03": "A twenty-minute walk",
+      "s04": "Ten push-ups",
+      "s05": "Read ten pages",
+      "s06": "Five minutes of quiet breathing",
+      "s07": "Call a friend",
+      "s08": "Send a kind message",
+      "s09": "Drink two glasses of water",
+      "s10": "Cook at home today"
     }
   },
   "rewards": {

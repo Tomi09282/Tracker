@@ -1,0 +1,18 @@
+{
+  "id": "F-starter-challenges",
+  "title": "Finding O2: an opt-in starter pool - \"Kezdő kihívások hozzáadása\" on the empty challenge pool and on Ma's empty NAPI DOBÁS creates ten small challenges through the existing POST /challenges with fixed client keys (starter-01 ... starter-10, idempotent); frontend only, no migration, no backend change",
+  "screens": ["challenges-pool", "today"],
+  "owns": [
+    "frontend/src/features/challenges/ChallengePoolPage.tsx",
+    "frontend/src/features/challenges/TodayDraw.tsx",
+    "frontend/src/features/challenges/StarterAction.tsx",
+    "frontend/src/features/challenges/starterChallenges.ts",
+    "docs/pipeline/pulse/pkg/F-starter-challenges/**"
+  ],
+  "mustNotTouch": ["frontend/src/ui/**", "frontend/src/app/**", "frontend/src/lib/**", "frontend/src/i18n/**", "frontend/scripts/**", "frontend/src/features/**/use*.ts", "backend/**"],
+  "handIn": { "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"] },
+  "dependsOn": ["S-challenges", "S-lifeos-polish"],
+  "i18nNamespaces": ["challenges"],
+  "size": "S",
+  "notes": "Proposed by the package itself (no work-packages.json entry): the integrator adds it at merge and passes the four frontend paths from the closed S-challenges / S-lifeos-polish. challengesApi.ts is untouched. Opt-in by owner decision 'go' on O2; the alternative (seed per account) needs a migration or a backend hook and was not taken."
+}

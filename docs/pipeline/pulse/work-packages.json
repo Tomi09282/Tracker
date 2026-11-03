@@ -3526,6 +3526,46 @@
       "liveWrites": [],
       "notes": "Entry added by the integrator at merge-S-lifeos-polish from the package's own pkg/S-lifeos-polish/work-package.json (as committed on pulse/S-lifeos-polish 9a0c2d6; the slot's working-tree entry carried wide feature globs, the committed one is narrowed to the files the diff touches, checked by hand against owns.json). Polish round over the eight merged LifeOS screen packages on the B-lifeos-polish API; 20 paths passed from the closed S-ma, S-tasks, S-challenges, S-rewards, S-calendar, S-focus, S-progress-days, S-progress and B-lifeos-polish (one file, one owner). owns.json also named 8 files inside the hand-in folders of S-ma, S-calendar, S-tasks, S-challenges, S-focus and S-rewards (make-states.mjs, states.json): pulse-owns-check rule 7 forbids a package to own another package's hand-in folder, so those stay with their closed packages and the integrator applied the package's fixture migration to them in the merge commit (the same way earlier merges changed them). Backend: it adds the additive dayRules field to GET /lifeos/today (rules.js dayPointRules, tx/lifeos.js, smoke/lifeos-polish.js). Hand-in applied at merge: i18n.patch.json, shared.patch (DayPointRules, LifeosToday.dayRules) and requests R-S-lifeos-polish-01..04 (pulse-frames.json setCheck, ScreenHeader 44 pt back control, pulse-shot targets probe, Numeral Fraction complete). The dev backend on :3000 picks dayRules up only after a restart.",
       "wave": 8
+    },
+    {
+      "id": "F-starter-challenges",
+      "title": "Finding O2: an opt-in starter pool - \"Kezdő kihívások hozzáadása\" on the empty challenge pool and on Ma's empty NAPI DOBÁS creates ten small challenges through the existing POST /challenges with fixed client keys (starter-01 ... starter-10, idempotent); frontend only, no migration, no backend change",
+      "screens": [
+        "challenges-pool",
+        "today"
+      ],
+      "owns": [
+        "frontend/src/features/challenges/ChallengePoolPage.tsx",
+        "frontend/src/features/challenges/TodayDraw.tsx",
+        "frontend/src/features/challenges/StarterAction.tsx",
+        "frontend/src/features/challenges/starterChallenges.ts",
+        "docs/pipeline/pulse/pkg/F-starter-challenges/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/scripts/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ]
+      },
+      "dependsOn": [
+        "S-challenges",
+        "S-lifeos-polish"
+      ],
+      "i18nNamespaces": [
+        "challenges"
+      ],
+      "size": "S",
+      "notes": "Proposed by the package itself (no work-packages.json entry): the integrator adds it at merge and passes the four frontend paths from the closed S-challenges / S-lifeos-polish. challengesApi.ts is untouched. Opt-in by owner decision 'go' on O2; the alternative (seed per account) needs a migration or a backend hook and was not taken."
     }
   ],
   "queue": [

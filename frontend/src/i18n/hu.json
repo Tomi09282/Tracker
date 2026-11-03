@@ -1492,6 +1492,19 @@
       "hint": "Koppints egyre: ma ez a küldetésed.",
       "reroll": "Újradobás · {{count}}",
       "picked": "Mai kihívás · {{coins}} érme"
+    },
+    "starter": {
+      "add": "Kezdő kihívások hozzáadása",
+      "s01": "Ágyazz be reggel",
+      "s02": "Tíz perc rendrakás",
+      "s03": "Húsz perc séta",
+      "s04": "Tíz fekvőtámasz",
+      "s05": "Olvass tíz oldalt",
+      "s06": "Öt perc csendes légzés",
+      "s07": "Hívj fel egy barátot",
+      "s08": "Írj egy kedves üzenetet",
+      "s09": "Igyál két pohár vizet",
+      "s10": "Főzz ma otthon"
     }
   },
   "rewards": {
