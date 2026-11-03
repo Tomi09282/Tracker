@@ -611,6 +611,51 @@ if (!seeded) {
       `${json?.exercises?.length ?? 0} hits`);
   }
   {
+    // The list carries each row's muscles ({ slug, role }) for the plan editor's picker map. Primary
+    // first, then secondary, each in the taxonomy's sort order - and the order must hold even
+    // though rear-delts (40) sorts BEFORE triceps (60): the role outranks the sort order.
+    const { res, json } = await call('/api/v1/exercises?q=tarkora&lang=hu', { jar: coachJar });
+    const row = json?.exercises?.find((e) => e.id === privateId);
+    check('list rows carry muscles as [{slug, role}]',
+      res.status === 200 && Array.isArray(row?.muscles) && row.muscles.every((m) => Object.keys(m).sort().join() === 'role,slug'),
+      JSON.stringify(row?.muscles));
+    check('list muscles: primary first, even when a secondary sorts earlier in the taxonomy',
+      JSON.stringify(row?.muscles) === JSON.stringify([{ slug: 'triceps', role: 'primary' }, { slug: 'rear-delts', role: 'secondary' }]),
+      JSON.stringify(row?.muscles));
+  }
+  {
+    // Order inside the two groups follows the taxonomy (chest 10 < lats 100; biceps 50 < abs 80),
+    // not the order the muscles were sent in. And an exercise without muscles answers [], never null.
+    const mk = (name, muscles) => call('/api/v1/exercises', {
+      method: 'POST', jar: coachJar, body: { name, difficulty: 'beginner', exercise_type: 'strength', ...(muscles ? { muscles } : {}) },
+    });
+    const { json: many } = await mk('Smoke Muscle Order Probe', [
+      { slug: 'abs', role: 'secondary' }, { slug: 'lats', role: 'primary' },
+      { slug: 'biceps', role: 'secondary' }, { slug: 'chest', role: 'primary' },
+    ]);
+    const { json: none } = await mk('Smoke Muscle Empty Probe', null);
+    const { json: list } = await call('/api/v1/exercises?mine=1&sort=name&lang=en', { jar: coachJar });
+    const rows = list?.exercises ?? [];
+    check('list muscles: each group follows the taxonomy sort order',
+      JSON.stringify(rows.find((e) => e.id === many?.id)?.muscles) === JSON.stringify([
+        { slug: 'chest', role: 'primary' }, { slug: 'lats', role: 'primary' },
+        { slug: 'biceps', role: 'secondary' }, { slug: 'abs', role: 'secondary' },
+      ]), JSON.stringify(rows.find((e) => e.id === many?.id)?.muscles));
+    const empty = rows.find((e) => e.id === none?.id);
+    check('an exercise without muscles answers muscles: []', !!empty && Array.isArray(empty.muscles) && empty.muscles.length === 0, JSON.stringify(empty?.muscles));
+    check('the muscle subquery does not duplicate rows', new Set(rows.map((e) => e.id)).size === rows.length, `${rows.length} rows`);
+    // Paged walk (limit 1): the keyset cursor must still visit every row exactly once.
+    const seen = [];
+    let cursor = null;
+    for (let i = 0; i < 6; i += 1) {
+      const { json: page } = await call(`/api/v1/exercises?mine=1&sort=name&lang=en&limit=1${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, { jar: coachJar });
+      seen.push(...(page?.exercises ?? []).map((e) => e.id));
+      cursor = page?.nextCursor;
+      if (!cursor) break;
+    }
+    check('paging with muscles visits every row once', seen.length === rows.length && new Set(seen).size === seen.length, `${seen.length} of ${rows.length}`);
+  }
+  {
     // FTS5 syntax in user input must be inert, not a query language.
     const { res } = await call('/api/v1/exercises?q=' + encodeURIComponent('" OR name : *'), { jar: coachJar });
     check('FTS metacharacters are escaped, not executed', res.status === 200, `status ${res.status}`);

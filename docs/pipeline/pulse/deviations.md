@@ -774,3 +774,11 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: `lifeos/progress-days` — a settled user with a full week only.
 - What the app does: D6 a new user's page ends after four "0" rows (no sentence drawn); D8 today's column reads 0 for a habit-only day until the day close (GET /lifeos/stats carries no habits preview); D9 a lapsed day is drawn without a bar.
 - Status: open — owner (copy for D6, the server preview for D8, the look of D9).
+
+## DEV-093 — P-picker-muscles: the plan editor's exercise picker shows the muscle map (owner override)
+
+- Source: owner request of 2026-11-03: "in the trainer's plan editor, when the coach searches for an exercise, also show the muscle map so they see what it works"
+- Package: P-picker-muscles
+- The frames show: `plan-editor-3` (picker with flags) draws result rows as a name only; `brain/58-Pulse/Screens/plan-editor.md` lists a muscle map / muscle tags / a "no results" text in the picker under "must not be shown", and `Feature inventory.md` listed a shared picker with a muscle heat map as planned.
+- What the app does: each of the (up to 12) results gets a read-only mannequin as its lead (72 pt tall; back view when most primary muscles are drawn only on the back, front otherwise; primary lit, secondary the weaker step; mounted only when the row is near the visible part of the scroll box) and a one-line muscle label under the name (primary in `text-2`, secondary dimmer, "Nincs izom megadva" when none); the scroll box grows from about 3.5 to about 4.5 rows (27 rem). `GET /exercises` now carries `muscles: [{slug, role}]` per row. Also drawn because the frames show none: loading skeleton, "Nincs találat" + hint, load error + "Újra". The names follow the interface language (the picker hard-coded `hu`) and the query is debounced 300 ms like the library's.
+- Status: ruled — the owner approved the override on 2026-11-03 (a layout the owner has not seen on a real device is still open: the row is 92 pt high, so on a phone with the keyboard up only a few results show before the page scrolls).

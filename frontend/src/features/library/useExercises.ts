@@ -19,6 +19,13 @@ export interface ExerciseRow {
    * from `useTaxonomies`.
    */
   equipment: string[];
+  /**
+   * What the exercise works: `{ slug, role }` entries, the primary muscles first, then the secondary
+   * ones, each group in the taxonomy's sort order. The slug is the vocabulary of `Taxonomy.slug`,
+   * `muscle.<slug>` and the mannequin's regions; labels are not carried. Always an array: `[]`
+   * means the exercise has no muscles recorded (about one in thirteen of the catalogue), never null.
+   */
+  muscles: { slug: string; role: 'primary' | 'secondary' }[];
   /** Both present only when `forClient` was asked for. */
   missing_equipment?: string[];
   conflicts?: { body_area: string; severity: 'avoid' | 'caution'; relation: 'loads' | 'stabilises' }[];

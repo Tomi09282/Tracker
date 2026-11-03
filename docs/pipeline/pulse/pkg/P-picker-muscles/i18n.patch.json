@@ -1,0 +1,45 @@
+{
+  "package": "P-picker-muscles",
+  "base": "da2127e",
+  "namespaces": [
+    "plans"
+  ],
+  "set": [
+    {
+      "key": "plans.pickerNoMuscles",
+      "hu": "Nincs izom megadva",
+      "en": "No muscles listed",
+      "de": "Keine Muskeln angegeben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "owner request 2026-11-03 (DEV-093): muscle map in the coach plan editor picker: the muscle line of a result whose exercise has no muscles recorded"
+    },
+    {
+      "key": "plans.pickerEmpty",
+      "hu": "Nincs találat",
+      "en": "No results",
+      "de": "Keine Treffer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "owner request 2026-11-03 (DEV-093): muscle map in the coach plan editor picker: the picker found nothing (the spec drew no empty state)"
+    },
+    {
+      "key": "plans.pickerEmptyHint",
+      "hu": "Próbálj másik szót; angol névvel is találhatsz.",
+      "en": "Try another word; English names match too.",
+      "de": "Versuche ein anderes Wort; englische Namen werden auch gefunden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "owner request 2026-11-03 (DEV-093): muscle map in the coach plan editor picker: the hint under the empty picker (search also reads the English names)"
+    },
+    {
+      "key": "plans.pickerError",
+      "hu": "A gyakorlatok nem töltődtek be.",
+      "en": "The exercises could not be loaded.",
+      "de": "Die Übungen konnten nicht geladen werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "owner request 2026-11-03 (DEV-093): muscle map in the coach plan editor picker: the picker’s load error (the spec drew none); the action is common.retry"
+    }
+  ]
+}

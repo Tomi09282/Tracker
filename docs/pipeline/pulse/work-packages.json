@@ -1152,7 +1152,6 @@
       "id": "B-equipment",
       "title": "Equipment keys on the exercise list (owner decision 2026-10-17, .pulse/owner-answers.md last section: extend the backend now): GET /api/v1/exercises carries equipment: string[] per row",
       "owns": [
-        "backend/src/exercises/routes.js",
         "backend/scripts/verify-equipment.mjs",
         "docs/pipeline/pulse/pkg/B-equipment/**"
       ],
@@ -1174,7 +1173,7 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field. At merge-B-q2 backend/package.json passed to B-q2 (B-equipment is closed; one file, one owner)."
+      "notes": "Added by the integrator at merge: the package ran outside the plan (no brief), on the owner decision of 2026-10-17. The rendering of the 48 pt still from row.equipment and the eight missing stills are separate frontend / asset packages. The dev backend on :3000 needs a restart on the merged code before the live app serves the field. At merge-B-q2 backend/package.json passed to B-q2 (B-equipment is closed; one file, one owner). At merge-P-picker-muscles backend/src/exercises/routes.js passed to P-picker-muscles (B-equipment is closed; one file, one owner)."
     },
     {
       "id": "B-roles",
@@ -1483,7 +1482,6 @@
       "id": "B-lifeos-polish",
       "title": "LifeOS backend polish round (approved plan abundant-booping-willow; owner 2026-10-18 rulings) on the merged B-core, B-habits-tasks, B-rewards-challenges, B-calendar and B-focus: the adversarial security review .pulse/review/security-lifeos (attacks 01 / 02 / 02b / 05a / 07 / 08 / 11 / 12 fixed), the lazy LifeOS start for accounts with a stored zone, the task point rules on GET /tasks and GET /lifeos/today, nextEvent reminders / firstReminder (S-calendar review DEV-k), the MAI DOBÁS picked fields; no migration",
       "owns": [
-        "backend/scripts/smoke.js",
         "backend/scripts/verify-031.mjs",
         "backend/scripts/verify-day-close.mjs",
         "backend/src/coins/achievements.js",
@@ -1529,7 +1527,7 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-lifeos-polish) from the package's own pkg/B-lifeos-polish/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The diff was checked by hand against owns.json: every touched path is in it. owns.json claims a wider set (backend/package.json, gdpr.js, index.js, worker.js, coins/routes.js, lifeos-focus-views.js, the other smoke/lifeos-*.js, a verify-lifeos-polish.mjs that was never written, backend/src/lifeos/**); only the 18 paths the package changed pass to it, from the closed B-focus (6), B-calendar (2), B-rewards-challenges (4), B-habits-tasks (5) and B-core (1); backend/src/coins/achievements.js (019 coins, pre-Pulse) had no owner and smoke/lifeos-polish.js is new. No migration (036 unused). The security review's FINDINGS.md was never written; the package took its findings from the attacks/*.mjs and out-*.txt files (handoff.json lists the four low / info ones left open). The new response fields are required in lifeos-api.ts, so the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges and S-focus need taskRules, nextEvent.reminders / firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs pass again (the frontend polish round). The dev backend on :3000 picks the changes up only after a restart. At merge-S-lifeos-polish backend/scripts/smoke/lifeos-polish.js, backend/src/db/tx/lifeos.js, backend/src/lifeos/rules.js passed to S-lifeos-polish (B-lifeos-polish is closed; one file, one owner)."
+      "notes": "Added by the integrator at merge (merge-B-lifeos-polish) from the package's own pkg/B-lifeos-polish/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The diff was checked by hand against owns.json: every touched path is in it. owns.json claims a wider set (backend/package.json, gdpr.js, index.js, worker.js, coins/routes.js, lifeos-focus-views.js, the other smoke/lifeos-*.js, a verify-lifeos-polish.mjs that was never written, backend/src/lifeos/**); only the 18 paths the package changed pass to it, from the closed B-focus (6), B-calendar (2), B-rewards-challenges (4), B-habits-tasks (5) and B-core (1); backend/src/coins/achievements.js (019 coins, pre-Pulse) had no owner and smoke/lifeos-polish.js is new. No migration (036 unused). The security review's FINDINGS.md was never written; the package took its findings from the attacks/*.mjs and out-*.txt files (handoff.json lists the four low / info ones left open). The new response fields are required in lifeos-api.ts, so the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges and S-focus need taskRules, nextEvent.reminders / firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs pass again (the frontend polish round). The dev backend on :3000 picks the changes up only after a restart. At merge-S-lifeos-polish backend/scripts/smoke/lifeos-polish.js, backend/src/db/tx/lifeos.js, backend/src/lifeos/rules.js passed to S-lifeos-polish (B-lifeos-polish is closed; one file, one owner). At merge-P-picker-muscles backend/scripts/smoke.js passed to P-picker-muscles (B-lifeos-polish is closed; one file, one owner)."
     }
   ],
   "screens": [
@@ -1805,7 +1803,6 @@
         "plan-editor"
       ],
       "owns": [
-        "frontend/src/features/plans/PlanEditorPage.tsx",
         "docs/pipeline/pulse/pkg/S-plan-editor/**"
       ],
       "mustNotTouch": [
@@ -1839,7 +1836,7 @@
       ],
       "size": "XL",
       "wave": 2,
-      "notes": "After S-coach-plans (the status vocabulary and plan rows are settled there). The object of every state is fixed: the three frames = the member's own plan (id from the freeze), replay only, never written; every mutating state = the scratch template plan, live; the no-days empty state = the zero-day scratch plan; offline-disabled controls and Undo timing = CDP offline + virtual time. All ten mutations, reorder, undo toasts, offline-disabled controls, the status sheet and the empty state survive. No date field is invented.",
+      "notes": "After S-coach-plans (the status vocabulary and plan rows are settled there). The object of every state is fixed: the three frames = the member's own plan (id from the freeze), replay only, never written; every mutating state = the scratch template plan, live; the no-days empty state = the zero-day scratch plan; offline-disabled controls and Undo timing = CDP offline + virtual time. All ten mutations, reorder, undo toasts, offline-disabled controls, the status sheet and the empty state survive. No date field is invented. At merge-P-picker-muscles frontend/src/features/plans/PlanEditorPage.tsx passed to P-picker-muscles (S-plan-editor is closed; one file, one owner).",
       "i18nNamespaces": [
         "plans"
       ],
@@ -3566,6 +3563,48 @@
       ],
       "size": "S",
       "notes": "Proposed by the package itself (no work-packages.json entry): the integrator adds it at merge and passes the four frontend paths from the closed S-challenges / S-lifeos-polish. challengesApi.ts is untouched. Opt-in by owner decision 'go' on O2; the alternative (seed per account) needs a migration or a backend hook and was not taken."
+    },
+    {
+      "id": "P-picker-muscles",
+      "title": "The plan editor's exercise picker shows the muscle map on every result (owner request 2026-11-03, DEV-093): each of the up to 12 results is led by a read-only mannequin with the exercise's muscles lit and carries a one-line muscle label; GET /exercises rows carry muscles [{slug, role}] for it; the picker gains loading, no-match and failed states, follows the interface language and debounces the query 300 ms",
+      "screens": [
+        "plan-editor"
+      ],
+      "owns": [
+        "frontend/src/features/plans/ExercisePicker.tsx",
+        "frontend/src/features/plans/PlanEditorPage.tsx",
+        "backend/src/exercises/routes.js",
+        "backend/scripts/smoke.js",
+        "docs/pipeline/pulse/pkg/P-picker-muscles/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/scripts/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/src/db/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ]
+      },
+      "dependsOn": [
+        "S-plan-editor",
+        "B-equipment",
+        "B-lifeos-polish"
+      ],
+      "i18nNamespaces": [
+        "plans"
+      ],
+      "size": "S",
+      "wave": 8,
+      "notes": "Entry added by the integrator at merge-P-picker-muscles: the package ran outside the plan entry list (no brief, no work-package.json), on an owner request of 2026-11-03 that overrides the plan-editor spec (DEV-093, ruled). 3 paths passed from the closed S-plan-editor (PlanEditorPage.tsx), B-equipment (exercises/routes.js) and B-lifeos-polish (smoke.js); ExercisePicker.tsx is new. frontend/src/features/library/useExercises.ts (frozen, ExerciseRow.muscles type only) was edited by the package instead of travelling as shared.patch; the integrator accepted it in the squash because it is a one-field type addition that no gate mirrors. The author applied the four plans.picker* keys into the three bundles itself and wrote i18n.patch.json with make-i18n.mjs; at merge pulse-i18n check is run against this entry. Docs came with the squash (Screens/plan-editor.md, Feature inventory.md, deviations.md DEV-093). Backend: an additive field only (GET /exercises rows gain muscles, a correlated scalar subquery like EQUIPMENT_SLUGS; no migration, no new route); the dev backend on :3000 serves it only after a restart. Open for the owner: the 92 pt row on a phone with the keyboard up shows few results before the page scrolls.",
+      "liveWrites": []
     }
   ],
   "queue": [

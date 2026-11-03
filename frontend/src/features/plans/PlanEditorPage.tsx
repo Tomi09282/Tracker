@@ -25,7 +25,7 @@ import {
   type PlanBlock, type PlanDay, type PlanExercise, type PlanSummary,
 } from './usePlans';
 import { useOnline } from './useOnline';
-import { useExercises } from '../library/useExercises';
+import { ExercisePicker } from './ExercisePicker';
 import { useClients } from '../coaching/useCoaching';
 import { personLabel } from '../../lib/person';
 
@@ -136,7 +136,6 @@ export function PlanEditorPage() {
   const [collapsedBlocks, setCollapsedBlocks] = useState<Set<number>>(new Set());
   const [cloning, setCloning] = useState(false);
   const [copyNotice, setCopyNotice] = useState<number | null>(null);
-  const [search, setSearch] = useState('');
 
   // `null` means "untouched", which is what makes the header pill honest: it is disabled until one
   // of the plan-level fields actually differs from the server's copy. Holding the plan's own value
@@ -148,7 +147,6 @@ export function PlanEditorPage() {
   // asking anyone. On a template there is no client and the flags simply do not appear — which is
   // correct: a template is written for nobody in particular.
   const forClient = data?.plan?.coach_client_id ?? undefined;
-  const results = useExercises({ q: search || undefined, forClient }, 'hu');
 
   /*
    * The library's `Új terv` creates a draft with a default name and lands here. If the title does
@@ -419,7 +417,6 @@ export function PlanEditorPage() {
 
   const closePicker = () => {
     setPickerBlock(null);
-    setSearch('');
   };
 
   /** A closed day: the index row — numeral, name, start time, the disclosure mark and the trash. */
@@ -504,58 +501,18 @@ export function PlanEditorPage() {
 
   /** The exercise picker, in place of "+ Gyakorlat": the list it adds to stays in view while you search. */
   const picker = (block: PlanBlock) => (
-    <div className="mt-2 flex flex-col">
-      <Field label={t('plans.findExercise')} value={search} autoFocus onChange={(e) => setSearch(e.target.value)} />
-      {/* At most three and a half rows (a row is 56 + its hairline): the half row cut at the
-          bottom is what says the list scrolls. The closing rule is the scroller's own, so it
-          stays under the list instead of scrolling away with the last row. */}
-      <div className={(results.data?.pages?.[0]?.exercises ?? []).length > 0 ? 'max-h-50 overflow-y-auto border-b border-hair-strong' : 'max-h-50 overflow-y-auto'}>
-        <RowStack>
-          {(results.data?.pages?.[0]?.exercises ?? []).slice(0, 12).map((r) => {
-            /* FLAGS, NOT A FILTER. The coach may know the client's knee is fine this week, or that the
-               gym has kit the questionnaire predates. An option that vanishes teaches them nothing;
-               one that carries a reason lets them decide. */
-            const avoid = r.conflicts?.some((c) => c.severity === 'avoid' && c.relation === 'loads');
-            const flags =
-              r.missing_equipment?.length || r.conflicts?.length ? (
-                <span className="flex items-baseline gap-3">
-                  {r.missing_equipment?.length ? (
-                    <span className="text-data text-text-2">{t('plans.missingKit', { count: r.missing_equipment.length })}</span>
-                  ) : null}
-                  {r.conflicts?.length ? (
-                    <span
-                      className={avoid ? 'text-micro text-danger' : 'text-micro text-warning'}
-                      title={r.conflicts.map((c) => t(`onboarding.area.${c.body_area}`)).join(', ')}
-                    >
-                      {t(`onboarding.area.${r.conflicts[0].body_area}`)}
-                    </span>
-                  ) : null}
-                </span>
-              ) : undefined;
-            return (
-              <ListRow
-                key={r.id}
-                title={r.name}
-                trailing={flags}
-                disabled={offline}
-                onClick={async () => {
-                  await addExercise.mutateAsync({
-                    planId, block_id: block.id, exercise_id: r.id,
-                    target_sets: 3, target_reps_min: 8,
-                  });
-                  closePicker();
-                }}
-              />
-            );
-          })}
-        </RowStack>
-      </div>
-      <div className="flex h-11 items-center">
-        <TextLink text="body" onClick={closePicker}>
-          {t('common.cancel')}
-        </TextLink>
-      </div>
-    </div>
+    <ExercisePicker
+      forClient={forClient}
+      offline={offline}
+      onPick={async (exerciseId) => {
+        await addExercise.mutateAsync({
+          planId, block_id: block.id, exercise_id: exerciseId,
+          target_sets: 3, target_reps_min: 8,
+        });
+        closePicker();
+      }}
+      onCancel={closePicker}
+    />
   );
 
   /** A block of the open day: a section head with its four columns, then its rows. */
