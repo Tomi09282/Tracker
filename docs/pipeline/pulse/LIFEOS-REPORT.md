@@ -64,11 +64,17 @@ nyitott pontot nem hagyott.
 5. Négy kisebb szövegezési / viselkedési kérdés: `docs/pipeline/pulse/deviations.md` DEV-089 … DEV-092
    (fókusz-ajtó blokk nélkül, korai Befejezés megerősítés nélkül, Nyújtás alsor, Napok nem rajzolt állapotai).
 
+## Utólag javítva (2026-11-03)
+
+- **Offline hidegindítás:** térerő nélkül a Ma (a sáv és az oldal saját offline állapota) jön a belépő lap helyett. Független átvilágítás háromszor.
+- **Régi hiba, útközben kiderült:** 15 perc inaktivitás után az újranyitott app a belépő lapra dobott, mert a `/auth/me` nem frissítette a munkamenetet. Javítva.
+- **Kezdő kihíváslista:** az üres kihívás-listán és a Ma „Napi dobás" részén „Kezdő kihívások hozzáadása" (10 kihívás, magyarul/angolul/németül, csak kérésre).
+
 ## Nyitott pontok (lista: `docs/pipeline/pulse/review/lifeos-open.md`)
 
-- **Offline hidegindítás:** bejelentkezett tag térerő nélkül a belépő lapra kerül („Nincs internetkapcsolat”), nem a
+- ~~**Offline hidegindítás:**~~ (javítva, lásd fent) bejelentkezett tag térerő nélkül a belépő lapra kerül („Nincs internetkapcsolat”), nem a
   Ma-ra; netre visszatérve rendben van. Régi hiány, nem most romlott el.
-- **Üres kihíváslista:** új fióknak nincs miből húzni, amíg nem ad hozzá kihívást. Kérdés: legyen kezdő lista?
+- ~~**Üres kihíváslista:**~~ (javítva, lásd fent) új fióknak nincs miből húzni, amíg nem ad hozzá kihívást. Kérdés: legyen kezdő lista?
 - Apróságok: a Profil lapnak nincs főcíme (akadálymentesség), egy régi, már lecserélt edzés-képernyő fotója nem fut le,
   az admin régi érme-felvétele miatt a SZINT sor nem látszik egy képen.
 

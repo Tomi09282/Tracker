@@ -12,6 +12,11 @@ Pictures: `.pulse/final-lifeos/` (git-ignored): one pair per frame under `pairs/
 | F2 | `brain-gen` refused to run (`server.js mounts routers this script does not know about: ../src/lifeos/routes.js`), so `30-API/Endpoints.md` had no LifeOS endpoint | the LifeOS router and its seven sub-routers are listed; 229 endpoints, schema v35 |
 | F3 | The capture freeze lacked requests that later packages added to old screens: `GET /rewards` (user, admin — Profil's JUTALMAK row), `GET /me/prefs` (coach, demo N — the timezone bootstrap), `GET /my-plans/week?from=2026-10-16&days=1` (user). 18 states of S-settings, S-coins-xp, S-day-settings, S-workout and coach-dashboard-1 failed with `unrecorded` | recorded with `pulse-shot --record --only-missing` against the dev backend (GETs only; `.pulse/rec` is not in git). Every LifeOS and round-A state captures again (the superseded `workout-3` aside, O3) |
 
+## Fixed after the closing (2026-11-03)
+
+- **O1** offline cold start: `G-offline-start` (a UI-only session hint, erased by logout / any real 401; 3 review rounds). The review also found a pre-existing bug, fixed in the same package: `GET /auth/me` never went through the refresh, so a cold start more than 15 minutes after the last token threw a valid session to /login.
+- **O2** empty challenge pool: `F-starter-challenges` (opt-in "Kezdő kihívások hozzáadása", ten starters, frontend only).
+
 ## Open (not fixed here), with the owning package
 
 | # | Severity | Finding | Owner | Smallest fix |
