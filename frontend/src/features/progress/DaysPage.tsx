@@ -1,5 +1,5 @@
-import { useId, type ReactNode } from 'react';
-import { useNavigate } from 'react-router';
+import { useId, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Screen } from '../../ui/shell/Screen';
 import { ScreenHeader } from '../../ui/shell/ScreenHeader';
@@ -68,10 +68,18 @@ export function DaysPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const stats = useLifeosStats();
+  const arrival = useLocation().state as { switchFocus?: boolean } | null;
+  const switchRef = useRef<HTMLDivElement>(null);
+  // Arriving by the page switch (from Test / Fotók / Megosztás): the keyboard stays on the switch (review D3).
+  useLayoutEffect(() => {
+    if (arrival?.switchFocus) switchRef.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const choose = (view: ProgressView) => {
     if (view === 'days') return;
-    navigate('/progress', { replace: true, state: { tab: view } });
+    navigate('/progress', { replace: true, state: { tab: view, switchFocus: true } });
   };
 
   const data = stats.data;
@@ -80,6 +88,7 @@ export function DaysPage() {
     <Screen top="root">
       <div className="flex flex-col gap-2">
         <ScreenHeader kind="root" title={t('progress.title')} />
+        <div ref={switchRef}>
         <Segmented
           layout="cells"
           label={t('progress.title')}
@@ -92,6 +101,7 @@ export function DaysPage() {
             { value: 'sharing', label: t('progress.tab.sharing') },
           ]}
         />
+        </div>
       </div>
 
       {stats.isError && !data ? (
@@ -126,7 +136,7 @@ function DaysContent({ data }: { data: LifeosStatsResponse }) {
   return (
     <>
       <Hero data={data} />
-      {data.weeks.length > 0 ? <Weeks weeks={data.weeks} /> : null}
+      <WeeksSince data={data} />
       {data.habits && data.habits.rows.length > 0 ? <Habits habits={data.habits} /> : null}
       {data.kcal && (data.kcal.targetKcal !== null || data.kcal.trackedDays > 0) ? <Kcal kcal={data.kcal} /> : null}
     </>
@@ -144,7 +154,8 @@ function Hero({ data }: { data: LifeosStatsResponse }) {
 
   // The figures over the bars, as the frame shows them: the best day, every day that lost coins,
   // and today. The other days carry their figure for a screen reader only.
-  const nets = days.map((d) => (d.status === 'before_start' || d.status === 'future' ? null : coinsOf(d.netMinor)));
+  // A lapsed day (its catch-up window passed unsettled) has no figure to draw: like a day before the start, no bar (review D5).
+  const nets = days.map((d) => (d.status === 'before_start' || d.status === 'future' || d.status === 'lapsed' ? null : coinsOf(d.netMinor)));
   const best = nets.reduce<number>((m, v) => (v !== null && v > m ? v : m), 0);
   const bestIndex = best > 0 ? nets.indexOf(best) : -1;
   const columns: DayColumn[] = days.map((d, i) => {
@@ -192,6 +203,16 @@ function TightSection({ title, trailing, children }: { title: string; trailing?:
       {children}
     </section>
   );
+}
+
+/**
+ * HETEK without the weeks LifeOS did not exist in: a week that ended before the start day is not a "0"
+ * row (review D4). The current week always stays.
+ */
+function WeeksSince({ data }: { data: LifeosStatsResponse }) {
+  const since = data.startedOn ?? null;
+  const rows = since ? data.weeks.filter((w, i) => i === 0 || w.weekEnd >= since) : data.weeks;
+  return rows.length > 0 ? <Weeks weeks={rows} /> : null;
 }
 
 function Weeks({ weeks }: { weeks: LifeosStatsResponse['weeks'] }) {
@@ -310,9 +331,10 @@ function Kcal({ kcal }: { kcal: NonNullable<LifeosStatsResponse['kcal']> }) {
       ) : null}
       {kcal.trackedDays > 0 && kcal.targetKcal !== null ? (
         <p className="text-cap text-text-2">
-          <span className="text-warning">{t('progressDays.kcal.over', { n: kcal.overDays })}</span>{' '}
+          {/* Warn only when a day really was over the target; with none over the line is plain and the penalty tail goes (review D2). */}
+          <span className={kcal.overDays > 0 ? 'text-warning' : undefined}>{t('progressDays.kcal.over', { n: kcal.overDays })}</span>{' '}
           {t(hungarianBackVowel(kcal.trackedDays) ? 'progressDays.kcal.ofBack' : 'progressDays.kcal.ofFront', { n: kcal.trackedDays })}
-          {penalty > 0 ? ` · ${t('progressDays.kcal.perDay', { coins: signedFigure(-penalty, locale) })}` : null}
+          {penalty > 0 && kcal.overDays > 0 ? ` · ${t('progressDays.kcal.perDay', { coins: signedFigure(-penalty, locale) })}` : null}
         </p>
       ) : null}
     </Section>

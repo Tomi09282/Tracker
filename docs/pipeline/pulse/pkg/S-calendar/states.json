@@ -364,6 +364,14 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-21",
             "due": [
               {
@@ -818,6 +826,14 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-21",
             "due": [
               {
@@ -1532,6 +1548,14 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-21",
             "due": [
               {
@@ -2011,6 +2035,14 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-21",
             "due": [
               {
@@ -2152,6 +2184,14 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-21",
             "due": [
               {
@@ -2538,202 +2578,14 @@
       ]
     },
     "capture-event": {
-      "title": "Rögzítés — esemény (hand-in R-S-calendar-02)",
+      "title": "Rögzítés — esemény, Ma fölött (hand-in R-S-calendar-02)",
       "frame": "lifeos/capture",
       "account": "M",
-      "route": "/tasks?capture=1",
-      "height": 874,
-      "clock": "2026-10-19T14:00:00+02:00",
-      "reach": "fixture",
-      "why": "lifeos/capture with Esemény chosen (the hand-in to S-tasks' CaptureSheet): the words typed, Hova? Esemény, Mikor? Dátum, Időpontban, the start field with \"Emlékeztető 1 órával előtte\". Behind the sheet stands Feladatok (S-tasks' route; Ma mounts the same sheet). GET /tasks is a contract body -> matched-fixture at best",
-      "steps": [
-        {
-          "type": {
-            "role": "textbox",
-            "name": {
-              "key": "capture.what"
-            },
-            "text": "Fogorvos szerdán 10-kor"
-          },
-          "arrived": {
-            "role": "textbox",
-            "name": {
-              "key": "capture.what"
-            }
-          }
-        },
-        {
-          "click": {
-            "role": "radio",
-            "name": {
-              "key": "calendar.capture.event"
-            }
-          },
-          "arrived": {
-            "role": "radio",
-            "name": {
-              "key": "calendar.capture.event"
-            },
-            "checked": true
-          }
-        },
-        {
-          "click": {
-            "role": "radio",
-            "name": {
-              "key": "capture.atTime"
-            }
-          },
-          "arrived": {
-            "role": "radio",
-            "name": {
-              "key": "capture.atTime"
-            },
-            "checked": true
-          }
-        },
-        {
-          "click": {
-            "role": "radio",
-            "name": {
-              "key": "tasks.due.date"
-            },
-            "within": {
-              "role": "dialog"
-            }
-          },
-          "arrived": {
-            "role": "radio",
-            "name": {
-              "key": "tasks.due.date"
-            },
-            "within": {
-              "role": "dialog"
-            },
-            "checked": true
-          }
-        }
-      ],
-      "arrived": {
-        "text": {
-          "key": "calendar.capture.reminderHint"
-        }
-      },
-      "fixtures": [
-        {
-          "method": "GET",
-          "path": "/api/v1/tasks",
-          "body": {
-            "started": true,
-            "today": "2026-10-19",
-            "due": [
-              {
-                "id": 21,
-                "title": "Közös költség befizetése",
-                "notes": null,
-                "priority": 2,
-                "points": null,
-                "dueOn": "2026-10-21",
-                "dueTime": "15:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 1000,
-                "lateNow": false,
-                "payoutNowMinor": 1000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
-            "overdue": [],
-            "anytime": [
-              {
-                "id": 31,
-                "title": "Felhívni anyát",
-                "notes": null,
-                "priority": 1,
-                "points": null,
-                "dueOn": null,
-                "dueTime": null,
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 500,
-                "lateNow": false,
-                "payoutNowMinor": 500,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
-            "completedToday": [],
-            "upcoming": [
-              {
-                "id": 24,
-                "title": "Ajándék Beának",
-                "notes": null,
-                "priority": 2,
-                "points": null,
-                "dueOn": "2026-10-24",
-                "dueTime": "18:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 1000,
-                "lateNow": false,
-                "payoutNowMinor": 1000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              },
-              {
-                "id": 41,
-                "title": "Befizetni a villanyszámlát",
-                "notes": null,
-                "priority": 3,
-                "points": null,
-                "dueOn": "2026-10-26",
-                "dueTime": "17:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 2000,
-                "lateNow": false,
-                "payoutNowMinor": 2000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
-            "done": [],
-            "templates": [],
-            "openCount": 3
-          }
-        }
-      ]
-    },
-    "ma-next": {
-      "title": "Ma — KÖVETKEZŐ (hand-in R-S-calendar-03)",
-      "frame": "lifeos/ma-1",
-      "account": "M",
       "route": "/",
-      "height": 2248,
+      "height": 874,
       "clock": "2026-10-19T13:20:00+02:00",
       "reach": "fixture",
-      "why": "the frame day (Monday 19 October): no session running, the plan day \"Felsőtest – húzás\", 4 habits and 6 tasks of the README-ma seed. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best. Plus nextEvent (B-calendar Phase-5 field, added by an edit): the KÖVETKEZŐ section, \"Vacsora Annával · Trattoria Toscana · 19:30\"",
+      "why": "lifeos/capture with Esemény chosen, OVER Ma opened from its \"Rögzítés +\": the words typed, Hova? Esemény, Mikor? Dátum (Wednesday 21 October), Időpontban, Kezdés 10:00 and \"Emlékeztető 1 órával előtte\". Behind the sheet stands the frame day of Ma (ma-1). GET /tasks is a contract body -> matched-fixture at best",
       "fixtures": [
         {
           "method": "GET",
@@ -3022,6 +2874,27 @@
                     "paidMinor": null,
                     "overduePenaltyMinor": null,
                     "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
                   }
                 ],
                 "overdue": [],
@@ -3070,18 +2943,88 @@
                   }
                 ],
                 "anytimeCount": 0,
-                "openCount": 4
+                "openCount": 5
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
               },
               "add": true
             },
             {
               "pointer": "/challenge",
-              "value": null,
+              "value": {
+                "date": "2026-10-19",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 31,
+                    "name": "Lift helyett lépcső egész nap",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 31,
+                  "taskId": 951,
+                  "pickedAt": 1792386000,
+                  "done": false,
+                  "taskDeleted": false,
+                  "title": "Lift helyett lépcső egész nap",
+                  "valueMinor": 1500,
+                  "paidMinor": null
+                }
+              },
               "add": true
             },
             {
               "pointer": "/nextEvent",
-              "add": true,
               "value": {
                 "eventId": 14,
                 "date": "2026-10-19",
@@ -3092,8 +3035,53 @@
                 "endAt": 1792438200,
                 "startTime": "19:30",
                 "endTime": "21:30",
-                "recurring": false
-              }
+                "recurring": false,
+                "reminders": [
+                  60
+                ],
+                "firstReminder": {
+                  "minutesBefore": 60,
+                  "at": 1792427400,
+                  "time": "18:30"
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": {
+                  "id": 42,
+                  "title": "Mélymunka – szakdolgozat",
+                  "status": "planned",
+                  "startsAt": 1792411200,
+                  "endsAt": 1792412700,
+                  "startTime": "14:00",
+                  "endTime": "14:25",
+                  "plannedMinutes": 25,
+                  "elapsedMinutes": 0,
+                  "remainingSeconds": 1500,
+                  "checkinMinutes": 0,
+                  "checkinsDone": 0,
+                  "checkinsMax": 0,
+                  "checkinDue": false,
+                  "nextCheckinAt": null,
+                  "lastCheckinAt": null,
+                  "expectedMinor": 800,
+                  "payoutNowMinor": null,
+                  "closedAt": null,
+                  "closedOn": null,
+                  "paidMinutes": null,
+                  "paidCheckins": null,
+                  "awardedMinor": null,
+                  "capped": false
+                },
+                "todayMinutes": 50,
+                "todaySessions": 1,
+                "todayEarnedMinor": 2300,
+                "maxMinutesPerDay": 480
+              },
+              "add": true
             }
           ]
         },
@@ -3191,108 +3179,384 @@
           "path": "/api/v1/tasks",
           "body": {
             "started": true,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            },
             "today": "2026-10-19",
-            "due": [
-              {
-                "id": 21,
-                "title": "Közös költség befizetése",
-                "notes": null,
-                "priority": 2,
-                "points": null,
-                "dueOn": "2026-10-21",
-                "dueTime": "15:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 1000,
-                "lateNow": false,
-                "payoutNowMinor": 1000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
+            "due": [],
             "overdue": [],
-            "anytime": [
-              {
-                "id": 31,
-                "title": "Felhívni anyát",
-                "notes": null,
-                "priority": 1,
-                "points": null,
-                "dueOn": null,
-                "dueTime": null,
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 500,
-                "lateNow": false,
-                "payoutNowMinor": 500,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
+            "anytime": [],
             "completedToday": [],
-            "upcoming": [
-              {
-                "id": 24,
-                "title": "Ajándék Beának",
-                "notes": null,
-                "priority": 2,
-                "points": null,
-                "dueOn": "2026-10-24",
-                "dueTime": "18:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 1000,
-                "lateNow": false,
-                "payoutNowMinor": 1000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              },
-              {
-                "id": 41,
-                "title": "Befizetni a villanyszámlát",
-                "notes": null,
-                "priority": 3,
-                "points": null,
-                "dueOn": "2026-10-26",
-                "dueTime": "17:00",
-                "recurrence": null,
-                "isTemplate": false,
-                "parentTaskId": null,
-                "completedAt": null,
-                "completedOn": null,
-                "overdueOn": null,
-                "valueMinor": 2000,
-                "lateNow": false,
-                "payoutNowMinor": 2000,
-                "paidMinor": null,
-                "overduePenaltyMinor": null,
-                "challengeId": null
-              }
-            ],
+            "upcoming": [],
             "done": [],
             "templates": [],
-            "openCount": 3
+            "openCount": 0
           }
         }
       ],
       "arrived": {
-        "text": "Vacsora Annával"
-      }
+        "text": {
+          "key": "calendar.capture.reminderHint"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "today.tasks.capture"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "scroll": "top",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "calendar.capture.event"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "calendar.capture.event"
+            },
+            "checked": true
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            },
+            "text": "Fogorvos szerdán 10-kor"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            },
+            "checked": true
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.today"
+            },
+            "within": {
+              "role": "dialog"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "capture.atTime"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^óra"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "spinbutton",
+            "name": {
+              "re": "^perc"
+            },
+            "focused": true
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "text": "10:00"
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "tasks.due.date"
+            },
+            "checked": true
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowUp",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowRight",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "role": "dialog"
+          }
+        },
+        {
+          "press": "ArrowDown",
+          "arrived": {
+            "text": {
+              "hu": "október 21.",
+              "en": "October 21",
+              "de": "21. Oktober"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "capture.what"
+            },
+            "focused": true
+          }
+        }
+      ]
     }
   }
 }

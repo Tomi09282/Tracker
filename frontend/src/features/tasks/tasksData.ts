@@ -161,6 +161,7 @@ export function rowCoinsMinor(task: Task): number | null {
 /**
  * What each priority pays on time under the rules in force (task-form "Közepes · 10").
  *
+ * 0. `taskRules` of GET /tasks (B-lifeos-polish): the rule set in force, in minor units. Always sent.
  * 1. The server's own figures, when `GET /tasks` carries them: `rules.taskLow / taskMid / taskHigh`
  *    in points (request R-S-tasks-fix-02 - the PointRules keys; read only when present, so the
  *    screen works before and after the backend adds them).
@@ -176,6 +177,13 @@ const RULE_OF: Record<TaskPriority, keyof TaskRuleFigures> = { 1: 'taskLow', 2: 
 export function priorityValues(data: TasksResponse | undefined): Partial<Record<TaskPriority, number>> {
   const out: Partial<Record<TaskPriority, number>> = {};
   if (!data) return out;
+  // B-lifeos-polish: GET /tasks carries `taskRules` (minor units, also before a zone): the figures of the rule set in force.
+  if (data.taskRules) {
+    out[1] = data.taskRules.lowMinor;
+    out[2] = data.taskRules.midMinor;
+    out[3] = data.taskRules.highMinor;
+    return out;
+  }
   const rules = (data as TasksResponse & { rules?: TaskRuleFigures }).rules;
   for (const p of PRIORITIES) {
     const points = rules?.[RULE_OF[p]];

@@ -9,7 +9,7 @@
       "height": 2248,
       "clock": "2026-10-19T13:20:00+02:00",
       "reach": "fixture",
-      "why": "the frame day (Monday 19 October): no session running, the plan day \"Felsőtest – húzás\", 4 habits and 6 tasks of the README-ma seed. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best",
+      "why": "the frame day (Monday 19 October): no session running, the plan day \"Felsőtest – húzás\", 4 habits and 6 tasks of the README-ma seed, the picked daily challenge (NAPI DOBÁS, elvállalva), the planned focus block (FÓKUSZ, ma 50 perc) and the next event with its reminder (KÖVETKEZŐ) - the whole frame. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best",
       "fixtures": [
         {
           "method": "GET",
@@ -298,6 +298,27 @@
                     "paidMinor": null,
                     "overduePenaltyMinor": null,
                     "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
                   }
                 ],
                 "overdue": [],
@@ -346,13 +367,144 @@
                   }
                 ],
                 "anytimeCount": 0,
-                "openCount": 4
+                "openCount": 5
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
               },
               "add": true
             },
             {
               "pointer": "/challenge",
-              "value": null,
+              "value": {
+                "date": "2026-10-19",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 31,
+                    "name": "Lift helyett lépcső egész nap",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 31,
+                  "taskId": 951,
+                  "pickedAt": 1792386000,
+                  "done": false,
+                  "taskDeleted": false,
+                  "title": "Lift helyett lépcső egész nap",
+                  "valueMinor": 1500,
+                  "paidMinor": null
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": {
+                "eventId": 14,
+                "date": "2026-10-19",
+                "title": "Vacsora Annával",
+                "location": "Trattoria Toscana",
+                "allDay": false,
+                "startAt": 1792431000,
+                "endAt": 1792438200,
+                "startTime": "19:30",
+                "endTime": "21:30",
+                "recurring": false,
+                "reminders": [
+                  60
+                ],
+                "firstReminder": {
+                  "minutesBefore": 60,
+                  "at": 1792427400,
+                  "time": "18:30"
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": {
+                  "id": 42,
+                  "title": "Mélymunka – szakdolgozat",
+                  "status": "planned",
+                  "startsAt": 1792411200,
+                  "endsAt": 1792412700,
+                  "startTime": "14:00",
+                  "endTime": "14:25",
+                  "plannedMinutes": 25,
+                  "elapsedMinutes": 0,
+                  "remainingSeconds": 1500,
+                  "checkinMinutes": 0,
+                  "checkinsDone": 0,
+                  "checkinsMax": 0,
+                  "checkinDue": false,
+                  "nextCheckinAt": null,
+                  "lastCheckinAt": null,
+                  "expectedMinor": 800,
+                  "payoutNowMinor": null,
+                  "closedAt": null,
+                  "closedOn": null,
+                  "paidMinutes": null,
+                  "paidCheckins": null,
+                  "awardedMinor": null,
+                  "capped": false
+                },
+                "todayMinutes": 50,
+                "todaySessions": 1,
+                "todayEarnedMinor": 2300,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -462,7 +614,7 @@
       "height": 1748,
       "clock": "2026-10-20T21:10:00+02:00",
       "reach": "fixture",
-      "why": "the rest day after ma-1: 3 good habits done, 2 bad habits clean, the 2 Tuesday tasks done, tomorrow \"Alsótest – guggolás 18:00\" from the week window. The daily challenge (Phase 4) is not on Ma yet, so \"Ma eddig\" lacks its +15 and the NAPI DOBÁS block is not drawn",
+      "why": "the rest day after ma-1: 3 good habits done, 2 bad habits clean, the 2 Tuesday tasks done, the picked challenge done (+15, so \"Ma eddig +68\"; NAPI DOBÁS \"teljesítve\"), tomorrow \"Alsótest – guggolás 18:00\" from the week window",
       "fixtures": [
         {
           "method": "GET",
@@ -739,6 +891,27 @@
                     "paidMinor": 500,
                     "overduePenaltyMinor": null,
                     "challengeId": null
+                  },
+                  {
+                    "id": 952,
+                    "title": "Hideg zuhany 2 percig",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792477800,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 1500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 32
                   }
                 ],
                 "anytimeCount": 0,
@@ -747,8 +920,95 @@
               "add": true
             },
             {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
               "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-20",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 32,
+                    "name": "Hideg zuhany 2 percig",
+                    "category": "discipline",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 32,
+                  "taskId": 952,
+                  "pickedAt": 1792476000,
+                  "done": true,
+                  "taskDeleted": false,
+                  "title": "Hideg zuhany 2 percig",
+                  "valueMinor": 1500,
+                  "paidMinor": 1500
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -897,7 +1157,7 @@
       "height": 1470,
       "clock": "2026-10-19T09:00:00+02:00",
       "reach": "fixture",
-      "why": "a brand-new member: 0 coins, level 0, only the onboarding plan's workout (\"Teljes test – alap\"); no habits, no tasks — the two empty sections. The frame's pay lines under the empty states quote the admin rules and are not drawn",
+      "why": "a brand-new member: 0 coins, level 0, only the onboarding plan's workout (\"Teljes test – alap\"); no habits, no tasks — the two empty sections, each with the pay line the frame draws under its link (from taskRules / dayRules)",
       "fixtures": [
         {
           "method": "GET",
@@ -980,8 +1240,45 @@
               "add": true
             },
             {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
               "pointer": "/challenge",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -1094,7 +1391,7 @@
       "height": 1790,
       "clock": "2026-10-21T07:30:00+02:00",
       "reach": "fixture",
-      "why": "the frame's day without its subject: the pending daily draw (NAPI DOBÁS above MAI EDZÉS) is Phase 4 and cannot be reached; every other block (hero 0/7, the Wednesday workout, 5 habits, 3 tasks) is drawn. Ma then continues with TÁPLÁLKOZÁS and the library row, which the frame crops",
+      "why": "the frame's day: the pending daily draw (NAPI DOBÁS above MAI EDZÉS, \"Újradobás · 1\"), hero 0/7, the Wednesday workout, 5 habits, 3 tasks. Ma then continues with TÁPLÁLKOZÁS and the library row, which the frame crops",
       "fixtures": [
         {
           "method": "GET",
@@ -1390,8 +1687,86 @@
               "add": true
             },
             {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
               "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-21",
+                "state": "drawn",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 21,
+                    "name": "Hideg zuhany 2 percig",
+                    "category": "discipline",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 22,
+                    "name": "30 fekvőtámasz a nap folyamán",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 23,
+                    "name": "Egy óra képernyő nélkül",
+                    "category": "mind",
+                    "points": 20,
+                    "weight": 2,
+                    "valueMinor": 2000,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": null
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -1784,6 +2159,27 @@
                     "paidMinor": null,
                     "overduePenaltyMinor": null,
                     "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
                   }
                 ],
                 "overdue": [],
@@ -1832,13 +2228,50 @@
                   }
                 ],
                 "anytimeCount": 0,
-                "openCount": 4
+                "openCount": 5
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
               },
               "add": true
             },
             {
               "pointer": "/challenge",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -1959,7 +2392,7 @@
       "height": 874,
       "clock": "2026-10-19T09:00:00+02:00",
       "reach": "fixture",
-      "why": "FELADATOK \"+ Rögzítés\" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: an empty TasksResponse, schema-checked like the rest",
+      "why": "FELADATOK \"+ Rögzítés\" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: a started, empty TasksResponse with the task rules, schema-checked like the rest",
       "fixtures": [
         {
           "method": "GET",
@@ -2042,8 +2475,45 @@
               "add": true
             },
             {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
               "pointer": "/challenge",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]
@@ -2145,7 +2615,7 @@
           "method": "GET",
           "path": "/api/v1/tasks",
           "body": {
-            "started": false,
+            "started": true,
             "today": "2026-10-19",
             "due": [],
             "overdue": [],
@@ -2154,7 +2624,15 @@
             "upcoming": [],
             "done": [],
             "templates": [],
-            "openCount": 0
+            "openCount": 0,
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
+            }
           }
         }
       ],
@@ -2267,8 +2745,45 @@
               "add": true
             },
             {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
               "pointer": "/challenge",
               "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
               "add": true
             }
           ]

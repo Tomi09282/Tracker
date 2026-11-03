@@ -67,6 +67,7 @@ export function newFocusKey() {
 export function useStartFocus() {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: 'always', // never queued while offline: a block started later would be judged at the wrong moment (review S-focus 6)
     mutationFn: (body: FocusStart) => apiWithRefresh<FocusStartResponse>('/focus', { method: 'POST', body }),
     onSuccess: ({ session }) => putSession(qc, session),
     onError: (err) => {
@@ -80,6 +81,7 @@ export function useStartFocus() {
 export function useFocusCheckin() {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: 'always',
     mutationFn: (id: number) => apiWithRefresh<FocusCheckinResponse>(`/focus/${id}/checkin`, { method: 'POST', body: {} }),
     onSuccess: ({ session }) => putSession(qc, session),
     onError: (err) => {
@@ -92,6 +94,7 @@ export function useFocusCheckin() {
 export function useFinishFocus() {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: 'always',
     mutationFn: (id: number) => apiWithRefresh<FocusFinishResponse>(`/focus/${id}/finish`, { method: 'POST', body: {} }),
     onSuccess: ({ session }) => putSession(qc, session),
   });
@@ -100,6 +103,7 @@ export function useFinishFocus() {
 export function useCancelFocus() {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: 'always',
     mutationFn: (id: number) => apiWithRefresh<FocusSessionResponse>(`/focus/${id}/cancel`, { method: 'POST', body: {} }),
     onSuccess: ({ session }) => putSession(qc, session),
   });

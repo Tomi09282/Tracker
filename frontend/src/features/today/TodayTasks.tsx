@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Plus, Repeat } from 'lucide-react';
-import type { LifeosToday, Task } from '../../lib/lifeos-api';
+import type { LifeosToday, Task, TaskPointRules } from '../../lib/lifeos-api';
 import { ListRow } from '../../ui/data/ListRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { Section } from '../../ui/data/SectionHeader';
@@ -38,14 +38,16 @@ export function TodayTasks({
   tasks,
   today,
   timeZone,
+  rules,
   onCapture,
 }: {
   tasks: LifeosToday['tasks'] | null;
   today: string | null;
   timeZone: string | null;
+  rules?: TaskPointRules | null;
   onCapture: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const complete = useCompleteTask();
   const reopen = useReopenTask();
@@ -79,6 +81,14 @@ export function TodayTasks({
           body={t('today.tasks.emptyBody')}
           action={t('today.tasks.capture')}
           onClick={onCapture}
+          pays={
+            rules
+              ? t('today.tasks.pays', {
+                  min: coins(rules.lowMinor).toLocaleString(i18n.language),
+                  max: coins(rules.highMinor).toLocaleString(i18n.language),
+                })
+              : null
+          }
         />
       </Section>
     );

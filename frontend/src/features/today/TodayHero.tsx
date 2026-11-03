@@ -24,12 +24,14 @@ import { coins, signed, type DayCount } from './model';
 export interface TodayHeroProps {
   count: DayCount | null;
   earnedMinor: number | null;
+  /** What a perfect day pays at the close (`dayRules.perfectDayMinor`); the line quotes it when known. */
+  perfectMinor?: number | null;
   pending: boolean;
   failed: boolean;
   onRetry: () => void;
 }
 
-export function TodayHero({ count, earnedMinor, pending, failed, onRetry }: TodayHeroProps) {
+export function TodayHero({ count, earnedMinor, perfectMinor = null, pending, failed, onRetry }: TodayHeroProps) {
   const { t, i18n } = useTranslation();
   const label = t('today.hero.label');
 
@@ -103,7 +105,15 @@ export function TodayHero({ count, earnedMinor, pending, failed, onRetry }: Toda
       {count.perfect ? (
         <p className="flex items-center gap-2 text-cap text-text-1">
           <Check aria-hidden className="size-4 shrink-0 text-accent" strokeWidth={2.5} />
-          {t('today.hero.perfect')}
+          <span>
+            {t('today.hero.perfect')}
+            {perfectMinor !== null && perfectMinor > 0 ? (
+              <span className="text-text-2">
+                {' · '}
+                {t('today.hero.perfectPays', { coins: coins(perfectMinor).toLocaleString(i18n.language) })}
+              </span>
+            ) : null}
+          </span>
         </p>
       ) : count.onlyWorkout ? (
         <p className="text-cap text-text-2">{t('today.hero.onlyWorkout')}</p>

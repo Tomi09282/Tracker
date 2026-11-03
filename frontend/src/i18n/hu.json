@@ -103,7 +103,8 @@
       "left": "hátra",
       "onlyWorkout": "Ma egy tétel: az edzésed",
       "perfect": "Tökéletes nap",
-      "sr": "Ma {{done}} kész a {{total}} tételből"
+      "sr": "Ma {{done}} kész a {{total}} tételből",
+      "perfectPays": "+{{coins}} érme napzáráskor"
     },
     "ledger": {
       "coins": "érme",
@@ -119,11 +120,11 @@
       "all": "Összes",
       "emptyTitle": "Még nincs szokásod",
       "emptyBody": "Kezdj eggyel, például a vízzel.",
-      "first": "Első szokás"
+      "first": "Első szokás",
+      "pays": "+{{coins}} érme / nap · {{days}} nap után {{mult}}"
     },
     "habit": {
       "done": "Kész",
-      "reminder": "Emlékeztető {{time}}",
       "pending": "Ma még nincs kész",
       "clean": "{{count}} napja tiszta",
       "relapsed": "Ma {{count}} visszaesés",
@@ -142,7 +143,8 @@
       "capture": "Rögzítés",
       "doneToday": "Kész ma · {{count}}",
       "emptyTitle": "Nincs teendő",
-      "emptyBody": "Rögzíts bármit, határidővel együtt."
+      "emptyBody": "Rögzíts bármit, határidővel együtt.",
+      "pays": "+{{min}}–{{max}} érme teendőnként"
     },
     "task": {
       "low": "Alacsony",
@@ -1554,7 +1556,8 @@
       "nameRequired": "Adj nevet a jutalomnak",
       "costMin": "Legalább 1 érme",
       "costMax": "Legfeljebb {{count}} érme"
-    }
+    },
+    "gone": "Ez a jutalom nem érhető el"
   },
   "calendar": {
     "title": "Naptár",

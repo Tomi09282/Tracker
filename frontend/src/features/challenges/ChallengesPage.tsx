@@ -117,6 +117,22 @@ export function ChallengesPage() {
         {t('challenges.failed')}
       </NoticeLine>
     );
+  } else if (day && day.state === 'due' && draw.isError) {
+    // The day's first draw failed for a reason that is not a refusal (500 / network): the read still says
+    // `due`, so without this the skeleton would stay forever (review S-challenges 7).
+    body = (
+      <NoticeLine
+        tone="danger"
+        role="alert"
+        action={
+          <TextLink className="min-w-11" onClick={() => draw.mutate(undefined, { onError: () => toast(t('challenges.failed'), 'error') })} busy={draw.isPending}>
+            {t('common.retry')}
+          </TextLink>
+        }
+      >
+        {t('challenges.failed')}
+      </NoticeLine>
+    );
   } else if (!today.data || (day && day.state === 'due')) {
     body = <DrawSkeleton />;
   } else if (!day) {
@@ -163,7 +179,8 @@ export function ChallengesPage() {
   return (
     <Screen top="push">
       <ScreenHeader kind="push" title={t('challenges.title')} trailing={poolLink} />
-      <p className="text-body text-text-2">{t('challenges.rule')}</p>
+      {/* The rule line is the question "pick one": once the pick is made it is answered, so it goes (review S-challenges 6). */}
+      {day?.state === 'picked' ? null : <p className="text-body text-text-2">{t('challenges.rule')}</p>}
       {body}
       {open ? (
         <Dock>

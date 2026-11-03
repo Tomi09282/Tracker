@@ -1,0 +1,12 @@
+{
+  "id": "R-S-lifeos-polish-03",
+  "from": "S-lifeos-polish",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (the targets probe)",
+  "need": "The targets probe reads an element's own box. The kit's hug chips and weekday chips (Segment) are narrower than 44 for a short word (Ma 39, H 26) but keep a 44 x 44 target with an invisible ::after layer (E6Segmented.tsx: after:min-w-[var(--target-min)]), so the thumb target is right and the ink is where the frame draws it. The patch reads the ::after layer's computed size and accepts the element when the layer reaches 44 x 44 (reviews S-habits-fix 6, S-tasks-fix 10, S-ma-fix 10).",
+  "evidence": "frontend/src/ui/feedback/variants/E6Segmented.tsx lines 150-185",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-lifeos-polish/requests/R-S-lifeos-polish-03.patch",
+  "interim": "applied in the slot working tree for the captures, never committed",
+  "status": "open"
+}

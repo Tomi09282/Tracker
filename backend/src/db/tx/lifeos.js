@@ -41,6 +41,7 @@ import {
   workoutPoints,
   RULE_KEYS,
   taskPointRules,
+  dayPointRules,
 } from '../../lifeos/rules.js';
 import { workoutDueOn } from '../../plans/occurrences.js';
 import { loadOccurrences, nextEventFor, workoutDoneOn, workoutView } from '../lifeos-calendar.js';
@@ -171,6 +172,8 @@ export function lifeosTodayQuery({ userId }) {
       rulesVersion: version,
       // B-lifeos-polish: the capture sheet's priority picker ("Alacsony 5 / Közepes 10 / Fontos 20").
       taskRules: taskPointRules(rules),
+      // S-lifeos-polish: the habit / perfect-day figures of Ma's lines (ma-2, ma-3).
+      dayRules: dayPointRules(rules),
       wallet: walletView(userId, prefs, rules, now),
       workout: {
         date: workoutDate,

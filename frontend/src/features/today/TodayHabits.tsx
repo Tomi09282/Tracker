@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, X } from 'lucide-react';
-import type { Habit } from '../../lib/lifeos-api';
+import type { DayPointRules, Habit } from '../../lib/lifeos-api';
 import { Dot } from '../../ui/data/Dot';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
 import { ProgressBar } from '../../ui/data/ProgressBar';
@@ -11,6 +11,7 @@ import { ConfirmSheet } from '../../ui/feedback/ConfirmSheet';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { CheckMark } from '../../ui/primitives/CheckMark';
 import { TextLink } from '../../ui/primitives/TextLink';
+import { scheduleWord } from '../habits/HabitRow';
 import { clockOf, coins, habitDone, multiplier, relapsedToday, signed } from './model';
 import { TodayEmpty } from './TodayEmpty';
 import { useLogHabit, useRelapse } from './useTodayActions';
@@ -37,8 +38,18 @@ import { useLogHabit, useRelapse } from './useTodayActions';
  * Nothing yet (ma-3): "+ Első szokás" opens the new-habit sheet over Ma (`onFirst`, S-habits'
  * HabitSheet) — the habit is made in one step, not behind a second tap on Szokások.
  */
-export function TodayHabits({ habits, timeZone, onFirst }: { habits: Habit[] | null; timeZone: string | null; onFirst: () => void }) {
-  const { t } = useTranslation();
+export function TodayHabits({
+  habits,
+  timeZone,
+  rules,
+  onFirst,
+}: {
+  habits: Habit[] | null;
+  timeZone: string | null;
+  rules?: DayPointRules | null;
+  onFirst: () => void;
+}) {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const log = useLogHabit();
   const relapse = useRelapse();
@@ -90,6 +101,15 @@ export function TodayHabits({ habits, timeZone, onFirst }: { habits: Habit[] | n
             body={t('today.habits.emptyBody')}
             action={t('today.habits.first')}
             onClick={onFirst}
+            pays={
+              rules
+                ? t('today.habits.pays', {
+                    coins: coins(rules.habitMinor),
+                    days: rules.streakTier1Days,
+                    mult: multiplier(rules.streakTier1MultBp, i18n.language),
+                  })
+                : null
+            }
           />
         </Section>
       ) : (
@@ -173,7 +193,8 @@ function HabitRow({ habit: h, timeZone, busy, onTap }: { habit: Habit; timeZone:
   } else if (weekly) {
     sub = t('today.habit.weekly', { count: h.timesPerWeek ?? 0, done: h.weekDone ?? 0 });
   } else if (h.reminderTime) {
-    sub = t('today.habit.reminder', { time: h.reminderTime });
+    // "Naponta · emlékeztető 21:30": the same words as the Szokások list (frames habits-1 / ma-4).
+    sub = `${scheduleWord(h, t, lang)} · ${t('habits.reminderAt', { time: h.reminderTime })}`;
   } else {
     sub = t('today.habit.pending');
   }

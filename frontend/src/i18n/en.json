@@ -103,7 +103,8 @@
       "left": "to go",
       "onlyWorkout": "One item today: your workout",
       "perfect": "Perfect day",
-      "sr": "Today {{done}} of {{total}} done"
+      "sr": "Today {{done}} of {{total}} done",
+      "perfectPays": "+{{coins}} coins at day close"
     },
     "ledger": {
       "coins": "coins",
@@ -119,11 +120,11 @@
       "all": "All",
       "emptyTitle": "No habits yet",
       "emptyBody": "Start with one, water for example.",
-      "first": "First habit"
+      "first": "First habit",
+      "pays": "+{{coins}} coins / day · {{mult}} after {{days}} days"
     },
     "habit": {
       "done": "Done",
-      "reminder": "Reminder {{time}}",
       "pending": "Not done yet today",
       "clean": "Clean for {{count}} days",
       "relapsed": "{{count}} relapse today",
@@ -142,7 +143,8 @@
       "capture": "Capture",
       "doneToday": "Done today · {{count}}",
       "emptyTitle": "Nothing to do",
-      "emptyBody": "Capture anything, with its deadline."
+      "emptyBody": "Capture anything, with its deadline.",
+      "pays": "+{{min}}–{{max}} coins per task"
     },
     "task": {
       "low": "Low",
@@ -1554,7 +1556,8 @@
       "nameRequired": "Give the reward a name",
       "costMin": "At least 1 coin",
       "costMax": "At most {{count}} coins"
-    }
+    },
+    "gone": "This reward is not available"
   },
   "calendar": {
     "title": "Calendar",

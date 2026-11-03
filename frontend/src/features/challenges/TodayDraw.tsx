@@ -6,6 +6,7 @@ import type { ChallengeDraw, LifeosToday } from '../../lib/lifeos-api';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
 import { RowStack } from '../../ui/data/RowStack';
 import { Section } from '../../ui/data/SectionHeader';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { CheckMark } from '../../ui/primitives/CheckMark';
 import { TextLink } from '../../ui/primitives/TextLink';
@@ -72,6 +73,25 @@ export function TodayDraw({ day, place }: TodayDrawProps) {
   if ((place === 'open') !== drawIsOpen(c)) return null;
   const lang = i18n.language;
   const title = t('challenges.today.title');
+
+  if (c.state === 'due' && draw.isError) {
+    // The first draw of the day failed and the read still says `due`: say so, with the way to try again.
+    return (
+      <Section title={title}>
+        <NoticeLine
+          tone="danger"
+          role="alert"
+          action={
+            <TextLink className="min-w-11 justify-end" onClick={() => draw.mutate(undefined, { onError: () => void qc.invalidateQueries({ queryKey: ['lifeos', 'today'] }) })} busy={draw.isPending}>
+              {t('common.retry')}
+            </TextLink>
+          }
+        >
+          {t('challenges.failed')}
+        </NoticeLine>
+      </Section>
+    );
+  }
 
   if (c.state === 'picked') {
     const chosen = c.options.find((o) => o.chosen);

@@ -18,8 +18,8 @@ import type { NextEvent } from '../../lib/lifeos-api';
  * today names its weekday before the place ("Szerda · Trattoria Toscana"); an all-day event says
  * "Egész nap" instead of a clock. The row opens the event on that day; "Naptár ›" opens the tab.
  *
- * The frame's "· emlékeztető 18:30" is not drawn: `nextEvent` carries no reminders (B-calendar
- * api.md), and the line never says what the server did not.
+ * The frame's "· emlékeztető 18:30" is the event's first reminder (`nextEvent.firstReminder`, B-lifeos-polish):
+ * drawn when the server sends one, never otherwise.
  */
 export function NextEventSection({ next, today }: { next: NextEvent | null | undefined; today: string | null }) {
   const { t, i18n } = useTranslation();
@@ -32,7 +32,9 @@ export function NextEventSection({ next, today }: { next: NextEvent | null | und
           return word.charAt(0).toLocaleUpperCase(i18n.language) + word.slice(1);
         })()
       : null;
-  const sub = [weekday, next.location].filter(Boolean).join(' · ') || undefined;
+  // The first reminder, when the event has one ("Trattoria Toscana · emlékeztető 18:30"): the server's wall-clock time (B-lifeos-polish).
+  const reminder = next.firstReminder ? t('habits.reminderAt', { time: next.firstReminder.time }) : null;
+  const sub = [weekday, next.location, reminder].filter(Boolean).join(' · ') || undefined;
   return (
     <Section
       title={t('calendar.next.title')}

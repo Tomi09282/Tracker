@@ -1,0 +1,38 @@
+{
+  "package": "S-lifeos-polish",
+  "branch": "pulse/S-lifeos-polish",
+  "base": "pulse-redesign 2be8036 (B-lifeos-polish), already merged in",
+  "reviews": [
+    ".pulse/review/S-ma-fix", ".pulse/review/S-habits-fix", ".pulse/review/S-tasks-fix", ".pulse/review/S-challenges",
+    ".pulse/review/S-rewards", ".pulse/review/S-calendar", ".pulse/review/S-focus", ".pulse/review/S-progress-days"
+  ],
+  "build": "pulse-verify --package <S-ma | S-calendar | S-tasks | S-challenges | S-rewards | S-habits | S-focus | S-progress-days> (port 5227): build green (every gate + tsc -b + vite build) and every state captured, 8 runs: 9 + 10 + 11 + 13 + 9 + 9 + 11 + 6 = 78 of 78 (replay); extra runs --lang de --width 360 for S-ma and S-focus (no overflow, nothing clipped)",
+  "backend": "dayRules added to GET /lifeos/today (src/lifeos/rules.js dayPointRules, src/db/tx/lifeos.js, smoke/lifeos-polish.js): npm run smoke 806 passed 0 failed (805 + 1); check:all chain on a throwaway migrated DB: check:modules / routes / admin-audit / worker-tx / route-tx / body-writes / gdpr, verify:schema / migrations / rekey / markdown / last-admin / gates / seats / equipment / 019 / 021 / 022 / 023-025 / 030-035 / lifeos-rules / day-close green; verify:013 and verify:015 need the dev seed pairing (a coach-client link that does not exist on a scratch DB) and were not green there",
+  "fixtureCheck": "fixture-schema-check.mjs of S-ma (24 bodies), S-calendar (17), S-challenges (13), S-focus (13), S-tasks (14), S-rewards (7), S-progress-days (4): constraints OK and tsc --strict clean against lib/lifeos-api.ts (with the shared.patch applied); the red step left by B-lifeos-polish is closed (make-states.mjs of S-ma / S-calendar regenerate; migrate-fixtures.mjs adds taskRules / dayRules / nextEvent / focus / picked.title and the reward-gone state, run after the generators)",
+  "findings": {
+    "a event-form": "sheet top at the frame's 189 pt, fields scroll in a 100dvh-387 pt region, Jegyzet below the first view, Dátum without a chevron (class on the field; kit option noted in R-02)",
+    "b rewards.gone": "RewardDetailPage says rewards.gone; state reward-gone; setCheck in boxedAllow (R-01)",
+    "c challenge": "Ma already left the picked task out of FELADATOK and of the a/b counters (re-verified on ma-1 / ma-2 fixtures with a challengeId task); MAI DOBÁS no longer prints the rule line once picked; a failed first draw shows the danger line with Újra on both screens",
+    "d Ma": "pay lines (ma-3), +68 and the perfect-day pay (ma-2), NAPI DOBÁS / FÓKUSZ / KÖVETKEZŐ in the frames' places (ma-1 composes whole), KÖVETKEZŐ prints the first reminder, Nyújtás 'Naponta · emlékeztető 21:30'; priority figures on real data (taskRules read by priorityValues)",
+    "e capture": "state capture-event: opened over Ma from Ma, Esemény, date and time typed by the keyboard steps, reminder hint",
+    "f fixtures": "ma-capture-sheet /tasks started: true",
+    "g targets": "the targets probe reads the kit's ::after target layer (R-03); back control min 44 pt (R-02)",
+    "h S-focus": "1 Fraction complete (R-04), 2 SZINT bar pixel-equal, 6 networkMode always, 8 real end time + no 'jóváírva' for 0 coins, 9 ma-focus is the whole ma-1, 10 duration chips wrap; open: 3/4/5 kit, 7 owner",
+    "h S-progress-days": "D2 warn only when days are over, D3 focus stays on the switch, D4 no rows for weeks before the start, D5 no bar for a lapsed day; open: D1 kit, D6/D8/D9 owner"
+  },
+  "handIn": {
+    "i18n.patch.json": "4 keys (rewards.gone, today.habits.pays, today.tasks.pays, today.hero.perfectPays) + remove today.habit.reminder; pulse-i18n check OK",
+    "shared.patch": "lib/lifeos-api.ts: DayPointRules + LifeosToday.dayRules (optional)",
+    "requests": [
+      "requests/R-S-lifeos-polish-01 pulse-frames.json boxedAllow setCheck",
+      "requests/R-S-lifeos-polish-02 ScreenHeader back control min 44 pt",
+      "requests/R-S-lifeos-polish-03 pulse-shot.mjs targets probe reads ::after",
+      "requests/R-S-lifeos-polish-04 Numeral Fraction complete (THE BUILD NEEDS IT: FocusDone uses the prop)"
+    ],
+    "workPackages": "the entry is pkg/S-lifeos-polish/work-package.json (added to work-packages.json in the slot's working tree only); owns narrowed to the touched files, takenFrom the eight closed packages and B-lifeos-polish",
+    "appliedInSlot": "frontend/src/i18n/{hu,en,de}.json, lib/lifeos-api.ts, ui/data/Numeral.tsx, ui/shell/ScreenHeader.tsx, scripts/pulse-frames.json, scripts/pulse-shot.mjs, docs/pipeline/pulse/work-packages.json - uncommitted by rule; the committed code needs them to build"
+  },
+  "pairs": ".pulse/pairs/S-lifeos-polish/",
+  "live": "not exercised: the dev backend on :3000 predates B-lifeos-polish and dayRules (restart needed); the backend half is proved by smoke on its own throwaway server, the screens by replay",
+  "differences": "deviations.md"
+}

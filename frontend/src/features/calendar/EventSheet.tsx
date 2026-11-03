@@ -164,6 +164,15 @@ function EventSheetBody({ target, onClose }: { target: EventSheetTarget | null; 
       status={write.isPending ? 'busy' : write.isError ? 'error' : 'idle'}
       onRetry={failure && retryable(failure) ? submit : undefined}
     >
+      {/*
+        The frame's sheet stands where it stands (top at 189 pt on a 874 pt screen, the Naptár header and
+        month line still visible above it) and ends with Emlékeztető and Mentés. Jegyzet, which the frame
+        does not draw, would make the sheet 83 pt taller; so the fields scroll inside a region of the frame's
+        height (874 - 387 = 487 pt) and Jegyzet sits below the first view. Mentés stays docked under the region.
+      */}
+      <div
+        className="-mx-1 flex max-h-[calc(100dvh-387px)] min-h-40 flex-col gap-4 overflow-y-auto overscroll-contain px-1 [&>*]:shrink-0" // token-lint-disable: event-form's sheet top (189 pt of 874) = 100dvh - 387 pt for the field region
+      >
       <Field
         label={t('calendar.form.name')}
         value={title}
@@ -194,7 +203,9 @@ function EventSheetBody({ target, onClose }: { target: EventSheetTarget | null; 
           glyph="chevron"
           format={(value, loc) => shortDay(value, loc)}
           error={dateError}
-          className="w-[106px] min-w-0 flex-1"
+          // event-form draws the bare "okt. 21." over the hairline: the field keeps its hit area and its
+          // native picker, only the kit's chevron is not drawn (request R-S-lifeos-polish-02: a bare DateTrigger).
+          className="w-[106px] min-w-0 flex-1 [&_svg]:hidden"
         />
         {allDay ? (
           <DateTrigger
@@ -312,6 +323,7 @@ function EventSheetBody({ target, onClose }: { target: EventSheetTarget | null; 
         maxRows={5}
         onChange={(e) => setNotes(e.target.value)}
       />
+      </div>
 
       {write.isError ? (
         <NoticeLine tone="danger" role="alert">

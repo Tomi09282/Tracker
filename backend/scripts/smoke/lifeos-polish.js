@@ -86,6 +86,8 @@ export async function lifeosPolishSmoke({ call, check, Jar, stamp, PASSWORD }) {
     const ma = await call('/api/v1/lifeos/today', { jar: u.jar });
     check('GET /tasks carries taskRules from the admin rule set in force', JSON.stringify(t.json?.taskRules) === JSON.stringify(want), JSON.stringify(t.json?.taskRules));
     check('GET /lifeos/today carries the same taskRules', JSON.stringify(ma.json?.taskRules) === JSON.stringify(want), JSON.stringify(ma.json?.taskRules));
+    const wantDay = { habitMinor: r.habitSuccess * 100, streakTier1Days: r.streakTier1Days, streakTier1MultBp: r.streakTier1MultBp, perfectDayMinor: r.perfectDay * 100 };
+    check('GET /lifeos/today carries dayRules (the habit pay, the first streak step, the perfect day)', JSON.stringify(ma.json?.dayRules) === JSON.stringify(wantDay), JSON.stringify(ma.json?.dayRules));
     const noZone = await register('rules-nozone', { zone: null });
     const nz = await call('/api/v1/tasks', { jar: noZone.jar });
     check('the rules are there before a zone too (the picker draws them)', nz.json?.started === false && nz.json?.taskRules?.highMinor === want.highMinor);

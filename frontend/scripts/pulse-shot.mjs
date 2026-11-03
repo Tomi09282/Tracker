@@ -2450,6 +2450,12 @@ const PAGE_PROBES = String.raw`
     let r = el.getBoundingClientRect();
     if ((r.width <= 2 || r.height <= 2) && el.labels && el.labels[0]) r = el.labels[0].getBoundingClientRect(); // a visually hidden input: its label is the target
     if (r.width >= 43.5 && r.height >= 43.5) continue;
+    // The kit's short words (a chip, a weekday) keep a 44 pt target with an invisible ::after layer that
+    // leaves the ink and the layout where the frame has them: the target is that layer's box, not the element's.
+    {
+      const layer = getComputedStyle(el, '::after');
+      if (layer.content !== 'none' && layer.position === 'absolute' && Math.max(r.width, parseFloat(layer.width) || 0) >= 43.5 && Math.max(r.height, parseFloat(layer.height) || 0) >= 43.5) continue;
+    }
     const region = !!el.closest('svg') && (el.getAttribute('role') === 'button' || el.tagName.toLowerCase() !== 'a');
     const inline = getComputedStyle(el).display === 'inline' && el.tagName.toLowerCase() === 'a';
     targets.push({ what: label(el), kit: kitOf(el), exempt: region ? (chipRowShown ? 'muscle region (a chip row is on screen)' : 'muscle region') : null, inlineLink: inline, ...box(r) });

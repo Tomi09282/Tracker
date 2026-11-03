@@ -70,7 +70,7 @@ const task = (o) => ({
   payoutNowMinor: o.completedAt ? null : o.value,
   paidMinor: o.completedAt ? o.value : null,
   overduePenaltyMinor: null,
-  challengeId: null, // B-rewards-challenges (033): Task.challengeId is required; Ma picks no challenge yet
+  challengeId: o.challengeId ?? null, // B-rewards-challenges (033): the challenge a picked task came from
 });
 
 /* ── edit helpers ─────────────────────────────────────────────────────────────────────────────── */
@@ -78,8 +78,43 @@ const task = (o) => ({
 const set = (pointer, value) => ({ pointer, value });
 const add = (pointer, value) => ({ pointer, value, add: true });
 
+/**
+ * The rule figures GET /lifeos/today carries since B-lifeos-polish (taskRules) and S-lifeos-polish (dayRules):
+ * the admin defaults (rules.js DEFAULT_RULES: task 5 / 10 / 20, late 50 %, overdue 5; habit 10, the first streak
+ * step at 7 days x1.25, the perfect day 25), in minor units.
+ */
+const TASK_RULES = { lowMinor: 500, midMinor: 1000, highMinor: 2000, latePct: 50, overdueMinor: 500 };
+const DAY_RULES = { habitMinor: 1000, streakTier1Days: 7, streakTier1MultBp: 12500, perfectDayMinor: 2500 };
+
+/** The challenge's three options (S-challenges' own seed: 15 / 15 / 25 coins). */
+const option = (id, name, category, points, chosen = false) => ({
+  id, name, category, points, weight: 2, valueMinor: points * 100, archived: false, archivedAt: null, chosen,
+});
+
+/** A picked draw (the B-lifeos-polish `picked.title / valueMinor / paidMinor` included). */
+const pickedDraw = (date, options, { challengeId, taskId, pickedAt, done, paidMinor }) => ({
+  date,
+  state: 'picked',
+  poolCount: 8,
+  options,
+  rerollsLeft: 1,
+  picked: {
+    challengeId,
+    taskId,
+    pickedAt,
+    done,
+    taskDeleted: false,
+    title: options.find((o) => o.chosen)?.name ?? null,
+    valueMinor: options.find((o) => o.chosen)?.valueMinor ?? null,
+    paidMinor,
+  },
+});
+
+/** An empty FÓKUSZ block: no block open, nothing paid today (the server always sends the field). */
+const EMPTY_FOCUS = { current: null, todayMinutes: 0, todaySessions: 0, todayEarnedMinor: 0, maxMinutesPerDay: 480 };
+
 /** GET /lifeos/today over the B-core recording of user@. */
-function lifeos({ today, balance, xp, level, floor, next, earned, due, done, habits, tasks }) {
+function lifeos({ today, balance, xp, level, floor, next, earned, due, done, habits, tasks, challenge = null, focus = EMPTY_FOCUS, nextEvent = null }) {
   return {
     method: 'GET',
     path: '/api/v1/lifeos/today',
@@ -101,7 +136,11 @@ function lifeos({ today, balance, xp, level, floor, next, earned, due, done, hab
       set('/workout/done', done),
       add('/habits', habits),
       add('/tasks', tasks),
-      add('/challenge', null), // B-rewards-challenges (033): no draw drawn on Ma yet (NAPI DOBÁS is not on the page)
+      add('/taskRules', TASK_RULES), // B-lifeos-polish
+      add('/dayRules', DAY_RULES), // S-lifeos-polish
+      add('/challenge', challenge), // B-rewards-challenges (033): NAPI DOBÁS
+      add('/nextEvent', nextEvent), // B-calendar (034): KÖVETKEZŐ
+      add('/focus', focus), // B-focus (035): FÓKUSZ
     ],
   };
 }
@@ -162,12 +201,68 @@ const ma1Habits = [
   habit({ id: 3, name: 'Nyújtás 10 perc', reminder: '21:30', streak: 31, best: 45, freezes: 1, mult: 15000, full: 1500 }),
   habit({ id: 6, name: 'Esti nassolás', kind: 'bad', log: log(MON, 1, 'relapse'), streak: 4, preview: -1000, full: 1500 }),
 ];
+// MAI DOBÁS picked on the frame day: the pick became task 951 (challengeId 31, +15), shown in NAPI DOBÁS, never in FELADATOK.
+const ma1Options = [
+  option(31, 'Lift helyett lépcső egész nap', 'movement', 15, true),
+  option(33, 'Olvass el 20 oldalt', 'mind', 15),
+  option(34, '10 000 lépés', 'movement', 25),
+];
+const ma1Challenge = pickedDraw(MON, ma1Options, { challengeId: 31, taskId: 951, pickedAt: at('2026-10-19T07:00:00+02:00'), done: false, paidMinor: null });
+// FÓKUSZ: 50 paid minutes today and the next planned block at 14:00 (frame ma-1).
+const ma1Focus = {
+  current: {
+    id: 42,
+    title: 'Mélymunka – szakdolgozat',
+    status: 'planned',
+    startsAt: at('2026-10-19T14:00:00+02:00'),
+    endsAt: at('2026-10-19T14:25:00+02:00'),
+    startTime: '14:00',
+    endTime: '14:25',
+    plannedMinutes: 25,
+    elapsedMinutes: 0,
+    remainingSeconds: 1500,
+    checkinMinutes: 0,
+    checkinsDone: 0,
+    checkinsMax: 0,
+    checkinDue: false,
+    nextCheckinAt: null,
+    lastCheckinAt: null,
+    expectedMinor: 800,
+    payoutNowMinor: null,
+    closedAt: null,
+    closedOn: null,
+    paidMinutes: null,
+    paidCheckins: null,
+    awardedMinor: null,
+    capped: false,
+  },
+  todayMinutes: 50,
+  todaySessions: 1,
+  todayEarnedMinor: 2300,
+  maxMinutesPerDay: 480,
+};
+// KÖVETKEZŐ: "Vacsora Annával" at 19:30, reminder one hour before (18:30).
+const ma1NextEvent = {
+  eventId: 14,
+  date: MON,
+  title: 'Vacsora Annával',
+  location: 'Trattoria Toscana',
+  allDay: false,
+  startAt: at('2026-10-19T19:30:00+02:00'),
+  endAt: at('2026-10-19T21:30:00+02:00'),
+  startTime: '19:30',
+  endTime: '21:30',
+  recurring: false,
+  reminders: [60],
+  firstReminder: { minutesBefore: 60, at: at('2026-10-19T18:30:00+02:00'), time: '18:30' },
+};
 const ma1Tasks = {
   due: [
     task({ id: 11, title: 'Befizetni a villanyszámlát', priority: 3, dueOn: MON, dueTime: '17:00', value: 2000 }),
     task({ id: 12, title: 'Bevásárlás: zab, tojás, túró', priority: 2, dueOn: MON, dueTime: '19:00', value: 1000 }),
     task({ id: 13, title: 'Felhívni anyát', priority: 2, dueOn: MON, dueTime: '20:00', value: 1000, recurrence: { type: 'weekly', weekdayMask: 9 } }),
     task({ id: 14, title: 'Kiválogatni a téli ruhákat', priority: 1, dueOn: MON, value: 500 }),
+    task({ id: 951, title: 'Lift helyett lépcső egész nap', priority: 2, dueOn: MON, value: 1500, challengeId: 31 }),
   ],
   overdue: [],
   completedToday: [
@@ -175,7 +270,7 @@ const ma1Tasks = {
     task({ id: 16, title: 'Időpontot foglalni a fodrászhoz', priority: 1, dueOn: MON, value: 500, completedAt: at('2026-10-19T09:30:00+02:00') }),
   ],
   anytimeCount: 0,
-  openCount: 4,
+  openCount: 5,
 };
 const ma1 = {
   title: 'Ma — edzésnap (a keret)',
@@ -185,9 +280,12 @@ const ma1 = {
   height: 2248,
   clock: '2026-10-19T13:20:00+02:00',
   reach: 'fixture',
-  why: 'the frame day (Monday 19 October): no session running, the plan day "Felsőtest – húzás", 4 habits and 6 tasks of the README-ma seed. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best',
+  why: 'the frame day (Monday 19 October): no session running, the plan day "Felsőtest – húzás", 4 habits and 6 tasks of the README-ma seed, the picked daily challenge (NAPI DOBÁS, elvállalva), the planned focus block (FÓKUSZ, ma 50 perc) and the next event with its reminder (KÖVETKEZŐ) - the whole frame. GET /lifeos/today carries no habits / tasks on the running backend (no migration 032), so they are fixture keys: matched-fixture at best',
   fixtures: [
-    lifeos({ today: MON, balance: 190, xp: 2158, level: 4, floor: 1600, next: 2500, earned: 1000, due: true, done: false, habits: ma1Habits, tasks: ma1Tasks }),
+    lifeos({
+      today: MON, balance: 190, xp: 2158, level: 4, floor: 1600, next: 2500, earned: 1000, due: true, done: false,
+      habits: ma1Habits, tasks: ma1Tasks, challenge: ma1Challenge, focus: ma1Focus, nextEvent: ma1NextEvent,
+    }),
     planToday(MON, { name: 'Felsőtest – húzás', exercises: 5 }),
     noSession,
     nutrition(MON, 1240, 86),
@@ -198,6 +296,13 @@ const ma1 = {
 /* ── ma-2 · Tuesday 20 October 2026, 21:10: a rest day, everything done ──────────────────────── */
 
 const TUE = '2026-10-20';
+// The challenge picked and done on the rest day (+15 paid): NAPI DOBÁS says "teljesítve"; its task is not a FELADATOK row and does not count.
+const ma2Options = [
+  option(32, 'Hideg zuhany 2 percig', 'discipline', 15, true),
+  option(33, 'Olvass el 20 oldalt', 'mind', 15),
+  option(34, '10 000 lépés', 'movement', 25),
+];
+const ma2Challenge = pickedDraw(TUE, ma2Options, { challengeId: 32, taskId: 952, pickedAt: at('2026-10-20T08:00:00+02:00'), done: true, paidMinor: 1500 });
 const ma2 = {
   title: 'Ma — pihenőnap, minden kész',
   frame: 'lifeos/ma-2',
@@ -206,7 +311,7 @@ const ma2 = {
   height: 1748,
   clock: '2026-10-20T21:10:00+02:00',
   reach: 'fixture',
-  why: 'the rest day after ma-1: 3 good habits done, 2 bad habits clean, the 2 Tuesday tasks done, tomorrow "Alsótest – guggolás 18:00" from the week window. The daily challenge (Phase 4) is not on Ma yet, so "Ma eddig" lacks its +15 and the NAPI DOBÁS block is not drawn',
+  why: 'the rest day after ma-1: 3 good habits done, 2 bad habits clean, the 2 Tuesday tasks done, the picked challenge done (+15, so "Ma eddig +68"; NAPI DOBÁS "teljesítve"), tomorrow "Alsótest – guggolás 18:00" from the week window',
   fixtures: [
     lifeos({
       today: TUE,
@@ -231,10 +336,12 @@ const ma2 = {
         completedToday: [
           task({ id: 21, title: 'Feladni a csomagot a Foxpostnál', priority: 2, dueOn: TUE, value: 1000, completedAt: at('2026-10-20T12:40:00+02:00') }),
           task({ id: 22, title: 'Kivinni a szelektívet', priority: 1, dueOn: TUE, value: 500, recurrence: { type: 'weekly', weekdayMask: 2 }, completedAt: at('2026-10-20T19:05:00+02:00') }),
+          task({ id: 952, title: 'Hideg zuhany 2 percig', priority: 2, dueOn: TUE, value: 1500, challengeId: 32, completedAt: at('2026-10-20T08:30:00+02:00') }),
         ],
         anytimeCount: 0,
         openCount: 0,
       },
+      challenge: ma2Challenge,
     }),
     planToday(TUE, { name: 'Pihenőnap', rest: true }),
     noSession,
@@ -279,7 +386,7 @@ const ma3 = {
   height: 1470,
   clock: '2026-10-19T09:00:00+02:00',
   reach: 'fixture',
-  why: 'a brand-new member: 0 coins, level 0, only the onboarding plan\'s workout ("Teljes test – alap"); no habits, no tasks — the two empty sections. The frame\'s pay lines under the empty states quote the admin rules and are not drawn',
+  why: 'a brand-new member: 0 coins, level 0, only the onboarding plan\'s workout ("Teljes test – alap"); no habits, no tasks — the two empty sections, each with the pay line the frame draws under its link (from taskRules / dayRules)',
   fixtures: [
     lifeos({ today: MON, balance: 0, xp: 0, level: 0, floor: 0, next: 100, earned: 0, due: true, done: false, habits: [], tasks: { due: [], overdue: [], completedToday: [], anytimeCount: 0, openCount: 0 } }),
     planToday(MON, { name: 'Teljes test – alap', exercises: 6, plan: 'Kezdő terv – 1. hét' }),
@@ -292,6 +399,18 @@ const ma3 = {
 /* ── ma-4 · Wednesday 21 October 2026, 07:30: nothing done yet (the draw is Phase 4) ──────────── */
 
 const WED = '2026-10-21';
+const ma4Challenge = {
+  date: WED,
+  state: 'drawn',
+  poolCount: 8,
+  options: [
+    option(21, 'Hideg zuhany 2 percig', 'discipline', 15),
+    option(22, '30 fekvőtámasz a nap folyamán', 'movement', 15),
+    option(23, 'Egy óra képernyő nélkül', 'mind', 20),
+  ],
+  rerollsLeft: 1,
+  picked: null,
+};
 const ma4 = {
   title: 'Ma — szerda reggel, még semmi kész',
   frame: 'lifeos/ma-4',
@@ -300,7 +419,7 @@ const ma4 = {
   height: 1790,
   clock: '2026-10-21T07:30:00+02:00',
   reach: 'fixture',
-  why: 'the frame\'s day without its subject: the pending daily draw (NAPI DOBÁS above MAI EDZÉS) is Phase 4 and cannot be reached; every other block (hero 0/7, the Wednesday workout, 5 habits, 3 tasks) is drawn. Ma then continues with TÁPLÁLKOZÁS and the library row, which the frame crops',
+  why: 'the frame\'s day: the pending daily draw (NAPI DOBÁS above MAI EDZÉS, "Újradobás · 1"), hero 0/7, the Wednesday workout, 5 habits, 3 tasks. Ma then continues with TÁPLÁLKOZÁS and the library row, which the frame crops',
   fixtures: [
     lifeos({
       today: WED,
@@ -330,6 +449,7 @@ const ma4 = {
         anytimeCount: 0,
         openCount: 3,
       },
+      challenge: ma4Challenge,
     }),
     planToday(WED, { name: 'Alsótest – guggolás', exercises: 6 }),
     noSession,
@@ -379,13 +499,15 @@ const captureSheet = {
   height: 874,
   clock: ma3.clock,
   reach: 'fixture',
-  why: 'FELADATOK "+ Rögzítés" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: an empty TasksResponse, schema-checked like the rest',
+  why: 'FELADATOK "+ Rögzítés" opens the S-tasks capture sheet (frame lifeos/capture) over Ma (request R-S-ma-02, applied in the fix round). The sheet reads GET /tasks for the logical today: a started, empty TasksResponse with the task rules, schema-checked like the rest',
   fixtures: [
     ...ma3.fixtures,
     {
       method: 'GET',
       path: '/api/v1/tasks',
-      body: { started: false, today: MON, due: [], overdue: [], anytime: [], completedToday: [], upcoming: [], done: [], templates: [], openCount: 0 },
+      // started: true - the lifeos/today of the same state is started, and a real server never sends the pair
+      // "door + active pill" (review S-ma-fix 6); rulesVersion / taskRules arrive since B-lifeos-polish.
+      body: { started: true, today: MON, due: [], overdue: [], anytime: [], completedToday: [], upcoming: [], done: [], templates: [], openCount: 0, rulesVersion: 1, taskRules: TASK_RULES },
     },
   ],
   steps: [{ click: { role: 'button', name: { key: 'today.tasks.capture' } }, arrived: { role: 'dialog' } }],

@@ -1,0 +1,36 @@
+diff --git a/frontend/src/lib/lifeos-api.ts b/frontend/src/lib/lifeos-api.ts
+index 04aaccf..c4c0624 100644
+--- a/frontend/src/lib/lifeos-api.ts
++++ b/frontend/src/lib/lifeos-api.ts
+@@ -79,6 +79,22 @@ export interface TaskPointRules {
+   overdueMinor: number;
+ }
+ 
++/**
++ * The day's headline rules in force (S-lifeos-polish, additive): the figures Ma's lines quote -
++ * ma-2 "Tökéletes nap · +25 érme napzáráskor", ma-3 "+10 érme / nap · 7 nap után ×1,25". The admin
++ * rule set, in minor units (the streak step in days and basis points). Absent from a backend
++ * before this field: the lines are then left out, never printed from constants.
++ */
++export interface DayPointRules {
++  /** rules.habitSuccess: what a done habit day pays before any streak multiplier. */
++  habitMinor: number;
++  /** rules.streakTier1Days / streakTier1MultBp: the first streak step ("7 nap után ×1,25"). */
++  streakTier1Days: number;
++  streakTier1MultBp: number;
++  /** rules.perfectDay: the bonus a perfect day pays at the day close. */
++  perfectDayMinor: number;
++}
++
+ /** One day of the current Monday..Sunday week on the wallet. */
+ export interface WalletWeekDay {
+   date: DayKey;
+@@ -137,6 +153,8 @@ export interface LifeosToday {
+   rulesVersion: number;
+   /** B-lifeos-polish: the capture sheet's priority picker. */
+   taskRules: TaskPointRules;
++  /** S-lifeos-polish: the habit / perfect-day figures of Ma's lines; absent before the backend sends it. */
++  dayRules?: DayPointRules;
+   wallet: LifeosWallet;
+   workout: {
+     /** The CALENDAR date a workout started now is logged on (workout_logs.local_date). */

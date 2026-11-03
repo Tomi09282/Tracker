@@ -286,3 +286,18 @@ export function taskPointRules(rules) {
     overdueMinor: pointsToMinor(rules.taskOverdue),
   };
 }
+
+/**
+ * The day rules Ma's lines quote (frames ma-2 "Tökéletes nap · +25 érme napzáráskor" and ma-3 "+10 érme / nap ·
+ * 7 nap után ×1,25"): what a done habit day pays, the first streak step and the perfect-day bonus, from the admin
+ * rule set in force, in minor units. GET /lifeos/today carries it (S-lifeos-polish), so no client prints a number
+ * the admin can change.
+ */
+export function dayPointRules(rules) {
+  return {
+    habitMinor: pointsToMinor(rules.habitSuccess),
+    streakTier1Days: rules.streakTier1Days,
+    streakTier1MultBp: rules.streakTier1MultBp,
+    perfectDayMinor: pointsToMinor(rules.perfectDay),
+  };
+}

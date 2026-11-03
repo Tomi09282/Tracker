@@ -742,3 +742,35 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: `lifeos/focus-3` — no string is drawn at this place.
 - What the app does: the XP bar is the level progress of the wallet after the finish (readLevel of coins/statement.ts); the frame layer name "74 % to level 5 (+23 XP)" is not drawn as words
 - Status: open — a copy question; nothing was invented.
+
+## DEV-089 — S-lifeos-polish: Ma, the FÓKUSZ door when no block is planned
+
+- Source: `pkg/S-lifeos-polish/deviations.md` question 1 (review of S-focus)
+- Package: S-lifeos-polish
+- The frames show: `lifeos/ma-1` draws FÓKUSZ ("ma 50 perc", a planned block); `ma-2`, `ma-3` and `ma-4` do not draw the section.
+- What the app does: GET /lifeos/today always sends `focus`, so Ma always draws the FÓKUSZ door "Fókusz indítása"; without it /focus would have no door.
+- Status: open — owner: keep the door, or draw FÓKUSZ only once a block exists and put the door elsewhere.
+
+## DEV-090 — S-lifeos-polish: Fókusz, Befejezés before the end asks nothing
+
+- Source: `pkg/S-lifeos-polish/deviations.md` question 3 (S-focus review 7)
+- Package: S-lifeos-polish
+- The frames show: `lifeos/focus-2` — the docked Befejezés has no confirmation drawn (only Feladás has one).
+- What the app does: an early Befejezés finishes at once and pays the elapsed minutes only; it cannot be undone.
+- Status: open — owner: should an early Befejezés ask first?
+
+## DEV-091 — S-lifeos-polish: Ma, Nyújtás sub line wording
+
+- Source: `pkg/S-lifeos-polish/deviations.md` question 2
+- Package: S-lifeos-polish
+- The frames show: `lifeos/ma-1` "Emlékeztető 21:30"; `lifeos/ma-4` and `lifeos/habits-1` "Naponta · emlékeztető 21:30".
+- What the app does: one wording on both screens, the ma-4 / habits-1 form (habits.scheduleDaily + habits.reminderAt).
+- Status: open — the frames disagree; owner picks the wording.
+
+## DEV-092 — S-lifeos-polish: Haladás > Napok, the three states the frame does not draw
+
+- Source: `pkg/S-lifeos-polish/deviations.md` question 5 (S-progress-days review D6 / D8 / D9)
+- Package: S-lifeos-polish
+- The frames show: `lifeos/progress-days` — a settled user with a full week only.
+- What the app does: D6 a new user's page ends after four "0" rows (no sentence drawn); D8 today's column reads 0 for a habit-only day until the day close (GET /lifeos/stats carries no habits preview); D9 a lapsed day is drawn without a bar.
+- Status: open — owner (copy for D6, the server preview for D8, the look of D9).

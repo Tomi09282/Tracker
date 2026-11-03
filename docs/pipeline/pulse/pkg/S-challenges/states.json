@@ -1,2302 +1,2422 @@
 {
- "about": "S-challenges - MAI DOBÁS (/challenges), KIHÍVÁSOK (/challenges/pool), the challenge sheet and Ma's NAPI DOBÁS (design round B frames lifeos/challenges-1, challenges-2, ma-4; ma-1 / ma-2 for the picked teaser). Account M = user@tracker.local. Written by make-states.mjs (edit that file, not this one). The running dev backend has no migration 033: the challenge reads are contract bodies typed by lib/lifeos-api.ts (B-rewards-challenges' Phase-4 block), checked by fixture-schema-check.mjs; Ma's GET /lifeos/today is S-ma's edit list + the Phase-4 key challenge. Nothing is written live.",
- "states": {
-  "challenges-1": {
-   "title": "Mai dobás — a keret (szerda, október 21., egy lehetőség kiválasztva)",
-   "frame": "lifeos/challenges-1",
-   "account": "M",
-   "route": "/challenges?option=2",
-   "height": 874,
-   "clock": "2026-10-21T07:35:00+02:00",
-   "reach": "fixture",
-   "why": "the frame state: three options, \"10 perc nyújtás lefekvés előtt\" chosen (reached from Ma's NAPI DOBÁS, ?option=2), one reroll left, the pill. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "body": {
-      "started": true,
-      "draw": {
-       "date": "2026-10-21",
-       "state": "drawn",
-       "poolCount": 8,
-       "options": [
+  "about": "S-challenges - MAI DOBÁS (/challenges), KIHÍVÁSOK (/challenges/pool), the challenge sheet and Ma's NAPI DOBÁS (design round B frames lifeos/challenges-1, challenges-2, ma-4; ma-1 / ma-2 for the picked teaser). Account M = user@tracker.local. Written by make-states.mjs (edit that file, not this one). The running dev backend has no migration 033: the challenge reads are contract bodies typed by lib/lifeos-api.ts (B-rewards-challenges' Phase-4 block), checked by fixture-schema-check.mjs; Ma's GET /lifeos/today is S-ma's edit list + the Phase-4 key challenge. Nothing is written live.",
+  "states": {
+    "challenges-1": {
+      "title": "Mai dobás — a keret (szerda, október 21., egy lehetőség kiválasztva)",
+      "frame": "lifeos/challenges-1",
+      "account": "M",
+      "route": "/challenges?option=2",
+      "height": 874,
+      "clock": "2026-10-21T07:35:00+02:00",
+      "reach": "fixture",
+      "why": "the frame state: three options, \"10 perc nyújtás lefekvés előtt\" chosen (reached from Ma's NAPI DOBÁS, ?option=2), one reroll left, the pill. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
         {
-         "id": 1,
-         "name": "Hideg zuhany, 2 perc",
-         "category": "discipline",
-         "points": 20,
-         "weight": 3,
-         "valueMinor": 2000,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "body": {
+            "started": true,
+            "draw": {
+              "date": "2026-10-21",
+              "state": "drawn",
+              "poolCount": 8,
+              "options": [
+                {
+                  "id": 1,
+                  "name": "Hideg zuhany, 2 perc",
+                  "category": "discipline",
+                  "points": 20,
+                  "weight": 3,
+                  "valueMinor": 2000,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                },
+                {
+                  "id": 2,
+                  "name": "10 perc nyújtás lefekvés előtt",
+                  "category": "movement",
+                  "points": 15,
+                  "weight": 4,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                },
+                {
+                  "id": 3,
+                  "name": "Olvass el 20 oldalt",
+                  "category": "mind",
+                  "points": 15,
+                  "weight": 3,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                }
+              ],
+              "rerollsLeft": 1,
+              "picked": null
+            }
+          }
         },
         {
-         "id": 2,
-         "name": "10 perc nyújtás lefekvés előtt",
-         "category": "movement",
-         "points": 15,
-         "weight": 4,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
-        },
-        {
-         "id": 3,
-         "name": "Olvass el 20 oldalt",
-         "category": "mind",
-         "points": 15,
-         "weight": 3,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
+          "method": "GET",
+          "path": "/api/v1/challenges",
+          "body": {
+            "active": [
+              {
+                "id": 1,
+                "name": "Hideg zuhany, 2 perc",
+                "category": "discipline",
+                "points": 20,
+                "weight": 3,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 2,
+                "name": "10 perc nyújtás lefekvés előtt",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 3,
+                "name": "Olvass el 20 oldalt",
+                "category": "mind",
+                "points": 15,
+                "weight": 3,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 4,
+                "name": "10 000 lépés",
+                "category": "movement",
+                "points": 25,
+                "weight": 2,
+                "valueMinor": 2500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 5,
+                "name": "Nincs telefon vacsoránál",
+                "category": "discipline",
+                "points": 10,
+                "weight": 3,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 6,
+                "name": "Írj köszönő üzenetet valakinek",
+                "category": "connection",
+                "points": 10,
+                "weight": 2,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 7,
+                "name": "30 fekvőtámasz",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 8,
+                "name": "Főzz magadnak ebédet",
+                "category": "food",
+                "points": 20,
+                "weight": 1,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              }
+            ],
+            "archived": [
+              {
+                "id": 9,
+                "name": "Futás, 5 km",
+                "category": "movement",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1790960400
+              },
+              {
+                "id": 10,
+                "name": "10 perc meditáció",
+                "category": "mind",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1791525600
+              }
+            ],
+            "limits": {
+              "pool": 50
+            }
+          }
         }
-       ],
-       "rerollsLeft": 1,
-       "picked": null
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.noPick"
+        }
       }
-     }
     },
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges",
-     "body": {
-      "active": [
-       {
-        "id": 1,
-        "name": "Hideg zuhany, 2 perc",
-        "category": "discipline",
-        "points": 20,
-        "weight": 3,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 2,
-        "name": "10 perc nyújtás lefekvés előtt",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 3,
-        "name": "Olvass el 20 oldalt",
-        "category": "mind",
-        "points": 15,
-        "weight": 3,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 4,
-        "name": "10 000 lépés",
-        "category": "movement",
-        "points": 25,
-        "weight": 2,
-        "valueMinor": 2500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 5,
-        "name": "Nincs telefon vacsoránál",
-        "category": "discipline",
-        "points": 10,
-        "weight": 3,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 6,
-        "name": "Írj köszönő üzenetet valakinek",
-        "category": "connection",
-        "points": 10,
-        "weight": 2,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 7,
-        "name": "30 fekvőtámasz",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 8,
-        "name": "Főzz magadnak ebédet",
-        "category": "food",
-        "points": 20,
-        "weight": 1,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       }
-      ],
-      "archived": [
-       {
-        "id": 9,
-        "name": "Futás, 5 km",
-        "category": "movement",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1790960400
-       },
-       {
-        "id": 10,
-        "name": "10 perc meditáció",
-        "category": "mind",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1791525600
-       }
-      ],
-      "limits": {
-       "pool": 50
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.noPick"
-    }
-   }
-  },
-  "challenges-1-open": {
-   "title": "Mai dobás — még nincs választás",
-   "account": "M",
-   "route": "/challenges",
-   "height": 874,
-   "clock": "2026-10-21T07:35:00+02:00",
-   "reach": "fixture",
-   "why": "nothing chosen yet: every \"+N\" in text-2, the pill off. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "body": {
-      "started": true,
-      "draw": {
-       "date": "2026-10-21",
-       "state": "drawn",
-       "poolCount": 8,
-       "options": [
+    "challenges-1-open": {
+      "title": "Mai dobás — még nincs választás",
+      "account": "M",
+      "route": "/challenges",
+      "height": 874,
+      "clock": "2026-10-21T07:35:00+02:00",
+      "reach": "fixture",
+      "why": "nothing chosen yet: every \"+N\" in text-2, the pill off. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
         {
-         "id": 1,
-         "name": "Hideg zuhany, 2 perc",
-         "category": "discipline",
-         "points": 20,
-         "weight": 3,
-         "valueMinor": 2000,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
-        },
-        {
-         "id": 2,
-         "name": "10 perc nyújtás lefekvés előtt",
-         "category": "movement",
-         "points": 15,
-         "weight": 4,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
-        },
-        {
-         "id": 3,
-         "name": "Olvass el 20 oldalt",
-         "category": "mind",
-         "points": 15,
-         "weight": 3,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "body": {
+            "started": true,
+            "draw": {
+              "date": "2026-10-21",
+              "state": "drawn",
+              "poolCount": 8,
+              "options": [
+                {
+                  "id": 1,
+                  "name": "Hideg zuhany, 2 perc",
+                  "category": "discipline",
+                  "points": 20,
+                  "weight": 3,
+                  "valueMinor": 2000,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                },
+                {
+                  "id": 2,
+                  "name": "10 perc nyújtás lefekvés előtt",
+                  "category": "movement",
+                  "points": 15,
+                  "weight": 4,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                },
+                {
+                  "id": 3,
+                  "name": "Olvass el 20 oldalt",
+                  "category": "mind",
+                  "points": 15,
+                  "weight": 3,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                }
+              ],
+              "rerollsLeft": 1,
+              "picked": null
+            }
+          }
         }
-       ],
-       "rerollsLeft": 1,
-       "picked": null
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.noPick"
-    }
-   }
-  },
-  "challenges-1-picked": {
-   "title": "Mai dobás — elvállalva",
-   "account": "M",
-   "route": "/challenges",
-   "height": 874,
-   "clock": "2026-10-21T07:40:00+02:00",
-   "reach": "fixture",
-   "why": "after \"Ezt vállalom\": the chosen option ticked with \"elvállalva\", the others in text-3, no reroll, no pill. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "body": {
-      "started": true,
-      "draw": {
-       "date": "2026-10-21",
-       "state": "picked",
-       "poolCount": 8,
-       "options": [
-        {
-         "id": 1,
-         "name": "Hideg zuhany, 2 perc",
-         "category": "discipline",
-         "points": 20,
-         "weight": 3,
-         "valueMinor": 2000,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
-        },
-        {
-         "id": 2,
-         "name": "10 perc nyújtás lefekvés előtt",
-         "category": "movement",
-         "points": 15,
-         "weight": 4,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": true
-        },
-        {
-         "id": 3,
-         "name": "Olvass el 20 oldalt",
-         "category": "mind",
-         "points": 15,
-         "weight": 3,
-         "valueMinor": 1500,
-         "archived": false,
-         "archivedAt": null,
-         "chosen": false
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.noPick"
         }
-       ],
-       "rerollsLeft": 1,
-       "picked": {
-        "challengeId": 2,
-        "taskId": 950,
-        "pickedAt": 1792560960,
-        "done": false,
-        "taskDeleted": false
-       }
       }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.state.accepted"
-    }
-   }
-  },
-  "challenges-empty": {
-   "title": "Mai dobás — üres a kihívások listája",
-   "account": "M",
-   "route": "/challenges",
-   "height": 874,
-   "clock": "2026-10-21T07:35:00+02:00",
-   "reach": "fixture",
-   "why": "state empty_pool: the empty state leads to the pool. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "body": {
-      "started": true,
-      "draw": {
-       "date": "2026-10-21",
-       "state": "empty_pool",
-       "poolCount": 0,
-       "options": [],
-       "rerollsLeft": 1,
-       "picked": null
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.emptyTitle"
-    }
-   }
-  },
-  "challenges-no-zone": {
-   "title": "Mai dobás — nincs még időzóna",
-   "account": "M",
-   "route": "/challenges",
-   "height": 874,
-   "reach": "fixture",
-   "why": "draw null before the zone is set: the line leads to \"Nap és időzóna\". GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "body": {
-      "started": false,
-      "draw": null
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.noZone"
-    }
-   }
-  },
-  "challenges-failed": {
-   "title": "Mai dobás — a lekérés nem sikerült",
-   "account": "M",
-   "route": "/challenges",
-   "height": 874,
-   "reach": "fixture",
-   "why": "a failed read: the danger line with \"Újra\" (GET /challenges/today answered 500)",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges/today",
-     "status": 500,
-     "body": {
-      "error": "internal error",
-      "code": "internal",
-      "requestId": "fixture"
-     }
-    }
-   ],
-   "expect": {
-    "requests": [
-     {
-      "path": "/api/v1/challenges/today",
-      "status": 500
-     }
-    ],
-    "console": [
-     "500"
-    ]
-   },
-   "arrived": {
-    "role": "button",
-    "name": {
-     "key": "common.retry"
-    }
-   }
-  },
-  "challenges-2": {
-   "title": "Kihívások — a keret (8 / 50, két archivált)",
-   "frame": "lifeos/challenges-2",
-   "account": "M",
-   "route": "/challenges/pool",
-   "height": 1126,
-   "clock": "2026-10-21T07:40:00+02:00",
-   "reach": "fixture",
-   "why": "the frame state: eight live challenges with weight and coins, two archived. The frame's mid-swipe row (\"30 fekvőtámasz\" with Archiválás revealed) is not a state the kit row has (no swipe): it is drawn at rest. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges",
-     "body": {
-      "active": [
-       {
-        "id": 1,
-        "name": "Hideg zuhany, 2 perc",
-        "category": "discipline",
-        "points": 20,
-        "weight": 3,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 2,
-        "name": "10 perc nyújtás lefekvés előtt",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 3,
-        "name": "Olvass el 20 oldalt",
-        "category": "mind",
-        "points": 15,
-        "weight": 3,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 4,
-        "name": "10 000 lépés",
-        "category": "movement",
-        "points": 25,
-        "weight": 2,
-        "valueMinor": 2500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 5,
-        "name": "Nincs telefon vacsoránál",
-        "category": "discipline",
-        "points": 10,
-        "weight": 3,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 6,
-        "name": "Írj köszönő üzenetet valakinek",
-        "category": "connection",
-        "points": 10,
-        "weight": 2,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 7,
-        "name": "30 fekvőtámasz",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 8,
-        "name": "Főzz magadnak ebédet",
-        "category": "food",
-        "points": 20,
-        "weight": 1,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       }
-      ],
-      "archived": [
-       {
-        "id": 9,
-        "name": "Futás, 5 km",
-        "category": "movement",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1790960400
-       },
-       {
-        "id": 10,
-        "name": "10 perc meditáció",
-        "category": "mind",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1791525600
-       }
-      ],
-      "limits": {
-       "pool": 50
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.poolRule"
-    }
-   }
-  },
-  "challenges-pool-empty": {
-   "title": "Kihívások — még nincs kihívás",
-   "account": "M",
-   "route": "/challenges/pool",
-   "height": 874,
-   "reach": "fixture",
-   "why": "an empty pool: the empty state with \"+ Új kihívás\". GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges",
-     "body": {
-      "active": [],
-      "archived": [],
-      "limits": {
-       "pool": 50
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.emptyTitle"
-    }
-   }
-  },
-  "challenge-sheet-new": {
-   "title": "Új kihívás — a lap",
-   "account": "M",
-   "route": "/challenges/pool?new=1",
-   "height": 874,
-   "reach": "fixture",
-   "why": "the header plus opens the sheet (round B does not draw it: built from the kit as habit-form / task-form). GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges",
-     "body": {
-      "active": [
-       {
-        "id": 1,
-        "name": "Hideg zuhany, 2 perc",
-        "category": "discipline",
-        "points": 20,
-        "weight": 3,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 2,
-        "name": "10 perc nyújtás lefekvés előtt",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 3,
-        "name": "Olvass el 20 oldalt",
-        "category": "mind",
-        "points": 15,
-        "weight": 3,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 4,
-        "name": "10 000 lépés",
-        "category": "movement",
-        "points": 25,
-        "weight": 2,
-        "valueMinor": 2500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 5,
-        "name": "Nincs telefon vacsoránál",
-        "category": "discipline",
-        "points": 10,
-        "weight": 3,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 6,
-        "name": "Írj köszönő üzenetet valakinek",
-        "category": "connection",
-        "points": 10,
-        "weight": 2,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 7,
-        "name": "30 fekvőtámasz",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 8,
-        "name": "Főzz magadnak ebédet",
-        "category": "food",
-        "points": 20,
-        "weight": 1,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       }
-      ],
-      "archived": [
-       {
-        "id": 9,
-        "name": "Futás, 5 km",
-        "category": "movement",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1790960400
-       },
-       {
-        "id": 10,
-        "name": "10 perc meditáció",
-        "category": "mind",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1791525600
-       }
-      ],
-      "limits": {
-       "pool": 50
-      }
-     }
-    }
-   ],
-   "arrived": {
-    "role": "dialog"
-   }
-  },
-  "challenge-sheet-edit": {
-   "title": "Kihívás szerkesztése — Hideg zuhany, 2 perc",
-   "account": "M",
-   "route": "/challenges/pool",
-   "height": 874,
-   "reach": "fixture",
-   "why": "a row opens the same sheet in edit mode: Mentés, Archiválás, Törlés. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/challenges",
-     "body": {
-      "active": [
-       {
-        "id": 1,
-        "name": "Hideg zuhany, 2 perc",
-        "category": "discipline",
-        "points": 20,
-        "weight": 3,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 2,
-        "name": "10 perc nyújtás lefekvés előtt",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 3,
-        "name": "Olvass el 20 oldalt",
-        "category": "mind",
-        "points": 15,
-        "weight": 3,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 4,
-        "name": "10 000 lépés",
-        "category": "movement",
-        "points": 25,
-        "weight": 2,
-        "valueMinor": 2500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 5,
-        "name": "Nincs telefon vacsoránál",
-        "category": "discipline",
-        "points": 10,
-        "weight": 3,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 6,
-        "name": "Írj köszönő üzenetet valakinek",
-        "category": "connection",
-        "points": 10,
-        "weight": 2,
-        "valueMinor": 1000,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 7,
-        "name": "30 fekvőtámasz",
-        "category": "movement",
-        "points": 15,
-        "weight": 4,
-        "valueMinor": 1500,
-        "archived": false,
-        "archivedAt": null
-       },
-       {
-        "id": 8,
-        "name": "Főzz magadnak ebédet",
-        "category": "food",
-        "points": 20,
-        "weight": 1,
-        "valueMinor": 2000,
-        "archived": false,
-        "archivedAt": null
-       }
-      ],
-      "archived": [
-       {
-        "id": 9,
-        "name": "Futás, 5 km",
-        "category": "movement",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1790960400
-       },
-       {
-        "id": 10,
-        "name": "10 perc meditáció",
-        "category": "mind",
-        "points": 15,
-        "weight": 2,
-        "valueMinor": 1500,
-        "archived": true,
-        "archivedAt": 1791525600
-       }
-      ],
-      "limits": {
-       "pool": 50
-      }
-     }
-    }
-   ],
-   "steps": [
-    {
-     "click": {
-      "role": "button",
-      "name": {
-       "re": "^Hideg zuhany, 2 perc"
-      }
-     },
-     "arrived": {
-      "role": "dialog"
-     }
-    }
-   ],
-   "arrived": {
-    "role": "dialog"
-   }
-  },
-  "ma-4-draw": {
-   "title": "Ma — szerda reggel, a napi dobás vár",
-   "frame": "lifeos/ma-4",
-   "account": "M",
-   "route": "/",
-   "height": 1790,
-   "clock": "2026-10-21T07:30:00+02:00",
-   "reach": "fixture",
-   "why": "ma-4's subject: NAPI DOBÁS above MAI EDZÉS with three options and \"Újradobás · 1\". S-ma's ma-4 edit list + the Phase-4 key challenge (add) -> matched-fixture. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/lifeos/today",
-     "edits": [
-      {
-       "pointer": "/started",
-       "value": true
-      },
-      {
-       "pointer": "/startedOn",
-       "value": "2026-08-03"
-      },
-      {
-       "pointer": "/today",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/settledThrough",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/wallet/balanceMinor",
-       "value": 36200
-      },
-      {
-       "pointer": "/wallet/spendableMinor",
-       "value": 36200
-      },
-      {
-       "pointer": "/wallet/xp",
-       "value": 2356
-      },
-      {
-       "pointer": "/wallet/level",
-       "value": 4
-      },
-      {
-       "pointer": "/wallet/bounds/levelFloorXp",
-       "value": 1600
-      },
-      {
-       "pointer": "/wallet/bounds/nextLevelXp",
-       "value": 2500
-      },
-      {
-       "pointer": "/wallet/today",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/wallet/todayEarnedMinor",
-       "value": 0
-      },
-      {
-       "pointer": "/workout/date",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/workout/due",
-       "value": true
-      },
-      {
-       "pointer": "/workout/done",
-       "value": false
-      },
-      {
-       "pointer": "/habits",
-       "value": [
+    },
+    "challenges-1-picked": {
+      "title": "Mai dobás — elvállalva",
+      "account": "M",
+      "route": "/challenges",
+      "height": 874,
+      "clock": "2026-10-21T07:40:00+02:00",
+      "reach": "fixture",
+      "why": "after \"Ezt vállalom\": the chosen option ticked with \"elvállalva\", the others in text-3, no reroll, no pill. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
         {
-         "id": 1,
-         "name": "Olvasás 20 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 1,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 15,
-          "best": 15,
-          "freezes": 0,
-          "multiplierBp": 12500,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1300
-        },
-        {
-         "id": 2,
-         "name": "Víz",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 8,
-         "unit": "pohár",
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 2,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-21",
-          "count": 1,
-          "status": "pending",
-          "doneAt": null
-         },
-         "streak": {
-          "current": 10,
-          "best": 10,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1000
-        },
-        {
-         "id": 3,
-         "name": "Nyújtás 10 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": "21:30",
-         "sortOrder": 3,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 33,
-          "best": 45,
-          "freezes": 1,
-          "multiplierBp": 15000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
-        },
-        {
-         "id": 5,
-         "name": "Dohányzás",
-         "kind": "bad",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 15,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 5,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 14,
-          "best": 14,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
-        },
-        {
-         "id": 6,
-         "name": "Esti nassolás",
-         "kind": "bad",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 15,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 6,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 2,
-          "best": 2,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "body": {
+            "started": true,
+            "draw": {
+              "date": "2026-10-21",
+              "state": "picked",
+              "poolCount": 8,
+              "options": [
+                {
+                  "id": 1,
+                  "name": "Hideg zuhany, 2 perc",
+                  "category": "discipline",
+                  "points": 20,
+                  "weight": 3,
+                  "valueMinor": 2000,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                },
+                {
+                  "id": 2,
+                  "name": "10 perc nyújtás lefekvés előtt",
+                  "category": "movement",
+                  "points": 15,
+                  "weight": 4,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": true
+                },
+                {
+                  "id": 3,
+                  "name": "Olvass el 20 oldalt",
+                  "category": "mind",
+                  "points": 15,
+                  "weight": 3,
+                  "valueMinor": 1500,
+                  "archived": false,
+                  "archivedAt": null,
+                  "chosen": false
+                }
+              ],
+              "rerollsLeft": 1,
+              "picked": {
+                "challengeId": 2,
+                "taskId": 950,
+                "pickedAt": 1792560960,
+                "done": false,
+                "taskDeleted": false,
+                "title": "10 perc nyújtás lefekvés előtt",
+                "valueMinor": 1500,
+                "paidMinor": null
+              }
+            }
+          }
         }
-       ],
-       "add": true
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.state.accepted"
+        }
+      }
+    },
+    "challenges-empty": {
+      "title": "Mai dobás — üres a kihívások listája",
+      "account": "M",
+      "route": "/challenges",
+      "height": 874,
+      "clock": "2026-10-21T07:35:00+02:00",
+      "reach": "fixture",
+      "why": "state empty_pool: the empty state leads to the pool. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "body": {
+            "started": true,
+            "draw": {
+              "date": "2026-10-21",
+              "state": "empty_pool",
+              "poolCount": 0,
+              "options": [],
+              "rerollsLeft": 1,
+              "picked": null
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.emptyTitle"
+        }
+      }
+    },
+    "challenges-no-zone": {
+      "title": "Mai dobás — nincs még időzóna",
+      "account": "M",
+      "route": "/challenges",
+      "height": 874,
+      "reach": "fixture",
+      "why": "draw null before the zone is set: the line leads to \"Nap és időzóna\". GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "body": {
+            "started": false,
+            "draw": null
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.noZone"
+        }
+      }
+    },
+    "challenges-failed": {
+      "title": "Mai dobás — a lekérés nem sikerült",
+      "account": "M",
+      "route": "/challenges",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a failed read: the danger line with \"Újra\" (GET /challenges/today answered 500)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges/today",
+          "status": 500,
+          "body": {
+            "error": "internal error",
+            "code": "internal",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/challenges/today",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
       },
-      {
-       "pointer": "/tasks",
-       "value": {
-        "due": [
-         {
-          "id": 31,
-          "title": "Elküldeni a heti riportot",
-          "notes": null,
-          "priority": 3,
-          "points": null,
-          "dueOn": "2026-10-21",
-          "dueTime": "12:00",
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 2000,
-          "lateNow": false,
-          "payoutNowMinor": 2000,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 32,
-          "title": "Felhívni a szerelőt a kazán miatt",
-          "notes": null,
-          "priority": 2,
-          "points": null,
-          "dueOn": "2026-10-21",
-          "dueTime": "16:00",
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 1000,
-          "lateNow": false,
-          "payoutNowMinor": 1000,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 33,
-          "title": "Megöntözni a növényeket",
-          "notes": null,
-          "priority": 1,
-          "points": null,
-          "dueOn": "2026-10-21",
-          "dueTime": null,
-          "recurrence": {
-           "type": "weekly",
-           "weekdayMask": 4
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "challenges-2": {
+      "title": "Kihívások — a keret (8 / 50, két archivált)",
+      "frame": "lifeos/challenges-2",
+      "account": "M",
+      "route": "/challenges/pool",
+      "height": 1126,
+      "clock": "2026-10-21T07:40:00+02:00",
+      "reach": "fixture",
+      "why": "the frame state: eight live challenges with weight and coins, two archived. The frame's mid-swipe row (\"30 fekvőtámasz\" with Archiválás revealed) is not a state the kit row has (no swipe): it is drawn at rest. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges",
+          "body": {
+            "active": [
+              {
+                "id": 1,
+                "name": "Hideg zuhany, 2 perc",
+                "category": "discipline",
+                "points": 20,
+                "weight": 3,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 2,
+                "name": "10 perc nyújtás lefekvés előtt",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 3,
+                "name": "Olvass el 20 oldalt",
+                "category": "mind",
+                "points": 15,
+                "weight": 3,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 4,
+                "name": "10 000 lépés",
+                "category": "movement",
+                "points": 25,
+                "weight": 2,
+                "valueMinor": 2500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 5,
+                "name": "Nincs telefon vacsoránál",
+                "category": "discipline",
+                "points": 10,
+                "weight": 3,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 6,
+                "name": "Írj köszönő üzenetet valakinek",
+                "category": "connection",
+                "points": 10,
+                "weight": 2,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 7,
+                "name": "30 fekvőtámasz",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 8,
+                "name": "Főzz magadnak ebédet",
+                "category": "food",
+                "points": 20,
+                "weight": 1,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              }
+            ],
+            "archived": [
+              {
+                "id": 9,
+                "name": "Futás, 5 km",
+                "category": "movement",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1790960400
+              },
+              {
+                "id": 10,
+                "name": "10 perc meditáció",
+                "category": "mind",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1791525600
+              }
+            ],
+            "limits": {
+              "pool": 50
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.poolRule"
+        }
+      }
+    },
+    "challenges-pool-empty": {
+      "title": "Kihívások — még nincs kihívás",
+      "account": "M",
+      "route": "/challenges/pool",
+      "height": 874,
+      "reach": "fixture",
+      "why": "an empty pool: the empty state with \"+ Új kihívás\". GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges",
+          "body": {
+            "active": [],
+            "archived": [],
+            "limits": {
+              "pool": 50
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.emptyTitle"
+        }
+      }
+    },
+    "challenge-sheet-new": {
+      "title": "Új kihívás — a lap",
+      "account": "M",
+      "route": "/challenges/pool?new=1",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the header plus opens the sheet (round B does not draw it: built from the kit as habit-form / task-form). GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges",
+          "body": {
+            "active": [
+              {
+                "id": 1,
+                "name": "Hideg zuhany, 2 perc",
+                "category": "discipline",
+                "points": 20,
+                "weight": 3,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 2,
+                "name": "10 perc nyújtás lefekvés előtt",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 3,
+                "name": "Olvass el 20 oldalt",
+                "category": "mind",
+                "points": 15,
+                "weight": 3,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 4,
+                "name": "10 000 lépés",
+                "category": "movement",
+                "points": 25,
+                "weight": 2,
+                "valueMinor": 2500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 5,
+                "name": "Nincs telefon vacsoránál",
+                "category": "discipline",
+                "points": 10,
+                "weight": 3,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 6,
+                "name": "Írj köszönő üzenetet valakinek",
+                "category": "connection",
+                "points": 10,
+                "weight": 2,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 7,
+                "name": "30 fekvőtámasz",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 8,
+                "name": "Főzz magadnak ebédet",
+                "category": "food",
+                "points": 20,
+                "weight": 1,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              }
+            ],
+            "archived": [
+              {
+                "id": 9,
+                "name": "Futás, 5 km",
+                "category": "movement",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1790960400
+              },
+              {
+                "id": 10,
+                "name": "10 perc meditáció",
+                "category": "mind",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1791525600
+              }
+            ],
+            "limits": {
+              "pool": 50
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "challenge-sheet-edit": {
+      "title": "Kihívás szerkesztése — Hideg zuhany, 2 perc",
+      "account": "M",
+      "route": "/challenges/pool",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a row opens the same sheet in edit mode: Mentés, Archiválás, Törlés. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/challenges",
+          "body": {
+            "active": [
+              {
+                "id": 1,
+                "name": "Hideg zuhany, 2 perc",
+                "category": "discipline",
+                "points": 20,
+                "weight": 3,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 2,
+                "name": "10 perc nyújtás lefekvés előtt",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 3,
+                "name": "Olvass el 20 oldalt",
+                "category": "mind",
+                "points": 15,
+                "weight": 3,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 4,
+                "name": "10 000 lépés",
+                "category": "movement",
+                "points": 25,
+                "weight": 2,
+                "valueMinor": 2500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 5,
+                "name": "Nincs telefon vacsoránál",
+                "category": "discipline",
+                "points": 10,
+                "weight": 3,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 6,
+                "name": "Írj köszönő üzenetet valakinek",
+                "category": "connection",
+                "points": 10,
+                "weight": 2,
+                "valueMinor": 1000,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 7,
+                "name": "30 fekvőtámasz",
+                "category": "movement",
+                "points": 15,
+                "weight": 4,
+                "valueMinor": 1500,
+                "archived": false,
+                "archivedAt": null
+              },
+              {
+                "id": 8,
+                "name": "Főzz magadnak ebédet",
+                "category": "food",
+                "points": 20,
+                "weight": 1,
+                "valueMinor": 2000,
+                "archived": false,
+                "archivedAt": null
+              }
+            ],
+            "archived": [
+              {
+                "id": 9,
+                "name": "Futás, 5 km",
+                "category": "movement",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1790960400
+              },
+              {
+                "id": 10,
+                "name": "10 perc meditáció",
+                "category": "mind",
+                "points": 15,
+                "weight": 2,
+                "valueMinor": 1500,
+                "archived": true,
+                "archivedAt": 1791525600
+              }
+            ],
+            "limits": {
+              "pool": 50
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Hideg zuhany, 2 perc"
+            }
           },
-          "isTemplate": false,
-          "parentTaskId": 133,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 500,
-          "lateNow": false,
-          "payoutNowMinor": 500,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         }
-        ],
-        "overdue": [],
-        "completedToday": [],
-        "anytimeCount": 0,
-        "openCount": 3
-       },
-       "add": true
-      },
-      {
-       "pointer": "/challenge",
-       "value": {
-        "date": "2026-10-21",
-        "state": "drawn",
-        "poolCount": 8,
-        "options": [
-         {
-          "id": 21,
-          "name": "Hideg zuhany 2 percig",
-          "category": "discipline",
-          "points": 15,
-          "weight": 2,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         },
-         {
-          "id": 22,
-          "name": "30 fekvőtámasz a nap folyamán",
-          "category": "movement",
-          "points": 15,
-          "weight": 2,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         },
-         {
-          "id": 23,
-          "name": "Egy óra képernyő nélkül",
-          "category": "mind",
-          "points": 20,
-          "weight": 2,
-          "valueMinor": 2000,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         }
-        ],
-        "rerollsLeft": 1,
-        "picked": null
-       },
-       "add": true
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/my-plans/today",
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/days/0/date",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/days/0/day_name",
-       "value": "Alsótest – guggolás"
-      },
-      {
-       "pointer": "/days/0/is_rest",
-       "value": 0
-      },
-      {
-       "pointer": "/days/0/est_minutes",
-       "value": 65
-      },
-      {
-       "pointer": "/days/0/start_time",
-       "value": "18:00"
-      },
-      {
-       "pointer": "/days/0/exercise_count",
-       "value": 6
-      },
-      {
-       "pointer": "/days/0/log_id",
-       "value": null
-      },
-      {
-       "pointer": "/days/0/log_status",
-       "value": null
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/workouts/current",
-     "edits": [
-      {
-       "pointer": "/log",
-       "value": null
-      },
-      {
-       "pointer": "/exercises",
-       "value": []
-      },
-      {
-       "pointer": "/sets",
-       "value": []
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/nutrition-log/2026-10-21",
-     "from": {
-      "path": "/api/v1/nutrition-log/2026-10-15"
-     },
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/totals/kcal",
-       "value": 0
-      },
-      {
-       "pointer": "/totals/protein_g",
-       "value": 0
-      },
-      {
-       "pointer": "/targets/kcal_target",
-       "value": 2600
-      },
-      {
-       "pointer": "/targets/protein_g_target",
-       "value": 180
-      }
-     ]
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.today.hint"
-    }
-   }
-  },
-  "ma-1-picked": {
-   "title": "Ma — edzésnap, a napi kihívás elvállalva",
-   "frame": "lifeos/ma-1",
-   "account": "M",
-   "route": "/",
-   "height": 2248,
-   "clock": "2026-10-19T13:20:00+02:00",
-   "reach": "fixture",
-   "why": "ma-1's NAPI DOBÁS teaser: \"Lift helyett lépcső egész nap\", \"Mai kihívás · +15 érme\", ELVÁLLALVA, after FELADATOK (FÓKUSZ and KÖVETKEZŐ are later phases). S-ma's ma-1 edit list + challenge (add) + the picked task -> matched-fixture",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/lifeos/today",
-     "edits": [
-      {
-       "pointer": "/started",
-       "value": true
-      },
-      {
-       "pointer": "/startedOn",
-       "value": "2026-08-03"
-      },
-      {
-       "pointer": "/today",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/settledThrough",
-       "value": "2026-10-18"
-      },
-      {
-       "pointer": "/wallet/balanceMinor",
-       "value": 19000
-      },
-      {
-       "pointer": "/wallet/spendableMinor",
-       "value": 19000
-      },
-      {
-       "pointer": "/wallet/xp",
-       "value": 2158
-      },
-      {
-       "pointer": "/wallet/level",
-       "value": 4
-      },
-      {
-       "pointer": "/wallet/bounds/levelFloorXp",
-       "value": 1600
-      },
-      {
-       "pointer": "/wallet/bounds/nextLevelXp",
-       "value": 2500
-      },
-      {
-       "pointer": "/wallet/today",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/wallet/todayEarnedMinor",
-       "value": 1000
-      },
-      {
-       "pointer": "/workout/date",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/workout/due",
-       "value": true
-      },
-      {
-       "pointer": "/workout/done",
-       "value": false
-      },
-      {
-       "pointer": "/habits",
-       "value": [
-        {
-         "id": 1,
-         "name": "Olvasás 20 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 1,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-19",
-          "count": 1,
-          "status": "done",
-          "doneAt": 1792388400
-         },
-         "streak": {
-          "current": 14,
-          "best": 14,
-          "freezes": 0,
-          "multiplierBp": 12500,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 1300,
-         "fullMinor": 1300
-        },
-        {
-         "id": 2,
-         "name": "Víz",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 8,
-         "unit": "pohár",
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 2,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-19",
-          "count": 5,
-          "status": "pending",
-          "doneAt": null
-         },
-         "streak": {
-          "current": 9,
-          "best": 9,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 500,
-         "fullMinor": 1000
-        },
-        {
-         "id": 3,
-         "name": "Nyújtás 10 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": "21:30",
-         "sortOrder": 3,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 31,
-          "best": 45,
-          "freezes": 1,
-          "multiplierBp": 15000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
-        },
-        {
-         "id": 6,
-         "name": "Esti nassolás",
-         "kind": "bad",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 15,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 6,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-19",
-          "count": 1,
-          "status": "relapse",
-          "doneAt": null
-         },
-         "streak": {
-          "current": 4,
-          "best": 4,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": -1000,
-         "fullMinor": 1500
+          "arrived": {
+            "role": "dialog"
+          }
         }
-       ],
-       "add": true
-      },
-      {
-       "pointer": "/tasks",
-       "value": {
-        "due": [
-         {
-          "id": 11,
-          "title": "Befizetni a villanyszámlát",
-          "notes": null,
-          "priority": 3,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": "17:00",
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 2000,
-          "lateNow": false,
-          "payoutNowMinor": 2000,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 12,
-          "title": "Bevásárlás: zab, tojás, túró",
-          "notes": null,
-          "priority": 2,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": "19:00",
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 1000,
-          "lateNow": false,
-          "payoutNowMinor": 1000,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 13,
-          "title": "Felhívni anyát",
-          "notes": null,
-          "priority": 2,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": "20:00",
-          "recurrence": {
-           "type": "weekly",
-           "weekdayMask": 9
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "ma-4-draw": {
+      "title": "Ma — szerda reggel, a napi dobás vár",
+      "frame": "lifeos/ma-4",
+      "account": "M",
+      "route": "/",
+      "height": 1790,
+      "clock": "2026-10-21T07:30:00+02:00",
+      "reach": "fixture",
+      "why": "ma-4's subject: NAPI DOBÁS above MAI EDZÉS with three options and \"Újradobás · 1\". S-ma's ma-4 edit list + the Phase-4 key challenge (add) -> matched-fixture. GET /challenges* is answered by a contract body (the running dev backend has no migration 033 yet) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 36200
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 36200
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2356
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 0
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 15,
+                    "best": 15,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-21",
+                    "count": 1,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 10,
+                    "best": 10,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 33,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 5,
+                  "name": "Dohányzás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 5,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 2,
+                    "best": 2,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 31,
+                    "title": "Elküldeni a heti riportot",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": "12:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 32,
+                    "title": "Felhívni a szerelőt a kazán miatt",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": "16:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 33,
+                    "title": "Megöntözni a növényeket",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-21",
+                    "dueTime": null,
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 4
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 133,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [],
+                "anytimeCount": 0,
+                "openCount": 3
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-21",
+                "state": "drawn",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 21,
+                    "name": "Hideg zuhany 2 percig",
+                    "category": "discipline",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 22,
+                    "name": "30 fekvőtámasz a nap folyamán",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 23,
+                    "name": "Egy óra képernyő nélkül",
+                    "category": "mind",
+                    "points": 20,
+                    "weight": 2,
+                    "valueMinor": 2000,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": null
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Alsótest – guggolás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 6
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-21",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
           },
-          "isTemplate": false,
-          "parentTaskId": 113,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 1000,
-          "lateNow": false,
-          "payoutNowMinor": 1000,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 14,
-          "title": "Kiválogatni a téli ruhákat",
-          "notes": null,
-          "priority": 1,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 500,
-          "lateNow": false,
-          "payoutNowMinor": 500,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 951,
-          "title": "Lift helyett lépcső egész nap",
-          "notes": null,
-          "priority": 2,
-          "points": 15,
-          "dueOn": "2026-10-19",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": null,
-          "completedOn": null,
-          "overdueOn": null,
-          "valueMinor": 1500,
-          "lateNow": false,
-          "payoutNowMinor": 1500,
-          "paidMinor": null,
-          "overduePenaltyMinor": null,
-          "challengeId": 31
-         }
-        ],
-        "overdue": [],
-        "completedToday": [
-         {
-          "id": 15,
-          "title": "Kivinni a szemetet",
-          "notes": null,
-          "priority": 1,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": 1792390200,
-          "completedOn": "2026-10-19",
-          "overdueOn": null,
-          "valueMinor": 500,
-          "lateNow": false,
-          "payoutNowMinor": null,
-          "paidMinor": 500,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 16,
-          "title": "Időpontot foglalni a fodrászhoz",
-          "notes": null,
-          "priority": 1,
-          "points": null,
-          "dueOn": "2026-10-19",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": 1792395000,
-          "completedOn": "2026-10-19",
-          "overdueOn": null,
-          "valueMinor": 500,
-          "lateNow": false,
-          "payoutNowMinor": null,
-          "paidMinor": 500,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         }
-        ],
-        "anytimeCount": 0,
-        "openCount": 4
-       },
-       "add": true
-      },
-      {
-       "pointer": "/challenge",
-       "value": {
-        "date": "2026-10-19",
-        "state": "picked",
-        "poolCount": 8,
-        "options": [
-         {
-          "id": 31,
-          "name": "Lift helyett lépcső egész nap",
-          "category": "movement",
-          "points": 15,
-          "weight": 2,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": true
-         },
-         {
-          "id": 33,
-          "name": "Olvass el 20 oldalt",
-          "category": "mind",
-          "points": 15,
-          "weight": 3,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         },
-         {
-          "id": 34,
-          "name": "10 000 lépés",
-          "category": "movement",
-          "points": 25,
-          "weight": 2,
-          "valueMinor": 2500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         }
-        ],
-        "rerollsLeft": 1,
-        "picked": {
-         "challengeId": 31,
-         "taskId": 951,
-         "pickedAt": 1792388400,
-         "done": false,
-         "taskDeleted": false
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
         }
-       },
-       "add": true
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/my-plans/today",
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/days/0/date",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/days/0/day_name",
-       "value": "Felsőtest – húzás"
-      },
-      {
-       "pointer": "/days/0/is_rest",
-       "value": 0
-      },
-      {
-       "pointer": "/days/0/est_minutes",
-       "value": 65
-      },
-      {
-       "pointer": "/days/0/start_time",
-       "value": "18:00"
-      },
-      {
-       "pointer": "/days/0/exercise_count",
-       "value": 5
-      },
-      {
-       "pointer": "/days/0/log_id",
-       "value": null
-      },
-      {
-       "pointer": "/days/0/log_status",
-       "value": null
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/workouts/current",
-     "edits": [
-      {
-       "pointer": "/log",
-       "value": null
-      },
-      {
-       "pointer": "/exercises",
-       "value": []
-      },
-      {
-       "pointer": "/sets",
-       "value": []
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/nutrition-log/2026-10-19",
-     "from": {
-      "path": "/api/v1/nutrition-log/2026-10-15"
-     },
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/totals/kcal",
-       "value": 1240
-      },
-      {
-       "pointer": "/totals/protein_g",
-       "value": 86
-      },
-      {
-       "pointer": "/targets/kcal_target",
-       "value": 2600
-      },
-      {
-       "pointer": "/targets/protein_g_target",
-       "value": 180
-      }
-     ]
-    }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.state.accepted"
-    }
-   }
-  },
-  "ma-2-done": {
-   "title": "Ma — pihenőnap, a napi kihívás teljesítve",
-   "frame": "lifeos/ma-2",
-   "account": "M",
-   "route": "/",
-   "height": 1748,
-   "clock": "2026-10-20T21:10:00+02:00",
-   "reach": "fixture",
-   "why": "ma-2's challenge ticked (\"teljesítve\"), and \"Ma eddig\" now carries its +15 (+68 as drawn). S-ma's ma-2 edit list + challenge (add) + the completed task -> matched-fixture",
-   "fixtures": [
-    {
-     "method": "GET",
-     "path": "/api/v1/lifeos/today",
-     "edits": [
-      {
-       "pointer": "/started",
-       "value": true
-      },
-      {
-       "pointer": "/startedOn",
-       "value": "2026-08-03"
-      },
-      {
-       "pointer": "/today",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/settledThrough",
-       "value": "2026-10-19"
-      },
-      {
-       "pointer": "/wallet/balanceMinor",
-       "value": 24500
-      },
-      {
-       "pointer": "/wallet/spendableMinor",
-       "value": 24500
-      },
-      {
-       "pointer": "/wallet/xp",
-       "value": 2239
-      },
-      {
-       "pointer": "/wallet/level",
-       "value": 4
-      },
-      {
-       "pointer": "/wallet/bounds/levelFloorXp",
-       "value": 1600
-      },
-      {
-       "pointer": "/wallet/bounds/nextLevelXp",
-       "value": 2500
-      },
-      {
-       "pointer": "/wallet/today",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/wallet/todayEarnedMinor",
-       "value": 1500
-      },
-      {
-       "pointer": "/workout/date",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/workout/due",
-       "value": false
-      },
-      {
-       "pointer": "/workout/done",
-       "value": false
-      },
-      {
-       "pointer": "/habits",
-       "value": [
-        {
-         "id": 1,
-         "name": "Olvasás 20 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 1,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-20",
-          "count": 1,
-          "status": "done",
-          "doneAt": 1792474500
-         },
-         "streak": {
-          "current": 15,
-          "best": 15,
-          "freezes": 0,
-          "multiplierBp": 12500,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 1300,
-         "fullMinor": 1300
-        },
-        {
-         "id": 2,
-         "name": "Víz",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 8,
-         "unit": "pohár",
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 2,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-20",
-          "count": 8,
-          "status": "done",
-          "doneAt": 1792518000
-         },
-         "streak": {
-          "current": 10,
-          "best": 10,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 1000,
-         "fullMinor": 1000
-        },
-        {
-         "id": 3,
-         "name": "Nyújtás 10 perc",
-         "kind": "good",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 10,
-         "pointsPenalty": 5,
-         "reminderTime": "21:30",
-         "sortOrder": 3,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": {
-          "date": "2026-10-20",
-          "count": 1,
-          "status": "done",
-          "doneAt": 1792523100
-         },
-         "streak": {
-          "current": 33,
-          "best": 45,
-          "freezes": 1,
-          "multiplierBp": 15000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 1500,
-         "fullMinor": 1500
-        },
-        {
-         "id": 5,
-         "name": "Dohányzás",
-         "kind": "bad",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 15,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 5,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 13,
-          "best": 13,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
-        },
-        {
-         "id": 6,
-         "name": "Esti nassolás",
-         "kind": "bad",
-         "scheduleType": "daily",
-         "weekdayMask": 127,
-         "timesPerWeek": null,
-         "targetCount": 1,
-         "unit": null,
-         "pointsSuccess": 15,
-         "pointsPenalty": 5,
-         "reminderTime": null,
-         "sortOrder": 6,
-         "startedOn": "2026-08-03",
-         "archived": false,
-         "scheduledToday": true,
-         "log": null,
-         "streak": {
-          "current": 1,
-          "best": 1,
-          "freezes": 0,
-          "multiplierBp": 10000,
-          "weekStreak": null
-         },
-         "weekDone": null,
-         "previewMinor": 0,
-         "fullMinor": 1500
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.today.hint"
         }
-       ],
-       "add": true
-      },
-      {
-       "pointer": "/tasks",
-       "value": {
-        "due": [],
-        "overdue": [],
-        "completedToday": [
-         {
-          "id": 21,
-          "title": "Feladni a csomagot a Foxpostnál",
-          "notes": null,
-          "priority": 2,
-          "points": null,
-          "dueOn": "2026-10-20",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": 1792492800,
-          "completedOn": "2026-10-20",
-          "overdueOn": null,
-          "valueMinor": 1000,
-          "lateNow": false,
-          "payoutNowMinor": null,
-          "paidMinor": 1000,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 22,
-          "title": "Kivinni a szelektívet",
-          "notes": null,
-          "priority": 1,
-          "points": null,
-          "dueOn": "2026-10-20",
-          "dueTime": null,
-          "recurrence": {
-           "type": "weekly",
-           "weekdayMask": 2
+      }
+    },
+    "ma-1-picked": {
+      "title": "Ma — edzésnap, a napi kihívás elvállalva",
+      "frame": "lifeos/ma-1",
+      "account": "M",
+      "route": "/",
+      "height": 2248,
+      "clock": "2026-10-19T13:20:00+02:00",
+      "reach": "fixture",
+      "why": "ma-1's NAPI DOBÁS teaser: \"Lift helyett lépcső egész nap\", \"Mai kihívás · +15 érme\", ELVÁLLALVA, after FELADATOK (FÓKUSZ and KÖVETKEZŐ are later phases). S-ma's ma-1 edit list + challenge (add) + the picked task -> matched-fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2158
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 1000
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792388400
+                  },
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 5,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 9,
+                    "best": 9,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 500,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 31,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "relapse",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 4,
+                    "best": 4,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": -1000,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 11,
+                    "title": "Befizetni a villanyszámlát",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "17:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 12,
+                    "title": "Bevásárlás: zab, tojás, túró",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "19:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 13,
+                    "title": "Felhívni anyát",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "20:00",
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 9
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 113,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 14,
+                    "title": "Kiválogatni a téli ruhákat",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": 15,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 15,
+                    "title": "Kivinni a szemetet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792390200,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 16,
+                    "title": "Időpontot foglalni a fodrászhoz",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792395000,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 4
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-19",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 31,
+                    "name": "Lift helyett lépcső egész nap",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 3,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 31,
+                  "taskId": 951,
+                  "pickedAt": 1792388400,
+                  "done": false,
+                  "taskDeleted": false,
+                  "title": "Lift helyett lépcső egész nap",
+                  "valueMinor": 1500,
+                  "paidMinor": null
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
           },
-          "isTemplate": false,
-          "parentTaskId": 122,
-          "completedAt": 1792515900,
-          "completedOn": "2026-10-20",
-          "overdueOn": null,
-          "valueMinor": 500,
-          "lateNow": false,
-          "payoutNowMinor": null,
-          "paidMinor": 500,
-          "overduePenaltyMinor": null,
-          "challengeId": null
-         },
-         {
-          "id": 952,
-          "title": "Hideg zuhany 2 percig",
-          "notes": null,
-          "priority": 2,
-          "points": 15,
-          "dueOn": "2026-10-20",
-          "dueTime": null,
-          "recurrence": null,
-          "isTemplate": false,
-          "parentTaskId": null,
-          "completedAt": 1792476600,
-          "completedOn": "2026-10-20",
-          "overdueOn": null,
-          "valueMinor": 1500,
-          "lateNow": false,
-          "payoutNowMinor": 1500,
-          "paidMinor": 1500,
-          "overduePenaltyMinor": null,
-          "challengeId": 32
-         }
-        ],
-        "anytimeCount": 0,
-        "openCount": 0
-       },
-       "add": true
-      },
-      {
-       "pointer": "/challenge",
-       "value": {
-        "date": "2026-10-20",
-        "state": "picked",
-        "poolCount": 8,
-        "options": [
-         {
-          "id": 32,
-          "name": "Hideg zuhany 2 percig",
-          "category": "discipline",
-          "points": 15,
-          "weight": 2,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": true
-         },
-         {
-          "id": 33,
-          "name": "Olvass el 20 oldalt",
-          "category": "mind",
-          "points": 15,
-          "weight": 3,
-          "valueMinor": 1500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         },
-         {
-          "id": 34,
-          "name": "10 000 lépés",
-          "category": "movement",
-          "points": 25,
-          "weight": 2,
-          "valueMinor": 2500,
-          "archived": false,
-          "archivedAt": null,
-          "chosen": false
-         }
-        ],
-        "rerollsLeft": 1,
-        "picked": {
-         "challengeId": 32,
-         "taskId": 952,
-         "pickedAt": 1792474800,
-         "done": true,
-         "taskDeleted": false
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1240
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 86
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
         }
-       },
-       "add": true
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.state.accepted"
+        }
       }
-     ]
     },
-    {
-     "method": "GET",
-     "path": "/api/v1/my-plans/today",
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/days/0/date",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/days/0/day_name",
-       "value": "Pihenőnap"
-      },
-      {
-       "pointer": "/days/0/is_rest",
-       "value": 1
-      },
-      {
-       "pointer": "/days/0/est_minutes",
-       "value": null
-      },
-      {
-       "pointer": "/days/0/start_time",
-       "value": null
-      },
-      {
-       "pointer": "/days/0/exercise_count",
-       "value": 0
-      },
-      {
-       "pointer": "/days/0/log_id",
-       "value": null
-      },
-      {
-       "pointer": "/days/0/log_status",
-       "value": null
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/workouts/current",
-     "edits": [
-      {
-       "pointer": "/log",
-       "value": null
-      },
-      {
-       "pointer": "/exercises",
-       "value": []
-      },
-      {
-       "pointer": "/sets",
-       "value": []
-      }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/my-plans/week",
-     "query": {
-      "from": "2026-10-21",
-      "days": "1"
-     },
-     "from": {
-      "path": "/api/v1/my-plans/week?days=7&from=2026-10-12"
-     },
-     "edits": [
-      {
-       "pointer": "/from",
-       "value": "2026-10-21"
-      },
-      {
-       "pointer": "/days",
-       "value": 1
-      },
-      {
-       "pointer": "/occurrences",
-       "value": [
+    "ma-2-done": {
+      "title": "Ma — pihenőnap, a napi kihívás teljesítve",
+      "frame": "lifeos/ma-2",
+      "account": "M",
+      "route": "/",
+      "height": 1748,
+      "clock": "2026-10-20T21:10:00+02:00",
+      "reach": "fixture",
+      "why": "ma-2's challenge ticked (\"teljesítve\"), and \"Ma eddig\" now carries its +15 (+68 as drawn). S-ma's ma-2 edit list + challenge (add) + the completed task -> matched-fixture",
+      "fixtures": [
         {
-         "date": "2026-10-21",
-         "day_id": 5,
-         "day_name": "Alsótest – guggolás",
-         "slot": 0,
-         "is_rest": 0,
-         "est_minutes": 70,
-         "start_time": "18:00",
-         "exercise_count": 6,
-         "plan_id": 1,
-         "plan_name": "Felső/alsó szplit – 12 hetes blokk",
-         "log_id": null,
-         "log_status": null
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 24500
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 24500
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2239
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 1500
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": false
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792474500
+                  },
+                  "streak": {
+                    "current": 15,
+                    "best": 15,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 8,
+                    "status": "done",
+                    "doneAt": 1792518000
+                  },
+                  "streak": {
+                    "current": 10,
+                    "best": 10,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1000,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-20",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792523100
+                  },
+                  "streak": {
+                    "current": 33,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1500,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 5,
+                  "name": "Dohányzás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 5,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 13,
+                    "best": 13,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 1,
+                    "best": 1,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 21,
+                    "title": "Feladni a csomagot a Foxpostnál",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792492800,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 1000,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 22,
+                    "title": "Kivinni a szelektívet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 2
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 122,
+                    "completedAt": 1792515900,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 952,
+                    "title": "Hideg zuhany 2 percig",
+                    "notes": null,
+                    "priority": 2,
+                    "points": 15,
+                    "dueOn": "2026-10-20",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792476600,
+                    "completedOn": "2026-10-20",
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": 1500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 32
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 0
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-20",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 32,
+                    "name": "Hideg zuhany 2 percig",
+                    "category": "discipline",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 3,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 32,
+                  "taskId": 952,
+                  "pickedAt": 1792474800,
+                  "done": true,
+                  "taskDeleted": false,
+                  "title": "Hideg zuhany 2 percig",
+                  "valueMinor": 1500,
+                  "paidMinor": 1500
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": null,
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": null,
+                "todayMinutes": 0,
+                "todaySessions": 0,
+                "todayEarnedMinor": 0,
+                "maxMinutesPerDay": 480
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Pihenőnap"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 1
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/week",
+          "query": {
+            "from": "2026-10-21",
+            "days": "1"
+          },
+          "from": {
+            "path": "/api/v1/my-plans/week?days=7&from=2026-10-12"
+          },
+          "edits": [
+            {
+              "pointer": "/from",
+              "value": "2026-10-21"
+            },
+            {
+              "pointer": "/days",
+              "value": 1
+            },
+            {
+              "pointer": "/occurrences",
+              "value": [
+                {
+                  "date": "2026-10-21",
+                  "day_id": 5,
+                  "day_name": "Alsótest – guggolás",
+                  "slot": 0,
+                  "is_rest": 0,
+                  "est_minutes": 70,
+                  "start_time": "18:00",
+                  "exercise_count": 6,
+                  "plan_id": 1,
+                  "plan_name": "Felső/alsó szplit – 12 hetes blokk",
+                  "log_id": null,
+                  "log_status": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-20",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-20"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 2480
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 176
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
         }
-       ]
+      ],
+      "arrived": {
+        "text": {
+          "key": "challenges.state.done"
+        }
       }
-     ]
-    },
-    {
-     "method": "GET",
-     "path": "/api/v1/nutrition-log/2026-10-20",
-     "from": {
-      "path": "/api/v1/nutrition-log/2026-10-15"
-     },
-     "edits": [
-      {
-       "pointer": "/date",
-       "value": "2026-10-20"
-      },
-      {
-       "pointer": "/totals/kcal",
-       "value": 2480
-      },
-      {
-       "pointer": "/totals/protein_g",
-       "value": 176
-      },
-      {
-       "pointer": "/targets/kcal_target",
-       "value": 2600
-      },
-      {
-       "pointer": "/targets/protein_g_target",
-       "value": 180
-      }
-     ]
     }
-   ],
-   "arrived": {
-    "text": {
-     "key": "challenges.state.done"
-    }
-   }
   }
- }
 }

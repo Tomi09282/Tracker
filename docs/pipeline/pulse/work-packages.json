@@ -1484,7 +1484,6 @@
       "title": "LifeOS backend polish round (approved plan abundant-booping-willow; owner 2026-10-18 rulings) on the merged B-core, B-habits-tasks, B-rewards-challenges, B-calendar and B-focus: the adversarial security review .pulse/review/security-lifeos (attacks 01 / 02 / 02b / 05a / 07 / 08 / 11 / 12 fixed), the lazy LifeOS start for accounts with a stored zone, the task point rules on GET /tasks and GET /lifeos/today, nextEvent reminders / firstReminder (S-calendar review DEV-k), the MAI DOBÁS picked fields; no migration",
       "owns": [
         "backend/scripts/smoke.js",
-        "backend/scripts/smoke/lifeos-polish.js",
         "backend/scripts/verify-031.mjs",
         "backend/scripts/verify-day-close.mjs",
         "backend/src/coins/achievements.js",
@@ -1498,11 +1497,9 @@
         "backend/src/db/tx/lifeos-rewards.js",
         "backend/src/db/tx/lifeos-stats.js",
         "backend/src/db/tx/lifeos-tasks.js",
-        "backend/src/db/tx/lifeos.js",
         "backend/src/lifeos/focus-routes.js",
         "backend/src/lifeos/habit-routes.js",
         "backend/src/lifeos/routes.js",
-        "backend/src/lifeos/rules.js",
         "docs/pipeline/pulse/pkg/B-lifeos-polish/**"
       ],
       "handIn": {
@@ -1532,7 +1529,7 @@
         "npm run smoke (cwd backend/, integration worktree)",
         "npm run build (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-lifeos-polish) from the package's own pkg/B-lifeos-polish/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The diff was checked by hand against owns.json: every touched path is in it. owns.json claims a wider set (backend/package.json, gdpr.js, index.js, worker.js, coins/routes.js, lifeos-focus-views.js, the other smoke/lifeos-*.js, a verify-lifeos-polish.mjs that was never written, backend/src/lifeos/**); only the 18 paths the package changed pass to it, from the closed B-focus (6), B-calendar (2), B-rewards-challenges (4), B-habits-tasks (5) and B-core (1); backend/src/coins/achievements.js (019 coins, pre-Pulse) had no owner and smoke/lifeos-polish.js is new. No migration (036 unused). The security review's FINDINGS.md was never written; the package took its findings from the attacks/*.mjs and out-*.txt files (handoff.json lists the four low / info ones left open). The new response fields are required in lifeos-api.ts, so the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges and S-focus need taskRules, nextEvent.reminders / firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs pass again (the frontend polish round). The dev backend on :3000 picks the changes up only after a restart."
+      "notes": "Added by the integrator at merge (merge-B-lifeos-polish) from the package's own pkg/B-lifeos-polish/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The diff was checked by hand against owns.json: every touched path is in it. owns.json claims a wider set (backend/package.json, gdpr.js, index.js, worker.js, coins/routes.js, lifeos-focus-views.js, the other smoke/lifeos-*.js, a verify-lifeos-polish.mjs that was never written, backend/src/lifeos/**); only the 18 paths the package changed pass to it, from the closed B-focus (6), B-calendar (2), B-rewards-challenges (4), B-habits-tasks (5) and B-core (1); backend/src/coins/achievements.js (019 coins, pre-Pulse) had no owner and smoke/lifeos-polish.js is new. No migration (036 unused). The security review's FINDINGS.md was never written; the package took its findings from the attacks/*.mjs and out-*.txt files (handoff.json lists the four low / info ones left open). The new response fields are required in lifeos-api.ts, so the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges and S-focus need taskRules, nextEvent.reminders / firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs pass again (the frontend polish round). The dev backend on :3000 picks the changes up only after a restart. At merge-S-lifeos-polish backend/scripts/smoke/lifeos-polish.js, backend/src/db/tx/lifeos.js, backend/src/lifeos/rules.js passed to S-lifeos-polish (B-lifeos-polish is closed; one file, one owner)."
     }
   ],
   "screens": [
@@ -1911,7 +1908,6 @@
         "progress"
       ],
       "owns": [
-        "frontend/src/features/progress/ProgressPage.tsx",
         "docs/pipeline/pulse/pkg/S-progress/**"
       ],
       "mustNotTouch": [
@@ -1943,7 +1939,7 @@
       ],
       "size": "L",
       "wave": 2,
-      "notes": "progress-2 is seed-only: the default view is the two empty sentences. Sharing controls keep their code semantics (Q4 default). Photo delete keeps its sheet. The hand-rolled tab strip and the local toggle move onto the shared components; the raw file input (ProgressPage.tsx:471) becomes FilePick. Nothing is written on user@.",
+      "notes": "progress-2 is seed-only: the default view is the two empty sentences. Sharing controls keep their code semantics (Q4 default). Photo delete keeps its sheet. The hand-rolled tab strip and the local toggle move onto the shared components; the raw file input (ProgressPage.tsx:471) becomes FilePick. Nothing is written on user@. At merge-S-lifeos-polish frontend/src/features/progress/ProgressPage.tsx passed to S-lifeos-polish (S-progress is closed; one file, one owner).",
       "i18nNamespaces": [
         "progress"
       ],
@@ -2984,9 +2980,12 @@
         "capture"
       ],
       "owns": [
-        "frontend/src/features/tasks/**",
+        "docs/pipeline/pulse/pkg/S-tasks/**",
         "frontend/src/features/capture/**",
-        "docs/pipeline/pulse/pkg/S-tasks/**"
+        "frontend/src/features/tasks/TaskRow.tsx",
+        "frontend/src/features/tasks/TaskSheet.tsx",
+        "frontend/src/features/tasks/TasksPage.tsx",
+        "frontend/src/features/tasks/formParts.tsx"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3033,7 +3032,7 @@
         "capture"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' RecurrencePicker / TimeTrigger / weekdays.ts - merge both first; the slot holds them as uncommitted interim copies. tasksData.ts holds the hooks under a non-use* file name. GET /tasks is not in the freeze (the running dev backend has no migration 032): every capture answers it with a contract body checked against TasksResponse (fixture-schema-check.mjs) - matched-fixture at best until recorded. CaptureSheet is exported for S-ma (the Ma page's FELADATOK 'Rögzítés +'); /tasks?capture=1 opens it over Feladatok until Ma mounts it. Entry added by the integrator at merge-B-habits-tasks from the package's own pkg/S-tasks/work-package.json (as committed on pulse/S-tasks a3aaa56). Merged at merge-S-tasks (6cffffd): R-S-tasks-01 applied by hand onto the merged S-ma lines (nav.today, home owns gains /tasks); its check-nav NO_INBOUND row for /tasks is NOT applied because S-ma already draws the /tasks doors (Rögzítés, Kész ma); fixtures merged on the 2026-10-18 fixture ruling (fixture-schema-check.mjs OK, tsc clean). Fix round S-tasks-fix (pulse/S-tasks-fix 7ffa1e1) merged at merge-S-tasks-fix: R-S-tasks-fix-01 applied unchanged (AppLayout mounts useTimezoneBootstrap, useSaveDayPrefs re-reads [\"lifeos\"]); R-S-tasks-fix-02 (rule figures on GET /tasks) stays open for the backend lane; R-S-ma-02 is carried by pulse/S-ma-fix, not applied here; the integrator added challengeId: null to the 119 Task fixture bodies and to fixture-schema-check.mjs because B-rewards-challenges (d295d61) made Task.challengeId required.",
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' RecurrencePicker / TimeTrigger / weekdays.ts - merge both first; the slot holds them as uncommitted interim copies. tasksData.ts holds the hooks under a non-use* file name. GET /tasks is not in the freeze (the running dev backend has no migration 032): every capture answers it with a contract body checked against TasksResponse (fixture-schema-check.mjs) - matched-fixture at best until recorded. CaptureSheet is exported for S-ma (the Ma page's FELADATOK 'Rögzítés +'); /tasks?capture=1 opens it over Feladatok until Ma mounts it. Entry added by the integrator at merge-B-habits-tasks from the package's own pkg/S-tasks/work-package.json (as committed on pulse/S-tasks a3aaa56). Merged at merge-S-tasks (6cffffd): R-S-tasks-01 applied by hand onto the merged S-ma lines (nav.today, home owns gains /tasks); its check-nav NO_INBOUND row for /tasks is NOT applied because S-ma already draws the /tasks doors (Rögzítés, Kész ma); fixtures merged on the 2026-10-18 fixture ruling (fixture-schema-check.mjs OK, tsc clean). Fix round S-tasks-fix (pulse/S-tasks-fix 7ffa1e1) merged at merge-S-tasks-fix: R-S-tasks-fix-01 applied unchanged (AppLayout mounts useTimezoneBootstrap, useSaveDayPrefs re-reads [\"lifeos\"]); R-S-tasks-fix-02 (rule figures on GET /tasks) stays open for the backend lane; R-S-ma-02 is carried by pulse/S-ma-fix, not applied here; the integrator added challengeId: null to the 119 Task fixture bodies and to fixture-schema-check.mjs because B-rewards-challenges (d295d61) made Task.challengeId required. At merge-S-lifeos-polish frontend/src/features/tasks/tasksData.ts passed to S-lifeos-polish (S-tasks is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 6
     },
     {
@@ -3043,11 +3042,17 @@
         "today"
       ],
       "owns": [
-        "frontend/src/features/today/**",
+        "docs/pipeline/pulse/pkg/S-ma/**",
+        "frontend/src/features/home/HomeNutrition.tsx",
         "frontend/src/features/home/HomePage.tsx",
         "frontend/src/features/home/WeekStrip.tsx",
-        "frontend/src/features/home/HomeNutrition.tsx",
-        "docs/pipeline/pulse/pkg/S-ma/**"
+        "frontend/src/features/today/LedgerLine.tsx",
+        "frontend/src/features/today/TodayNutrition.tsx",
+        "frontend/src/features/today/TodayWorkout.tsx",
+        "frontend/src/features/today/model.ts",
+        "frontend/src/features/today/useLifeosToday.ts",
+        "frontend/src/features/today/useTodayActions.ts",
+        "frontend/src/features/today/useTodayPlan.ts"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3097,7 +3102,7 @@
         "nav"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, the integrator adds it at merge. Ownership of HomePage.tsx, WeekStrip.tsx and HomeNutrition.tsx passes from the closed S-home to this package, which deletes them (their week query and nutrition block live on in features/today/). The three new hooks are NEW files that no gate mirrors or imports: add them to frozen.except as was done for useFinishWorkout.ts. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch): merge B-habits-tasks first. The doors Összes -> /habits, Kész ma -> /tasks, Első szokás -> /habits and Rögzítés (until the capture sheet exists) -> /tasks need S-habits / S-tasks merged before or with this package. Reads the existing home.* keys (greeting, start, resume, restDay, inProgress, done, exerciseCount, todayTitle, emptyTitle, emptyBody) - they keep their namespace. Merged at merge-S-ma (pulse/S-ma ed55f98): shared.patch withdrawn (a screen package hands in none, PLAN 4.4 item 4), the index route travels in R-S-ma-01; the three hooks are in frozen.except; R-S-ma-02 waits for S-tasks; the S-home frame states home-1..3 on / are marked superseded in pulse-frames.json.",
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, the integrator adds it at merge. Ownership of HomePage.tsx, WeekStrip.tsx and HomeNutrition.tsx passes from the closed S-home to this package, which deletes them (their week query and nutrition block live on in features/today/). The three new hooks are NEW files that no gate mirrors or imports: add them to frozen.except as was done for useFinishWorkout.ts. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch): merge B-habits-tasks first. The doors Összes -> /habits, Kész ma -> /tasks, Első szokás -> /habits and Rögzítés (until the capture sheet exists) -> /tasks need S-habits / S-tasks merged before or with this package. Reads the existing home.* keys (greeting, start, resume, restDay, inProgress, done, exerciseCount, todayTitle, emptyTitle, emptyBody) - they keep their namespace. Merged at merge-S-ma (pulse/S-ma ed55f98): shared.patch withdrawn (a screen package hands in none, PLAN 4.4 item 4), the index route travels in R-S-ma-01; the three hooks are in frozen.except; R-S-ma-02 waits for S-tasks; the S-home frame states home-1..3 on / are marked superseded in pulse-frames.json. At merge-S-lifeos-polish frontend/src/features/today/TodayEmpty.tsx, frontend/src/features/today/TodayHabits.tsx, frontend/src/features/today/TodayHero.tsx, frontend/src/features/today/TodayPage.tsx, frontend/src/features/today/TodayTasks.tsx passed to S-lifeos-polish (S-ma is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 6,
       "frozenExcept": [
         "frontend/src/features/today/useLifeosToday.ts",
@@ -3113,8 +3118,12 @@
         "challenges-pool"
       ],
       "owns": [
-        "frontend/src/features/challenges/**",
-        "docs/pipeline/pulse/pkg/S-challenges/**"
+        "docs/pipeline/pulse/pkg/S-challenges/**",
+        "frontend/src/features/challenges/ChallengePoolPage.tsx",
+        "frontend/src/features/challenges/ChallengeSheet.tsx",
+        "frontend/src/features/challenges/WeightBar.tsx",
+        "frontend/src/features/challenges/challengeFormat.ts",
+        "frontend/src/features/challenges/challengesApi.ts"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3162,7 +3171,7 @@
         "challenges"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only): the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge it first; the slot holds it applied locally and uncommitted. challengesApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 033: every capture answers the challenge reads with contract bodies (states.json) checked against the lifeos-api types - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-challenges/work-package.json (as committed on pulse/S-challenges).",
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only): the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge it first; the slot holds it applied locally and uncommitted. challengesApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 033: every capture answers the challenge reads with contract bodies (states.json) checked against the lifeos-api types - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-challenges/work-package.json (as committed on pulse/S-challenges). At merge-S-lifeos-polish frontend/src/features/challenges/ChallengesPage.tsx, frontend/src/features/challenges/TodayDraw.tsx passed to S-lifeos-polish (S-challenges is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 7
     },
     {
@@ -3174,8 +3183,13 @@
         "reward-form"
       ],
       "owns": [
-        "frontend/src/features/rewards/**",
-        "docs/pipeline/pulse/pkg/S-rewards/**"
+        "docs/pipeline/pulse/pkg/S-rewards/**",
+        "frontend/src/features/rewards/RedeemConfirm.tsx",
+        "frontend/src/features/rewards/RewardRow.tsx",
+        "frontend/src/features/rewards/RewardSheet.tsx",
+        "frontend/src/features/rewards/RewardsLedgerRow.tsx",
+        "frontend/src/features/rewards/RewardsPage.tsx",
+        "frontend/src/features/rewards/rewardsApi.ts"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3221,7 +3235,7 @@
         "rewards"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-rewards-challenges first; the slot holds it applied and uncommitted. rewardsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 033: every capture answers GET /rewards and GET /rewards/:id with contract bodies (states.json) - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-rewards/work-package.json (as committed on pulse/S-rewards).",
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-rewards-challenges first; the slot holds it applied and uncommitted. rewardsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 033: every capture answers GET /rewards and GET /rewards/:id with contract bodies (states.json) - matched-fixture at best until recorded. Entry added by the integrator at merge-B-rewards-challenges from the package's own pkg/S-rewards/work-package.json (as committed on pulse/S-rewards). At merge-S-lifeos-polish frontend/src/features/rewards/RewardDetailPage.tsx passed to S-lifeos-polish (S-rewards is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 7
     },
     {
@@ -3233,8 +3247,14 @@
         "event-form"
       ],
       "owns": [
-        "frontend/src/features/calendar/**",
-        "docs/pipeline/pulse/pkg/S-calendar/**"
+        "docs/pipeline/pulse/pkg/S-calendar/**",
+        "frontend/src/features/calendar/AgendaRows.tsx",
+        "frontend/src/features/calendar/CalendarPage.tsx",
+        "frontend/src/features/calendar/EventDetailPage.tsx",
+        "frontend/src/features/calendar/TightSection.tsx",
+        "frontend/src/features/calendar/calendarApi.ts",
+        "frontend/src/features/calendar/calendarFormat.ts",
+        "frontend/src/features/calendar/captureEvent.ts"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3284,7 +3304,7 @@
         "calendar"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries it in its WORKING TREE only): the integrator adds it at merge. Builds against B-calendar's Phase-5 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and imports S-tasks' TaskSheet / tasksData (the '+ Teendő' and the TEENDŐK rows): merge B-calendar, S-tasks and S-ma first. calendarApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 034: every state answers GET /calendar and GET /events/:id with contract bodies and is matched-fixture at best. Entry added by the integrator at merge-B-calendar from the package's own pkg/S-calendar/work-package.json (as committed on pulse/S-calendar a9db0e8).",
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries it in its WORKING TREE only): the integrator adds it at merge. Builds against B-calendar's Phase-5 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and imports S-tasks' TaskSheet / tasksData (the '+ Teendő' and the TEENDŐK rows): merge B-calendar, S-tasks and S-ma first. calendarApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 034: every state answers GET /calendar and GET /events/:id with contract bodies and is matched-fixture at best. Entry added by the integrator at merge-B-calendar from the package's own pkg/S-calendar/work-package.json (as committed on pulse/S-calendar a9db0e8). At merge-S-lifeos-polish frontend/src/features/calendar/EventSheet.tsx, frontend/src/features/calendar/NextEventSection.tsx passed to S-lifeos-polish (S-calendar is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 8
     },
     {
@@ -3294,8 +3314,11 @@
         "focus"
       ],
       "owns": [
-        "frontend/src/features/focus/**",
-        "docs/pipeline/pulse/pkg/S-focus/**"
+        "docs/pipeline/pulse/pkg/S-focus/**",
+        "frontend/src/features/focus/FocusPage.tsx",
+        "frontend/src/features/focus/FocusRunning.tsx",
+        "frontend/src/features/focus/TodayFocus.tsx",
+        "frontend/src/features/focus/focusClock.ts"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3343,7 +3366,7 @@
         "focus"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-focus first; the slot holds it applied and uncommitted. focusApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 035: every capture answers GET /focus/current with a contract body checked against FocusCurrentResponse - matched-fixture at best until recorded. TodayFocus is exported for S-ma (Ma's FÓKUSZ section, R-S-focus-02). Entry added by the integrator at merge-B-focus from the package's own pkg/S-focus/work-package.json (as committed on pulse/S-focus 0200ea7).",
+      "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-focus first; the slot holds it applied and uncommitted. focusApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 035: every capture answers GET /focus/current with a contract body checked against FocusCurrentResponse - matched-fixture at best until recorded. TodayFocus is exported for S-ma (Ma's FÓKUSZ section, R-S-focus-02). Entry added by the integrator at merge-B-focus from the package's own pkg/S-focus/work-package.json (as committed on pulse/S-focus 0200ea7). At merge-S-lifeos-polish frontend/src/features/focus/FocusDone.tsx, frontend/src/features/focus/FocusSetup.tsx, frontend/src/features/focus/focusApi.ts, frontend/src/features/focus/focusFormat.ts passed to S-lifeos-polish (S-focus is closed; one file, one owner), and its feature glob became the explicit list of the files that stay here, so later files are not pattern-owned by a closed package.",
       "wave": 7
     },
     {
@@ -3353,9 +3376,8 @@
         "progress-days"
       ],
       "owns": [
-        "frontend/src/features/progress/DaysPage.tsx",
-        "frontend/src/features/progress/days/**",
-        "docs/pipeline/pulse/pkg/S-progress-days/**"
+        "docs/pipeline/pulse/pkg/S-progress-days/**",
+        "frontend/src/features/progress/days/**"
       ],
       "mustNotTouch": [
         "frontend/src/ui/**",
@@ -3400,7 +3422,110 @@
         "progressDays"
       ],
       "liveWrites": [],
-      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch, applied locally and uncommitted in the slot): merge B-focus first. The hooks live in features/progress/days/daysApi.ts (a non-use* file name, so the frozen features/**/use*.ts glob needs no exception). Imports the merged S-habits streak parts (features/habits/HabitRow.tsx MultiplierLine, FreezeLine; habitFormat.ts) as S-ma does. The running dev backend has no migration 035 / stats route yet: every capture answers GET /lifeos/stats with a contract body (states.json) and is reported matched-fixture at best until the integrator records it. Reads GET /lifeos/stats only: it carries every block of the frame in one settled snapshot; GET /lifeos/days (per-day detail) is not needed by this frame. Entry added by the integrator at merge-B-focus from the package's own pkg/S-progress-days/work-package.json (as committed on pulse/S-progress-days 7a74706)."
+      "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch, applied locally and uncommitted in the slot): merge B-focus first. The hooks live in features/progress/days/daysApi.ts (a non-use* file name, so the frozen features/**/use*.ts glob needs no exception). Imports the merged S-habits streak parts (features/habits/HabitRow.tsx MultiplierLine, FreezeLine; habitFormat.ts) as S-ma does. The running dev backend has no migration 035 / stats route yet: every capture answers GET /lifeos/stats with a contract body (states.json) and is reported matched-fixture at best until the integrator records it. Reads GET /lifeos/stats only: it carries every block of the frame in one settled snapshot; GET /lifeos/days (per-day detail) is not needed by this frame. Entry added by the integrator at merge-B-focus from the package's own pkg/S-progress-days/work-package.json (as committed on pulse/S-progress-days 7a74706). At merge-S-lifeos-polish frontend/src/features/progress/DaysPage.tsx passed to S-lifeos-polish (S-progress-days is closed; one file, one owner)."
+    },
+    {
+      "id": "S-lifeos-polish",
+      "title": "LifeOS frontend polish round: the independent reviews of the merged LifeOS screens (Ma, Szokasok, Feladatok + capture, Kihivasok, Jutalmak, Naptar, Fokusz, Halads > Napok) fixed on the current tree, on the B-lifeos-polish API",
+      "screens": [
+        "today",
+        "habits",
+        "tasks",
+        "capture",
+        "challenges",
+        "rewards",
+        "calendar",
+        "focus",
+        "progress"
+      ],
+      "owns": [
+        "backend/scripts/smoke/lifeos-polish.js",
+        "backend/src/db/tx/lifeos.js",
+        "backend/src/lifeos/rules.js",
+        "docs/pipeline/pulse/pkg/S-lifeos-polish/**",
+        "frontend/src/features/calendar/EventSheet.tsx",
+        "frontend/src/features/calendar/NextEventSection.tsx",
+        "frontend/src/features/challenges/ChallengesPage.tsx",
+        "frontend/src/features/challenges/TodayDraw.tsx",
+        "frontend/src/features/focus/FocusDone.tsx",
+        "frontend/src/features/focus/FocusSetup.tsx",
+        "frontend/src/features/focus/focusApi.ts",
+        "frontend/src/features/focus/focusFormat.ts",
+        "frontend/src/features/progress/DaysPage.tsx",
+        "frontend/src/features/progress/ProgressPage.tsx",
+        "frontend/src/features/rewards/RewardDetailPage.tsx",
+        "frontend/src/features/tasks/tasksData.ts",
+        "frontend/src/features/today/TodayEmpty.tsx",
+        "frontend/src/features/today/TodayHabits.tsx",
+        "frontend/src/features/today/TodayHero.tsx",
+        "frontend/src/features/today/TodayPage.tsx",
+        "frontend/src/features/today/TodayTasks.tsx"
+      ],
+      "mustNotTouch": [
+        "frontend/src/ui/**",
+        "frontend/src/app/**",
+        "frontend/src/lib/**",
+        "frontend/src/i18n/**",
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/scripts/**",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ],
+        "shared.patch": [
+          "frontend/src/lib/lifeos-api.ts"
+        ],
+        "requests": {
+          "R-S-lifeos-polish-01": "frontend/scripts/pulse-frames.json: setCheck in the boxed allow-list",
+          "R-S-lifeos-polish-02": "frontend/src/ui/shell/ScreenHeader.tsx: 44 pt back control",
+          "R-S-lifeos-polish-03": "frontend/scripts/pulse-shot.mjs: the targets probe reads the ::after target layer",
+          "R-S-lifeos-polish-04": "frontend/src/ui/data/Numeral.tsx: Fraction complete (closes R-S-focus-03)"
+        }
+      },
+      "frames": [
+        "lifeos/ma-1",
+        "lifeos/ma-2",
+        "lifeos/ma-3",
+        "lifeos/ma-4",
+        "lifeos/capture",
+        "lifeos/event-form",
+        "lifeos/focus-1",
+        "lifeos/focus-3",
+        "lifeos/progress-days",
+        "lifeos/rewards-1",
+        "lifeos/reward-detail",
+        "lifeos/habits-1",
+        "lifeos/habit-form"
+      ],
+      "route": "/",
+      "dependsOn": [
+        "B-lifeos-polish",
+        "S-ma",
+        "S-habits",
+        "S-tasks",
+        "S-challenges",
+        "S-rewards",
+        "S-calendar",
+        "S-focus",
+        "S-progress-days"
+      ],
+      "size": "L",
+      "i18nNamespaces": [
+        "today",
+        "rewards"
+      ],
+      "liveWrites": [],
+      "notes": "Entry added by the integrator at merge-S-lifeos-polish from the package's own pkg/S-lifeos-polish/work-package.json (as committed on pulse/S-lifeos-polish 9a0c2d6; the slot's working-tree entry carried wide feature globs, the committed one is narrowed to the files the diff touches, checked by hand against owns.json). Polish round over the eight merged LifeOS screen packages on the B-lifeos-polish API; 20 paths passed from the closed S-ma, S-tasks, S-challenges, S-rewards, S-calendar, S-focus, S-progress-days, S-progress and B-lifeos-polish (one file, one owner). owns.json also named 8 files inside the hand-in folders of S-ma, S-calendar, S-tasks, S-challenges, S-focus and S-rewards (make-states.mjs, states.json): pulse-owns-check rule 7 forbids a package to own another package's hand-in folder, so those stay with their closed packages and the integrator applied the package's fixture migration to them in the merge commit (the same way earlier merges changed them). Backend: it adds the additive dayRules field to GET /lifeos/today (rules.js dayPointRules, tx/lifeos.js, smoke/lifeos-polish.js). Hand-in applied at merge: i18n.patch.json, shared.patch (DayPointRules, LifeosToday.dayRules) and requests R-S-lifeos-polish-01..04 (pulse-frames.json setCheck, ScreenHeader 44 pt back control, pulse-shot targets probe, Numeral Fraction complete). The dev backend on :3000 picks dayRules up only after a restart.",
+      "wave": 8
     }
   ],
   "queue": [

@@ -150,8 +150,11 @@ const calendarBody = (anytime) => ({
 
 const ANYTIME_CALL = task(31, 'Felhívni anyát', 1, 500, null, null);
 
+const TASK_RULES = { lowMinor: 500, midMinor: 1000, highMinor: 2000, latePct: 50, overdueMinor: 500 };
 const tasksBody = {
   started: true,
+  rulesVersion: 1, // B-lifeos-polish: GET /tasks carries the rule set and the priority figures
+  taskRules: TASK_RULES,
   today: '2026-10-21',
   due: [task(21, 'Közös költség befizetése', 2, 1000, '2026-10-21', '15:00')],
   overdue: [],
@@ -365,65 +368,38 @@ const states = {
     arrived: { role: 'dialog' },
     fixtures: [{ method: 'GET', path: '/api/v1/events/7', body: { event: swim } }],
   },
-  'capture-event': {
-    title: 'Rögzítés — esemény (hand-in R-S-calendar-02)',
-    frame: 'lifeos/capture',
-    account: 'M',
-    route: '/tasks?capture=1',
-    height: 874,
-    clock: '2026-10-19T14:00:00+02:00',
-    reach: 'fixture',
-    why: 'lifeos/capture with Esemény chosen (the hand-in to S-tasks\' CaptureSheet): the words typed, Hova? Esemény, Mikor? Dátum, Időpontban, the start field with "Emlékeztető 1 órával előtte". Behind the sheet stands Feladatok (S-tasks\' route; Ma mounts the same sheet). GET /tasks is a contract body -> matched-fixture at best',
-    steps: [
-      {
-        type: { role: 'textbox', name: { key: 'capture.what' }, text: 'Fogorvos szerdán 10-kor' },
-        arrived: { role: 'textbox', name: { key: 'capture.what' } },
-      },
-      { click: { role: 'radio', name: { key: 'calendar.capture.event' } }, arrived: { role: 'radio', name: { key: 'calendar.capture.event' }, checked: true } },
-      { click: { role: 'radio', name: { key: 'capture.atTime' } }, arrived: { role: 'radio', name: { key: 'capture.atTime' }, checked: true } },
-      {
-        click: { role: 'radio', name: { key: 'tasks.due.date' }, within: { role: 'dialog' } },
-        arrived: { role: 'radio', name: { key: 'tasks.due.date' }, within: { role: 'dialog' }, checked: true },
-      },
-    ],
-    arrived: { text: { key: 'calendar.capture.reminderHint' } },
-    fixtures: [{ method: 'GET', path: '/api/v1/tasks', body: { ...tasksBody, today: '2026-10-19' } }],
-  },
 };
 
-/* Ma's KÖVETKEZŐ (hand-in R-S-calendar-03): S-ma's ma-1 state with one more edit, nextEvent. */
+/*
+ * The capture frame and Ma's KÖVETKEZŐ are states of MA now (S-lifeos-polish): S-ma's ma-1 carries the whole frame
+ * (the picked challenge, FÓKUSZ, KÖVETKEZŐ with its reminder), so ma-next is that state itself and no longer lives here.
+ * What stays here is the capture sheet with Esemény chosen, opened OVER Ma from Ma (frame lifeos/capture): S-tasks'
+ * own steps for the native date and time (the keyboard, as the tool cannot open a native picker) after Hova? Esemény.
+ */
 try {
-  // The integrated S-ma states (S-ma-fix: challengeId / challenge on every Task and GET /lifeos/today), read from
-  // the tree since merge-S-calendar; the slot read the stale pulse/S-ma branch through git.
   const sma = JSON.parse(fs.readFileSync(path.join(here, '../S-ma/states.json'), 'utf8'));
+  const stasks = JSON.parse(fs.readFileSync(path.join(here, '../S-tasks/states.json'), 'utf8'));
   const ma1 = structuredClone(sma.states['ma-1']);
-  const today = ma1.fixtures.find((f) => f.path === '/api/v1/lifeos/today');
-  today.edits.push({
-    pointer: '/nextEvent',
-    add: true,
-    value: {
-      eventId: 14,
-      date: '2026-10-19',
-      title: 'Vacsora Annával',
-      location: 'Trattoria Toscana',
-      allDay: false,
-      startAt: at('2026-10-19', '19:30'),
-      endAt: at('2026-10-19', '21:30'),
-      startTime: '19:30',
-      endTime: '21:30',
-      recurring: false,
-    },
+  const steps = structuredClone(stasks.states.capture.steps);
+  // The sheet opens from Ma's FELADATOK head; the words are typed first, then Hova? Esemény.
+  steps.unshift({ scroll: 'top', arrived: { role: 'dialog' } });
+  steps.unshift({ click: { role: 'button', name: { key: 'today.tasks.capture' } }, arrived: { role: 'dialog' } });
+  steps.splice(2, 0, {
+    click: { role: 'radio', name: { key: 'calendar.capture.event' } },
+    arrived: { role: 'radio', name: { key: 'calendar.capture.event' }, checked: true },
   });
-  ma1.fixtures.push({ method: 'GET', path: '/api/v1/tasks', body: { ...tasksBody, today: '2026-10-19' } });
-  states['ma-next'] = {
+  ma1.fixtures.push({ method: 'GET', path: '/api/v1/tasks', body: { ...tasksBody, today: '2026-10-19', due: [], upcoming: [], anytime: [], openCount: 0 } });
+  states['capture-event'] = {
     ...ma1,
-    title: 'Ma — KÖVETKEZŐ (hand-in R-S-calendar-03)',
-    frame: 'lifeos/ma-1',
-    why: `${ma1.why}. Plus nextEvent (B-calendar Phase-5 field, added by an edit): the KÖVETKEZŐ section, "Vacsora Annával · Trattoria Toscana · 19:30"`,
-    arrived: { text: 'Vacsora Annával' },
+    title: 'Rögzítés — esemény, Ma fölött (hand-in R-S-calendar-02)',
+    frame: 'lifeos/capture',
+    height: 874,
+    why: 'lifeos/capture with Esemény chosen, OVER Ma opened from its "Rögzítés +": the words typed, Hova? Esemény, Mikor? Dátum (Wednesday 21 October), Időpontban, Kezdés 10:00 and "Emlékeztető 1 órával előtte". Behind the sheet stands the frame day of Ma (ma-1). GET /tasks is a contract body -> matched-fixture at best',
+    steps,
+    arrived: { text: { key: 'calendar.capture.reminderHint' } },
   };
 } catch (err) {
-  console.warn(`ma-next skipped: ${err.message.split('\n')[0]}`);
+  console.warn(`capture-event skipped: ${String(err.message).split(String.fromCharCode(10))[0]}`);
 }
 
 const out = {

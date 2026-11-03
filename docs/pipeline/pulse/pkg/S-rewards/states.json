@@ -965,6 +965,42 @@
           "key": "rewards.fulfilledNote"
         }
       }
+    },
+    "reward-gone": {
+      "title": "Jutalom — nem érhető el (404)",
+      "account": "M",
+      "route": "/rewards/999999",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a reward that is not there, or from another account (the same 404, anti-IDOR): the danger line \"Ez a jutalom nem érhető el\" with the way back to Jutalmak, nothing to retry (review S-rewards 6, as habit-gone)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/rewards/999999",
+          "status": 404,
+          "body": {
+            "error": "not found",
+            "code": "not_found",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/rewards/999999",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "rewards.gone"
+        }
+      }
     }
   }
 }

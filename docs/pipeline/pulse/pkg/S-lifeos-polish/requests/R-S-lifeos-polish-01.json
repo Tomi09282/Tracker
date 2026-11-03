@@ -1,0 +1,12 @@
+{
+  "id": "R-S-lifeos-polish-01",
+  "from": "S-lifeos-polish",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-frames.json (defaults.probes.boxedAllow)",
+  "need": "The boxed probe flags the kit setCheck ring (24 pt, 4 px border, transparent) on every screen that draws a set check: reward-detail, reward-redeem, reward-detail-resting, habits-1, habit-form, calendar-1/-2 and the task rows. The frames draw this ring, so the flag is a false positive (reviews S-rewards 5, S-habits-fix 7, S-calendar). The patch adds 'setCheck' to the allow-list.",
+  "evidence": "frontend/src/ui/primitives/CheckMark.tsx data-kit=\"setCheck\"; .pulse/review/S-rewards/REVIEW.md difference 5",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-lifeos-polish/requests/R-S-lifeos-polish-01.patch",
+  "interim": "applied in the slot working tree for the captures, never committed",
+  "status": "open"
+}

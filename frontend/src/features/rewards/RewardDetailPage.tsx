@@ -72,7 +72,7 @@ export function RewardDetailPage() {
         // A reward that is not there and another account's reward are the same 404 (anti-IDOR):
         // one honest line and the way back to the shop — nothing to retry.
         <NoticeLine tone="danger" role="alert" action={<TextLink to="/rewards">{t('rewards.title')}</TextLink>}>
-          {t('rewards.failed')}
+          {t('rewards.gone')}
         </NoticeLine>
       ) : detail.isError && !data ? (
         <NoticeLine

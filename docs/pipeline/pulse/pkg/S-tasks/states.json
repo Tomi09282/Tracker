@@ -436,6 +436,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -880,6 +888,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -1556,6 +1572,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -2320,6 +2344,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -2776,6 +2808,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -3236,6 +3276,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -3304,6 +3352,14 @@
             "openCount": 0,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -3804,6 +3860,14 @@
             "openCount": 9,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse, frontend/src/lib/lifeos-api.ts; api.md GET /tasks): the dev backend on :3000 runs without migration 032, so GET /tasks answers 404 and cannot be recorded yet. Checked by fixture-schema-check.mjs (typed `satisfies TasksResponse` + the route's invariants)."
@@ -3895,6 +3959,14 @@
             "openCount": 0,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse; api.md GET /tasks, B-core api.md 'Before a zone is set: started false, today null'). Checked by fixture-schema-check.mjs."
@@ -3930,6 +4002,14 @@
             "openCount": 0,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse; api.md GET /tasks, B-core api.md 'Before a zone is set: started false, today null'). Checked by fixture-schema-check.mjs."
@@ -4026,6 +4106,14 @@
             "openCount": 0,
             "limits": {
               "open": 300
+            },
+            "rulesVersion": 1,
+            "taskRules": {
+              "lowMinor": 500,
+              "midMinor": 1000,
+              "highMinor": 2000,
+              "latePct": 50,
+              "overdueMinor": 500
             }
           },
           "why": "contract body in B-habits-tasks' exact shape (TasksResponse; api.md GET /tasks, B-core api.md 'Before a zone is set: started false, today null'). Checked by fixture-schema-check.mjs."

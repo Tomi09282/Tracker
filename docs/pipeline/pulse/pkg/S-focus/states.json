@@ -615,12 +615,13 @@
     },
     "ma-focus": {
       "title": "Ma — a FÓKUSZ blokk (következő blokk 14:00)",
+      "frame": "lifeos/ma-1",
       "account": "M",
       "route": "/",
-      "height": 874,
+      "height": 2248,
       "clock": "2026-10-19T13:20:00+02:00",
       "reach": "fixture",
-      "why": "Ma's FÓKUSZ section (lifeos/ma-1 y 1576, R-S-focus-02 applied): Ma's own ma-1 fixtures (pkg/S-ma/states.json) with the Phase-6 focus field added (an edit the recording cannot hold before migration 035; schema-checked against TodayFocus) - a planned 25-minute block at 14:00, 50 minutes paid today.",
+      "why": "Ma's FÓKUSZ section (lifeos/ma-1 y 1576, R-S-focus-02 applied): Ma's own ma-1 fixtures (pkg/S-ma/states.json) with the Phase-6 focus field added (an edit the recording cannot hold before migration 035; schema-checked against TodayFocus) - a planned 25-minute block at 14:00, 50 minutes paid today. (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish)",
       "fixtures": [
         {
           "method": "GET",
@@ -909,6 +910,27 @@
                     "paidMinor": null,
                     "overduePenaltyMinor": null,
                     "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
                   }
                 ],
                 "overdue": [],
@@ -957,13 +979,112 @@
                   }
                 ],
                 "anytimeCount": 0,
-                "openCount": 4
+                "openCount": 5
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-19",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 31,
+                    "name": "Lift helyett lépcső egész nap",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 31,
+                  "taskId": 951,
+                  "pickedAt": 1792386000,
+                  "done": false,
+                  "taskDeleted": false,
+                  "title": "Lift helyett lépcső egész nap",
+                  "valueMinor": 1500,
+                  "paidMinor": null
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": {
+                "eventId": 14,
+                "date": "2026-10-19",
+                "title": "Vacsora Annával",
+                "location": "Trattoria Toscana",
+                "allDay": false,
+                "startAt": 1792431000,
+                "endAt": 1792438200,
+                "startTime": "19:30",
+                "endTime": "21:30",
+                "recurring": false,
+                "reminders": [
+                  60
+                ],
+                "firstReminder": {
+                  "minutesBefore": 60,
+                  "at": 1792427400,
+                  "time": "18:30"
+                }
               },
               "add": true
             },
             {
               "pointer": "/focus",
-              "add": true,
               "value": {
                 "current": {
                   "id": 42,
@@ -995,16 +1116,7 @@
                 "todaySessions": 1,
                 "todayEarnedMinor": 2300,
                 "maxMinutesPerDay": 480
-              }
-            },
-            {
-              "pointer": "/challenge",
-              "value": null,
-              "add": true
-            },
-            {
-              "pointer": "/nextEvent",
-              "value": null,
+              },
               "add": true
             }
           ]
@@ -1099,26 +1211,10 @@
           ]
         }
       ],
-      "steps": [
-        {
-          "scroll": {
-            "role": "heading",
-            "name": {
-              "key": "focus.title"
-            }
-          },
-          "arrived": {
-            "role": "heading",
-            "name": {
-              "key": "focus.title"
-            }
-          }
-        }
-      ],
       "arrived": {
-        "role": "heading",
+        "role": "button",
         "name": {
-          "key": "focus.title"
+          "key": "home.start"
         }
       }
     },

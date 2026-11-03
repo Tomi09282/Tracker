@@ -97,6 +97,11 @@ export interface FractionProps {
   mode?: NumeralMode;
   /** What a screen reader says instead of "2 / 4". */
   srText?: string;
+  /**
+   * The count is complete (3 / 3 of focus-3): the slash and the whole are ink too, one figure in one
+   * colour. A partial count (1 / 4) keeps the pending tone. Default off.
+   */
+  complete?: boolean;
   /** Placement only — never a `text-…` class. */
   className?: string;
 }
@@ -290,7 +295,7 @@ const SLASH: Record<NumeralSize, { fontSize: string; letterSpacing: string }> = 
  * inks at the giant and 6 at `num`. The box is one cap high from the whole's cap line, so a
  * fraction under an eyebrow stands exactly where the frame draws it.
  */
-export function Fraction({ value, of, size = 'num', mode = 'static', srText, className }: FractionProps) {
+export function Fraction({ value, of, size = 'num', mode = 'static', srText, complete = false, className }: FractionProps) {
   const part = useFigure(value);
   const whole = useFigure(of);
   const direction = useDirection(value);
@@ -306,10 +311,10 @@ export function Fraction({ value, of, size = 'num', mode = 'static', srText, cla
       <span className="sr-only">{srText ?? `${part} / ${whole}`}</span>
       <span aria-hidden className="contents">
         <Figure text={part} size={size} mode={mode} direction={direction} overshoot={false} className="text-text-1" />
-        <span className={cn('inline-block leading-none text-text-3', TRIM_CLASS)} style={{ ...SLASH[size], ...inkOffsets('/', size, { overshoot: false }), letterSpacing: SLASH[size].letterSpacing }}>
+        <span className={cn('inline-block leading-none', complete ? 'text-text-1' : 'text-text-3', TRIM_CLASS)} style={{ ...SLASH[size], ...inkOffsets('/', size, { overshoot: false }), letterSpacing: SLASH[size].letterSpacing }}>
           /
         </span>
-        <Figure text={whole} size={size} mode="static" direction="up" overshoot={false} className="text-text-3" />
+        <Figure text={whole} size={size} mode="static" direction="up" overshoot={false} className={complete ? 'text-text-1' : 'text-text-3'} />
       </span>
     </span>
   );

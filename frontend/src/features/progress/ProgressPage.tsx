@@ -73,19 +73,28 @@ export function ProgressPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   // Napok is its own route (/progress/days): its switch comes back here with the chosen view.
-  const back = (useLocation().state as { tab?: unknown } | null)?.tab;
+  const arrival = useLocation().state as { tab?: unknown; switchFocus?: boolean } | null;
+  const back = arrival?.tab;
   const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>(back === 'photos' || back === 'sharing' ? back : 'body');
+  const switchRef = useRef<HTMLDivElement>(null);
+  // Arriving by the page switch (from Napok): the keyboard stays on the switch, on the chosen cell (review S-progress-days D3).
+  useLayoutEffect(() => {
+    if (arrival?.switchFocus) switchRef.current?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
+    // Once, on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Screen top="root">
       <div className="flex flex-col gap-2">
         <ScreenHeader kind="root" title={t('progress.title')} />
         {/* A TAB IS A FILTER, NOT A NEW SCREEN: one route, one URL, local state (R20). */}
+        <div ref={switchRef}>
         <Segmented
           layout="cells"
           label={t('progress.title')}
           value={tab}
-          onChange={(v) => (v === 'days' ? navigate('/progress/days', { replace: true }) : setTab(v))}
+          onChange={(v) => (v === 'days' ? navigate('/progress/days', { replace: true, state: { switchFocus: true } }) : setTab(v))}
           options={[
             { value: 'body', label: t('progress.tab.body') },
             { value: 'days', label: t('progressDays.tab') },
@@ -93,6 +102,7 @@ export function ProgressPage() {
             { value: 'sharing', label: t('progress.tab.sharing') },
           ]}
         />
+        </div>
       </div>
 
       <section aria-label={t(`progress.tab.${tab}`)} className="flex flex-col gap-section">

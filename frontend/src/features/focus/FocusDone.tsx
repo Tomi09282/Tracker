@@ -14,7 +14,7 @@ import type { FocusFinishResponse, FocusRules } from '../../lib/lifeos-api';
 import { useWallet } from '../coins/useCoins';
 import { readLevel } from '../coins/statement';
 import { FigUnit } from '../habits/HabitRow';
-import { coinsOf, minutesCoins, span } from './focusFormat';
+import { coinsOf, endedAtClock, minutesCoins, span } from './focusFormat';
 
 /**
  * focus-3 — the finished block (`figma-build/lifeos/focus-3.body.js`):
@@ -56,7 +56,7 @@ export function FocusDone({ result, rules }: { result: FocusFinishResponse; rule
       <StatBlock
         label={s.title}
         caption={t('focus.doneMeta', {
-          span: span(s.startTime ?? '', s.endTime ?? '', '–'),
+          span: span(s.startTime ?? '', endedAtClock(s), '–'),
         })}
       >
         <FigUnit value={minutes} unit={t('focus.unitMin')} size="giant" unitClass="text-eyebrow" />
@@ -66,26 +66,29 @@ export function FocusDone({ result, rules }: { result: FocusFinishResponse; rule
         <RowStack open close>
           <LedgerRow
             label={t('focus.coins')}
+            // Nothing paid (an early finish at minute 0): no "jóváírva" and no coin, just the figure.
             note={
-              <span className="inline-flex items-start gap-2 text-cap text-text-2">
-                {t('focus.credited')}
-                <Pic slot="coin" width={22} className="-my-0.75" />
-              </span>
+              awarded > 0 ? (
+                <span className="inline-flex items-start gap-2 text-cap text-text-2">
+                  {t('focus.credited')}
+                  <Pic slot="coin" width={22} className="-my-0.75" />
+                </span>
+              ) : undefined
             }
-            value={`+${awarded}`}
+            value={awarded > 0 ? `+${awarded}` : '0'}
             srText={t('focus.coinsPlus', { n: awarded })}
           />
           {s.checkinMinutes > 0 ? (
             <LedgerRow
               label={t('focus.checkin')}
               note={<span className="text-cap text-text-2">{t('focus.every', { n: s.checkinMinutes })}</span>}
-              value={<Fraction value={checkins} of={s.checkinsMax} />}
+              value={<Fraction value={checkins} of={s.checkinsMax} complete={checkins >= s.checkinsMax} />}
             />
           ) : null}
           {level ? (
             <LedgerRow
               label={t('focus.level')}
-              note={<ProgressBar value={level.progress} className="mb-1.25 w-30" label={t('focus.level')} />}
+              note={<ProgressBar value={level.progress} className="relative -top-0.75 mb-1.25 w-30" label={t('focus.level')} />}
               value={level.level}
             />
           ) : null}

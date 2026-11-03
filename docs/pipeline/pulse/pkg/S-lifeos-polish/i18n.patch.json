@@ -1,0 +1,52 @@
+{
+  "package": "S-lifeos-polish",
+  "base": "2be8036",
+  "namespaces": [
+    "rewards",
+    "today"
+  ],
+  "set": [
+    {
+      "key": "rewards.gone",
+      "hu": "Ez a jutalom nem érhető el",
+      "en": "This reward is not available",
+      "de": "Diese Belohnung ist nicht verfügbar",
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-rewards 6: /rewards/:id answering 404 (missing or another account's reward) showed the retry message; same form as habits.gone (\"Ez a szokás nem érhető el\")"
+    },
+    {
+      "key": "today.habits.pays",
+      "hu": "+{{coins}} érme / nap · {{days}} nap után {{mult}}",
+      "en": "+{{coins}} coins / day · {{mult}} after {{days}} days",
+      "de": "+{{coins}} Münzen / Tag · {{mult}} nach {{days}} Tagen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-3 fourth line of the empty SZOKÁSOK block (\"+10 érme / nap · 7 nap után ×1,25\"), quoted from GET /lifeos/today dayRules"
+    },
+    {
+      "key": "today.tasks.pays",
+      "hu": "+{{min}}–{{max}} érme teendőnként",
+      "en": "+{{min}}–{{max}} coins per task",
+      "de": "+{{min}}–{{max}} Münzen pro Aufgabe",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-3 fourth line of the empty FELADATOK block (\"+5–20 érme teendőnként\"), quoted from GET /lifeos/today taskRules"
+    },
+    {
+      "key": "today.hero.perfectPays",
+      "hu": "+{{coins}} érme napzáráskor",
+      "en": "+{{coins}} coins at day close",
+      "de": "+{{coins}} Münzen zum Tagesabschluss",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-2 caption \"Tökéletes nap · +25 érme napzáráskor\", quoted from GET /lifeos/today dayRules"
+    }
+  ],
+  "remove": [
+    {
+      "key": "today.habit.reminder",
+      "reason": "its only consumer, features/today/TodayHabits.tsx, now prints \"Naponta · emlékeztető 21:30\" from habits.scheduleDaily + habits.reminderAt (the words of the Szokások list and frame ma-4)"
+    }
+  ]
+}

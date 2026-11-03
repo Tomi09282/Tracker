@@ -1,0 +1,12 @@
+{
+  "id": "R-S-lifeos-polish-02",
+  "from": "S-lifeos-polish",
+  "kind": "kit",
+  "blocking": false,
+  "target": "frontend/src/ui/shell/ScreenHeader.tsx (BackControl)",
+  "need": "The back control of a pushed header ('‹ MA') is 36.6 x 44 pt: its box is the slot (12) + gap + the parent's name, so the thumb target is 7 pt narrower than 44 (reviews S-habits-fix 6, S-challenges 8, S-focus 11). The patch gives the control a 44 pt minimum width for every form (it was only the bare form); the ink starts on the gutter as before, the extra width is empty space to the right of the name. Optional second kit item, not patched: a bare DateTrigger (glyph 'none') - event-form draws 'okt. 21.' without a chevron; S-lifeos-polish hides the chevron with a [&_svg]:hidden class on the field instead.",
+  "evidence": "review reports; frontend/src/ui/shell/ScreenHeader.tsx",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-lifeos-polish/requests/R-S-lifeos-polish-02.patch",
+  "interim": "applied in the slot working tree for the captures, never committed",
+  "status": "open"
+}

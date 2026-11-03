@@ -103,7 +103,8 @@
       "left": "offen",
       "onlyWorkout": "Heute ein Punkt: dein Training",
       "perfect": "Perfekter Tag",
-      "sr": "Heute {{done}} von {{total}} erledigt"
+      "sr": "Heute {{done}} von {{total}} erledigt",
+      "perfectPays": "+{{coins}} Münzen zum Tagesabschluss"
     },
     "ledger": {
       "coins": "Münzen",
@@ -119,11 +120,11 @@
       "all": "Alle",
       "emptyTitle": "Noch keine Gewohnheiten",
       "emptyBody": "Fang mit einer an, zum Beispiel Wasser.",
-      "first": "Erste Gewohnheit"
+      "first": "Erste Gewohnheit",
+      "pays": "+{{coins}} Münzen / Tag · {{mult}} nach {{days}} Tagen"
     },
     "habit": {
       "done": "Erledigt",
-      "reminder": "Erinnerung {{time}}",
       "pending": "Heute noch nicht erledigt",
       "clean": "Seit {{count}} Tagen sauber",
       "relapsed": "Heute {{count}} Rückfall",
@@ -142,7 +143,8 @@
       "capture": "Erfassen",
       "doneToday": "Heute erledigt · {{count}}",
       "emptyTitle": "Nichts zu tun",
-      "emptyBody": "Erfasse alles, mit Frist."
+      "emptyBody": "Erfasse alles, mit Frist.",
+      "pays": "+{{min}}–{{max}} Münzen pro Aufgabe"
     },
     "task": {
       "low": "Niedrig",
@@ -1554,7 +1556,8 @@
       "nameRequired": "Gib der Belohnung einen Namen",
       "costMin": "Mindestens 1 Münze",
       "costMax": "Höchstens {{count}} Münzen"
-    }
+    },
+    "gone": "Diese Belohnung ist nicht verfügbar"
   },
   "calendar": {
     "title": "Kalender",

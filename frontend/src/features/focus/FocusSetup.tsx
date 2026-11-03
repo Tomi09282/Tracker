@@ -178,7 +178,8 @@ function Radios({
   };
   return (
     <div onKeyDown={onKey}>
-      <ChipRow label={label} role="radiogroup">
+      {/* `wrap`: at 360 pt in German "2 Std." would be cut by the row's own scroll; it drops to a second line instead (review S-focus 10). */}
+      <ChipRow label={label} role="radiogroup" wrap>
         {values.map((v, i) => (
           <Chip
             key={v}

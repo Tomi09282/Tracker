@@ -45,6 +45,19 @@ export function clockAt(epochSeconds: number, locale: string, timeZone?: string)
 /** "21:10 → 22:00" / "21:10 – 22:00": two clock figures, the separator is the frame's. */
 export const span = (start: string, end: string, sep: '→' | '–') => `${start} ${sep} ${end}`;
 
+/**
+ * The wall-clock time a block really ended. A block closed before its planned end (Befejezés early)
+ * ends at the close, not at the plan: the planned end time moved back by what was left. Zone-free: both
+ * clocks are the server's wall times and the shift is a difference of two instants.
+ */
+export function endedAtClock(s: Pick<FocusSession, 'endTime' | 'endsAt' | 'closedAt'>): string {
+  const end = s.endTime ?? '';
+  if (s.closedAt === null || s.closedAt >= s.endsAt || !/^\d{2}:\d{2}$/.test(end)) return end;
+  const minutes = Math.round((s.endsAt - s.closedAt) / 60);
+  const total = (((Number(end.slice(0, 2)) * 60 + Number(end.slice(3, 5)) - minutes) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
 /** "1 / 3": mono figures, the frame's spacing. */
 export const ratio = (done: number, of: number) => `${done} / ${of}`;
 

@@ -1,0 +1,14 @@
+diff --git a/frontend/src/ui/shell/ScreenHeader.tsx b/frontend/src/ui/shell/ScreenHeader.tsx
+index 5285062..ce8f26e 100644
+--- a/frontend/src/ui/shell/ScreenHeader.tsx
++++ b/frontend/src/ui/shell/ScreenHeader.tsx
+@@ -110,8 +110,7 @@ const EYEBROW = 'text-eyebrow text-text-2';
+  */
+ function BackControl({ back }: { back: ScreenHeaderBack }) {
+   const className = cn(
+-    'inline-flex min-h-[var(--target-min)] shrink-0 items-center gap-1.5 text-text-1',
+-    back.bare && 'min-w-[var(--target-min)]',
++    'inline-flex min-h-[var(--target-min)] min-w-[var(--target-min)] shrink-0 items-center gap-1.5 text-text-1',
+     'transition-opacity duration-[var(--duration-instant)] ease-[var(--ease-standard)]',
+     'active:opacity-[var(--pressed-opacity)] motion-reduce:transition-none',
+     // A specimen holds a state that needs a finger or a keyboard: the same declarations as the

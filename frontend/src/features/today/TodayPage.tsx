@@ -100,6 +100,7 @@ export function TodayPage() {
       <TodayHero
         count={count}
         earnedMinor={day ? earnedTodayMinor(day) : null}
+        perfectMinor={day?.dayRules?.perfectDayMinor ?? null}
         pending={lifeos.isPending}
         failed={lifeos.isError && !day}
         onRetry={() => void lifeos.refetch()}
@@ -113,8 +114,8 @@ export function TodayPage() {
         <TodayHabitsSkeleton />
       ) : day ? (
         <>
-          <TodayHabits habits={day.habits ?? null} timeZone={timeZone} onFirst={() => setNewHabit((n) => Math.abs(n) + 1)} />
-          <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} onCapture={() => setCapturing(true)} />
+          <TodayHabits habits={day.habits ?? null} timeZone={timeZone} rules={day.dayRules ?? null} onFirst={() => setNewHabit((n) => Math.abs(n) + 1)} />
+          <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} rules={day.taskRules ?? null} onCapture={() => setCapturing(true)} />
           <TodayDraw day={day} place="settled" />
           <TodayFocus focus={day.focus} />
         </>
@@ -123,7 +124,7 @@ export function TodayPage() {
       <TodayNutrition date={todayLocal()} />
 
       {/* KÖVETKEZŐ (S-calendar, plan Phase 5): the next event within 7 days; not drawn without one. */}
-      <NextEventSection next={day?.nextEvent} today={todayLocal()} />
+      <NextEventSection next={day?.nextEvent} today={day?.today ?? todayLocal()} />
 
       {/* The permanent way to the exercise library (D2), last on Ma (owner, 2026-10-17; round B
           draws it with the barbell still and a line saying what is there). */}

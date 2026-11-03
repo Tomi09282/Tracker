@@ -1,0 +1,106 @@
+{
+  "id": "S-lifeos-polish",
+  "decision": "frontend polish round for the merged LifeOS screens (Ma, Szokasok, Feladatok + capture, Kihivasok, Jutalmak, Naptar, Fokusz, Halads > Napok) on the independent reviews in .pulse/review/{S-ma-fix,S-habits-fix,S-tasks-fix,S-challenges,S-rewards,S-calendar,S-focus,S-progress-days}/REVIEW.md and the B-lifeos-polish API (taskRules, nextEvent.firstReminder, challenge.picked); approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md; approved frames round B",
+  "owns": [
+    "backend/scripts/smoke/lifeos-polish.js",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/lifeos/rules.js",
+    "frontend/src/features/calendar/EventSheet.tsx",
+    "frontend/src/features/calendar/NextEventSection.tsx",
+    "frontend/src/features/challenges/ChallengesPage.tsx",
+    "frontend/src/features/challenges/TodayDraw.tsx",
+    "frontend/src/features/focus/FocusDone.tsx",
+    "frontend/src/features/focus/FocusSetup.tsx",
+    "frontend/src/features/focus/focusApi.ts",
+    "frontend/src/features/focus/focusFormat.ts",
+    "frontend/src/features/progress/DaysPage.tsx",
+    "frontend/src/features/progress/ProgressPage.tsx",
+    "frontend/src/features/rewards/RewardDetailPage.tsx",
+    "frontend/src/features/tasks/tasksData.ts",
+    "frontend/src/features/today/TodayEmpty.tsx",
+    "frontend/src/features/today/TodayHabits.tsx",
+    "frontend/src/features/today/TodayHero.tsx",
+    "frontend/src/features/today/TodayPage.tsx",
+    "frontend/src/features/today/TodayTasks.tsx",
+    "docs/pipeline/pulse/pkg/S-ma/make-states.mjs",
+    "docs/pipeline/pulse/pkg/S-ma/states.json",
+    "docs/pipeline/pulse/pkg/S-calendar/make-states.mjs",
+    "docs/pipeline/pulse/pkg/S-calendar/states.json",
+    "docs/pipeline/pulse/pkg/S-tasks/states.json",
+    "docs/pipeline/pulse/pkg/S-challenges/states.json",
+    "docs/pipeline/pulse/pkg/S-focus/states.json",
+    "docs/pipeline/pulse/pkg/S-rewards/states.json",
+    "docs/pipeline/pulse/pkg/S-lifeos-polish/**"
+  ],
+  "takenFrom": {
+    "S-ma (closed)": [
+      "frontend/src/features/today/**",
+      "docs/pipeline/pulse/pkg/S-ma/make-states.mjs",
+      "docs/pipeline/pulse/pkg/S-ma/states.json",
+      "docs/pipeline/pulse/pkg/S-ma/fixture-schema-check.mjs"
+    ],
+    "S-habits (closed)": [
+      "frontend/src/features/habits/**"
+    ],
+    "S-tasks (closed)": [
+      "frontend/src/features/tasks/**",
+      "frontend/src/features/capture/**",
+      "docs/pipeline/pulse/pkg/S-tasks/states.json"
+    ],
+    "S-challenges (closed)": [
+      "frontend/src/features/challenges/**",
+      "docs/pipeline/pulse/pkg/S-challenges/make-states.mjs",
+      "docs/pipeline/pulse/pkg/S-challenges/states.json"
+    ],
+    "S-rewards (closed)": [
+      "frontend/src/features/rewards/**",
+      "docs/pipeline/pulse/pkg/S-rewards/states.json"
+    ],
+    "S-calendar (closed)": [
+      "frontend/src/features/calendar/**",
+      "docs/pipeline/pulse/pkg/S-calendar/make-states.mjs",
+      "docs/pipeline/pulse/pkg/S-calendar/states.json"
+    ],
+    "S-focus (closed)": [
+      "frontend/src/features/focus/**",
+      "docs/pipeline/pulse/pkg/S-focus/states.json"
+    ],
+    "S-progress-days (closed)": [
+      "frontend/src/features/progress/DaysPage.tsx",
+      "frontend/src/features/progress/days/**",
+      "docs/pipeline/pulse/pkg/S-progress-days/states.json"
+    ],
+    "B-lifeos-polish (closed)": [
+      "backend/src/lifeos/rules.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/scripts/smoke/lifeos-polish.js"
+    ]
+  },
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "shared.patch": [
+      "frontend/src/lib/lifeos-api.ts"
+    ],
+    "requests": "docs/pipeline/pulse/pkg/S-lifeos-polish/requests/"
+  },
+  "frames": [
+    "lifeos/ma-1",
+    "lifeos/ma-2",
+    "lifeos/ma-3",
+    "lifeos/ma-4",
+    "lifeos/capture",
+    "lifeos/event-form",
+    "lifeos/focus-1",
+    "lifeos/focus-3",
+    "lifeos/progress-days",
+    "lifeos/rewards-1",
+    "lifeos/reward-detail",
+    "lifeos/habits-1",
+    "lifeos/habit-form"
+  ],
+  "note": "owns narrowed to the files the diff touches (checked by hand, as B-lifeos-polish did); takenFrom names the closed packages they come from"
+}
