@@ -121,16 +121,28 @@ export function refreshSession(): Promise<boolean> {
 }
 
 /**
+ * The auth routes where a 401 IS the answer, so it must never trigger a refresh: a wrong password
+ * on login / change-credentials, a refresh token the server has refused (refreshing again would
+ * loop), a logout of a session that is already gone, a registration. Everything else under
+ * `/auth/` is bound to the session — `GET /auth/me` (who am I) and `PATCH /auth/me` (my name) —
+ * and an expired 15-minute access cookie there is exactly what a refresh exists to repair.
+ * (Before this list, ALL of `/auth/` was exempt: a cold start or a reconnect more than 15 minutes
+ * after the last token read `/auth/me` as "signed out" although the 7-day refresh cookie was valid.)
+ */
+const NO_REFRESH = /^\/auth\/(?:login|register|refresh|logout|logout-all|change-credentials)(?:[/?]|$)/;
+
+/**
  * Calls the API and, on a 401, transparently refreshes once and retries.
  *
- * Deliberately NOT applied to the auth routes themselves: a failed login must surface as a
- * failed login, not trigger a refresh loop.
+ * Not applied to the routes in `NO_REFRESH`: a failed login must surface as a failed login, not
+ * trigger a refresh loop. A refresh that fails throws the ORIGINAL 401, so a caller that maps a 401
+ * to "signed out" (`useSession`) still gets it.
  */
 export async function apiWithRefresh<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
   try {
     return await api<T>(path, options);
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401 && !path.startsWith('/auth/')) {
+    if (err instanceof ApiError && err.status === 401 && !NO_REFRESH.test(path)) {
       if (await refreshSession()) return api<T>(path, options);
     }
     throw err;

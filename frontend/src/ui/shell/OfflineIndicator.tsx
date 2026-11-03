@@ -5,6 +5,7 @@ import { cn } from '../../lib/cn';
 import { apiWithRefresh } from '../../lib/api';
 import { flushOutbox, subscribeOutbox, type OutboxEntry } from '../../lib/outbox';
 import { useSession } from '../../features/auth/useSession';
+import { isVerifiedSession } from '../../features/auth/sessionCache';
 import { Rule } from '../data/Rule';
 import { NoticeLine } from '../feedback/NoticeLine';
 
@@ -34,7 +35,13 @@ import { NoticeLine } from '../feedback/NoticeLine';
  */
 export function OfflineIndicator() {
   const qc = useQueryClient();
-  const { data: user } = useSession();
+  const { data: user, dataUpdatedAt } = useSession();
+  // The outbox is drained only under a session the SERVER has confirmed. An offline cold start draws
+  // the shell from a remembered hint (`RequireAuth`), and a hint must not act: `flushOutbox` drops an
+  // entry on any 4xx but 408/429, so draining under a stale or planted hint would send real writes
+  // under whoever's cookies these are and lose them to a 401. The drain runs again as soon as the
+  // re-check turns the hint into a verified session (`drain` changes, the effect below re-runs).
+  const verifiedUser = isVerifiedSession(user, dataUpdatedAt) ? user : null;
   const [offline, setOffline] = useState(() => typeof navigator !== 'undefined' && !navigator.onLine);
   const [queued, setQueued] = useState<OutboxEntry[]>([]);
   const [sending, setSending] = useState(false);
@@ -44,10 +51,10 @@ export function OfflineIndicator() {
   useEffect(() => subscribeOutbox(setQueued), []);
 
   const drain = useCallback(async () => {
-    if (!user) return;
+    if (!verifiedUser) return;
     setSending(true);
     try {
-      const result = await flushOutbox(user.id, (path, body) =>
+      const result = await flushOutbox(verifiedUser.id, (path, body) =>
         apiWithRefresh(path, { method: 'POST', body }),
       );
       if (result.sent > 0) {
@@ -58,7 +65,7 @@ export function OfflineIndicator() {
     } finally {
       setSending(false);
     }
-  }, [user, qc]);
+  }, [verifiedUser, qc]);
 
   useEffect(() => {
     let cancelled = false;

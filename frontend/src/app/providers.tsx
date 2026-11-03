@@ -1,27 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { ApiError } from '../lib/api';
+import { createTrackerQueryClient } from './trackerQueryClient';
 import { ElementStyleProvider } from '../ui/feedback/ElementStyleProvider';
 import { LoadingAnnouncer } from '../ui/feedback/LoadingAnnouncer';
 import { ToastHost } from '../ui/feedback/ToastHost';
 import { OfflineIndicator } from '../ui/shell/OfflineIndicator';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Refetching every time the window regains focus is a mobile battery and data tax for
-      // data that changes on the order of minutes. Screens that need freshness ask for it.
-      refetchOnWindowFocus: false,
-      staleTime: 30_000,
-      retry: (failureCount, error) => {
-        // Retrying a 4xx just repeats a request the server already refused — and on a 429 it
-        // actively makes the rate limiting worse.
-        if (error instanceof ApiError && error.status < 500) return false;
-        return failureCount < 2;
-      },
-    },
-  },
-});
+const queryClient = createTrackerQueryClient();
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
