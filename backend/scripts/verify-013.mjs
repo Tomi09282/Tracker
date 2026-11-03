@@ -57,12 +57,18 @@ try {
   // are not already linked is all this needs, and the pair is only ever used to hang a rolled-back
   // conversation off.
   while (freeLinks().length < 2) {
+    // The pair must not be linked already: on a database seeded only by seed:dev-users the one
+    // coach and the one member ARE linked, and re-inserting that pair crashed the probe on
+    // coach_clients' UNIQUE (coach_id, client_id) before it checked anything.
     const pair = c.prepare(
-      `SELECT (SELECT id FROM users WHERE role IN ('coach','admin') LIMIT 1) AS coach,
-              (SELECT id FROM users WHERE role = 'user' LIMIT 1)             AS client`,
+      `SELECT co.id AS coach, cl.id AS client
+         FROM users co, users cl
+        WHERE co.role IN ('coach','admin') AND cl.role = 'user' AND co.id <> cl.id
+          AND NOT EXISTS (SELECT 1 FROM coach_clients x WHERE x.coach_id = co.id AND x.client_id = cl.id)
+        LIMIT 1`,
     ).get();
     if (!pair?.coach || !pair?.client) {
-      console.log('FAIL  the dev database has no coach and no client to build a link from');
+      console.log('FAIL  the dev database has no unlinked coach / member pair to build a link from');
       c.exec('ROLLBACK');
       process.exit(1);
     }
