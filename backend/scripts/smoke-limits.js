@@ -66,5 +66,57 @@ const post = (path, body) =>
   check('standard RateLimit headers present', hasStandard, [...res.headers.keys()].filter((k) => k.startsWith('ratelimit')).join(','));
 }
 
+// --- the account-admin writes carry the admin write budget: 60 per admin AND 120 per IP -------
+//
+// B-admin-accounts. The account writes share the budgets of admin/limiters.js with the older admin
+// writes (role, disable, enable, moderation). The admin tokens are signed here from the throwaway
+// database's own rows (login has its own 10-per-IP budget, which the blocks above use up), so this
+// needs no password and no login. After the first call the POST is a replay (nothing to reset),
+// which is exactly what makes it cheap to repeat: the limiter, not the transaction, is what stops
+// call 61.
+if (process.env.SMOKE_ACCOUNTS && process.env.DB_PATH) {
+  const { default: Database } = await import('better-sqlite3-multiple-ciphers');
+  const { deriveDbKeyHex } = await import('../src/lib/dbkey.js');
+  const { signAccessToken } = await import('../src/auth/tokens.js');
+  const conn = new Database(process.env.DB_PATH);
+  conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+  conn.pragma('busy_timeout = 5000');
+  const plant = (label, role) => {
+    const id = Number(
+      conn.prepare('INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)').run(`rl-adm-${label}-${stamp}@example.com`, 'x', role).lastInsertRowid,
+    );
+    return conn.prepare('SELECT id, role, session_version FROM users WHERE id = ?').get(id);
+  };
+  const victim = plant('victim', 'user');
+  const admins = [plant('a1', 'admin'), plant('a2', 'admin')];
+  const reset = async (admin) => {
+    const token = await signAccessToken(admin);
+    const res = await fetch(`${BASE}/api/v1/admin/users/${victim.id}/reset-lockout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF': '1', Cookie: `access=${token}` },
+      body: '{}',
+    });
+    return res.status;
+  };
+  const first = [];
+  for (let i = 0; i < 64; i += 1) first.push(await reset(admins[0]));
+  check(
+    'account writes: one admin gets 60 calls per 15 minutes, then 429',
+    first.slice(0, 60).every((s) => s === 200) && first.slice(60).every((s) => s === 429),
+    `${first.slice(58, 62).join(',')} ... ${first.slice(60).join(',')}`,
+  );
+  // 64 calls are on the per-IP counter and the second admin has used none of its own 60: the per-IP
+  // budget (120) runs out after 56 more calls.
+  const second = [];
+  for (let i = 0; i < 60; i += 1) second.push(await reset(admins[1]));
+  const okCount = second.filter((s) => s === 200).length;
+  check(
+    'account writes: the per-IP budget of 120 stops a second admin before its own 60 are used',
+    okCount === 56 && second.slice(56).every((s) => s === 429),
+    `${okCount} accepted, then ${second.slice(55, 58).join(',')}`,
+  );
+  conn.close();
+}
+
 console.log(`\n${failed === 0 ? 'LIMITS OK' : 'LIMITS FAILED'} — ${passed} passed, ${failed} failed`);
 process.exit(failed === 0 ? 0 : 1);

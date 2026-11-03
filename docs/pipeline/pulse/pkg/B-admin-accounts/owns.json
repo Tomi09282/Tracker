@@ -1,0 +1,35 @@
+{
+  "id": "B-admin-accounts",
+  "decision": "owner decisions 2026-11-03: accounts are editable only through the safe set (display name, role with the admin's own password for a grant, disable and enable with a REQUIRED reason, coin adjustment, reset login lockout, sign out all sessions, force password change); the e-mail is read-only; lists have search + filters + 'more' paging; approved Figma frames admin-accounts-v2, admin-account-detail-1..3 (TRACKER-mockups/5-pulse/figma-build/admin-v2/DESIGN-NOTES.md)",
+  "owns": [
+    "backend/src/admin/accounts.js",
+    "backend/src/admin/limiters.js",
+    "backend/src/db/tx/admin-accounts.js",
+    "backend/src/lib/display-name.js",
+    "backend/src/lib/like.js",
+    "backend/scripts/smoke/admin-accounts.js",
+    "backend/scripts/verify-admin-accounts.mjs",
+    "docs/pipeline/pulse/pkg/B-admin-accounts/**"
+  ],
+  "sharedEdits": {
+    "decision": "small edits to integrator-owned / shared files, each listed so the integrator can resolve conflicts",
+    "files": [
+      "backend/server.js (one import + one app.use next to adminRoutes)",
+      "backend/src/db/index.js (the facade names of the new reads and writes, one block)",
+      "backend/src/db/worker.js (one `export * from './tx/admin-accounts.js'`; setAccountDisabledTx: a reason is required for enable too; adminAdjustCoinsTx: refuses the admin's own account before any other check)",
+      "backend/src/admin/routes.js (limiters moved to admin/limiters.js and imported; GET /admin/users moved to admin/accounts.js; POST /admin/users/:id/enable takes a required reason)",
+      "backend/src/auth/routes.js (the display-name validator moved to lib/display-name.js; behaviour of PATCH /auth/me unchanged)",
+      "backend/src/coins/routes.js (maps the new 'self' outcome of POST /admin/users/:id/coins to 409 cannot_adjust_own_coins)",
+      "backend/scripts/smoke.js (one section hook after the LifeOS sections; SMOKE_ONLY=admin-accounts runs just that section)",
+      "backend/scripts/smoke-run.mjs (SMOKE_SERVER overrides the server entry, used by verify-admin-accounts.mjs to run a planted-defect copy)",
+      "backend/package.json (verify:admin-accounts)"
+    ]
+  },
+  "handIn": {},
+  "notInScope": [
+    "no migration (036 is NOT used): every read is an indexed query on existing tables; the audit_log read by (target_type, target_id) is an id-descending walk without a dedicated index - see api.md follow-ups",
+    "the screens (S-admin-accounts reads api.md)",
+    "marketplace post moderation, statistics (B-admin-posts, B-admin-stats)",
+    "work-package.json entry - the integrator's, at merge"
+  ]
+}

@@ -1179,7 +1179,6 @@
       "id": "B-roles",
       "title": "Roles stack on one account in what the server answers (approved plan phase 1 Backend, owner request \"kezdjuk el implementalni a tervet\"): GET /auth/me and PATCH /me carry roles, GET /conversations takes ?side=coach|client, GET /clients/:id/records is coach-only, check-routes refuses any read of a client view",
       "owns": [
-        "backend/src/auth/routes.js",
         "backend/src/chat/routes.js",
         "backend/scripts/check-routes.mjs",
         "docs/pipeline/pulse/pkg/B-roles/**"
@@ -1209,7 +1208,6 @@
         "backend/src/db/migrations/030_retire_theme_packs.sql",
         "backend/scripts/seed-smoke-store.mjs",
         "backend/scripts/verify-019.mjs",
-        "backend/scripts/smoke-run.mjs",
         "docs/pipeline/pulse/pkg/B-q2/**"
       ],
       "handIn": {
@@ -1240,7 +1238,6 @@
       "id": "B-core",
       "title": "LifeOS Phase 2 \"Core\" on the backend (approved plan abundant-booping-willow, B0 + P2; owner 2026-10-17 / 2026-10-18): the worker split (db/conn.js + db/tx/*.js), migration 031 (user_prefs, point_rule_sets, coin_events, daily_summaries, coin_reasons xp / spend, spend-covered trigger), the lazy day close, the workout award, /me/prefs, /lifeos/today, /admin/rules, the extended wallet and ledger",
       "owns": [
-        "backend/server.js",
         "backend/scripts/check-admin-audit.mjs",
         "backend/scripts/check-gdpr.mjs",
         "backend/scripts/check-route-tx.mjs",
@@ -1319,7 +1316,6 @@
         "backend/scripts/lib/worker-sources.mjs",
         "backend/scripts/smoke/lifeos-habits-tasks.js",
         "backend/scripts/verify-032.mjs",
-        "backend/scripts/verify-gates.mjs",
         "backend/scripts/verify-lifeos-rules.mjs",
         "backend/src/db/conn.js",
         "backend/src/db/migrations/032_lifeos_habits_tasks.sql",
@@ -1438,15 +1434,11 @@
       "id": "B-focus",
       "title": "LifeOS Phase 6 \"Focus + statistics\" on the backend (approved plan abundant-booping-willow, Phase 6, backend half B.1-B.10; owner 2026-10-18: design round B and the economy sheet approved): migration 035 (focus_sessions with one unfinished session per user, the frozen plan, paced check-ins, the truthful close and the truthful focus.finish coin event), start / check-in / finish / cancel as named worker transactions, the /focus routes, GET /lifeos/days and GET /lifeos/stats (ports of the f_app stats functions), the focus block on GET /lifeos/today, GDPR",
       "owns": [
-        "backend/package.json",
         "backend/scripts/smoke/lifeos-focus.js",
         "backend/scripts/verify-035.mjs",
-        "backend/src/coins/routes.js",
         "backend/src/db/gdpr.js",
-        "backend/src/db/index.js",
         "backend/src/db/lifeos-focus-views.js",
         "backend/src/db/migrations/035_lifeos_focus.sql",
-        "backend/src/db/worker.js",
         "backend/src/lifeos/focus.js",
         "backend/src/lifeos/stats.js",
         "backend/src/lifeos/stats-routes.js",
@@ -1528,6 +1520,55 @@
         "npm run build (cwd frontend/, integration worktree)"
       ],
       "notes": "Added by the integrator at merge (merge-B-lifeos-polish) from the package's own pkg/B-lifeos-polish/owns.json: the package ran outside the plan entry list (no brief), on the approved LifeOS plan. The diff was checked by hand against owns.json: every touched path is in it. owns.json claims a wider set (backend/package.json, gdpr.js, index.js, worker.js, coins/routes.js, lifeos-focus-views.js, the other smoke/lifeos-*.js, a verify-lifeos-polish.mjs that was never written, backend/src/lifeos/**); only the 18 paths the package changed pass to it, from the closed B-focus (6), B-calendar (2), B-rewards-challenges (4), B-habits-tasks (5) and B-core (1); backend/src/coins/achievements.js (019 coins, pre-Pulse) had no owner and smoke/lifeos-polish.js is new. No migration (036 unused). The security review's FINDINGS.md was never written; the package took its findings from the attacks/*.mjs and out-*.txt files (handoff.json lists the four low / info ones left open). The new response fields are required in lifeos-api.ts, so the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges and S-focus need taskRules, nextEvent.reminders / firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs pass again (the frontend polish round). The dev backend on :3000 picks the changes up only after a restart. At merge-S-lifeos-polish backend/scripts/smoke/lifeos-polish.js, backend/src/db/tx/lifeos.js, backend/src/lifeos/rules.js passed to S-lifeos-polish (B-lifeos-polish is closed; one file, one owner). At merge-P-picker-muscles backend/scripts/smoke.js passed to P-picker-muscles (B-lifeos-polish is closed; one file, one owner)."
+    },
+    {
+      "id": "B-admin-accounts",
+      "title": "The admin account backend (owner decisions 2026-11-03, figma-build/admin-v2/DESIGN-NOTES.md): GET /admin/users carries displayName, searches e-mail and display name (accent- and case-insensitive, wildcards escaped), filters by role and state, five sort keys with keyset cursors and a total; GET /admin/users/:id is one read snapshot (identity, disable reason, sessions, lockout, coaching, marketplace, coins, activity counts, audit tail); PATCH /admin/users/:id/name and POST reset-lockout / signout-all / force-password-change are named IMMEDIATE transactions with a DB-side admin re-check and their own audit action; POST /admin/users/:id/enable now REQUIRES a reason; POST /admin/users/:id/coins refuses the admin's own account (409 cannot_adjust_own_coins); admin rate-limit budgets are shared through admin/limiters.js; no migration",
+      "owns": [
+        "backend/package.json",
+        "backend/scripts/brain-gen.mjs",
+        "backend/scripts/smoke-limits.js",
+        "backend/scripts/smoke-run.mjs",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/admin-accounts.js",
+        "backend/scripts/verify-admin-accounts.mjs",
+        "backend/scripts/verify-gates.mjs",
+        "backend/server.js",
+        "backend/src/admin/accounts.js",
+        "backend/src/admin/limiters.js",
+        "backend/src/admin/routes.js",
+        "backend/src/auth/routes.js",
+        "backend/src/coins/routes.js",
+        "backend/src/db/index.js",
+        "backend/src/db/tx/admin-accounts.js",
+        "backend/src/db/worker.js",
+        "backend/src/lib/display-name.js",
+        "backend/src/lib/like.js",
+        "docs/pipeline/pulse/pkg/B-admin-accounts/**"
+      ],
+      "handIn": {},
+      "dependsOn": [
+        "B-focus",
+        "B-roles",
+        "B-lifeos-polish"
+      ],
+      "parallelGroup": "backend lane (owner admin round 2026-11-03)",
+      "size": "L",
+      "acceptance": [
+        "GET /admin/users: displayName per row, q over e-mail and display name, role / state filters, sort name|created|email|role|clients with a keyset cursor each, total of the filtered set, page cap 24, a bad cursor is a 400",
+        "GET /admin/users/:id answers from ONE read snapshot; unknown id is 404; activity is counts only; no provider ids",
+        "PATCH name, POST reset-lockout / signout-all / force-password-change: one worker call each, IMMEDIATE transaction, actor re-read as an enabled admin with the session version, replay answers replayed:true, unique audit actions user.name.change / user.lockout.reset / user.sessions.revoke / user.password.force",
+        "POST /admin/users/:id/enable requires a reason (route and transaction); an admin cannot adjust their own coins (409 cannot_adjust_own_coins)",
+        "smoke/admin-accounts.js (160 assertions) and verify-admin-accounts.mjs (16 planted defects) green"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree, fresh migrated DB + seed:dev-users; verify:015 and verify:013 are the accepted fresh-DB / demo-DB reds)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "node scripts/verify-admin-accounts.mjs (cwd backend/)",
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-admin-accounts) from the package's own pkg/B-admin-accounts/owns.json: the package ran outside the plan entry list (no brief). The diff was checked against owns.json: every changed path passes to it. Passed from the closed lanes: B-focus (4), B-q2 (1), P-picker-muscles (1), B-habits-tasks (1), B-core (1), B-roles (1); backend/src/admin/routes.js, scripts/brain-gen.mjs and scripts/smoke-limits.js had no owner. No migration (036 unused). The shared edits in server.js, db/index.js, db/worker.js, auth/routes.js, coins/routes.js, smoke.js, smoke-run.mjs, package.json were checked by hand against owns.json sharedEdits. B-admin-posts and B-admin-stats, running in parallel, will edit the same shared files; whichever merges second applies its edits to the moved tree and takes the paths over. The dev backend on :3000 picks the changes up only after a restart. Follow-ups from handoff.json: brain:gen to refresh 30-API/Endpoints.md; no (target_type, target_id) index on audit_log; frame 3b draws the coin row on the own account, the server answers 409."
     }
   ],
   "screens": [
@@ -3574,7 +3615,6 @@
         "frontend/src/features/plans/ExercisePicker.tsx",
         "frontend/src/features/plans/PlanEditorPage.tsx",
         "backend/src/exercises/routes.js",
-        "backend/scripts/smoke.js",
         "docs/pipeline/pulse/pkg/P-picker-muscles/**"
       ],
       "mustNotTouch": [

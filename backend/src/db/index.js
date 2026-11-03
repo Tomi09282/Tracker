@@ -185,6 +185,16 @@ export const cancelFocus = (args) => pool.run(args, { name: 'cancelFocusTx' });
 export const lifeosDays = (args) => pool.run(args, { name: 'lifeosDaysQuery' });
 export const lifeosStats = (args) => pool.run(args, { name: 'lifeosStatsQuery' });
 
+// Admin accounts (package B-admin-accounts): ./tx/admin-accounts.js, re-exported by worker.js. Two
+// reads (the filtered list with its total, the whole inspect page - each ONE read snapshot) and four
+// named writes; the role / disable / coin writes of the same page keep the transactions they had.
+export const adminUsersList = (args) => pool.run(args, { name: 'adminUsersListQuery' });
+export const adminAccountDetail = (args) => pool.run(args, { name: 'adminAccountDetailQuery' });
+export const adminSetDisplayName = (args) => pool.run(args, { name: 'adminSetDisplayNameTx' });
+export const adminResetLockout = (args) => pool.run(args, { name: 'adminResetLockoutTx' });
+export const adminSignOutAll = (args) => pool.run(args, { name: 'adminSignOutAllTx' });
+export const adminForcePasswordChange = (args) => pool.run(args, { name: 'adminForcePasswordChangeTx' });
+
 // LifeOS challenges and rewards (migration 033): ./tx/lifeos-rewards.js, re-exported by worker.js.
 // The draw is made in the worker (crypto.randomInt); a pick creates a task, which pays on completion;
 // a redemption is the one LifeOS spend (redeemRewardTx: the balance guard is inside the INSERT).

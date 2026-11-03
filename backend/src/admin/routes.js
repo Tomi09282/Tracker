@@ -2,43 +2,18 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import argon2 from 'argon2';
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
 import { resolveLang, languages } from '../lib/lang.js';
-import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 import { assertAdmin } from '../lib/assert-admin.js';
+import { adminReadIpLimiter, adminReadLimiter, adminWriteIpLimiter, adminWriteLimiter } from './limiters.js';
 import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from '../exercises/detail.js';
 
 const router = Router();
 
-const limiter = (limit, keyGenerator) =>
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit,
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: () => process.env.NODE_ENV === 'test',
-    ...(keyGenerator ? { keyGenerator } : {}),
-  });
-
-/**
- * ═══ READS AND WRITES DO NOT SHARE A BUDGET ════════════════════════════════════════════════════
- *
- * They used to: one `adminLimiter` at 120 per 15 minutes per IP covered all eight routes here,
- * reads included. Opening the dashboard costs three requests — stats, metrics, users — so a working
- * admin session spends the write budget on looking at things, and the limiter that is supposed to
- * bound damage is exhausted by the page that shows there is none.
- *
- * And it was IP-only. A per-IP limit stops one machine; it does not stop one principal with a
- * laptop, a phone and a VPN, which is the shape of an actual compromised admin session.
- */
-const adminReadIpLimiter = limiter(600);
-const adminReadLimiter = limiter(300, (req) => `adm-r:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
-const adminWriteIpLimiter = limiter(120);
-const adminWriteLimiter = limiter(60, (req) => `adm-w:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
-
+// The four budgets (reads 600/IP + 300/admin, writes 120/IP + 60/admin per 15 minutes) live in
+// admin/limiters.js, shared with admin/accounts.js; see the note there.
 
 router.get(
   '/admin/stats',
@@ -327,7 +302,9 @@ const sendDisableOutcome = (res, result) => {
 };
 
 const DisableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
-const EnableBody = z.object({}).strict();
+// Enabling asks for a reason exactly like disabling does (owner, 2026-11-03): a restore is a judgement
+// too, and the audit row should carry it. The 3a frame's end action 'Engedélyezés' opens a reason sheet.
+const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
 
 /**
  * Stop an account.
@@ -377,8 +354,11 @@ router.post(
 /**
  * Let an account back in.
  *
- * No reason required, deliberately, and the asymmetry is the point: the heavy act is stopping
- * somebody, and requiring paperwork to undo a mistake makes the mistake likelier to stand.
+ * A reason is REQUIRED (owner decision 2026-11-03). This used to carry the opposite argument — the
+ * heavy act is stopping somebody, and paperwork to undo a mistake makes the mistake likelier to
+ * stand — and it was weighed again: an enable is a judgement about a person who was stopped for a
+ * reason, the audit row is where a later admin reads why they came back, and the reason sheet is one
+ * field. The transaction refuses an empty reason in both directions (`needs_reason`).
  */
 router.post(
   '/admin/users/:id/enable',
@@ -389,13 +369,14 @@ router.post(
   asyncRoute(async (req, res) => {
     const id = z.coerce.number().int().positive().safeParse(req.params.id);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
-    if (!EnableBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+    const body = EnableBody.safeParse(req.body ?? {});
+    if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
     const result = await db.setAccountDisabled({
       actorId: req.user.id,
       targetId: id.data,
       disabled: false,
-      reason: null,
+      reason: body.data.reason,
       requestId: res.locals.requestId,
       ip: req.ip ?? null,
     });
@@ -409,115 +390,9 @@ router.post(
 
 /* ── user search ─────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * The columns an admin may sort by, as a MAP from a client key to SQL.
- *
- * The client never sends SQL and never sends a column name that reaches a query. It sends a key,
- * and a key that is not in this object is a 400 — so there is no interpolation to get wrong and no
- * "sanitise the sort parameter" step that somebody later relaxes.
- *
- * `email` sorts on the same expression its unique index is built on, so the sort is answered from
- * the index rather than by a temp b-tree.
- */
-const USER_SORTS = {
-  created: { sql: 'u.created_at', tiebreak: 'u.id' },
-  email: { sql: 'lower(trim(u.email))', tiebreak: 'u.id' },
-  role: { sql: 'u.role', tiebreak: 'u.id' },
-};
-
-const userQuery = z
-  .object({
-    // Bounded and regex-shaped. This is fed to a LIKE, so the bound is what stops a pathological
-    // pattern, and the character class is what stops a wildcard being smuggled in: `%` and `_` are
-    // LIKE metacharacters, and a search for `%` would match every account in the product.
-    q: z.string().trim().min(1).max(80).regex(/^[\w@.\-+ ]+$/u).optional(),
-    sort: z.enum(['created', 'email', 'role']).optional(),
-    dir: z.enum(['asc', 'desc']).optional(),
-    role: z.enum(['user', 'coach', 'admin']).optional(),
-    state: z.enum(['all', 'enabled', 'disabled']).optional(),
-    cursor: z.string().max(200).optional(),
-  })
-  .strict();
-
-/**
- * Find an account.
- *
- * ═══ THE PROJECTION IS THE SMALLEST THING THAT ANSWERS THE QUESTION ════════════════════════════
- *
- * An admin looking up a user needs to identify them, see their standing, and act. They do not need
- * the person's measurements, their food log, their photos or their conversations, and this endpoint
- * cannot reach any of it. The columns below are the whole projection, and `password_hash`,
- * `session_version` and `next_login_at` are deliberately absent — a support screen that leaks a
- * hash is a support screen that has to be treated as a credential store.
- *
- * ═══ AND THE PAGINATION IS THE ONE THE CODEBASE ALREADY HAS ════════════════════════════════════
- *
- * `lib/cursor.js` encodes an opaque keyset tuple and caps the page at MAX_PAGE. It had zero admin
- * callers: the three existing admin list routes use three different dialects — a raw integer
- * cursor, a hardcoded LIMIT 50 with no cursor at all, and a limit with no cursor. A fourth would
- * have been the eleventh time this project reimplemented something it already had.
- */
-router.get(
-  '/admin/users',
-  requireAuth,
-  requireRole('admin'),
-  adminReadIpLimiter,
-  adminReadLimiter,
-  asyncRoute(async (req, res) => {
-    if (!(await assertAdmin(req, res))) return;
-    const parsed = userQuery.safeParse(req.query);
-    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
-    const { q, role, state = 'all' } = parsed.data;
-    const sortKey = parsed.data.sort ?? 'created';
-    const desc = (parsed.data.dir ?? 'desc') === 'desc';
-    const order = USER_SORTS[sortKey];
-
-    // The keyset cursor carries the SORTED value and the tiebreak id, so a page boundary cannot
-    // skip or repeat a row when two accounts share a timestamp — which every seeded batch does.
-    const after = parsed.data.cursor ? decodeCursor(parsed.data.cursor) : null;
-    const cursorOk = Array.isArray(after) && after.length === 2;
-
-    // Every fragment below is a FIXED string chosen by a key, never assembled from request text.
-    const cmp = desc ? '<' : '>';
-    const dir = desc ? 'DESC' : 'ASC';
-    const rows = await db.all(
-      `SELECT u.id, u.email, u.role, u.created_at AS createdAt, u.disabled_at AS disabledAt,
-              u.must_change_credentials AS mustChange,
-              EXISTS (SELECT 1 FROM coach_profiles c WHERE c.user_id = u.id) AS hasProfile,
-              (SELECT COUNT(*) FROM coach_clients k
-                WHERE k.coach_id = u.id AND k.status = 'active')            AS clientCount
-         FROM users u
-        WHERE (? IS NULL OR lower(trim(u.email)) LIKE '%' || lower(?) || '%')
-          AND (? IS NULL OR u.role = ?)
-          AND (? = 'all'
-            OR (? = 'enabled'  AND u.disabled_at IS NULL)
-            OR (? = 'disabled' AND u.disabled_at IS NOT NULL))
-          AND (? = 0 OR (${order.sql}, ${order.tiebreak}) ${cmp} (?, ?))
-        ORDER BY ${order.sql} ${dir}, ${order.tiebreak} ${dir}
-        LIMIT ?`,
-      [
-        q ?? null, q ?? '',
-        role ?? null, role ?? null,
-        state, state, state,
-        cursorOk ? 1 : 0, cursorOk ? after[0] : null, cursorOk ? after[1] : null,
-        MAX_PAGE + 1,
-      ],
-    );
-
-    const page = rows.slice(0, MAX_PAGE);
-    const last = page[page.length - 1];
-    res.json({
-      users: page,
-      // The cursor encodes the SORT VALUE, not the row id — a cursor built from the id would walk
-      // the wrong order the moment the sort key is anything but `created`.
-      nextCursor:
-        rows.length > MAX_PAGE && last
-          ? encodeCursor([sortKey === 'email' ? String(last.email).trim().toLowerCase() : sortKey === 'role' ? last.role : last.createdAt, last.id])
-          : null,
-      sort: { key: sortKey, direction: desc ? 'desc' : 'asc' },
-    });
-  }),
-);
+// GET /admin/users (the account list) and GET /admin/users/:id (the inspect page) live in
+// admin/accounts.js since package B-admin-accounts: search over e-mail and display name, role and
+// state filters, five sort keys with a keyset cursor each, a total count.
 
 /* ── metrics ─────────────────────────────────────────────────────────────────────────────────── */
 

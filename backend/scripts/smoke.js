@@ -524,6 +524,17 @@ await call('/api/v1/auth/login', { method: 'POST', body: { email: EMAIL, passwor
 // --- exercise library ------------------------------------------------------------------------
 const seeded = process.env.SMOKE_ACCOUNTS ? JSON.parse(process.env.SMOKE_ACCOUNTS).accounts : null;
 
+// SMOKE_ONLY=admin-accounts runs ONLY the account-admin section against a freshly seeded server and
+// exits. scripts/verify-admin-accounts.mjs uses it to run that section against copies of the backend
+// with a defect planted in each, and to prove every check can fail.
+if (process.env.SMOKE_ONLY === 'admin-accounts' && seeded) {
+  const { adminAccountsSmoke } = await import('./smoke/admin-accounts.js');
+  await adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  console.log(`
+${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} failed (admin-accounts only)`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 if (!seeded) {
   check('exercise suite: privileged accounts available', false, 'SMOKE_ACCOUNTS missing — run via npm run smoke');
 } else {
@@ -5826,6 +5837,10 @@ if (seeded) {
   // B-lifeos-polish: the security review's regressions and the polish round's fields.
   const { lifeosPolishSmoke } = await import('./smoke/lifeos-polish.js');
   await lifeosPolishSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  // B-admin-accounts: the account list, the inspect read and the four account writes, five passes each.
+  const { adminAccountsSmoke } = await import('./smoke/admin-accounts.js');
+  await adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

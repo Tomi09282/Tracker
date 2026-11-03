@@ -21,6 +21,7 @@ export * from './tx/lifeos-rewards.js';
 export * from './tx/lifeos-events.js';
 export * from './tx/lifeos-focus.js';
 export * from './tx/lifeos-stats.js';
+export * from './tx/admin-accounts.js';
 
 /**
  * Shutdown, part one: close THIS worker's connection before the pool terminates it (see
@@ -1386,6 +1387,11 @@ export function adminAdjustCoinsTx({
     ).get(actorUserId);
     if (!actor || actor.role !== 'admin') return { outcome: 'forbidden' };
     if (actor.session_version !== actorSessionVersion) return { outcome: 'forbidden' };
+
+    // An admin does not adjust their OWN wallet (owner, 2026-11-03). Checked right after the actor is
+    // known and before anything else, so the refusal cannot be mistaken for a replay or a missing
+    // wallet, and it holds under the write lock like every other guard here.
+    if (actorUserId === targetUserId) return { outcome: 'self' };
 
     current = 'SELECT the prior adjustment (idempotency)';
     const prior = stmt(
@@ -3049,7 +3055,9 @@ export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requ
     // disable must not rewrite when the account was actually stopped.
     if (disabled === (target.disabledAt !== null)) return view(true);
 
-    if (disabled && (!reason || reason.trim().length === 0)) return { outcome: 'needs_reason' };
+    // A reason is required in BOTH directions (owner, 2026-11-03): disabling and enabling are each a
+    // judgement about a person, and the audit row is where the next admin reads why.
+    if (!reason || reason.trim().length === 0) return { outcome: 'needs_reason' };
 
     // No last-admin count here either, for the same reason and with the same evidence — see the
     // note in setUserRoleTx. An admin cannot disable themselves, and a disabled account is refused

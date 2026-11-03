@@ -27,6 +27,7 @@
     "verify:023": "node scripts/verify-023.mjs",
     "check:body-writes": "node scripts/check-body-writes.mjs",
     "verify:gates": "node scripts/verify-gates.mjs",
+    "verify:admin-accounts": "node scripts/verify-admin-accounts.mjs",
     "verify:last-admin": "node scripts/verify-last-admin.mjs",
     "check:admin-audit": "node scripts/check-admin-audit.mjs",
     "verify:024": "node scripts/verify-024.mjs",

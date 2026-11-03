@@ -7,6 +7,7 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { logger } from '../lib/logger.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { displayNameValue } from '../lib/display-name.js';
 import {
   signAccessToken,
   newRefreshToken,
@@ -340,63 +341,14 @@ router.get(
 );
 
 /**
- * The bounds are the migration's bounds, restated.
- *
- * Not because the CHECK is untrusted — it is the thing that actually holds — but because a
- * constraint violation arrives as a 500 and reads in the log as a server fault. The schema is the
- * guarantee; this is the error message. If the two ever disagree, 029 wins and this is the bug.
+ * The name rule (bounds, code-point counting, control and bidi characters) lives in lib/display-name.js,
+ * shared with the admin's PATCH /admin/users/:id/name so the two routes cannot drift apart.
  *
  * `null` is an explicit, reachable value: clearing your name is a thing a person is allowed to do,
  * and it has to be distinguishable from "field omitted" (which `.strict()` plus `.optional()`
  * would collapse). So the field is required and nullable — the client always states its intent.
- *
- * ═══ THE TWO BOUNDS HAVE TO COUNT THE SAME THING ═══════════════════════════════════════════════
- *
- * They did not. `z.string().min(2)` counts UTF-16 code units; SQLite's `length()` counts
- * characters. For everything on the basic plane those agree, so it looked right — but a single
- * astral character is two code units and one character, so `"🎉"` passed zod and was then refused
- * by the CHECK. The user saw the opaque `this change is not allowed by the data model`, the log
- * recorded `constraint refused a write`, and the sentence above about 029 winning turned out to be
- * describing a live bug rather than a hypothetical.
- *
- * `[...v].length` iterates code points, which is the same unit `length()` uses. Verified by
- * execution against this project's own SQLite: `length(trim('🎉'))` is 1.
  */
-const CODE_POINTS = (v) => [...v].length;
-
-/**
- * Control characters are not part of a name, and two of the ranges are actively dangerous.
- *
- * C0 and C1 include newline and NUL. A name with a newline in it breaks every single-line list
- * this app renders it into, and SQLite's `length()` stops counting at the first NUL — so a name
- * beginning with one would measure 0 to the database and pass a bound it never actually met.
- *
- * The bidi overrides (U+202A–U+202E, U+2066–U+2069) are the spoofing case. They re-order the text
- * AROUND them, so a name containing one can rewrite how the rest of a coach's client row reads.
- * Nobody's name needs them; a name in Hebrew or Arabic gets its direction from its own characters.
- */
-const CONTROLS = new RegExp(
-  [
-    '[',
-    '\u0000-\u001F',  // C0, which is where NUL and newline live
-    '\u007F-\u009F',  // DEL and C1
-    '\u202A-\u202E',  // the bidi embeddings and overrides
-    '\u2066-\u2069',  // the bidi isolates
-    ']',
-  ].join(''),
-);
-
-const DisplayNamePatch = z
-  .object({
-    displayName: z
-      .string()
-      .trim()
-      .refine((v) => !CONTROLS.test(v), 'control characters are not part of a name')
-      .refine((v) => CODE_POINTS(v) >= 2, 'too short')
-      .refine((v) => CODE_POINTS(v) <= 120, 'too long')
-      .nullable(),
-  })
-  .strict();
+const DisplayNamePatch = z.object({ displayName: displayNameValue }).strict();
 
 router.patch(
   '/me',

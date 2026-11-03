@@ -16,7 +16,8 @@ const limitsMode = process.argv.includes('--limits');
 const suite = limitsMode ? 'scripts/smoke-limits.js' : 'scripts/smoke.js';
 
 const dir = mkdtempSync(path.join(tmpdir(), 'tracker-smoke-'));
-const port = 3100 + Math.floor(Math.random() * 400);
+// SMOKE_PORT pins the port (a lane agent runs on its own); the default stays a random one.
+const port = Number(process.env.SMOKE_PORT) || 3100 + Math.floor(Math.random() * 400);
 
 const childEnv = {
   ...process.env,
@@ -29,7 +30,10 @@ const childEnv = {
   SMOKE_BASE: `http://localhost:${port}`,
 };
 
-const server = spawn(process.execPath, ['server.js'], { env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
+// SMOKE_SERVER lets scripts/verify-admin-accounts.mjs boot a copy of the backend with a defect planted
+// in it; the seed scripts below keep using the real src (they only create accounts).
+const serverEntry = process.env.SMOKE_SERVER || 'server.js';
+const server = spawn(process.execPath, [serverEntry], { env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
 let serverErr = '';
 server.stderr.on('data', (c) => {
   serverErr += c.toString();

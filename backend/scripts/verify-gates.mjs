@@ -101,6 +101,8 @@ const TOUCHED = [
   'src/chat/routes.js',
   'src/db/tx/lifeos.js',
   'src/db/index.js',
+  'src/db/tx/admin-accounts.js',
+  'src/admin/accounts.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -503,6 +505,42 @@ await mutate({
   to: "`INSERT INTO audit_trail (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'lifeos.rules.set'",
   gate: 'scripts/check-admin-audit.mjs',
   expect: 'reaches no INSERT INTO audit_log',
+});
+
+await mutate({
+  label: 'an account-admin transaction (tx/admin-accounts.js) that stops auditing is caught',
+  file: 'src/db/tx/admin-accounts.js',
+  from: "`INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'user.lockout.reset'",
+  to: "`INSERT INTO audit_trail (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'user.lockout.reset'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'reaches no INSERT INTO audit_log',
+});
+
+await mutate({
+  label: 'two account writes sharing one audit action string are caught',
+  file: 'src/db/tx/admin-accounts.js',
+  from: "VALUES (?, 'user.sessions.revoke'",
+  to: "VALUES (?, 'user.lockout.reset'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: "'user.lockout.reset' is written from 2 different places",
+});
+
+await mutate({
+  label: 'the account inspect read without its database admin re-check is caught',
+  file: 'src/admin/accounts.js',
+  from: "    if (!(await assertAdmin(req, res))) return;\n    const p = idParams.safeParse(req.params);\n    if (!p.success) return sendError(res, 400, ERR.VALIDATION);\n",
+  to: "    const p = idParams.safeParse(req.params);\n    if (!p.success) return sendError(res, 400, ERR.VALIDATION);\n",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'authorises from the JWT alone',
+});
+
+await mutate({
+  label: 'an account write without its rate limiters is caught',
+  file: 'src/admin/accounts.js',
+  from: "'/admin/users/:id/signout-all',\n  requireAuth,\n  requireRole('admin'),\n  adminWriteIpLimiter,\n  adminWriteLimiter,\n",
+  to: "'/admin/users/:id/signout-all',\n  requireAuth,\n  requireRole('admin'),\n",
+  gate: 'scripts/check-routes.mjs',
+  expect: 'is a write with no rate limiter',
 });
 
 await mutate({

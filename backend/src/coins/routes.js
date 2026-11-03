@@ -425,6 +425,15 @@ router.post(
         return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
       case 'missing':
         return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+      // An admin may not move their own wallet; the guard is inside the transaction, this is its
+      // answer. Same 409 shape as the account routes (`reason` names the rule).
+      case 'self':
+        return res.status(409).json({
+          error: 'conflict',
+          code: ERR.CONFLICT,
+          reason: 'cannot_adjust_own_coins',
+          requestId: res.locals.requestId,
+        });
       case 'out_of_bounds':
         return sendError(res, 400, ERR.VALIDATION, 'that amount is outside what one adjustment may move');
       case 'insufficient':
