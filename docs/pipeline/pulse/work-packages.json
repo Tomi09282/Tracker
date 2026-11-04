@@ -1526,22 +1526,16 @@
       "title": "The admin account backend (owner decisions 2026-11-03, figma-build/admin-v2/DESIGN-NOTES.md): GET /admin/users carries displayName, searches e-mail and display name (accent- and case-insensitive, wildcards escaped), filters by role and state, five sort keys with keyset cursors and a total; GET /admin/users/:id is one read snapshot (identity, disable reason, sessions, lockout, coaching, marketplace, coins, activity counts, audit tail); PATCH /admin/users/:id/name and POST reset-lockout / signout-all / force-password-change are named IMMEDIATE transactions with a DB-side admin re-check and their own audit action; POST /admin/users/:id/enable now REQUIRES a reason; POST /admin/users/:id/coins refuses the admin's own account (409 cannot_adjust_own_coins); admin rate-limit budgets are shared through admin/limiters.js; no migration",
       "owns": [
         "backend/package.json",
-        "backend/scripts/brain-gen.mjs",
         "backend/scripts/smoke-limits.js",
-        "backend/scripts/smoke-run.mjs",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke/admin-accounts.js",
         "backend/scripts/verify-admin-accounts.mjs",
         "backend/scripts/verify-gates.mjs",
-        "backend/server.js",
         "backend/src/admin/accounts.js",
         "backend/src/admin/limiters.js",
         "backend/src/admin/routes.js",
         "backend/src/auth/routes.js",
         "backend/src/coins/routes.js",
-        "backend/src/db/index.js",
         "backend/src/db/tx/admin-accounts.js",
-        "backend/src/db/worker.js",
         "backend/src/lib/display-name.js",
         "backend/src/lib/like.js",
         "docs/pipeline/pulse/pkg/B-admin-accounts/**"
@@ -1568,7 +1562,48 @@
         "npm run build (cwd frontend/, integration worktree)",
         "npm run verify:gates (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-admin-accounts) from the package's own pkg/B-admin-accounts/owns.json: the package ran outside the plan entry list (no brief). The diff was checked against owns.json: every changed path passes to it. Passed from the closed lanes: B-focus (4), B-q2 (1), P-picker-muscles (1), B-habits-tasks (1), B-core (1), B-roles (1); backend/src/admin/routes.js, scripts/brain-gen.mjs and scripts/smoke-limits.js had no owner. No migration (036 unused). The shared edits in server.js, db/index.js, db/worker.js, auth/routes.js, coins/routes.js, smoke.js, smoke-run.mjs, package.json were checked by hand against owns.json sharedEdits. B-admin-posts and B-admin-stats, running in parallel, will edit the same shared files; whichever merges second applies its edits to the moved tree and takes the paths over. The dev backend on :3000 picks the changes up only after a restart. Follow-ups from handoff.json: brain:gen to refresh 30-API/Endpoints.md; no (target_type, target_id) index on audit_log; frame 3b draws the coin row on the own account, the server answers 409."
+      "notes": "Added by the integrator at merge (merge-B-admin-accounts) from the package's own pkg/B-admin-accounts/owns.json: the package ran outside the plan entry list (no brief). The diff was checked against owns.json: every changed path passes to it. Passed from the closed lanes: B-focus (4), B-q2 (1), P-picker-muscles (1), B-habits-tasks (1), B-core (1), B-roles (1); backend/src/admin/routes.js, scripts/brain-gen.mjs and scripts/smoke-limits.js had no owner. No migration (036 unused). The shared edits in server.js, db/index.js, db/worker.js, auth/routes.js, coins/routes.js, smoke.js, smoke-run.mjs, package.json were checked by hand against owns.json sharedEdits. B-admin-posts and B-admin-stats, running in parallel, will edit the same shared files; whichever merges second applies its edits to the moved tree and takes the paths over. The dev backend on :3000 picks the changes up only after a restart. Follow-ups from handoff.json: brain:gen to refresh 30-API/Endpoints.md; no (target_type, target_id) index on audit_log; frame 3b draws the coin row on the own account, the server answers 409. At merge-B-admin-posts backend/scripts/brain-gen.mjs, scripts/smoke-run.mjs, scripts/smoke.js, server.js, src/db/index.js and src/db/worker.js passed to B-admin-posts (B-admin-accounts is closed; one file, one owner)."
+    },
+    {
+      "id": "B-admin-posts",
+      "title": "The admin marketplace-posts backend (owner decisions 2026-11-03 items 2 and 4, figma-build/admin-v2/DESIGN-NOTES.md): GET /admin/marketplace/posts (search over title / handle / names with escaped LIKE plus a title-only FTS arm, state and kind filters, sort newest | oldest | reports, keyset cursor, filtered total, per-row open-report count and public visibility); GET /admin/marketplace/posts/:publicId is one read snapshot (kind fields, price, city, author with disabled flag, state timeline, moderation history from the audit log, body excerpt or rendered tree on request, pictures, reports without reporter identity; a never-published draft shows metadata only); POST /admin/marketplace/posts/:publicId/restore is a named IMMEDIATE transaction with a DB-side admin re-check and the guard inside the UPDATE (one marketplace.moderation.restore audit row, 409 not_removed on replay or lost race); GET /admin/marketplace/media/:key serves pictures of ever-published posts; POST /admin/marketplace/remove answers {removed, replayed, target, state}; per-admin account limiters on all admin routes of moderation.js; SECURITY: PUBLIC_POST and PUBLIC_PROFILE now require the author to be an enabled coach or admin, so disabling or demoting a coach hides their posts, profile, directory entry and pictures on the next request; no migration",
+      "owns": [
+        "backend/scripts/brain-gen.mjs",
+        "backend/scripts/mutants-admin-posts.mjs",
+        "backend/scripts/smoke-run.mjs",
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/admin-posts.js",
+        "backend/server.js",
+        "backend/src/db/index.js",
+        "backend/src/db/tx/admin-posts.js",
+        "backend/src/db/worker.js",
+        "backend/src/public/admin-posts.js",
+        "backend/src/public/moderation.js",
+        "backend/src/public/visibility.js",
+        "docs/pipeline/pulse/pkg/B-admin-posts/**"
+      ],
+      "handIn": {},
+      "dependsOn": [
+        "B-admin-accounts",
+        "B-lifeos-polish"
+      ],
+      "parallelGroup": "backend lane (owner admin round 2026-11-03)",
+      "size": "L",
+      "acceptance": [
+        "GET /admin/marketplace/posts: q over title / handle / names (wildcards escaped), state and kind filters, sort newest|oldest|reports with a keyset cursor each, total of the filtered set, page cap 50, a bad cursor is a 400, rows carry no body / e-mail / row id",
+        "GET /admin/marketplace/posts/:publicId answers from ONE read snapshot; a malformed or unknown id is the same 404; reports never carry the reporter; a never-published draft shows metadata only",
+        "POST .../restore: one worker call, IMMEDIATE transaction, actor re-read as an enabled admin under the write lock, guard inside the UPDATE, one marketplace.moderation.restore audit row, replay or lost race answers 409 not_removed",
+        "a disabled or demoted author vanishes from feed, post, search, directory, profile, grid and public media on the next request (PUBLIC_POST / PUBLIC_PROFILE), and fileReportTx composes the same constants",
+        "smoke/admin-posts.js (187 assertions) and mutants-admin-posts.mjs (26 planted defects, all killed) green"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree, fresh migrated DB + seed:dev-users; verify:015 and verify:013 are the accepted fresh-DB / demo-DB reds)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "node scripts/mutants-admin-posts.mjs (cwd backend/)",
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-admin-posts) from the package's own pkg/B-admin-posts/owns.json: the package ran outside the plan entry list (no brief). The package was based on the pulse-int tip before B-admin-accounts, so the squash was a three-way merge with ONE conflict, backend/src/db/worker.js (two adjacent export-star lines, both kept). The diff was checked against owns.json: the 12 non-doc paths pass to it; backend/scripts/brain-gen.mjs, scripts/smoke-run.mjs, scripts/smoke.js, server.js, src/db/index.js and src/db/worker.js passed from the closed B-admin-accounts; src/public/moderation.js, visibility.js, admin-posts.js and the new files had no owner. No migration (036 unused): the 021/022 triggers allow clearing removed_at / removed_by / removal_reason in one UPDATE. owns.json lists backend/scripts/check-routes.mjs as a possible shared edit; it was not changed. The dev backend on :3000 picks the changes up only after a restart. Follow-ups from handoff.json: docs/brain not regenerated (npm run brain:gen once after all three admin backend lanes have merged); the frame says a post of a disabled author is still visible, it no longer is, so S-admin-posts needs ONE new Hungarian string; taking a post and its author profile down is still two calls."
     }
   ],
   "screens": [

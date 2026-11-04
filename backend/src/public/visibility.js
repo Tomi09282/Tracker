@@ -28,6 +28,35 @@
 // already drifted and broken a client's read. This file is that lesson applied BEFORE the drift.
 
 /**
+ * The AUTHOR'S standing as a fact about the row, written once and composed into both predicates.
+ *
+ * ═══ THE GAP THIS CLOSES (package B-admin-posts, owner decision 2026-11-03) ════════════════════
+ *
+ * PUBLIC_POST and PUBLIC_PROFILE used to look only at the post and the profile row. Neither looked
+ * at the ACCOUNT behind them, so disabling a coach (users.disabled_at) or demoting one (users.role
+ * back to 'user') left every published post, the profile page, the directory entry and every post
+ * image on the open internet. The WRITE side always carried the standing (trg_post_publish_standing_*
+ * and trg_post_restore_standing_upd re-read users.disabled_at and users.role); the READ side, whose
+ * own comment promised it "carries the same four facts and takes effect on the very next request",
+ * carried two of them.
+ *
+ * It is a correlated EXISTS on the users primary key, so it costs about what the `c.published_at`
+ * test beside it costs, binds NO parameter (the property this file is built on: the response is a
+ * pure function of the data, never of the viewer) and takes effect on the next request in both
+ * directions: disabling hides, re-enabling shows again, with no sweep and nothing to forget. Same
+ * shape as the profile-removal clause below, for the same reason.
+ *
+ * `ua` is a private alias; `ownerColumn` names the author's account on the row the caller aliased
+ * (`p.author_user_id` for a post, `c.user_id` for a profile).
+ */
+const AUTHOR_STANDING = (ownerColumn) => `EXISTS (
+    SELECT 1 FROM users ua
+     WHERE ua.id = ${ownerColumn}
+       AND ua.disabled_at IS NULL
+       AND ua.role IN ('coach','admin')
+  )`;
+
+/**
  * A post an anonymous visitor may read. Composed by: the latest feed, the by-city feed, the
  * by-kind feed, search, a coach's post grid, the single-post read and the public media serve.
  *
@@ -42,6 +71,9 @@
  *   c.removed_at IS NULL       REMOVING A COACH REMOVES THEIR POSTS, on the next read, with no
  *                              sweep. This is the clause a "delete their rows" design gets wrong:
  *                              a sweep leaves a window, and the window is exactly when it matters.
+ *   the author is an ENABLED coach or admin
+ *                              DISABLING OR DEMOTING A COACH REMOVES THEIR POSTS the same way
+ *                              (AUTHOR_STANDING below).
  */
 export const PUBLIC_POST = `(
   p.published_at IS NOT NULL
@@ -49,12 +81,19 @@ export const PUBLIC_POST = `(
   AND p.removed_at IS NULL
   AND c.published_at IS NOT NULL
   AND c.removed_at IS NULL
+  AND ${AUTHOR_STANDING('p.author_user_id')}
 )`;
 
-/** A profile an anonymous visitor may read. Alias: `coach_profiles c`. */
+/**
+ * A profile an anonymous visitor may read. Alias: `coach_profiles c`.
+ *
+ * Disabling or demoting the account hides the profile page and the directory entry too (and, via
+ * PUBLIC_POST, every post of that author).
+ */
 export const PUBLIC_PROFILE = `(
   c.published_at IS NOT NULL
   AND c.removed_at IS NULL
+  AND ${AUTHOR_STANDING('c.user_id')}
 )`;
 
 /**

@@ -13,6 +13,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const limitsMode = process.argv.includes('--limits');
+// --only=<section>: run ONE self-contained section of scripts/smoke.js (see SMOKE_ONLY there).
+const only = process.argv.find((a) => a.startsWith('--only='))?.slice('--only='.length) ?? '';
 const suite = limitsMode ? 'scripts/smoke-limits.js' : 'scripts/smoke.js';
 
 const dir = mkdtempSync(path.join(tmpdir(), 'tracker-smoke-'));
@@ -106,7 +108,7 @@ if (!up) {
   }
 
   const runner = spawn(process.execPath, [suite], {
-    env: { ...childEnv, SMOKE_ACCOUNTS: seeded },
+    env: { ...childEnv, SMOKE_ACCOUNTS: seeded, ...(only ? { SMOKE_ONLY: only } : {}) },
     stdio: 'inherit',
   });
   runner.on('exit', (code) => cleanup(code ?? 1));

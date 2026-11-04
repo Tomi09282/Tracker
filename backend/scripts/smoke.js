@@ -257,6 +257,16 @@ async function call(path, { method = 'GET', body, jar, headers = {}, csrf = true
   return { res, json };
 }
 
+// --- SMOKE_ONLY=admin-posts (node scripts/smoke-run.mjs --only=admin-posts) -----------------------
+// Runs ONE self-contained section against the fresh throwaway database and exits: the mutant runner
+// (scripts/mutants-admin-posts.mjs) needs a fast loop, and the section registers its own accounts.
+if (process.env.SMOKE_ONLY === 'admin-posts') {
+  const { adminPostsSmoke } = await import('./smoke/admin-posts.js');
+  await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
+  console.log(`\n${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} (admin-posts only) - ${passed} passed, ${failed} failed`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 // --- health & shape ------------------------------------------------------------------------
 {
   const { res } = await call('/healthz');
@@ -5841,6 +5851,14 @@ if (seeded) {
   // B-admin-accounts: the account list, the inspect read and the four account writes, five passes each.
   const { adminAccountsSmoke } = await import('./smoke/admin-accounts.js');
   await adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+}
+
+// --- admin marketplace posts (package B-admin-posts) ------------------------------------------
+// The five passes for the list, the inspect page, restore and the admin picture route, plus the
+// visibility gap (a disabled or demoted author vanishes from every public read). Self-contained.
+{
+  const { adminPostsSmoke } = await import('./smoke/admin-posts.js');
+  await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

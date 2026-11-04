@@ -12,6 +12,10 @@ import { readFileSync } from 'node:fs';
 import { EXPORT_TABLES, UNLINK_BEFORE_DELETE } from './gdpr.js';
 import { randomBytes } from 'node:crypto';
 import { getDb, stmt, rethrow, closeDb } from './conn.js';
+// The ONE public-visibility predicate (pure strings, binds nothing). The report lookup below must
+// see exactly what a reader sees, so it composes the shared constants instead of keeping a copy
+// that can drift - it had: the copy lacked the author-standing clause (package B-admin-posts).
+import { PUBLIC_POST, PUBLIC_PROFILE } from '../public/visibility.js';
 
 export { getDb, stmt, rethrow } from './conn.js';
 export * from './tx/lifeos.js';
@@ -22,6 +26,7 @@ export * from './tx/lifeos-events.js';
 export * from './tx/lifeos-focus.js';
 export * from './tx/lifeos-stats.js';
 export * from './tx/admin-accounts.js';
+export * from './tx/admin-posts.js';
 
 /**
  * Shutdown, part one: close THIS worker's connection before the pool terminates it (see
@@ -2745,15 +2750,14 @@ export function fileReportTx({
              FROM coach_posts p
              JOIN coach_profiles c ON c.user_id = p.author_user_id
             WHERE p.public_id = ?
-              AND p.published_at IS NOT NULL AND p.deleted_at IS NULL AND p.removed_at IS NULL
-              AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+              AND ${PUBLIC_POST}`,
         ).get(publicId)
       : stmt(
           `SELECT NULL AS postId, c.user_id AS profileId, c.user_id AS authorId,
                   substr(c.bio_src, 1, 4000) AS snapshot,
                   CASE WHEN length(c.bio_src) > 4000 THEN 1 ELSE 0 END AS truncated
              FROM coach_profiles c
-            WHERE c.handle = ? AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+            WHERE c.handle = ? AND ${PUBLIC_PROFILE}`,
         ).get(handle);
     if (!subject) return { outcome: 'missing' };
     if (subject.authorId === reporterId) return { outcome: 'self_report' };

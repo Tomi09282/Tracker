@@ -33,6 +33,7 @@ import paymentWebhookRoutes from './src/payments/webhook.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
 import composeUploadRoutes from './src/public/compose-media.js';
 import moderationRoutes from './src/public/moderation.js';
+import adminPostRoutes from './src/public/admin-posts.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -247,6 +248,8 @@ app.use('/api/v1', composeRoutes);
 // by audience rather than by file size: reporting is requireAuth with no role gate, because the
 // person who finds something is rarely a coach.
 app.use('/api/v1', moderationRoutes);
+// The admin side of the same marketplace: every post in every state, the inspect page, restore.
+app.use('/api/v1', adminPostRoutes);
 app.use(AUTH_PATH, authRoutes);
 app.use('/api/v1', privacyRoutes);
   app.use('/api/v1', themeRoutes);

@@ -177,6 +177,9 @@ const routers = [
   ['/api/v1', '../src/public/compose.js'],
   ['/api/v1', '../src/public/compose-media.js'],
   ['/api/v1', '../src/public/moderation.js'],
+  // B-admin-posts: the admin side of marketplace posts. The file is not named *routes.js, so the
+  // cross-check below cannot notice it is missing: it has to be listed here by hand.
+  ['/api/v1', '../src/public/admin-posts.js'],
   // LifeOS: routes.js holds /me/prefs, /lifeos/today and /admin/rules itself and mounts the rest
   // with router.use(), which this walk does not descend into — so each sub-router is listed too.
   ['/api/v1', '../src/lifeos/routes.js'],

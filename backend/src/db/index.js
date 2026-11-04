@@ -104,6 +104,13 @@ export const fileReport = (args) => pool.run(args, { name: 'fileReportTx' });
 export const resolveReport = (args) => pool.run(args, { name: 'resolveReportTx' });
 export const removeSubject = (args) => pool.run(args, { name: 'removeSubjectTx' });
 
+// Admin view of marketplace posts (package B-admin-posts, ./tx/admin-posts.js, re-exported by
+// worker.js): two snapshot READS (the list with its filtered total, the whole inspect page) and the
+// one write, lifting a take-down. The take-down itself is removeSubject above.
+export const adminPostList = (args) => pool.run(args, { name: 'adminPostListQuery' });
+export const adminPostDetail = (args) => pool.run(args, { name: 'adminPostDetailQuery' });
+export const restoreRemovedPost = (args) => pool.run(args, { name: 'restoreRemovedPostTx' });
+
 // Disabling an account. The last-admin guard is read under the write lock rather than pre-checked:
 // two admins disabling each other at the same instant would otherwise leave the product with none,
 // and enabling an account requires an admin — a state nothing could recover from.
