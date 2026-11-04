@@ -1,0 +1,30 @@
+{
+  "id": "B-admin-polish",
+  "decision": "backend fix round after the independent security review of the admin v2 backend (.pulse/review/security-admin-v2: FINDINGS.md was never written, the findings were derived from the raw attack outputs attacks/out-01..08.txt) and the backend items of the S-admin-* screen reviews (none existed at fix time); owner decisions 2026-11-03 unchanged",
+  "owns": [
+    "backend/scripts/smoke/admin-polish.js",
+    "backend/src/admin/params.js",
+    "backend/src/lib/reason-text.js",
+    "docs/pipeline/pulse/pkg/B-admin-polish/**"
+  ],
+  "sharedEdits": {
+    "decision": "small edits to files owned by the closed admin lanes / the integrator, each listed so the integrator can resolve conflicts",
+    "files": [
+      "backend/src/admin/routes.js (B-admin-accounts): strict ids on role/disable/enable/moderation, reasonText on the reasons, the enable step-up for admins",
+      "backend/src/admin/accounts.js (B-admin-accounts): idParams imported from admin/params.js, two route comments",
+      "backend/src/db/tx/admin-accounts.js (B-admin-accounts): liveSessions/lastWatermark - sign-out-all and force-password-change are replays only when no access token can be alive",
+      "backend/src/db/worker.js (integrator): setAccountDisabledTx takes stepUp and refuses to re-enable an admin without it (4 lines)",
+      "backend/src/coins/routes.js (B-admin-accounts): strict idParam, reasonText note",
+      "backend/src/public/moderation.js (B-admin-posts): strict report id",
+      "backend/src/lib/display-name.js (B-admin-accounts): hasInvisible refinement",
+      "backend/scripts/smoke.js (integrator): SMOKE_ONLY=admin-polish hook and the section call before the statistics section",
+      "backend/scripts/smoke/admin-accounts.js (B-admin-accounts): the ZWJ name probe and the flagged-replay check follow the fix (see api.md, Proof)",
+      "backend/scripts/verify-admin-accounts.mjs (B-admin-accounts): two EnableBody anchors, mutant 2 expects the search check"
+    ]
+  },
+  "handIn": {},
+  "notInScope": [
+    "the screens (S-admin-accounts, S-admin-posts, S-admin-moderation)",
+    "owner design decisions (listed in the report instead)"
+  ]
+}

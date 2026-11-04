@@ -51,10 +51,12 @@ const MUTANTS = [
     expect: '"_" is a literal',
   },
   {
-    label: 'the display-name validator lets the U+202E bidi override through',
+    // Since B-admin-polish a name with U+202E is ALSO refused by hasInvisible (every format character),
+    // so this defect now shows on the account search, the other reader of CONTROLS.
+    label: 'the CONTROLS set lets the U+202E bidi override through (names stay refused by hasInvisible; the search does not)',
     file: 'src/lib/display-name.js',
     edit: swap("'\\u202A-\\u202E', // the bidi embeddings and overrides", "'\\u202A-\\u202D', // the bidi embeddings and overrides"),
-    expect: 'extremes: 120 code points pass and 121 fail',
+    expect: 'q: NUL, newline and a bidi override are refused',
   },
   {
     label: 'the admin name route stops using the shared validator (any string goes)',
@@ -138,7 +140,7 @@ const MUTANTS = [
   {
     label: 'enable does not insist on a reason at the edge',
     file: 'src/admin/routes.js',
-    edit: swap('const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();', 'const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000).optional() }).strict();'),
+    edit: swap('const EnableBody = z.object({ reason: reasonText(2000), password: z.string().min(1).max(200).optional() }).strict();', 'const EnableBody = z.object({ reason: reasonText(2000).optional(), password: z.string().min(1).max(200).optional() }).strict();'),
     expect: 'enable WITHOUT a reason is refused',
   },
   {
@@ -147,7 +149,7 @@ const MUTANTS = [
     edit: swap("if (!reason || reason.trim().length === 0) return { outcome: 'needs_reason' };", "if (disabled && (!reason || reason.trim().length === 0)) return { outcome: 'needs_reason' };"),
     expect: 'enable WITHOUT a reason is refused',
     // paired with the route-level mutant above: this one alone is caught by the zod schema
-    alsoEdit: [['src/admin/routes.js', swap('const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();', 'const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000).optional() }).strict();')]],
+    alsoEdit: [['src/admin/routes.js', swap('const EnableBody = z.object({ reason: reasonText(2000), password: z.string().min(1).max(200).optional() }).strict();', 'const EnableBody = z.object({ reason: reasonText(2000).optional(), password: z.string().min(1).max(200).optional() }).strict();')]],
   },
 ];
 

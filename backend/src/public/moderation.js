@@ -19,6 +19,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
+import { idParams } from '../admin/params.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
@@ -213,7 +214,8 @@ router.post(
   adminWriteLimiter,
   adminWriteAccountLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.object({ id: z.coerce.number().int().min(1) }).strict().safeParse(req.params);
+    // A canonical decimal id (admin/params.js); z.coerce read '0x10' as 16 and ' 5' as 5.
+    const id = idParams.safeParse(req.params);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const parsed = resolveBody.safeParse(req.body);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);

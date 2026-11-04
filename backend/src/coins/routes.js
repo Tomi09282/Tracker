@@ -34,6 +34,8 @@
 // operations rather than a false replay, and one principal cannot squat another's key.
 import { Router } from 'express';
 import { z } from 'zod';
+import { idParams } from '../admin/params.js';
+import { reasonText } from '../lib/reason-text.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
@@ -97,7 +99,8 @@ const adminCoinAccountLimiter = rateLimit({
 
 /* ── validation ─────────────────────────────────────────────────────────────────────────────── */
 
-const idParam = z.object({ id: z.coerce.number().int().positive().max(2_147_483_647) }).strict();
+// A canonical decimal id (admin/params.js): z.coerce read '0x10' as 16 and ' 5' as 5.
+const idParam = idParams;
 
 /**
  * The client's half of an idempotency key.
@@ -129,7 +132,8 @@ const adminAdjustBody = z
       .min(-1_000_000)
       .max(1_000_000)
       .refine((n) => n !== 0, { message: 'a zero adjustment moves nothing' }),
-    note: z.string().trim().min(1).max(280),
+    // lib/reason-text.js: no NUL, no bidi override, no lone surrogate in the ledger and audit row.
+    note: reasonText(280),
     idempotency_key: clientKey,
   })
   .strict();

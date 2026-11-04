@@ -492,7 +492,7 @@ export async function adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASS
       ['two letters', 'Ab'], ['one letter', 'A'], ['only spaces', '    '], ['120 characters', 'x'.repeat(120)], ['121 characters', 'x'.repeat(121)],
       ['120 emoji (240 UTF-16 units)', '🎉'.repeat(120)], ['121 emoji', '🎉'.repeat(121)], ['one emoji', '🎉'], ['two emoji', '🎉🎉'],
       ['newline', 'A\nB'], ['NUL', 'A\u0000B'], ['tab', 'A\tB'], ['bidi override U+202E', 'A\u202EB'], ['bidi isolate U+2066', 'A\u2066B'], ['DEL', 'A\u007FB'], ['C1 U+0085', 'A\u0085B'],
-      ['zero-width joiner (allowed)', 'A\u200DB'], ['decomposed accent', 'Éva'], ['Hebrew', 'דוד כהן'], ['Arabic', 'محمد علي'], ['leading and trailing spaces', '  Ab  '],
+      ['zero-width joiner between letters (refused since B-admin-polish: renders as "AB")', 'A\u200DB'], ['emoji ZWJ sequence (allowed)', 'Ab \u{1F469}\u200D\u{1F4BB}'], ['decomposed accent', 'Éva'], ['Hebrew', 'דוד כהן'], ['Arabic', 'محمد علي'], ['leading and trailing spaces', '  Ab  '],
     ];
     const mine = await make('parity');
     const rows = [];
@@ -501,7 +501,7 @@ export async function adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASS
       const viaSelf = (await call(`${API}/auth/me`, { method: 'PATCH', jar: mine.jar, body: { displayName: value } })).res.status;
       rows.push([label, viaAdmin, viaSelf]);
     }
-    const expectOk = new Set(['two letters', '120 characters', '120 emoji (240 UTF-16 units)', 'two emoji', 'zero-width joiner (allowed)', 'decomposed accent', 'Hebrew', 'Arabic', 'leading and trailing spaces']);
+    const expectOk = new Set(['two letters', '120 characters', '120 emoji (240 UTF-16 units)', 'two emoji', 'emoji ZWJ sequence (allowed)', 'decomposed accent', 'Hebrew', 'Arabic', 'leading and trailing spaces']);
     check('extremes: 120 code points pass and 121 fail; emoji count as one; controls and bidi marks fail; Hebrew, Arabic and accents pass', rows.every(([l, a]) => (expectOk.has(l) ? a === 200 : a === 400)), rows.filter(([l, a]) => (expectOk.has(l) ? a !== 200 : a !== 400)).map((x) => x.join(':')).join('; ') || 'as expected');
     check('and the admin route answers EXACTLY what the user\'s own PATCH /auth/me answers for every one of them (one shared validator)', rows.every(([, a, s]) => a === s), rows.filter(([, a, s]) => a !== s).map((x) => x.join(':')).join('; ') || `${rows.length} probes agree`);
     const ok120 = await send('PATCH', `/${mine.id}/name`, adminA, { displayName: '🎉'.repeat(120) });
@@ -608,9 +608,15 @@ export async function adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASS
     check('the person can still sign in, but reaches nothing except /auth/me, change-credentials and logout', jar !== null && (await call(`${API}/auth/me`, { jar })).res.status === 200 && (await call(`${API}/coins/wallet`, { jar })).res.status === 403, '');
     const list = await get(`?q=${encodeURIComponent(t.email)}`, adminA);
     check('the list shows the flag (mustChange 1)', list.json?.users?.[0]?.mustChange === 1, JSON.stringify(list.json?.users?.[0]?.mustChange));
+    // B-admin-polish (security review admin v2, S3): forcing again while the flagged person IS signed
+    // in ends that session - it used to be a replay that left it alive. With nothing signed in it is
+    // a replay, as before.
     const again = await send('POST', `/${t.id}/force-password-change`, adminA, {});
-    check('replay: already flagged -> replayed:true, no second audit row', again.json?.replayed === true && audits('user.password.force', t.id) === before + 1, '');
-    const changed = await call(`${API}/auth/change-credentials`, { method: 'POST', jar, body: { currentPassword: PASSWORD, password: 'BrandNewPass123y' } });
+    check('already flagged but signed in -> applied, that session ends', again.json?.replayed === false && audits('user.password.force', t.id) === before + 2 && (await call(`${API}/auth/me`, { jar })).res.status === 401, JSON.stringify(again.json));
+    const third = await send('POST', `/${t.id}/force-password-change`, adminA, {});
+    check('replay: already flagged and nothing signed in -> replayed:true, no new audit row', third.json?.replayed === true && audits('user.password.force', t.id) === before + 2, JSON.stringify(third.json));
+    const jarAgain = await login(t.email);
+    const changed = await call(`${API}/auth/change-credentials`, { method: 'POST', jar: jarAgain, body: { currentPassword: PASSWORD, password: 'BrandNewPass123y' } });
     check('and the person clears the flag by choosing a new password', changed.res.status === 200 && rowOf(t.id).must_change_credentials === 0, `${changed.res.status}`);
 
     const t2 = await make('forcepw2');

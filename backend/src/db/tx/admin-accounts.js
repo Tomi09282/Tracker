@@ -47,6 +47,67 @@ function conn() {
 
 const nowSec = () => Math.floor(Date.now() / 1000);
 
+/* ── "could an access token of this account still be alive?" ──────────────────────────────────────
+ *
+ * B-admin-polish (security review admin-v2, S1 / S3). Sign-out-all and force-password-change used to
+ * call themselves a REPLAY whenever the account had no open refresh family. That is the wrong
+ * question: an ACCESS token lives for its own 15 minutes without any refresh row. A victim who logs
+ * out on their own device revokes the refresh token and leaves the access token alive - and a copy
+ * of it (the stolen one, the reason an admin presses "sign out everywhere") kept working after the
+ * admin's 200 { replayed: true }, because nothing bumped the session version.
+ *
+ * Every access token is minted right after a refresh-token row is inserted (auth/routes.js
+ * issueSession: login and every rotation), so "an access token minted after the last time THIS
+ * action ended the sessions, inside one access lifetime" is answerable from refresh_tokens: a row
+ * created inside the access window AND after the last revoke of this action. "After" is asked two
+ * ways, and either one counts:
+ *
+ *   - rowid above the watermark the action stored in its audit row (`upTo`). Exact inside one
+ *     second, but refresh_tokens has a TEXT primary key, so its rowid can be reused once the row
+ *     holding the maximum is purged - on its own it could miss a row and call a live token a replay.
+ *   - created_at strictly after the second the audit row was written. Immune to rowid reuse, blind
+ *     inside the same second.
+ *
+ * No such row and no open family = genuinely nothing to end = a replay. Anything else is applied
+ * (version bumped, tokens revoked, one audit row) - conservative on purpose: applying once too often
+ * costs an audit row, replaying once too often leaves a stolen token alive.
+ *
+ * ACCESS_WINDOW_SEC is auth/tokens.js ACCESS_TTL_SEC (15 min) plus a minute of clock slack. It is
+ * restated rather than imported because the worker does not load the JWT module.
+ */
+const ACCESS_WINDOW_SEC = 15 * 60 + 60;
+
+/** Where the last `action` row for this account left off: its rowid watermark and its second. */
+function lastWatermark(action, targetId) {
+  const row = stmt(
+    `SELECT json_extract(detail, '$.upTo') AS upTo, created_at AS at FROM audit_log
+      WHERE action = ? AND target_type = 'user' AND target_id = ?
+      ORDER BY id DESC LIMIT 1`,
+  ).get(action, targetId);
+  return {
+    upTo: Number.isSafeInteger(row?.upTo) ? row.upTo : 0,
+    at: Number.isSafeInteger(row?.at) ? row.at : 0,
+  };
+}
+
+/** Open refresh families, and whether an access token may have been minted after `mark`. */
+function liveSessions(targetId, mark, now) {
+  const { open } = stmt(
+    `SELECT COUNT(DISTINCT family_id) AS open FROM refresh_tokens
+      WHERE user_id = ? AND revoked = 0 AND consumed_at IS NULL AND expires_at > ?`,
+  ).get(targetId, now);
+  const minted =
+    stmt(
+      `SELECT EXISTS (SELECT 1 FROM refresh_tokens
+         WHERE user_id = ? AND created_at > ? AND (rowid > ? OR created_at > ?)) AS m`,
+    ).get(targetId, now - ACCESS_WINDOW_SEC, mark.upTo, mark.at).m === 1;
+  return { open, minted };
+}
+
+/** The highest refresh-token rowid of the account right now - the watermark the next check uses. */
+const currentWatermark = (targetId) =>
+  stmt('SELECT COALESCE(MAX(rowid), 0) AS w FROM refresh_tokens WHERE user_id = ?').get(targetId).w;
+
 /* ══ the account list ════════════════════════════════════════════════════════════════════════════ */
 
 /**
@@ -495,7 +556,8 @@ export function adminResetLockoutTx({ actorId, actorSessionVersion, targetId, re
 /**
  * End every session of an account: the same two effects as the user's own logout-all - every
  * refresh token revoked, `session_version` bumped so the live access tokens die on their next
- * request - plus an audit row. An account with no open session is a replay.
+ * request - plus an audit row. A replay only when nothing could still be signed in (no open refresh
+ * family and no access token minted since this action last ran - see liveSessions).
  *
  * Signing yourself out is allowed (it is your own logout-all); the route clears the cookies then.
  */
@@ -520,13 +582,14 @@ export function adminSignOutAllTx({ actorId, actorSessionVersion, targetId, requ
     const target = stmt('SELECT id FROM users WHERE id = ?').get(targetId);
     if (!target) return { outcome: 'missing' };
 
+    // A replay only when nothing could still be signed in: no open refresh family AND no access
+    // token minted since this action last ended the sessions (see liveSessions above).
     current = 'COUNT the open sessions';
-    const { open } = stmt(
-      `SELECT COUNT(DISTINCT family_id) AS open FROM refresh_tokens
-        WHERE user_id = ? AND revoked = 0 AND consumed_at IS NULL AND expires_at > ?`,
-    ).get(targetId, nowSec());
-    if (open === 0) return view(true, 0);
+    const { open, minted } = liveSessions(targetId, lastWatermark('user.sessions.revoke', targetId), nowSec());
+    if (open === 0 && !minted) return view(true, 0);
 
+    current = 'SELECT the watermark';
+    const upTo = currentWatermark(targetId);
     current = 'UPDATE the refresh tokens';
     stmt('UPDATE refresh_tokens SET revoked = 1 WHERE user_id = ? AND revoked = 0').run(targetId);
     current = 'UPDATE the session version';
@@ -536,7 +599,7 @@ export function adminSignOutAllTx({ actorId, actorSessionVersion, targetId, requ
     stmt(
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
        VALUES (?, 'user.sessions.revoke', 'user', ?, ?, ?, ?)`,
-    ).run(actorId, targetId, JSON.stringify({ sessions: open }), requestId, ip);
+    ).run(actorId, targetId, JSON.stringify({ sessions: open, upTo }), requestId, ip);
 
     return view(false, open);
   });
@@ -551,7 +614,8 @@ export function adminSignOutAllTx({ actorId, actorSessionVersion, targetId, requ
 /**
  * Make the person choose a new password at their next sign-in: `must_change_credentials = 1` (the
  * flow-C gate in requireAuth then lets the account reach nothing but /auth/me, change-credentials
- * and logout), and every session ends now. An account already flagged is a replay.
+ * and logout), and every session ends now. An account already flagged with nothing signed in is a
+ * replay.
  */
 export function adminForcePasswordChangeTx({ actorId, actorSessionVersion, targetId, requestId, ip = null }) {
   const c = conn();
@@ -573,8 +637,17 @@ export function adminForcePasswordChangeTx({ actorId, actorSessionVersion, targe
     current = 'SELECT the target';
     const target = stmt('SELECT id, must_change_credentials AS mustChange FROM users WHERE id = ?').get(targetId);
     if (!target) return { outcome: 'missing' };
-    if (target.mustChange === 1) return view(true);
+    // Already flagged is a replay ONLY when nothing is signed in either. A flagged account can still
+    // sign in (to reach change-credentials), so "force" again on a flagged account with a session
+    // ends that session - "every session ends now" is what the button says (review admin-v2, S3).
+    if (target.mustChange === 1) {
+      current = 'COUNT the open sessions';
+      const { open, minted } = liveSessions(targetId, lastWatermark('user.password.force', targetId), nowSec());
+      if (open === 0 && !minted) return view(true);
+    }
 
+    current = 'SELECT the watermark';
+    const upTo = currentWatermark(targetId);
     current = 'UPDATE the account';
     stmt('UPDATE users SET must_change_credentials = 1, session_version = session_version + 1 WHERE id = ?').run(targetId);
     current = 'UPDATE the refresh tokens';
@@ -584,7 +657,7 @@ export function adminForcePasswordChangeTx({ actorId, actorSessionVersion, targe
     stmt(
       `INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)
        VALUES (?, 'user.password.force', 'user', ?, ?, ?, ?)`,
-    ).run(actorId, targetId, JSON.stringify({}), requestId, ip);
+    ).run(actorId, targetId, JSON.stringify({ upTo, alreadyFlagged: target.mustChange === 1 }), requestId, ip);
 
     return view(false);
   });

@@ -545,6 +545,16 @@ ${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} fail
   process.exit(failed === 0 ? 0 : 1);
 }
 
+// SMOKE_ONLY=admin-polish runs ONLY the B-admin-polish regressions (the security review of the admin
+// v2 backend) - the section that was proven red on the code before the package.
+if (process.env.SMOKE_ONLY === 'admin-polish' && seeded) {
+  const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
+  await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  console.log(`
+${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} failed (admin-polish only)`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 if (!seeded) {
   check('exercise suite: privileged accounts available', false, 'SMOKE_ACCOUNTS missing — run via npm run smoke');
 } else {
@@ -5859,6 +5869,14 @@ if (seeded) {
 {
   const { adminPostsSmoke } = await import('./smoke/admin-posts.js');
   await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
+}
+
+// --- admin security regressions (package B-admin-polish) ----------------------------------------
+// The security review of the admin v2 backend: the enable step-up for admins, sign-out that ends a
+// live access token, canonical ids, invisible names, clean reasons. Five passes where they apply.
+if (seeded) {
+  const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
+  await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
 }
 
 // --- admin statistics (package B-admin-stats) --------------------------------------------------

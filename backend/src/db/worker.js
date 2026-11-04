@@ -3025,7 +3025,7 @@ export function removeSubjectTx({
  * moment ago would still be acting on a token that says otherwise, and the operations here decide
  * who may do everything else.
  */
-export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requestId, ip = null }) {
+export function setAccountDisabledTx({ actorId, targetId, disabled, reason, stepUp = false, requestId, ip = null }) {
   const conn = getDb();
   let current = null;
 
@@ -3062,6 +3062,11 @@ export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requ
     // A reason is required in BOTH directions (owner, 2026-11-03): disabling and enabling are each a
     // judgement about a person, and the audit row is where the next admin reads why.
     if (!reason || reason.trim().length === 0) return { outcome: 'needs_reason' };
+
+    // Bringing back an ADMIN hands over everything a grant does, so it carries the grant's step-up
+    // (B-admin-polish; security review admin v2, attack 06): the route verified the actor's own
+    // password, and the role is checked HERE, under the write lock, not from a read before it.
+    if (!disabled && target.role === 'admin' && stepUp !== true) return { outcome: 'step_up_required' };
 
     // No last-admin count here either, for the same reason and with the same evidence — see the
     // note in setUserRoleTx. An admin cannot disable themselves, and a disabled account is refused

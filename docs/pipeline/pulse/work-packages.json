@@ -1527,14 +1527,9 @@
       "owns": [
         "backend/package.json",
         "backend/scripts/smoke-limits.js",
-        "backend/scripts/smoke/admin-accounts.js",
-        "backend/scripts/verify-admin-accounts.mjs",
         "backend/scripts/verify-gates.mjs",
-        "backend/src/admin/accounts.js",
         "backend/src/admin/limiters.js",
         "backend/src/auth/routes.js",
-        "backend/src/db/tx/admin-accounts.js",
-        "backend/src/lib/display-name.js",
         "backend/src/lib/like.js",
         "docs/pipeline/pulse/pkg/B-admin-accounts/**"
       ],
@@ -1571,9 +1566,7 @@
         "backend/scripts/smoke/admin-posts.js",
         "backend/src/db/index.js",
         "backend/src/db/tx/admin-posts.js",
-        "backend/src/db/worker.js",
         "backend/src/public/admin-posts.js",
-        "backend/src/public/moderation.js",
         "backend/src/public/visibility.js",
         "docs/pipeline/pulse/pkg/B-admin-posts/**"
       ],
@@ -1605,13 +1598,10 @@
       "title": "The admin statistics backend (owner decision 2026-11-03 item 3, figma-build/admin-v2/DESIGN-NOTES.md): GET /admin/stats gains an additive panel (users total / new in 7 days, active coaches, completed workouts today / 7 days, pending moderation, open reports, the 30-day curve of people who logged something; every old key unchanged); new GET /admin/statistics?days=7|30|90 (USERS, ACTIVITY, COINS with an integrity ok / not-ok, MARKETPLACE, COACHES, SYSTEM; every series dense and zero-filled, the clock named per series, counts only) behind a single-flight TTL cache (45 s statistics, 30 s for the scan half of the panel; the counters an admin acts on stay live); the four coin reconciliation checks move to coins/integrity.js so GET /admin/coins/audit (same response) and the statistics page cannot drift; per-IP (240 / 15 min) and per-admin (120 / 15 min) limits, DB-side admin re-check, no audit row (reads); no migration",
       "owns": [
         "backend/scripts/brain-gen.mjs",
-        "backend/scripts/smoke.js",
         "backend/scripts/smoke/admin-statistics.js",
         "backend/server.js",
-        "backend/src/admin/routes.js",
         "backend/src/admin/statistics.js",
         "backend/src/coins/integrity.js",
-        "backend/src/coins/routes.js",
         "backend/src/lib/ttl-cache.js",
         "docs/pipeline/pulse/pkg/B-admin-stats/**"
       ],
@@ -1636,6 +1626,49 @@
         "npm run verify:gates (cwd frontend/, integration worktree)"
       ],
       "notes": "Added by the integrator at merge (merge-B-admin-stats) from the package's own pkg/B-admin-stats/owns.json: the package ran outside the plan entry list (no brief). The package was based on the tip before B-admin-accounts and B-admin-posts, so the squash was a three-way merge with three textual conflicts, all two adjacent registration lines where both sides were kept: server.js (import and app.use), brain-gen.mjs (router list) and smoke.js (the statistics section is its own block after the admin-posts block, last of all, because it plants a fixture and waits out the cache TTL once). The diff was checked against owns.json: the 12 paths pass to it; backend/src/lib/ttl-cache.js was missing from the package's owns.json and is added here; backend/server.js, scripts/brain-gen.mjs and scripts/smoke.js passed from the closed B-admin-posts, src/admin/routes.js and src/coins/routes.js from the closed B-admin-accounts; statistics.js, integrity.js, admin-statistics.js and ttl-cache.js had no owner. No migration (036 unused), no new table, no audit row (reads). The dev backend on :3000 picks the changes up only after a restart. Follow-ups from handoff.json: docs/brain is not regenerated (npm run brain:gen once, all three admin backend lanes are merged now); recommended later migration CREATE INDEX audit_log_created_idx ON audit_log (created_at) for the 24 h audit count; recommended later an index or counter for the coach_posts state split if the marketplace grows; the frames' new Hungarian copy belongs to S-admin-moderation's i18n.patch.json."
+    },
+    {
+      "id": "B-admin-polish",
+      "title": "The admin backend fix round after the independent security review of the admin v2 backend (attacks out-01..08): H1 enabling a disabled ADMIN account asks for the acting admin's own password (401 step_up_required, role checked inside setAccountDisabledTx); H2 sign-out-all and force-password-change are replays only when no refresh family is open AND no access token was minted since the action last ran, so a copied access token of a logged-out device dies; M1 canonical decimal ids on role / disable / enable / coins / report resolve / exercise moderation (admin/params.js); M2 display names refuse format characters (emoji and Indic ZWJ, letter ZWNJ excepted), line / paragraph separators, Hangul fillers, braille blank, lone surrogates, 4+ combining marks; M3 reasons and notes (lib/reason-text.js) refuse NUL / C0 / C1 (TAB, LF ok), bidi controls, lone surrogates, normalised to NFC with CRLF->LF; no migration",
+      "owns": [
+        "backend/scripts/smoke.js",
+        "backend/scripts/smoke/admin-accounts.js",
+        "backend/scripts/smoke/admin-polish.js",
+        "backend/scripts/verify-admin-accounts.mjs",
+        "backend/src/admin/accounts.js",
+        "backend/src/admin/params.js",
+        "backend/src/admin/routes.js",
+        "backend/src/coins/routes.js",
+        "backend/src/db/tx/admin-accounts.js",
+        "backend/src/db/worker.js",
+        "backend/src/lib/display-name.js",
+        "backend/src/lib/reason-text.js",
+        "backend/src/public/moderation.js",
+        "docs/pipeline/pulse/pkg/B-admin-polish/**"
+      ],
+      "handIn": {},
+      "dependsOn": [
+        "B-admin-accounts",
+        "B-admin-posts",
+        "B-admin-stats"
+      ],
+      "parallelGroup": "backend lane (owner admin round 2026-11-03)",
+      "size": "M",
+      "acceptance": [
+        "enabling a disabled admin account needs { reason, password } with the acting admin's own password: 401 step_up_required without it, 401 with a wrong one; the role is read inside the transaction",
+        "sign-out-all and force-password-change on an account with no open refresh family and no access token minted since the last run are replays; after a sign-out a copied access token is dead",
+        "ids in role / disable / enable / coins / report resolve / exercise moderation URLs are canonical decimals (01, +1, 1e0 are 400)",
+        "display names and reasons refuse the invisible and control characters listed above; the attack scripts of .pulse/review/security-admin-v2/attacks no longer reproduce",
+        "smoke section admin-polish green (104 assertions, 47 red on the base commit)"
+      ],
+      "verify": [
+        "npm run check:all (cwd backend/, integration worktree, fresh migrated DB + seed:dev-users)",
+        "npm run smoke (cwd backend/, integration worktree)",
+        "attacks 01..08 against a scratch backend on the merged tree",
+        "npm run build (cwd frontend/, integration worktree)",
+        "npm run verify:gates (cwd frontend/, integration worktree)"
+      ],
+      "notes": "Added by the integrator at merge (merge-B-admin-polish) from the package's own pkg/B-admin-polish/owns.json: the package ran outside the plan entry list (no brief). The package was based on pulse-int 966b625; pulse-int has since gained S-admin-accounts (frontend only), so the squash was clean with no conflict. The diff was checked against owns.json: the 4 own paths plus the 10 shared edits pass to it - smoke/admin-accounts.js, verify-admin-accounts.mjs, admin/accounts.js, db/tx/admin-accounts.js and lib/display-name.js from the closed B-admin-accounts, db/worker.js and public/moderation.js from the closed B-admin-posts, scripts/smoke.js, admin/routes.js and coins/routes.js from the closed B-admin-stats. No migration (036 unused). The dev backend on :3000 picks the changes up only after a restart. Frontend follow-up for S-admin-accounts: the enable sheet of a disabled ADMIN account must send { reason, password } and handle 401 step_up_required like the admin grant (no approved frame shows it)."
     }
   ],
   "screens": [

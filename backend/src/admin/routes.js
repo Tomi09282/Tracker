@@ -10,6 +10,8 @@ import { assertAdmin } from '../lib/assert-admin.js';
 import { adminReadIpLimiter, adminReadLimiter, adminWriteIpLimiter, adminWriteLimiter } from './limiters.js';
 import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from '../exercises/detail.js';
 import { panelFigures } from './statistics.js';
+import { idString, parseId } from './params.js';
+import { reasonText } from '../lib/reason-text.js';
 
 const router = Router();
 
@@ -114,7 +116,7 @@ router.get(
   adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
-    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const id = idString.parse(req.params.id);
     const lang = await resolveLang(req);
     const { fallback } = await languages();
 
@@ -143,7 +145,7 @@ router.get(
 const DecisionSchema = z
   .object({
     decision: z.enum(['approve', 'reject']),
-    reason: z.string().trim().max(500).optional(),
+    reason: reasonText(500, { min: 0 }).optional(),
   })
   .strict()
   .refine((d) => d.decision !== 'reject' || (d.reason && d.reason.length > 0), {
@@ -161,7 +163,7 @@ router.post(
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
-    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const id = idString.parse(req.params.id);
     const body = DecisionSchema.parse(req.body);
 
     // ═══ THIS USED TO BE A writeTx PAIR, AND IT REFUSED AFTER IT HAD COMMITTED ═════════════════
@@ -237,8 +239,10 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = RoleSchema.safeParse(req.body);
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
@@ -305,10 +309,13 @@ const sendDisableOutcome = (res, result) => {
   });
 };
 
-const DisableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
+// lib/reason-text.js: no NUL, no bidi override, no lone surrogate in an append-only audit row.
+const DisableBody = z.object({ reason: reasonText(2000) }).strict();
 // Enabling asks for a reason exactly like disabling does (owner, 2026-11-03): a restore is a judgement
 // too, and the audit row should carry it. The 3a frame's end action 'Engedélyezés' opens a reason sheet.
-const EnableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
+// `password` is the actor's OWN password, read only when the account coming back is an ADMIN (see
+// the enable route): letting a stopped admin back in hands over everything a grant does.
+const EnableBody = z.object({ reason: reasonText(2000), password: z.string().min(1).max(200).optional() }).strict();
 
 /**
  * Stop an account.
@@ -334,8 +341,10 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = DisableBody.safeParse(req.body);
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
@@ -371,20 +380,51 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = EnableBody.safeParse(req.body ?? {});
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
+
+    // ═══ RE-ENABLING AN ADMIN IS A GRANT (security review admin v2, 2026-11-04, attack 06) ══════
+    //
+    // Measured: the owner disables admin X (compromised); a stolen session of admin B re-enables X
+    // with a reason and no password - while granting admin to anybody asks B for B's password. X
+    // signs in as an admin, and keeps that power after the owner revokes B's sessions: exactly the
+    // "second admin that outlives the stolen session" the grant step-up exists to stop.
+    //
+    // So the same step-up: a supplied password is checked here (wrong = the generic 401), and the
+    // TRANSACTION refuses to bring back an account whose role is admin unless it was - the role is
+    // read under the write lock, so a demote/promote racing this request cannot slip past it.
+    let stepUp = false;
+    if (body.data.password !== undefined) {
+      const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+      if (!actor?.password_hash || !(await argon2.verify(actor.password_hash, body.data.password))) {
+        req.log.warn({ actorId: req.user.id, targetId: id.data }, 'account enable refused: step-up failed');
+        return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+      }
+      stepUp = true;
+    }
 
     const result = await db.setAccountDisabled({
       actorId: req.user.id,
       targetId: id.data,
       disabled: false,
       reason: body.data.reason,
+      stepUp,
       requestId: res.locals.requestId,
       ip: req.ip ?? null,
     });
 
+    if (result.outcome === 'step_up_required') {
+      return res.status(401).json({
+        error: 're-enabling an admin requires your password',
+        code: ERR.UNAUTHORIZED,
+        reason: 'step_up_required',
+        requestId: res.locals.requestId,
+      });
+    }
     if (result.outcome !== 'applied') return sendDisableOutcome(res, result);
     invalidateSvCache(id.data);
     req.log.info({ targetId: id.data }, 'account enabled');

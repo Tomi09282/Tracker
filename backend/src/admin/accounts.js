@@ -32,25 +32,14 @@ import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 import { displayNameValue, CONTROLS, codePoints } from '../lib/display-name.js';
 import { foldText, containsPattern } from '../lib/like.js';
 import { adminReadIpLimiter, adminReadLimiter, adminWriteIpLimiter, adminWriteLimiter } from './limiters.js';
+import { idParams } from './params.js';
 
 const router = Router();
 
 /* ── validation ──────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * The :id of every route here. A digits-only string, no sign, no leading zero, no exponent, no
- * whitespace, no hex - `z.coerce.number()` would have accepted '1e3', '0x10' and ' 5 ' as ids -
- * and bounded to a 32-bit integer, so '99999999999' is a validation error rather than a lookup.
- */
-const idParams = z
-  .object({
-    id: z
-      .string()
-      .regex(/^[1-9]\d{0,9}$/)
-      .transform(Number)
-      .pipe(z.number().int().max(2_147_483_647)),
-  })
-  .strict();
+// The :id of every route here: a canonical decimal, 1..2^31-1 - admin/params.js (B-admin-polish moved
+// it there so the older admin routes use the same rule).
 
 const EmptyBody = z.object({}).strict();
 const NameBody = z.object({ displayName: displayNameValue }).strict();
@@ -263,7 +252,9 @@ router.post(
 /**
  * End every session of an account, now: refresh tokens revoked and the session version bumped, so
  * live access tokens die on their next request (the sv cache is dropped so that means the next one).
- * An account with no open session = replay. Signing yourself out also clears your own cookies.
+ * A replay only when nothing can still be signed in: no open refresh family AND no access token
+ * minted since this action last ran (B-admin-polish - a logged-out device's copied access token used
+ * to survive a "replayed" sign-out). Signing yourself out also clears your own cookies.
  */
 router.post(
   '/admin/users/:id/signout-all',
@@ -297,7 +288,9 @@ router.post(
 
 /**
  * Make the person set a new password at their next sign-in and end their sessions now. Empty body.
- * Already flagged = replay. Doing it to yourself ends your own session too (cookies cleared).
+ * Already flagged AND nothing signed in = replay (a flagged account can still sign in to reach
+ * change-credentials; forcing again ends that session). Doing it to yourself ends your own session
+ * too (cookies cleared).
  */
 router.post(
   '/admin/users/:id/force-password-change',
