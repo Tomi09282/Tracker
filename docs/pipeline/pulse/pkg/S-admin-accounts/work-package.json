@@ -1,0 +1,20 @@
+{
+  "id": "S-admin-accounts",
+  "screens": ["admin-accounts", "admin-account-detail", "admin-account-coins"],
+  "owns": [
+    "frontend/src/features/admin/AdminAccountsPage.tsx",
+    "frontend/src/features/admin/UserSearch.tsx",
+    "frontend/src/features/admin/accounts/**",
+    "docs/pipeline/pulse/pkg/S-admin-accounts/**"
+  ],
+  "mustNotTouch": ["backend/**", "frontend/src/features/**/use*.ts"],
+  "handIn": { "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"] },
+  "frames": [],
+  "account": "admin@tracker.local",
+  "route": "/admin/accounts",
+  "dependsOn": ["B-admin-accounts", "S-admin"],
+  "size": "L",
+  "i18nNamespaces": ["adminUsers"],
+  "liveWrites": [],
+  "notes": "Owner decisions 2026-11-03 (items 1 and 4): the account list with search / role / state / sort, the count and 'Tovabbiak' paging (the list state lives in the URL search params), the account page /admin/accounts/:id with the safe-set writes (name, role with the admin's own password for a grant, disable and enable with a required reason, coin adjustment, lift the lock-out, sign out everywhere, force a password change), the own-account and disabled states, and the coin ledger /admin/accounts/:id/coins; built 1:1 to the approved Figma frames admin-accounts-v2, admin-account-detail-1, -2a..-2d, -3a, -3b on the real endpoints of B-admin-accounts. Shared edits: app/router.tsx (2 lazy routes), app/routeMeta.ts (2 rows), scripts/check-nav-active.mjs (2 EXPECT rows), ui/data/Monogram.tsx (size 140 and a muted dot), i18n through i18n.patch.json (namespace adminUsers). The Piacter door passes ?view=posts&q=<handle> to S-admin-posts' list."
+}

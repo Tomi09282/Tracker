@@ -53,6 +53,12 @@ const AdminPage = lazy(() =>
 const AdminAccountsPage = lazy(() =>
   import('../features/admin/AdminAccountsPage').then((m) => ({ default: m.AdminAccountsPage })),
 );
+const AccountDetailPage = lazy(() =>
+  import('../features/admin/accounts/AccountDetailPage').then((m) => ({ default: m.AccountDetailPage })),
+);
+const AccountCoinsPage = lazy(() =>
+  import('../features/admin/accounts/AccountCoinsPage').then((m) => ({ default: m.AccountCoinsPage })),
+);
 const AdminMarketplacePage = lazy(() =>
   import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
 );
@@ -192,6 +198,9 @@ export const router = createBrowserRouter([
       // The admin bar's Fiókok and Piactér tabs (design round A): sections of /admin that became
       // routes, so each has a URL, a lit tab and a way in from the bar.
       { path: 'admin/accounts', element: suspended(<AdminAccountsPage />) },
+      // An account's page, pushed from a row of Fiókok, and its whole coin ledger (S-admin-accounts).
+      { path: 'admin/accounts/:id', element: suspended(<AccountDetailPage />) },
+      { path: 'admin/accounts/:id/coins', element: suspended(<AccountCoinsPage />) },
       { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
       // LifeOS Phase 2: the admin-global point rules, pushed from Moderáció's "Szabályok" door row
       // (design round A: a door, not a tab — the admin bar keeps Moderáció lit).

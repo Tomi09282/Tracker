@@ -1109,20 +1109,219 @@
     "title": "Konten",
     "search": "Nach E-Mail suchen",
     "noneTitle": "Keine Treffer",
-    "noneBody": "Versuche es mit einem Teil der E-Mail-Adresse.",
+    "noneBody": "Versuche ein anderes Wort oder einen anderen Filter.",
     "disabled": "deaktiviert",
     "mustChange": "Passwortwechsel",
-    "moreMatches": "Es gibt mehr Treffer, als auf eine Seite passen — grenze die Suche ein.",
     "col": {
       "email": "E-Mail",
       "role": "Rolle",
       "clients": "Klienten",
-      "created": "Registriert"
+      "created": "Registriert",
+      "name": "Name"
     },
     "role": {
-      "user": "Nutzer",
+      "user": "Mitglied",
       "coach": "Coach",
       "admin": "Admin"
+    },
+    "searchPlaceholder": "Nach Name oder E-Mail suchen",
+    "filter": {
+      "role": "Rolle",
+      "state": "Status",
+      "sort": "Sortierung",
+      "all": "Alle",
+      "active": "Aktiv",
+      "disabled": "Deaktiviert"
+    },
+    "count": "{{count}} Konten",
+    "countOne": "{{count}} Konto",
+    "more": "Weitere",
+    "failedTitle": "Laden fehlgeschlagen",
+    "failedBody": "Die Konten sind gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+    "failedDetailBody": "Das Konto ist gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+    "failedLedgerBody": "Das Protokoll ist gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+    "goneTitle": "Dieses Konto wurde nicht gefunden",
+    "goneBody": "Es wurde möglicherweise inzwischen gelöscht. Geh zurück zur Kontenliste.",
+    "account": "Konto",
+    "readOnly": "schreibgeschützt",
+    "state": {
+      "active": "aktiv"
+    },
+    "you": "du",
+    "disabledNotice": "Deaktiviert",
+    "sec": {
+      "account": "Konto",
+      "coach": "Coach-Seite",
+      "activity": "Aktivität",
+      "audit": "Protokoll"
+    },
+    "actions": "Aktionen",
+    "lastLogin": "Letzte Anmeldung",
+    "openSessions": "Offene Sitzungen",
+    "lockout": {
+      "label": "Sperre",
+      "none": "keine",
+      "until": "gesperrt bis {{time}}",
+      "failed": "{{count}} fehlgeschlagene Anmeldungen",
+      "failedOne": "{{count}} fehlgeschlagene Anmeldung",
+      "reset": "Sperre aufheben",
+      "nothing": "nichts gesperrt",
+      "message": "{{name}} kann sich wieder anmelden.",
+      "confirm": "Aufheben"
+    },
+    "mustChangeLabel": "Passwortwechsel",
+    "mustChangeYes": "erforderlich",
+    "mustChangeNo": "nicht erforderlich",
+    "tier": "Paket",
+    "subscription": "Abo",
+    "sub": {
+      "active": "aktiv",
+      "trialing": "Testphase",
+      "past_due": "Zahlung fällig",
+      "canceled": "gekündigt",
+      "none": "keine"
+    },
+    "profile": "Profil",
+    "profileState": "Status",
+    "profileVerified": "verifiziert",
+    "profilePublished": "veröffentlicht",
+    "profileUnpublished": "nicht veröffentlicht",
+    "profileRemoved": "entfernt",
+    "posts": "Beiträge",
+    "openReports": "Offene Meldungen",
+    "countsOnly": "nur Anzahlen",
+    "act": {
+      "workouts": "Trainings",
+      "nutrition": "Ernährungstagebuch",
+      "measurements": "Messungen",
+      "photos": "Fotos"
+    },
+    "privacy": "Der Inhalt ist privat: Admins sehen nur die Anzahl.",
+    "auditLast": "letzte 5 Ereignisse",
+    "actorSystem": "System",
+    "audit": {
+      "user": {
+        "role": {
+          "change": "Rolle geändert"
+        },
+        "disable": "Konto deaktiviert",
+        "enable": "Konto aktiviert",
+        "name": {
+          "change": "Name geändert"
+        },
+        "lockout": {
+          "reset": "Sperre aufgehoben"
+        },
+        "sessions": {
+          "revoke": "Überall abgemeldet"
+        },
+        "password": {
+          "force": "Passwortwechsel erzwungen"
+        },
+        "credentials": {
+          "change": "Passwort geändert"
+        }
+      },
+      "coin": {
+        "admin": {
+          "adjust": "Münzkorrektur"
+        }
+      }
+    },
+    "coin": {
+      "head": "Münzen",
+      "balance": "Guthaben",
+      "fullLedger": "Vollständiges Protokoll",
+      "entries": "{{count}} Einträge",
+      "entriesOne": "{{count}} Eintrag",
+      "reason": {
+        "admin": {
+          "credit": "Admin-Korrektur",
+          "debit": "Admin-Korrektur"
+        },
+        "store": {
+          "purchase": "Kauf"
+        },
+        "achievement": {
+          "reward": "Erfolgsbelohnung"
+        },
+        "focus": {
+          "finish": "Fokusblock"
+        },
+        "habit": {
+          "relapse": "Rückfall"
+        }
+      },
+      "title": "Münzkorrektur",
+      "direction": "Richtung",
+      "credit": "Gutschrift",
+      "debit": "Abbuchung",
+      "amount": "Betrag",
+      "unit": "Münzen",
+      "balanceLabel": "Guthaben:",
+      "note": "Notiz",
+      "record": "Erfassen"
+    },
+    "reason": "Grund",
+    "reasonHint": "Pflichtfeld. Kommt ins Audit-Protokoll.",
+    "nameSheet": {
+      "title": "Name bearbeiten",
+      "label": "Anzeigename",
+      "hint": "So sieht sich die Person selbst. Die E-Mail-Adresse kann nicht geändert werden.",
+      "invalid": "Der Name muss 2 bis 120 Zeichen lang sein."
+    },
+    "roleSheet": {
+      "about": {
+        "user": "Eigenes Training, Ernährung, Fortschritt",
+        "coach": "Klienten und Pläne",
+        "admin": "Voller Admin-Zugriff"
+      },
+      "current": "Aktuell · {{text}}",
+      "password": "Dein eigenes Passwort",
+      "passwordHint": "Admin-Rechte kannst du nur mit deinem eigenen Passwort vergeben."
+    },
+    "disable": {
+      "title": "Konto deaktivieren",
+      "message": "{{name}} kann sich nicht mehr anmelden, die offenen Sitzungen enden.",
+      "link": "Deaktivieren",
+      "hint": "Kann sich nicht anmelden, Sitzungen enden. Ein Grund ist nötig."
+    },
+    "enable": {
+      "title": "Konto aktivieren",
+      "message": "{{name}} kann sich wieder anmelden.",
+      "link": "Aktivieren",
+      "hint": "Kann sich wieder anmelden. Zum Aktivieren ist ein Grund nötig."
+    },
+    "signout": {
+      "sheetTitle": "Abmelden",
+      "title": "Überall abmelden",
+      "open": "{{count}} offene Sitzungen",
+      "openOne": "{{count}} offene Sitzung",
+      "none": "keine offenen Sitzungen",
+      "message": "Alle Sitzungen von {{name}} enden; die Person muss sich neu anmelden.",
+      "selfMessage": "Alle deine Sitzungen enden, auch auf diesem Gerät. Du musst dich neu anmelden.",
+      "confirm": "Abmelden"
+    },
+    "password": {
+      "sheetTitle": "Passwortwechsel",
+      "force": "Passwortwechsel erzwingen",
+      "forceSub": "Beim nächsten Anmelden muss ein neues Passwort gesetzt werden.",
+      "message": "{{name}} muss beim nächsten Anmelden ein neues Passwort setzen; die Sitzungen enden.",
+      "selfMessage": "Du musst beim nächsten Anmelden ein neues Passwort setzen; deine Sitzungen enden.",
+      "confirm": "Erzwingen"
+    },
+    "selfNote": "Dein eigenes Konto kannst du hier nicht ändern.",
+    "err": {
+      "generic": "Das hat nicht geklappt. Versuche es erneut.",
+      "stepUp": "Gib dein eigenes Passwort ein.",
+      "password": "Falsches Passwort.",
+      "forbidden": "Dazu hast du keine Berechtigung.",
+      "gone": "Dieses Konto gibt es nicht mehr.",
+      "insufficient": "Das Guthaben darf nicht unter null fallen.",
+      "self": "Das kannst du bei deinem eigenen Konto nicht tun.",
+      "conflict": "Das Konto hat sich inzwischen geändert. Prüfe es und versuche es erneut.",
+      "rate": "Zu viele Anfragen. Warte einen Moment.",
+      "invalid": "So lässt sich das nicht speichern. Prüfe die Felder."
     }
   },
   "adminRules": {

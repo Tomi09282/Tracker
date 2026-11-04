@@ -1109,20 +1109,219 @@
     "title": "Fiókok",
     "search": "Keresés e-mailben",
     "noneTitle": "Nincs találat",
-    "noneBody": "Próbáld meg az e-mail cím egy részletével.",
+    "noneBody": "Próbálj másik szót vagy szűrőt.",
     "disabled": "letiltva",
     "mustChange": "jelszócsere",
-    "moreMatches": "Több találat van, mint amennyi elfér egy oldalon — szűkíts a kereséssel.",
     "col": {
       "email": "E-mail",
       "role": "Szerepkör",
       "clients": "Kliensek",
-      "created": "Regisztrált"
+      "created": "Regisztrált",
+      "name": "Név"
     },
     "role": {
-      "user": "Felhasználó",
+      "user": "Tag",
       "coach": "Edző",
       "admin": "Admin"
+    },
+    "searchPlaceholder": "Keresés névben vagy e-mailben",
+    "filter": {
+      "role": "Szerep",
+      "state": "Állapot",
+      "sort": "Rendezés",
+      "all": "Mind",
+      "active": "Aktív",
+      "disabled": "Letiltott"
+    },
+    "count": "{{count}} fiók",
+    "countOne": "{{count}} fiók",
+    "more": "Továbbiak",
+    "failedTitle": "Nem sikerült betölteni",
+    "failedBody": "A fiókok most nem érhetők el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "failedDetailBody": "A fiók most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "failedLedgerBody": "A napló most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "goneTitle": "Ez a fiók nem található",
+    "goneBody": "Lehet, hogy közben törölték. Térj vissza a fiókok listájához.",
+    "account": "Fiók",
+    "readOnly": "csak olvasható",
+    "state": {
+      "active": "aktív"
+    },
+    "you": "te",
+    "disabledNotice": "Letiltva",
+    "sec": {
+      "account": "Fiók",
+      "coach": "Edzői oldal",
+      "activity": "Tevékenység",
+      "audit": "Napló"
+    },
+    "actions": "Műveletek",
+    "lastLogin": "Utolsó belépés",
+    "openSessions": "Nyitott munkamenet",
+    "lockout": {
+      "label": "Kizárás",
+      "none": "nincs",
+      "until": "zárolva {{time}}-ig",
+      "failed": "{{count}} hibás belépés",
+      "failedOne": "{{count}} hibás belépés",
+      "reset": "Kizárás feloldása",
+      "nothing": "nincs zárolás",
+      "message": "{{name}} újra próbálkozhat a belépéssel.",
+      "confirm": "Feloldás"
+    },
+    "mustChangeLabel": "Jelszócsere",
+    "mustChangeYes": "kötelező",
+    "mustChangeNo": "nem kötelező",
+    "tier": "Csomag",
+    "subscription": "Előfizetés",
+    "sub": {
+      "active": "aktív",
+      "trialing": "próbaidőszak",
+      "past_due": "fizetésre vár",
+      "canceled": "lemondva",
+      "none": "nincs"
+    },
+    "profile": "Profil",
+    "profileState": "Állapot",
+    "profileVerified": "ellenőrzött",
+    "profilePublished": "közzétett",
+    "profileUnpublished": "nem közzétett",
+    "profileRemoved": "levéve",
+    "posts": "Bejegyzések",
+    "openReports": "Nyitott bejelentés",
+    "countsOnly": "csak darabszám",
+    "act": {
+      "workouts": "Edzések",
+      "nutrition": "Étkezési napló",
+      "measurements": "Mérések",
+      "photos": "Fotók"
+    },
+    "privacy": "A tartalom privát: az admin csak a darabszámot látja.",
+    "auditLast": "utolsó 5 esemény",
+    "actorSystem": "Rendszer",
+    "audit": {
+      "user": {
+        "role": {
+          "change": "Szerepkör módosítva"
+        },
+        "disable": "Fiók letiltva",
+        "enable": "Fiók engedélyezve",
+        "name": {
+          "change": "Név módosítva"
+        },
+        "lockout": {
+          "reset": "Kizárás feloldva"
+        },
+        "sessions": {
+          "revoke": "Kijelentkeztetés mindenhonnan"
+        },
+        "password": {
+          "force": "Jelszócsere előírva"
+        },
+        "credentials": {
+          "change": "Jelszó módosítva"
+        }
+      },
+      "coin": {
+        "admin": {
+          "adjust": "Érme-korrekció"
+        }
+      }
+    },
+    "coin": {
+      "head": "Érme",
+      "balance": "egyenleg",
+      "fullLedger": "Teljes napló",
+      "entries": "{{count}} tétel",
+      "entriesOne": "{{count}} tétel",
+      "reason": {
+        "admin": {
+          "credit": "Admin-korrekció",
+          "debit": "Admin-korrekció"
+        },
+        "store": {
+          "purchase": "Vásárlás"
+        },
+        "achievement": {
+          "reward": "Eredmény jutalma"
+        },
+        "focus": {
+          "finish": "Fókuszblokk"
+        },
+        "habit": {
+          "relapse": "Visszaesés"
+        }
+      },
+      "title": "Érme-korrekció",
+      "direction": "Irány",
+      "credit": "Jóváírás",
+      "debit": "Levonás",
+      "amount": "Összeg",
+      "unit": "érme",
+      "balanceLabel": "Egyenleg:",
+      "note": "Megjegyzés",
+      "record": "Rögzítés"
+    },
+    "reason": "Indok",
+    "reasonHint": "Kötelező. Az audit naplóba kerül.",
+    "nameSheet": {
+      "title": "Név szerkesztése",
+      "label": "Megjelenített név",
+      "hint": "A felhasználó így látja magát. Az e-mail-cím nem módosítható.",
+      "invalid": "A névnek 2 és 120 karakter közöttinek kell lennie."
+    },
+    "roleSheet": {
+      "about": {
+        "user": "Saját edzés, étkezés, haladás",
+        "coach": "Kliensek és tervek",
+        "admin": "Teljes admin-hozzáférés"
+      },
+      "current": "Jelenlegi · {{text}}",
+      "password": "A saját jelszavad",
+      "passwordHint": "Admin jogot csak a saját jelszavad megadásával adhatsz."
+    },
+    "disable": {
+      "title": "Fiók letiltása",
+      "message": "{{name}} nem tud majd belépni, a nyitott munkamenetei megszűnnek.",
+      "link": "Letiltás",
+      "hint": "Nem tud belépni, a munkamenetei megszűnnek. Indok kell."
+    },
+    "enable": {
+      "title": "Fiók engedélyezése",
+      "message": "{{name}} újra beléphet.",
+      "link": "Engedélyezés",
+      "hint": "Újra beléphet. Az engedélyezéshez indok kell."
+    },
+    "signout": {
+      "sheetTitle": "Kijelentkeztetés",
+      "title": "Kijelentkeztetés mindenhonnan",
+      "open": "{{count}} nyitott munkamenet",
+      "openOne": "{{count}} nyitott munkamenet",
+      "none": "nincs nyitott munkamenet",
+      "message": "{{name}} minden munkamenete megszűnik, újra be kell lépnie.",
+      "selfMessage": "Minden munkameneted megszűnik, ezen az eszközön is. Újra be kell lépned.",
+      "confirm": "Kijelentkeztetés"
+    },
+    "password": {
+      "sheetTitle": "Jelszócsere",
+      "force": "Jelszócsere kötelező",
+      "forceSub": "A következő belépéskor új jelszót kell megadnia.",
+      "message": "{{name}} a következő belépéskor új jelszót kell, hogy megadjon; a munkamenetei megszűnnek.",
+      "selfMessage": "A következő belépéskor új jelszót kell megadnod; a munkameneteid megszűnnek.",
+      "confirm": "Előírás"
+    },
+    "selfNote": "A saját fiókodat itt nem módosíthatod.",
+    "err": {
+      "generic": "Nem sikerült. Próbáld újra.",
+      "stepUp": "Add meg a saját jelszavad.",
+      "password": "Hibás jelszó.",
+      "forbidden": "Ehhez nincs jogosultságod.",
+      "gone": "Ez a fiók már nem található.",
+      "insufficient": "Az egyenleg nem mehet nulla alá.",
+      "self": "Ezt a saját fiókodon nem teheted meg.",
+      "conflict": "A fiók állapota közben megváltozott. Nézd át, és próbáld újra.",
+      "rate": "Túl sok kérés. Várj egy kicsit.",
+      "invalid": "Ez így nem menthető. Ellenőrizd a mezőket."
     }
   },
   "adminRules": {

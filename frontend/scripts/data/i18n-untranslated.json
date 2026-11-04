@@ -20,6 +20,7 @@
     "adminRules.unit.pct": "unit symbol",
     "coins.level.xp": "two figures and the unit XP, the same in every language",
     "tasks.priorityValue": "a template of two placeholders and a middle dot: no words to translate",
-    "rewards.times": "a count with the multiplication sign: the same in every language"
+    "rewards.times": "a count with the multiplication sign: the same in every language",
+    "adminUsers.profile": "the same word in Hungarian and in German"
   }
 }

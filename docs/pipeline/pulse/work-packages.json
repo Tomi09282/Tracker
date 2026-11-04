@@ -2606,11 +2606,9 @@
       "owns": [
         "frontend/src/features/admin/AdminPage.tsx",
         "frontend/src/features/admin/AdminShell.tsx",
-        "frontend/src/features/admin/UserSearch.tsx",
         "frontend/src/features/admin/ModerationQueue.tsx",
         "frontend/src/features/admin/MarketplaceQueue.tsx",
         "frontend/src/features/admin/AdminMetrics.tsx",
-        "frontend/src/features/admin/AdminAccountsPage.tsx",
         "frontend/src/features/admin/AdminMarketplacePage.tsx",
         "docs/pipeline/pulse/pkg/S-admin/**"
       ],
@@ -3712,6 +3710,44 @@
       "wave": 8,
       "notes": "Entry added by the integrator at merge-P-picker-muscles: the package ran outside the plan entry list (no brief, no work-package.json), on an owner request of 2026-11-03 that overrides the plan-editor spec (DEV-093, ruled). 3 paths passed from the closed S-plan-editor (PlanEditorPage.tsx), B-equipment (exercises/routes.js) and B-lifeos-polish (smoke.js); ExercisePicker.tsx is new. frontend/src/features/library/useExercises.ts (frozen, ExerciseRow.muscles type only) was edited by the package instead of travelling as shared.patch; the integrator accepted it in the squash because it is a one-field type addition that no gate mirrors. The author applied the four plans.picker* keys into the three bundles itself and wrote i18n.patch.json with make-i18n.mjs; at merge pulse-i18n check is run against this entry. Docs came with the squash (Screens/plan-editor.md, Feature inventory.md, deviations.md DEV-093). Backend: an additive field only (GET /exercises rows gain muscles, a correlated scalar subquery like EQUIPMENT_SLUGS; no migration, no new route); the dev backend on :3000 serves it only after a restart. Open for the owner: the 92 pt row on a phone with the keyboard up shows few results before the page scrolls.",
       "liveWrites": []
+    },
+    {
+      "id": "S-admin-accounts",
+      "screens": [
+        "admin-accounts",
+        "admin-account-detail",
+        "admin-account-coins"
+      ],
+      "owns": [
+        "frontend/src/features/admin/AdminAccountsPage.tsx",
+        "frontend/src/features/admin/UserSearch.tsx",
+        "frontend/src/features/admin/accounts/**",
+        "docs/pipeline/pulse/pkg/S-admin-accounts/**"
+      ],
+      "mustNotTouch": [
+        "backend/**",
+        "frontend/src/features/**/use*.ts"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ]
+      },
+      "frames": [],
+      "account": "admin@tracker.local",
+      "route": "/admin/accounts",
+      "dependsOn": [
+        "B-admin-accounts",
+        "S-admin"
+      ],
+      "size": "L",
+      "i18nNamespaces": [
+        "adminUsers"
+      ],
+      "liveWrites": [],
+      "notes": "Owner decisions 2026-11-03 (items 1 and 4): the account list with search / role / state / sort, the count and 'Tovabbiak' paging (the list state lives in the URL search params), the account page /admin/accounts/:id with the safe-set writes (name, role with the admin's own password for a grant, disable and enable with a required reason, coin adjustment, lift the lock-out, sign out everywhere, force a password change), the own-account and disabled states, and the coin ledger /admin/accounts/:id/coins; built 1:1 to the approved Figma frames admin-accounts-v2, admin-account-detail-1, -2a..-2d, -3a, -3b on the real endpoints of B-admin-accounts. Shared edits: app/router.tsx (2 lazy routes), app/routeMeta.ts (2 rows), scripts/check-nav-active.mjs (2 EXPECT rows), ui/data/Monogram.tsx (size 140 and a muted dot), i18n through i18n.patch.json (namespace adminUsers). The Piacter door passes ?view=posts&q=<handle> to S-admin-posts' list. Integration (merge-S-admin-accounts): the squash applied cleanly; frontend/src/features/admin/AdminAccountsPage.tsx and UserSearch.tsx (deleted, replaced by accounts/AccountList.tsx) passed here from the closed S-admin (one file, one owner); the shared edits (router.tsx 3 lazy imports + 3 routes, routeMeta.ts 2 rows, check-nav-active.mjs 2 EXPECT rows, Monogram.tsx size 140 + muted dot) are integrator files and were accepted in the squash. The handoff.md deviations (1-9) are for deviations.md / the owner."
     }
   ],
   "queue": [

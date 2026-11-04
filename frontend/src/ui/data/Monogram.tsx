@@ -48,14 +48,18 @@ import { Skeleton } from '../feedback/ScreenSkeleton';
  * from the left and 15 % down, measured from the node's box (`imageTransform` in `monogramMark`).
  */
 
-/** The sizes the frames draw: 28 a row lead, 64 the board's mid size, 96 the chat anchor, 124 the client anchor, 176 a hero. */
-export type MonogramSize = 28 | 64 | 96 | 124 | 176;
+/** The sizes the frames draw: 28 a row lead, 64 the board's mid size, 96 the chat anchor, 124 the client anchor, 140 the admin's account page (`admin-account-detail-1`), 176 a hero. */
+export type MonogramSize = 28 | 64 | 96 | 124 | 140 | 176;
 
 /** `ink` = text-1 · `pending` = text-3 (a day that is not set, `plan-editor`). Ignored under the texture. */
 export type MonogramTone = 'ink' | 'pending';
 
-/** The dot's colour: the lamp, or the warning tone (a state that waits for someone). */
-export type MonogramDot = 'accent' | 'warn';
+/**
+ * The dot's colour: the lamp, the warning tone (a state that waits for someone), or `muted` - a grey
+ * dot for an account that is switched off (admin account page, frame `admin-account-detail-3a`: red is
+ * kept for the state word, so the dot goes quiet instead).
+ */
+export type MonogramDot = 'accent' | 'warn' | 'muted';
 
 export interface MonogramProps {
   /** The person: the letters come from `personInitials` (display name, else the e-mail local part). */
@@ -214,7 +218,7 @@ function textureFill(text: string, overTop: number, advance: number, src: string
 
 const TEXTURE = pulseSrcSet('texture-monogram').src;
 const TONE: Record<MonogramTone, string> = { ink: 'text-text-1', pending: 'text-text-3' };
-const DOT: Record<MonogramDot, string> = { accent: 'bg-accent', warn: 'bg-warning' };
+const DOT: Record<MonogramDot, string> = { accent: 'bg-accent', warn: 'bg-warning', muted: 'bg-text-3' };
 
 /* ── Monogram ─────────────────────────────────────────────────────────────────────────────────── */
 
@@ -224,7 +228,7 @@ export function Monogram({ person, initials, size = 28, dot, dotLabel, light, to
   const box = inkBox(text);
   const textured = light ?? size >= 96;
   const d = dot ? Math.round(size / 8) : 0;
-  const dotTone: MonogramDot = dot === 'warn' ? 'warn' : 'accent';
+  const dotTone: MonogramDot = dot === 'warn' || dot === 'muted' ? dot : 'accent';
   return (
     <span
       data-kit="monogramMark"
@@ -267,6 +271,7 @@ const SKELETON: Record<MonogramSize, string> = {
   64: 'h-[51px] w-[58px]',
   96: 'h-[77px] w-[86px]',
   124: 'h-[99px] w-[112px]',
+  140: 'h-[112px] w-[126px]',
   176: 'h-[141px] w-[158px]',
 };
 

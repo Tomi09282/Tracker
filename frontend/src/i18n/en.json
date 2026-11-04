@@ -1109,20 +1109,219 @@
     "title": "Accounts",
     "search": "Search by email",
     "noneTitle": "No matches",
-    "noneBody": "Try a fragment of the email address.",
+    "noneBody": "Try another word or filter.",
     "disabled": "disabled",
     "mustChange": "password reset",
-    "moreMatches": "There are more matches than fit on a page — narrow the search.",
     "col": {
       "email": "Email",
       "role": "Role",
       "clients": "Clients",
-      "created": "Joined"
+      "created": "Joined",
+      "name": "Name"
     },
     "role": {
-      "user": "User",
+      "user": "Member",
       "coach": "Coach",
       "admin": "Admin"
+    },
+    "searchPlaceholder": "Search by name or email",
+    "filter": {
+      "role": "Role",
+      "state": "Status",
+      "sort": "Sort",
+      "all": "All",
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "count": "{{count}} accounts",
+    "countOne": "{{count}} account",
+    "more": "More",
+    "failedTitle": "Could not load",
+    "failedBody": "The accounts are not available right now. Check your connection and try again.",
+    "failedDetailBody": "The account is not available right now. Check your connection and try again.",
+    "failedLedgerBody": "The ledger is not available right now. Check your connection and try again.",
+    "goneTitle": "This account was not found",
+    "goneBody": "It may have been deleted in the meantime. Go back to the list of accounts.",
+    "account": "Account",
+    "readOnly": "read-only",
+    "state": {
+      "active": "active"
+    },
+    "you": "you",
+    "disabledNotice": "Disabled",
+    "sec": {
+      "account": "Account",
+      "coach": "Coach side",
+      "activity": "Activity",
+      "audit": "Log"
+    },
+    "actions": "Actions",
+    "lastLogin": "Last sign-in",
+    "openSessions": "Open sessions",
+    "lockout": {
+      "label": "Lock-out",
+      "none": "none",
+      "until": "locked until {{time}}",
+      "failed": "{{count}} failed sign-ins",
+      "failedOne": "{{count}} failed sign-in",
+      "reset": "Lift the lock-out",
+      "nothing": "nothing locked",
+      "message": "{{name}} can try to sign in again.",
+      "confirm": "Lift"
+    },
+    "mustChangeLabel": "Password change",
+    "mustChangeYes": "required",
+    "mustChangeNo": "not required",
+    "tier": "Plan",
+    "subscription": "Subscription",
+    "sub": {
+      "active": "active",
+      "trialing": "trial",
+      "past_due": "payment due",
+      "canceled": "canceled",
+      "none": "none"
+    },
+    "profile": "Profile",
+    "profileState": "Status",
+    "profileVerified": "verified",
+    "profilePublished": "published",
+    "profileUnpublished": "not published",
+    "profileRemoved": "taken down",
+    "posts": "Posts",
+    "openReports": "Open reports",
+    "countsOnly": "counts only",
+    "act": {
+      "workouts": "Workouts",
+      "nutrition": "Food log",
+      "measurements": "Measurements",
+      "photos": "Photos"
+    },
+    "privacy": "The content is private: an admin sees only the count.",
+    "auditLast": "last 5 events",
+    "actorSystem": "System",
+    "audit": {
+      "user": {
+        "role": {
+          "change": "Role changed"
+        },
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "name": {
+          "change": "Name changed"
+        },
+        "lockout": {
+          "reset": "Lock-out lifted"
+        },
+        "sessions": {
+          "revoke": "Signed out everywhere"
+        },
+        "password": {
+          "force": "Password change required"
+        },
+        "credentials": {
+          "change": "Password changed"
+        }
+      },
+      "coin": {
+        "admin": {
+          "adjust": "Coin adjustment"
+        }
+      }
+    },
+    "coin": {
+      "head": "Coins",
+      "balance": "balance",
+      "fullLedger": "Full ledger",
+      "entries": "{{count}} entries",
+      "entriesOne": "{{count}} entry",
+      "reason": {
+        "admin": {
+          "credit": "Admin adjustment",
+          "debit": "Admin adjustment"
+        },
+        "store": {
+          "purchase": "Purchase"
+        },
+        "achievement": {
+          "reward": "Achievement reward"
+        },
+        "focus": {
+          "finish": "Focus block"
+        },
+        "habit": {
+          "relapse": "Relapse"
+        }
+      },
+      "title": "Coin adjustment",
+      "direction": "Direction",
+      "credit": "Credit",
+      "debit": "Debit",
+      "amount": "Amount",
+      "unit": "coins",
+      "balanceLabel": "Balance:",
+      "note": "Note",
+      "record": "Record"
+    },
+    "reason": "Reason",
+    "reasonHint": "Required. It goes into the audit log.",
+    "nameSheet": {
+      "title": "Edit name",
+      "label": "Display name",
+      "hint": "This is how the user sees themselves. The email address cannot be changed.",
+      "invalid": "The name must be 2 to 120 characters long."
+    },
+    "roleSheet": {
+      "about": {
+        "user": "Own workouts, meals, progress",
+        "coach": "Clients and plans",
+        "admin": "Full admin access"
+      },
+      "current": "Current · {{text}}",
+      "password": "Your own password",
+      "passwordHint": "You can grant admin rights only by entering your own password."
+    },
+    "disable": {
+      "title": "Disable account",
+      "message": "{{name}} will not be able to sign in, and their open sessions end.",
+      "link": "Disable",
+      "hint": "Cannot sign in, sessions end. A reason is required."
+    },
+    "enable": {
+      "title": "Enable account",
+      "message": "{{name}} can sign in again.",
+      "link": "Enable",
+      "hint": "Can sign in again. A reason is required to enable."
+    },
+    "signout": {
+      "sheetTitle": "Sign out",
+      "title": "Sign out everywhere",
+      "open": "{{count}} open sessions",
+      "openOne": "{{count}} open session",
+      "none": "no open sessions",
+      "message": "All sessions of {{name}} end; they have to sign in again.",
+      "selfMessage": "All your sessions end, on this device too. You will have to sign in again.",
+      "confirm": "Sign out"
+    },
+    "password": {
+      "sheetTitle": "Password change",
+      "force": "Require a password change",
+      "forceSub": "They must set a new password at the next sign-in.",
+      "message": "{{name}} must set a new password at the next sign-in; their sessions end.",
+      "selfMessage": "You must set a new password at the next sign-in; your sessions end.",
+      "confirm": "Require"
+    },
+    "selfNote": "You cannot change your own account here.",
+    "err": {
+      "generic": "That did not work. Try again.",
+      "stepUp": "Enter your own password.",
+      "password": "Wrong password.",
+      "forbidden": "You are not allowed to do this.",
+      "gone": "This account no longer exists.",
+      "insufficient": "The balance cannot go below zero.",
+      "self": "You cannot do this to your own account.",
+      "conflict": "The account changed in the meantime. Check it and try again.",
+      "rate": "Too many requests. Wait a moment.",
+      "invalid": "This cannot be saved as it is. Check the fields."
     }
   },
   "adminRules": {
