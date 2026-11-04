@@ -9,6 +9,7 @@ import { resolveLang, languages } from '../lib/lang.js';
 import { assertAdmin } from '../lib/assert-admin.js';
 import { adminReadIpLimiter, adminReadLimiter, adminWriteIpLimiter, adminWriteLimiter } from './limiters.js';
 import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from '../exercises/detail.js';
+import { panelFigures } from './statistics.js';
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router.get(
 
     // One round trip per metric would be several worker hops; these are cheap indexed counts,
     // so they run in parallel across the pool.
-    const [users, exercises, media, moderation, translations, sessions, audit] = await Promise.all([
+    const [users, exercises, media, moderation, translations, sessions, audit, panel] = await Promise.all([
       db.get(`SELECT COUNT(*) AS total,
                      SUM(role = 'coach') AS coaches,
                      SUM(role = 'admin') AS admins,
@@ -43,9 +44,12 @@ router.get(
       db.get('SELECT COUNT(*) AS rows, COUNT(DISTINCT lang) AS langs FROM exercise_translations'),
       db.get('SELECT COUNT(*) AS active FROM refresh_tokens WHERE revoked = 0 AND expires_at > unixepoch()'),
       db.get('SELECT COUNT(*) AS events_24h FROM audit_log WHERE created_at >= unixepoch() - 86400'),
+      // B-admin-stats: the Moderation panel's figures, ADDITIVE (every key above is unchanged).
+      // Built in statistics.js; its scan half goes through a 30 s single-flight cache.
+      panelFigures(),
     ]);
 
-    res.json({ users, exercises, media, moderation, translations, sessions, audit });
+    res.json({ users, exercises, media, moderation, translations, sessions, audit, panel });
   }),
 );
 

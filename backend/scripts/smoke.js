@@ -5861,6 +5861,14 @@ if (seeded) {
   await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
 }
 
+// --- admin statistics (package B-admin-stats) --------------------------------------------------
+// GET /admin/statistics and the panel on GET /admin/stats. Last of all: it plants a fixture into the
+// database and waits out the cache TTL once (about a minute).
+{
+  const { adminStatisticsSmoke } = await import('./smoke/admin-statistics.js');
+  await adminStatisticsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+}
+
 // --- logout --------------------------------------------------------------------------------
 const jar2 = new Jar();
 {

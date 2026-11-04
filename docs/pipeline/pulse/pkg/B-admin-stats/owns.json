@@ -1,0 +1,16 @@
+{
+  "id": "B-admin-stats",
+  "decision": "owner decisions of 2026-11-03 (.pulse/owner-answers.md): (3) statistics are a compact panel at the top of Moderacio (6 numbers + one 30-day curve) with a door row to a detailed Statistics page; frames admin-moderation-v2, admin-moderation-v2-empty, admin-statistics-1, admin-statistics-2 (TRACKER-mockups/5-pulse/figma-build/admin-v2/DESIGN-NOTES.md). Backend half only: GET /admin/stats gains an additive `panel`, new GET /admin/statistics?days=7|30|90. No migration, no new table, no audit row (reads).",
+  "owns": [
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/admin-statistics.js",
+    "backend/scripts/brain-gen.mjs",
+    "backend/server.js",
+    "backend/src/admin/routes.js",
+    "backend/src/admin/statistics.js",
+    "backend/src/coins/integrity.js",
+    "backend/src/coins/routes.js",
+    "docs/pipeline/pulse/pkg/B-admin-stats/**"
+  ],
+  "notes": "Shared files touched with the smallest possible hunk: admin/routes.js (the GET /admin/stats handler gains `panel` from statistics.js; one import), coins/routes.js (GET /admin/coins/audit calls the new shared coinIntegrity() so the statistics page and the audit page cannot drift), server.js (one mount line), brain-gen.mjs (one router line) and smoke.js (one import-and-call block)."
+}

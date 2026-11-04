@@ -40,6 +40,7 @@ import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { assertAdmin } from '../lib/assert-admin.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
 import { ensureSettled } from '../lifeos/settle.js';
+import { coinIntegrity } from './integrity.js';
 
 const router = Router();
 
@@ -506,51 +507,9 @@ router.get(
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return undefined;
 
-    // 1. A wallet that disagrees with its ledger. There is no AFTER DELETE recompute, so a
-    //    hand-deleted row leaves the cache high until the next movement heals it downward — this
-    //    is what makes that window visible rather than silent.
-    const drifting = await db.all(
-      `SELECT w.user_id AS userId, w.balance_minor AS balanceMinor,
-              COALESCE((SELECT SUM(l.amount_minor) FROM coin_ledger l WHERE l.user_id = w.user_id), 0)
-                AS ledgerSumMinor
-         FROM coin_wallets w
-        WHERE w.balance_minor <> COALESCE(
-              (SELECT SUM(l.amount_minor) FROM coin_ledger l WHERE l.user_id = w.user_id), 0)
-        LIMIT 50`,
-    );
-
-    // 2. Money and receipts must be one-to-one in both directions.
-    const unpaidPurchases = await db.all(
-      `SELECT p.id AS purchaseId, p.user_id AS userId
-         FROM coin_purchases p
-        WHERE NOT EXISTS (SELECT 1 FROM coin_ledger l
-                           WHERE l.reason_key = 'store.purchase'
-                             AND l.ref_type = 'coin_purchase' AND l.ref_id = p.id)
-        LIMIT 50`,
-    );
-    const orphanDebits = await db.all(
-      `SELECT l.id AS entryId, l.user_id AS userId
-         FROM coin_ledger l
-        WHERE l.reason_key = 'store.purchase'
-          AND NOT EXISTS (SELECT 1 FROM coin_purchases p WHERE p.id = l.ref_id)
-        LIMIT 50`,
-    );
-
-    // 3. Nobody owns anything nobody paid for.
-    const unbackedEntitlements = await db.all(
-      `SELECT e.id AS entitlementId, e.user_id AS userId
-         FROM coin_entitlements e
-        WHERE e.revoked_at IS NULL
-          AND NOT EXISTS (SELECT 1 FROM coin_purchases p
-                           WHERE p.id = e.purchase_id AND p.user_id = e.user_id)
-        LIMIT 50`,
-    );
-
-    const clean =
-      drifting.length === 0 &&
-      unpaidPurchases.length === 0 &&
-      orphanDebits.length === 0 &&
-      unbackedEntitlements.length === 0;
+    // The four checks live in coins/integrity.js: the admin Statistics page reduces the SAME
+    // checks to ok / not ok, and two copies of a reconciliation drift.
+    const { clean, drifting, unpaidPurchases, orphanDebits, unbackedEntitlements } = await coinIntegrity(50);
 
     res.json({ clean, drifting, unpaidPurchases, orphanDebits, unbackedEntitlements });
   }),
