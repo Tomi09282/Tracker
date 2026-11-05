@@ -70,6 +70,18 @@
   --text-giant--font-weight: 900;
   --text-giant--letter-spacing: -0.01em;
 
+  /* The two figure steps the admin statistics frames draw (admin-moderation-v2: the panel's six
+     numerals at 56; admin-statistics-1: the six block numerals at 80, a step down from the giant so
+     six blocks stay readable). Digits, "/" and "," only. */
+  --text-hero: 5rem;                          /* 80px — a statistics block's numeral */
+  --text-hero--line-height: 4.5rem;           /* 72px */
+  --text-hero--font-weight: 900;
+  --text-hero--letter-spacing: -0.01em;
+
+  --text-stat: 3.5rem;                        /* 56px — the panel's numerals */
+  --text-stat--line-height: 3.5rem;           /* 56px */
+  --text-stat--font-weight: 900;
+
   --text-num: 3rem;                           /* 48px — ledger and stat numerals */
   --text-num--line-height: 3rem;              /* 48px */
   --text-num--font-weight: 900;

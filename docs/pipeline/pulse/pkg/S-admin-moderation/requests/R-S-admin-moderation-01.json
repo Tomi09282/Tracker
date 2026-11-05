@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-moderation-01",
+  "from": "S-admin-moderation",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/feedback/DayBars.tsx (new, moved from features/admin/DayBars.tsx)",
+  "need": "admin-statistics-1 draws a series line with its own thirty thin day bars (height = count, today's bar in the primary ink, a 1 pt tick for an empty day). The kit's charts are lines (Sparkline, TrendChart) and equal segments (SegmentBar); none draws a bar whose height is a count.",
+  "evidence": "figma-build/admin-v2/common.js miniBars; the Statistics page pair pictures (Uj regisztracio, Befejezett edzes, Taplalkozas-naplo)",
+  "proposedApi": "<DayBars values={number[]} className? />  (decorative, aria-hidden; the line that owns it prints the total)",
+  "interim": "features/admin/DayBars.tsx, tokens only; nothing waits for this.",
+  "status": "open",
+  "resolution": null
+}

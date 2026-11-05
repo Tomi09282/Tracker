@@ -1,0 +1,28 @@
+{
+  "id": "S-admin-moderation",
+  "branch": "pulse/S-admin-moderation",
+  "screen": "/admin (Moderacio) + /admin/stats (Statisztika)",
+  "summary": "Frontend half of owner decision (3), 2026-11-03. AdminPage loses the UserSplit block and the footer sentence and gains the STATISZTIKA panel (StatsPanel: six figures at the new 'stat' numeral step, the 30-day curve of people who logged with the lime end dot, the Reszletek / Szabalyok doors in one closed stack) fed by the additive panel of GET /admin/stats; the waiting count in the queue head is the panel's moderationPending, no grey zero. The queue's empty state is the graphite shield + display title (admin-moderation-v2-empty); a failed queue read is one danger line with 'Ujra' (never the false empty state). New page /admin/stats (StatisticsPage): back '< Moderacio', window switch 7 / 30 / 90 in ?days=, six blocks (users with role split bar, activity with the honesty note, coins, marketplace with the post-state split bar, coaches, system), DayBars for the series lines, loading skeleton, full-page error with the one pill 'Ujra', forbidden. Kit parts only (Numeral, Fraction, SplitBar, Sparkline, RowStack, ListRow, Segmented); two additive numeral steps (hero 80, stat 56) and one additive Sparkline tone (ink). Route is lazy + suspended, ROUTE_META row, moderation tab owns[] gains /admin/stats, check-nav-active row added. No backend file touched.",
+  "frames": {
+    "admin-moderation-v2": { "verdict": "matched-live", "reason": "pair picture app | Figma looked at: every block within 2 pt vertically (panel gaps measured and fixed: caption step, the 'N / 7 nap' fraction no longer grows its cell, the trend sits 16 under the grid). Figures differ because the scratch DB (seed:demo) is not the persona data (0 new in 7 days vs 2, 1 active coach vs 2, 0 / 20 vs 4 / 23).", "pair": ".pulse/pairs/S-admin-moderation/admin-moderation-v2.pair-0.png" },
+    "admin-moderation-v2-empty": { "verdict": "matched-fixture", "reason": "queue answers [] and pending 0 by edits over the live answers; shield 96 pt and title within 3 pt of the frame.", "pair": ".pulse/pairs/S-admin-moderation/admin-moderation-v2-empty.pair-0.png" },
+    "admin-statistics-1": { "verdict": "matched-live", "reason": "six blocks, 2588 pt tall like the frame; every block within 2-3 pt; the live data differ (19 users 15/3/1 match).", "pair": ".pulse/pairs/S-admin-moderation/admin-statistics-1.pair-0.png (-1, -2)" },
+    "admin-statistics-2": { "verdict": "matched-fixture (error) / matched-live (loading)", "reason": "error: GET /admin/statistics stubbed 500, the pair is identical in layout; loading: captured against a dev server whose middleware never answers that path (pulse-shot cannot settle such a page, so the picture is its FAILED.png), skeleton within 2 pt of the frame's left phone; the loading state therefore has no entry in states.json.", "pair": ".pulse/pairs/S-admin-moderation/admin-statistics-2-error.pair-0.png, -loading.pair-0.png" }
+  },
+  "extraStates": {
+    "moderation-error": "GET /admin/moderation 500: the one danger line with Ujra under the queue head",
+    "statistics-forbidden": "user@ opens /admin/stats: the refusal, no statistics request (PATCH /me/prefs stubbed)"
+  },
+  "variants": "hu / en / de, 360 / 402 / 430 and reduced motion captured for six states (all ok, --strict --focus-walk ok); window switch and the back door verified in the browser (?days=7 -> 'naplozo ember · 7 nap', back to /admin).",
+  "sharedEdits": [
+    "frontend/src/app/router.tsx", "frontend/src/app/routeMeta.ts", "frontend/src/app/navTabs.ts",
+    "frontend/scripts/check-nav-active.mjs (row '/admin/stats' -> '/admin')", "frontend/scripts/check-type-scale.mjs",
+    "frontend/src/ui/data/Numeral.tsx", "frontend/src/ui/tokens/tokens.css", "frontend/src/index.css", "frontend/src/lib/cn.ts",
+    "frontend/src/ui/feedback/Sparkline.tsx", "docs/pipeline/pulse/kit/charts.md",
+    "frontend/src/i18n/{hu,en,de}.json (patch applied)", "docs/pipeline/pulse/work-packages.json (entry S-admin-moderation)"
+  ],
+  "ownership": "pulse-owns-check reports two new problems: AdminPage.tsx and ModerationQueue.tsx are listed under the closed S-admin; they pass to S-admin-moderation at merge (as the earlier closings did).",
+  "gates": "frontend npm run build green (check:i18n 1467 keys x3); verify:gates 78 passed 0 failed 7 dormant; backend (untouched): check:all rc 0, smoke 1257 passed 0 failed on a fresh DB migrated to 35 + seed:dev-users (one earlier run hit a Windows native exit crash 0xC0000005 in verify-last-admin / seed-taxonomy-i18n after their output, both green on the rerun).",
+  "requests": ["R-S-admin-moderation-01 (DayBars into the kit)", "R-S-admin-moderation-02 (larger shield raster)"],
+  "note": "pre-existing: seed-moderation-demo.mjs writes submitted_at as a datetime string, which crashes the queue's relative time (RangeError); not used for the captures, not touched."
+}

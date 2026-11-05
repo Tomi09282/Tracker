@@ -241,17 +241,15 @@
   },
   "admin": {
     "eyebrow": "Adminisztráció",
-    "users": "Felhasználók",
     "moderation": "Moderációs sor",
     "pendingCount": "{{count}} várakozik",
-    "queueEmptyTitle": "Nincs mit moderálni",
+    "queueEmptyTitle": "Nincs várakozó beküldés",
     "queueEmptyBody": "Minden beküldött gyakorlatot elbíráltál.",
     "approve": "Jóváhagyás",
     "reject": "Elutasítás",
     "reason": "Indoklás",
     "forbiddenTitle": "Nincs jogosultságod",
     "forbiddenBody": "Ez az oldal csak adminisztrátoroknak érhető el.",
-    "footer": "{{sessions}} aktív munkamenet · {{events}} naplóesemény az elmúlt 24 órában",
     "marketplace": {
       "title": "Piactéri bejelentések",
       "report": "Bejelentés",
@@ -303,11 +301,7 @@
     "reviewGoneBody": "Időközben valaki döntött róla. Frissítsd a listát.",
     "reasonHint": "A beküldő elolvassa, a saját gyakorlatánál jelenik meg.",
     "refreshQueue": "Sor frissítése",
-    "unit": {
-      "user": "Felhasználó",
-      "exercise": "Gyakorlat",
-      "media": "Médiafájl"
-    },
+    "unit": {},
     "legend": {
       "members": "Tagok",
       "coaches": "Edzők",
@@ -2063,6 +2057,77 @@
       },
       "reason": "Levétel indoka",
       "reasonHint": "Kötelező. Az audit-naplóba kerül, a szerző nem látja."
+    }
+  },
+  "adminStats": {
+    "title": "Statisztika",
+    "window": "Időablak",
+    "days": "{{count}} nap",
+    "details": "Részletek",
+    "detailsSub": "Felhasználók, aktivitás, érme, piactér",
+    "errorTitle": "Nem sikerült betölteni",
+    "errorBody": "A statisztika most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "panel": {
+      "users": "Felhasználó összesen",
+      "new7d": "Új 7 napban",
+      "activeCoaches": "Aktív edző",
+      "workouts": "Edzés ma\n/ 7 nap",
+      "pending": "Várakozó moderáció",
+      "openReports": "Nyitott jelentés",
+      "curve": "Aktív naplózók · {{count}} nap",
+      "curveToday": "{{count}} ma"
+    },
+    "section": {
+      "users": "Felhasználók",
+      "activity": "Aktivitás",
+      "coins": "Érme",
+      "marketplace": "Piactér",
+      "coaches": "Edzők",
+      "system": "Rendszer"
+    },
+    "users": {
+      "unit": "felhasználó",
+      "signups": "Új regisztráció",
+      "disabled": "Letiltott"
+    },
+    "activity": {
+      "people": "naplózó ember · {{count}} nap",
+      "today": "Naplózók ma",
+      "workouts": "Befejezett edzés",
+      "nutrition": "Táplálkozás-napló",
+      "note": "Nincs valódi napi aktív felhasználó: a termék nem tárol utolsó belépést. A szám azokat számolja, akik aznap naplóztak valamit."
+    },
+    "coins": {
+      "moved": "érme forgalom · {{count}} nap",
+      "minted": "Kibocsátás",
+      "mintedSub": "jóváírás",
+      "spent": "Költés",
+      "spentSub": "beváltás, vásárlás",
+      "integrity": "Integritás ellenőrzés",
+      "integritySub": "tárca = főkönyv · nyugta = vásárlás",
+      "integrityOk": "Rendben",
+      "integrityDrift": "Eltérés"
+    },
+    "market": {
+      "unit": "poszt",
+      "published": "Közzétett",
+      "scheduled": "Ütemezett",
+      "draft": "Piszkozat",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve",
+      "openReports": "Nyitott jelentés",
+      "resolved": "Elintézett jelentés"
+    },
+    "coaches": {
+      "withClients": "edző ügyféllel",
+      "perCoach": "Ügyfél / edző",
+      "perCoachSub": "aktív kapcsolatok átlaga",
+      "links": "Aktív kapcsolat"
+    },
+    "system": {
+      "sessions": "aktív munkamenet",
+      "audit": "Auditesemény",
+      "auditSub": "24 óra"
     }
   }
 }

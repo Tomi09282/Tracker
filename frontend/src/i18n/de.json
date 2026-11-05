@@ -241,17 +241,15 @@
   },
   "admin": {
     "eyebrow": "Verwaltung",
-    "users": "Nutzer",
     "moderation": "Moderationswarteschlange",
     "pendingCount": "{{count}} warten",
-    "queueEmptyTitle": "Nichts zu moderieren",
+    "queueEmptyTitle": "Keine wartenden Einsendungen",
     "queueEmptyBody": "Über jede eingereichte Übung wurde entschieden.",
     "approve": "Freigeben",
     "reject": "Ablehnen",
     "reason": "Grund",
     "forbiddenTitle": "Nicht berechtigt",
     "forbiddenBody": "Diese Seite steht nur Administratoren offen.",
-    "footer": "{{sessions}} aktive Sitzungen · {{events}} Audit-Ereignisse in den letzten 24 Stunden",
     "marketplace": {
       "title": "Marktplatz-Meldungen",
       "report": "Meldung",
@@ -303,11 +301,7 @@
     "reviewGoneBody": "Jemand hat inzwischen entschieden. Liste aktualisieren.",
     "reasonHint": "Die verfassende Person liest dies an ihrer eigenen Übung.",
     "refreshQueue": "Warteschlange aktualisieren",
-    "unit": {
-      "user": "Nutzer",
-      "exercise": "Übung",
-      "media": "Mediendatei"
-    },
+    "unit": {},
     "legend": {
       "members": "Mitglieder",
       "coaches": "Coaches",
@@ -2063,6 +2057,77 @@
       },
       "reason": "Grund der Entfernung",
       "reasonHint": "Pflichtfeld. Es kommt ins Audit-Log; der Autor sieht es nicht."
+    }
+  },
+  "adminStats": {
+    "title": "Statistik",
+    "window": "Zeitraum",
+    "days": "{{count}} Tage",
+    "details": "Details",
+    "detailsSub": "Nutzer, Aktivität, Münzen, Marktplatz",
+    "errorTitle": "Laden fehlgeschlagen",
+    "errorBody": "Die Statistik ist gerade nicht verfügbar. Prüfe deine Verbindung und versuche es erneut.",
+    "panel": {
+      "users": "Nutzer gesamt",
+      "new7d": "Neu in 7 Tagen",
+      "activeCoaches": "Aktive Trainer",
+      "workouts": "Training heute\n/ 7 Tage",
+      "pending": "Wartet auf Prüfung",
+      "openReports": "Offene Meldungen",
+      "curve": "Protokollierende · {{count}} Tage",
+      "curveToday": "{{count}} heute"
+    },
+    "section": {
+      "users": "Nutzer",
+      "activity": "Aktivität",
+      "coins": "Münzen",
+      "marketplace": "Marktplatz",
+      "coaches": "Trainer",
+      "system": "System"
+    },
+    "users": {
+      "unit": "Nutzer",
+      "signups": "Neue Registrierungen",
+      "disabled": "Gesperrt"
+    },
+    "activity": {
+      "people": "Protokollierende · {{count}} Tage",
+      "today": "Heute protokolliert",
+      "workouts": "Abgeschlossene Trainings",
+      "nutrition": "Ernährungstagebuch",
+      "note": "Es gibt keine echte tägliche Nutzerzahl: Das Produkt speichert keinen letzten Login. Die Zahl zählt die Personen, die an dem Tag etwas protokolliert haben."
+    },
+    "coins": {
+      "moved": "Münzumsatz · {{count}} Tage",
+      "minted": "Ausgegeben",
+      "mintedSub": "Gutschriften",
+      "spent": "Ausgaben",
+      "spentSub": "Einlösungen, Käufe",
+      "integrity": "Integritätsprüfung",
+      "integritySub": "Wallet = Hauptbuch · Beleg = Kauf",
+      "integrityOk": "In Ordnung",
+      "integrityDrift": "Abweichung"
+    },
+    "market": {
+      "unit": "Beiträge",
+      "published": "Veröffentlicht",
+      "scheduled": "Geplant",
+      "draft": "Entwurf",
+      "withdrawn": "Zurückgezogen",
+      "removed": "Abgenommen",
+      "openReports": "Offene Meldungen",
+      "resolved": "Erledigte Meldungen"
+    },
+    "coaches": {
+      "withClients": "Trainer mit Klienten",
+      "perCoach": "Klienten / Trainer",
+      "perCoachSub": "Durchschnitt der aktiven Verbindungen",
+      "links": "Aktive Verbindungen"
+    },
+    "system": {
+      "sessions": "aktive Sitzungen",
+      "audit": "Audit-Ereignisse",
+      "auditSub": "24 Stunden"
     }
   }
 }

@@ -40,8 +40,8 @@ import { DigitRoller } from '../feedback/CountUp';
  * it is 111.6 on the same 108 line.
  */
 
-/** The two numeral roles of the ramp. `giant` is the ONE hero numeral of a screen; `num` is every other big figure. */
-export type NumeralSize = 'giant' | 'num';
+/** The numeral roles of the ramp. `giant` is the ONE hero numeral of a screen; `hero` (80) and `stat` (56) are the admin statistics frames' figures; `num` is every other big figure. */
+export type NumeralSize = 'giant' | 'hero' | 'stat' | 'num';
 
 /** `ink` = a value that is there · `pending` = planned, a denominator, a zero · `warn` = over target. */
 export type NumeralTone = 'ink' | 'pending' | 'warn';
@@ -157,7 +157,7 @@ const CELL_LEFT = Math.min(...[...DIGITS].map((d) => (CELL - glyph(d)[0]) / 2 + 
 const CELL_RIGHT = Math.min(...[...DIGITS].map((d) => (CELL - glyph(d)[0]) / 2 + glyph(d)[2]));
 
 /** Tracking of each role, in em (tokens.css `--text-giant--letter-spacing`, `--text-num` has none). */
-const TRACKING: Record<NumeralSize, number> = { giant: -0.01, num: 0 };
+const TRACKING: Record<NumeralSize, number> = { giant: -0.01, hero: -0.01, stat: 0, num: 0 };
 
 const em = (n: number) => `${+n.toFixed(4)}em`;
 
@@ -198,7 +198,7 @@ function inkOffsets(text: string, size: NumeralSize, { cells = false, overshoot 
 /* ── shared pieces ────────────────────────────────────────────────────────────────────────────── */
 
 /** `text-num` declares no tracking, so it is set to none here — a `num` inside a tracked eyebrow must not inherit it. */
-const STEP: Record<NumeralSize, string> = { giant: 'text-giant', num: 'text-num tracking-normal' };
+const STEP: Record<NumeralSize, string> = { giant: 'text-giant', hero: 'text-hero', stat: 'text-stat tracking-normal', num: 'text-num tracking-normal' };
 const TONE: Record<NumeralTone, string> = { ink: 'text-text-1', pending: 'text-text-3', warn: 'text-warning' };
 
 /** THE ONE SIZE MECHANISM: `text-giant` on the element, the fluid size inline. Nothing for `num`. */
@@ -287,6 +287,8 @@ export function Numeral({ value, size = 'num', tone = 'ink', mode = 'static', fr
 /** The slash at 80 % of the size: its ink (cap + descender, one em) is then exactly one cap high. */
 const SLASH: Record<NumeralSize, { fontSize: string; letterSpacing: string }> = {
   giant: { fontSize: 'calc(99em / 124)', letterSpacing: em(TRACKING.giant) },
+  hero: { fontSize: 'calc(64em / 80)', letterSpacing: em(TRACKING.hero) },
+  stat: { fontSize: 'calc(45em / 56)', letterSpacing: 'normal' },
   num: { fontSize: 'calc(38em / 48)', letterSpacing: 'normal' },
 };
 
@@ -305,7 +307,7 @@ export function Fraction({ value, of, size = 'num', mode = 'static', srText, com
     <span
       data-kit="fraction"
       data-size={size}
-      className={cn('inline-flex items-start', STEP[size], size === 'giant' ? 'gap-3' : 'gap-1.5', className)}
+      className={cn('inline-flex items-start', STEP[size], size === 'giant' ? 'gap-3' : size === 'hero' ? 'gap-2.5' : 'gap-1.5', className)}
       style={{ ...sizeStyle(size), paddingTop: wholeBox.paddingTop, paddingBottom: wholeBox.paddingBottom }}
     >
       <span className="sr-only">{srText ?? `${part} / ${whole}`}</span>

@@ -172,9 +172,34 @@ export function ModerationQueue() {
     );
   }
 
+  if (queue.isError) {
+    // A list that failed to load is not an empty queue: saying "Minden beküldött gyakorlatot
+    // elbíráltál" over a failed read would be false. The same words and the same way out as the
+    // panel above ("Nem sikerült betölteni", "Újra").
+    return (
+      <NoticeLine
+        tone="danger"
+        role="alert"
+        action={
+          <TextLink busy={queue.isFetching} onClick={() => void queue.refetch()}>
+            {t('common.retry')}
+          </TextLink>
+        }
+      >
+        {t('adminStats.errorTitle')}
+      </NoticeLine>
+    );
+  }
+
   if (rows.length === 0) {
-    // Also where a failed list lands (as before): no copy exists for a failure here.
-    return <EmptyState title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />;
+    // admin-moderation-v2-empty: the graphite shield (the Admin tab's object, unlit) over the
+    // display title and the one line.
+    return (
+      <div className="flex flex-col gap-6 pt-3.5">
+        <Pic slot="tab-admin" width={96} />
+        <EmptyState title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
+      </div>
+    );
   }
 
   const toggle = (id: number) => {

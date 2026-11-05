@@ -2637,9 +2637,7 @@
         "admin"
       ],
       "owns": [
-        "frontend/src/features/admin/AdminPage.tsx",
         "frontend/src/features/admin/AdminShell.tsx",
-        "frontend/src/features/admin/ModerationQueue.tsx",
         "frontend/src/features/admin/AdminMetrics.tsx",
         "docs/pipeline/pulse/pkg/S-admin/**"
       ],
@@ -3829,6 +3827,59 @@
         ]
       },
       "liveWrites": []
+    },
+    {
+      "id": "S-admin-moderation",
+      "title": "Moderacio + Statistics (owner decision 2026-11-03, item 3): AdminPage loses the user split and the footer sentence and gains the compact STATISZTIKA panel (six figures, one 30-day curve, the Reszletek / Szabalyok doors) fed by GET /admin/stats; the new Statistics page at /admin/stats (window 7 / 30 / 90, six blocks, loading skeleton, error state) fed by GET /admin/statistics; frames admin-moderation-v2, admin-moderation-v2-empty, admin-statistics-1, admin-statistics-2",
+      "screens": [
+        "admin-moderation-v2",
+        "admin-moderation-v2-empty",
+        "admin-statistics-1",
+        "admin-statistics-2"
+      ],
+      "owns": [
+        "frontend/src/features/admin/AdminPage.tsx",
+        "frontend/src/features/admin/ModerationQueue.tsx",
+        "frontend/src/features/admin/StatsPanel.tsx",
+        "frontend/src/features/admin/StatisticsPage.tsx",
+        "frontend/src/features/admin/statisticsModel.ts",
+        "frontend/src/features/admin/DayBars.tsx",
+        "docs/pipeline/pulse/pkg/S-admin-moderation/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ]
+      },
+      "sharedEdits": {
+        "frontend/src/app/router.tsx": "one lazy import and the route admin/stats",
+        "frontend/src/app/routeMeta.ts": "the ROUTE_META row '/admin/stats' (parent /admin, nav.moderation)",
+        "frontend/src/app/navTabs.ts": "the moderation tab's owns[] gains '/admin/stats'",
+        "frontend/src/ui/data/Numeral.tsx": "two additive sizes, 'hero' (80) and 'stat' (56), the figures admin-statistics-1 and admin-moderation-v2 draw",
+        "frontend/src/ui/tokens/tokens.css": "--text-hero, --text-stat (+ line height, weight, tracking)",
+        "frontend/src/index.css": "the two steps join the display-face binding block",
+        "frontend/src/lib/cn.ts": "the two steps join TYPE_STEPS",
+        "frontend/scripts/check-type-scale.mjs": "the two steps join the display roster",
+        "frontend/src/ui/feedback/Sparkline.tsx": "one additive tone, 'ink' (line and end dot in the primary ink: the coin curve of admin-statistics-1)",
+        "docs/pipeline/pulse/kit/charts.md": "the Sparkline tone table"
+      },
+      "dependsOn": [
+        "B-admin-stats",
+        "S-admin",
+        "S-admin-rules"
+      ],
+      "i18nNamespaces": [
+        "adminStats",
+        "admin"
+      ],
+      "size": "M",
+      "notes": "Frontend half of owner decision (3). No backend file is touched. DayBars (the 30 thin day bars of admin-statistics-1) is a kit gap that lives beside the page until the integrator decides (request R-S-admin-moderation-01). The shield of the empty queue is the tab-admin raster at 96 pt; a larger raster is request R-S-admin-moderation-02. Integration (merge-S-admin-moderation): the squash conflicted only in routeMeta.ts (the /admin/stats row beside the account and post rows), work-packages.json and the three i18n bundles; routeMeta.ts and work-packages.json were resolved by hand keeping both packages' lines, the bundles were taken from pulse-int and the patch (53 set, 1 change, 5 remove) applied by hand because the author had applied the keys into the bundles himself and pulse-i18n check then refuses a second apply. AdminPage.tsx and ModerationQueue.tsx passed here from the closed S-admin (one file, one owner). The shared edits (router.tsx one lazy import + one route, routeMeta.ts one row, navTabs.ts moderation owns[] gains /admin/stats, check-nav-active.mjs one EXPECT row, ui/data/Numeral.tsx sizes hero and stat, ui/tokens/tokens.css, index.css, lib/cn.ts, check-type-scale.mjs, ui/feedback/Sparkline.tsx tone ink) are integrator files and were accepted in the squash; the kit/charts.md Sparkline tone row, listed under sharedEdits but missing from the branch, was written at merge. Requests R-S-admin-moderation-01 (DayBars into the kit) and -02 (larger shield raster) stay open."
     }
   ],
   "queue": [

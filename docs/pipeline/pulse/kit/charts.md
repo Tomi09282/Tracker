@@ -39,7 +39,7 @@ import { Sparkline } from '../../ui/feedback/Sparkline';
 | `series` | `TrendPoint[]` (`{ date: 'YYYY-MM-DD', value }`, oldest first) | — | the readings. Empty → renders nothing |
 | `width` | `number` | `140` | pt. With `fluid` it is the design width the 3 pt air is measured against |
 | `height` | `number` | `32` | pt |
-| `tone` | `'quiet' \| 'live'` | `'quiet'` | `quiet`: line `--text-2`, end dot `--text-1` (a glance in a row). `live`: line `--text-1`, end dot `--accent` |
+| `tone` | `'quiet' \| 'live' \| 'ink'` | `'quiet'` | `quiet`: line `--text-2`, end dot `--text-1` (a glance in a row). `live`: line `--text-1`, end dot `--accent`. `ink`: line `--text-1`, end dot `--text-1` (a chart that is not the screen's live datum, e.g. admin-statistics-1's coin curve beside the lime-ended activity curve) |
 | `fluid` | `boolean` | `false` | fill the container's width; the line, the dots and the dash keep their size, only x reflows |
 | `className` | `string` | — | placement only |
 

@@ -241,17 +241,15 @@
   },
   "admin": {
     "eyebrow": "Administration",
-    "users": "Users",
     "moderation": "Moderation queue",
     "pendingCount": "{{count}} waiting",
-    "queueEmptyTitle": "Nothing to moderate",
+    "queueEmptyTitle": "No submissions waiting",
     "queueEmptyBody": "Every submitted exercise has been decided.",
     "approve": "Approve",
     "reject": "Reject",
     "reason": "Reason",
     "forbiddenTitle": "Not authorised",
     "forbiddenBody": "This page is available to administrators only.",
-    "footer": "{{sessions}} active sessions · {{events}} audit events in the last 24 hours",
     "marketplace": {
       "title": "Marketplace reports",
       "report": "Report",
@@ -303,11 +301,7 @@
     "reviewGoneBody": "Somebody decided it in the meantime. Refresh the list.",
     "reasonHint": "The author reads this on their own exercise.",
     "refreshQueue": "Refresh the queue",
-    "unit": {
-      "user": "User",
-      "exercise": "Exercise",
-      "media": "Media file"
-    },
+    "unit": {},
     "legend": {
       "members": "Members",
       "coaches": "Coaches",
@@ -2063,6 +2057,77 @@
       },
       "reason": "Reason for taking down",
       "reasonHint": "Required. It goes into the audit log; the author does not see it."
+    }
+  },
+  "adminStats": {
+    "title": "Statistics",
+    "window": "Time window",
+    "days": "{{count}} days",
+    "details": "Details",
+    "detailsSub": "Users, activity, coins, marketplace",
+    "errorTitle": "Could not load",
+    "errorBody": "The statistics are not available right now. Check your connection and try again.",
+    "panel": {
+      "users": "Users in total",
+      "new7d": "New in 7 days",
+      "activeCoaches": "Active coaches",
+      "workouts": "Workouts today\n/ 7 days",
+      "pending": "Waiting for review",
+      "openReports": "Open reports",
+      "curve": "People logging · {{count}} days",
+      "curveToday": "{{count}} today"
+    },
+    "section": {
+      "users": "Users",
+      "activity": "Activity",
+      "coins": "Coins",
+      "marketplace": "Marketplace",
+      "coaches": "Coaches",
+      "system": "System"
+    },
+    "users": {
+      "unit": "users",
+      "signups": "New sign-ups",
+      "disabled": "Disabled"
+    },
+    "activity": {
+      "people": "people logging · {{count}} days",
+      "today": "Logged today",
+      "workouts": "Completed workouts",
+      "nutrition": "Nutrition log",
+      "note": "There is no real daily active user count: the product stores no last login. The figure counts the people who logged something that day."
+    },
+    "coins": {
+      "moved": "coins moved · {{count}} days",
+      "minted": "Issued",
+      "mintedSub": "credits",
+      "spent": "Spent",
+      "spentSub": "redemptions, purchases",
+      "integrity": "Integrity check",
+      "integritySub": "wallet = ledger · receipt = purchase",
+      "integrityOk": "All good",
+      "integrityDrift": "Mismatch"
+    },
+    "market": {
+      "unit": "posts",
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down",
+      "openReports": "Open reports",
+      "resolved": "Resolved reports"
+    },
+    "coaches": {
+      "withClients": "coaches with clients",
+      "perCoach": "Clients / coach",
+      "perCoachSub": "average of active links",
+      "links": "Active links"
+    },
+    "system": {
+      "sessions": "active sessions",
+      "audit": "Audit events",
+      "auditSub": "24 hours"
     }
   }
 }

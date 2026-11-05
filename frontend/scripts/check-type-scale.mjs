@@ -33,7 +33,7 @@
  *
  *        @layer components {
  *          /* type-binding:start *\/
- *          .text-giant, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
+ *          .text-giant, .text-hero, .text-stat, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
  *          .text-data-l, .text-data, .text-micro { font-family: var(--font-mono); }
  *          .text-display-xl, .text-display, .text-eyebrow, .text-micro { text-transform: uppercase; }
  *          /* type-binding:end *\/
@@ -83,7 +83,7 @@ const BINDING_HOMES = ['src/index.css', TOKENS];
  */
 const ROSTER = {
   display: {
-    steps: ['giant', 'num', 'display-xl', 'display', 'eyebrow'],
+    steps: ['giant', 'hero', 'stat', 'num', 'display-xl', 'display', 'eyebrow'],
     property: 'font-family',
     value: 'var(--font-display)',
     means: 'the display face',

@@ -93,7 +93,7 @@
  */
 @layer components {
   /* type-binding:start */
-  .text-giant, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
+  .text-giant, .text-hero, .text-stat, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
   .text-data-l, .text-data, .text-micro { font-family: var(--font-mono); }
   .text-display-xl, .text-display, .text-eyebrow, .text-micro { text-transform: uppercase; }
   /* type-binding:end */

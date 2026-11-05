@@ -1,118 +1,14 @@
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
-import { apiWithRefresh } from '../../lib/api';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { Screen } from '../../ui/shell/Screen';
-import { StatBlock } from '../../ui/data/StatBlock';
-import { Numeral } from '../../ui/data/Numeral';
-import { SplitBar, SplitLegend, type SplitPart } from '../../ui/data/SplitBar';
-import { LedgerRow } from '../../ui/data/LedgerRow';
-import { ListRow } from '../../ui/data/ListRow';
-import { RowStack } from '../../ui/data/RowStack';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { hasRole, useSession } from '../auth/useSession';
 import { ModerationQueue } from './ModerationQueue';
 import { AdminForbidden, AdminHeader } from './AdminShell';
-
-interface Stats {
-  users: { total: number; coaches: number; admins: number; disabled: number; new_7d: number };
-  exercises: { total: number; global: number; private: number; custom: number };
-  media: { total: number; bytes: number };
-  moderation: { pending: number };
-  translations: { rows: number; langs: number };
-  sessions: { active: number };
-  audit: { events_24h: number };
-}
-
-/**
- * A translated sentence with some of its figures in ink.
- *
- * The figures are interpolated as markers and the sentence is cut around them, so the words stay
- * the bundle's (in every language, in its own order) and only the figures change colour — "3
- * várakozik", "3 aktív munkamenet · 14 naplóesemény az elmúlt 24 órában" (admin-1: the counts in
- * ink, the words in text-2; the "24" of the sentence is a word, not a figure).
- */
-function inked(sentence: (marks: Record<string, string>) => string, figures: Record<string, string>): ReactNode[] {
-  const names = Object.keys(figures);
-  const marks = Object.fromEntries(names.map((name, i) => [name, `\u0001${i}\u0001`]));
-  return sentence(marks)
-    .split(/\u0001(\d+)\u0001/)
-    .map((part, i) =>
-      i % 2 === 1 ? (
-        <span key={i} className="text-text-1">
-          {figures[names[Number(part)]]}
-        </span>
-      ) : (
-        part
-      ),
-    );
-}
-
-/**
- * ═══ THE PARTS PARTITION BY ROLE, AND THAT IS THE WHOLE POINT ══════════════════════════════════
- *
- * A split claims its parts add up to the whole. The obvious three — members, coaches, new this week
- * — do not: `users.new_7d` counts everyone who registered in the last seven days, so a coach who
- * signed up on Tuesday is in TWO of them. `role` is one column on `users`, so member / coach / admin
- * are disjoint by construction and sum to the total exactly.
- *
- * admin-1: the giant total under its eyebrow, the three-line legend beside it (first cap line on the
- * numeral's top, last baseline on its baseline), and the proportional bar 20 under the numeral in
- * three ink steps — roles are categories, never lime. From five digits the numeral needs the width,
- * so the legend drops under the bar (`admin-1.body.js`).
- */
-function UserSplit({ users }: { users: Stats['users'] }) {
-  const { t } = useTranslation();
-  const members = Math.max(0, users.total - users.coaches - users.admins);
-  // The legend names POPULATIONS (`Tagok`, `Edzők`, `Adminok`); the eyebrow names the unit the
-  // figure counts (`Felhasználó`), not the plural table label `admin.users`.
-  const parts: SplitPart[] = [
-    { label: t('admin.legend.members'), count: members },
-    { label: t('admin.legend.coaches'), count: users.coaches },
-    { label: t('admin.legend.admins'), count: users.admins },
-  ];
-  const long = String(users.total).length >= 5;
-  const figure = (
-    <StatBlock label={t('admin.unit.user')}>
-      <Numeral size="giant" value={users.total} mode="roll" from={0} />
-    </StatBlock>
-  );
-
-  return (
-    <div className="flex flex-col gap-5">
-      {long ? (
-        figure
-      ) : (
-        <div className="flex items-start justify-between gap-6">
-          {figure}
-          <SplitLegend layout="stack" parts={parts} keepZero label={t('admin.users')} className="mt-6 -mb-1 w-30 self-stretch" />
-        </div>
-      )}
-      {users.total > 0 ? <SplitBar legend={long ? 'grid' : 'none'} parts={parts} label={t('admin.users')} /> : null}
-    </div>
-  );
-}
-
-/** Where the figures will stand while `/admin/stats` loads: eyebrow, the giant's cap, the bar, the ledger line. */
-function FiguresSkeleton() {
-  const { t } = useTranslation();
-  return (
-    <div role="status" className="flex flex-col gap-8">
-      <span className="sr-only">{t('common.loading')}</span>
-      <div aria-hidden className="flex flex-col gap-5">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-25 w-24" />
-        </div>
-        <Skeleton className="h-1.5 w-full" />
-      </div>
-      <Skeleton className="h-19 w-full" />
-    </div>
-  );
-}
+import { StatsPanel, inked } from './StatsPanel';
+import { useAdminStats } from './statisticsModel';
 
 /**
  * The moderation panel's head: the eyebrow, and ONE trailing node — the waiting count (mono, the
@@ -161,24 +57,20 @@ function ModerationHeader({ pending }: { pending?: number }) {
 /**
  * Moderáció (`/admin`) — the admin view's landing tab.
  *
- * admin-view-1: the category header (eyebrow, the one door to the style studio, the tab's name as
- * the title); the user split as the hero; the exercise and media counts on one closed ledger line;
- * the moderation queue as a section of its own; the liveness footer. Nothing is enclosed. The
- * waiting count is the only element on the screen that means "someone is waiting".
+ * admin-moderation-v2 / -empty: the category header (eyebrow, the one door to the style studio, the
+ * tab's name as the title); STATISZTIKA — the compact panel (six figures, the 30-day curve and the
+ * doors "Részletek ›" / "Szabályok ›", `StatsPanel`); the moderation queue as a section of its own.
+ * The user split and the liveness footer of admin-view-1 are gone: the split moved to the
+ * Statistics page (`/admin/stats`), the sentence's figures are on its System block. Nothing is
+ * enclosed. The waiting count is the only element on the screen that means "someone is waiting".
  *
- * Fiókok and Piactér are tabs of the admin bar now (`AdminAccountsPage`, `AdminMarketplacePage`);
- * the local section switch is gone. The frame's "Szabályok" door row under the ledger leads to
- * `/admin/rules` (Phase 2, the admin-global point rules).
+ * Fiókok and Piactér are tabs of the admin bar (`AdminAccountsPage`, `AdminMarketplacePage`).
  */
 export function AdminPage() {
   const { t } = useTranslation();
   const { data: user } = useSession();
 
-  const stats = useQuery({
-    queryKey: ['admin', 'stats'],
-    queryFn: () => apiWithRefresh<Stats>('/admin/stats'),
-    enabled: hasRole(user, 'admin'),
-  });
+  const stats = useAdminStats(hasRole(user, 'admin'));
 
   // The server enforces this too — this is only so a non-admin sees an explanation instead of
   // a screen full of failed requests.
@@ -188,44 +80,14 @@ export function AdminPage() {
     <Screen top="push" width="wide">
       <AdminHeader title={t('admin.section.moderation')} />
 
-      {stats.isPending ? <FiguresSkeleton /> : stats.data ? <UserSplit users={stats.data.users} /> : null}
+      <StatsPanel stats={stats} />
 
-      {/* One closed stack (admin-view-1): the two counts on one ledger line, not tappable — what
-          the library and the uploads hold — and under it the door to the point rules,
-          "Szabályok ›" (/admin/rules, S-admin-rules). The door stays when the figures fail. */}
-      <RowStack open close>
-        {stats.data ? (
-          <LedgerRow
-            label={t('admin.unit.exercise')}
-            value={stats.data.exercises.total}
-            pair={{ label: t('admin.unit.media'), value: stats.data.media.total }}
-          />
-        ) : null}
-        <ListRow title={t('adminRules.title')} to="/admin/rules" chevron />
-      </RowStack>
-
-      {/* The queue as a section of its own (admin-view-1): its head opens on the closed ledger's
-          rule, so it draws no second one. The queue AND the decision live here. See the header
-          comment in ModerationQueue. */}
+      {/* The queue as a section of its own: its head opens on the doors' closing rule, so it draws no
+          second one. The queue AND the decision live here. See the header comment in ModerationQueue. */}
       <div className="flex flex-col gap-4">
-        <ModerationHeader pending={stats.data?.moderation.pending} />
+        <ModerationHeader pending={stats.data?.panel.moderationPending} />
         <ModerationQueue />
       </div>
-
-      {stats.data ? (
-        // The last block, and kept: the cheapest liveness signal on the screen. The queue closes on
-        // its own rule, so the footer is the line alone (admin-view-1).
-        <footer>
-          {/* 240 wide: the sentence breaks after its second figure's word, as admin-view-1 draws it
-              ("… · 14 naplóesemény" / "az elmúlt 24 órában"). */}
-          <p className="max-w-60 text-cap text-text-2">
-            {inked((m) => t('admin.footer', { sessions: m.sessions, events: m.events }), {
-              sessions: String(stats.data.sessions.active),
-              events: String(stats.data.audit.events_24h),
-            })}
-          </p>
-        </footer>
-      ) : null}
     </Screen>
   );
 }

@@ -40,6 +40,8 @@ import { extendTailwindMerge } from 'tailwind-merge';
 const TYPE_STEPS = [
   // The Pulse ramp (Pulse System §2.2).
   'giant',
+  'hero',
+  'stat',
   'num',
   'display-xl',
   'display',

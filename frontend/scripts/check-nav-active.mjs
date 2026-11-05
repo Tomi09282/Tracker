@@ -117,6 +117,7 @@ const EXPECT_BY_VIEW = {
     ['/admin', '/admin'],
     ['/admin/styles', '/admin'],
     ['/admin/rules', '/admin'],
+    ['/admin/stats', '/admin'],
     ['/admin/accounts', '/admin/accounts'],
     ['/admin/accounts/12', '/admin/accounts'],
     ['/admin/accounts/12/coins', '/admin/accounts'],

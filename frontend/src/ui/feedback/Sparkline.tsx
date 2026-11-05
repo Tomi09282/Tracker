@@ -9,8 +9,10 @@ import type { TrendPoint } from './TrendChart';
  *             dot in the primary ink. It is a shape beside a numeral, not the answer.
  *   'live'  — a chart: the line in the primary ink and the end dot in the lime, because the last
  *             reading IS the live datum of the screen.
+ *   'ink'   — a chart that is NOT the screen's live datum (admin-statistics-1's coin curve, drawn
+ *             next to the lime-ended activity curve): the line AND the end dot in the primary ink.
  */
-export type SparklineTone = 'quiet' | 'live';
+export type SparklineTone = 'quiet' | 'live' | 'ink';
 
 export interface SparklineProps {
   /** Readings, oldest first. x is TIME (see `chartGeometry.plot`); a pause of 14+ days is drawn dotted. */
@@ -44,7 +46,7 @@ export function Sparkline({ series, width = 140, height = 32, tone = 'quiet', fl
       width={width}
       height={height}
       fluid={fluid}
-      line={tone === 'live' ? 'ink' : 'quiet'}
+      line={tone === 'quiet' ? 'quiet' : 'ink'}
       end={{ r: 3, tone: tone === 'live' ? 'live' : 'ink' }}
       className={className}
     />

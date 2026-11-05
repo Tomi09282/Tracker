@@ -152,9 +152,9 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
   admin: [
     { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
     { kind: 'switch', key: 'switch-trainer', to: '/coach', view: 'trainer', icon: 'switch-trainer', labelKey: 'nav.switch.trainer', nameKey: 'nav.switch.trainerName' },
-    // The style studio's only door is on Moderáció (its header link), and so is the point rules'
-    // (its "Szabályok" door row), so both belong here.
-    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/admin/rules', '/notifications'] },
+    // The style studio's only door is on Moderáció (its header link), and so are the point rules'
+    // ("Szabályok") and the statistics' ("Részletek" door rows), so all three belong here.
+    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/admin/rules', '/admin/stats', '/notifications'] },
     { key: 'accounts', to: '/admin/accounts', icon: 'accounts', labelKey: 'nav.accounts' },
     { key: 'market', to: '/admin/marketplace', icon: 'market', labelKey: 'nav.marketplace' },
   ],
