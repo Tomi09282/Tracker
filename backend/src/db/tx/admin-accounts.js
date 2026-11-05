@@ -371,14 +371,22 @@ export function adminAccountDetailQuery({ targetId, actorId }) {
     const { measurements } = stmt('SELECT COUNT(*) AS measurements FROM body_measurements WHERE client_user_id = ?').get(targetId);
     const { photos } = stmt('SELECT COUNT(*) AS photos FROM progress_photos WHERE client_user_id = ?').get(targetId);
 
-    // The last five audit events whose TARGET is this account. The detail JSON is NOT returned
-    // (it can carry a reason or a before/after); the page shows what happened, when, by whom.
+    // The last five ACCOUNT events whose TARGET is this account: what an admin set, plus the
+    // person's own password change - exactly the actions with an `adminUsers.audit.<action>` line
+    // in the i18n bundles, so the page never has a machine code to print. Routine rows the person
+    // writes about themselves (a timezone sync on an app start, a day-start change) are not account
+    // events; they used to push the admin-set ones out of the five and reach the page as raw codes.
+    // The detail JSON is NOT returned (it can carry a reason or a before/after); the page shows
+    // what happened, when, by whom.
     current = 'SELECT the audit events';
     const audit = stmt(
       `SELECT a.id, a.action, a.created_at AS createdAt, a.request_id AS requestId,
               a.actor_id AS actorId, w.email AS actorEmail
          FROM audit_log a LEFT JOIN users w ON w.id = a.actor_id
         WHERE a.target_type = 'user' AND a.target_id = ?
+          AND a.action IN ('user.role.change', 'user.disable', 'user.enable', 'user.name.change',
+                           'user.lockout.reset', 'user.sessions.revoke', 'user.password.force',
+                           'user.credentials.change', 'coin.admin.adjust')
         ORDER BY a.id DESC LIMIT 5`,
     ).all(targetId);
 

@@ -34,7 +34,7 @@
 // operations rather than a false replay, and one principal cannot squat another's key.
 import { Router } from 'express';
 import { z } from 'zod';
-import { idParams } from '../admin/params.js';
+import { idParams, idString } from '../admin/params.js';
 import { reasonText } from '../lib/reason-text.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
@@ -147,8 +147,9 @@ const pageQuery = z
 
 const adminLedgerQuery = z
   .object({
-    user_id: z.coerce.number().int().positive().max(2_147_483_647).optional(),
-    actor_id: z.coerce.number().int().positive().max(2_147_483_647).optional(),
+    // canonical decimal ids (admin/params.js): z.coerce read user_id=0x10 as account 16
+    user_id: idString.optional(),
+    actor_id: idString.optional(),
     cursor: z.coerce.number().int().min(1).max(9_007_199_254_740_991).optional(),
     limit: z.coerce.number().int().min(1).max(50).optional(),
   })
@@ -478,6 +479,13 @@ router.get(
     const parsed = adminLedgerQuery.safeParse(req.query);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { user_id: userId, actor_id: actorId, cursor, limit = 25 } = parsed.data;
+
+    // An account's statement for an account that does not exist is a 404, not an empty statement:
+    // the ledger page drew "ERME egyenleg -" for any id while the account page said "not found".
+    // (Its rows cannot outlive it - coin_ledger.user_id is ON DELETE CASCADE - so nothing is hidden.)
+    if (userId !== undefined && !(await db.get('SELECT 1 AS ok FROM users WHERE id = ?', [userId]))) {
+      return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    }
 
     const entries = await db.all(
       `SELECT l.id, l.user_id AS userId, l.amount_minor AS amountMinor,

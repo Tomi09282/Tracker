@@ -87,3 +87,37 @@ Environment note: on this machine Node 24.16 segfaults now and then on process e
 better-sqlite3 / Piscina scripts (rc 139 / 0xC0000005, e.g. seed-taxonomy-i18n in smoke-run setup,
 verify-last-admin 1 of 3 runs). The step is re-run; it is not a test failure and not caused by this
 package (seen on the stashed pulse-int code as well).
+
+# Round 2 (2026-11-05) - the backend items of the S-admin-accounts screen review
+
+Base: pulse-int a7df161 (round 1 squash-merged as 8bf476b, S-admin-accounts on top). No migration, no
+new route, no i18n. `.pulse/review/security-admin-v2/FINDINGS.md` still does not exist (the round-1
+table above is still the security review's list); of the three screen reviews only
+`.pulse/review/S-admin-accounts/REVIEW.md` exists (S-admin-posts / S-admin-moderation have none yet).
+
+| id | review item | backend fix | status |
+|----|-------------|-------------|--------|
+| A1 | #2 (blocking) NAPLO prints raw machine codes; routine rows push the admin events out of the last five | `adminAccountDetailQuery` (db/tx/admin-accounts.js) lists only the account actions: `user.role.change`, `user.disable`, `user.enable`, `user.name.change`, `user.lockout.reset`, `user.sessions.revoke`, `user.password.force`, `user.credentials.change`, `coin.admin.adjust` - exactly the `adminUsers.audit.*` keys of the bundles. Static SQL literals, no new parameter. | fixed (backend half; the client fallback `defaultValue: action` is the screen lane's) |
+| A2 | #9c a wrong step-up password is POSTed twice (401 -> refresh -> replay) | step-up failures answer `401 { error: 'invalid credentials', code: 'unauthorized', reason: 'step_up_failed' }` (`sendStepUpFailed`, lib/http.js) on `/admin/users/:id/role`, `/admin/users/:id/enable` and `/me/delete`; `apiWithRefresh` (frontend/src/lib/api.ts) does not refresh on a 401 whose `reason` is `step_up_required` / `step_up_failed`. A real session failure (requireAuth) carries no reason, so it still refreshes. | fixed |
+| A3 | #11 `/admin/accounts/:id/coins` for a missing account draws an empty ledger | `GET /admin/coins/ledger?user_id=<no such account>` -> **404** `not_found` (ledger rows cascade with the account, so an erased account has none to hide). `user_id` / `actor_id` are canonical decimal ids (`idString`, admin/params.js): `0x10`, ` 5`, `1e1`, `05`, `1.0` are 400 (they read as accounts 16, 5, 10, 5, 1 before). | fixed (the ledger page must draw its "not found" state on the 404 - screen lane) |
+| - | #9a/#9b step-up field keeps its error / "Ujra" resends the old password | client only | screen lane |
+| - | #1 offline writes queue silently (TanStack networkMode) | client only | screen lane |
+| - | #10 a second admin acting on stale state is not told | the server already answers `{ replayed: true }` for the late disable / enable; the sheet can say "already disabled" from it | screen lane |
+| - | #12 display name accepts markup (`<script>`) | NOT changed - which characters a name may carry is a product rule shared with PATCH /auth/me; React escapes it and no non-escaping sink exists today | owner decision (forOrchestrator) |
+| L3 | (security round 1) posts cursor with negative keys | NOT changed: the closed B-admin-posts smoke asserts on purpose that a well-formed cursor at the numeric extremes is an ordinary page; bound parameters, harmless | not fixed - listed |
+
+## Proof (round 2)
+
+`backend/scripts/smoke/admin-polish-2.js` (runs with `--only=admin-polish` and in the full smoke):
+
+- on pulse-int a7df161 (`git checkout pulse-int -- backend/src`, this branch's smoke files): **15 FAIL / 125 PASS** - every A1, A2 step-up-reason, A3 404 and A3 id-spelling check red;
+- on this branch: **140 PASS / 0 FAIL** (round 1 104 + round 2 36).
+
+The client half of A2 (`frontend/src/lib/api.ts`), `proof/client-stepup-refresh.mjs` (transpiles a copy
+of api.ts with the frontend's TypeScript, fakes `fetch`, counts requests):
+
+```
+OLD  step-up 401 -> 3 requests  POST /role, POST /auth/refresh, POST /role
+NEW  step-up 401 -> 1 requests  POST /role
+     session 401 -> 3 requests  (GET, refresh, GET) - unchanged on both
+```

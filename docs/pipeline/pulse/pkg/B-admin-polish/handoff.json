@@ -32,5 +32,40 @@
     "verifyGates": "78 passed, 0 failed, 7 dormant"
   },
   "sharedEdits": "see owns.json sharedEdits (admin/routes.js, admin/accounts.js, db/tx/admin-accounts.js, db/worker.js 4 lines, coins/routes.js, public/moderation.js, lib/display-name.js, scripts/smoke.js, scripts/smoke/admin-accounts.js, scripts/verify-admin-accounts.mjs)",
-  "frontendImpact": "S-admin-accounts: the enable sheet of a disabled ADMIN account must send { reason, password } (handle 401 reason step_up_required like the admin grant); no approved frame shows it"
+  "frontendImpact": "S-admin-accounts: the enable sheet of a disabled ADMIN account must send { reason, password } (handle 401 reason step_up_required like the admin grant); no approved frame shows it",
+  "round2": {
+    "base": "pulse-int b55eb25 merged in (a7df161 + S-admin-posts, frontend only); 0 commits behind at hand-in",
+    "source": ".pulse/review/S-admin-accounts/REVIEW.md (backend items); security FINDINGS.md still absent; no S-admin-posts / S-admin-moderation REVIEW.md",
+    "fixed": [
+      "A1 (review #2) account detail NAPLO lists only the account actions (user.role.change, user.disable, user.enable, user.name.change, user.lockout.reset, user.sessions.revoke, user.password.force, user.credentials.change, coin.admin.adjust)",
+      "A2 (review #9c) step-up failures (role grant, enable admin, /me/delete) answer 401 reason step_up_failed; apiWithRefresh does not refresh on step_up_required / step_up_failed",
+      "A3 (review #11) GET /admin/coins/ledger?user_id=<missing> -> 404; user_id / actor_id canonical decimal ids"
+    ],
+    "notFixed": [
+      "L3 posts cursor negative keys: B-admin-posts smoke asserts the extremes are ordinary pages - left as is",
+      "#12 display-name markup: owner decision (character rule shared with PATCH /auth/me)"
+    ],
+    "screenLane": [
+      "#1 networkMode 'always' on useAccountWrite (offline writes queue silently and replay later)",
+      "#2 client fallback must not print a code (defaultValue: t('adminUsers.audit.other'))",
+      "#9a/#9b clear the step-up error on edit; Ujra must send the field's current password",
+      "#10 say 'already disabled / enabled' when the response is { replayed: true }",
+      "#11 the ledger page draws 'Ez a fiok nem talalhato' on the new 404",
+      "round 1: the enable sheet of a disabled ADMIN still sends { reason } only - it needs the password field (401 step_up_required today)"
+    ],
+    "proof": {
+      "smokeSection": "backend/scripts/smoke/admin-polish-2.js (with admin-polish.js under --only=admin-polish)",
+      "redOnBase": "15 FAIL / 125 PASS with backend/src of pulse-int a7df161",
+      "green": "140 PASS / 0 FAIL",
+      "client": "docs/pipeline/pulse/pkg/B-admin-polish/proof/client-stepup-refresh.mjs: old api.ts 3 requests per wrong step-up password, new 1; session 401 still refreshes"
+    },
+    "gates": {
+      "backendCheckAll": "green on a fresh scratch DB migrated to 35 + seed:dev-users",
+      "smoke": "1364 passed, 0 failed",
+      "smokeLimits": "7 passed, 0 failed",
+      "verifyAdminAccounts": "16/16 planted defects caught (mutant 9 re-run after its anchor was scoped)",
+      "frontendBuild": "green (after merging b55eb25)",
+      "verifyGates": "78 passed, 0 failed, 7 dormant"
+    }
+  }
 }

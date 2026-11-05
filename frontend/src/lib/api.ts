@@ -132,6 +132,13 @@ export function refreshSession(): Promise<boolean> {
 const NO_REFRESH = /^\/auth\/(?:login|register|refresh|logout|logout-all|change-credentials)(?:[/?]|$)/;
 
 /**
+ * A 401 that is about a step-up password, not the session: the admin grant, re-enabling an admin,
+ * deleting one's own account. requireAuth already accepted the session, so a refresh repairs
+ * nothing - it only replayed the same POST and sent every wrong password twice.
+ */
+const STEP_UP_REASONS: ReadonlySet<unknown> = new Set(['step_up_required', 'step_up_failed']);
+
+/**
  * Calls the API and, on a 401, transparently refreshes once and retries.
  *
  * Not applied to the routes in `NO_REFRESH`: a failed login must surface as a failed login, not
@@ -142,7 +149,7 @@ export async function apiWithRefresh<T = unknown>(path: string, options: ApiOpti
   try {
     return await api<T>(path, options);
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401 && !NO_REFRESH.test(path)) {
+    if (err instanceof ApiError && err.status === 401 && !NO_REFRESH.test(path) && !STEP_UP_REASONS.has(err.body.reason)) {
       if (await refreshSession()) return api<T>(path, options);
     }
     throw err;

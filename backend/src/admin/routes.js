@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import argon2 from 'argon2';
 import * as db from '../db/index.js';
-import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { ERR, sendError, sendStepUpFailed, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
 import { resolveLang, languages } from '../lib/lang.js';
 import { assertAdmin } from '../lib/assert-admin.js';
@@ -261,7 +261,7 @@ router.post(
       const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
       if (!actor || !(await argon2.verify(actor.password_hash, body.data.password))) {
         req.log.warn({ actorId: req.user.id, targetId: id.data }, 'admin grant refused: step-up failed');
-        return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+        return sendStepUpFailed(res);
       }
     }
 
@@ -402,7 +402,7 @@ router.post(
       const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
       if (!actor?.password_hash || !(await argon2.verify(actor.password_hash, body.data.password))) {
         req.log.warn({ actorId: req.user.id, targetId: id.data }, 'account enable refused: step-up failed');
-        return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+        return sendStepUpFailed(res);
       }
       stepUp = true;
     }

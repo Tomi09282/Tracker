@@ -1633,6 +1633,7 @@
       "owns": [
         "backend/scripts/smoke.js",
         "backend/scripts/smoke/admin-accounts.js",
+        "backend/scripts/smoke/admin-polish-2.js",
         "backend/scripts/smoke/admin-polish.js",
         "backend/scripts/verify-admin-accounts.mjs",
         "backend/src/admin/accounts.js",
@@ -1641,9 +1642,12 @@
         "backend/src/coins/routes.js",
         "backend/src/db/tx/admin-accounts.js",
         "backend/src/db/worker.js",
+        "backend/src/lib/http.js",
         "backend/src/lib/display-name.js",
         "backend/src/lib/reason-text.js",
+        "backend/src/privacy/routes.js",
         "backend/src/public/moderation.js",
+        "frontend/src/lib/api.ts",
         "docs/pipeline/pulse/pkg/B-admin-polish/**"
       ],
       "handIn": {},
@@ -1659,7 +1663,8 @@
         "sign-out-all and force-password-change on an account with no open refresh family and no access token minted since the last run are replays; after a sign-out a copied access token is dead",
         "ids in role / disable / enable / coins / report resolve / exercise moderation URLs are canonical decimals (01, +1, 1e0 are 400)",
         "display names and reasons refuse the invisible and control characters listed above; the attack scripts of .pulse/review/security-admin-v2/attacks no longer reproduce",
-        "smoke section admin-polish green (104 assertions, 47 red on the base commit)"
+        "smoke section admin-polish green (104 assertions, 47 red on the base commit)",
+        "ROUND 2 (backend items of the S-admin-accounts screen review): account detail NAPLO lists only the nine account actions; a wrong step-up password (admin grant, enable of an admin, /me/delete) answers 401 reason step_up_failed and apiWithRefresh does not refresh on step_up_required / step_up_failed; GET /admin/coins/ledger?user_id=<missing> is 404 and user_id / actor_id are canonical decimal ids; smoke section admin-polish-2 36 assertions (15 red on the base)"
       ],
       "verify": [
         "npm run check:all (cwd backend/, integration worktree, fresh migrated DB + seed:dev-users)",
@@ -1668,7 +1673,7 @@
         "npm run build (cwd frontend/, integration worktree)",
         "npm run verify:gates (cwd frontend/, integration worktree)"
       ],
-      "notes": "Added by the integrator at merge (merge-B-admin-polish) from the package's own pkg/B-admin-polish/owns.json: the package ran outside the plan entry list (no brief). The package was based on pulse-int 966b625; pulse-int has since gained S-admin-accounts (frontend only), so the squash was clean with no conflict. The diff was checked against owns.json: the 4 own paths plus the 10 shared edits pass to it - smoke/admin-accounts.js, verify-admin-accounts.mjs, admin/accounts.js, db/tx/admin-accounts.js and lib/display-name.js from the closed B-admin-accounts, db/worker.js and public/moderation.js from the closed B-admin-posts, scripts/smoke.js, admin/routes.js and coins/routes.js from the closed B-admin-stats. No migration (036 unused). The dev backend on :3000 picks the changes up only after a restart. Frontend follow-up for S-admin-accounts: the enable sheet of a disabled ADMIN account must send { reason, password } and handle 401 step_up_required like the admin grant (no approved frame shows it)."
+      "notes": "Added by the integrator at merge (merge-B-admin-polish) from the package's own pkg/B-admin-polish/owns.json: the package ran outside the plan entry list (no brief). The package was based on pulse-int 966b625; pulse-int has since gained S-admin-accounts (frontend only), so the squash was clean with no conflict. The diff was checked against owns.json: the 4 own paths plus the 10 shared edits pass to it - smoke/admin-accounts.js, verify-admin-accounts.mjs, admin/accounts.js, db/tx/admin-accounts.js and lib/display-name.js from the closed B-admin-accounts, db/worker.js and public/moderation.js from the closed B-admin-posts, scripts/smoke.js, admin/routes.js and coins/routes.js from the closed B-admin-stats. No migration (036 unused). The dev backend on :3000 picks the changes up only after a restart. Frontend follow-up for S-admin-accounts: the enable sheet of a disabled ADMIN account must send { reason, password } and handle 401 step_up_required like the admin grant (no approved frame shows it). ROUND 2 (merge-B-admin-polish, second squash): the backend items A1 NAPLO filter, A2 step-up 401 reason step_up_failed (+ the one-condition client change in lib/api.ts, an integrator file), A3 ledger 404 and canonical ledger ids; the package was based on pulse-int b55eb25, pulse-int has since gained S-admin-moderation (frontend only), the squash was clean. New own path backend/scripts/smoke/admin-polish-2.js; shared edits passed to it: backend/src/lib/http.js and backend/src/privacy/routes.js (no owner before), frontend/src/lib/api.ts (the integrator's). Screen-lane items stay with the S-admin lanes: networkMode on useAccountWrite, the NAPLO client fallback, step-up field error clearing, replayed wording, the ledger 404 state, the enable-admin password field. Owner decisions open: #12 display-name markup, D1."
     }
   ],
   "screens": [

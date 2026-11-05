@@ -104,7 +104,8 @@ const MUTANTS = [
   {
     label: 'reset-lockout writes its audit row under the wrong action string',
     file: TX,
-    edit: swap("'user.lockout.reset'", "'user.lockout.resetx'"),
+    // scoped to the transaction: since B-admin-polish round 2 the NAPLO read lists the action too
+    edit: (src) => inFunction(src, 'adminResetLockoutTx', swap("'user.lockout.reset'", "'user.lockout.resetx'")),
     expect: 'one audit row (user.lockout.reset)',
   },
   {

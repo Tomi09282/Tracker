@@ -550,6 +550,8 @@ ${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} fail
 if (process.env.SMOKE_ONLY === 'admin-polish' && seeded) {
   const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
   await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  const { adminPolish2Smoke } = await import('./smoke/admin-polish-2.js');
+  await adminPolish2Smoke({ call, check, Jar, seeded, stamp, PASSWORD });
   console.log(`
 ${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} failed (admin-polish only)`);
   process.exit(failed === 0 ? 0 : 1);
@@ -5877,6 +5879,10 @@ if (seeded) {
 if (seeded) {
   const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
   await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  // round 2: the backend items of the S-admin-accounts screen review (NAPLO filter, step-up 401
+  // reason, ledger 404)
+  const { adminPolish2Smoke } = await import('./smoke/admin-polish-2.js');
+  await adminPolish2Smoke({ call, check, Jar, seeded, stamp, PASSWORD });
 }
 
 // --- admin statistics (package B-admin-stats) --------------------------------------------------
