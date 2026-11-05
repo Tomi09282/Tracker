@@ -59,6 +59,9 @@ const AccountDetailPage = lazy(() =>
 const AccountCoinsPage = lazy(() =>
   import('../features/admin/accounts/AccountCoinsPage').then((m) => ({ default: m.AccountCoinsPage })),
 );
+const AdminPostDetailPage = lazy(() =>
+  import('../features/admin/marketplace/PostDetailPage').then((m) => ({ default: m.PostDetailPage })),
+);
 const AdminMarketplacePage = lazy(() =>
   import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
 );
@@ -202,6 +205,8 @@ export const router = createBrowserRouter([
       { path: 'admin/accounts/:id', element: suspended(<AccountDetailPage />) },
       { path: 'admin/accounts/:id/coins', element: suspended(<AccountCoinsPage />) },
       { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
+      // The admin's inspect page of one marketplace post, pushed from Piactér > Posztok (S-admin-posts).
+      { path: 'admin/marketplace/posts/:publicId', element: suspended(<AdminPostDetailPage />) },
       // LifeOS Phase 2: the admin-global point rules, pushed from Moderáció's "Szabályok" door row
       // (design round A: a door, not a tab — the admin bar keeps Moderáció lit).
       { path: 'admin/rules', element: suspended(<RulesPage />) },

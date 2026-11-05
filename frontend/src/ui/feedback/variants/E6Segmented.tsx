@@ -106,6 +106,12 @@ export interface SegmentedProps<T extends string> {
    * (frames `settings-day`, `settings-day-v2`: the segSwitch's texts re-set to mono Medium, -1 %).
    */
   figures?: boolean;
+  /**
+   * The quiet page switch of a screen with two views (admin-market-v2: "JELENTÉSEK 4 | POSZTOK"):
+   * the words in mono `data`, upper case and tracked, a `count` after the word in `text-3` instead
+   * of the lamp colour — the screen's lime is kept for its filter. Use with `layout="cells"`.
+   */
+  quiet?: boolean;
   /** Placement only (`self-start`, `shrink-0`, a margin). Never a colour, size or type. */
   className?: string;
 }
@@ -131,6 +137,8 @@ export interface SegmentProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
   mark?: 'ink' | 'accent';
   /** The option is a figure: `data-l` (mono) instead of `body-m` (see `SegmentedProps.figures`). */
   figures?: boolean;
+  /** The quiet page switch (see `SegmentedProps.quiet`): mono upper-case words, the count in `text-3`. */
+  quiet?: boolean;
   /** The word. */
   children: ReactNode;
 }
@@ -157,7 +165,7 @@ const FORCED = [
  * a word shorter than that — the target, not the layout.
  */
 export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segment(
-  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, mark = 'ink', figures = false, children, type, disabled, ...rest },
+  { selected, layout, onRule = layout === 'cells', busy = false, failed = false, count, mark = 'ink', figures = false, quiet = false, children, type, disabled, ...rest },
   ref,
 ) {
   const inert = rest['aria-disabled'] === true || rest['aria-disabled'] === 'true';
@@ -169,7 +177,7 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
       disabled={disabled}
       className={cn(
         'relative inline-flex h-11 shrink-0 select-none items-center whitespace-nowrap',
-        figures ? 'text-data-l' : 'text-body-m',
+        quiet ? 'text-data uppercase tracking-widest' : figures ? 'text-data-l' : 'text-body-m',
         // A hug segment's BOX reaches 8 past its word on either side and gives the 16 back in
         // negative margins: the layout is the word (the next word still starts 24 after it, the
         // control is still as wide as its words), the target is the word + 16 — 44 for "Elöl",
@@ -208,7 +216,7 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
           {count != null && count > 0 ? (
             <>
               {' '}
-              <span className="text-data text-accent">{count}</span>
+              <span className={cn('text-data', quiet ? 'text-text-3' : 'text-accent')}>{count}</span>
             </>
           ) : null}
         </span>
@@ -261,6 +269,7 @@ export function Segmented<T extends string>({
   rule = false,
   disabled = false,
   figures = false,
+  quiet = false,
   className,
 }: SegmentedProps<T>) {
   const { t } = useTranslation();
@@ -386,6 +395,7 @@ export function Segmented<T extends string>({
             failed={phase === 'failed'}
             count={opt.count}
             figures={figures}
+            quiet={quiet}
             onClick={() => select(opt.value)}
           >
             {opt.label}

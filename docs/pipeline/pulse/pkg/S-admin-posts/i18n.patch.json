@@ -1,0 +1,675 @@
+{
+  "package": "S-admin-posts",
+  "base": "966b625",
+  "namespaces": [
+    "adminPosts"
+  ],
+  "set": [
+    {
+      "key": "adminPosts.view.label",
+      "hu": "Piactér nézet",
+      "en": "Marketplace view",
+      "de": "Marktplatz-Ansicht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the accessible name of the switch"
+    },
+    {
+      "key": "adminPosts.view.reports",
+      "hu": "Jelentések",
+      "en": "Reports",
+      "de": "Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2-reports: switch"
+    },
+    {
+      "key": "adminPosts.view.posts",
+      "hu": "Posztok",
+      "en": "Posts",
+      "de": "Beiträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: switch"
+    },
+    {
+      "key": "adminPosts.search",
+      "hu": "Cím vagy @szerző",
+      "en": "Title or @author",
+      "de": "Titel oder @Autor",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: the search line"
+    },
+    {
+      "key": "adminPosts.stateLabel",
+      "hu": "Állapot",
+      "en": "State",
+      "de": "Status",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the accessible name of the state filter"
+    },
+    {
+      "key": "adminPosts.state.all",
+      "hu": "Mind",
+      "en": "All",
+      "de": "Alle",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: state filter"
+    },
+    {
+      "key": "adminPosts.state.draft",
+      "hu": "Piszkozat",
+      "en": "Draft",
+      "de": "Entwurf",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: state filter and tag"
+    },
+    {
+      "key": "adminPosts.state.live",
+      "hu": "Élő",
+      "en": "Live",
+      "de": "Live",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: state filter and tag"
+    },
+    {
+      "key": "adminPosts.state.withdrawn",
+      "hu": "Visszavonva",
+      "en": "Withdrawn",
+      "de": "Zurückgezogen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: state filter and tag (the author withdrew it)"
+    },
+    {
+      "key": "adminPosts.state.removed",
+      "hu": "Levéve",
+      "en": "Taken down",
+      "de": "Entfernt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: state filter and tag (a moderator took it down)"
+    },
+    {
+      "key": "adminPosts.more",
+      "hu": "Továbbiak",
+      "en": "More",
+      "de": "Mehr",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: paging row"
+    },
+    {
+      "key": "adminPosts.countOf",
+      "hu": "{{shown}} / {{total}} poszt",
+      "en": "{{shown}} / {{total}} posts",
+      "de": "{{shown}} / {{total}} Beiträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: \"7 / 31 poszt\""
+    },
+    {
+      "key": "adminPosts.reportCount",
+      "hu": "{{count}} jelentés",
+      "en": "Reports: {{count}}",
+      "de": "Meldungen: {{count}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-market-v2: open-report count on a row"
+    },
+    {
+      "key": "adminPosts.emptyTitle",
+      "hu": "Még nincs poszt",
+      "en": "No posts yet",
+      "de": "Noch keine Beiträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): empty list"
+    },
+    {
+      "key": "adminPosts.emptyBody",
+      "hu": "Amint egy edző közzétesz egy posztot vagy piszkozatot ment, itt jelenik meg.",
+      "en": "When a coach publishes a post or saves a draft, it appears here.",
+      "de": "Sobald ein Coach einen Beitrag veröffentlicht oder einen Entwurf speichert, erscheint er hier.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): empty list"
+    },
+    {
+      "key": "adminPosts.noMatchBody",
+      "hu": "Próbálj másik szót, vagy válassz másik állapotot.",
+      "en": "Try another word or pick another state.",
+      "de": "Versuche ein anderes Wort oder wähle einen anderen Status.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): no match under a search or filter"
+    },
+    {
+      "key": "adminPosts.errorTitle",
+      "hu": "Nem sikerült betölteni",
+      "en": "Could not load",
+      "de": "Laden fehlgeschlagen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "sentence style of frame admin-statistics-2 (error): same title"
+    },
+    {
+      "key": "adminPosts.errorBody",
+      "hu": "A piactér most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "en": "The marketplace is not available right now. Check your connection and try again.",
+      "de": "Der Marktplatz ist gerade nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "sentence style of frame admin-statistics-2 (error): same sentence, the subject changed"
+    },
+    {
+      "key": "adminPosts.detail.title",
+      "hu": "Poszt",
+      "en": "Post",
+      "de": "Beitrag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: display title"
+    },
+    {
+      "key": "adminPosts.detail.goneTitle",
+      "hu": "Ez a poszt nem található",
+      "en": "This post was not found",
+      "de": "Dieser Beitrag wurde nicht gefunden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): 404 on the post page"
+    },
+    {
+      "key": "adminPosts.detail.goneBody",
+      "hu": "Lehet, hogy már nem létezik, vagy hibás a hivatkozás.",
+      "en": "It may no longer exist, or the link is wrong.",
+      "de": "Er existiert möglicherweise nicht mehr, oder der Link ist falsch.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): 404 on the post page"
+    },
+    {
+      "key": "adminPosts.detail.privateDraft",
+      "hu": "Nem nyilvános · csak a szerző látja.",
+      "en": "Not public · only the author sees it.",
+      "de": "Nicht öffentlich · nur der Autor sieht ihn.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-draft: under the title"
+    },
+    {
+      "key": "adminPosts.detail.authorOff",
+      "hu": "A szerző le van tiltva, ezért a poszt nem látszik.",
+      "en": "The author is disabled, so the post is not shown.",
+      "de": "Der Autor ist gesperrt, deshalb wird der Beitrag nicht angezeigt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-3 says \"...de a posztja még látszik.\"; changed because the server hides the posts of a disabled author (B-admin-posts api.md section 3)"
+    },
+    {
+      "key": "adminPosts.detail.notShown",
+      "hu": "A poszt most nem látszik a nyilvános oldalon.",
+      "en": "The post is not shown on the public page right now.",
+      "de": "Der Beitrag wird auf der öffentlichen Seite gerade nicht angezeigt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the post is live but something else hides it (author demoted, profile unpublished or removed)"
+    },
+    {
+      "key": "adminPosts.facts.title",
+      "hu": "Adatok",
+      "en": "Details",
+      "de": "Daten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.facts.readOnly",
+      "hu": "csak olvasható",
+      "en": "read only",
+      "de": "nur lesbar",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section note"
+    },
+    {
+      "key": "adminPosts.facts.kind",
+      "hu": "Fajta",
+      "en": "Kind",
+      "de": "Art",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row"
+    },
+    {
+      "key": "adminPosts.facts.time",
+      "hu": "Időpont",
+      "en": "Time",
+      "de": "Zeitpunkt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row"
+    },
+    {
+      "key": "adminPosts.facts.capacity",
+      "hu": "Férőhely",
+      "en": "Capacity",
+      "de": "Plätze",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row"
+    },
+    {
+      "key": "adminPosts.facts.seats",
+      "hu": "{{count}} hely",
+      "en": "{{count}} seats",
+      "de": "{{count}} Plätze",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: \"16 hely\""
+    },
+    {
+      "key": "adminPosts.facts.price",
+      "hu": "Ár",
+      "en": "Price",
+      "de": "Preis",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row"
+    },
+    {
+      "key": "adminPosts.author.title",
+      "hu": "Szerző",
+      "en": "Author",
+      "de": "Autor",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.author.disabled",
+      "hu": "Letiltva",
+      "en": "Disabled",
+      "de": "Deaktiviert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-3: tag on the author row"
+    },
+    {
+      "key": "adminPosts.timeline.title",
+      "hu": "Állapot",
+      "en": "Status",
+      "de": "Status",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.timeline.created",
+      "hu": "Létrehozva",
+      "en": "Created",
+      "de": "Erstellt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: step"
+    },
+    {
+      "key": "adminPosts.timeline.published",
+      "hu": "Közzétéve",
+      "en": "Published",
+      "de": "Veröffentlicht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: step"
+    },
+    {
+      "key": "adminPosts.timeline.withdrawn",
+      "hu": "Visszavonva",
+      "en": "Withdrawn",
+      "de": "Zurückgezogen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the author withdrew the post (the frames do not draw a withdrawn page; the list does)"
+    },
+    {
+      "key": "adminPosts.timeline.removed",
+      "hu": "Levéve",
+      "en": "Taken down",
+      "de": "Entfernt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: step \"Levéve · Takács Dániel\""
+    },
+    {
+      "key": "adminPosts.timeline.reason",
+      "hu": "Indok: {{reason}}",
+      "en": "Reason: {{reason}}",
+      "de": "Grund: {{reason}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: step detail"
+    },
+    {
+      "key": "adminPosts.timeline.notPublished",
+      "hu": "Még nincs közzétéve.",
+      "en": "Not published yet.",
+      "de": "Noch nicht veröffentlicht.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-draft: step detail"
+    },
+    {
+      "key": "adminPosts.removed.reason",
+      "hu": "Indok",
+      "en": "Reason",
+      "de": "Grund",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: banner"
+    },
+    {
+      "key": "adminPosts.restore.action",
+      "hu": "Visszaállítás",
+      "en": "Restore",
+      "de": "Wiederherstellen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: pill and sheet link"
+    },
+    {
+      "key": "adminPosts.restore.hint",
+      "hu": "A poszt újra megjelenik a nyilvános oldalon.",
+      "en": "The post will show on the public page again.",
+      "de": "Der Beitrag erscheint wieder auf der öffentlichen Seite.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: under the pill"
+    },
+    {
+      "key": "adminPosts.restore.title",
+      "hu": "Visszaállítod a posztot?",
+      "en": "Restore the post?",
+      "de": "Beitrag wiederherstellen?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-restore: sheet title"
+    },
+    {
+      "key": "adminPosts.restore.message",
+      "hu": "A poszt újra megjelenik a nyilvános oldalon, a szerző profilján és a piactéren.",
+      "en": "The post will show again on the public page, on the author’s profile and in the marketplace.",
+      "de": "Der Beitrag erscheint wieder auf der öffentlichen Seite, im Profil des Autors und auf dem Marktplatz.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-restore: sheet sentence"
+    },
+    {
+      "key": "adminPosts.restore.messageHidden",
+      "hu": "A poszt visszaáll, de a nyilvános oldalon még nem látszik: a szerző vagy a profilja miatt.",
+      "en": "The post is restored, but it still does not show on the public page: because of the author or their profile.",
+      "de": "Der Beitrag wird wiederhergestellt, ist auf der öffentlichen Seite aber noch nicht sichtbar: wegen des Autors oder seines Profils.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): restore sheet when something else still hides the post (the server says so in the restore answer)"
+    },
+    {
+      "key": "adminPosts.body.title",
+      "hu": "Szöveg",
+      "en": "Text",
+      "de": "Text",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.body.full",
+      "hu": "Teljes szöveg",
+      "en": "Full text",
+      "de": "Ganzer Text",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: link"
+    },
+    {
+      "key": "adminPosts.media.title",
+      "hu": "Média",
+      "en": "Media",
+      "de": "Medien",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.media.count",
+      "hu": "{{count}} kép",
+      "en": "{{count}} images",
+      "de": "{{count}} Bilder",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section note"
+    },
+    {
+      "key": "adminPosts.media.cover",
+      "hu": "Borító",
+      "en": "Cover",
+      "de": "Titelbild",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: caption"
+    },
+    {
+      "key": "adminPosts.media.nth",
+      "hu": "{{n}}. kép",
+      "en": "Image {{n}}",
+      "de": "Bild {{n}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: caption"
+    },
+    {
+      "key": "adminPosts.reports.title",
+      "hu": "Jelentések",
+      "en": "Reports",
+      "de": "Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.reports.open",
+      "hu": "{{count}} nyitott",
+      "en": "{{count}} open",
+      "de": "{{count}} offen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section note"
+    },
+    {
+      "key": "adminPosts.reports.closed",
+      "hu": "{{count}} lezárt",
+      "en": "{{count}} closed",
+      "de": "{{count}} abgeschlossen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: section note"
+    },
+    {
+      "key": "adminPosts.reports.both",
+      "hu": "{{open}} nyitott / {{closed}} lezárt",
+      "en": "{{open}} open / {{closed}} closed",
+      "de": "{{open}} offen / {{closed}} abgeschlossen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "designers’ note (\"N nyitott / N lezárt\"): open and closed reports on one post"
+    },
+    {
+      "key": "adminPosts.reports.severity",
+      "hu": "Súlyosság",
+      "en": "Severity",
+      "de": "Schweregrad",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: bar label"
+    },
+    {
+      "key": "adminPosts.reports.upholdAndTakeDown",
+      "hu": "Helybenhagyás és levétel",
+      "en": "Uphold and take down",
+      "de": "Bestätigen und entfernen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: link"
+    },
+    {
+      "key": "adminPosts.reports.upheld",
+      "hu": "Helybenhagyva",
+      "en": "Upheld",
+      "de": "Bestätigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: closed report"
+    },
+    {
+      "key": "adminPosts.reports.rejected",
+      "hu": "Elutasítva",
+      "en": "Rejected",
+      "de": "Abgelehnt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2: closed report"
+    },
+    {
+      "key": "adminPosts.manage.title",
+      "hu": "Kezelés",
+      "en": "Manage",
+      "de": "Verwalten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: section"
+    },
+    {
+      "key": "adminPosts.manage.postSub",
+      "hu": "Nyilvánosan eltűnik. Visszaállítható.",
+      "en": "Disappears from the public page. Can be restored.",
+      "de": "Verschwindet von der öffentlichen Seite. Kann wiederhergestellt werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row sub line"
+    },
+    {
+      "key": "adminPosts.manage.profileSub",
+      "hu": "Posztjai is eltűnnek.",
+      "en": "Their posts disappear too.",
+      "de": "Ihre Beiträge verschwinden ebenfalls.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1 says \"Posztjai is eltűnnek. Visszaállítható.\"; the second sentence is dropped: no screen or route restores a profile"
+    },
+    {
+      "key": "adminPosts.manage.draftNote",
+      "hu": "A piszkozat nem nyilvános, így nincs mit levenni.",
+      "en": "A draft is not public, so there is nothing to take down.",
+      "de": "Ein Entwurf ist nicht öffentlich, es gibt also nichts zu entfernen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-draft: note"
+    },
+    {
+      "key": "adminPosts.takedown.post.title",
+      "hu": "Poszt levétele",
+      "en": "Take down post",
+      "de": "Beitrag entfernen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-takedown: sheet title and link, row title"
+    },
+    {
+      "key": "adminPosts.takedown.post.message",
+      "hu": "A poszt eltűnik a nyilvános oldalról. Később visszaállíthatod.",
+      "en": "The post disappears from the public page. You can restore it later.",
+      "de": "Der Beitrag verschwindet von der öffentlichen Seite. Du kannst ihn später wiederherstellen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-takedown: sheet sentence"
+    },
+    {
+      "key": "adminPosts.takedown.profile.title",
+      "hu": "Szerző profiljának levétele",
+      "en": "Take down author profile",
+      "de": "Autorenprofil entfernen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: row title; the sheet reuses it"
+    },
+    {
+      "key": "adminPosts.takedown.profile.message",
+      "hu": "A profil és a posztjai eltűnnek a nyilvános oldalról.",
+      "en": "The profile and its posts disappear from the public page.",
+      "de": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the sheet of the profile take-down (the frames draw only the post sheet)"
+    },
+    {
+      "key": "adminPosts.takedown.both.title",
+      "hu": "Poszt és szerzői profil levétele együtt",
+      "en": "Take down post and author profile together",
+      "de": "Beitrag und Autorenprofil zusammen entfernen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-3: link and sheet title"
+    },
+    {
+      "key": "adminPosts.takedown.both.message",
+      "hu": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról.",
+      "en": "The post and the author’s profile both disappear from the public page.",
+      "de": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the sheet of the coordinated take-down"
+    },
+    {
+      "key": "adminPosts.takedown.report.title",
+      "hu": "Helybenhagyás és levétel",
+      "en": "Uphold and take down",
+      "de": "Bestätigen und entfernen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-1: the link of a report opens the same sheet (designers’ note 6)"
+    },
+    {
+      "key": "adminPosts.takedown.report.message",
+      "hu": "A bejelentés helybenhagyva, a poszt eltűnik a nyilvános oldalról. Később visszaállíthatod.",
+      "en": "The report is upheld and the post disappears from the public page. You can restore it later.",
+      "de": "Die Meldung wird bestätigt und der Beitrag verschwindet von der öffentlichen Seite. Du kannst ihn später wiederherstellen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "NOT in a frame (a state or sentence the frames do not draw; proposed by this package, see copy-to-approve.md): the sheet of an upheld report"
+    },
+    {
+      "key": "adminPosts.takedown.reason",
+      "hu": "Levétel indoka",
+      "en": "Reason for taking down",
+      "de": "Grund der Entfernung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-takedown: field"
+    },
+    {
+      "key": "adminPosts.takedown.reasonHint",
+      "hu": "Kötelező. Az audit-naplóba kerül, a szerző nem látja.",
+      "en": "Required. It goes into the audit log; the author does not see it.",
+      "de": "Pflichtfeld. Es kommt ins Audit-Log; der Autor sieht es nicht.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-post-detail-2-takedown: field hint"
+    }
+  ]
+}

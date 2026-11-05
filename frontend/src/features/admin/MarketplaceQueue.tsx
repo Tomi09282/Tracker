@@ -92,8 +92,9 @@ const subjectOf = (r: ReportRow) => (r.postId ? r.postTitle : `@${r.profileHandl
  *
  * ═══ THE QUEUE IS DOORS; THE CASE IS A PAGE (design round A, fix 3) ════════════════════════════
  *
- * The eyebrow with the count of the chosen status, the status filter as lime-marked words, and each
- * report as one row that opens it: the subject, the reason and the reporter count, the mono date,
+ * The status filter as lime-marked words (the count of open reports stands in the page's switch
+ * now, admin-market-v2-reports — this queue has no head of its own), and each report as one row
+ * that opens it: the subject, the reason and the reporter count, the mono date,
  * the chevron. The snapshot, the live-page link, the reporter's note and the decision stand on the
  * pushed report page (`MarketplaceReport`, admin-view-3-report). No pill on this page.
  */
@@ -104,13 +105,7 @@ export function MarketplaceQueue({ status, onStatus }: { status: ReportStatus; o
   const reports = queue.data?.reports ?? [];
 
   return (
-    <section className="flex flex-col gap-4" aria-label={t('admin.marketplace.title')}>
-      <SectionHeader
-        rule={false}
-        title={t('admin.marketplace.title')}
-        // A count only when there IS one — never a grey zero.
-        trailing={reports.length > 0 ? <span className="text-data text-text-2">{reports.length}</span> : undefined}
-      />
+    <section className="flex flex-col gap-6" aria-label={t('admin.marketplace.title')}>
       {/* 16 between the words, as admin-view-3 sets them: the four statuses then fit the 354 measure
           (the kit line is 24 apart); a longer locale still scrolls sideways inside the line. */}
       <ChipRow label={t('admin.marketplace.title')} scroll="bleed" className="gap-x-4">

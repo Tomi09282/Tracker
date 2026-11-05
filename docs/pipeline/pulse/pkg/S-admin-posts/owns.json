@@ -1,0 +1,23 @@
+{
+  "id": "S-admin-posts",
+  "decision": "frontend of the admin marketplace posts (owner decisions 2026-11-03, items 2 and 4): the Piacter tab gets the Jelentesek | Posztok switch, a searchable / filterable / paged post list, the post inspect page at /admin/marketplace/posts/:publicId with take-down (required reason), restore, the draft variant and the author-disabled notice; built 1:1 to admin-market-v2, admin-market-v2-reports, admin-post-detail-1/-2/-2-takedown/-2-restore/-2-draft/-3",
+  "owns": [
+    "frontend/src/features/admin/AdminMarketplacePage.tsx",
+    "frontend/src/features/admin/MarketplaceQueue.tsx",
+    "frontend/src/features/admin/marketplace/**",
+    "docs/pipeline/pulse/pkg/S-admin-posts/**"
+  ],
+  "sharedEdits": {
+    "decision": "small registration edits in integrator-owned files, listed so the integrator can resolve conflicts",
+    "files": [
+      "frontend/src/app/router.tsx (one lazy import + one route)",
+      "frontend/src/app/routeMeta.ts (one ROUTE_META row)",
+      "frontend/src/i18n/hu.json, en.json, de.json (through i18n.patch.json, applied with pulse-i18n)"
+    ]
+  },
+  "notInScope": [
+    "any backend file (B-admin-posts is merged on pulse-int)",
+    "the account page (S-admin-accounts): the author row only links to /admin/accounts/:id",
+    "work-package.json entry of the integrator"
+  ]
+}

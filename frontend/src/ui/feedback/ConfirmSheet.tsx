@@ -20,6 +20,8 @@ export interface ConfirmSheetProps {
   tone?: 'danger' | 'default';
   /** The action is in flight: its link shows the three dots and cannot fire twice. */
   busy?: boolean;
+  /** The action is not available yet (a required reason still empty): its link is dimmed and inert. */
+  confirmDisabled?: boolean;
   /** The sheet's status and retry, passed to `Sheet` (error = the danger dot + "Újra" in the header). */
   status?: ElementStatus;
   onRetry?: () => void;
@@ -39,13 +41,14 @@ export function ConfirmSheetBody({
   onCancel,
   tone = 'danger',
   busy = false,
-}: Pick<ConfirmSheetProps, 'message' | 'confirmLabel' | 'onConfirm' | 'cancelLabel' | 'tone' | 'busy'> & { onCancel?: () => void }) {
+  confirmDisabled = false,
+}: Pick<ConfirmSheetProps, 'message' | 'confirmLabel' | 'onConfirm' | 'cancelLabel' | 'tone' | 'busy' | 'confirmDisabled'> & { onCancel?: () => void }) {
   const { t } = useTranslation();
   return (
     <>
       {message ? <p className="text-body text-text-2">{message}</p> : null}
       <div className="flex flex-col items-start">
-        <TextLink text="body" tone={tone === 'danger' ? 'danger' : 'default'} busy={busy} onClick={onConfirm}>
+        <TextLink text="body" tone={tone === 'danger' ? 'danger' : 'default'} busy={busy} disabled={confirmDisabled} onClick={onConfirm}>
           {confirmLabel}
         </TextLink>
         <TextLink text="body" onClick={onCancel}>
@@ -76,6 +79,7 @@ export function ConfirmSheet({
   cancelLabel,
   tone = 'danger',
   busy = false,
+  confirmDisabled = false,
   status,
   onRetry,
 }: ConfirmSheetProps) {
@@ -90,6 +94,7 @@ export function ConfirmSheet({
           onCancel={onClose}
           tone={tone}
           busy={busy}
+          confirmDisabled={confirmDisabled}
         />
       </div>
     </Sheet>

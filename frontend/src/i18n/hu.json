@@ -1954,5 +1954,115 @@
     "sumNoCheckin": "{{min}} perc × {{perHour}} érme/óra = {{a}}",
     "capped": "A napi érmeplafon vagy a napi fókuszkeret miatt kevesebb járt.",
     "todayMinutes": "ma {{n}} perc"
+  },
+  "adminPosts": {
+    "view": {
+      "label": "Piactér nézet",
+      "reports": "Jelentések",
+      "posts": "Posztok"
+    },
+    "search": "Cím vagy @szerző",
+    "stateLabel": "Állapot",
+    "state": {
+      "all": "Mind",
+      "draft": "Piszkozat",
+      "live": "Élő",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve"
+    },
+    "more": "Továbbiak",
+    "countOf": "{{shown}} / {{total}} poszt",
+    "reportCount": "{{count}} jelentés",
+    "emptyTitle": "Még nincs poszt",
+    "emptyBody": "Amint egy edző közzétesz egy posztot vagy piszkozatot ment, itt jelenik meg.",
+    "noMatchBody": "Próbálj másik szót, vagy válassz másik állapotot.",
+    "errorTitle": "Nem sikerült betölteni",
+    "errorBody": "A piactér most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "detail": {
+      "title": "Poszt",
+      "goneTitle": "Ez a poszt nem található",
+      "goneBody": "Lehet, hogy már nem létezik, vagy hibás a hivatkozás.",
+      "privateDraft": "Nem nyilvános · csak a szerző látja.",
+      "authorOff": "A szerző le van tiltva, ezért a poszt nem látszik.",
+      "notShown": "A poszt most nem látszik a nyilvános oldalon."
+    },
+    "facts": {
+      "title": "Adatok",
+      "readOnly": "csak olvasható",
+      "kind": "Fajta",
+      "time": "Időpont",
+      "capacity": "Férőhely",
+      "seats": "{{count}} hely",
+      "price": "Ár"
+    },
+    "author": {
+      "title": "Szerző",
+      "disabled": "Letiltva"
+    },
+    "timeline": {
+      "title": "Állapot",
+      "created": "Létrehozva",
+      "published": "Közzétéve",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve",
+      "reason": "Indok: {{reason}}",
+      "notPublished": "Még nincs közzétéve."
+    },
+    "removed": {
+      "reason": "Indok"
+    },
+    "restore": {
+      "action": "Visszaállítás",
+      "hint": "A poszt újra megjelenik a nyilvános oldalon.",
+      "title": "Visszaállítod a posztot?",
+      "message": "A poszt újra megjelenik a nyilvános oldalon, a szerző profilján és a piactéren.",
+      "messageHidden": "A poszt visszaáll, de a nyilvános oldalon még nem látszik: a szerző vagy a profilja miatt."
+    },
+    "body": {
+      "title": "Szöveg",
+      "full": "Teljes szöveg"
+    },
+    "media": {
+      "title": "Média",
+      "count": "{{count}} kép",
+      "cover": "Borító",
+      "nth": "{{n}}. kép"
+    },
+    "reports": {
+      "title": "Jelentések",
+      "open": "{{count}} nyitott",
+      "closed": "{{count}} lezárt",
+      "both": "{{open}} nyitott / {{closed}} lezárt",
+      "severity": "Súlyosság",
+      "upholdAndTakeDown": "Helybenhagyás és levétel",
+      "upheld": "Helybenhagyva",
+      "rejected": "Elutasítva"
+    },
+    "manage": {
+      "title": "Kezelés",
+      "postSub": "Nyilvánosan eltűnik. Visszaállítható.",
+      "profileSub": "Posztjai is eltűnnek.",
+      "draftNote": "A piszkozat nem nyilvános, így nincs mit levenni."
+    },
+    "takedown": {
+      "post": {
+        "title": "Poszt levétele",
+        "message": "A poszt eltűnik a nyilvános oldalról. Később visszaállíthatod."
+      },
+      "profile": {
+        "title": "Szerző profiljának levétele",
+        "message": "A profil és a posztjai eltűnnek a nyilvános oldalról."
+      },
+      "both": {
+        "title": "Poszt és szerzői profil levétele együtt",
+        "message": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról."
+      },
+      "report": {
+        "title": "Helybenhagyás és levétel",
+        "message": "A bejelentés helybenhagyva, a poszt eltűnik a nyilvános oldalról. Később visszaállíthatod."
+      },
+      "reason": "Levétel indoka",
+      "reasonHint": "Kötelező. Az audit-naplóba kerül, a szerző nem látja."
+    }
   }
 }

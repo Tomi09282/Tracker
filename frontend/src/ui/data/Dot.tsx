@@ -12,6 +12,8 @@ import { cn } from '../../lib/cn';
  *   half       ink at 50 %: a draft, a planned day (the `half` light level of `SegmentBar`)
  *   off        the track level (white 10 %): withdrawn, removed (the `off` light level)
  *   ink        text-1: a neutral notice (`NoticeLine` tone `info`)
+ *   ring       an outline, no fill: a thing that is not public yet (a draft post, admin-market-v2)
+ *   quiet      text-3: a state that is over without being a fault (a withdrawn post)
  *   ok · warn · danger   the semantic tones (saved, pending / handover, failed)
  *
  * Sizes: 6 (every status mark, legend key, unread mark) and 8 (the role key of a muscle list).
@@ -24,7 +26,7 @@ import { cn } from '../../lib/cn';
  * Lucide glyph to 16 — a `Dot` is a `span`, not an `svg`, and keeps its own size there.
  */
 
-export type DotTone = 'live' | 'secondary' | 'half' | 'off' | 'ink' | 'ok' | 'warn' | 'danger';
+export type DotTone = 'live' | 'secondary' | 'half' | 'off' | 'ink' | 'ring' | 'quiet' | 'ok' | 'warn' | 'danger';
 export type DotSize = 6 | 8;
 
 export interface DotProps {
@@ -44,6 +46,8 @@ const FILL: Record<DotTone, string> = {
   half: 'bg-text-1/50',
   off: 'bg-track',
   ink: 'bg-text-1',
+  ring: 'border border-edge',
+  quiet: 'bg-text-3',
   ok: 'bg-success',
   warn: 'bg-warning',
   danger: 'bg-danger',

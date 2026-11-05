@@ -121,6 +121,7 @@ const EXPECT_BY_VIEW = {
     ['/admin/accounts/12', '/admin/accounts'],
     ['/admin/accounts/12/coins', '/admin/accounts'],
     ['/admin/marketplace', '/admin/marketplace'],
+    ['/admin/marketplace/posts/Ax0000000001', '/admin/marketplace'],
     ['/notifications', '/admin'],
   ],
 };

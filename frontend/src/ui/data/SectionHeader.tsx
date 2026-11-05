@@ -62,6 +62,11 @@ interface SectionHeaderBase {
   rule?: boolean;
   /** The heading level of the eyebrow. `h2` unless the section sits inside another section. */
   heading?: HeadingTag;
+  /**
+   * The two gaps of the head (rule to eyebrow, eyebrow to content) where a frame draws them closer than
+   * the kit's 16: `8` or `12`, both gaps at once (the admin post page, `sect(..., { gap })`). Default 16.
+   */
+  gap?: 8 | 12;
   /** Placement only. */
   className?: string;
 }
@@ -77,6 +82,8 @@ export type SectionHeaderProps = SectionHeaderBase &
     | { children: ReactNode; title?: never; titleId?: never }
   );
 
+const GAP = { 8: 'gap-2', 12: 'gap-3' } as const;
+
 const present = (node: ReactNode) => node !== undefined && node !== null && node !== false;
 
 /** The kit's `dx = 5`: the trailing node ends in a glyph (a link or button with a `trail`). */
@@ -91,11 +98,12 @@ export function SectionHeader(props: SectionHeaderProps) {
     trailingInFlow = false,
     rule = true,
     heading: Heading = 'h2',
+    gap,
     className,
   } = props;
   const tail = trailing;
   return (
-    <div className={cn('flex w-full flex-col gap-group', className)}>
+    <div className={cn('flex w-full flex-col', gap ? GAP[gap] : 'gap-group', className)}>
       {rule ? <Rule strong /> : null}
       <div
         data-kit="sect"
@@ -138,14 +146,16 @@ export interface SectionProps {
   heading?: HeadingTag;
   children?: ReactNode;
   id?: string;
+  /** See `SectionHeader.gap`: the head's two gaps and the one to the content together. */
+  gap?: 8 | 12;
   /** Placement, or another gap between head and content (`gap-3` where a frame draws 12). */
   className?: string;
 }
 
-export function Section({ title, trailing, trailingInFlow, rule, heading, children, id, className }: SectionProps) {
+export function Section({ title, trailing, trailingInFlow, rule, heading, children, id, gap, className }: SectionProps) {
   const titleId = useId();
   return (
-    <section id={id} aria-labelledby={titleId} className={cn('flex w-full flex-col gap-group', className)}>
+    <section id={id} aria-labelledby={titleId} className={cn('flex w-full flex-col', gap ? GAP[gap] : 'gap-group', className)}>
       <SectionHeader
         title={title}
         titleId={titleId}
@@ -153,6 +163,7 @@ export function Section({ title, trailing, trailingInFlow, rule, heading, childr
         trailingInFlow={trailingInFlow}
         rule={rule}
         heading={heading}
+        gap={gap}
       />
       {children}
     </section>

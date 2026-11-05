@@ -1954,5 +1954,115 @@
     "sumNoCheckin": "{{min}} Min. × {{perHour}} Münzen/Std. = {{a}}",
     "capped": "Die tägliche Münzobergrenze oder das tägliche Fokuslimit hat weniger ausgezahlt.",
     "todayMinutes": "heute {{n}} Min."
+  },
+  "adminPosts": {
+    "view": {
+      "label": "Marktplatz-Ansicht",
+      "reports": "Meldungen",
+      "posts": "Beiträge"
+    },
+    "search": "Titel oder @Autor",
+    "stateLabel": "Status",
+    "state": {
+      "all": "Alle",
+      "draft": "Entwurf",
+      "live": "Live",
+      "withdrawn": "Zurückgezogen",
+      "removed": "Entfernt"
+    },
+    "more": "Mehr",
+    "countOf": "{{shown}} / {{total}} Beiträge",
+    "reportCount": "Meldungen: {{count}}",
+    "emptyTitle": "Noch keine Beiträge",
+    "emptyBody": "Sobald ein Coach einen Beitrag veröffentlicht oder einen Entwurf speichert, erscheint er hier.",
+    "noMatchBody": "Versuche ein anderes Wort oder wähle einen anderen Status.",
+    "errorTitle": "Laden fehlgeschlagen",
+    "errorBody": "Der Marktplatz ist gerade nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+    "detail": {
+      "title": "Beitrag",
+      "goneTitle": "Dieser Beitrag wurde nicht gefunden",
+      "goneBody": "Er existiert möglicherweise nicht mehr, oder der Link ist falsch.",
+      "privateDraft": "Nicht öffentlich · nur der Autor sieht ihn.",
+      "authorOff": "Der Autor ist gesperrt, deshalb wird der Beitrag nicht angezeigt.",
+      "notShown": "Der Beitrag wird auf der öffentlichen Seite gerade nicht angezeigt."
+    },
+    "facts": {
+      "title": "Daten",
+      "readOnly": "nur lesbar",
+      "kind": "Art",
+      "time": "Zeitpunkt",
+      "capacity": "Plätze",
+      "seats": "{{count}} Plätze",
+      "price": "Preis"
+    },
+    "author": {
+      "title": "Autor",
+      "disabled": "Deaktiviert"
+    },
+    "timeline": {
+      "title": "Status",
+      "created": "Erstellt",
+      "published": "Veröffentlicht",
+      "withdrawn": "Zurückgezogen",
+      "removed": "Entfernt",
+      "reason": "Grund: {{reason}}",
+      "notPublished": "Noch nicht veröffentlicht."
+    },
+    "removed": {
+      "reason": "Grund"
+    },
+    "restore": {
+      "action": "Wiederherstellen",
+      "hint": "Der Beitrag erscheint wieder auf der öffentlichen Seite.",
+      "title": "Beitrag wiederherstellen?",
+      "message": "Der Beitrag erscheint wieder auf der öffentlichen Seite, im Profil des Autors und auf dem Marktplatz.",
+      "messageHidden": "Der Beitrag wird wiederhergestellt, ist auf der öffentlichen Seite aber noch nicht sichtbar: wegen des Autors oder seines Profils."
+    },
+    "body": {
+      "title": "Text",
+      "full": "Ganzer Text"
+    },
+    "media": {
+      "title": "Medien",
+      "count": "{{count}} Bilder",
+      "cover": "Titelbild",
+      "nth": "Bild {{n}}"
+    },
+    "reports": {
+      "title": "Meldungen",
+      "open": "{{count}} offen",
+      "closed": "{{count}} abgeschlossen",
+      "both": "{{open}} offen / {{closed}} abgeschlossen",
+      "severity": "Schweregrad",
+      "upholdAndTakeDown": "Bestätigen und entfernen",
+      "upheld": "Bestätigt",
+      "rejected": "Abgelehnt"
+    },
+    "manage": {
+      "title": "Verwalten",
+      "postSub": "Verschwindet von der öffentlichen Seite. Kann wiederhergestellt werden.",
+      "profileSub": "Ihre Beiträge verschwinden ebenfalls.",
+      "draftNote": "Ein Entwurf ist nicht öffentlich, es gibt also nichts zu entfernen."
+    },
+    "takedown": {
+      "post": {
+        "title": "Beitrag entfernen",
+        "message": "Der Beitrag verschwindet von der öffentlichen Seite. Du kannst ihn später wiederherstellen."
+      },
+      "profile": {
+        "title": "Autorenprofil entfernen",
+        "message": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite."
+      },
+      "both": {
+        "title": "Beitrag und Autorenprofil zusammen entfernen",
+        "message": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite."
+      },
+      "report": {
+        "title": "Bestätigen und entfernen",
+        "message": "Die Meldung wird bestätigt und der Beitrag verschwindet von der öffentlichen Seite. Du kannst ihn später wiederherstellen."
+      },
+      "reason": "Grund der Entfernung",
+      "reasonHint": "Pflichtfeld. Es kommt ins Audit-Log; der Autor sieht es nicht."
+    }
   }
 }

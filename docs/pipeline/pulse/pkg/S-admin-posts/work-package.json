@@ -1,0 +1,30 @@
+{
+  "id": "S-admin-posts",
+  "screens": ["admin-market-v2", "admin-market-v2-reports", "admin-post-detail-1", "admin-post-detail-2", "admin-post-detail-2-takedown", "admin-post-detail-2-restore", "admin-post-detail-2-draft", "admin-post-detail-3"],
+  "owns": [
+    "frontend/src/features/admin/AdminMarketplacePage.tsx",
+    "frontend/src/features/admin/MarketplaceQueue.tsx",
+    "frontend/src/features/admin/marketplace/**",
+    "docs/pipeline/pulse/pkg/S-admin-posts/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "frames": [],
+  "account": "admin@tracker.local",
+  "route": "/admin/marketplace",
+  "dependsOn": ["B-admin-posts", "S-admin"],
+  "size": "L",
+  "wave": 6,
+  "notes": "Piacter tab: the quiet Jelentesek | Posztok switch, the post list (search, state filter, Tovabbiak paging, all in the address), the post inspect page /admin/marketplace/posts/:publicId (take-down with a required reason, restore, the draft variant, the author-disabled notice, reports decided in place). Edits in integrator-owned files are small and listed in owns.json sharedEdits: router.tsx (one lazy route), routeMeta.ts (one row), ui/data/Dot.tsx (tones ring and quiet), ui/feedback/variants/E6Segmented.tsx (the quiet switch), ui/feedback/ConfirmSheet.tsx (confirmDisabled), the three i18n bundles through i18n.patch.json.",
+  "i18nNamespaces": ["adminPosts"],
+  "handIn": { "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"] },
+  "liveWrites": []
+}

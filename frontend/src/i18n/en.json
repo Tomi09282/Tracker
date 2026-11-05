@@ -1954,5 +1954,115 @@
     "sumNoCheckin": "{{min}} min × {{perHour}} coins/h = {{a}}",
     "capped": "The daily coin cap or the daily focus limit paid less.",
     "todayMinutes": "{{n}} min today"
+  },
+  "adminPosts": {
+    "view": {
+      "label": "Marketplace view",
+      "reports": "Reports",
+      "posts": "Posts"
+    },
+    "search": "Title or @author",
+    "stateLabel": "State",
+    "state": {
+      "all": "All",
+      "draft": "Draft",
+      "live": "Live",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down"
+    },
+    "more": "More",
+    "countOf": "{{shown}} / {{total}} posts",
+    "reportCount": "Reports: {{count}}",
+    "emptyTitle": "No posts yet",
+    "emptyBody": "When a coach publishes a post or saves a draft, it appears here.",
+    "noMatchBody": "Try another word or pick another state.",
+    "errorTitle": "Could not load",
+    "errorBody": "The marketplace is not available right now. Check your connection and try again.",
+    "detail": {
+      "title": "Post",
+      "goneTitle": "This post was not found",
+      "goneBody": "It may no longer exist, or the link is wrong.",
+      "privateDraft": "Not public · only the author sees it.",
+      "authorOff": "The author is disabled, so the post is not shown.",
+      "notShown": "The post is not shown on the public page right now."
+    },
+    "facts": {
+      "title": "Details",
+      "readOnly": "read only",
+      "kind": "Kind",
+      "time": "Time",
+      "capacity": "Capacity",
+      "seats": "{{count}} seats",
+      "price": "Price"
+    },
+    "author": {
+      "title": "Author",
+      "disabled": "Disabled"
+    },
+    "timeline": {
+      "title": "Status",
+      "created": "Created",
+      "published": "Published",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down",
+      "reason": "Reason: {{reason}}",
+      "notPublished": "Not published yet."
+    },
+    "removed": {
+      "reason": "Reason"
+    },
+    "restore": {
+      "action": "Restore",
+      "hint": "The post will show on the public page again.",
+      "title": "Restore the post?",
+      "message": "The post will show again on the public page, on the author’s profile and in the marketplace.",
+      "messageHidden": "The post is restored, but it still does not show on the public page: because of the author or their profile."
+    },
+    "body": {
+      "title": "Text",
+      "full": "Full text"
+    },
+    "media": {
+      "title": "Media",
+      "count": "{{count}} images",
+      "cover": "Cover",
+      "nth": "Image {{n}}"
+    },
+    "reports": {
+      "title": "Reports",
+      "open": "{{count}} open",
+      "closed": "{{count}} closed",
+      "both": "{{open}} open / {{closed}} closed",
+      "severity": "Severity",
+      "upholdAndTakeDown": "Uphold and take down",
+      "upheld": "Upheld",
+      "rejected": "Rejected"
+    },
+    "manage": {
+      "title": "Manage",
+      "postSub": "Disappears from the public page. Can be restored.",
+      "profileSub": "Their posts disappear too.",
+      "draftNote": "A draft is not public, so there is nothing to take down."
+    },
+    "takedown": {
+      "post": {
+        "title": "Take down post",
+        "message": "The post disappears from the public page. You can restore it later."
+      },
+      "profile": {
+        "title": "Take down author profile",
+        "message": "The profile and its posts disappear from the public page."
+      },
+      "both": {
+        "title": "Take down post and author profile together",
+        "message": "The post and the author’s profile both disappear from the public page."
+      },
+      "report": {
+        "title": "Uphold and take down",
+        "message": "The report is upheld and the post disappears from the public page. You can restore it later."
+      },
+      "reason": "Reason for taking down",
+      "reasonHint": "Required. It goes into the audit log; the author does not see it."
+    }
   }
 }

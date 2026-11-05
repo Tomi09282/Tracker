@@ -2640,9 +2640,7 @@
         "frontend/src/features/admin/AdminPage.tsx",
         "frontend/src/features/admin/AdminShell.tsx",
         "frontend/src/features/admin/ModerationQueue.tsx",
-        "frontend/src/features/admin/MarketplaceQueue.tsx",
         "frontend/src/features/admin/AdminMetrics.tsx",
-        "frontend/src/features/admin/AdminMarketplacePage.tsx",
         "docs/pipeline/pulse/pkg/S-admin/**"
       ],
       "mustNotTouch": [
@@ -3781,6 +3779,56 @@
       ],
       "liveWrites": [],
       "notes": "Owner decisions 2026-11-03 (items 1 and 4): the account list with search / role / state / sort, the count and 'Tovabbiak' paging (the list state lives in the URL search params), the account page /admin/accounts/:id with the safe-set writes (name, role with the admin's own password for a grant, disable and enable with a required reason, coin adjustment, lift the lock-out, sign out everywhere, force a password change), the own-account and disabled states, and the coin ledger /admin/accounts/:id/coins; built 1:1 to the approved Figma frames admin-accounts-v2, admin-account-detail-1, -2a..-2d, -3a, -3b on the real endpoints of B-admin-accounts. Shared edits: app/router.tsx (2 lazy routes), app/routeMeta.ts (2 rows), scripts/check-nav-active.mjs (2 EXPECT rows), ui/data/Monogram.tsx (size 140 and a muted dot), i18n through i18n.patch.json (namespace adminUsers). The Piacter door passes ?view=posts&q=<handle> to S-admin-posts' list. Integration (merge-S-admin-accounts): the squash applied cleanly; frontend/src/features/admin/AdminAccountsPage.tsx and UserSearch.tsx (deleted, replaced by accounts/AccountList.tsx) passed here from the closed S-admin (one file, one owner); the shared edits (router.tsx 3 lazy imports + 3 routes, routeMeta.ts 2 rows, check-nav-active.mjs 2 EXPECT rows, Monogram.tsx size 140 + muted dot) are integrator files and were accepted in the squash. The handoff.md deviations (1-9) are for deviations.md / the owner."
+    },
+    {
+      "id": "S-admin-posts",
+      "screens": [
+        "admin-market-v2",
+        "admin-market-v2-reports",
+        "admin-post-detail-1",
+        "admin-post-detail-2",
+        "admin-post-detail-2-takedown",
+        "admin-post-detail-2-restore",
+        "admin-post-detail-2-draft",
+        "admin-post-detail-3"
+      ],
+      "owns": [
+        "frontend/src/features/admin/AdminMarketplacePage.tsx",
+        "frontend/src/features/admin/MarketplaceQueue.tsx",
+        "frontend/src/features/admin/marketplace/**",
+        "docs/pipeline/pulse/pkg/S-admin-posts/**"
+      ],
+      "mustNotTouch": [
+        "frontend/src/assets/**",
+        "frontend/src/index.css",
+        "frontend/index.html",
+        "frontend/public/**",
+        "frontend/package.json",
+        "frontend/src/features/playground/**",
+        "frontend/src/features/**/use*.ts",
+        "backend/**"
+      ],
+      "frames": [],
+      "account": "admin@tracker.local",
+      "route": "/admin/marketplace",
+      "dependsOn": [
+        "B-admin-posts",
+        "S-admin"
+      ],
+      "size": "L",
+      "wave": 6,
+      "notes": "Piacter tab: the quiet Jelentesek | Posztok switch, the post list (search, state filter, Tovabbiak paging, all in the address), the post inspect page /admin/marketplace/posts/:publicId (take-down with a required reason, restore, the draft variant, the author-disabled notice, reports decided in place). Edits in integrator-owned files are small and listed in owns.json sharedEdits: router.tsx (one lazy route), routeMeta.ts (one row), ui/data/Dot.tsx (tones ring and quiet), ui/feedback/variants/E6Segmented.tsx (the quiet switch), ui/feedback/ConfirmSheet.tsx (confirmDisabled), the three i18n bundles through i18n.patch.json. Integration (merge-S-admin-posts): the squash conflicted only in router.tsx (the AdminPostDetailPage lazy import beside the two account imports), routeMeta.ts (the /admin/marketplace/posts/:publicId row beside the two account rows) and work-packages.json; all three resolved by hand to keep both packages' lines. AdminMarketplacePage.tsx and MarketplaceQueue.tsx passed here from the closed S-admin (one file, one owner). The shared edits (router.tsx one lazy import + one route, routeMeta.ts one row, check-nav-active.mjs one EXPECT row, ui/data/Dot.tsx tones, ui/data/ListRow.tsx, ui/data/SectionHeader.tsx, ui/feedback/ConfirmSheet.tsx confirmDisabled, ui/feedback/variants/E6Segmented.tsx quiet switch) are integrator files and were accepted in the squash. The author applied the adminPosts keys into the three bundles itself and wrote i18n.patch.json with make-i18n.mjs.",
+      "i18nNamespaces": [
+        "adminPosts"
+      ],
+      "handIn": {
+        "i18n.patch.json": [
+          "frontend/src/i18n/hu.json",
+          "frontend/src/i18n/en.json",
+          "frontend/src/i18n/de.json"
+        ]
+      },
+      "liveWrites": []
     }
   ],
   "queue": [

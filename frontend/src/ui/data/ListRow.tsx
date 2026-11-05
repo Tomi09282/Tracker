@@ -258,7 +258,7 @@ export function ListRow(props: ListRowProps) {
               {subLead}
             </span>
           ) : null}
-          {has(sub) ? <span className={cn('min-w-0', CLAMP[subLines])}>{sub}</span> : null}
+          {has(sub) ? <span className={cn('min-w-0 flex-1', CLAMP[subLines])}>{sub}</span> : null}
         </span>
         {valueOnSub ? valueNode : null}
       </span>

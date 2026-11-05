@@ -79,6 +79,7 @@ export const ROUTE_META = {
   '/admin/rules': { parent: '/admin', parentLabelKey: 'nav.moderation' },
   '/admin/accounts/:id': { parent: '/admin/accounts', parentLabelKey: 'nav.accounts' },
   '/admin/accounts/:id/coins': { parent: '/admin/accounts', parentLabelKey: 'nav.accounts' },
+  '/admin/marketplace/posts/:publicId': { parent: '/admin/marketplace', parentLabelKey: 'nav.marketplace' },
   '/coach/clients/:id': { parent: '/coach', parentLabelKey: 'coaching.title' },
   '/coach/clients/:id/chat': { parent: '/coach', parentLabelKey: 'coaching.title' },
   '/coach/plans/:id': { parent: '/coach/plans', parentLabelKey: 'plans.title' },
