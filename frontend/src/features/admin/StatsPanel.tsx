@@ -10,7 +10,7 @@ import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { Sparkline } from '../../ui/feedback/Sparkline';
 import { TextLink } from '../../ui/primitives/TextLink';
-import { toTrend, type AdminStats } from './statisticsModel';
+import { compactFigure, toTrend, type AdminStats } from './statisticsModel';
 
 /**
  * A translated sentence with some of its figures in ink.
@@ -62,7 +62,7 @@ function PanelSkeleton() {
     </li>
   );
   return (
-    <div role="status" className="flex flex-col gap-6">
+    <div role="status" className="flex flex-col gap-5">
       <span className="sr-only">{t('common.loading')}</span>
       <div aria-hidden className="flex flex-col gap-6">
         <ul className="grid grid-cols-3 gap-x-2 gap-y-6">{[0, 1, 2].map(cell)}</ul>
@@ -93,14 +93,31 @@ function PanelSkeleton() {
  * shape of the screen: the last reading IS today's figure. A figure that failed to arrive is not
  * drawn as 0: the whole panel falls back to one line with "Újra", and the doors stay.
  */
-export function StatsPanel({ stats }: { stats: UseQueryResult<AdminStats> }) {
+export function StatsPanel({ stats, onRetry }: { stats: UseQueryResult<AdminStats>; onRetry?: () => void }) {
   const { t, i18n } = useTranslation();
   const panel = stats.data?.panel;
+  const lang = i18n.language;
+  /** A figure of the grid: the exact one while it fits its column, the compact one after (srText keeps the exact). */
+  const fig = (n: number, mode?: 'roll') => {
+    const shown = compactFigure(n, lang);
+    return (
+      <Numeral
+        size="stat"
+        value={shown}
+        srText={n.toLocaleString(lang)}
+        {...(mode === 'roll' && typeof shown === 'number' ? { mode, from: 0 } : {})}
+      />
+    );
+  };
 
   return (
     <div className="flex flex-col gap-5">
-      <section aria-labelledby="admin-stats-panel" className="flex flex-col gap-6">
-        <SectionHeader title={t('adminStats.title')} titleId="admin-stats-panel" />
+      {/* The frame steps 20 from the rule to the label AND 20 from the label to the numerals; the kit's head draws 16 and
+          the section 24 (review S-admin-moderation 8: the label sat 4 high, the numerals right): the rule and the
+          label are laid here at 20 each. */}
+      <section aria-labelledby="admin-stats-panel" className="flex flex-col gap-5">
+        <Rule strong />
+        <SectionHeader rule={false} title={t('adminStats.title')} titleId="admin-stats-panel" />
         {stats.isPending ? (
           <PanelSkeleton />
         ) : !panel ? (
@@ -108,7 +125,7 @@ export function StatsPanel({ stats }: { stats: UseQueryResult<AdminStats> }) {
             tone="danger"
             role="alert"
             action={
-              <TextLink busy={stats.isFetching} onClick={() => void stats.refetch()}>
+              <TextLink busy={stats.isFetching} onClick={() => (onRetry ? onRetry() : void stats.refetch())}>
                 {t('common.retry')}
               </TextLink>
             }
@@ -119,26 +136,26 @@ export function StatsPanel({ stats }: { stats: UseQueryResult<AdminStats> }) {
           <>
             <div className="flex flex-col gap-4">
               <ul className="grid grid-cols-3 gap-x-2">
-                <Cell figure={<Numeral size="stat" value={panel.users.total} mode="roll" from={0} />} caption={t('adminStats.panel.users')} />
-                <Cell figure={<Numeral size="stat" value={panel.users.new7d} />} caption={t('adminStats.panel.new7d')} />
-                <Cell figure={<Numeral size="stat" value={panel.activeCoaches} />} caption={t('adminStats.panel.activeCoaches')} />
+                <Cell figure={fig(panel.users.total, 'roll')} caption={t('adminStats.panel.users')} />
+                <Cell figure={fig(panel.users.new7d)} caption={t('adminStats.panel.new7d')} />
+                <Cell figure={fig(panel.activeCoaches)} caption={t('adminStats.panel.activeCoaches')} />
               </ul>
               <Rule />
               <ul className="grid grid-cols-3 gap-x-2">
                 <Cell
                   figure={
-                    <span className="flex items-baseline gap-2">
-                      <Numeral size="stat" value={panel.workouts.today} />
-                      <span className="text-data-l leading-none text-text-2">/ {panel.workouts.last7d.toLocaleString(i18n.language)}</span>
+                    <span className="flex items-baseline gap-2 whitespace-nowrap">
+                      {fig(panel.workouts.today)}
+                      <span className="text-data-l leading-none text-text-2">/ {compactFigure(panel.workouts.last7d, lang, 1_000).toLocaleString(lang)}</span>
                     </span>
                   }
                   caption={t('adminStats.panel.workouts')}
                 />
-                <Cell figure={<Numeral size="stat" value={panel.moderationPending} />} caption={t('adminStats.panel.pending')} />
-                <Cell figure={<Numeral size="stat" value={panel.openReports} />} caption={t('adminStats.panel.openReports')} />
+                <Cell figure={fig(panel.moderationPending)} caption={t('adminStats.panel.pending')} />
+                <Cell figure={fig(panel.openReports)} caption={t('adminStats.panel.openReports')} />
               </ul>
             </div>
-            <figure className="-mt-2 flex flex-col gap-2.5">
+            <figure className="-mt-0.5 flex flex-col gap-2.5">
               <figcaption className="flex items-baseline justify-between gap-4 text-cap text-text-2">
                 <span>{t('adminStats.panel.curve', { count: panel.loggedPeople.daily.length })}</span>
                 <span>

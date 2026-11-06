@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
-import { apiWithRefresh } from '../../lib/api';
+import { ApiError, apiWithRefresh } from '../../lib/api';
+import { useOnline } from '../plans/useOnline';
 import { equipmentStill } from '../../assets/pulse';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { TextLink } from '../../ui/primitives/TextLink';
@@ -97,6 +99,14 @@ export function useWide() {
   return wide;
 }
 
+/** The queue's read; the panel head shares it (one cache entry) to say how many of the waiting rows the list holds. */
+export function useModerationQueue() {
+  return useQuery({
+    queryKey: ['admin', 'moderation'],
+    queryFn: () => apiWithRefresh<{ queue: QueueItem[] }>('/admin/moderation'),
+  });
+}
+
 const wordOf = (item: { name?: string; label?: string; slug: string }) => item.name ?? item.label ?? item.slug;
 
 /**
@@ -115,8 +125,9 @@ const wordOf = (item: { name?: string; label?: string; slug: string }) => item.n
  * and after it stay rows, dimmed while one is open. Above 1024 px the list and the review stand side
  * by side as before (R21).
  */
-export function ModerationQueue() {
+export function ModerationQueue({ quietError = false, pending }: { quietError?: boolean; pending?: number }) {
   const { t, i18n } = useTranslation();
+  const online = useOnline();
   const qc = useQueryClient();
   const wide = useWide();
   const ago = useAgo();
@@ -124,10 +135,7 @@ export function ModerationQueue() {
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
 
-  const queue = useQuery({
-    queryKey: ['admin', 'moderation'],
-    queryFn: () => apiWithRefresh<{ queue: QueueItem[] }>('/admin/moderation'),
-  });
+  const queue = useModerationQueue();
 
   const submission = useQuery({
     queryKey: ['admin', 'moderation', selected, i18n.language],
@@ -136,6 +144,9 @@ export function ModerationQueue() {
   });
 
   const decide = useMutation({
+    // NEVER queued while offline (review S-admin-moderation 2): a paused approval fires by itself on reconnect and
+    // publishes a movement to the shared library with no tap. It fails at once instead, and the review says so.
+    networkMode: 'always',
     mutationFn: (v: { id: number; decision: 'approve' | 'reject'; reason?: string }) =>
       apiWithRefresh(`/admin/moderation/${v.id}`, {
         method: 'POST',
@@ -173,6 +184,8 @@ export function ModerationQueue() {
   }
 
   if (queue.isError) {
+    // The panel above already says it (one line, one "Újra" for both reads).
+    if (quietError) return null;
     // A list that failed to load is not an empty queue: saying "Minden beküldött gyakorlatot
     // elbíráltál" over a failed read would be false. The same words and the same way out as the
     // panel above ("Nem sikerült betölteni", "Újra").
@@ -195,7 +208,7 @@ export function ModerationQueue() {
     // admin-moderation-v2-empty: the graphite shield (the Admin tab's object, unlit) over the
     // display title and the one line.
     return (
-      <div className="flex flex-col gap-6 pt-3.5">
+      <div className="flex flex-col gap-6 pt-2">
         <Pic slot="tab-admin" width={96} />
         <EmptyState title={t('admin.queueEmptyTitle')} body={t('admin.queueEmptyBody')} />
       </div>
@@ -203,6 +216,7 @@ export function ModerationQueue() {
   }
 
   const toggle = (id: number) => {
+    decide.reset();
     setSelected(selected === id ? null : id);
     setRejecting(false);
     setReason('');
@@ -256,6 +270,8 @@ export function ModerationQueue() {
         data={submission.data}
         showHeader={wide}
         busy={decide.isPending}
+        offline={!online}
+        failure={decide.isError ? decideFailure(decide.error, t) : null}
         rejecting={rejecting}
         reason={reason}
         onReason={setReason}
@@ -274,6 +290,10 @@ export function ModerationQueue() {
       />
     );
 
+  // The route lists its first page only: when more wait than the list holds, the line says the rest follows.
+  const capped =
+    pending !== undefined && pending > rows.length ? <p className="pt-3 text-cap text-text-3">{t('admin.queueCapped', { count: rows.length })}</p> : null;
+
   // "Open one first": why the rows carry no approve control.
   const hint = (
     <div className="flex flex-col gap-1">
@@ -289,6 +309,7 @@ export function ModerationQueue() {
           <RowStack close aria-label={t('admin.moderation')}>
             {rows.map(closedRow)}
           </RowStack>
+          {capped}
         </div>
         <div className="col-span-8 min-w-0">{selected === null ? hint : review}</div>
       </div>
@@ -300,9 +321,12 @@ export function ModerationQueue() {
     // On a phone a row opens in place, so the "open one first" hint of the two-pane layout says
     // nothing here (admin-view-1 drops it; design round A review, finding 4).
     return (
-      <RowStack close aria-label={t('admin.moderation')}>
-        {rows.map(closedRow)}
-      </RowStack>
+      <>
+        <RowStack close aria-label={t('admin.moderation')}>
+          {rows.map(closedRow)}
+        </RowStack>
+        {capped}
+      </>
     );
   }
 
@@ -331,8 +355,16 @@ export function ModerationQueue() {
       </div>
       <Rule strong />
       {at < rows.length - 1 ? <RowStack>{rows.slice(at + 1).map(closedRow)}</RowStack> : null}
+      {capped}
     </div>
   );
+}
+
+/** The sentence for a decision that did not go through: gone (somebody was first), offline, or the server. */
+function decideFailure(err: unknown, t: TFunction): { title: string; body?: string } {
+  if (err instanceof ApiError && (err.status === 404 || err.status === 409)) return { title: t('admin.reviewGoneTitle'), body: t('admin.reviewGoneBody') };
+  if (!(err instanceof ApiError) && typeof navigator !== 'undefined' && !navigator.onLine) return { title: t('admin.decideOffline') };
+  return { title: t('admin.decideFailed') };
 }
 
 /** The review while it loads: a display line, two mono lines, the image's 16:9, three text lines. */
@@ -355,6 +387,8 @@ function ReviewBody({
   data,
   showHeader,
   busy,
+  offline,
+  failure,
   rejecting,
   reason,
   onReason,
@@ -366,6 +400,10 @@ function ReviewBody({
   /** The name and e-mail as the review's own header — the wide pane; on a phone the open row is the header. */
   showHeader: boolean;
   busy: boolean;
+  /** The connection is off: the two decisions are inert and say why. */
+  offline: boolean;
+  /** The last decision did not go through: said under the controls, in words. */
+  failure: { title: string; body?: string } | null;
   rejecting: boolean;
   reason: string;
   onReason: (v: string) => void;
@@ -462,6 +500,12 @@ function ReviewBody({
           <NoticeLine tone="warn">{t('admin.noInstructions')}</NoticeLine>
         )}
 
+        {failure ? (
+          <NoticeLine tone="danger" role="alert" detail={failure.body}>
+            {failure.title}
+          </NoticeLine>
+        ) : null}
+
         {/* ── the decision ── */}
         {rejecting ? (
           <div className="flex flex-col gap-4">
@@ -477,7 +521,7 @@ function ReviewBody({
               <TextLink
                 text="body"
                 tone="danger"
-                disabled={reason.trim().length === 0}
+                disabled={reason.trim().length === 0 || offline}
                 busy={busy}
                 onClick={() => onDecide('reject')}
               >
@@ -490,7 +534,7 @@ function ReviewBody({
           </div>
         ) : (
           <div className="flex flex-col items-start gap-2">
-            <Pressable variant="primary" size="lg" className="w-full" busy={busy} onClick={() => onDecide('approve')}>
+            <Pressable variant="primary" size="lg" className="w-full" busy={busy} disabled={offline} onClick={() => onDecide('approve')}>
               {t('admin.approve')}
             </Pressable>
             <TextLink text="body" onClick={onStartReject}>

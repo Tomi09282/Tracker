@@ -55,6 +55,7 @@ export function TakeDownSheet({ target, open, onClose }: { target: TakeDownTarge
   }, [open, target?.kind, target?.postId]);
 
   const act = useMutation({
+    networkMode: 'always', // see useTakeDown
     mutationFn: async () => {
       if (!target) return;
       const why = reason.trim();

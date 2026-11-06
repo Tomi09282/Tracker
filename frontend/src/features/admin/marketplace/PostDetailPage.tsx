@@ -152,23 +152,36 @@ function PostBody({ data, online }: { data: AdminPostDetail; online: boolean }) 
   const cover = post.mediaWithheld ? undefined : (post.media.find((m) => m.role === 'cover') ?? post.media[0]);
   const hiddenOther = post.publicVisibility.hiddenBy.filter((h) => h !== 'removed' && h !== 'draft' && h !== 'withdrawn');
   const authorOff = author.disabled && live;
+  // The profile was taken down (a second, separate act with no way back here): the notice names it, not only the disable.
+  const profileRemoved = post.publicVisibility.hiddenBy.includes('profile_removed');
 
   return (
     <div className="flex flex-col gap-7">
       {cover ? (
         // admin-post-detail-1: the middle 232 of a 440 x 330 render, wider than the column (the screen clips the
-        // sides) and feathered into the black as the public page's cover is; dimmed while removed.
-        <div className={cn('-mx-6 -mt-1 flex h-58 justify-center overflow-hidden', removed && 'opacity-40')}>
-          <UserPhoto src={cover.url} alt={cover.alt ?? ''} ratio={440 / 232} feather desaturate priority className="w-110 max-w-none shrink-0" />
+        // sides). Not feathered: the picture's black is the page (`blend="lighten"`), so its light reaches the top
+        // at full strength and no box shows (review S-admin-posts 1); dimmed on the picture itself while removed
+        // (an opacity on a parent would isolate the blend).
+        <div className="-mx-6 -mt-1 flex h-58 justify-center overflow-hidden">
+          <UserPhoto
+            src={cover.url}
+            alt={cover.alt ?? ''}
+            ratio={440 / 232}
+            blend="lighten"
+            desaturate
+            priority
+            className={cn('w-110 max-w-none shrink-0', removed && 'opacity-40')}
+          />
         </div>
       ) : null}
 
       <header className={cn('flex flex-col gap-2', !cover && '-mt-1')}>
         <div className="flex items-center gap-4">
           <span className="text-micro text-text-2">{kind(post.kind)}</span>
-          <PostStateTag state={post.state} lamp />
+          {/* The lime lamp says "on the open internet": a live post nobody can see now (author off, profile gone) gets the ink dot. */}
+          <PostStateTag state={post.state} lamp={post.publicVisibility.visible} />
         </div>
-        <h2 className="text-title text-text-1">{post.title}</h2>
+        <h2 className="text-title break-words text-text-1">{post.title}</h2>
         {isDraft && !removed ? <p className="text-cap text-text-2">{t('adminPosts.detail.privateDraft')}</p> : null}
         {live && post.publicVisibility.visible ? (
           <TextLink href={`/m/p/${post.id}`} target="_blank" rel="noreferrer" lead={<ExternalLink />} className="self-start">
@@ -187,6 +200,11 @@ function PostBody({ data, online }: { data: AdminPostDetail; online: boolean }) 
           <NoticeLine tone="warn" role="status">
             {t('adminPosts.detail.authorOff')}
           </NoticeLine>
+          {profileRemoved ? (
+            <NoticeLine tone="warn" role="status">
+              {t('adminPosts.detail.profileOff')}
+            </NoticeLine>
+          ) : null}
           {author.handle && author.profile && !author.profile.removed ? (
             <TextLink
               text="cap"
@@ -204,7 +222,7 @@ function PostBody({ data, online }: { data: AdminPostDetail; online: boolean }) 
         <section className="flex flex-col gap-1">
           <Rule />
           <NoticeLine tone="warn" role="status">
-            {t('adminPosts.detail.notShown')}
+            {profileRemoved ? t('adminPosts.detail.profileOff') : t('adminPosts.detail.notShown')}
           </NoticeLine>
         </section>
       ) : null}
@@ -277,7 +295,7 @@ function RemovedBanner({
         <PostStateTag state="removed" />
       </div>
       <p className="text-cap text-text-3">{t('adminPosts.removed.reason')}</p>
-      <p className="text-body text-text-1">{removal.reason ?? '—'}</p>
+      <p className="text-body break-words text-text-1">{removal.reason ?? '—'}</p>
       <p className="text-data text-text-3">{[who, dateTime(removal.at)].filter(Boolean).join(' · ')}</p>
       <div className="pt-3">
         <Pressable variant="primary" size="lg" className="w-full" disabled={!online} onClick={onRestore}>
@@ -413,7 +431,10 @@ function MediaSection({ data }: { data: AdminPostDetail }) {
       <ul className="grid grid-cols-3 gap-4">
         {media.map((m, i) => (
           <li key={m.key} className="flex flex-col gap-2">
-            <UserPhoto src={m.thumbUrl} alt={m.alt ?? ''} ratio={4 / 3} feather desaturate />
+            {/* A box of its own: the three captions stay on one line whatever shape the pictures are (review S-admin-posts 9). */}
+            <div className="aspect-[4/3] w-full overflow-hidden">
+              <UserPhoto src={m.thumbUrl} alt={m.alt ?? ''} ratio={4 / 3} blend="lighten" desaturate className="h-full" />
+            </div>
             <span className="text-data text-text-3">{i === 0 && m.role === 'cover' ? t('adminPosts.media.cover') : t('adminPosts.media.nth', { n: i + 1 })}</span>
           </li>
         ))}
@@ -510,6 +531,7 @@ function ReportGroupRow({
   const { dateTime } = useStamp();
   const refresh = useRefreshAll();
   const reject = useMutation({
+    networkMode: 'always', // see useTakeDown
     mutationFn: () => decideReports(group.ids, 'rejected', null),
     onSuccess: () => refresh(),
   });
@@ -519,7 +541,7 @@ function ReportGroupRow({
         <h3 className="text-body-m text-text-1">{t(`admin.marketplace.reason.${group.reason}`, { defaultValue: group.reason })}</h3>
         <span className="shrink-0 text-data text-text-3">{dateTime(group.at)}</span>
       </div>
-      <p className="text-cap text-text-2">{t('admin.marketplace.reporters', { count: group.ids.length })}</p>
+      <p className="text-cap text-text-2">{t(group.ids.length === 1 ? 'admin.marketplace.reportersOne' : 'admin.marketplace.reporters', { count: group.ids.length })}</p>
       <div className="flex items-center gap-3">
         <span className="text-cap text-text-2">{t('adminPosts.reports.severity')}</span>
         <ProgressBar value={group.severity} max={100} label={t('adminPosts.reports.severity')} valueText={String(group.severity)} className="w-24" />
@@ -548,7 +570,7 @@ function ReportGroupRow({
           ) : null}
         </>
       ) : (
-        <p className="text-data text-text-2">
+        <p className="text-data uppercase text-text-2">
           {t(group.status === 'upheld' ? 'adminPosts.reports.upheld' : 'adminPosts.reports.rejected')}
           {group.resolvedAt !== null ? ` · ${dateTime(group.resolvedAt)}` : ''}
         </p>

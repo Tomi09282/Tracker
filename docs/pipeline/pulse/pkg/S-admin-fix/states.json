@@ -1,0 +1,199 @@
+{
+  "about": "S-admin-fix - the account screens, captured LIVE against a scratch backend (own port, throwaway encrypted DB: seed:dev-users, S-admin-posts/seed-scratch.mjs, 45 extra accounts, a disabled account and a disabled admin, a coin ledger on account 4): node scripts/pulse-shot.mjs --package S-admin-fix --live --base http://localhost:5224 --port 5224 --api http://localhost:3624. Account A = admin@. Nothing is recorded and no write is ever fired (the sheets are opened and filled, never confirmed). The ids are the scratch DB's.",
+  "states": {
+    "accounts-list": {
+      "frame": "admin-v2/admin-accounts-v2",
+      "title": "Fiókok - lista",
+      "account": "A",
+      "route": "/admin/accounts",
+      "height": 1288,
+      "reach": "live",
+      "why": "the account list on the scratch DB: 59 accounts, first page 24, the paging row closed by its hairline",
+      "arrived": {
+        "text": {
+          "key": "adminUsers.more"
+        }
+      }
+    },
+    "account-detail": {
+      "frame": "admin-v2/admin-account-detail-1",
+      "title": "Fiók - edzői oldal",
+      "account": "A",
+      "route": "/admin/accounts/4",
+      "height": 2818,
+      "reach": "live",
+      "why": "a coach with a profile, coin ledger and an audit tail; every section label on the frame's 8 pt",
+      "arrived": {
+        "text": {
+          "key": "adminUsers.actions"
+        }
+      }
+    },
+    "account-disabled": {
+      "frame": "admin-v2/admin-account-detail-3a-disabled",
+      "title": "Fiók - letiltva",
+      "account": "A",
+      "route": "/admin/accounts/15",
+      "height": 1390,
+      "reach": "live",
+      "why": "a disabled account with its reason",
+      "arrived": {
+        "text": {
+          "key": "adminUsers.enable.link"
+        }
+      }
+    },
+    "account-own": {
+      "frame": "admin-v2/admin-account-detail-3b-own",
+      "title": "Fiók - a saját",
+      "account": "A",
+      "route": "/admin/accounts/3",
+      "height": 1224,
+      "reach": "live",
+      "why": "the admin's own account",
+      "arrived": {
+        "text": {
+          "key": "adminUsers.selfNote"
+        }
+      }
+    },
+    "sheet-name": {
+      "frame": "admin-v2/admin-account-detail-2a-name",
+      "title": "Név szerkesztése",
+      "account": "A",
+      "route": "/admin/accounts/4",
+      "height": 874,
+      "reach": "live",
+      "why": "the name sheet",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "adminUsers.nameSheet.label"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Név szerkesztése"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminUsers.nameSheet.title"
+            }
+          }
+        }
+      ]
+    },
+    "sheet-disable": {
+      "frame": "admin-v2/admin-account-detail-2c-disable",
+      "title": "Fiók letiltása - lap",
+      "account": "A",
+      "route": "/admin/accounts/4",
+      "height": 874,
+      "reach": "live",
+      "why": "the reason sheet with a reason typed; never confirmed",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "adminUsers.reason"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Letiltás"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminUsers.disable.title"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "adminUsers.reason"
+            },
+            "text": "Visszaélés a piactéren."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "adminUsers.reason"
+            }
+          }
+        }
+      ]
+    },
+    "sheet-coins": {
+      "frame": "admin-v2/admin-account-detail-2d-coins",
+      "title": "Érme-korrekció",
+      "account": "A",
+      "route": "/admin/accounts/4",
+      "height": 874,
+      "reach": "live",
+      "why": "the coin sheet: the - and + on the figure's centre",
+      "arrived": {
+        "role": "dialog",
+        "name": {
+          "key": "adminUsers.coin.title"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Érme-korrekció"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminUsers.coin.title"
+            }
+          }
+        }
+      ]
+    },
+    "sheet-enable-admin": {
+      "title": "Admin engedélyezése - lap",
+      "account": "A",
+      "route": "/admin/accounts/58",
+      "height": 874,
+      "reach": "live",
+      "why": "the enable sheet of a DISABLED ADMIN with the password field (review item 14); never confirmed",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "adminUsers.roleSheet.password"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Engedélyezés"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminUsers.enable.title"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

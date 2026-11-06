@@ -120,14 +120,17 @@ export function AccountList({ enabled }: { enabled: boolean }) {
 
   return (
     <section className="flex flex-col" aria-label={t('adminUsers.title')}>
-      <SearchField
-        label={t('adminUsers.searchPlaceholder')}
-        placeholder={t('adminUsers.searchPlaceholder')}
-        value={typed}
-        maxLength={80}
-        onChange={(e) => setTyped(e.target.value)}
-        autoComplete="off"
-      />
+      {/* The frame sets the search line 8 closer under the title than the screen's own gap (review S-admin-accounts 2). */}
+      <div className="-mt-2">
+        <SearchField
+          label={t('adminUsers.searchPlaceholder')}
+          placeholder={t('adminUsers.searchPlaceholder')}
+          value={typed}
+          maxLength={80}
+          onChange={(e) => setTyped(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
 
       {/* Three quiet lines between hairlines: the frame draws no box and no chip. */}
       <div className="mt-4 grid grid-cols-[minmax(4.75rem,max-content)_minmax(0,1fr)] divide-y divide-hair border-y border-hair">
@@ -195,7 +198,7 @@ export function AccountList({ enabled }: { enabled: boolean }) {
           <p className="mt-6 pb-1 text-data text-text-1" aria-live="polite">
             {t(total === 1 ? 'adminUsers.countOne' : 'adminUsers.count', { count: total })}
           </p>
-          <RowStack open close={!list.hasNextPage} aria-label={t('adminUsers.title')} className={cn(stale && 'opacity-[var(--pressed-opacity)]')}>
+          <RowStack open close aria-label={t('adminUsers.title')} className={cn(stale && 'opacity-[var(--pressed-opacity)]')}>
             {rows.map((u) => (
               <ListRow
                 key={u.id}
@@ -207,8 +210,9 @@ export function AccountList({ enabled }: { enabled: boolean }) {
                 sub={
                   <>
                     <span className="block truncate">{u.email}</span>
-                    <span className="mt-0.5 flex items-center gap-2.5">
-                      <span className="inline-flex items-center gap-1.5">
+                    {/* The date never breaks; a flag that does not fit beside it takes the next line (review S-admin-accounts 8, en / de). */}
+                    <span className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
                         {u.role === 'admin' ? <UserCog aria-hidden className="size-4 shrink-0" strokeWidth={1.75} /> : null}
                         <span className="text-data">
                           {roleName(u.role)} · {fmt.date(u.createdAt)}

@@ -1,0 +1,23 @@
+{
+  "id": "S-admin-fix",
+  "title": "Frontend fix round for the three admin screens after their independent pair-picture reviews (.pulse/review/S-admin-accounts, S-admin-posts, S-admin-moderation): every blocking difference and the cheap minor ones in features/admin/** (a write or a decision is never queued while offline, the step-up password of re-enabling a disabled admin, no machine codes in NAPLO, the refresh glyph reads the panel too, the post cover as the frame's lighten render, the report queue grouped by reason, the profile take-down says it cannot be undone), plus the frontend consequences of the B-admin-polish backend round; deviations that stay go to deviations.md",
+  "screens": [
+    "admin-accounts-v2", "admin-account-detail-1", "admin-account-detail-2a-name", "admin-account-detail-2b-role", "admin-account-detail-2c-disable", "admin-account-detail-2d-coins", "admin-account-detail-3a-disabled", "admin-account-detail-3b-own",
+    "admin-market-v2", "admin-market-v2-reports", "admin-post-detail-1", "admin-post-detail-2", "admin-post-detail-2-takedown", "admin-post-detail-2-restore", "admin-post-detail-2-draft", "admin-post-detail-3",
+    "admin-moderation-v2", "admin-moderation-v2-empty", "admin-statistics-1", "admin-statistics-2"
+  ],
+  "owns": [
+    "frontend/src/features/admin/**",
+    "docs/pipeline/pulse/pkg/S-admin-fix/**"
+  ],
+  "mustNotTouch": ["backend/**", "frontend/src/app/**", "frontend/src/lib/**", "frontend/scripts/**", "frontend/package.json"],
+  "handIn": { "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"] },
+  "sharedEdits": {
+    "frontend/src/ui/media/UserPhoto.tsx": "one additive prop, blend='lighten' (the picture's black is the page: the admin post cover and thumbnails of admin-post-detail-1, no feather mask)",
+    "docs/pipeline/pulse/deviations.md": "the next DEV numbers"
+  },
+  "dependsOn": ["S-admin-accounts", "S-admin-posts", "S-admin-moderation", "B-admin-polish"],
+  "i18nNamespaces": ["adminUsers", "admin", "adminPosts", "adminStats"],
+  "size": "M",
+  "notes": "Frontend only. The files of the three closed packages pass here at the squash (one file, one owner)."
+}

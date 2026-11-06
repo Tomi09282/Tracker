@@ -35,6 +35,12 @@ export interface UserPhotoProps {
    * (post-detail-1: the cover under the top bar). Use with `feather`.
    */
   bleed?: boolean;
+  /**
+   * The picture's black IS the page: `lighten` against the canvas, so a graphite render has no edge and no box,
+   * and its light is at full strength (a feather mask would fade it out). A square-edged, unmasked picture - the
+   * admin post page's cover and thumbnails (admin-post-detail-1, "LIGHTEN"). Never with `feather`.
+   */
+  blend?: 'lighten';
 }
 
 /** Each edge fades over 16 % of its side; the two gradients are intersected. A mask reads only alpha, so the opaque `currentColor` is the "keep" colour. */
@@ -65,7 +71,7 @@ const FEATHER: CSSProperties = {
  *
  * It fills the width it is given — size it with a width class or a grid cell from the call site.
  */
-export function UserPhoto({ src, alt, ratio, desaturate = false, fit = 'cover', priority = false, loading, className, feather = false, bleed = false }: UserPhotoProps) {
+export function UserPhoto({ src, alt, ratio, desaturate = false, fit = 'cover', priority = false, loading, className, feather = false, bleed = false, blend }: UserPhotoProps) {
   return (
     <img
       data-kit="userPhoto"
@@ -76,11 +82,11 @@ export function UserPhoto({ src, alt, ratio, desaturate = false, fit = 'cover', 
       decoding="async"
       draggable={false}
       data-feather={feather || undefined}
-      style={feather ? { aspectRatio: ratio, ...FEATHER } : { aspectRatio: ratio }}
+      style={feather ? { aspectRatio: ratio, ...FEATHER } : blend ? { aspectRatio: ratio, mixBlendMode: blend } : { aspectRatio: ratio }}
       className={cn(
         // `--radius-1` is the scale's 2 px step: "user photos 2" is the one radius an image may have.
         'w-full',
-        feather ? 'rounded-none' : 'rounded-[var(--radius-1)]',
+        feather || blend ? 'rounded-none' : 'rounded-[var(--radius-1)]',
         bleed && '-mx-6 w-[calc(100%+3rem)] max-w-none',
         fit === 'cover' ? 'object-cover' : 'object-contain',
         desaturate && 'grayscale',

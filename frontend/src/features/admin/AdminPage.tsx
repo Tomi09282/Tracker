@@ -5,7 +5,7 @@ import { Pressable } from '../../ui/primitives/Pressable';
 import { Screen } from '../../ui/shell/Screen';
 import { SectionHeader } from '../../ui/data/SectionHeader';
 import { hasRole, useSession } from '../auth/useSession';
-import { ModerationQueue } from './ModerationQueue';
+import { ModerationQueue, useModerationQueue } from './ModerationQueue';
 import { AdminForbidden, AdminHeader } from './AdminShell';
 import { StatsPanel, inked } from './StatsPanel';
 import { useAdminStats } from './statisticsModel';
@@ -21,10 +21,12 @@ import { useAdminStats } from './statisticsModel';
  * now 404s — had no way out except a full page reload. `admin.reviewGoneBody` tells the admin to
  * "refresh the list"; this is what they press.
  */
-function ModerationHeader({ pending }: { pending?: number }) {
+function ModerationHeader({ pending, shown }: { pending?: number; shown?: number }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const fetching = useIsFetching({ queryKey: ['admin', 'moderation'] }) > 0;
+  // The count next to the glyph is the PANEL's number (`['admin','stats']`), the list is `['admin','moderation']`:
+  // the glyph reads both again, or the two disagree after it (review S-admin-moderation 1).
+  const fetching = useIsFetching({ queryKey: ['admin', 'moderation'] }) + useIsFetching({ queryKey: ['admin', 'stats'] }) > 0;
 
   return (
     <SectionHeader
@@ -35,16 +37,27 @@ function ModerationHeader({ pending }: { pending?: number }) {
           {/* A count only when there IS one — never a grey zero. */}
           {pending ? (
             <span className="text-data text-text-2">
-              {inked((m) => t('admin.pendingCount', { count: pending, replace: { count: m.count } }), { count: String(pending) })}
+              {/* The queue route lists at most its first page: "50 / 55" says so instead of a count the list cannot show. */}
+              {shown !== undefined && shown < pending
+                ? inked((m) => t('admin.pendingShown', { replace: { shown: m.shown, total: m.total } }), { shown: String(shown), total: String(pending) })
+                : inked((m) => t('admin.pendingCount', { count: pending, replace: { count: m.count } }), { count: String(pending) })}
             </span>
-          ) : null}
+          ) : (
+            // No count: an invisible one still gives the glyph the baseline the label aligns to, so the head stands where it does with a number (admin-moderation-v2-empty).
+            <span aria-hidden className="text-data">
+              {'​'}
+            </span>
+          )}
           <Pressable
             variant="link"
             shape="icon"
             aria-label={t('admin.refreshQueue')}
             busy={fetching}
             className="-me-3"
-            onClick={() => void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] })}
+            onClick={() => {
+              void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] });
+              void qc.invalidateQueries({ queryKey: ['admin', 'stats'] });
+            }}
           >
             <RefreshCw aria-hidden />
           </Pressable>
@@ -71,6 +84,8 @@ export function AdminPage() {
   const { data: user } = useSession();
 
   const stats = useAdminStats(hasRole(user, 'admin'));
+  const qc = useQueryClient();
+  const queue = useModerationQueue();
 
   // The server enforces this too — this is only so a non-admin sees an explanation instead of
   // a screen full of failed requests.
@@ -80,13 +95,20 @@ export function AdminPage() {
     <Screen top="push" width="wide">
       <AdminHeader title={t('admin.section.moderation')} />
 
-      <StatsPanel stats={stats} />
+      <StatsPanel
+        stats={stats}
+        // One "Újra" for both reads: with the server down the queue stays quiet under the panel's line (review S-admin-moderation 10).
+        onRetry={() => {
+          void stats.refetch();
+          void qc.invalidateQueries({ queryKey: ['admin', 'moderation'] });
+        }}
+      />
 
       {/* The queue as a section of its own: its head opens on the doors' closing rule, so it draws no
           second one. The queue AND the decision live here. See the header comment in ModerationQueue. */}
       <div className="flex flex-col gap-4">
-        <ModerationHeader pending={stats.data?.panel.moderationPending} />
-        <ModerationQueue />
+        <ModerationHeader pending={stats.data?.panel.moderationPending} shown={queue.data?.queue.length} />
+        <ModerationQueue quietError={stats.isError} pending={stats.data?.panel.moderationPending} />
       </div>
     </Screen>
   );

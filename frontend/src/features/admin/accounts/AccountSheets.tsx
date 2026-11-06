@@ -27,8 +27,10 @@ interface SheetBase {
   busy: boolean;
   /** The refusal, in words (already translated). */
   error: string | null;
-  /** The sheet's "Újra" in the header after a failed write. */
-  onRetry?: () => void;
+  /** The connection is off (a sheet opened before the drop): the save is inert, the page says why. */
+  offline?: boolean;
+  /** The admin changed a field: the page forgets the last refusal (it must not stay under a new value). */
+  onEdit?: () => void;
 }
 
 /* ── 2a · name ─────────────────────────────────────────────────────────────────────────────── */
@@ -52,14 +54,18 @@ export function NameSheet({
   const trimmed = draft.trim();
   const dirty = trimmed !== current.trim();
   const valid = isValidDisplayName(draft);
+  // "Újra" in the header sends what is in the field NOW (review S-admin-accounts 9b), never the last attempt.
+  const send = () => {
+    if (dirty && valid && !base.busy && !base.offline) onSave(trimmed.length ? trimmed : null);
+  };
 
   return (
-    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.nameSheet.title')} status={base.error ? 'error' : 'idle'} onRetry={base.onRetry}>
+    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.nameSheet.title')} status={base.error ? 'error' : 'idle'} onRetry={send}>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (dirty && valid && !base.busy) onSave(trimmed.length ? trimmed : null);
+          send();
         }}
       >
         <Field
@@ -70,9 +76,12 @@ export function NameSheet({
           autoComplete="off"
           hint={t('adminUsers.nameSheet.hint')}
           error={base.error ?? (valid ? undefined : t('adminUsers.nameSheet.invalid'))}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            base.onEdit?.();
+          }}
         />
-        <Pressable type="submit" variant="primary" size="lg" className="w-full" busy={base.busy} disabled={!dirty || !valid}>
+        <Pressable type="submit" variant="primary" size="lg" className="w-full" busy={base.busy} disabled={!dirty || !valid || base.offline}>
           {t('common.save')}
         </Pressable>
       </form>
@@ -108,15 +117,18 @@ export function RoleSheet({
 
   // The step-up is asked ONLY when granting admin: the admin's OWN password, never the account's.
   const grantsAdmin = chosen === 'admin' && current !== 'admin';
-  const ready = chosen !== current && (!grantsAdmin || password.length > 0);
+  const ready = chosen !== current && (!grantsAdmin || password.length > 0) && !base.offline;
+  const send = () => {
+    if (ready && !base.busy) onSave(chosen, grantsAdmin ? password : undefined);
+  };
 
   return (
-    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.col.role')} status={base.error ? 'error' : 'idle'} onRetry={base.onRetry}>
+    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.col.role')} status={base.error ? 'error' : 'idle'} onRetry={send}>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (ready && !base.busy) onSave(chosen, grantsAdmin ? password : undefined);
+          send();
         }}
       >
         <RowStack as="div" role="radiogroup" open close aria-label={t('adminUsers.col.role')}>
@@ -129,7 +141,10 @@ export function RoleSheet({
               sub={r === current ? t('adminUsers.roleSheet.current', { text: afterDot(t(`adminUsers.roleSheet.about.${r}`), i18n.language) }) : t(`adminUsers.roleSheet.about.${r}`)}
               subLines={2}
               trailing={chosen === r ? <Check aria-hidden className="size-5 text-text-1" strokeWidth={2.25} /> : <span aria-hidden className="size-5" />}
-              onClick={() => setChosen(r)}
+              onClick={() => {
+                setChosen(r);
+                base.onEdit?.();
+              }}
             />
           ))}
         </RowStack>
@@ -142,7 +157,10 @@ export function RoleSheet({
             autoComplete="current-password"
             hint={t('adminUsers.roleSheet.passwordHint')}
             error={base.error ?? undefined}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              base.onEdit?.();
+            }}
           />
         ) : base.error ? (
           <p role="alert" className="text-cap text-danger">
@@ -183,7 +201,7 @@ function CentredStepper({
   const shown = value === null ? '' : String(value);
   const by = (d: number) => onChange(clamp((value ?? min) + d));
   return (
-    <div role="group" aria-label={label} className="flex h-16 items-start justify-between">
+    <div role="group" aria-label={label} className="flex h-16 items-center justify-between">
       <Pressable variant="link" shape="icon" aria-label={t('common.less')} disabled={value !== null && value <= min} onPointerDown={(e) => e.preventDefault()} onClick={() => by(-1)}>
         <Minus aria-hidden />
       </Pressable>
@@ -211,7 +229,7 @@ function CentredStepper({
           }}
           className="w-auto text-center"
         />
-        <span aria-hidden className="ms-1.5 mt-9 text-cap text-text-2">
+        <span aria-hidden className="ms-1.5 mt-10 text-cap text-text-2">
           {unit}
         </span>
       </div>
@@ -252,22 +270,28 @@ export function CoinSheet({
   // A debit below zero is refused by the server (409); the sheet says so before the tap.
   const overdraws = direction === 'debit' && after < 0;
   const trimmed = note.trim();
-  const ready = coins >= 1 && trimmed.length >= 1 && !overdraws;
+  const ready = coins >= 1 && trimmed.length >= 1 && !overdraws && !base.offline;
+  const send = () => {
+    if (ready && !base.busy) onSave((direction === 'credit' ? 1 : -1) * coins * 100, trimmed, key);
+  };
 
   return (
-    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.coin.title')} status={base.error ? 'error' : 'idle'} onRetry={base.onRetry}>
+    <Sheet open={base.open} onClose={base.onClose} title={t('adminUsers.coin.title')} status={base.error ? 'error' : 'idle'} onRetry={send}>
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (ready && !base.busy) onSave((direction === 'credit' ? 1 : -1) * coins * 100, trimmed, key);
+          send();
         }}
       >
         <Segmented
           layout="cells"
           label={t('adminUsers.coin.direction')}
           value={direction}
-          onChange={setDirection}
+          onChange={(d) => {
+            setDirection(d);
+            base.onEdit?.();
+          }}
           options={[
             { value: 'credit', label: t('adminUsers.coin.credit') },
             { value: 'debit', label: t('adminUsers.coin.debit') },
@@ -276,7 +300,10 @@ export function CoinSheet({
         <CentredStepper
           label={t('adminUsers.coin.amount')}
           value={amount}
-          onChange={setAmount}
+          onChange={(n) => {
+            setAmount(n);
+            base.onEdit?.();
+          }}
           min={1}
           max={MAX_COINS}
           unit={t('adminUsers.coin.unit')}
@@ -296,7 +323,10 @@ export function CoinSheet({
           autoComplete="off"
           hint={t('adminUsers.reasonHint')}
           error={base.error ?? undefined}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => {
+            setNote(e.target.value);
+            base.onEdit?.();
+          }}
         />
         <Pressable type="submit" variant="primary" size="lg" className="w-full" busy={base.busy} disabled={!ready}>
           {t('adminUsers.coin.record')}

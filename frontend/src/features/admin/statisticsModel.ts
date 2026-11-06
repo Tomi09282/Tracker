@@ -96,6 +96,9 @@ export function useAdminStats(enabled: boolean) {
     queryKey: ['admin', 'stats'],
     queryFn: () => apiWithRefresh<AdminStats>('/admin/stats'),
     enabled,
+    // Offline, a read that is not cached FAILS (and reaches the designed error state with "Újra") instead of
+    // pausing for ever behind a loading skeleton (review S-admin-moderation 5).
+    networkMode: 'always',
   });
 }
 
@@ -105,6 +108,7 @@ export function useAdminStatistics(days: StatisticsDays, enabled: boolean) {
     queryKey: ['admin', 'statistics', days],
     queryFn: () => apiWithRefresh<AdminStatistics>(`/admin/statistics?days=${days}`),
     enabled,
+    networkMode: 'always', // see useAdminStats
   });
 }
 
@@ -121,4 +125,16 @@ export const toWholeCoins = (minor: number) => Math.round(minor / MINOR_PER_COIN
 export function parseWindow(raw: string | null): StatisticsDays {
   const n = Number(raw);
   return (STATISTICS_WINDOWS as readonly number[]).includes(n) && String(n) === raw ? (n as StatisticsDays) : DEFAULT_WINDOW;
+}
+
+/**
+ * A figure that has to fit a column of the panel: exact up to 9 999, then "12k" / "3M" (whole thousands, whole
+ * millions - the Statistics page has the exact figure). `from` lowers the threshold for the small second figure of a
+ * pair ("/ 1,2k"). Review S-admin-moderation 3: six-digit counts printed over their neighbours.
+ */
+export function compactFigure(n: number, lang: string, from = 10_000): string | number {
+  if (n < from) return n;
+  const fmt = (x: number, digits: number) => new Intl.NumberFormat(lang, { maximumFractionDigits: digits }).format(x);
+  if (n >= 1_000_000) return `${fmt(Math.floor(n / 1_000_000), 0)}M`;
+  return from >= 10_000 ? `${fmt(Math.floor(n / 1_000), 0)}k` : `${fmt(Math.floor(n / 100) / 10, 1)}k`;
 }

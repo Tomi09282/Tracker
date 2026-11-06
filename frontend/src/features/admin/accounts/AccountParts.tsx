@@ -1,8 +1,8 @@
-import { useId, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { Link, type To } from 'react-router';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '../../../lib/cn';
-import { SectionHeader } from '../../../ui/data/SectionHeader';
+import { Section } from '../../../ui/data/SectionHeader';
 
 /**
  * One fact of the account page (frames `admin-account-detail-*`): the label on the left in `body`
@@ -80,14 +80,13 @@ export function LedgerLine({
 /**
  * A section of the account page: the kit's section (strong rule, eyebrow, the content), set 8 apart
  * throughout - rule, eyebrow and rows - as the frames draw it (`sect(..., { gap: 8 })`), where the kit's
- * default section stands 16 apart.
+ * default section stands 16 apart. `gap={8}` sets ALL of it: a `className` gap on the head lost to the
+ * kit's own 16 and left every label 8 pt low (review S-admin-accounts 3).
  */
 export function AccountSection({ title, trailing, children }: { title: string; trailing?: ReactNode; children: ReactNode }) {
-  const titleId = useId();
   return (
-    <section aria-labelledby={titleId} className="flex w-full flex-col gap-2">
-      <SectionHeader title={title} titleId={titleId} trailing={trailing} className="gap-2" />
+    <Section gap={8} title={title} trailing={trailing}>
       {children}
-    </section>
+    </Section>
   );
 }

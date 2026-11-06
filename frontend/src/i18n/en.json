@@ -260,12 +260,12 @@
       "snapshotTruncated": "The text was longer; the copy is truncated.",
       "reporters": "{{count}} different reporters",
       "decide": "Decide",
-      "upholdAndRemove": "Uphold and remove",
+      "upholdAndRemove": "Uphold and take down",
       "reject": "Reject",
-      "removalReason": "Reason for removal",
+      "removalReason": "Reason for taking down",
       "removalReasonHint": "This goes into the audit log. The author does not see it.",
       "resolutionNote": "Internal note",
-      "reasonRequired": "A removal needs a reason.",
+      "reasonRequired": "Taking it down needs a reason.",
       "status": {
         "open": "Open",
         "triaged": "Triaged",
@@ -283,7 +283,8 @@
         "ip_infringement": "Copyright",
         "spam": "Spam",
         "other": "Other"
-      }
+      },
+      "reportersOne": "{{count}} different reporter"
     },
     "styleStudio": "Style studio",
     "section": {
@@ -306,7 +307,11 @@
       "members": "Members",
       "coaches": "Coaches",
       "admins": "Admins"
-    }
+    },
+    "pendingShown": "{{shown}} / {{total}} waiting",
+    "queueCapped": "You see the first {{count}} submissions. The next ones follow as you decide.",
+    "decideFailed": "The decision did not go through. Try again.",
+    "decideOffline": "You are offline, the decision did not go through."
   },
   "muscle": {
     "chest": "Chest",
@@ -1220,7 +1225,8 @@
         "admin": {
           "adjust": "Coin adjustment"
         }
-      }
+      },
+      "other": "Other event"
     },
     "coin": {
       "head": "Coins",
@@ -1284,7 +1290,9 @@
       "title": "Enable account",
       "message": "{{name}} can sign in again.",
       "link": "Enable",
-      "hint": "Can sign in again. A reason is required to enable."
+      "hint": "Can sign in again. A reason is required to enable.",
+      "adminMessage": "{{name}} can sign in again and gets the admin role back. Enter your own password to confirm.",
+      "passwordHint": "A disabled admin can only be enabled with your own password."
     },
     "signout": {
       "sheetTitle": "Sign out",
@@ -1315,7 +1323,12 @@
       "self": "You cannot do this to your own account.",
       "conflict": "The account changed in the meantime. Check it and try again.",
       "rate": "Too many requests. Wait a moment.",
-      "invalid": "This cannot be saved as it is. Check the fields."
+      "invalid": "This cannot be saved as it is. Check the fields.",
+      "offline": "You are offline, so the change was not saved."
+    },
+    "replayed": {
+      "disable": "This account was already disabled, so nothing changed.",
+      "enable": "This account was already enabled, so nothing changed."
     }
   },
   "adminRules": {
@@ -1978,7 +1991,8 @@
       "goneBody": "It may no longer exist, or the link is wrong.",
       "privateDraft": "Not public · only the author sees it.",
       "authorOff": "The author is disabled, so the post is not shown.",
-      "notShown": "The post is not shown on the public page right now."
+      "notShown": "The post is not shown on the public page right now.",
+      "profileOff": "The author’s profile was taken down, so the post is not shown."
     },
     "facts": {
       "title": "Details",
@@ -2035,7 +2049,7 @@
     "manage": {
       "title": "Manage",
       "postSub": "Disappears from the public page. Can be restored.",
-      "profileSub": "Their posts disappear too.",
+      "profileSub": "Their posts disappear too. Cannot be undone.",
       "draftNote": "A draft is not public, so there is nothing to take down."
     },
     "takedown": {
@@ -2045,11 +2059,11 @@
       },
       "profile": {
         "title": "Take down author profile",
-        "message": "The profile and its posts disappear from the public page."
+        "message": "The profile and its posts disappear from the public page. This cannot be undone here."
       },
       "both": {
         "title": "Take down post and author profile together",
-        "message": "The post and the author’s profile both disappear from the public page."
+        "message": "The post and the author’s profile both disappear from the public page. The post can be restored later, the profile not here."
       },
       "report": {
         "title": "Uphold and take down",
@@ -2057,7 +2071,8 @@
       },
       "reason": "Reason for taking down",
       "reasonHint": "Required. It goes into the audit log; the author does not see it."
-    }
+    },
+    "openPost": "Open post"
   },
   "adminStats": {
     "title": "Statistics",

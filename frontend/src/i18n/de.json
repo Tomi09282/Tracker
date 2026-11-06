@@ -262,7 +262,7 @@
       "decide": "Entscheiden",
       "upholdAndRemove": "Bestätigen und entfernen",
       "reject": "Ablehnen",
-      "removalReason": "Grund für die Entfernung",
+      "removalReason": "Grund der Entfernung",
       "removalReasonHint": "Das landet im Audit-Log. Der Autor sieht es nicht.",
       "resolutionNote": "Interne Notiz",
       "reasonRequired": "Eine Entfernung braucht einen Grund.",
@@ -283,7 +283,8 @@
         "ip_infringement": "Urheberrecht",
         "spam": "Spam",
         "other": "Sonstiges"
-      }
+      },
+      "reportersOne": "{{count}} meldende Person"
     },
     "styleStudio": "Stil-Studio",
     "section": {
@@ -304,9 +305,13 @@
     "unit": {},
     "legend": {
       "members": "Mitglieder",
-      "coaches": "Coaches",
+      "coaches": "Trainer",
       "admins": "Admins"
-    }
+    },
+    "pendingShown": "{{shown}} / {{total}} warten",
+    "queueCapped": "Du siehst die ersten {{count}} Einreichungen. Die weiteren folgen, sobald du entscheidest.",
+    "decideFailed": "Die Entscheidung ist nicht angekommen. Versuche es erneut.",
+    "decideOffline": "Du bist offline, die Entscheidung ist nicht angekommen."
   },
   "muscle": {
     "chest": "Brust",
@@ -1220,7 +1225,8 @@
         "admin": {
           "adjust": "Münzkorrektur"
         }
-      }
+      },
+      "other": "Anderes Ereignis"
     },
     "coin": {
       "head": "Münzen",
@@ -1284,7 +1290,9 @@
       "title": "Konto aktivieren",
       "message": "{{name}} kann sich wieder anmelden.",
       "link": "Aktivieren",
-      "hint": "Kann sich wieder anmelden. Zum Aktivieren ist ein Grund nötig."
+      "hint": "Kann sich wieder anmelden. Zum Aktivieren ist ein Grund nötig.",
+      "adminMessage": "{{name}} kann sich wieder anmelden und erhält die Admin-Rolle zurück. Gib dazu dein eigenes Passwort ein.",
+      "passwordHint": "Einen deaktivierten Admin kannst du nur mit deinem eigenen Passwort aktivieren."
     },
     "signout": {
       "sheetTitle": "Abmelden",
@@ -1315,7 +1323,12 @@
       "self": "Das kannst du bei deinem eigenen Konto nicht tun.",
       "conflict": "Das Konto hat sich inzwischen geändert. Prüfe es und versuche es erneut.",
       "rate": "Zu viele Anfragen. Warte einen Moment.",
-      "invalid": "So lässt sich das nicht speichern. Prüfe die Felder."
+      "invalid": "So lässt sich das nicht speichern. Prüfe die Felder.",
+      "offline": "Du bist offline, deshalb wurde die Änderung nicht gespeichert."
+    },
+    "replayed": {
+      "disable": "Dieses Konto war bereits deaktiviert, daher hat sich nichts geändert.",
+      "enable": "Dieses Konto war bereits aktiviert, daher hat sich nichts geändert."
     }
   },
   "adminRules": {
@@ -1978,7 +1991,8 @@
       "goneBody": "Er existiert möglicherweise nicht mehr, oder der Link ist falsch.",
       "privateDraft": "Nicht öffentlich · nur der Autor sieht ihn.",
       "authorOff": "Der Autor ist gesperrt, deshalb wird der Beitrag nicht angezeigt.",
-      "notShown": "Der Beitrag wird auf der öffentlichen Seite gerade nicht angezeigt."
+      "notShown": "Der Beitrag wird auf der öffentlichen Seite gerade nicht angezeigt.",
+      "profileOff": "Das Profil des Autors wurde entfernt, deshalb wird der Beitrag nicht angezeigt."
     },
     "facts": {
       "title": "Daten",
@@ -2035,7 +2049,7 @@
     "manage": {
       "title": "Verwalten",
       "postSub": "Verschwindet von der öffentlichen Seite. Kann wiederhergestellt werden.",
-      "profileSub": "Ihre Beiträge verschwinden ebenfalls.",
+      "profileSub": "Ihre Beiträge verschwinden ebenfalls. Nicht rückgängig zu machen.",
       "draftNote": "Ein Entwurf ist nicht öffentlich, es gibt also nichts zu entfernen."
     },
     "takedown": {
@@ -2045,11 +2059,11 @@
       },
       "profile": {
         "title": "Autorenprofil entfernen",
-        "message": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite."
+        "message": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite. Das lässt sich hier nicht rückgängig machen."
       },
       "both": {
         "title": "Beitrag und Autorenprofil zusammen entfernen",
-        "message": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite."
+        "message": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite. Der Beitrag lässt sich später wiederherstellen, das Profil hier nicht."
       },
       "report": {
         "title": "Bestätigen und entfernen",
@@ -2057,7 +2071,8 @@
       },
       "reason": "Grund der Entfernung",
       "reasonHint": "Pflichtfeld. Es kommt ins Audit-Log; der Autor sieht es nicht."
-    }
+    },
+    "openPost": "Beitrag öffnen"
   },
   "adminStats": {
     "title": "Statistik",
@@ -2071,7 +2086,7 @@
       "users": "Nutzer gesamt",
       "new7d": "Neu in 7 Tagen",
       "activeCoaches": "Aktive Trainer",
-      "workouts": "Training heute\n/ 7 Tage",
+      "workouts": "Sport heute\n/ 7 Tage",
       "pending": "Wartet auf Prüfung",
       "openReports": "Offene Meldungen",
       "curve": "Protokollierende · {{count}} Tage",

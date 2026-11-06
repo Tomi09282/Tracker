@@ -116,7 +116,8 @@ export function PostsList({
               ))}
             </RowStack>
           </div>
-          <div className="flex flex-col items-center gap-1 pt-2">
+          {/* The paging block is 8 closer to the stack and its count 4 closer to "Továbbiak" than the first cut (review S-admin-posts 7). */}
+          <div className="flex flex-col items-center">
             {posts.hasNextPage ? (
               <TextLink text="body" trail={<ChevronDown />} busy={posts.isFetchingNextPage} onClick={() => void posts.fetchNextPage()}>
                 {t('adminPosts.more')}

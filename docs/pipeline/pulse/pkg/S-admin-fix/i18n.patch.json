@@ -1,0 +1,252 @@
+{
+  "package": "S-admin-fix",
+  "base": "7197950",
+  "namespaces": [
+    "adminUsers",
+    "admin",
+    "adminPosts",
+    "adminStats"
+  ],
+  "set": [
+    {
+      "key": "adminUsers.audit.other",
+      "hu": "Egyéb esemény",
+      "en": "Other event",
+      "de": "Anderes Ereignis",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 2 - an audit action without its own line never prints a machine code"
+    },
+    {
+      "key": "adminUsers.err.offline",
+      "hu": "Nincs kapcsolat, ezért a módosítás nem mentődött el.",
+      "en": "You are offline, so the change was not saved.",
+      "de": "Du bist offline, deshalb wurde die Änderung nicht gespeichert.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 1 - a write is never queued for a reconnect; it fails at once and says so"
+    },
+    {
+      "key": "adminUsers.enable.adminMessage",
+      "hu": "{{name}} újra beléphet, és az admin jogát is visszakapja. Ehhez add meg a saját jelszavad.",
+      "en": "{{name}} can sign in again and gets the admin role back. Enter your own password to confirm.",
+      "de": "{{name}} kann sich wieder anmelden und erhält die Admin-Rolle zurück. Gib dazu dein eigenes Passwort ein.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 14 - the enable sheet of a disabled ADMIN (B-admin-polish H1 asks for the actor's password)"
+    },
+    {
+      "key": "adminUsers.enable.passwordHint",
+      "hu": "Letiltott admint csak a saját jelszavad megadásával engedélyezhetsz.",
+      "en": "A disabled admin can only be enabled with your own password.",
+      "de": "Einen deaktivierten Admin kannst du nur mit deinem eigenen Passwort aktivieren.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 14 - hint under the password field (the role sheet's wording: roleSheet.passwordHint)"
+    },
+    {
+      "key": "adminUsers.replayed.disable",
+      "hu": "Ez a fiók már le volt tiltva, ezért nem változott semmi.",
+      "en": "This account was already disabled, so nothing changed.",
+      "de": "Dieses Konto war bereits deaktiviert, daher hat sich nichts geändert.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 10 - another admin was first; the server answers replayed"
+    },
+    {
+      "key": "adminUsers.replayed.enable",
+      "hu": "Ez a fiók már engedélyezve volt, ezért nem változott semmi.",
+      "en": "This account was already enabled, so nothing changed.",
+      "de": "Dieses Konto war bereits aktiviert, daher hat sich nichts geändert.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-accounts item 10 - another admin was first; the server answers replayed"
+    },
+    {
+      "key": "admin.pendingShown",
+      "hu": "{{shown}} / {{total}} várakozik",
+      "en": "{{shown}} / {{total}} waiting",
+      "de": "{{shown}} / {{total}} warten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-moderation item 4 - the queue route lists a first page only; the head says how many of the waiting rows the list holds"
+    },
+    {
+      "key": "admin.queueCapped",
+      "hu": "Az első {{count}} beküldést látod. Ha döntöttél, jön a következő.",
+      "en": "You see the first {{count}} submissions. The next ones follow as you decide.",
+      "de": "Du siehst die ersten {{count}} Einreichungen. Die weiteren folgen, sobald du entscheidest.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-moderation item 4 - under the list when more wait than it holds"
+    },
+    {
+      "key": "admin.decideFailed",
+      "hu": "A döntés nem ment át. Próbáld újra.",
+      "en": "The decision did not go through. Try again.",
+      "de": "Die Entscheidung ist nicht angekommen. Versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-moderation item 2 - a decision is never queued while offline; a failed one says so"
+    },
+    {
+      "key": "admin.decideOffline",
+      "hu": "Nincs kapcsolat, a döntés nem ment át.",
+      "en": "You are offline, the decision did not go through.",
+      "de": "Du bist offline, die Entscheidung ist nicht angekommen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-moderation item 2 - the same, with the connection off"
+    },
+    {
+      "key": "admin.marketplace.reportersOne",
+      "hu": "{{count}} különböző bejelentő",
+      "en": "{{count}} different reporter",
+      "de": "{{count}} meldende Person",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-posts item 11 - the singular (\"1 different reporters\" in English)"
+    },
+    {
+      "key": "adminPosts.openPost",
+      "hu": "Poszt megnyitása",
+      "en": "Open post",
+      "de": "Beitrag öffnen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-posts item 10 - the report page links to the post's inspect page"
+    },
+    {
+      "key": "adminPosts.detail.profileOff",
+      "hu": "A szerző profilját levették, ezért a poszt nem látszik.",
+      "en": "The author’s profile was taken down, so the post is not shown.",
+      "de": "Das Profil des Autors wurde entfernt, deshalb wird der Beitrag nicht angezeigt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: review S-admin-posts item 2 - the notice names the profile take-down, not only a disabled author"
+    }
+  ],
+  "change": [
+    {
+      "key": "admin.legend.coaches",
+      "de": {
+        "from": "Coaches",
+        "to": "Trainer"
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-moderation item 6 - de: the users block said \"Coaches\" while the rest of the pages say \"Trainer\" (hu / en unchanged)"
+    },
+    {
+      "key": "adminStats.panel.workouts",
+      "de": {
+        "from": "Training heute\n/ 7 Tage",
+        "to": "Sport heute\n/ 7 Tage"
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-moderation item 11 - de: \"TRAINING HEUTE\" is 14 mono capitals and wraps the caption to three lines at 360 pt (the frame caps a caption at two); \"Sport heute\" fits (hu / en unchanged)"
+    },
+    {
+      "key": "admin.marketplace.upholdAndRemove",
+      "hu": {
+        "from": "Helybenhagyás és eltávolítás",
+        "to": "Helybenhagyás és levétel"
+      },
+      "en": {
+        "from": "Uphold and remove",
+        "to": "Uphold and take down"
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 10 - ONE word for the act on both pages that open a report (the post page already says \"levétel\" / \"take down\")"
+    },
+    {
+      "key": "admin.marketplace.removalReason",
+      "hu": {
+        "from": "Eltávolítás indoka",
+        "to": "Levétel indoka"
+      },
+      "en": {
+        "from": "Reason for removal",
+        "to": "Reason for taking down"
+      },
+      "de": {
+        "from": "Grund für die Entfernung",
+        "to": "Grund der Entfernung"
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 10 - the same words as adminPosts.takedown.reason"
+    },
+    {
+      "key": "admin.marketplace.reasonRequired",
+      "hu": {
+        "from": "Eltávolításhoz indok kell.",
+        "to": "Levételhez indok kell."
+      },
+      "en": {
+        "from": "A removal needs a reason.",
+        "to": "Taking it down needs a reason."
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 10"
+    },
+    {
+      "key": "adminPosts.manage.profileSub",
+      "hu": {
+        "from": "Posztjai is eltűnnek.",
+        "to": "Posztjai is eltűnnek. Nem vonható vissza."
+      },
+      "en": {
+        "from": "Their posts disappear too.",
+        "to": "Their posts disappear too. Cannot be undone."
+      },
+      "de": {
+        "from": "Ihre Beiträge verschwinden ebenfalls.",
+        "to": "Ihre Beiträge verschwinden ebenfalls. Nicht rückgängig zu machen."
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 2 - the frame says \"Visszaállítható.\"; the server has one restore route, for a post, so the row says the truth"
+    },
+    {
+      "key": "adminPosts.takedown.profile.message",
+      "hu": {
+        "from": "A profil és a posztjai eltűnnek a nyilvános oldalról.",
+        "to": "A profil és a posztjai eltűnnek a nyilvános oldalról. Ezt itt nem lehet visszavonni."
+      },
+      "en": {
+        "from": "The profile and its posts disappear from the public page.",
+        "to": "The profile and its posts disappear from the public page. This cannot be undone here."
+      },
+      "de": {
+        "from": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite.",
+        "to": "Das Profil und seine Beiträge verschwinden von der öffentlichen Seite. Das lässt sich hier nicht rückgängig machen."
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 2 - the sheet that takes a whole profile off says there is no way back"
+    },
+    {
+      "key": "adminPosts.takedown.both.message",
+      "hu": {
+        "from": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról.",
+        "to": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról. A poszt később visszaállítható, a profil itt nem."
+      },
+      "en": {
+        "from": "The post and the author’s profile both disappear from the public page.",
+        "to": "The post and the author’s profile both disappear from the public page. The post can be restored later, the profile not here."
+      },
+      "de": {
+        "from": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite.",
+        "to": "Der Beitrag und das Profil des Autors verschwinden beide von der öffentlichen Seite. Der Beitrag lässt sich später wiederherstellen, das Profil hier nicht."
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "review S-admin-posts item 2"
+    }
+  ],
+  "remove": []
+}

@@ -790,3 +790,50 @@ One entry = one `## DEV-<n>` block with the same five lines. Append only; never 
 - The frames show: NAPLO lines such as "Erme-korrekcio -50", a person's name and a "Rendszer" actor; the disabled (3a) and own (3b) pages with FIOK + MUVELETEK only; "Nyitott munkamenet 3 · ebbol ez"; a lit "Mentes" pill on an unchanged name; no line under the coin figure; long sheet titles; the coin row on the own account; the filter words as plain text.
 - What the app does: (1) NAPLO shows the actor's e-mail and the action only (the API carries `actorEmail` and no detail, no system actor); (2) 3a / 3b keep ERME, TEVEKENYSEG and NAPLO too (an admin looking at a disabled account needs the log that says who disabled it); (3) the open-session row shows the count only; (4) enabling an account reuses the disable sheet's layout (title "Fiok engedelyezese", link "Engedelyezes"), it is not drawn; (5) the name sheet's "Mentes" is disabled until the name differs; (6) the coin figure is the kit's NumeralField with its 1 pt line (the `check:pulse` raw-form ban leaves no other typed number); (7) the sheet titles "Kijelentkeztetes" and "Jelszocsere" are shortened (the kit's sheet header cuts a longer title with an ellipsis); (8) "Erme-korrekcio" is hidden on the own account (the server answers 409 cannot_adjust_own_coins); (9) the filter words are bare toggle buttons (one `token-lint-disable` with the reason: Chip draws a filled pill, Pressable's link has no mark).
 - Status: open — owner (items 1 and 2 are the ones that change what an admin can read; each is a one-line change if he wants the frame's version, and 1 also needs the API to carry a detail line).
+
+## DEV-095 — S-admin-fix: the confirm sheets carry the kit's close X, the frames draw none
+
+- Source: `.pulse/review/S-admin-accounts/REVIEW.md` difference 5 (frame `admin-account-detail-2c-disable`; the same in the sign-out, lock-out and password sheets)
+- Package: S-admin-fix
+- The frames show: the `ConfirmSheet` header with the title only; the action link and "Mégse" are the two ways out.
+- What the app does: the kit's `Sheet` header draws a 44 pt close control at its right edge (it is part of the kit `Sheet` / `ConfirmSheet`, `src/ui/feedback/**`, used by every confirmation of the product), so the admin sheets have it too. Not changed here: removing it from the admin sheets only would make one family of confirmations differ from all the others.
+- Status: open — owner / integrator: either the designers add the X to the `ConfirmSheet` frame, or the kit drops it product-wide.
+
+## DEV-096 — S-admin-fix: a taken-down author profile has no way back
+
+- Source: `.pulse/review/S-admin-posts/REVIEW.md` difference 2 (frames `admin-post-detail-1`, `-2`, `-2-draft`: "Posztjai is eltűnnek. Visszaállítható.")
+- Package: S-admin-fix
+- The frames show: the row "Szerző profiljának levétele" with the sub line "Posztjai is eltűnnek. Visszaállítható."
+- What the app does: the backend has ONE restore route, for a post (`POST /admin/marketplace/posts/:id/restore`); nothing clears a profile's `removed_at`. The row, the sheet and the combined take-down therefore say "Nem vonható vissza" / "this cannot be undone here", and the post page names the profile take-down next to a disabled author ("A szerző profilját levették, ezért a poszt nem látszik"). The post of such an author can be restored but stays hidden (`hiddenBy` carries `profile_removed`), which the restore sheet already says.
+- Status: open — owner: a profile restore needs a backend route (a new package) and a row; until then the app tells the truth.
+
+## DEV-097 — S-admin-fix: three post frames are older than the product
+
+- Source: `.pulse/review/S-admin-posts/REVIEW.md` differences 2b, 2c, 13
+- Package: S-admin-fix
+- The frames show: (2b, `admin-post-detail-2-draft`) a SZÖVEG block with the draft's text; (2c, `admin-post-detail-2`) a snapshot block under each closed report; (13, `admin-post-detail-3`) "A szerző le van tiltva, de a posztja még látszik." with the live-page link.
+- What the app does: (2b) the server withholds a draft's body (`bodyWithheld`), so no SZÖVEG block; (2c) the snapshot is destroyed when a case closes (a trigger), so a closed report shows its outcome line only (now in upper case like the frame); (13) the server hides the posts of a disabled author, so the notice says the post is not shown and the page has no live-page link (the ELŐ dot is the ink one, not the lime lamp, on a post nobody can see).
+- Status: open — owner confirms the three behaviours; the designers redraw the frames.
+
+## DEV-098 — S-admin-fix: figures of the Moderáció panel above 9 999 are written "12k"
+
+- Source: `.pulse/review/S-admin-moderation/REVIEW.md` difference 3 (frame `admin-moderation-v2`)
+- Package: S-admin-fix
+- The frames show: one- and two-digit figures in 112 pt columns.
+- What the app does: a figure of the six is exact up to 9 999, then "12k" (whole thousands) and "3M" (whole millions); the small second figure of "Edzés ma / 7 nap" turns to "1,2k" from 1 000. A screen reader still hears the exact number; the Statistics page has the exact figure. Nothing changes below the threshold, so every frame is as drawn.
+- Status: open — owner (is a compact figure acceptable, or should the grid change shape at that size?).
+
+## DEV-099 — S-admin-fix: the moderation queue lists its first page only
+
+- Source: `.pulse/review/S-admin-moderation/REVIEW.md` difference 4 (frame `admin-moderation-v2`; owner decision 4: lists page with "Továbbiak")
+- Package: S-admin-fix
+- The frames show: "N várakozik" over the list.
+- What the app does: `GET /admin/moderation` answers at most 50 rows with no cursor (backend, outside this package). When more wait than the list holds, the head reads "50 / 55 várakozik" and a quiet line under the list says the next ones follow as the admin decides; the refresh glyph reads the panel and the list together.
+- Status: open — owner: a cursor on the queue route (a backend package) and a "Továbbiak" row.
+
+## DEV-100 — S-admin-fix: what stays of the three screen reviews
+
+- Source: the three `REVIEW.md` files of `.pulse/review/S-admin-accounts`, `S-admin-posts`, `S-admin-moderation`
+- Package: S-admin-fix
+- Not fixed, with the reason: accounts 12 — a display name may carry markup (`<script>`; React escapes it, no non-escaping sink exists; which characters a name may have is a product rule shared with PATCH /auth/me: owner); posts D1 (B-admin-polish) — the text of a post hidden by its author and edited afterwards is shown to the admin (owner); posts 12 — the moderation history (`moderationLog`) is fetched and not drawn, no frame has it (owner: a "Történet" section, or drop it from the read); posts 5 / 6 / 8 — a frame-side 1.5 pt offset of "Stílus stúdió", a 4.5 pt amber count, fixture-only differences (nothing to fix); moderation 7 — the Statistics page drifts down 0.5 - 1 pt per line row (4 pt by RENDSZER; the series lines are about 1 pt shorter than the frame's, not visible at a glance); accounts 13 — "Továbbiak" offline does nothing visible (the global offline strip says why).
+- Status: open — owner for the first three; the rest is accepted.

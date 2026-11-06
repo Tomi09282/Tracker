@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, apiWithRefresh } from '../../../lib/api';
+import { groupCases, type ReportRow } from './reportCases';
 
 /*
  * The admin's side of marketplace posts — the answers of docs/pipeline/pulse/pkg/B-admin-posts/api.md,
@@ -161,13 +162,13 @@ export function useAdminPosts(f: { q: string; state: AdminPostStateFilter }) {
   });
 }
 
-/** The count in the switch: open reports, from the same list the Jelentések view draws (one cached read). */
+/** The count in the switch: the open CASES (reports of one reason on one subject), as many as the Jelentések view has rows. */
 export function useOpenReportCount(enabled = true) {
   return useQuery({
     queryKey: [...REPORTS_KEY, 'open'],
-    queryFn: () => apiWithRefresh<{ reports: unknown[] }>('/admin/marketplace/reports?status=open'),
+    queryFn: () => apiWithRefresh<{ reports: ReportRow[] }>('/admin/marketplace/reports?status=open'),
     enabled,
-    select: (d) => d.reports.length,
+    select: (d) => groupCases(d.reports).length,
   });
 }
 
@@ -199,6 +200,7 @@ export function useRefreshAll() {
 export function useTakeDown() {
   const refresh = useRefreshAll();
   return useMutation({
+    networkMode: 'always', // a take-down is made now or fails and says so; it is never queued for a reconnect
     mutationFn: (v: { postId: string; reason: string } | { handle: string; reason: string }) =>
       apiWithRefresh<AdminRemoveResult>('/admin/marketplace/remove', {
         method: 'POST',
@@ -215,6 +217,7 @@ export function useTakeDown() {
 export function useRestore() {
   const refresh = useRefreshAll();
   return useMutation({
+    networkMode: 'always', // see useTakeDown
     mutationFn: (postId: string) =>
       apiWithRefresh<AdminPostRestoreResult>(`/admin/marketplace/posts/${postId}/restore`, { method: 'POST', body: {} }),
     // 409 not_removed: somebody restored it already. The page reloads into the live state; nothing to say.
@@ -235,6 +238,7 @@ export async function decideReports(
   ids: number[],
   status: 'upheld' | 'rejected',
   removalReason: string | null,
+  note: string | null = null,
 ): Promise<void> {
   for (const id of ids) {
     try {
@@ -242,7 +246,7 @@ export async function decideReports(
         method: 'POST',
         body: {
           status,
-          note: null,
+          note,
           remove: status === 'upheld',
           removal_reason: status === 'upheld' ? (removalReason ?? '').trim() : null,
         },

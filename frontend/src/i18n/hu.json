@@ -260,12 +260,12 @@
       "snapshotTruncated": "A szöveg hosszabb volt; a másolat le van vágva.",
       "reporters": "{{count}} különböző bejelentő",
       "decide": "Döntés",
-      "upholdAndRemove": "Helybenhagyás és eltávolítás",
+      "upholdAndRemove": "Helybenhagyás és levétel",
       "reject": "Elutasítás",
-      "removalReason": "Eltávolítás indoka",
+      "removalReason": "Levétel indoka",
       "removalReasonHint": "Ez az indok az audit-naplóba kerül. A szerző nem látja.",
       "resolutionNote": "Belső megjegyzés",
-      "reasonRequired": "Eltávolításhoz indok kell.",
+      "reasonRequired": "Levételhez indok kell.",
       "status": {
         "open": "Nyitott",
         "triaged": "Vizsgált",
@@ -283,7 +283,8 @@
         "ip_infringement": "Szerzői jog",
         "spam": "Kéretlen tartalom",
         "other": "Egyéb"
-      }
+      },
+      "reportersOne": "{{count}} különböző bejelentő"
     },
     "styleStudio": "Stílus stúdió",
     "section": {
@@ -306,7 +307,11 @@
       "members": "Tagok",
       "coaches": "Edzők",
       "admins": "Adminok"
-    }
+    },
+    "pendingShown": "{{shown}} / {{total}} várakozik",
+    "queueCapped": "Az első {{count}} beküldést látod. Ha döntöttél, jön a következő.",
+    "decideFailed": "A döntés nem ment át. Próbáld újra.",
+    "decideOffline": "Nincs kapcsolat, a döntés nem ment át."
   },
   "muscle": {
     "chest": "Mell",
@@ -1220,7 +1225,8 @@
         "admin": {
           "adjust": "Érme-korrekció"
         }
-      }
+      },
+      "other": "Egyéb esemény"
     },
     "coin": {
       "head": "Érme",
@@ -1284,7 +1290,9 @@
       "title": "Fiók engedélyezése",
       "message": "{{name}} újra beléphet.",
       "link": "Engedélyezés",
-      "hint": "Újra beléphet. Az engedélyezéshez indok kell."
+      "hint": "Újra beléphet. Az engedélyezéshez indok kell.",
+      "adminMessage": "{{name}} újra beléphet, és az admin jogát is visszakapja. Ehhez add meg a saját jelszavad.",
+      "passwordHint": "Letiltott admint csak a saját jelszavad megadásával engedélyezhetsz."
     },
     "signout": {
       "sheetTitle": "Kijelentkeztetés",
@@ -1315,7 +1323,12 @@
       "self": "Ezt a saját fiókodon nem teheted meg.",
       "conflict": "A fiók állapota közben megváltozott. Nézd át, és próbáld újra.",
       "rate": "Túl sok kérés. Várj egy kicsit.",
-      "invalid": "Ez így nem menthető. Ellenőrizd a mezőket."
+      "invalid": "Ez így nem menthető. Ellenőrizd a mezőket.",
+      "offline": "Nincs kapcsolat, ezért a módosítás nem mentődött el."
+    },
+    "replayed": {
+      "disable": "Ez a fiók már le volt tiltva, ezért nem változott semmi.",
+      "enable": "Ez a fiók már engedélyezve volt, ezért nem változott semmi."
     }
   },
   "adminRules": {
@@ -1978,7 +1991,8 @@
       "goneBody": "Lehet, hogy már nem létezik, vagy hibás a hivatkozás.",
       "privateDraft": "Nem nyilvános · csak a szerző látja.",
       "authorOff": "A szerző le van tiltva, ezért a poszt nem látszik.",
-      "notShown": "A poszt most nem látszik a nyilvános oldalon."
+      "notShown": "A poszt most nem látszik a nyilvános oldalon.",
+      "profileOff": "A szerző profilját levették, ezért a poszt nem látszik."
     },
     "facts": {
       "title": "Adatok",
@@ -2035,7 +2049,7 @@
     "manage": {
       "title": "Kezelés",
       "postSub": "Nyilvánosan eltűnik. Visszaállítható.",
-      "profileSub": "Posztjai is eltűnnek.",
+      "profileSub": "Posztjai is eltűnnek. Nem vonható vissza.",
       "draftNote": "A piszkozat nem nyilvános, így nincs mit levenni."
     },
     "takedown": {
@@ -2045,11 +2059,11 @@
       },
       "profile": {
         "title": "Szerző profiljának levétele",
-        "message": "A profil és a posztjai eltűnnek a nyilvános oldalról."
+        "message": "A profil és a posztjai eltűnnek a nyilvános oldalról. Ezt itt nem lehet visszavonni."
       },
       "both": {
         "title": "Poszt és szerzői profil levétele együtt",
-        "message": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról."
+        "message": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról. A poszt később visszaállítható, a profil itt nem."
       },
       "report": {
         "title": "Helybenhagyás és levétel",
@@ -2057,7 +2071,8 @@
       },
       "reason": "Levétel indoka",
       "reasonHint": "Kötelező. Az audit-naplóba kerül, a szerző nem látja."
-    }
+    },
+    "openPost": "Poszt megnyitása"
   },
   "adminStats": {
     "title": "Statisztika",

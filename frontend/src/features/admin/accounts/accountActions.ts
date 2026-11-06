@@ -16,7 +16,7 @@ export type AccountWrite =
   | { kind: 'name'; displayName: string | null }
   | { kind: 'role'; role: 'user' | 'coach' | 'admin'; password?: string }
   | { kind: 'disable'; reason: string }
-  | { kind: 'enable'; reason: string }
+  | { kind: 'enable'; reason: string; password?: string }
   | { kind: 'coins'; amountMinor: number; note: string; key: string }
   | { kind: 'resetLockout' }
   | { kind: 'signoutAll' }
@@ -43,7 +43,12 @@ function send(id: number, w: AccountWrite): Promise<WriteAnswer> {
     case 'disable':
       return apiWithRefresh(`${base}/disable`, { method: 'POST', body: { reason: w.reason } });
     case 'enable':
-      return apiWithRefresh(`${base}/enable`, { method: 'POST', body: { reason: w.reason } });
+      // Re-enabling a disabled ADMIN hands the admin power back, so the server asks for the actor's own
+      // password (B-admin-polish H1); for anyone else the body is the reason alone.
+      return apiWithRefresh(`${base}/enable`, {
+        method: 'POST',
+        body: w.password === undefined ? { reason: w.reason } : { reason: w.reason, password: w.password },
+      });
     case 'coins':
       return apiWithRefresh(`${base}/coins`, {
         method: 'POST',
@@ -62,6 +67,10 @@ export function useAccountWrite(id: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (w: AccountWrite) => send(id, w),
+    // NEVER queued while offline (review S-admin-accounts 1): TanStack's default 'online' PAUSES the call and
+    // fires it by itself on reconnect - minutes later, after the sheet was dismissed, and (for a coin
+    // adjustment) possibly twice. A write either happens now or fails at once and says so.
+    networkMode: 'always',
     // Success or not, what the server holds is read again: a refused write may mean the account changed.
     onSettled: () => void qc.invalidateQueries({ queryKey: ['admin', 'accounts'] }),
   });
@@ -69,7 +78,10 @@ export function useAccountWrite(id: number) {
 
 /** The one-line sentence for a refused write, in the admin area's own style. */
 export function writeErrorText(err: unknown, t: TFunction): string {
-  if (!(err instanceof ApiError)) return t('adminUsers.err.generic');
+  if (!(err instanceof ApiError)) {
+    // fetch() itself failed: with the connection off that is the whole story, otherwise the server is out of reach.
+    return typeof navigator !== 'undefined' && !navigator.onLine ? t('adminUsers.err.offline') : t('adminUsers.err.generic');
+  }
   const reason = typeof err.body.reason === 'string' ? err.body.reason : '';
   if (err.status === 401 && reason === 'step_up_required') return t('adminUsers.err.stepUp');
   if (err.status === 401) return t('adminUsers.err.password');

@@ -39,10 +39,14 @@ export function useCoinReason() {
   return (key: string) => t(`coins.reason.${key}`, { defaultValue: t(`adminUsers.coin.reason.${key}`, { defaultValue: key }) });
 }
 
-/** The words of an audit action, else the action itself (a mono code is still more useful than nothing). */
+/**
+ * The words of an audit action. The server lists only the nine account actions (B-admin-polish A1), every
+ * one of which has a line in the bundles; an action it may list in the future still never reaches the page
+ * as a machine code (review S-admin-accounts 2) - it reads "Egyéb esemény".
+ */
 function useAuditAction() {
   const { t } = useTranslation();
-  return (action: string) => t(`adminUsers.audit.${action}`, { defaultValue: action });
+  return (action: string) => t(`adminUsers.audit.${action}`, { defaultValue: t('adminUsers.audit.other') });
 }
 
 /**
@@ -85,6 +89,8 @@ export function AccountDetailPage() {
   const detail = useAccountDetail(id, admin);
   const write = useAccountWrite(id ?? 0);
   const [sheet, setSheet] = useState<SheetName | null>(null);
+  // A disable / enable that found the account already in that state (another admin was first): said, not silent.
+  const [replayed, setReplayed] = useState<'disable' | 'enable' | null>(null);
 
   if (me && !admin) return <AdminForbidden />;
 
@@ -105,6 +111,7 @@ export function AccountDetailPage() {
 
   const open = (s: SheetName) => {
     write.reset();
+    setReplayed(null);
     setSheet(s);
   };
   const close = () => setSheet(null);
@@ -120,14 +127,28 @@ export function AccountDetailPage() {
           void navigate('/login', { replace: true });
           return;
         }
+        // The server answers `replayed` when the account was already in the state asked for.
+        if (answer.replayed && (w.kind === 'disable' || w.kind === 'enable')) setReplayed(w.kind);
         close();
       },
     });
+  // The header's "Újra" of the sheets WITHOUT a field replays the same call; the sheets with fields send what is typed now.
   const retry = () => {
     if (write.variables) run(write.variables);
   };
+  // A 401 on a write is the step-up password (the session itself was repaired by the refresh): it belongs under the password field.
+  const passwordRefused = write.isError && write.error instanceof ApiError && write.error.status === 401;
   const error = write.isError ? writeErrorText(write.error, t) : null;
-  const sheetBase = { busy: write.isPending, error, onClose: close, onRetry: retry };
+  const sheetBase = {
+    busy: write.isPending,
+    error,
+    onClose: close,
+    offline: !online,
+    onEdit: () => {
+      if (write.isError) write.reset();
+    },
+  };
+  const targetIsAdmin = account?.role === 'admin';
 
   if (id === null || (detail.error instanceof ApiError && detail.error.status === 404)) {
     return (
@@ -191,6 +212,11 @@ export function AccountDetailPage() {
                 ]
                   .filter(Boolean)
                   .join(' · ')}
+              </NoticeLine>
+            ) : null}
+            {replayed ? (
+              <NoticeLine tone="warn" role="status">
+                {t(replayed === 'disable' ? 'adminUsers.replayed.disable' : 'adminUsers.replayed.enable')}
               </NoticeLine>
             ) : null}
           </section>
@@ -292,20 +318,27 @@ export function AccountDetailPage() {
             confirmLabel={t('adminUsers.disable.link')}
             busy={write.isPending}
             error={error}
+            offline={!online}
+            onEdit={sheetBase.onEdit}
             onConfirm={(reason) => run({ kind: 'disable', reason })}
           />
           <ReasonSheet
             open={sheet === 'enable'}
             onClose={close}
             title={t('adminUsers.enable.title')}
-            message={t('adminUsers.enable.message', { name })}
+            message={targetIsAdmin ? t('adminUsers.enable.adminMessage', { name }) : t('adminUsers.enable.message', { name })}
             reasonLabel={t('adminUsers.reason')}
             reasonHint={t('adminUsers.reasonHint')}
             confirmLabel={t('adminUsers.enable.link')}
             tone="default"
             busy={write.isPending}
-            error={error}
-            onConfirm={(reason) => run({ kind: 'enable', reason })}
+            // Re-enabling an ADMIN hands the admin power back: the server asks for the actor's own password.
+            password={targetIsAdmin ? { label: t('adminUsers.roleSheet.password'), hint: t('adminUsers.enable.passwordHint') } : undefined}
+            error={targetIsAdmin && passwordRefused ? null : error}
+            passwordError={targetIsAdmin && passwordRefused ? error : null}
+            offline={!online}
+            onEdit={sheetBase.onEdit}
+            onConfirm={(reason, password) => run({ kind: 'enable', reason, password })}
           />
           <ConfirmSheet
             open={sheet === 'signout'}
@@ -314,6 +347,7 @@ export function AccountDetailPage() {
             message={self ? t('adminUsers.signout.selfMessage') : t('adminUsers.signout.message', { name })}
             confirmLabel={t('adminUsers.signout.confirm')}
             busy={write.isPending}
+            confirmDisabled={!online}
             status={error ? 'error' : 'idle'}
             onRetry={retry}
             onConfirm={() => run({ kind: 'signoutAll' })}
@@ -326,6 +360,7 @@ export function AccountDetailPage() {
             confirmLabel={t('adminUsers.lockout.confirm')}
             tone="default"
             busy={write.isPending}
+            confirmDisabled={!online}
             status={error ? 'error' : 'idle'}
             onRetry={retry}
             onConfirm={() => run({ kind: 'resetLockout' })}
@@ -338,6 +373,7 @@ export function AccountDetailPage() {
             confirmLabel={t('adminUsers.password.confirm')}
             tone="default"
             busy={write.isPending}
+            confirmDisabled={!online}
             status={error ? 'error' : 'idle'}
             onRetry={retry}
             onConfirm={() => run({ kind: 'forcePassword' })}

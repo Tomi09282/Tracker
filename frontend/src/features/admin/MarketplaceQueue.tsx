@@ -1,38 +1,25 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { ExternalLink } from 'lucide-react';
+import { ChevronRight, ExternalLink } from 'lucide-react';
 import { apiWithRefresh } from '../../lib/api';
+import { useOnline } from '../plans/useOnline';
+import { decideReports } from './marketplace/adminPostsApi';
+import { groupCases, reportersKey, type ReportRow } from './marketplace/reportCases';
 import { Pressable } from '../../ui/primitives/Pressable';
 import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
 import { Chip, ChipRow } from '../../ui/primitives/ChipRow';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { RowStack } from '../../ui/data/RowStack';
 import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
 import { Section, SectionHeader } from '../../ui/data/SectionHeader';
 import { Rule } from '../../ui/data/Rule';
 import { Screen } from '../../ui/shell/Screen';
 import { ScreenHeader } from '../../ui/shell/ScreenHeader';
-
-interface ReportRow {
-  id: number;
-  reason: string;
-  note: string | null;
-  snapshot: string | null;
-  snapshotTruncated: 0 | 1;
-  status: string;
-  createdAt: number;
-  postId: string | null;
-  postTitle: string | null;
-  profileHandle: string | null;
-  profileName: string | null;
-  authorHandle: string | null;
-  severity: number;
-  distinctReporters: number;
-}
 
 export const REPORT_STATUSES = ['open', 'triaged', 'upheld', 'rejected'] as const;
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
@@ -102,7 +89,7 @@ export function MarketplaceQueue({ status, onStatus }: { status: ReportStatus; o
   const { t } = useTranslation();
   const reportedAt = useReportedAt();
   const queue = useReports(status);
-  const reports = queue.data?.reports ?? [];
+  const cases = useMemo(() => groupCases(queue.data?.reports ?? []), [queue.data]);
 
   return (
     <section className="flex flex-col gap-6" aria-label={t('admin.marketplace.title')}>
@@ -125,24 +112,26 @@ export function MarketplaceQueue({ status, onStatus }: { status: ReportStatus; o
             ))}
           </RowStack>
         </div>
-      ) : reports.length > 0 ? (
+      ) : cases.length > 0 ? (
         <RowStack open close aria-label={t('admin.marketplace.title')}>
-          {reports.map((r) => (
+          {cases.map((c) => (
             <ListRow
-              key={r.id}
-              to={{ search: reportSearch(status, r.id) }}
-              title={subjectOf(r)}
+              key={c.key}
+              to={{ search: reportSearch(status, c.head.id) }}
+              title={subjectOf(c.head)}
               lines={2}
+              // The frame's row stands 91 high (admin-market-v2-reports), the old queue's 83 (review S-admin-posts 4): 14 above and below, not 10.
+              className="py-3.5"
               sub={
                 <>
                   {/* How many DIFFERENT people, not how many reports. One person filing five times
                       is one person, and the server makes that true by replaying their duplicates. */}
                   <span className="block truncate">
-                    {t(`admin.marketplace.reason.${r.reason}`, { defaultValue: r.reason })}
+                    {t(`admin.marketplace.reason.${c.head.reason}`, { defaultValue: c.head.reason })}
                     {' · '}
-                    {t('admin.marketplace.reporters', { count: r.distinctReporters })}
+                    {t(reportersKey(c.reporters), { count: c.reporters })}
                   </span>
-                  <span className="mt-0.5 block truncate text-data text-text-3">{reportedAt(r.createdAt)}</span>
+                  <span className="mt-0.5 block truncate text-data text-text-3">{reportedAt(c.at)}</span>
                 </>
               }
               subLines={2}
@@ -185,8 +174,11 @@ export function MarketplaceReport({ id, status }: { id: number; status: ReportSt
   const navigate = useNavigate();
   const location = useLocation();
   const reportedAt = useReportedAt();
+  const online = useOnline();
   const queue = useReports(status);
   const report = queue.data?.reports.find((r) => r.id === id);
+  // The case: every report of this reason on this subject. Deciding it decides all of them (one act, as on the post page).
+  const reportCase = useMemo(() => groupCases(queue.data?.reports ?? []).find((c) => c.ids.includes(id)), [queue.data, id]);
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const decideId = useId();
@@ -199,13 +191,14 @@ export function MarketplaceReport({ id, status }: { id: number; status: ReportSt
   };
 
   const resolve = useMutation({
-    mutationFn: (v: { id: number; status: string; remove: boolean; removalReason: string | null; note: string | null }) =>
-      apiWithRefresh(`/admin/marketplace/reports/${v.id}/resolve`, {
-        method: 'POST',
-        body: { status: v.status, note: v.note, remove: v.remove, removal_reason: v.removalReason },
-      }),
+    // NEVER queued while offline: a decision is made now or it fails and says so (review S-admin-moderation 2, same cause).
+    networkMode: 'always',
+    mutationFn: (v: { status: 'upheld' | 'rejected'; removalReason: string | null; note: string | null }) =>
+      decideReports(reportCase?.ids ?? [id], v.status, v.removalReason, v.note),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['admin-marketplace-reports'] });
+      void qc.invalidateQueries({ queryKey: ['admin-marketplace-posts'] });
+      void qc.invalidateQueries({ queryKey: ['admin-marketplace-post'] });
       leave();
     },
   });
@@ -239,22 +232,28 @@ export function MarketplaceReport({ id, status }: { id: number; status: ReportSt
             <p className="text-cap text-text-2">
               {t(`admin.marketplace.reason.${report.reason}`, { defaultValue: report.reason })}
               {' · '}
-              {t('admin.marketplace.reporters', { count: report.distinctReporters })}
+              {t(reportersKey(reportCase?.reporters ?? 1), { count: reportCase?.reporters ?? 1 })}
             </p>
-            <p className="text-data text-text-3">{reportedAt(report.createdAt)}</p>
+            <p className="text-data text-text-3">{reportedAt(reportCase?.at ?? report.createdAt)}</p>
             {/* The reporter's own words, when they wrote any: kept from the old queue (behaviour
                 wins, Q4); the frame's sample report has none. */}
             {report.note ? <p className="mt-3 text-body text-text-2">{report.note}</p> : null}
             {report.postId ? (
-              <TextLink
-                href={`/m/p/${report.postId}`}
-                target="_blank"
-                rel="noreferrer"
-                lead={<ExternalLink />}
-                className="self-start"
-              >
-                {t('admin.marketplace.openLive')}
-              </TextLink>
+              <>
+                {/* The inspect page of the post: its history and the other reports are one tap away (review S-admin-posts 10). */}
+                <TextLink to={`/admin/marketplace/posts/${report.postId}`} trail={<ChevronRight />} className="self-start">
+                  {t('adminPosts.openPost')}
+                </TextLink>
+                <TextLink
+                  href={`/m/p/${report.postId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  lead={<ExternalLink />}
+                  className="self-start"
+                >
+                  {t('admin.marketplace.openLive')}
+                </TextLink>
+              </>
             ) : null}
           </div>
 
@@ -298,10 +297,8 @@ export function MarketplaceReport({ id, status }: { id: number; status: ReportSt
                     size="lg"
                     className="w-full"
                     busy={resolve.isPending}
-                    disabled={reason.trim().length === 0}
-                    onClick={() =>
-                      resolve.mutate({ id: report.id, status: 'upheld', remove: true, removalReason: reason, note: note || null })
-                    }
+                    disabled={reason.trim().length === 0 || !online}
+                    onClick={() => resolve.mutate({ status: 'upheld', removalReason: reason, note: note || null })}
                   >
                     {t('admin.marketplace.upholdAndRemove')}
                   </Pressable>
@@ -312,12 +309,16 @@ export function MarketplaceReport({ id, status }: { id: number; status: ReportSt
                     text="body"
                     className="self-center"
                     busy={resolve.isPending}
-                    onClick={() =>
-                      resolve.mutate({ id: report.id, status: 'rejected', remove: false, removalReason: null, note: note || null })
-                    }
+                    disabled={!online}
+                    onClick={() => resolve.mutate({ status: 'rejected', removalReason: null, note: note || null })}
                   >
                     {t('admin.marketplace.reject')}
                   </TextLink>
+                  {resolve.isError ? (
+                    <NoticeLine tone="danger" role="alert">
+                      {t(online ? 'adminPosts.errorBody' : 'adminUsers.err.offline')}
+                    </NoticeLine>
+                  ) : null}
                 </div>
               </div>
             </section>

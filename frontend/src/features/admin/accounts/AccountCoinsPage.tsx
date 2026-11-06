@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { ChevronDown } from 'lucide-react';
+import { ApiError } from '../../../lib/api';
 import { toCoins } from '../../coins/useCoins';
 import { LedgerRow } from '../../../ui/data/LedgerRow';
 import { ListRow, ListRowSkeleton } from '../../../ui/data/ListRow';
@@ -49,12 +50,14 @@ export function AccountCoinsPage() {
     else void navigate(`/admin/accounts/${id ?? ''}`, { replace: true });
   };
   const rows = ledger.data?.pages.flatMap((p) => p.entries) ?? [];
+  // An account that does not exist: B-admin-polish A3 made the ledger read a 404 (it used to answer an empty ledger).
+  const gone = id === null || [ledger.error, detail.error].some((e) => e instanceof ApiError && e.status === 404);
 
   return (
     <Screen top="push" width="wide">
       <ScreenHeader kind="push" title={t('adminUsers.coin.fullLedger')} back={{ onClick: leave, label: t('adminUsers.account') }} />
 
-      {id === null ? (
+      {gone ? (
         <EmptyState heading="h2" title={t('adminUsers.goneTitle')} body={t('adminUsers.goneBody')} />
       ) : (
         <div className="flex flex-col">
