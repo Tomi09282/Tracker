@@ -1,0 +1,25 @@
+{
+  "about": "Admin-v2-closing (INT) - the states the closing regression needed beyond the packages' own: the role sheet with the step-up field (frame admin-account-detail-2b-role, which no package states.json captured). Captured LIVE against a scratch backend seeded exactly as pkg/S-admin-fix/states.json says (seed:dev-users, seed:exercises, S-admin-posts/seed-scratch.mjs, 45 extra accounts, account 15 disabled, a disabled admin at 58, a coin ledger on account 4): node scripts/pulse-shot.mjs --package Admin-v2-closing --live --base http://localhost:5189 --port 5189 --api <scratch>. Nothing is recorded and no write is fired (the sheet is opened and filled, never confirmed). Account A = admin@.",
+  "states": {
+    "sheet-role": {
+      "frame": "admin-v2/admin-account-detail-2b-role",
+      "title": "Szerepkör - lap, Admin választva",
+      "account": "A",
+      "route": "/admin/accounts/4",
+      "height": 874,
+      "reach": "live",
+      "why": "the role sheet of a coach with Admin chosen: the step-up field (the admin's own password) appears; never confirmed",
+      "arrived": { "role": "textbox", "name": { "key": "adminUsers.roleSheet.password" } },
+      "steps": [
+        {
+          "click": { "role": "button", "name": { "re": "^Szerepkör" } },
+          "arrived": { "role": "dialog", "name": { "key": "adminUsers.col.role" } }
+        },
+        {
+          "click": { "role": "radio", "name": { "re": "^Admin" } },
+          "arrived": { "role": "textbox", "name": { "key": "adminUsers.roleSheet.password" } }
+        }
+      ]
+    }
+  }
+}
