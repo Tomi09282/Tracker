@@ -177,10 +177,13 @@ await run(
 );
 const accentless = await all(
   `SELECT f.name FROM foods_fts JOIN foods f ON f.id = foods_fts.rowid
-    WHERE foods_fts MATCH ? LIMIT 5`,
+    WHERE foods_fts MATCH ? LIMIT 20`,
   ['turo*'],
 );
-ok('FTS finds "Túró Rudi" when the user types "turo"', accentless.length === 1);
+// `some`, not `length === 1`: the probe must find ITS food, whatever else the database holds. A database seeded
+// with demo data already has "Túró, félzsíros", so the prefix matches two foods there and the old count failed
+// for a reason that has nothing to do with accents.
+ok('FTS finds "Túró Rudi" when the user types "turo"', accentless.some((r) => r.name === 'Túró Rudi'));
 
 console.log('\n── PLANS: ENTITLEMENT ──────────────────────────────────────────────────────────');
 
