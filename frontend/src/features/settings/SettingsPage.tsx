@@ -92,6 +92,7 @@ export function SettingsPage() {
         <section aria-label={t('settings.account')} className="flex flex-col gap-7">
           {isPending ? (
             <>
+              <h1 className="sr-only">{t('nav.profile')}</h1>
               <MonogramSkeleton size={176} className="self-start" />
               <div className="flex flex-col gap-2">
                 <Skeleton className="h-5 w-40" />
@@ -105,20 +106,27 @@ export function SettingsPage() {
                   account. This is the one screen that prints the address in full: it is your own. */}
               <div className="flex flex-col gap-1">
                 {user ? (
-                  // THE NAME LINE IS THE ONLY TARGET (round-A review finding 13): hug width, 44
-                  // tall by its padding, while it takes the title's 28 in the column (-my-2).
-                  <Pressable
-                    variant="link"
-                    aria-haspopup="dialog"
-                    aria-label={`${t('settings.displayName')}: ${personLabel(user)}`}
-                    onClick={() => setNameOpen(true)}
-                    className="-my-2 max-w-full gap-1.5 self-start py-2"
-                  >
-                    <span className="min-w-0 truncate text-title text-text-1">{personLabel(user)}</span>
-                    <ChevronRight aria-hidden className="text-text-3" />
-                  </Pressable>
+                  // THE NAME IS THE PAGE'S h1 (LifeOS review O4: the one page without one). The heading takes the
+                  // layout the button had — hug width, -my-2, self-start — and is a flex box so its one child stays a
+                  // flex item (an inline child would add a line box under it). The button inside is still THE ONLY
+                  // TARGET (round-A review finding 13): hug width, 44 tall by its padding.
+                  <h1 className="-my-2 flex max-w-full self-start">
+                    <Pressable
+                      variant="link"
+                      aria-haspopup="dialog"
+                      aria-label={`${t('settings.displayName')}: ${personLabel(user)}`}
+                      onClick={() => setNameOpen(true)}
+                      className="max-w-full gap-1.5 self-start py-2"
+                    >
+                      <span className="min-w-0 truncate text-title text-text-1">{personLabel(user)}</span>
+                      <ChevronRight aria-hidden className="text-text-3" />
+                    </Pressable>
+                  </h1>
                 ) : (
-                  <p aria-hidden className="h-7" />
+                  <>
+                    <h1 className="sr-only">{t('nav.profile')}</h1>
+                    <p aria-hidden className="h-7" />
+                  </>
                 )}
                 <div className="flex items-baseline justify-between gap-4">
                   <p className="min-w-0 truncate text-body text-text-2">{user?.email}</p>
