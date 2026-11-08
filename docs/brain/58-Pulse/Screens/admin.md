@@ -1,12 +1,20 @@
 ---
 type: screen-inventory
 title: Admin áttekintés — screen inventory
-updated: 2026-10-11
+updated: 2026-11-08
 route: "/admin"
 tags: [ux, screen, inventory, pulse]
 ---
 
 # Admin áttekintés — `/admin` · admin only (member and coach get a forbidden page) · "Admin" bottom tab, Profil → `settings.openAdmin` = "Admin felület megnyitása", desktop command palette · lit tab: Admin (6th of 7)
+
+> [!warning] Partly superseded by Admin v2 (2026-11-03 … 2026-11-08)
+> This inventory describes the admin overview as it was on 2026-10-11. Since then the user search
+> (`UserSearch.tsx`) is gone — its behaviour lives in the Fiókok list and the account page —; Moderáció
+> gained the STATISZTIKA panel and lost the user-split block and the footer sentence; and Statistics, the
+> account page, the coin ledger and the marketplace post page were added. What the admin area is now:
+> [[admin-v2]] · why: [[0026-admin-v2-inspect-and-correct]]. The sections below are kept as the
+> designer-facing record of the earlier brief and are not re-verified.
 
 Sources read: `frontend/src/features/admin/AdminPage.tsx`, `AdminShell.tsx`, `ModerationQueue.tsx`, `UserSearch.tsx`, `MarketplaceQueue.tsx`, `AdminMetrics.tsx`, `app/navTabs.ts`, `app/router.tsx`, `backend/src/admin/routes.js`, `backend/src/public/moderation.js`, `backend/scripts/seed-demo.mjs`, brain spec `55-Screens/admin-attekintes.md`. Copy is quoted in the form key = "value", every pair taken from `frontend/src/i18n/hu.json` and machine-checked against it. Status: **live** = rendered on the route · **planned** = spec / API only · **cut**.
 
