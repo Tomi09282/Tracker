@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Toggle } from '../../ui/primitives/Toggle';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { ChipRow } from '../../ui/primitives/ChipRow';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { Section } from '../../ui/data/SectionHeader';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
 import { ApiError } from '../../lib/api';
@@ -53,17 +55,27 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
 
   // Skeleton, not an empty chip row: an empty `options` list mid-fetch reads as "this client has
   // no equipment at all", which is a claim neither query has made yet.
+  // The section head stands; a block for the hint line and one per line of words below it.
   if (onboarding.isPending || taxonomies.isPending) {
-    return <Skeleton className="h-36 w-full rounded-card" />;
+    return (
+      <Section title={t('settings.equipment')}>
+        <div className="flex flex-col gap-4" aria-hidden>
+          <Skeleton className="h-3 w-72" />
+          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-4 w-72" />
+          <Skeleton className="h-4 w-56" />
+        </div>
+      </Section>
+    );
   }
 
   // The link's own 404 (not yours, archived, never existed) — the same story the page-level
   // `isError` guard above already tells for the whole screen.
   if (onboarding.isError) {
     return (
-      <Surface>
-        <p className="text-body-s text-text-2">{t('coaching.clientMissingBody')}</p>
-      </Surface>
+      <Section title={t('settings.equipment')}>
+        <p className="text-body text-text-2">{t('coaching.clientMissingBody')}</p>
+      </Section>
     );
   }
 
@@ -72,9 +84,9 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
   // offering chips here would let a save silently vanish into a profile that does not exist yet.
   if (!profile) {
     return (
-      <Surface>
-        <p className="text-body-s text-text-2">{t('coaching.noProfile')}</p>
-      </Surface>
+      <Section title={t('settings.equipment')}>
+        <p className="text-body text-text-2">{t('coaching.noProfile')}</p>
+      </Section>
     );
   }
 
@@ -113,28 +125,37 @@ export function ClientEquipmentCard({ linkId }: { linkId: number }) {
   };
 
   return (
-    <Surface className="flex flex-col gap-group">
-      <p className="text-title-2 text-text-1">{t('settings.equipment')}</p>
-      {/* States the consequence, not just the field: the coach is editing somebody else's answer. */}
-      <p className="text-body-s text-text-2">{t('coaching.equipmentHint')}</p>
-      <div className="flex flex-wrap gap-tight">
-        {options.map((eq) => (
-          <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
-        ))}
+    // client-detail-1 "Felszerelés": the section head carries the commit as its one trailing text
+    // link (the screen's one pill is "Új terv a kliensnek"), off until the set really differs.
+    <Section
+      title={t('settings.equipment')}
+      trailing={
+        // min-w-11: "Save" (en) is 30 pt of ink; the target still has to be 44 wide, with the word
+        // kept on the head's end (the same answer as the Settings name field).
+        <TextLink
+          className="min-w-11 justify-end"
+          onClick={handleSave}
+          disabled={!unsaved || save.isPending}
+          busy={save.isPending}
+        >
+          {t('common.save')}
+        </TextLink>
+      }
+    >
+      <div className="flex flex-col gap-1">
+        {/* States the consequence, not just the field: the coach is editing somebody else's answer. */}
+        <p className="text-cap text-text-2">{t('coaching.equipmentHint')}</p>
+        <ChipRow wrap label={t('settings.equipment')}>
+          {options.map((eq) => (
+            <Toggle key={eq.id} on={current.includes(eq.id)} label={eq.name} onToggle={() => toggle(eq.id)} />
+          ))}
+        </ChipRow>
       </div>
-      <Pressable
-        variant="primary"
-        disabled={!unsaved || save.isPending}
-        busy={save.isPending}
-        onClick={handleSave}
-      >
-        {t('common.save')}
-      </Pressable>
       {error ? (
-        <p aria-live="polite" className="text-caption text-danger">
+        <NoticeLine tone="danger" role="alert" compact>
           {error}
-        </p>
+        </NoticeLine>
       ) : null}
-    </Surface>
+    </Section>
   );
 }

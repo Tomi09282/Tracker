@@ -1,0 +1,90 @@
+{
+  "id": "B-lifeos-polish",
+  "decision": "backend polish round for the merged LifeOS packages (B-core, B-habits-tasks, B-rewards-challenges, B-calendar, B-focus) on the approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md: the adversarial security review .pulse/review/security-lifeos (every critical and high finding, the cheap mediums), the lazy LifeOS start for accounts with a stored zone, the task point rules on GET /tasks and /lifeos/today, the first reminder on nextEvent (S-calendar review DEV-k), the MAI DOBAS picked state; owner 2026-10-18 rulings in .pulse/owner-answers.md",
+  "owns": [
+    "backend/package.json",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-calendar.js",
+    "backend/scripts/smoke/lifeos-core.js",
+    "backend/scripts/smoke/lifeos-focus.js",
+    "backend/scripts/smoke/lifeos-habits-tasks.js",
+    "backend/scripts/smoke/lifeos-polish.js",
+    "backend/scripts/smoke/lifeos-rewards-challenges.js",
+    "backend/scripts/verify-031.mjs",
+    "backend/scripts/verify-day-close.mjs",
+    "backend/scripts/verify-lifeos-polish.mjs",
+    "backend/src/coins/achievements.js",
+    "backend/src/coins/routes.js",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/lifeos-calendar.js",
+    "backend/src/db/lifeos-focus-views.js",
+    "backend/src/db/lifeos-items.js",
+    "backend/src/db/lifeos-ledger.js",
+    "backend/src/db/lifeos-rewards-items.js",
+    "backend/src/db/tx/lifeos-events.js",
+    "backend/src/db/tx/lifeos-focus.js",
+    "backend/src/db/tx/lifeos-habits.js",
+    "backend/src/db/tx/lifeos-rewards.js",
+    "backend/src/db/tx/lifeos-stats.js",
+    "backend/src/db/tx/lifeos-tasks.js",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/**",
+    "docs/pipeline/pulse/pkg/B-lifeos-polish/**"
+  ],
+  "takenFrom": {
+    "B-focus (closed, merged 0b2c817)": [
+      "backend/package.json",
+      "backend/scripts/smoke.js",
+      "backend/scripts/smoke/lifeos-focus.js",
+      "backend/src/coins/routes.js",
+      "backend/src/db/gdpr.js",
+      "backend/src/db/index.js",
+      "backend/src/db/lifeos-focus-views.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/src/db/tx/lifeos-focus.js",
+      "backend/src/db/tx/lifeos-stats.js",
+      "backend/src/db/worker.js",
+      "backend/src/lifeos/** (the focus, stats and core files)"
+    ],
+    "B-calendar (closed, merged c12eed2)": [
+      "backend/scripts/smoke/lifeos-calendar.js",
+      "backend/src/db/lifeos-calendar.js",
+      "backend/src/db/tx/lifeos-events.js",
+      "backend/src/lifeos/** (the calendar files)"
+    ],
+    "B-rewards-challenges (closed)": [
+      "backend/scripts/smoke/lifeos-rewards-challenges.js",
+      "backend/src/db/lifeos-rewards-items.js",
+      "backend/src/db/tx/lifeos-rewards.js",
+      "backend/src/lifeos/** (the challenge and reward files)"
+    ],
+    "B-habits-tasks (closed, merged 4c3e668)": [
+      "backend/scripts/smoke/lifeos-habits-tasks.js",
+      "backend/src/db/lifeos-items.js",
+      "backend/src/db/lifeos-ledger.js",
+      "backend/src/db/tx/lifeos-habits.js",
+      "backend/src/db/tx/lifeos-tasks.js",
+      "backend/src/lifeos/** (the habit and task files)",
+      "backend/scripts/verify-day-close.mjs"
+    ],
+    "B-core (closed)": [
+      "backend/scripts/smoke/lifeos-core.js",
+      "backend/scripts/verify-031.mjs"
+    ],
+    "unowned (019 coins, pre-Pulse)": [
+      "backend/src/coins/achievements.js"
+    ]
+  },
+  "handIn": {
+    "shared.patch": [
+      "frontend/src/lib/lifeos-api.ts"
+    ]
+  },
+  "notInScope": [
+    "the screens: the frontend polish round reads the new fields (taskRules, nextEvent.firstReminder, challenge.picked title / valueMinor / paidMinor, DAY_SETTLED) through lifeos-api.ts",
+    "outside LifeOS but on the same coin ledger: workout-count achievements counted empty sessions (security review attack 08) - fixed here in src/coins/achievements.js (unowned 019 file): a session counts with a working set done or ten server-measured minutes",
+    "work-packages.json entry - the integrator's, at merge"
+  ]
+}

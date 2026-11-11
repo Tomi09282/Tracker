@@ -1,0 +1,67 @@
+{
+  "package": "S-compose-profile",
+  "branch": "pulse/S-compose-profile",
+  "verifiedOn": "pulse/S-compose-profile = pulse-redesign b09a468 + the S-compose-profile commits; no hand-in file (no i18n, variants or shared change)",
+  "door": "URL only on a phone (owner answer Q5): /compose/profile is reached from the desk; the page's own <Link to=\"/compose\"> is gone, the way back is ScreenHeader push from app/routeMeta.ts:49 (compose.backToDesk, VISSZA A PULTHOZ)",
+  "handIn": [],
+  "files": {
+    "frontend/src/features/compose/ProfileEditorPage.tsx": "render rewritten on the kit; everything from `export function ProfileEditorPage` to `visibleSpecialties` and from `submit` to `cityName` is byte-identical (hooks, state, effects, submit, toggleSpecialty, ordering). Screen push; Top = ScreenHeader push (no title) 16 above the anchor; removed = danger NoticeLine; Monogram 176 textured with the lime dot when publishedAt is set; h1 text-title; identity line = TextLink body regular, quiet closed / ink open, chevron down / up, aria-expanded, plain text when read-only; IdentityDisclosure = Section Nyilvános név módosítása + HandleField + warn NoticeLine (listed only) + danger refusal + two TextLinks (Név módosítása strong, Mégse); RowStack open close with CityRow (ListRow value + chevron -> kit Sheet of radio ListRows with CheckMark) and the public ListRow + Switch; the switch outcomes as NoticeLines; Field Megjelenített név (Kötelező); TextArea singleLine headline (Nem kötelező quiet, hint); Section Szakterületek with the two-ink counter, ChipRow wrap of Chips, Több TextLink; Section Bemutatkozás with the counter (two inks / warning / danger) and TextArea labelHidden 8-row window; Pressable primary lg Mentés / Profil létrehozása; TextLink Előnézet / Előnézet elrejtése; refusals as NoticeLines; preview Section with DocRenderer. Loading = Screen + header + MonogramSkeleton 176 + Skeleton lines (role status, sr-only Betöltés). CityPicker (native select) deleted.",
+    "frontend/src/features/compose/HandleField.tsx": "logic untouched (debounce, pattern, probe, status); the status line is a NoticeLine (free ok, taken / malformed danger, own / checking info, unknown warn) in the always-mounted aria-live 44 pt row; Loader2 / Check / X and the text-caption classes gone; export and props unchanged",
+    "docs/pipeline/pulse/pkg/S-compose-profile/budget.json": "deleted by check-pulse --fix-down (58 -> 0)"
+  },
+  "verdicts": {
+    "compose-profile-1": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-compose-profile/compose-profile-1.png (replay, 402 x 1416, scale 2, insets 62 / 34)",
+      "pair": ".pulse/pairs/S-compose-profile/compose-profile-1.pair.png, compose-profile-1.tile-1.png, compose-profile-1.tile-2.png",
+      "geometry": "70 compared, 61 matched, 7 deviating = width only or the textarea: the h1, the row title / sub and the hint are fixed 354 / 290 Figma boxes against hugging text (dy <= 0.7); the headline and the bio Value are textarea text the probe reads as one line (the hint at 643 and the bio underline at 1127 land, so the boxes are right); Field/Bemutatkozás is matched by kit name to the first inputField (the kit draws the bio as textArea). 2 unmatched = the two TextArea underlines (drawn as the box's bottom border; visible at 634 and 1127 in the tiles). 2 style = the two counters' first-range colour (the probe reads the outer span text-2; the figure is text-1 as drawn)",
+      "pill": "one lime pill, Mentés 24,1159 354 x 56 (frame 24,1160)"
+    },
+    "compose-profile-2": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-compose-profile/compose-profile-2.png (replay, 402 x 1089; the recorded GET /compose/handle?handle=kovacs-peter-edzo answers available)",
+      "pair": ".pulse/pairs/S-compose-profile/compose-profile-2.pair.png, compose-profile-2.tile-1.png, compose-profile-2.tile-2.png",
+      "geometry": "65 compared, 54 matched, 9 deviating = width only (h1, hint, Szabad, the warning, Város, the public row, the headline value, its hint; dy <= 0.7), 2 unmatched = the drawn text caret (headless capture, the caret blinks / is not a layer) and the headline underline (border), 0 style mismatches"
+    },
+    "profile-handle-own": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-handle-own.png", "note": "seed: panel open, nothing typed; Ez a jelenlegi neved. (info dot); Név módosítása disabled" },
+    "profile-handle-malformed": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-handle-malformed.png", "note": "seed: -x typed; danger line from the server's handlePattern; no request" },
+    "profile-handle-taken": { "verdict": "matched-fixture", "capture": ".pulse/shots/S-compose-profile/profile-handle-taken.png", "fixture": "GET /compose/handle?handle=kovacs-peter-edzo edit /available = false" },
+    "profile-handle-unknown": { "verdict": "matched-fixture", "capture": ".pulse/shots/S-compose-profile/profile-handle-unknown.png", "fixture": "GET /compose/handle?handle=kovacs-peter-edzo status 500, empty body; declared request + console" },
+    "profile-city-sheet": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-city-sheet.png", "note": "seed: panel open, Város row tapped; kit Sheet titled Város, Bárhol + 11 cities as radio rows, Budapest ticked; the base build had a native select (baseline capture of this state impossible, the inventory difference is DEV row 3)" },
+    "profile-specialties-expanded": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-specialties-expanded.png" },
+    "profile-specialties-cap": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-specialties-cap.png", "note": "6 / 6 kiválasztva; at 402 x 874 scrolled to the end the two chips sit under the tab bar, so that one scroll-end capture cannot click them (capture artefact, not a product path)" },
+    "profile-preview-open": { "verdict": "matched-fixture", "capture": ".pulse/shots/S-compose-profile/profile-preview-open.png (402 x 2091)", "fixture": "POST /compose/preview answered from the recorded GET /compose/profile /profile (its doc is the server's render of the same bio)" },
+    "profile-offline": { "verdict": "matched", "capture": ".pulse/shots/S-compose-profile/profile-offline.png", "note": "the shell's offline line; nothing page-level" },
+    "loading": { "verdict": "structure", "note": "no capture mechanism holds a GET in replay; built as Screen + header + MonogramSkeleton 176 + Skeleton lines, role status, checked in code" },
+    "create": { "verdict": "structure", "note": "profile null fails pulse-fixture-check (type: the recordings have object); checked in code (deviations row 1)" },
+    "removed": { "verdict": "structure", "note": "removedAt as a number fails pulse-fixture-check (the recordings have null); checked in code (deviations row 2)" },
+    "never-public / panel without warning": { "verdict": "structure", "note": "listedAt null fails pulse-fixture-check" },
+    "switch went dark / switch refused / save refused / rename refused": { "verdict": "structure", "note": "the 409 bodies carry `reason` (and postsWentDark on a 200 POST), which the checker refuses outside the error envelope - the same need as R-S-compose-post-01 / R-S-compose-hub-01; render-only NoticeLines, checked in code" },
+    "bio near / over the cap": { "verdict": "structure", "note": "reachable only by typing about 6 800 characters; counterTone and COUNTER_CLASS are the existing helpers" }
+  },
+  "probes": {
+    "all": "every captured state at 402: fonts loaded (display face Big Shoulders), one lime pill, zero boxed surfaces, no overflow; targets fail on ONE element in Hungarian - the kit Chip \"Erő\" 41.5 x 44 (request R-S-compose-profile-01); no undeclared console error or request",
+    "focusWalk": "compose-profile-1 21 stops, compose-profile-2 22 stops, city sheet 3 stops; none without visible focus (.pulse/shots/S-compose-profile/focus/)",
+    "reducedMotion": "no running infinite animation (.pulse/shots/S-compose-profile/rm/)",
+    "scrollEnd": "compose-profile-1 at 402 x 874 scrolled to the end: Előnézet clears the bar and the fade (.pulse/shots/S-compose-profile/end/)",
+    "w360_w430": "every state at 360 and 430: no overflow; the headline wraps to two lines at 360 (.pulse/shots/S-compose-profile/w360/, w430/)",
+    "languages": "every state in en and de: no overflow, no key path, no truncated label (.pulse/shots/S-compose-profile/en/, de/); en / de pass the target probe"
+  },
+  "inventory": "compose-profile-1, specialties, preview, offline = baseline. Panel states: -12 +1 = the native Város combobox with its 12 options -> one button \"Város Budapest\" (the options are radios in the sheet state, 37 controls). Nothing a user could do is gone.",
+  "ledger": {
+    "useTaxonomy 2 -> 1": "CityPicker received cities from the page; IdentityDisclosure no longer reads the taxonomy (it lost the city, which the page renders as CityRow from the page's own useTaxonomy)",
+    "door to=/compose 1 -> 0": "the back link moved to the shell: ScreenHeader kind push reads app/routeMeta.ts:49 ('/compose/profile' -> '/compose', compose.backToDesk); navigate('/compose') after a save is unchanged",
+    "role group 1 -> 0": "the specialty <ul role=\"group\"> is now the kit ChipRow, which renders role=\"group\" itself",
+    "aria-labelledby 2 -> 0": "the ul and the section were labelled by the h2; ChipRow is named with aria-label (the same words) and Section labels itself with its own id (useId)",
+    "aria-pressed 1 -> 0": "the chips are kit Chips, which still render aria-pressed (checked by the specialties-cap arrival: pressed=true)",
+    "focus-visible: 8 -> 0, motion-reduce: 1 -> 0": "the raw textarea / select / spinner classes are gone; focus and reduced motion are the kit's (Field / TextArea line, ListRow / TextLink ring, NoticeLine has no spinner); the focus walk passes"
+  },
+  "liveWrites": [],
+  "liveSmoke": "compose-profile-1 opened once against the live backend with the coach jar (refreshed, no login): renders, no undeclared error (.pulse/shots/S-compose-profile/live/compose-profile-1.live.png). No write.",
+  "deviations": "docs/pipeline/pulse/pkg/S-compose-profile/deviations.md (11 rows)",
+  "copyQuestions": [],
+  "proposedCopy": [],
+  "requests": ["R-S-compose-profile-01 (open, not blocking): a 44 pt target floor on Chip"],
+  "budget": { "before": 58, "after": 0 },
+  "lastBuild": "pulse-verify: build green in 13 s · 11 of 11 captured (replay) - on pulse-redesign b09a468 merged into the slot"
+}

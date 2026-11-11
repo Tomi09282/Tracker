@@ -1,0 +1,15 @@
+{
+  "state": "style-studio-2",
+  "what": "Elem-stílus stúdió — E1 átváltva C-re, mentve: the studio right after a variant was saved.",
+  "why": "Saving a variant rewrites the look of that element for EVERY user of the dev database. No capture saves one: the PUT is answered here, and the styles read that follows carries the new letter.",
+  "how": "PUT /ui/element-styles/:id answers 200 (backend/src/theme/routes.js); the page does not read the body, so the fixture sends none. The letter in the read after it is the one the script picked.",
+  "fixtures": [
+    { "label": "save", "method": "PUT", "path": "/api/v1/ui/element-styles/*", "status": 200 },
+    {
+      "after": "save",
+      "method": "GET",
+      "path": "/api/v1/ui/element-styles",
+      "edits": [{ "pointer": "/styles/E1", "value": "C" }]
+    }
+  ]
+}

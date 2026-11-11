@@ -1,0 +1,67 @@
+{
+  "package": "S-coach-dashboard",
+  "branch": "pulse/S-coach-dashboard",
+  "verifiedOn": "pulse/S-coach-dashboard = pulse-redesign d96b6e8 + the S-coach-dashboard commits (no hand-in file to apply)",
+  "handIn": [],
+  "files": {
+    "frontend/src/features/coaching/CoachDashboard.tsx": "render rewritten on the kit in the frames' order: Screen root (width wide, R21) > ScreenHeader greet (Klienseim / Edzői felület, NotificationBell) with the Tervek TextLink (to=\"/coach/plans\" literal, chevron trail) > hero stage (Pic hero-stopwatch 239 absolute -right-34 -top-58, StatBlock Kliensek + giant Numeral roll from 0, SplitBar two-column legend with ink steps) > [Rule strong + NoticeLine warn with the handoverShort detail] > Section Névsor (count trailing once loaded) with RowStack of ListRow (to the link id, 28 pt Monogram in the lead slot, mono sub line amber at 0 sessions, the átadásra vár micro tag 16 after the count, the archive icon button as control over both gaps, chevron) > RowStack open close of two LedgerRows (Csapatok opens the sheet, Élő kódok chevronSpace; dash on failure or while loading) > Section rule=false trailingInFlow Csatlakozási kódok with the ONE lime pill Új kód (size sm, 16 pt plus) and RowStack of code ListRows (figure in ink, word in text-2; Visszavonás danger TextLink) + the pre-made accounts door row > four Pulse Sheets (code ready with the 56 pt code row and CopyButton as is; Csapatok form; pre-made accounts form + secrets panel; archive confirmation). Everything above the return is unchanged except the donut colour constants (the team tone is SplitBar's ink step now) and the mint pill's look (same handler).",
+    "docs/pipeline/pulse/pkg/S-coach-dashboard/budget.json": "deleted by check-pulse --fix-down (63 -> 0)",
+    "docs/pipeline/pulse/pkg/S-coach-dashboard/states.json": "overrides for coach-dashboard-1 / -2 / -3 (edit fixtures over the coach recording; frame 2 scrolls to the end before Új kód) + 9 undrawn states + notCapturable (loading, busy, pregen-secrets, copy-feedback, admin)",
+    "docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md": "Q4 cases: the three undrawn sheets, forbidden, the undrawn data states, kept quirks",
+    "docs/pipeline/pulse/pkg/S-coach-dashboard/requests/R-S-coach-dashboard-01.json": "a 20 pt centred glyph for the bare icon button (the roster's archive glyph); also in .pulse/inbox"
+  },
+  "verdicts": {
+    "coach-dashboard-1": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-coach-dashboard/coach-dashboard-1.png",
+      "pair": ".pulse/pairs/S-coach-dashboard/coach-dashboard-1.pair.png",
+      "tiles": [".pulse/pairs/S-coach-dashboard/coach-dashboard-1.tile-1.png", ".pulse/pairs/S-coach-dashboard/coach-dashboard-1.tile-2.png"],
+      "fixture": "states.json overrides.coach-dashboard-1: six recorded clients renamed / re-counted (2 / 2 / 1 / 1 split), others removed, the fourth team removed, two live codes (3 / 20, 0 / 20), bell 1 (pulse-fixture-check OK)",
+      "geometry": "122 compared, 100 matched, 16 deviating, 0 style mismatches, 6 unmatched. Every deviation is a width only (dx 0, dy -0.8): the frame's text boxes are fixed 235 / 262 / 327 columns, the DOM text hugs its words; plus the stopwatch image, rendered at exactly 173,142 239 x 211.5 (the probe reports dw 10 for an image that runs 10 past the frame edge). The 6 unmatched are glyph/archive: the app draws the 24 pt glyph at the same centre (R-S-coach-dashboard-01).",
+      "probes": "fonts, one pill (Új kód 259.8,1088.7 118 x 44), boxed, overflow, targets, focus walk (25 stops, all visible), scroll-end, reduced motion: pass"
+    },
+    "coach-dashboard-2": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-coach-dashboard/coach-dashboard-2.png",
+      "pair": ".pulse/pairs/S-coach-dashboard/coach-dashboard-2.pair.png",
+      "fixture": "INT fixture coach-dashboard-2 (POST /invite-codes 201 with the drawn code) + overrides.coach-dashboard-2 (frame-1 data, the code list after the mint: 0 / 20, 3 / 20, 0 / 20 by re-valuing a recorded code, so Élő kódok reads 3)",
+      "geometry": "the probe measures the fixed sheet in document coordinates of the scrolled page (every dy is the scroll offset 642), so it cannot pass on this frame; minus the offset the sheet title is 1 pt right (the sheet's 1 pt edge), the explanation at 706 and the code at 784.5 (frame 785); read on the tile: grabber, title row, close, body, the two strong rules and the 56 pt code row with the copy glyph sit where the frame draws them",
+      "remaining": "the page behind the scrim stands about 7 pt higher than drawn: the frame is the page scrolled to its end LESS d (so a row name sits at 68); the capture is scrolled to the end"
+    },
+    "coach-dashboard-3": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-coach-dashboard/coach-dashboard-3.png",
+      "pair": ".pulse/pairs/S-coach-dashboard/coach-dashboard-3.pair.png",
+      "tiles": [".pulse/pairs/S-coach-dashboard/coach-dashboard-3.tile-1.png", ".pulse/pairs/S-coach-dashboard/coach-dashboard-3.tile-2.png"],
+      "fixture": "overrides.coach-dashboard-3: as frame 1 plus the recorded pre-made account without a team, its e-mail set to horvath.gabor@ (one pending, 2 / 2 / 1 / 2 split)",
+      "geometry": "136 compared, 110 matched, 19 deviating (widths only, dy -0.3, and the image as in frame 1), 0 style mismatches, 7 unmatched = glyph/archive (R-S-coach-dashboard-01). The tag átadásra vár renders at x 228.6, 92.4 wide (frame 229, 92)."
+    },
+    "coach-dashboard-recorded": { "verdict": "structure", "note": "the recording as it is: 14 clients, 2 pending (plural notice), five-part split (3 named + Egyéb csapatok + Csapat nélkül), 4 live codes, bell 2" },
+    "coach-dashboard-empty": { "verdict": "structure", "note": "no hero; Névsor with the left-aligned empty state; ledger and codes as recorded" },
+    "coach-dashboard-error": { "verdict": "structure", "open": "targets probe measures the TextLink 'Újra' layout box 30.4 x 44 - the kit's ::after target layer is not seen by the probe (same as R-S-home-03 / coach-plans-error)" },
+    "coach-dashboard-no-codes": { "verdict": "structure", "note": "heading, pill and door stay, no code row, ledger 0" },
+    "coach-dashboard-offline": { "verdict": "structure", "note": "shell offline line; Új kód in the disabled pill look, all Visszavonás and archive glyphs disabled" },
+    "coach-dashboard-teams-sheet": { "verdict": "structure", "note": "Pulse Sheet, underline field, Létrehozás strong text link (disabled while empty); focus walk 2 stops visible" },
+    "coach-dashboard-pregen-sheet": { "verdict": "structure", "note": "Pulse Sheet, e-mail field with its hint, Fiókok létrehozása strong text link" },
+    "coach-dashboard-archive-sheet": { "verdict": "structure", "note": "Pulse Sheet, monogram + sentence, Archiválás (danger) and Mégse; never confirmed" },
+    "coach-dashboard-forbidden": { "verdict": "structure", "note": "member: EmptyState as the h1; three 403 stubs" },
+    "loading": { "verdict": "structure", "note": "not capturable (no held answer, as R-S-coach-plans-02); code only" },
+    "busy": { "verdict": "structure", "note": "not capturable; kit Pressable / TextLink busy" },
+    "pregen-secrets": { "verdict": "structure", "note": "needs a 2xx body for an unrecorded POST; code only" }
+  },
+  "variants": {
+    "lang": "every state captured in en and de (_contact-states.en.png / .de.png): no key path, no overflow; the German archive sheet title 'Diesen Klienten archivieren?' is cut with an ellipsis by the kit Sheet header (one line) at 402",
+    "width": "360 and 430: no horizontal overflow; at 360 a long pending row cuts the tag with an ellipsis (one sub line)",
+    "w1280": "control inventory of coach-dashboard-recorded at 1280 equals the base inventory coach-dashboard-1.w1280.controls.json except the CSAPATOK row's name order ('4 CSAPATOK' -> 'CSAPATOK 4', the ledger reads label then figure) and the tab labels' case (shell, F11); the 1120 desktop column stays (R21)",
+    "reducedMotion": "pass (no running infinite animation)",
+    "scrollEnd": "pass for frames 1 / 3 and recorded: the last row clears the bar and the fade"
+  },
+  "inventory": "every state has the same number of controls as its baseline; the only difference is the CSAPATOK button's accessible name ('3 CSAPATOK' -> 'CSAPATOK 3': the tile read figure then caption, the ledger row reads label then figure); the roster rows, both sheet forms, the archive glyphs, Tervek, the bell, the pill, every Visszavonás and the door are unchanged in role, name, disabled state and href",
+  "ledger": "pulse-ledger lists 'door to={rows.length} 1 -> 0': that was CountUp's prop (<CountUp to={rows.length} />), not a route; the count-up is now Numeral mode=roll from 0. Hook and mutation calls unchanged; sr-only 0 -> 1 (the roster's loading announcement)",
+  "budget": "63 -> 0, file deleted",
+  "liveSmoke": "pulse-verify --live --smoke: 7 of 7 captured against the dev backend with the coach / member jars; coach-dashboard-recorded rendered from the live API with no fixture and no undeclared error. No write was made (liveWrites empty).",
+  "lastBuild": "pulse-verify: build green in 13 s · 12 of 12 captured (replay)",
+  "openRequests": ["R-S-coach-dashboard-01"],
+  "deviations": "docs/pipeline/pulse/pkg/S-coach-dashboard/deviations.md",
+  "proposedCopy": []
+}

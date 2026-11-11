@@ -1,0 +1,59 @@
+{
+  "package": "F6",
+  "lane": "A1 - actions (the keystone)",
+  "branch": "pulse/F6",
+  "verifiedOn": "pulse/F6 64224d8 = pulse-redesign 862d745 (F2:c, F3) + the F6 commits; shared.patch applied by pulse-sync",
+  "handIn": ["docs/pipeline/pulse/pkg/F6/shared.patch"],
+  "files": {
+    "frontend/src/ui/primitives/control.ts": "the recipe restyled in place: size axis md 44 (default) / lg 56 / sm 44; variant link (+ tone danger, text cap|body); link + shape icon = the bare iconBtn; Pulse pressed / disabled / busy / focus on primary and link; kitName(); the focus ring repaired for every look (focus-visible:outline-solid); bridged looks secondary / ghost / danger / selected / chip / field / density / chip() unchanged",
+    "frontend/src/ui/primitives/Pressable.tsx": "the <button>: data-kit from kitName(), busy = three 6 pt dots (100 / 60 / 30 %) over the invisible label (no spinner), trail glyph; ControlBody exported for the anchor forms",
+    "frontend/src/ui/primitives/TextLink.tsx": "NEW: the text link as button (Pressable), router <Link> (to) or <a> (href); disabled anchors inert with aria-disabled; data-kit=textLink",
+    "frontend/src/features/playground/kit/actions.tsx": "the lane's specimens: { kit, label, node, gap? } per board cell (the three board cells verbatim, then focus / pressed / busy / sm / route-link cells) + a default component",
+    "docs/pipeline/pulse/kit/actions.md": "the lane's page of the kit reference",
+    "docs/pipeline/pulse/pkg/F6/shared.patch": "tokens.css, block lane:F6: --delay-rest 1500ms, animate-pulse-rest, animate-busy-1/2/3 + @keyframes busy-dot",
+    "docs/pipeline/pulse/pkg/F6/budget.json": "check:pulse budget, lowered by --fix-down F6 (wash 14 -> 13: the primary's hover wash is gone)",
+    "docs/pipeline/pulse/pkg/F6/.gitattributes": "*.patch -text, as F5: a patch is applied byte for byte"
+  },
+  "build": "pulse-verify --all: build green in 22 s · 55 of 59 captured (replay) · .pulse/shots/F6-sweep",
+  "sweep": {
+    "captured": 55,
+    "notCaptured": {
+      "workout-2": "fixture workout-2.json does not exist yet (owned by S-workout)",
+      "onboarding-2": "fixture onboarding-2.json does not exist yet (owned by S-onboarding)",
+      "onboarding-3": "fixture onboarding-3.json does not exist yet (owned by S-onboarding)",
+      "style-studio-2": "not-arrived: its click target 'Legyen ez' (nth 2) is disabled since F2:b ('E1 Button - nem használt'); not an F6 effect"
+    },
+    "inventoryDiffs": {
+      "settings-1, settings-2": "-11: the theme picker removed by F1.1 (baseline is the base build)",
+      "style-studio-1": "-18 +18: F2:b's 'nem használt' labels and disabled 'Legyen ez' buttons"
+    },
+    "intendedDifferences": [
+      "a DISABLED md primary is now the Pulse disabled pill: surface-2 fill, text-3 label, no glow (was the lime at 45 %): client-detail-1/2/3 'Mentés', plan-editor-1/2/3 'Mentés', coach-chat-1/2 'Küldés' (icon primary)",
+      "nothing else changes at rest: the glow of an idle primary moved from the element's box-shadow to its ::before (same --shadow-glow, same box, same pixels); the primary's hover wash is gone (no pointer in a capture); no state captures a busy control",
+      "under keyboard focus only: every control now SHOWS its 2 px lime ring (it computed outline-style: none before - see kit/actions.md); a text link draws it around its 44 pt frame widened by 8 either side, radius 4",
+      "pressed: primary -> accent-pressed, no glow, scale 0.98 (was scale 0.97 + accent-pressed with the glow)",
+      "busy: three dots instead of the Loader2 spinner, on every variant"
+    ]
+  },
+  "kitBoard": {
+    "how": "the F7 kit host is not on pulse-redesign yet, so the specimens were rendered by a scratch host outside the tree (.pulse/pairs/F6/main.tsx: the board's own layout - 1300 wide, padding 40, a 354 column at x 40, 48 between cells, label gap from the specimen) built with vite against the slot's src/index.css, captured in headless Chrome through pulse-shot's launchChrome (.pulse/pairs/F6/capture.mjs) at 1300 x H, scale 1 and 2, reduced motion on and off",
+    "cells": {
+      "btnPrimary": "cell 354 x 352 = the board's 354 x 352; pills at y 56 / 136 / 216 / 296, 354 x 56 (board: the same); label words x 150.8 w 52.3 (board text box 150.5 / 53); busy dots at x 162 / 174 / 186, y 321, 6 x 6, opacity 1 / 0.6 / 0.3 (board: the same)",
+      "textLink": "cell 354 x 88 = board; frames 83.3 / 67.7 / 100 / 24.7 x 44 at x 0 / 103.3 / 191 / 311 (board 84 / 68 / 101 / 25 at 0 / 104 / 192 / 313: Geist in Chrome sets each word up to 1 pt narrower); words at y 57 (cap) / 55 (body), chevron 16 at x 67.3, y 58, text-2, stroke 1.75 in a 24 viewBox (= the board's 1.17 at 16); danger #f87171; off 0.4; hit layer of 'Újra' 44 x 44",
+      "iconBtn": "cell 354 x 88 = board; buttons 44 x 44 at x 0 / 60 / 120 / 180, glyph 24 at (10, 54); sm pill 100.4 x 44 at x 240 (board 101 x 44 at 240)"
+    },
+    "glow": "sampled 1 / 3 / 6 / 10 / 15 / 20 / 28 pt outside the pill's left, top and bottom edge: within 10 / 255 of the board at every point",
+    "states": {
+      "keyboard focus": "a real Tab lands on the first pill (:focus-visible) and renders the same pixels as the data-force=focus pill (max channel delta 4 / 255); real Tab on a link: ::before solid 2px rgb(203, 255, 46), width = frame + 16",
+      "pressed": "a real held mouse press (:active) renders the same pixels as the data-force=pressed pill (0 px differ)",
+      "bridge": "secondary / ghost / md primary under keyboard focus: solid 2px lime, offset 2"
+    }
+  },
+  "budget": { "before": { "frontend/src/ui/primitives/control.ts": { "wash": 14 } }, "after": { "frontend/src/ui/primitives/control.ts": { "wash": 13 } } },
+  "requests": [
+    "F8 (BadgeCount): the board places the badge's LEFT edge at 26 and top at 0 of the 44 x 44 iconBtn frame; '99+' (31 wide) grows out to 57 - kit/actions.md says so",
+    "F7 (kit host): read KitSpecimen.gap (12 when absent, 24 in the pill cells) as the label-to-nodes gap of a cell",
+    "19 other files pair Tailwind 4 'outline-none' with 'focus-visible:outline-*' and draw no ring for the same reason as control.ts did (Field.tsx, Switch.tsx, surfaceRecipe.ts, CommandPalette.tsx, four E-variant files and 11 feature files): each owner adds 'focus-visible:outline-solid'"
+  ],
+  "status": "handoff"
+}

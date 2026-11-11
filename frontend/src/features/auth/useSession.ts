@@ -7,8 +7,41 @@ export interface SessionUser {
   email: string;
   /** NULL until they set one. Print it through `personLabel` (lib/person.ts), never raw. */
   display_name: string | null;
+  /** The stored role. Read `roles` (through `hasRole`) for every "may this account …" question. */
   role: 'user' | 'coach' | 'admin';
+  /**
+   * The roles the account holds, as the ladder the server's guards enforce: user → [user],
+   * coach → [user, coach], admin → [user, coach, admin]. Derived by `/auth/me` on every read.
+   * Optional only for an answer recorded before the server sent it (the capture tool's replay):
+   * `rolesOf` derives the same ladder from `role` then.
+   */
+  roles?: readonly SessionRole[];
   created_at: number;
+}
+
+export type SessionRole = 'user' | 'coach' | 'admin';
+
+/**
+ * Does this account hold `role`? The ONE question every screen asks instead of comparing
+ * `user.role` — so an admin is a coach too, in one place, and the answer is the server's ladder.
+ *
+ * A convenience for what to DRAW, never a permission: every route and endpoint re-checks the role
+ * on the server. `undefined` / `null` (session unknown or signed out) holds nothing.
+ */
+export function hasRole(user: Pick<SessionUser, 'role' | 'roles'> | null | undefined, role: SessionRole): boolean {
+  return rolesOf(user).includes(role);
+}
+
+const ROLE_LADDER: Readonly<Record<SessionRole, readonly SessionRole[]>> = {
+  user: ['user'],
+  coach: ['user', 'coach'],
+  admin: ['user', 'coach', 'admin'],
+};
+
+/** The roles an account holds: the server's `roles`, or the same ladder derived from `role`. */
+export function rolesOf(user: Pick<SessionUser, 'role' | 'roles'> | null | undefined): readonly SessionRole[] {
+  if (!user) return [];
+  return user.roles ?? (Object.hasOwn(ROLE_LADDER, user.role) ? ROLE_LADDER[user.role] : []);
 }
 
 const SESSION_KEY = ['session'] as const;

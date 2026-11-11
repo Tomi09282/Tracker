@@ -1,0 +1,336 @@
+diff --git a/frontend/src/lib/lifeos-api.ts b/frontend/src/lib/lifeos-api.ts
+index bdc8510..1779763 100644
+--- a/frontend/src/lib/lifeos-api.ts
++++ b/frontend/src/lib/lifeos-api.ts
+@@ -1,8 +1,10 @@
+ /**
+- * The LifeOS core API (migration 031, backend package B-core) — response and request types.
++ * The LifeOS API — response and request types. Core: migration 031, backend package B-core
++ * (docs/pipeline/pulse/pkg/B-core/api.md). Habits, tasks and the full day close: migration 032,
++ * backend package B-habits-tasks (docs/pipeline/pulse/pkg/B-habits-tasks/api.md).
+  *
+- * Mirrors the server's zod schemas and worker answers (backend/src/lifeos/routes.js,
+- * backend/src/db/tx/lifeos.js); the prose contract is docs/pipeline/pulse/pkg/B-core/api.md.
++ * Mirrors the server's zod schemas and worker answers (backend/src/lifeos/*routes.js,
++ * backend/src/db/tx/lifeos*.js).
+  * Types only: no fetching here — each screen's hook owns its queries.
+  *
+  * Every amount is an INTEGER in minor units (1 coin = 100 minor; 1 LifeOS point = 1 coin).
+@@ -88,7 +90,7 @@ export interface TodayWorkoutOccurrence {
+   logStatus: 'in_progress' | 'completed' | 'abandoned' | null;
+ }
+ 
+-/** GET /lifeos/today (Phase-2 fields; habits, tasks, challenge, focus join in later phases). */
++/** GET /lifeos/today (Phase-2 and Phase-3 fields; challenge, focus and nutrition join later). */
+ export interface LifeosToday {
+   /** A zone is set and LifeOS has a start day. */
+   started: boolean;
+@@ -112,15 +114,28 @@ export interface LifeosToday {
+     pointsFull: number;
+     occurrences: TodayWorkoutOccurrence[];
+   };
++  /** Phase 3: live habits scheduled today, plus every live bad habit (shown daily). Empty before a zone. */
++  habits: Habit[];
++  /** Phase 3: today's tasks. Empty before a zone. */
++  tasks: {
++    /** Open, due today — by time, date-only last. */
++    due: Task[];
++    /** Open, due before today (with the penalty a settled day took, if any). */
++    overdue: Task[];
++    completedToday: Task[];
++    anytimeCount: number;
++    /** Open non-template tasks (the cap of 300 counts templates too). */
++    openCount: number;
++  };
+ }
+ 
+ /** The LifeOS fields GET /coins/ledger adds to each entry (null for non-LifeOS movements). */
+ export interface LifeosLedgerFields {
+   localDate: DayKey | null;
+-  /** 'workout_log' | 'day' in Phase 2; more sources join in later phases. */
++  /** 'workout_log' | 'day' (Phase 2), 'task' | 'habit_day' (Phase 3); more join in later phases. */
+   sourceType: string | null;
+   sourceId: number | null;
+-  /** The workout's title for a workout award; null otherwise. */
++  /** The workout's title, the task's title or the habit's name; null for day-level movements. */
+   sourceTitle: string | null;
+   /** Set on a reversal: the event it undoes. */
+   reversesEventId: number | null;
+@@ -217,3 +232,277 @@ export interface RulesStaleError {
+   currentVersion: number;
+   requestId: string;
+ }
++
++/* ── Phase 3: habits, tasks, the full day close (migration 032, package B-habits-tasks) ──────── */
++
++/** The 409 codes the habit and task routes answer (with `limit` on LIMIT_REACHED). */
++export type LifeosRefusalCode =
++  | 'TIMEZONE_REQUIRED'
++  | 'LIMIT_REACHED'
++  | 'DAY_LOCKED'
++  | 'NOT_SCHEDULED'
++  | 'WRONG_KIND'
++  | 'ARCHIVED'
++  | 'TEMPLATE';
++
++export interface LifeosRefusal {
++  error: string;
++  code: LifeosRefusalCode;
++  /** LIMIT_REACHED only: the cap that was hit (20 live habits, 100 habits in all, 300 open tasks). */
++  limit?: number;
++  requestId: string;
++}
++
++export type HabitKind = 'good' | 'bad';
++/** daily · weekdays (Monday-first bit mask, bit0 = Monday) · times_per_week (weekly quota, checked on Sunday). */
++export type HabitSchedule = 'daily' | 'weekdays' | 'times_per_week';
++export type HabitLogStatus = 'pending' | 'done' | 'skipped' | 'relapse';
++
++/** What the user said about a habit on a day (editable until the day settles). */
++export interface HabitLog {
++  date: DayKey;
++  /** Good habit: completions (0..target). Bad habit: relapses that day. */
++  count: number;
++  status: HabitLogStatus;
++  /** Epoch seconds when the count reached the target; null unless done. */
++  doneAt: number | null;
++}
++
++/** The streak as SETTLED so far (today counts only once it settles). */
++export interface HabitStreak {
++  current: number;
++  best: number;
++  freezes: number;
++  /** The multiplier today will be paid at, basis points (10000 = x1, 12500 = x1.25, 15000 = x1.5). */
++  multiplierBp: number;
++  /** Times-per-week habits: consecutive weeks with the quota met; null for the others. */
++  weekStreak: number | null;
++}
++
++/** One habit as GET /habits, GET /lifeos/today and every habit write answer it. */
++export interface Habit {
++  id: number;
++  name: string;
++  kind: HabitKind;
++  scheduleType: HabitSchedule;
++  /** 127 unless scheduleType is 'weekdays'. */
++  weekdayMask: number;
++  timesPerWeek: number | null;
++  targetCount: number;
++  unit: string | null;
++  /** Whole coins per completion (bad habit: per clean day), 0..50. */
++  pointsSuccess: number;
++  /** Whole coins per miss (bad habit: per relapse, before the factor and the daily cap), 0..50. */
++  pointsPenalty: number;
++  /** HH:MM or null. */
++  reminderTime: string | null;
++  sortOrder: number;
++  /** The first day the habit is scheduled (its creation day). */
++  startedOn: DayKey;
++  archived: boolean;
++  /** Live, existing and scheduled on the logical today. */
++  scheduledToday: boolean;
++  /** Today's log, or null when nothing was said today. */
++  log: HabitLog | null;
++  streak: HabitStreak;
++  /** Times-per-week habits: done days Monday..today; null for the others. */
++  weekDone: number | null;
++  /** What today pays if it settles as it stands (good: the full or partial share; bad: minus the relapses). */
++  previewMinor: number;
++  /** What a done day (good) or a clean day (bad) pays at today's multiplier. */
++  fullMinor: number;
++}
++
++/** GET /habits. */
++export interface HabitsResponse {
++  started: boolean;
++  today: DayKey | null;
++  /** Live habits first, then the archived ones. */
++  habits: Habit[];
++  /** The rules the Szokasok footer line quotes; absent before a zone. */
++  rules?: { freezeEvery: number; maxFreezes: number; partialHabitMinPct: number };
++  limits: { live: number };
++}
++
++export type HabitDayOutcome = 'done' | 'missed' | 'skipped' | 'frozen' | 'open' | 'clean' | 'relapse' | 'lapsed';
++
++/** One settled day of a habit (GET /habits/:id). */
++export interface HabitDay {
++  id: number;
++  date: DayKey;
++  outcome: HabitDayOutcome;
++  count: number;
++  targetCount: number;
++  /** The multiplier the day was paid at. */
++  multiplierBp: number;
++  streakAfter: number;
++  /** The milestone reached that day (7 / 30 / 100 by default), else null. */
++  milestoneDays: number | null;
++  /** 1 when the day earned a streak freeze. */
++  freezeEarned: 0 | 1;
++  /** Sunday rows of a times-per-week habit: the week's quota met (1) or not (0); else null. */
++  quotaMet: 0 | 1 | null;
++  doneAt: number | null;
++  /** The net coins of the day for this habit (award + milestone - penalty). */
++  coinsMinor: number;
++}
++
++/** GET /habits/:id: the habit and its last 12 Monday..Sunday weeks of settled days (newest first). */
++export interface HabitDetailResponse {
++  habit: Habit;
++  /** The Monday the 12 weeks start on. */
++  from: DayKey;
++  days: HabitDay[];
++  totals: {
++    coinsMinor: number;
++    /** done + clean days. */
++    done: number;
++    /** done, missed, clean and relapse days (skipped, frozen, open and lapsed do not count). */
++    scheduled: number;
++  };
++}
++
++/** POST /habits body (.strict()). A bad habit takes no schedule fields, count or unit. */
++export interface HabitCreate {
++  /** 8..64 of [A-Za-z0-9_-]: a replay with the same key answers the first habit (200, replayed). */
++  clientKey: string;
++  kind: HabitKind;
++  name: string;
++  scheduleType?: HabitSchedule;
++  /** Required with 'weekdays', refused otherwise. */
++  weekdayMask?: number;
++  /** Required with 'times_per_week', refused otherwise. */
++  timesPerWeek?: number;
++  targetCount?: number;
++  unit?: string | null;
++  pointsSuccess?: number;
++  pointsPenalty?: number;
++  reminderTime?: string | null;
++}
++
++/** PATCH /habits/:id body (.strict(), at least one key; schedule fields need scheduleType). */
++export type HabitPatch = Partial<Omit<HabitCreate, 'clientKey' | 'kind'>>;
++
++/** POST /habits -> 201 { habit } (200 with replayed: true on a replay); PATCH / archive / restore -> { habit }. */
++export interface HabitResponse {
++  habit: Habit;
++  replayed?: true;
++}
++
++/** POST /habits/:id/log and /relapse body: an ABSOLUTE count (replay-safe). Default day: today. */
++export interface HabitCountBody {
++  date?: DayKey;
++  count: number;
++}
++
++/** POST /habits/:id/skip body. */
++export interface HabitSkipBody {
++  date?: DayKey;
++}
++
++/** POST /habits/:id/log | skip | relapse -> 200. */
++export interface HabitLogResponse {
++  log: HabitLog;
++  habit: Habit;
++}
++
++/** RRULE-light (f_app): every N days from the first day, a Monday-first weekday mask, or a day of the month. */
++export type Recurrence =
++  | { type: 'daily'; interval?: number }
++  | { type: 'weekly'; weekdayMask: number }
++  | { type: 'monthly'; day: number };
++
++/** 1 low (5) · 2 medium (10) · 3 high (20). */
++export type TaskPriority = 1 | 2 | 3;
++
++/** One task as every task route answers it. */
++export interface Task {
++  id: number;
++  title: string;
++  notes: string | null;
++  priority: TaskPriority;
++  /** The per-task coin override, 0..50, or null (the priority decides). */
++  points: number | null;
++  /** The logical due day, or null (anytime). */
++  dueOn: DayKey | null;
++  /** HH:MM wall clock on the due day, or null (due by the end of the day). */
++  dueTime: string | null;
++  /** The template's rule (also on its instances, for the repeat glyph). */
++  recurrence: Recurrence | null;
++  /** A recurring template: never completed, never in a day list; its instances are. */
++  isTemplate: boolean;
++  parentTaskId: number | null;
++  /** Epoch seconds. */
++  completedAt: number | null;
++  /** The logical day it was completed on (its coins count there; reopen until it settles). */
++  completedOn: DayKey | null;
++  /** The settled day it was found overdue on. */
++  overdueOn: DayKey | null;
++  /** What it pays on time. */
++  valueMinor: number;
++  /** Completing it now would be late (half pay). */
++  lateNow: boolean;
++  /** What completing it now pays (before the daily cap); null once completed. */
++  payoutNowMinor: number | null;
++  /** The live award of a completed task (after the cap); null otherwise. */
++  paidMinor: number | null;
++  /** The overdue penalty a settled day took (negative), or null. */
++  overduePenaltyMinor: number | null;
++}
++
++/** GET /tasks: the task tabs (today, upcoming, overdue, anytime, done). */
++export interface TasksResponse {
++  started: boolean;
++  today: DayKey | null;
++  due: Task[];
++  overdue: Task[];
++  anytime: Task[];
++  completedToday: Task[];
++  /** Open, due in the next 7 days. */
++  upcoming: Task[];
++  /** Completed in the last 7 days, newest first, at most 100. */
++  done: Task[];
++  templates: Task[];
++  openCount: number;
++  limits?: { open: number };
++}
++
++/** POST /tasks body (.strict()). Capture sends the same. */
++export interface TaskCreate {
++  clientKey: string;
++  title: string;
++  notes?: string | null;
++  priority?: TaskPriority;
++  points?: number | null;
++  /** Required with dueTime and with recurrence. */
++  dueOn?: DayKey | null;
++  dueTime?: string | null;
++  recurrence?: Recurrence | null;
++}
++
++/** PATCH /tasks/:id body (.strict(), at least one key). A template cannot drop its recurrence (409). */
++export type TaskPatch = Partial<Omit<TaskCreate, 'clientKey'>>;
++
++/** POST /tasks -> 201 { task } (200 with replayed: true); GET / PATCH /tasks/:id -> { task }. */
++export interface TaskResponse {
++  task: Task;
++  replayed?: true;
++}
++
++/** POST /tasks/:id/complete -> 200 (empty body). `already` = it was completed; nothing paid again. */
++export interface TaskCompleteResponse {
++  task: Task;
++  awardedMinor: number;
++  late?: boolean;
++  /** The daily cap trimmed the award. */
++  capped?: boolean;
++  already?: true;
++}
++
++/** POST /tasks/:id/reopen -> 200 (empty body): the award reversed exactly. */
++export interface TaskReopenResponse {
++  task: Task;
++  /** Negative: the coins taken back. */
++  reversedMinor: number;
++  already?: true;
++}

@@ -1,0 +1,14 @@
+{
+  "id": "R-S-day-settings-04",
+  "from": "S-day-settings",
+  "kind": "row",
+  "blocking": true,
+  "target": "frontend/src/features/settings/SettingsPage.tsx",
+  "need": "The Profil row 'Nap és időzóna · Budapest · 04:00 ›' first under BEÁLLÍTÁSOK (round A settings-v2-2; the door to /settings/day). Handed in by the package as shared.patch; a screen package cannot hand in a shared.patch (PLAN 4.4 item 4), so the integrator filed it as this request with the package's patch unchanged.",
+  "evidence": "kepernyok-2x/lifeos/settings-day-v2@2x.png; state settings-day-profil-row in states.json",
+  "proposedApi": "ListRow to=\"/settings/day\" with the value zoneCity(timezone) · hourLabel(dayStartHour) from useDayPrefs()",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-04.patch",
+  "interim": "none",
+  "status": "merged",
+  "resolution": "Applied by the integrator in the same squash merge as pulse/S-day-settings (merge-S-day-settings); the patch is kept here."
+}

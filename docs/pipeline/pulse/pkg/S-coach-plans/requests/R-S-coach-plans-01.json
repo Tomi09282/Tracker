@@ -1,0 +1,14 @@
+{
+  "id": "R-S-coach-plans-01",
+  "from": "S-coach-plans",
+  "kind": "fixture",
+  "blocking": false,
+  "target": "frontend/scripts/fixtures/coach-plans-1.json (INT) / frontend/scripts/pulse-fixture-check.mjs",
+  "need": "coach-plans-1 draws an 'ended' plan (Lezárva, Nagy Eszter). The API sends 'ended' (PlanSummary['status'] = draft | active | paused | ended) but no recording of GET /api/v1/plans holds it, so pulse-fixture-check refuses /plans/3/status = \"ended\" (enum). Either a recording that carries an ended plan (a live status change is a write this package may not make), or a ruling that the enum of a typed union may take a value the type declares.",
+  "evidence": "node scripts/pulse-fixture-check.mjs S-coach-plans -> enum: /plans/3/status = \"ended\" — the recordings only ever have \"active\", \"draft\", \"paused\"",
+  "proposedApi": null,
+  "proposedPatch": "move states.json overrides.coach-plans-1 to scripts/fixtures/coach-plans-1.json and set pulse-frames.json coach-plans-1 reach: fixture, fixture: coach-plans-1",
+  "interim": "states.json overrides.coach-plans-1 holds the six-row fixture; pulse-shot applies it (it does not run the checker) and the frame is captured and paired as matched-fixture",
+  "status": "open",
+  "resolution": null
+}

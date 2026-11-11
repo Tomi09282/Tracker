@@ -1,0 +1,240 @@
+{
+  "about": "F12's extra states (PLAN 4.4 item 6): the underline Field on the signed-out auth screen in the states the two frames and the component board draw but the seed cannot show on arrival - a typed value with the line focused, the refusal of an empty submit, the register form filled and at rest. Signed out, nothing is submitted: no request leaves the page except the GETs of arrival (an empty submit is refused by the form itself). F12-kit-board is the kit board (F7) with this lane's cell in it. F12s2-kit-board (stage 2) is the same board with the search line focused.",
+  "states": {
+    "F12-login-focus": {
+      "title": "Belépés — e-mail typed, the line focused (lime underline + caret)",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "focused": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "auth.email"
+        },
+        "focused": true
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "F12-login-error": {
+      "title": "Belépés — empty submit refused by the form: 2 px danger lines, the messages under them",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "invalid": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "auth.password"
+        },
+        "invalid": true
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "F12-register-filled": {
+      "title": "Regisztráció — both fields filled and at rest (frame auth-2's data, typed; never submitted)",
+      "account": null,
+      "route": "/register",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "focused": true
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Tracker-pulse1"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "focused": true
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "re": "^tracker$"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "focused": false
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.register"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "F12-kit-board": {
+      "title": "Pulse kit — board layout, for the inputField cell (board 473, 1645, 354 x 494)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "F7's kit-board state (pkg/F7/states.json), repeated here because a package's run merges only its own states: the board host lays this lane's specimen into the board cell that carries its label, so the capture can be laid over _components-2.png. The one step puts the focus into the board's \"· focus\" specimen (the second \"Megjelenített név\" field), as the board draws it: value \"Takács Dán\", lime line, lime caret",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "nth": 1,
+            "text": "Takács Dán"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "settings.displayName"
+            },
+            "focused": true
+          }
+        }
+      ]
+    },
+    "F12s2-kit-board": {
+      "title": "Pulse kit — board layout, for the searchField cell (board 473, 2187, 354 x 128) and the pushed-screen bottomSheet cell (board 449, 4410, 402 x 644)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "Stage 2: the board host lays this lane's searchField and bottomSheet specimens into the board cells that carry their labels. The one step types into the board's second search line (the \"focus + clear\" specimen), as the board draws it: value \"fekveny\", lime line, lime caret, the clear x",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            },
+            "nth": 1,
+            "text": "fekveny"
+          },
+          "arrived": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            },
+            "focused": true
+          }
+        }
+      ]
+    }
+  }
+}

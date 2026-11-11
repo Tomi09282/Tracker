@@ -1,0 +1,4 @@
+[
+  { "element": "E25", "live": false, "reason": "one Pulse look: the balance is the giant Numeral that rolls from the previous value (A, odometer roll); CoinBalance no longer calls useElementVariant('E25') - fly-to-wallet (B), balance-pulse (C), breakdown-sheet (D) and milestone (E) are gone" },
+  { "element": "E26", "live": false, "reason": "one Pulse look: an earned achievement is the lit medal, no flicker; CoinsPage no longer calls useElementVariant('E26')" }
+]

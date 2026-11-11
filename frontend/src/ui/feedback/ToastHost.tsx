@@ -1,63 +1,41 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AnimatePresence } from 'motion/react';
-import { Toast, type ToastData, type ToastKind } from './variants/E12E16';
+import { AnimatePresence, motion } from 'motion/react';
+import { cn } from '../../lib/cn';
+import { EASE_STANDARD, useMotionSafe } from './useMotionSafe';
+import { DUR_MS, secs, Toast, type ToastData, type ToastKind } from './variants/E12E16';
 
 /**
- * The home the toast never had.
- *
- * ═══ E15 WAS DESIGNED, BUILT, AND UNREACHABLE ══════════════════════════════════════════════════
- *
- * `Toast` has five variants, an auto-dismiss timer that pauses on hover, an Undo affordance, and a
- * polite live region so it never interrupts a screen reader mid-sentence. It was used by exactly
- * one file: the variant playground. No real screen could show one, because nothing mounted a host
- * and nothing exposed a way to raise one.
- *
- * So every mutation in the product finished in silence. A save that works and says nothing is
- * indistinguishable from a save that did nothing — which is the same shape as the cover upload that
- * answered 201 while the editor showed stale data, and it is why that bug was invisible until
- * somebody watched the screen.
+ * The home of the toast, and the band it drops in.
  *
  * ═══ WHY A CONTEXT AND NOT A STORE ═════════════════════════════════════════════════════════════
  *
  * Raising a toast is a UI event with no state anybody reads back. A store would invite screens to
  * subscribe to "the current toast" and branch on it, which turns a notification into a state
  * machine two components can disagree about.
+ *
+ * ═══ ONE BAND, AT THE TOP (Pulse, PLAN R14) ════════════════════════════════════════════════════
+ *
+ * Pulse draws a toast as the page's own black dropping over the header zone: kit
+ * `showToast(root, msg, kind, action)` — a band 402 wide from the top edge, 6 under the status bar
+ * (`--band-pad-t`), one `noticeLine` and the strong rule, 7 under it (`style-studio-2`,
+ * `workout-2`: band 0-120, line 68-112, rule at 112). No capsule, no corner, no bottom stack.
+ *
+ * The contract did not move: `toast(message, kind?, options | fn)`, the four kinds, Undo, the 4 s
+ * timer with its pause, and the cap of three — now three lines in the one band, the oldest on top,
+ * each with its own countdown on its own rule.
  */
-
-/**
- * Which edge the toast comes from.
- *
- * ═══ WHY THIS IS A PROP AND NOT A NEW HOUSE RULE ═══════════════════════════════════════════════
- *
- * `workout-states.md` block 1 draws the record toast "pinned at the top of the viewport", and
- * `02b-workout-states.webp` shows it under the status bar. That is not a whim about that screen: on
- * the player, the bottom of the viewport is the rest timer, the nav, AND the check button the thumb
- * is already moving toward. A celebration that lands there covers the control it is celebrating.
- *
- * The alternative — moving the whole stack — was considered and rejected. `bottom` is a decision
- * this file already made and documented for the general case (below), and a top-pinned toast on
- * every screen would also land on the offline strip, which is sticky at the same `--z-toast` layer
- * and would be covered by it. One screen has a reason; one screen opts in.
- *
- * DEFAULT IS `bottom`, so no existing caller changes behaviour by not knowing about this.
- */
-export type ToastPlacement = 'top' | 'bottom';
 
 /** Everything optional about a raise, in one bag so the call site never counts positions. */
 export interface ToastOptions {
   onUndo?: () => void;
-  /** Defaults to `'bottom'`. See `ToastPlacement`. */
-  placement?: ToastPlacement;
 }
 
 interface ToastApi {
   /**
    * Raise a toast. Returns nothing: nobody should be waiting on a notification.
    *
-   * The third argument was `onUndo?: () => void` before `placement` existed, and callers pass it
-   * that way (`useComposeFlow.ts:85` forwards an undo callback it was handed). A bare function is
-   * still accepted and still means "undo", so adding an option did not have to become a rename
-   * across files nobody was otherwise touching — and the object form is what new callers use.
+   * A bare function as the third argument still means "undo" (`useComposeFlow.ts` forwards an
+   * undo callback it was handed); the object form is what new callers use.
    */
   toast: (message: string, kind?: ToastKind, options?: ToastOptions | (() => void)) => void;
 }
@@ -68,19 +46,83 @@ const ToastContext = createContext<ToastApi | null>(null);
  * `useToast` outside the provider is a no-op rather than a throw.
  *
  * A missing notification must never be the thing that takes a screen down. The provider wraps the
- * whole app, so this only fires in an isolated test render — and there, failing loudly about a
- * toast would obscure whatever the test was actually about.
+ * whole app, so this only fires in an isolated test render.
  */
 export function useToast(): ToastApi {
   const ctx = useContext(ToastContext);
   return ctx ?? { toast: () => {} };
 }
 
-/** A live toast, plus the edge it was raised at. `ToastData` is what the `Toast` component reads. */
-type Queued = ToastData & { placement: ToastPlacement };
+/** At most this many lines in the band: the oldest goes, because the newest is the one they caused. */
+const TOAST_CAP = 3;
+
+
+export interface ToastBandProps {
+  /** The lines, oldest first. The band renders nothing while this is empty. */
+  toasts: ToastData[];
+  onDismiss: (id: number) => void;
+  /**
+   * Kit specimens: the band is pinned to the top of its positioned parent instead of the viewport
+   * (the parent sets `--band-pad-t` for its device), and does not drop in.
+   */
+  inline?: boolean;
+  /** Kit specimens and captures: every line's countdown frozen at this share (0-1), no timer. */
+  still?: number;
+}
+
+/**
+ * The band — kit `showToast`: the canvas black from the top edge, the lines in the 24 pt gutter
+ * (a centred 430 column above 430 pt, as every screen), 7 pt under the closing rule.
+ *
+ * ═══ IT STANDS UNDER THE OFFLINE LINE, NEVER OVER IT ═══════════════════════════════════════════
+ *
+ * The offline line is sticky at the top of the page and publishes its height as `--offline-h`
+ * (0 while it is closed). The band starts there, and pads only by what of the status zone the
+ * offline line has not already covered — so with both up, the offline line and the toast are two
+ * lines one under the other, and neither hides the other.
+ *
+ * ═══ AND IT NEVER SWALLOWS A TAP IT DOES NOT OWN ═══════════════════════════════════════════════
+ *
+ * The band exists only while a line is in it (an empty band would sit over the header for
+ * nothing). It is opaque on purpose — Pulse's toast is "the page's own black dropping over the
+ * header zone" — so it takes the taps of what it covers, for at most 4 s, and every line in it can
+ * be closed with one tap.
+ */
+export function ToastBand({ toasts, onDismiss, inline = false, still }: ToastBandProps) {
+  const motionSafe = useMotionSafe();
+  const drops = motionSafe && !inline;
+  return (
+    <AnimatePresence initial={false}>
+      {toasts.length > 0 ? (
+        <motion.div
+          key="band"
+          data-kit="toastBand"
+          initial={drops ? { y: '-100%' } : false}
+          animate={{ y: 0 }}
+          exit={drops ? { y: '-100%', transition: { duration: secs(DUR_MS.fast), ease: EASE_STANDARD } } : undefined}
+          transition={drops ? { duration: secs(DUR_MS.base), ease: EASE_STANDARD } : { duration: 0 }}
+          className={cn(
+            'inset-x-0 z-[var(--z-toast)] bg-surface-0 pb-1.75',
+            inline
+              ? 'absolute top-0 pt-[var(--band-pad-t)]'
+              : 'fixed top-[var(--offline-h)] pt-[max(calc(var(--band-pad-t)_-_var(--offline-h)),0px)]',
+          )}
+        >
+          <div className="screen-x mx-auto flex w-full max-w-[var(--screen-max)] flex-col">
+            <AnimatePresence initial={false}>
+              {toasts.map((t, i) => (
+                <Toast key={t.id} toast={t} onDismiss={onDismiss} last={i === toasts.length - 1} still={still} />
+              ))}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
+  );
+}
 
 export function ToastHost({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Queued[]>([]);
+  const [toasts, setToasts] = useState<ToastData[]>([]);
   const nextId = useRef(1);
 
   const dismiss = useCallback((id: number) => {
@@ -91,19 +133,9 @@ export function ToastHost({ children }: { children: ReactNode }) {
     const opts: ToastOptions = typeof options === 'function' ? { onUndo: options } : (options ?? {});
     const id = nextId.current;
     nextId.current += 1;
-    setToasts((cur) => {
-      // THREE AT A TIME. A stack that grows without bound covers the thing the user is looking at,
-      // and the fourth notification about the same burst of work tells them nothing the first three
-      // did not. The oldest goes, because the newest is the one they caused.
-      //
-      // The cap is on the TOTAL, not per edge: two stacks of three is six notifications on screen,
-      // which is the unbounded case wearing a disguise.
-      const next: Queued[] = [
-        ...cur,
-        { id, kind, message, onUndo: opts.onUndo, placement: opts.placement ?? 'bottom' },
-      ];
-      return next.slice(-3);
-    });
+    // THREE AT A TIME. A band that grows without bound covers the screen it is reporting on, and
+    // the fourth notice about the same burst of work tells nothing the first three did not.
+    setToasts((cur) => [...cur, { id, kind, message, onUndo: opts.onUndo }].slice(-TOAST_CAP));
   }, []);
 
   const api = useMemo(() => ({ toast }), [toast]);
@@ -111,73 +143,9 @@ export function ToastHost({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      {/*
-        Fixed to an EDGE, clear of that edge's safe-area inset, and pointer-events-none on the
-        container so it never swallows a tap meant for the screen behind it — only the toasts
-        themselves are interactive, which matters because one of them carries an Undo.
-
-        `lg:items-end` is the desktop half of the position rule: the trailing CORNER on a pointer
-        screen, never the centre. Centred over a wide viewport a toast lands on top of whatever the
-        user was reading, and the wider the screen the further it is from where they were looking.
-        The column is `max-w-sm`, so the cross-axis alignment is the whole change — no width, no
-        offset, no second layout. It applies to both edges for the same reason.
-      */}
-      {/*
-        `--z-toast` and `--content-pad-b` are both declared tokens, and both were nearly re-derived
-        here by hand. The first draft used Tailwind's `z-50`, which is the SHEET layer — a toast
-        would have sat under one — and computed its own bottom offset, which put it on top of the
-        bottom navigation on every authenticated screen. The layer order and the height of the nav
-        are decisions this design system already made.
-      */}
-      {/*
-        TWO STACKS, ONE PER EDGE, and each renders nothing until something is raised at it — an
-        empty `fixed` overlay is `pointer-events-none` so it costs no taps, but it does cost a
-        layer, and the top one would otherwise sit over the offline strip on every screen forever.
-
-        `pb-[var(--content-pad-b)]` / the top inset are the two halves of the same rule: whichever
-        edge a stack is pinned to, it clears what already lives there. Below that is the nav; above
-        it is the notch.
-      */}
-      {(['bottom', 'top'] as const).map((edge) => {
-        const shown = toasts.filter((t) => t.placement === edge);
-        if (shown.length === 0) return null;
-        return (
-          <div
-            key={edge}
-            className={
-              edge === 'bottom'
-                ? 'pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-toast)] flex flex-col items-center px-4 pb-[var(--content-pad-b)] lg:items-end'
-                : 'pointer-events-none fixed inset-x-0 top-0 z-[var(--z-toast)] flex flex-col items-center px-4 pt-[calc(env(safe-area-inset-top)+--spacing(3))] lg:items-end'
-            }
-            // NOT a live region itself: each Toast already carries role="status", and nesting one
-            // live region inside another makes some screen readers announce the whole stack on
-            // every change.
-          >
-            {/*
-              THE SIZING WRAPPER SITS OUTSIDE AnimatePresence because `AnimatePresence` tracks its
-              DIRECT children: a plain keyed `div` in between hides the `Toast` from presence
-              detection, and the exit animation never runs. That is a real reason and it is the only
-              one.
-
-              It is written down because the first draft claimed a different one. Measuring in a
-              browser pane whose page is `hidden`, I read `scale(0.96) translateY(24px)` on a settled
-              toast and concluded it overlapped the nav and that its buttons were 42px. Both were the
-              frozen entrance: a hidden page suspends requestAnimationFrame, Motion animates on rAF,
-              so every Motion entrance sits at its initial values forever — and
-              `getBoundingClientRect` reports the TRANSFORMED box. Measured with `offsetHeight`,
-              which is layout: the buttons are 44px and the 80px bottom padding clears the 65px nav.
-              There was nothing wrong.
-            */}
-            <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">
-              <AnimatePresence initial={false}>
-                {shown.map((t) => (
-                  <Toast key={t.id} toast={t} onDismiss={dismiss} />
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        );
-      })}
+      {/* NOT a live region itself: each line carries role="status", and nesting one live region
+          inside another makes some screen readers announce the whole band on every change. */}
+      <ToastBand toasts={toasts} onDismiss={dismiss} />
     </ToastContext.Provider>
   );
 }

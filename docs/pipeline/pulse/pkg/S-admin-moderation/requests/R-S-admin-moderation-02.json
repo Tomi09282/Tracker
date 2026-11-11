@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-moderation-02",
+  "from": "S-admin-moderation",
+  "kind": "asset",
+  "blocking": false,
+  "target": "frontend/src/assets (a larger graphite shield raster, slot tab-admin-large)",
+  "need": "admin-moderation-v2-empty draws the Admin tab's graphite shield at 96 pt over the empty queue title. Only the tab-size raster exists, so the 96 pt render is an upscale of the tab raster.",
+  "evidence": "pair picture moderation-empty vs admin-moderation-v2-empty (the shield is the right size and place; the edge is softer than the frame's vector render)",
+  "proposedApi": "Pic slot=\"tab-admin\" at width 96 keeps working; a 3x raster replaces the file",
+  "interim": "Pic slot=\"tab-admin\" width 96; nothing waits for this.",
+  "status": "open",
+  "resolution": null
+}

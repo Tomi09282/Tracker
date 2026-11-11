@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../lib/cn';
 
 /**
  * The control recipe — every interactive element in the product is built from this.
@@ -9,40 +10,69 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * layer of every variant, and `check-tokens.mjs` refuses raw `<button>` elements outside
  * `src/ui/` so nothing can bypass it.
  *
- * All five interaction states the Bible requires are defined once, here:
- * hover, active (press), focus-visible, disabled, and busy.
+ * ═══ PULSE HAS TWO ACTION LOOKS, AND THEY ARE BOTH HERE ══════════════════════════════════════
+ *
+ *   the lime pill   `variant: 'primary'` + `size: 'lg'` (56) or `'sm'` (44)        kit: btnPrimary
+ *   the text link   `variant: 'link'` (+ `tone: 'danger'`, `text: 'body'`)         kit: textLink
+ *   the bare glyph  `variant: 'link'` + `shape: 'icon'`                            kit: iconBtn
+ *
+ * Every number below is the Figma kit's (`figma-build/app-kit.js`, lines 196-209) and the measured
+ * boxes of the component board (`_components.json`: `Button/primary`, `Link/…`, `Button/icon · …`).
+ *
+ * There is no third look. The bridged ones (`secondary`, `ghost`, `danger`, the chip and field
+ * shapes, the densities, the status chip) left in the closing cleanup (F19 rows 1 and 3), and
+ * `check:pulse` refuses their names. A control names its variant: there is no default look.
+ *
+ * ═══ THE PILL IS 56 UNLESS IT SAYS 44 ═════════════════════════════════════════════════════════
+ *
+ * A `primary` with no `size` is the 56 pt pill (`lg`); `size="sm"` is the 44 one. Every other look
+ * is 44 high (`md`). Until the closing cleanup (F19 row 4) the default was the bridged 44 and a
+ * pill had to name its height; every rebuilt screen did, so flipping it changed nothing drawn.
  */
-export const control = cva(
+
+/**
+ * The kit specimen has to show a pressed pill and a focused link side by side, and no page can
+ * hold five real presses and five real keyboard focuses at once. So the two Pulse looks answer
+ * to `data-force="pressed"` and `data-force="focus"` with the SAME declarations as the real
+ * state, written next to it — the specimen shows the recipe's own state, not a copy of it.
+ * Nothing in the product sets the attribute.
+ */
+const FORCED_FOCUS =
+  'data-[force=focus]:outline-solid data-[force=focus]:outline-2 data-[force=focus]:outline-offset-2 data-[force=focus]:outline-[var(--focus-ring)]';
+
+const recipe = cva(
   [
     'relative inline-flex select-none items-center justify-center gap-2',
     'font-body whitespace-nowrap',
 
-    // THE FLOOR. Both axes, on every variant, with no way to opt out from a call site.
-    //
-    // The height reads `--control-h` rather than `--target-min` because control height is one of
-    // the four things a theme pack is allowed to change (size / radius / shadow / border), and
-    // Solar declares 48px with the comment "Solar = soft: larger radii, deeper shadow, taller
-    // controls" — a claim the app did not make anywhere, because nothing consumed the token.
-    // Every pack declares `--control-h` at >= 44px (four of five as `var(--target-min)` itself),
-    // so the a11y floor is unchanged: this can only ever make a control taller.
+    // THE FLOOR, width half. Both axes, on every variant, with no way to opt out from a call
+    // site: the height half is the `size` axis below, whose smallest value is the same 44.
     // The WIDTH stays on `--target-min`: it is the floor for a square icon control, not a
-    // stylistic dimension, and a taller pack has no reason to widen every chip.
-    'min-h-[var(--control-h)] min-w-[var(--target-min)]',
+    // stylistic dimension. (The text link is the one exception, and it keeps the floor another
+    // way — see `link`.)
+    'min-w-[var(--target-min)]',
 
     // Press feedback. `duration-instant` (100ms) because a press must answer immediately;
-    // anything slower reads as lag rather than acknowledgement.
+    // anything slower reads as lag rather than acknowledgement. Transform and opacity only.
     'transition-[transform,background-color,border-color,color,opacity]',
     'duration-[var(--duration-instant)] ease-[var(--ease-standard)]',
-    'active:scale-[0.97]',
 
     // Focus is redrawn, never removed. The ring lives on the accent token so it survives a
     // theme swap.
-    'outline-none focus-visible:outline-2 focus-visible:outline-offset-2',
+    //
+    // `focus-visible:outline-solid` IS the ring. In Tailwind 4 `outline-none` sets the style
+    // variable `--tw-outline-style` to `none` as well as the property, and `outline-2` draws with
+    // `outline-style: var(--tw-outline-style)` — so without this class the ring had a width and a
+    // colour and no style, and every control showed NOTHING under keyboard focus (the built CSS
+    // of 0860942 holds both rules; in headless Chrome a Tab-focused, `:focus-visible` control
+    // computed `outline-style: none`). The global `:focus-visible` ring of index.css is in
+    // `@layer base` and loses to any utility, so it could not stand in.
+    'outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2',
     'focus-visible:outline-[var(--focus-ring)]',
 
     // Disabled must be unmistakable AND inert — a control that looks pressable but does
-    // nothing is worse than one that looks disabled.
-    'disabled:pointer-events-none disabled:opacity-45',
+    // nothing is worse than one that looks disabled. What it LOOKS like is the variant's word.
+    'disabled:pointer-events-none',
 
     // Busy: the control stays visible and keeps its size (no layout shift) but refuses input.
     'aria-busy:pointer-events-none aria-busy:cursor-progress',
@@ -55,121 +85,266 @@ export const control = cva(
   {
     variants: {
       variant: {
-        // Exactly one primary action per screen — the Bible's rule, and the reason this is the
-        // only variant with a filled accent background.
-        //
-        // `--shadow-glow` is Neon's declared structural identity ("pill + glow, no drop shadow")
-        // and it reached no product screen: the token is `none` in the other four packs, so
-        // carrying it here is the entire visible difference between Neon and Midnight-with-a-
-        // cyan-accent, and it costs literally nothing anywhere else. It is not a card shadow —
-        // the primary button has no border, so "border OR shadow, never both" is not in play.
-        primary:
-          'bg-accent text-accent-fg shadow-[var(--shadow-glow)] hover:bg-accent-hover active:bg-accent-pressed',
-        // The border WIDTH comes from the pack: Mono declares 2px under "sharp + flat: no radius,
-        // heavier border" and every call site wrote Tailwind's `border` (= 1px), so the heaviest
-        // pack shipped the same hairline as the calmest one.
-        // Hover strengthens the edge as well as the fill — a surface-2 hover on a surface-1
-        // control is a 1.1:1 change, which is not an answer to a pointer.
-        secondary: [
-          'border-[length:var(--border-width)] border-[var(--surface-border)]',
-          'bg-surface-1 text-text-1',
-          'hover:border-[var(--surface-border-strong)] hover:bg-surface-2',
+        /**
+         * THE LIME PILL — exactly one per screen, and the only thing in the product that glows.
+         *
+         *   rest      lamp fill, canvas-coloured label, the glow
+         *   pressed   `accent-pressed`, glow off, scale 0.98 — all in `instant`
+         *   disabled  `surface-2` fill, `text-3` label, no glow. A FILL change, not an opacity:
+         *             a 40 % lime still reads as "the action", only dimmer
+         *   busy      the lamp stays on, the glow goes, three dots stand in for the label
+         *             (drawn by `Pressable`)
+         *
+         * The glow is a layer of its own (`::before`, same box, same radius) and not a shadow of
+         * the pill, for two reasons: it can breathe — the resting pulse animates the OPACITY of
+         * that layer, which a compositor does for free, where animating a box-shadow repaints
+         * the label on every frame — and it can be switched off in one declaration without a
+         * second shadow utility. Keep 20 px clear around a pill: nothing clips the layer here,
+         * but an `overflow: hidden` ancestor will.
+         *
+         * Busy is `aria-busy` AND `disabled` on the element (a busy button must not submit
+         * twice), so the busy rule is written one selector heavier than the disabled one and
+         * wins on specificity, not on source order.
+         */
+        primary: [
+          'bg-accent text-accent-fg',
+          'before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:shadow-glow',
+          'active:scale-[0.98] active:bg-accent-pressed active:before:hidden',
+          'data-[force=pressed]:scale-[0.98] data-[force=pressed]:bg-accent-pressed data-[force=pressed]:before:hidden',
+          'disabled:bg-surface-2 disabled:text-text-3 disabled:before:hidden',
+          'aria-busy:disabled:bg-accent aria-busy:disabled:text-accent-fg',
+          FORCED_FOCUS,
         ].join(' '),
-        ghost: 'text-text-2 hover:bg-accent-subtle hover:text-text-1',
-        // Destructive is never styled as primary and never sits in the primary position.
-        danger: 'bg-danger text-on-danger hover:opacity-90',
-      },
-      /**
-       * The selected state of a filter chip / toggle — DESIGN §5.6, `bg-accent-subtle` + accent ink.
-       *
-       * A variant rather than a call-site constant because it was already being hand-written twice
-       * (MarketplacePage, ComposePage), and the hover half is the part a call site forgets: without
-       * `hover:bg-accent-subtle` the selected chip REVERTS to `surface-2` under the pointer, which
-       * reads as "you are about to deselect" on a chip that is merely being hovered.
-       *
-       * The transparent border is not decoration: `secondary` carries a `--border-width` edge, so a
-       * selected chip that simply dropped it would shrink by 1–2px and shove the row.
-       *
-       * DECLARED BETWEEN `variant` AND `density`, deliberately. cva emits variants in key order and
-       * `cn()` runs twMerge over the result, so position decides who wins a conflict: after
-       * `variant` the fill/edge/hover overrides land, before `density` the ink sits where the
-       * eventual `text-*` colour-group fix (lib/cn.ts) will let it survive alongside `text-body-s`.
-       * Until that lands `text-body-s` swallows it — exactly as it already swallows `secondary`'s
-       * and `ghost`'s ink today, so this variant is no worse off than the four above it.
-       */
-      selected: {
-        true: [
-          'bg-accent-subtle text-on-accent-subtle',
-          'border-[length:var(--border-width)] border-transparent',
-          'hover:bg-accent-subtle hover:text-on-accent-subtle hover:border-transparent',
+        /**
+         * THE TEXT LINK — every action that is not the screen's one pill. Bare text in a 44 pt
+         * frame: no fill, no border, no hover wash. `text-1` at rest; pressed is 60 % and "off"
+         * is 40 %, the one state grammar rows and links share. No scale: only the pill moves.
+         *
+         * What the frame looks like — hugging the words on the left edge, or a square for a bare
+         * glyph — is decided with `shape` in the compound rules at the end of this recipe.
+         * `aria-disabled` is honoured as well as `disabled`, because the router-link form is an
+         * anchor and an anchor cannot be disabled. A busy link keeps its full ink: the three dots
+         * are the message, and they must not be read as "off".
+         */
+        link: [
+          'text-text-1',
+          'active:opacity-[var(--pressed-opacity)] data-[force=pressed]:opacity-[var(--pressed-opacity)]',
+          'disabled:opacity-[var(--disabled-opacity)] aria-busy:disabled:opacity-100',
+          'aria-disabled:pointer-events-none aria-disabled:opacity-[var(--disabled-opacity)]',
+          FORCED_FOCUS,
         ].join(' '),
       },
       shape: {
         button: 'rounded-button px-4',
         // Square controls: the floor already guarantees 44×44, so no width class is needed.
-        // Square, and it has to say so: --control-h is 48px in Solar while --target-min is 44, so a
-        // min-width pinned to the floor would render every icon-only chip 44x48.
+        // With `variant: 'link'` this is the Pulse icon button: a bare glyph, nothing around it.
         icon: 'rounded-chip px-0 min-w-[var(--control-h)]',
-        chip: 'rounded-chip px-4',
-        field: 'w-full justify-start rounded-field px-3 text-left font-normal',
       },
       /**
-       * Visual density. NOTE: this changes padding and type size only — never the hit area.
-       * A "small" control is visually smaller while still occupying 44 px of tappable space,
-       * which is exactly how the previous build's 32 px chips should have been done.
+       * HEIGHT, and with it the Pulse metrics of the pill.
+       *
+       *   md   44 — the default of every look but the pill: the link, the bare glyph
+       *   lg   56 — the Pulse pill, and the default of `primary` (see `control()`)
+       *   sm   44 — the small Pulse pill (a chat composer's "Küldés" beside a 44 pt field)
+       *
+       * Declared AFTER `shape` so that its word is the last one on padding and type.
        */
-      density: {
-        compact: 'text-body-s px-3',
-        default: 'text-body-s',
-        large: 'text-title-3 px-5',
+      size: {
+        md: 'min-h-[var(--control-h)]',
+        lg: 'min-h-[var(--control-h-primary)]',
+        sm: 'min-h-[var(--control-h)]',
+      },
+      /**
+       * `link` only. `danger` = danger TEXT — never a red fill. A destructive action is confirmed in a sheet.
+       *
+       * Added by the G-shell gap lane (additive, ruling R6):
+       *   `quiet`       `text-2` — the closed identity trigger of compose-profile-1, a quiet glyph
+       *   `faint`       `text-3` — the 16 pt disclosure / reorder glyphs of plan-editor-2
+       *   `dangerQuiet` the danger ink with the GLYPH at 60 % — plan-editor's "Gyakorlat
+       *                 eltávolítása" beside the full-strength "Blokk törlése"
+       */
+      tone: {
+        default: '',
+        danger: '',
+        quiet: '',
+        faint: '',
+        dangerQuiet: '',
+      },
+      /**
+       * `link` only — the type role of the words. `cap` (13 / 18 Medium) is the inline link: in a
+       * section head, in a notice line. `body` (16 / 22 Medium) is the standalone link: a second
+       * action under a pill, a row of a confirm sheet, an empty state's way out.
+       */
+      text: {
+        cap: '',
+        body: '',
+        /**
+         * G-shell. `data-l` (Geist Mono Medium 16 / 20): a figure that is the action — coins-1's
+         * "250" beside its 20 pt coin, 6 apart. The lead may be an image (`Pic`); it is never
+         * recoloured.
+         */
+        data: '',
+      },
+      /**
+       * G-shell, `link` only — the weight of the words, by type role. `medium` is today's
+       * (`cap-m` / `body-m`). `regular` is `cap` / `body` (the identity line of compose-profile-1,
+       * Geist Regular 16 / 22). `strong` is `body-b` (SemiBold 16 / 22, "Név módosítása" of
+       * compose-profile-2); on a `cap` link it is the SemiBold of the same 13 / 18 step.
+       */
+      weight: {
+        medium: '',
+        regular: '',
+        strong: '',
+      },
+      /**
+       * G-shell, `link` + `shape: 'icon'` only — the glyph of the bare icon button.
+       *
+       *   `m`      24 pt at stroke 1.75, centred in the 44 frame (today's, the default)
+       *   `sm`     16 pt (stroke 1.75 of the 24 grid = 1.17 drawn), centred — plan-editor's glyph
+       *            cluster: reorder arrows, disclosure, the day / exercise trash
+       *   `field`  20 pt in `text-2`, its box against the RIGHT edge of the 44 frame — a field's or a
+       *            row's trailing control: the password reveal of auth-1 / auth-2 (frame 334-378,
+       *            glyph 359-379), the delete / clear cross of nutrition-1 / -2 and client-detail-2
+       */
+      glyph: {
+        m: '',
+        sm: '',
+        field: '',
+      },
+      /**
+       * G-shell, `primary` only. `false` = the pill at rest WITHOUT its glow layer and the resting
+       * pulse: a specimen of a pill that is not the screen's one live action (style-studio's row
+       * stages, whose frames set `effects = []`). Pressed, disabled and busy are unchanged.
+       */
+      lit: {
+        true: '',
+        false: 'before:hidden',
       },
     },
-    defaultVariants: { variant: 'secondary', shape: 'button', density: 'default' },
+    compoundVariants: [
+      // The Pulse pill: label `body-b`, 24 either side, 6 between a glyph and the label. And the
+      // resting pulse — the glow breathes 100 → 65 → 100 % on the ambient loop, starting 1.5 s
+      // after the pill appears. Only here: a `md` primary on a screen that still holds two or
+      // three of them would be two or three loops, and Pulse allows one per screen.
+      // Reduced motion: the loop goes, the glow stays.
+      {
+        variant: 'primary',
+        shape: 'button',
+        size: ['lg', 'sm'],
+        class: 'gap-1.5 px-6 text-body-b before:animate-pulse-rest motion-reduce:before:animate-none',
+      },
+      // The text link: hugs its words on the left edge, 4 between a glyph and the words, `cap-m`.
+      // A glyph beside the words is 16 px at stroke 1.75 — the frame's word, not the call site's.
+      // The frame is as wide as the words — "Újra" is 25 pt — so the 44 pt floor is kept by an
+      // invisible layer centred on the link, at least 44 wide: the target, not the layout.
+      //
+      // Keyboard focus. The kit draws none, so the ring stays (Pulse System §4) — but drawn on
+      // the element it would be a stadium 2 pt from the first and last letter, because the frame
+      // has no side padding. So a link draws it on its own `::before` instead: the 44 pt frame
+      // widened by 8 either side, radius 4, the same 2 pt `--focus-ring` line just outside it.
+      // The element's own ring is switched off for the link only (`iconBtn` keeps the round one).
+      {
+        variant: 'link',
+        shape: 'button',
+        class: [
+          'min-w-0 justify-start gap-1 px-0 text-cap-m',
+          '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.75]',
+          'after:absolute after:inset-y-0 after:left-1/2 after:w-full after:min-w-[var(--target-min)] after:-translate-x-1/2',
+          'before:pointer-events-none before:absolute before:inset-y-0 before:-inset-x-2 before:rounded-2',
+          'focus-visible:outline-none data-[force=focus]:outline-none',
+          'focus-visible:before:outline-solid focus-visible:before:outline-2 focus-visible:before:outline-[var(--focus-ring)]',
+          'data-[force=focus]:before:outline-solid data-[force=focus]:before:outline-2 data-[force=focus]:before:outline-[var(--focus-ring)]',
+        ].join(' '),
+      },
+      { variant: 'link', text: 'body', class: 'text-body-m' },
+      { variant: 'link', tone: 'danger', class: 'text-danger' },
+      // The bare glyph: 24 px at stroke 1.75 in a 44 × 44 frame. Size and stroke are the frame's
+      // word, not the call site's — an icon button cannot be handed a 20 px glyph by accident.
+      { variant: 'link', shape: 'icon', class: '[&_svg]:size-6 [&_svg]:stroke-[1.75]' },
+
+      // ── G-shell additions (additive: no existing combination changes) ──────────────────────
+      // The figure link: mono 16 / 20, 6 between the lead and the figure (coins-1 "Button/price").
+      // `font-mono` replaces the base `font-body` (one family group in the merger).
+      { variant: 'link', text: 'data', class: 'gap-1.5 font-mono text-data-l' },
+      // The weights, as type roles of the same size — the role carries the weight, so the merger
+      // keeps exactly one size class.
+      { variant: 'link', text: 'body', weight: 'regular', class: 'text-body' },
+      { variant: 'link', text: 'body', weight: 'strong', class: 'text-body-b' },
+      { variant: 'link', text: 'cap', weight: 'regular', class: 'text-cap' },
+      { variant: 'link', text: 'cap', weight: 'strong', class: 'font-semibold' },
+      // The quieter inks. On a text link the lead / trail glyphs are `text-2` already; the words
+      // take the tone.
+      { variant: 'link', tone: 'quiet', class: 'text-text-2' },
+      { variant: 'link', tone: 'faint', class: 'text-text-3' },
+      { variant: 'link', tone: 'dangerQuiet', class: 'text-danger [&_svg]:opacity-60' },
+      // The glyph sizes of the bare icon button. `field`: the box stands 1 past the frame's right
+      // edge, as the frames place it (eyeOff 359-379 in 334-378), so the ink ends on the edge.
+      { variant: 'link', shape: 'icon', glyph: 'sm', class: '[&_svg]:size-4' },
+      // The cross draws its ink 4 in from its box on each side (an eye 1.7), so the frames hang its
+      // box 4 past the edge (nutrition-1 / -2, client-detail-2: glyph/x 362-382 in 334-378): ink on
+      // the edge for both. Lucide names every glyph on its `<svg>` (`lucide-x`).
+      { variant: 'link', shape: 'icon', glyph: 'field', class: 'justify-end text-text-2 [&_svg]:-mr-px [&_svg]:size-5 [&_svg.lucide-x]:-mr-1' },
+      // A `field` glyph keeps a danger ink when one is asked for (a destructive row cross).
+      { variant: 'link', shape: 'icon', glyph: 'field', tone: ['danger', 'dangerQuiet'], class: 'text-danger' },
+      // The icon pill: the small lime pill around ONE glyph — 56 x 44, the 24 pt glyph at stroke
+      // 2.5, the glow and the resting pulse (workout-1 "Button/primary · Kész" 322,497 56 x 44,
+      // r 28, glyph 338,507). `lg` is the same at 56 high.
+      {
+        variant: 'primary',
+        shape: 'icon',
+        size: ['sm', 'lg'],
+        class: 'w-14 rounded-button px-0 [&_svg]:size-6 [&_svg]:stroke-[2.5] before:animate-pulse-rest motion-reduce:before:animate-none',
+      },
+    ],
+    // `text: 'cap'` names the link's default role so that the weight rules can match it; it adds
+    // no class to any look.
+    defaultVariants: { shape: 'button', size: 'md', text: 'cap' },
   },
 );
 
-export type ControlVariants = VariantProps<typeof control>;
+export type ControlVariants = VariantProps<typeof recipe>;
+
+type ControlProps = Parameters<typeof recipe>[0];
 
 /**
- * The STATUS chip — a chip-shaped label that reports state and does nothing when you touch it.
+ * The class list of a control.
  *
- * Separate from `control` rather than a variant of it, because everything `control` guarantees is
- * wrong here: a `cursor-pointer` on a `<span>` promises an action that does not exist,
- * `active:scale-[0.97]` answers a press nobody made, `min-h-[var(--control-h)]` inflates a 24px
- * word to 44px, and the disabled/busy states have no meaning on a thing that was never a target.
- * The 44px floor exists to protect TARGETS; applying it to a label does not make anything more
- * accessible, it just makes the row taller.
- *
- * It exists because the same string kept being retyped — `workout/SetRow.tsx`'s `Visszavonva`
- * label writes the `neutral` tone below verbatim, and the admin, coaching and library screens
- * hand-roll the tonal ones. A tone is a semantic claim ("this is a warning"), and a claim that is
- * copy-pasted drifts.
- *
- * The tone strings carry the INK and the base carries the size, in that order on purpose: under
- * today's twMerge config `text-caption` and `text-danger` share one class group, and if the sizes
- * came last a `danger` pill would render in the inherited colour — a warning with no warning in
- * it. Losing the caption size to an inherited one is a smaller wrong, and both survive once
- * `lib/cn.ts` teaches twMerge this project's font-size names.
+ * A Pulse look is resolved here, once, so that it is right for EVERY consumer: `Pressable` runs
+ * the class merger over the result anyway, but `<Link className={control(…)}>` does not, and the
+ * pill's 24 px padding must replace the button shape's 16 rather than sit beside it and let the
+ * stylesheet's source order decide.
  */
-export const chip = cva(['inline-flex items-center gap-1 whitespace-nowrap', 'rounded-chip px-3 py-1', 'text-caption'], {
-  variants: {
-    tone: {
-      /** The default: a bordered pill on the card surface. Says "state", claims nothing about it. */
-      neutral:
-        'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1 text-text-2',
-      /** Borderless, recessed — for a count or a tag that must not compete with the row it labels. */
-      quiet: 'bg-surface-2 text-text-3',
-      // `text-on-accent-subtle`, NOT `text-accent` — DESIGN §7 #63. The wash is the accent at 20%,
-      // so accent-on-accent-wash cannot open a contrast gap in any pack at any hue. Three call
-      // sites in `features/admin/` currently write the failing pair; this is the one to copy.
-      accent: 'bg-accent-subtle text-on-accent-subtle',
-      success: 'bg-success-subtle text-success',
-      warning: 'bg-warning-subtle text-warning',
-      danger: 'bg-danger-subtle text-danger',
-      info: 'bg-info-subtle text-info',
-    },
-  },
-  defaultVariants: { tone: 'neutral' },
-});
+export function control(props?: ControlProps): string {
+  const size = pillSize(props?.variant, props?.size);
+  const classes = recipe({ ...props, size });
+  const pulse = props?.variant === 'link' || size === 'lg' || size === 'sm';
+  return pulse ? cn(classes) : classes;
+}
 
-export type ChipVariants = VariantProps<typeof chip>;
+/** The height a control is drawn at: the one it names, else `lg` for the pill and `md` for the rest. */
+function pillSize(variant: ControlVariants['variant'], size: ControlVariants['size']): ControlVariants['size'] {
+  return size ?? (variant === 'primary' ? 'lg' : 'md');
+}
+
+/**
+ * The `data-kit` name of a control: the kit function of the Figma board it is an instance of, or
+ * `undefined` for none. The geometry probe finds a component by this name and compares its box
+ * with the frame (PLAN R27), so a 44 px `md` primary must NOT call itself the pill.
+ */
+export function kitName({ variant, shape, size }: Pick<ControlVariants, 'variant' | 'shape' | 'size'>): 'btnPrimary' | 'textLink' | 'iconBtn' | undefined {
+  if (variant === 'link') return shape === 'icon' ? 'iconBtn' : 'textLink';
+  // The icon pill (G-shell) is the pill too: the same fill, glow and states around one glyph.
+  const s = shape ?? 'button';
+  const h = pillSize(variant, size);
+  if (variant === 'primary' && (s === 'button' || s === 'icon') && (h === 'lg' || h === 'sm')) return 'btnPrimary';
+  return undefined;
+}
+
+/**
+ * G-shell — the disabled pill on an ANCHOR (`PressableLink`): what `disabled:` draws on a button,
+ * keyed on `aria-disabled`, because an anchor cannot be disabled. The link look answers to
+ * `aria-disabled` in the recipe already; the pill does not, and must not for a button (a busy pill
+ * is `aria-busy` + `disabled`, never `aria-disabled`), so it is applied by `PressableLink` only.
+ */
+export const ANCHOR_DISABLED_PILL =
+  'aria-disabled:pointer-events-none aria-disabled:bg-surface-2 aria-disabled:text-text-3 aria-disabled:before:hidden';

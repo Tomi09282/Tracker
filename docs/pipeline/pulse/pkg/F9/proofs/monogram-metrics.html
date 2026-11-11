@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'BSD'; src: url('bsd.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'BSD'; src: url('bsdx.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+#out { white-space: pre; }
+</style></head>
+<body><span style="font-family:BSD;font-weight:900">AŐ</span><div id="out"></div>
+<script>
+(async () => {
+  await document.fonts.load('900 124px BSD', 'ABCŐŰ');
+  await document.fonts.ready;
+  const S = 1000, W = 1600, H = 1800, BASE = 1300;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const cx = c.getContext('2d', { willReadFrequently: true });
+  const chars = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÖŐÚÜŰÄ0123456789·', 'KP', 'TD', 'SB', 'KA', 'NE', 'TL', 'VM', 'HG'];
+  const g = {};
+  for (const ch of chars) {
+    cx.clearRect(0, 0, W, H);
+    cx.font = '900 ' + S + 'px BSD';
+    cx.fillStyle = '#000'; cx.textBaseline = 'alphabetic';
+    const X = 200;
+    cx.fillText(ch, X, BASE);
+    const adv = cx.measureText(ch).width;
+    const d = cx.getImageData(0, 0, W, H).data;
+    let l = W, r = -1, t = H, b = -1;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (d[(y * W + x) * 4 + 3] > 127) { if (x < l) l = x; if (x > r) r = x; if (y < t) t = y; if (y > b) b = y; } }
+    g[ch] = { adv: +(adv / S).toFixed(4), lsb: +((l - X) / S).toFixed(4), rsb: +((X + adv - r - 1) / S).toFixed(4), top: +((BASE - t) / S).toFixed(4), bot: +((b + 1 - BASE) / S).toFixed(4), inkW: +((r + 1 - l) / S).toFixed(4) };
+  }
+  document.getElementById('out').textContent = 'RESULT' + JSON.stringify(g) + 'END';
+})();
+</script></body></html>

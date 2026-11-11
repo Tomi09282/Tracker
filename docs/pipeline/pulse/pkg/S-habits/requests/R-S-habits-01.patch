@@ -1,0 +1,88 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 0ef4a46..c713640 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -80,6 +80,8 @@ const EXPECT_BY_VIEW = {
+     ['/', '/'],
+     ['/onboarding', '/'],
+     ['/notifications', '/'],
++    ['/habits', '/'],
++    ['/habits/7', '/'],
+     ['/workout', '/workout'],
+     ['/workout/42', '/workout'],
+     ['/library', '/workout'],
+diff --git a/frontend/scripts/check-nav.mjs b/frontend/scripts/check-nav.mjs
+index 13e42b9..d4a43b3 100644
+--- a/frontend/scripts/check-nav.mjs
++++ b/frontend/scripts/check-nav.mjs
+@@ -89,6 +89,7 @@ const NO_INBOUND_BY_DESIGN = new Map([
+   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
+   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
+   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
++  ['/habits', { reason: 'Szokások is pushed from Ma ("Összes ›" in the SZOKÁSOK block, frame lifeos/ma-1), which package S-today builds; drop this row when that door is merged' }],
+   [
+     '/m',
+     {
+diff --git a/frontend/scripts/verify-gates.mjs b/frontend/scripts/verify-gates.mjs
+index 246118a..033196c 100644
+--- a/frontend/scripts/verify-gates.mjs
++++ b/frontend/scripts/verify-gates.mjs
+@@ -318,7 +318,7 @@ const PROBES = [
+     gate: 'check:nav-active',
+     label: 'Értesítések without its Kezdőlap tab is caught',
+     file: NAV_TABS,
+-    mutate: swap(/(owns:\s*\['\/onboarding'),\s*'\/notifications'\s*\]/, '$1]'),
++    mutate: swap(/(owns:\s*\['\/onboarding'),\s*'\/notifications'/, '$1'),
+     expect: /user view on \/notifications lights exactly one tab/,
+   },
+   {
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 26e0e23..8b848eb 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   user: [
+     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+     // lighting anything. `owns` is the exception list `end` cannot express.
+-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
++    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications', '/habits'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index b6f7245..b349233 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -59,6 +59,8 @@ export const ROUTE_META = {
+   '/coins': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/settings/equipment': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
++  '/habits': { parent: '/', parentLabelKey: 'habits.today' },
++  '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/notifications': {
+     parent: '/',
+     parentLabelKey: 'nav.home',
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index e286c74..62555ba 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -98,6 +98,10 @@ const EquipmentPage = lazy(() =>
+ const DaySettingsPage = lazy(() =>
+   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
+ );
++const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
++const HabitDetailPage = lazy(() =>
++  import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
++);
+ 
+ const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
+ 
+@@ -142,6 +146,8 @@ export const router = createBrowserRouter([
+     children: [
+       { index: true, element: suspended(<HomePage />) },
+       { path: 'notifications', element: suspended(<NotificationsPage />) },
++      { path: 'habits', element: suspended(<HabitsPage />) },
++      { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+       { path: 'library', element: suspended(<LibraryPage />) },
+       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+       { path: 'nutrition', element: suspended(<NutritionPage />) },

@@ -14,6 +14,8 @@ import themeRoutes from './src/theme/routes.js';
 import exerciseRoutes from './src/exercises/routes.js';
 import mediaRoutes from './src/exercises/media.js';
 import adminRoutes from './src/admin/routes.js';
+import adminAccountRoutes from './src/admin/accounts.js';
+import adminStatisticsRoutes from './src/admin/statistics.js';
 import privacyRoutes from './src/privacy/routes.js';
 import coachingRoutes from './src/coaching/routes.js';
 import onboardingRoutes from './src/onboarding/routes.js';
@@ -26,11 +28,13 @@ import icsRoutes from './src/plans/ics.js';
 import nutritionRoutes from './src/nutrition/routes.js';
 import progressRoutes, { uploadRouter as progressUploadRoutes } from './src/progress/routes.js';
 import coinRoutes from './src/coins/routes.js';
+import lifeosRoutes from './src/lifeos/routes.js';
 import publicRoutes from './src/public/routes.js';
 import paymentWebhookRoutes from './src/payments/webhook.js';
 import composeRoutes, { COMPOSE_JSON_LIMIT } from './src/public/compose.js';
 import composeUploadRoutes from './src/public/compose-media.js';
 import moderationRoutes from './src/public/moderation.js';
+import adminPostRoutes from './src/public/admin-posts.js';
 import { ensureDirs, sweepQuarantine } from './src/lib/media.js';
 import { sweepChatRetention } from './src/chat/retention.js';
 
@@ -245,11 +249,15 @@ app.use('/api/v1', composeRoutes);
 // by audience rather than by file size: reporting is requireAuth with no role gate, because the
 // person who finds something is rarely a coach.
 app.use('/api/v1', moderationRoutes);
+// The admin side of the same marketplace: every post in every state, the inspect page, restore.
+app.use('/api/v1', adminPostRoutes);
 app.use(AUTH_PATH, authRoutes);
 app.use('/api/v1', privacyRoutes);
   app.use('/api/v1', themeRoutes);
 app.use('/api/v1', exerciseRoutes);
 app.use('/api/v1', adminRoutes);
+app.use('/api/v1', adminAccountRoutes);
+app.use('/api/v1', adminStatisticsRoutes);
 app.use('/api/v1', coachingRoutes);
 app.use('/api/v1', onboardingRoutes);
 app.use('/api/v1', planRoutes);
@@ -260,6 +268,7 @@ app.use('/api/v1', icsRoutes);
 app.use('/api/v1', nutritionRoutes);
 app.use('/api/v1', progressRoutes);
 app.use('/api/v1', coinRoutes);
+app.use('/api/v1', lifeosRoutes);
 
 app.use((req, res) => sendError(res, 404, ERR.NOT_FOUND, 'not found'));
 app.use(errorHandler(logger));

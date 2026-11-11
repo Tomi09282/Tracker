@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { ChevronRight } from 'lucide-react';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useSession } from '../auth/useSession';
 import { ChatPanel } from '../chat/ChatPanel';
@@ -26,9 +27,9 @@ export function ChatTab({ linkId }: { linkId: number }) {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-16 w-2/3 rounded-card" />
-        <Skeleton className="ml-auto h-16 w-2/3 rounded-card" />
+      <div className="flex min-h-32 flex-col justify-end gap-5 pt-2" role="status" aria-label={t('common.loading')}>
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="ms-auto h-4 w-2/3" />
       </div>
     );
   }
@@ -36,11 +37,15 @@ export function ChatTab({ linkId }: { linkId: number }) {
   if (!conversation) {
     // The link went away between the screen loading and the chat opening — archived, or the client
     // left. The tab says so rather than spinning forever.
-    return <p className="text-body-s text-text-2">{t('chat.unavailable')}</p>;
+    return (
+      <NoticeLine tone="info" role="status">
+        {t('chat.unavailable')}
+      </NoticeLine>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-tight">
+    <div className="flex flex-col gap-2">
       {/* THE DOOR TO THE FULL SCREEN, and it is what makes that route reachable at all.
           `coach-chat` is its own screen — a thread inside a tab inside a scrolling page is a
           scrolling box in a scrolling box, which is the one shape a conversation must not have.
@@ -49,13 +54,9 @@ export function ChatTab({ linkId }: { linkId: number }) {
           hidden below 1024px, so a route with no link is a screen nobody can open.
           The tab keeps the panel, because reading the last few messages beside the client's plan
           is the common case; this is the way OUT of the tab and into the conversation. */}
-      <Link
-        to={`/coach/clients/${linkId}/chat`}
-        className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-tight self-end text-accent"
-      >
+      <TextLink to={`/coach/clients/${linkId}/chat`} text="body" className="self-start" trail={<ChevronRight />}>
         {t('chat.openFull')}
-        <ChevronRight className="size-icon-s shrink-0" strokeWidth={2} aria-hidden />
-      </Link>
+      </TextLink>
       <ChatPanel
         conversationId={conversation.id}
         meId={me?.id ?? -1}

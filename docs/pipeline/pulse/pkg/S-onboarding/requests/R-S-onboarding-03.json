@@ -1,0 +1,14 @@
+{
+  "id": "R-S-onboarding-03",
+  "from": "S-onboarding",
+  "kind": "token",
+  "blocking": false,
+  "target": "frontend/src/ui/tokens/tokens.css",
+  "need": "The Dock fade (--dock-fade, transparent 0% -> surface-0 50% of the WHOLE dock box) is still largely transparent where a status line stands 40 above the pill, so on a page longer than the screen the rows behind show through it (review S-onboarding, difference 1, blocking). Every footer that docks a status line above its action (onboarding, and per the review compose-post and settings) has the same defect.",
+  "evidence": ".pulse/review/S-onboarding/viewport-874/onboarding-three-areas-save-failed.png (before); .pulse/pairs/S-onboarding-fix2/save-line-874.before-after.png",
+  "proposedApi": "--dock-fade: linear-gradient(to bottom, transparent 0, var(--surface-0) 48px) - a fixed 48 pt ramp over the Dock pt-12, solid from the top of the content box",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-onboarding/requests/R-S-onboarding-03.patch",
+  "interim": "S-onboarding-fix2 gives its own status slot a canvas backing (48 pt ramp, then solid down to the pill) while a line is shown; it becomes redundant (harmless) if this lands",
+  "status": "open",
+  "resolution": null
+}

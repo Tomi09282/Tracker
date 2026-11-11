@@ -1,7 +1,5 @@
-import { useSyncExternalStore } from 'react';
+import { useId, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LucideIcon } from 'lucide-react';
-import { Bell, Speech, Vibrate } from 'lucide-react';
 import {
   cueSnapshot,
   setCueEnabled,
@@ -14,12 +12,15 @@ import {
   hapticsAvailable,
   type CueChannel,
 } from '../../features/workout/cues';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
 import { Switch } from '../../ui/primitives/Switch';
-import { Surface } from '../../ui/primitives/Surface';
-import { cn } from '../../lib/cn';
 
 /**
- * Which cues the workout player is allowed to emit on THIS device.
+ * Which cues the workout player is allowed to emit on THIS device — the three switches behind
+ * Profil's "Edzés közbeni jelzések" row (design round A, `settings-v2-2`): the row opens a sheet
+ * and the sheet holds these rows, on the gutter, a switch at the end of each. The row's value
+ * ("Hang · Rezgés") is `useCueSummary` below, read from the same store.
  *
  * Three switches rather than one, because they fail differently. The synthetic voice is the one
  * people actually want gone — it is grating in a gym, and on a device with no voice installed for
@@ -37,92 +38,85 @@ function useCues() {
   return useSyncExternalStore(subscribeCues, cueSnapshot, cueSnapshot);
 }
 
-function Row({
+function CueRow({
   channel,
-  icon: Icon,
   label,
   hint,
   available,
   onPreview,
 }: {
   channel: CueChannel;
-  icon: LucideIcon;
   label: string;
   hint: string;
   available: boolean;
   onPreview: () => void;
 }) {
   const cues = useCues();
-  const on = cues[channel];
-  const id = `cue-${channel}`;
+  const id = useId();
+  const titleId = `${id}-title`;
+  const hintId = `${id}-hint`;
 
   return (
-    <div className="flex items-center gap-tight px-[var(--card-pad)] py-2">
-      {/* The dim lands on the icon and the words, NOT on the whole row — the Switch already
-          carries the disabled opacity from `control.ts`, and stacking the two would sink an
-          unavailable channel to 20% and read as broken rather than as absent. */}
-      <div className={cn('flex min-w-0 flex-1 items-center gap-tight', !available && 'opacity-45')}>
-        <span
-          aria-hidden
-          // `rounded-field`, like every other 44px glyph square on this screen. `--radius-card`
-          // and `--radius-field` diverge sharply per pack (Neon: radius-6 vs radius-full), so the
-          // same holder rendered as a box in the section headers and a pill here.
-          className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-2"
-        >
-          <Icon className="size-icon-m" strokeWidth={2} />
-        </span>
-        <div className="min-w-0">
-          <span id={id} className="text-body block text-text-1">
-            {label}
-          </span>
-          <p id={`${id}-hint`} className="text-caption mt-0.5 text-text-3">
-            {hint}
-          </p>
-        </div>
-      </div>
-
-      <Switch
-        checked={on}
-        labelledBy={id}
-        describedBy={`${id}-hint`}
-        // A toggle for something that cannot happen would be a lie. Disabled and dimmed rather
-        // than hidden, so the absence is explained rather than mysterious.
-        disabled={!available}
-        onChange={(next) => {
-          setCueEnabled(channel, next);
-          // Turning something ON demonstrates it immediately, inside the tap so iOS counts it as a
-          // gesture. Nobody should have to start a Tabata to find out what they just enabled.
-          if (next) onPreview();
-        }}
-      />
-    </div>
+    // A row that only holds a control is not dimmed: the switch carries its own disabled state and
+    // the words stay readable (the frame's "Rezgés": switch at 40 %, title in ink).
+    <ListRow
+      title={label}
+      titleId={titleId}
+      sub={<span id={hintId}>{hint}</span>}
+      subLines={3}
+      control={
+        <Switch
+          checked={cues[channel]}
+          labelledBy={titleId}
+          describedBy={hintId}
+          // A switch for something that cannot happen would be a lie. Disabled rather than hidden,
+          // so the absence is explained rather than mysterious.
+          disabled={!available}
+          onChange={(next) => {
+            setCueEnabled(channel, next);
+            // Turning something ON demonstrates it immediately, inside the tap so iOS counts it as a
+            // gesture. Nobody should have to start a Tabata to find out what they just enabled.
+            if (next) onPreview();
+          }}
+        />
+      }
+    />
   );
 }
 
+/**
+ * The row's one-line value: "Hang" when the voice or the beep may sound, "Rezgés" when the device
+ * may vibrate (and can), joined by " · " — the words the frame draws. Nothing on = no value: the
+ * row then says nothing rather than inventing a word for "off".
+ */
+export function useCueSummary(): string {
+  const { t } = useTranslation();
+  const cues = useCues();
+  const words: string[] = [];
+  if (cues.speech || cues.tone) words.push(t('settings.cues.sound'));
+  if (cues.haptics && hapticsAvailable()) words.push(t('settings.cues.haptics'));
+  return words.join(' · ');
+}
+
+/** The three rows, as the sheet's body. Named as one group by the sheet's title. */
 export function CueSettings() {
   const { t, i18n } = useTranslation();
 
-  // Read once, and read by BOTH props. The row already rendered dimmed and inert without a motor,
-  // but its hint never said why — and the iPhone fact ("no vibration, so the beep is the only
-  // non-visual cue left") was welded into the SÍPSZÓ hint, on a row it is not about. The spec's
-  // [!important] moves that sentence here rather than copying it, so it lives in one place.
+  // Read once, and read by BOTH props: without a motor the row is disabled AND its hint says why
+  // (the iPhone fact lives on the vibration row, the row it is about).
   const haptics = hapticsAvailable();
 
   return (
-    // One card, three rows, hairlines between them — `pad="none"` because the rows own their
-    // own padding so a divider runs the full width of the card instead of floating inside it.
-    <Surface pad="none" className="divide-y divide-[var(--surface-border)] overflow-hidden">
-      <Row
+    <RowStack as="div" role="group" aria-label={t('settings.cues.row')}>
+      <CueRow
         channel="speech"
-        icon={Speech}
         label={t('settings.cues.speech')}
         hint={t('settings.cues.speechHint')}
         available={speechAvailable()}
         onPreview={() => speak(t('workout.interval.spokenWork', { round: 1, total: 8 }), i18n.language)}
       />
-      <Row
+      <CueRow
         channel="tone"
-        icon={Bell}
         label={t('settings.cues.tone')}
         hint={t('settings.cues.toneHint')}
         available
@@ -131,14 +125,13 @@ export function CueSettings() {
           tone(1320, 260);
         }}
       />
-      <Row
+      <CueRow
         channel="haptics"
-        icon={Vibrate}
         label={t('settings.cues.haptics')}
         hint={haptics ? t('settings.cues.hapticsHint') : t('settings.cues.hapticsUnavailable')}
         available={haptics}
         onPreview={() => vibrate('intervalWork')}
       />
-    </Surface>
+    </RowStack>
   );
 }

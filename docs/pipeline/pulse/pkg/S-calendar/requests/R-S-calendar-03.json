@@ -1,0 +1,12 @@
+{
+  "id": "R-S-calendar-03",
+  "from": "S-calendar",
+  "kind": "feature",
+  "blocking": false,
+  "target": "frontend/src/features/today/TodayPage.tsx (owned by S-ma)",
+  "need": "Ma draws KÖVETKEZŐ (frame lifeos/ma-1: section Következő with \"Naptár ›\", one list row title / place / start / chevron) from GET /lifeos/today nextEvent (B-calendar): TodayPage mounts the package's own features/calendar/NextEventSection.tsx after TÁPLÁLKOZÁS (one import, one element, the block comment). Not drawn when nextEvent is null. The row opens /calendar/events/<id>?on=<date>; another day than today puts its weekday before the place; an all-day event says Egész nap. The frame line \"· emlékeztető 18:30\" is not drawn: nextEvent carries no reminders.",
+  "evidence": "kepernyok-2x/lifeos/ma-1@2x.png; figma-build/lifeos/ma-1.part.js lines 43-44; .pulse/pairs/S-calendar/ma-next.*",
+  "interim": "Applied to the slot working tree only. Cut with git diff on pulse-redesign 05b830a (S-ma merged). It imports features/calendar/NextEventSection.tsx, so it merges with or after S-calendar, and needs B-calendar's LifeosToday.nextEvent (its shared.patch to lib/lifeos-api.ts).",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-calendar/requests/R-S-calendar-03.patch",
+  "status": "open"
+}

@@ -1,0 +1,365 @@
+{
+  "package": "S-focus",
+  "base": "1b7759f",
+  "namespaces": [
+    "focus"
+  ],
+  "set": [
+    {
+      "key": "focus.title",
+      "hu": "Fókusz",
+      "en": "Focus",
+      "de": "Fokus",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 title; lifeos/ma-1 section eyebrow FÓKUSZ"
+    },
+    {
+      "key": "focus.what",
+      "hu": "Min dolgozol?",
+      "en": "What are you working on?",
+      "de": "Woran arbeitest du?",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 field label"
+    },
+    {
+      "key": "focus.duration",
+      "hu": "Időtartam",
+      "en": "Duration",
+      "de": "Dauer",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 section eyebrow IDŐTARTAM"
+    },
+    {
+      "key": "focus.checkin",
+      "hu": "Ellenőrzés",
+      "en": "Check-in",
+      "de": "Check-in",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 / lifeos/focus-2 section eyebrow, lifeos/focus-3 ledger label ELLENŐRZÉS"
+    },
+    {
+      "key": "focus.none",
+      "hu": "Nincs",
+      "en": "None",
+      "de": "Keine",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 check-in word"
+    },
+    {
+      "key": "focus.minutes",
+      "hu": "{{n}} perc",
+      "en": "{{n}} min",
+      "de": "{{n}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 duration / check-in words \"25 perc\", \"15 perc\"; lifeos/ma-1 \"25 perc\""
+    },
+    {
+      "key": "focus.hours",
+      "hu": "{{n}} óra",
+      "en": "{{n}} h",
+      "de": "{{n}} Std.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 duration words \"1 óra\", \"1,5 óra\", \"2 óra\""
+    },
+    {
+      "key": "focus.rule",
+      "hu": "Várhatóan +{{coins}} érme: óránként {{perHour}}, jelzésenként +{{perCheckin}}.",
+      "en": "Expected +{{coins}} coins: {{perHour}} per hour, +{{perCheckin}} per check-in.",
+      "de": "Voraussichtlich +{{coins}} Münzen: {{perHour}} pro Stunde, +{{perCheckin}} pro Check-in.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 reward rule"
+    },
+    {
+      "key": "focus.ruleNoCheckin",
+      "hu": "Várhatóan +{{coins}} érme: óránként {{perHour}}.",
+      "en": "Expected +{{coins}} coins: {{perHour}} per hour.",
+      "de": "Voraussichtlich +{{coins}} Münzen: {{perHour}} pro Stunde.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/focus-1 reward rule when \"Nincs\" is chosen (the frame's line without its check-in part)"
+    },
+    {
+      "key": "focus.start",
+      "hu": "Fókusz indítása",
+      "en": "Start focus",
+      "de": "Fokus starten",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-1 docked pill; Ma's FÓKUSZ row when no block is open"
+    },
+    {
+      "key": "focus.noZone",
+      "hu": "Előbb állítsd be az időzónádat.",
+      "en": "Set your time zone first.",
+      "de": "Lege zuerst deine Zeitzone fest.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: GET /focus/current started false / POST /focus 409 TIMEZONE_REQUIRED, the line with the door to \"Nap és időzóna\""
+    },
+    {
+      "key": "focus.limit",
+      "hu": "Mára elérted a fókuszblokkok számát.",
+      "en": "You have reached today's number of focus blocks.",
+      "de": "Du hast die heutige Anzahl an Fokusblöcken erreicht.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: POST /focus 409 LIMIT_REACHED (48 a day)"
+    },
+    {
+      "key": "focus.startFailed",
+      "hu": "Nem sikerült elindítani. Próbáld újra.",
+      "en": "Could not start. Try again.",
+      "de": "Start fehlgeschlagen. Versuch es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: a failed POST /focus"
+    },
+    {
+      "key": "focus.failed",
+      "hu": "A fókusz betöltése nem sikerült.",
+      "en": "Could not load focus.",
+      "de": "Fokus konnte nicht geladen werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: a failed GET /focus/current, the danger line with \"Újra\""
+    },
+    {
+      "key": "focus.live",
+      "hu": "Fókuszban",
+      "en": "In focus",
+      "de": "Im Fokus",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 live line FÓKUSZBAN"
+    },
+    {
+      "key": "focus.planned",
+      "hu": "Következő blokk",
+      "en": "Next block",
+      "de": "Nächster Block",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-1 FÓKUSZ row \"Következő blokk · 25 perc · +8 érme\"; lifeos/focus-2 live line of a planned block"
+    },
+    {
+      "key": "focus.ended",
+      "hu": "Lejárt az idő",
+      "en": "Time is up",
+      "de": "Zeit ist um",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: a ran-out block (status ended) waiting for Befejezés / Feladás, the live line"
+    },
+    {
+      "key": "focus.left",
+      "hu": "{{min}} perc {{sec}} másodperc van hátra",
+      "en": "{{min}} min {{sec}} s left",
+      "de": "Noch {{min}} Min. {{sec}} Sek.",
+      "copy": "proposed",
+      "visible": false,
+      "source": "lifeos/focus-2 screen-reader text of the countdown \"34:42\""
+    },
+    {
+      "key": "focus.progress",
+      "hu": "{{done}} / {{of}} perc",
+      "en": "{{done}} / {{of}} min",
+      "de": "{{done}} / {{of}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 \"15 / 50 perc\""
+    },
+    {
+      "key": "focus.checkinAsk",
+      "hu": "Rajta vagy még? Jelezz, és jár a +{{coins}} érme.",
+      "en": "Still on it? Check in and get +{{coins}} coins.",
+      "de": "Noch dran? Melde dich und erhalte +{{coins}} Münzen.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 check-in line"
+    },
+    {
+      "key": "focus.checkinCta",
+      "hu": "Rajta vagyok",
+      "en": "I'm on it",
+      "de": "Ich bin dran",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 pill"
+    },
+    {
+      "key": "focus.finish",
+      "hu": "Befejezés",
+      "en": "Finish",
+      "de": "Beenden",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 docked text link"
+    },
+    {
+      "key": "focus.giveUp",
+      "hu": "Feladás",
+      "en": "Give up",
+      "de": "Aufgeben",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-2 docked danger link; the ConfirmSheet's action"
+    },
+    {
+      "key": "focus.giveUpTitle",
+      "hu": "Feladod a blokkot?",
+      "en": "Give up this block?",
+      "de": "Diesen Block aufgeben?",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/focus-2 \"Feladás → ConfirmSheet\" (body script comment): the sheet's title"
+    },
+    {
+      "key": "focus.giveUpBody",
+      "hu": "A feladott blokk nem ér érmét.",
+      "en": "A block you give up earns no coins.",
+      "de": "Ein aufgegebener Block bringt keine Münzen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/focus-2 ConfirmSheet message (api.md: Feladás pays nothing)"
+    },
+    {
+      "key": "focus.writeFailed",
+      "hu": "Nem sikerült. Próbáld újra.",
+      "en": "That did not work. Try again.",
+      "de": "Das hat nicht geklappt. Versuch es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: a failed check-in / finish / give-up, the error toast"
+    },
+    {
+      "key": "focus.doneTitle",
+      "hu": "Kész fókusz",
+      "en": "Focus done",
+      "de": "Fokus erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 title"
+    },
+    {
+      "key": "focus.doneMeta",
+      "hu": "{{span}} · feladás nélkül",
+      "en": "{{span}} · without giving up",
+      "de": "{{span}} · ohne Aufgeben",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 \"21:10 – 22:00 · feladás nélkül\""
+    },
+    {
+      "key": "focus.unitMin",
+      "hu": "perc",
+      "en": "min",
+      "de": "Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 figure unit PERC"
+    },
+    {
+      "key": "focus.coins",
+      "hu": "Érme",
+      "en": "Coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 ledger label ÉRME"
+    },
+    {
+      "key": "focus.credited",
+      "hu": "jóváírva",
+      "en": "credited",
+      "de": "gutgeschrieben",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 ledger note"
+    },
+    {
+      "key": "focus.coinsPlus",
+      "hu": "+{{n}} érme",
+      "en": "+{{n}} coins",
+      "de": "+{{n}} Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-1 \"+8 érme\"; lifeos/focus-3 screen-reader text of \"+23\""
+    },
+    {
+      "key": "focus.every",
+      "hu": "{{n}} percenként",
+      "en": "every {{n}} min",
+      "de": "alle {{n}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 ledger note \"15 percenként\""
+    },
+    {
+      "key": "focus.level",
+      "hu": "Szint",
+      "en": "Level",
+      "de": "Stufe",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 ledger label SZINT"
+    },
+    {
+      "key": "focus.sum",
+      "hu": "{{min}} perc × {{perHour}} érme/óra = {{a}} · {{n}} jelzés × {{p}} = {{b}}",
+      "en": "{{min}} min × {{perHour}} coins/h = {{a}} · {{n}} check-ins × {{p}} = {{b}}",
+      "de": "{{min}} Min. × {{perHour}} Münzen/Std. = {{a}} · {{n}} Check-ins × {{p}} = {{b}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/focus-3 sum line"
+    },
+    {
+      "key": "focus.sumNoCheckin",
+      "hu": "{{min}} perc × {{perHour}} érme/óra = {{a}}",
+      "en": "{{min}} min × {{perHour}} coins/h = {{a}}",
+      "de": "{{min}} Min. × {{perHour}} Münzen/Std. = {{a}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/focus-3 sum line of a block without check-ins (the frame's line without its check-in part)"
+    },
+    {
+      "key": "focus.capped",
+      "hu": "A napi érmeplafon vagy a napi fókuszkeret miatt kevesebb járt.",
+      "en": "The daily coin cap or the daily focus limit paid less.",
+      "de": "Die tägliche Münzobergrenze oder das tägliche Fokuslimit hat weniger ausgezahlt.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: lifeos/focus-3 when the finish answers capped, or paid less than the sum (B-focus api.md: the 400-coin cap, 480 paid minutes a day)"
+    },
+    {
+      "key": "focus.todayMinutes",
+      "hu": "ma {{n}} perc",
+      "en": "{{n}} min today",
+      "de": "heute {{n}} Min.",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/ma-1 FÓKUSZ head \"ma 50 perc\""
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": [
+    {
+      "where": "Fókusz, the ConfirmSheet behind \"Feladás\"",
+      "frame": "lifeos/focus-2",
+      "note": "the body script names the sheet (\"Feladás → ConfirmSheet\") but draws no words for it: title and message are proposed (focus.giveUpTitle / giveUpBody)"
+    },
+    {
+      "where": "Fókusz, focus-3 SZINT row",
+      "frame": "lifeos/focus-3",
+      "note": "the XP bar is the level progress of the wallet after the finish (readLevel of coins/statement.ts); the frame layer name \"74 % to level 5 (+23 XP)\" is not drawn as words"
+    }
+  ]
+}

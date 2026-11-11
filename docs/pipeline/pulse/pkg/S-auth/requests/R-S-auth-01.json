@@ -1,0 +1,14 @@
+{
+  "id": "R-S-auth-01",
+  "from": "S-auth",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/control.ts",
+  "need": "A field's trailing icon button as the frames draw it: the 20 pt glyph in text-2, its ink against the right edge of the 44 pt frame (auth-1 / auth-2 'Button/reveal': frame 334-378, glyph 359-379). The icon recipe forces a 24 pt text-1 glyph centred in the frame (344-368) and says a 20 pt glyph cannot be handed in, so the reveal eye is 4 pt too big, one step too bright and 11 pt left of where it is drawn.",
+  "evidence": "auth-1@2x.png and auth-2@2x.png, y 550-594; .pulse/geometry/auth-1.json 'glyph/eyeOff' [359,562,20,20] is listed unmatched by the probe; .pulse/pairs/S-auth/pair-auth-1-figma-app-diff.png; kit/inputs.md cell 2 draws it as a span for exactly this reason",
+  "proposedApi": "<Pressable variant=\"link\" shape=\"icon\" glyph=\"field\" … />  (glyph: 'm' default = today, 'field' = [&_svg]:size-5 text-text-2 justify-end)",
+  "proposedPatch": null,
+  "interim": "the reveal control is the kit icon button as it is (24 pt, text-1, centred); everything else on the line matches",
+  "status": "resolved",
+  "resolution": "G-shell (8827841) added glyph=\"field\" to the control recipe and set it on the reveal control; the probe now matches glyph/eyeOff on auth-1 (21 of 21 layers matched, S-auth-fix final run)."
+}

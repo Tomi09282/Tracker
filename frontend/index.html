@@ -4,41 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <!-- Matches surface-0 of the default pack, so the browser chrome and the overscroll area
-         do not flash a lighter color before the stylesheet lands. -->
-    <meta name="theme-color" content="#0B0D10" />
+    <!-- The Pulse canvas, a copy of --surface-0 (HTML cannot read a token): the browser chrome and
+         the overscroll area are this colour from the first byte, before the stylesheet lands.
+         check:canvas holds this tag, the token and both manifest colours equal. -->
+    <meta name="theme-color" content="#0B0D0A" />
     <title>Tracker</title>
-    <script>
-      // Pre-paint theme application. This runs BEFORE the stylesheet and before React, which is
-      // the only way to avoid a flash of the default theme for a user who picked another one.
-      // It is deliberately tiny, synchronous and dependency-free; anything that throws here
-      // would leave the page unstyled, so the whole body is wrapped.
-      //
-      // Under the production CSP there is no 'unsafe-inline' — this block is allowed by its
-      // sha256 hash, which scripts/csp-hashes.mjs derives from the built file.
-      (function () {
-        try {
-          var raw = localStorage.getItem('tracker.theme');
-          if (!raw) return;
-          var t = JSON.parse(raw);
-          var packs = ['midnight', 'solar', 'forest', 'neon', 'mono'];
-          if (t && packs.indexOf(t.pack) !== -1) {
-            document.documentElement.dataset.theme = t.pack;
-          }
-          // A custom accent is written straight onto the root element, where it overrides the
-          // pack's own value and every derived token recomputes from it.
-          if (t && typeof t.accent === 'string' && /^#[0-9A-Fa-f]{6}$/.test(t.accent)) {
-            document.documentElement.style.setProperty('--accent', t.accent);
-            if (typeof t.accentFg === 'string' && /^#[0-9A-Fa-f]{6}$/.test(t.accentFg)) {
-              document.documentElement.style.setProperty('--accent-fg', t.accentFg);
-            }
-          }
-        } catch (e) {
-          /* a corrupt cache must never stop the app from rendering */
-        }
-      })();
-    </script>
-
     <!-- The mark, which nothing linked to before this: `public/favicon.svg` has shipped since
          Phase 1 and no <link> referenced it, so every browser fell back to requesting
          /favicon.ico, getting the SPA's index.html, and drawing its default page glyph. -->

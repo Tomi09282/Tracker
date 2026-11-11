@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-03",
+  "from": "S-admin-fix2",
+  "kind": "capture",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (a fixture rule that answers a binary body from a file) or backend/scripts seed (a real photograph for the demo submissions)",
+  "need": "admin-2 draws the opened submission's upload as a 354 x 199 photograph (a barbell plate held in two hands, radius 2). The demo seed stores a blank 92-byte transparent WebP for every submission, and a states.json fixture can only answer JSON, so neither a live nor a replay capture can show a photograph there. The product draws whatever the upload is; the region can only match the frame once a real photograph is served for /api/v1/media/<key>.",
+  "evidence": "review finding 1 (.pulse/review/S-admin/REVIEW.md); .pulse/geometry/admin-2.json node 128:51 'Image/... beküldött média · blank still (asset submission-split-squat needed)' 24,371 354x199; figma-build/app/admin-2.body.js lines 99-103 (NEEDED AND MISSING: manifest slot submission-split-squat); pairs in .pulse/pairs/S-admin-fix2/",
+  "proposedApi": "a fixture rule { method: 'GET', path: '/api/v1/media/<key>', file: '<path under the package folder>', contentType: 'image/webp' } that pulse-fixture-check accepts for an image route, or a seed upload that is a real photograph",
+  "interim": "ModerationQueue.tsx keeps the upload's rectangle as the kit's skeleton block (the body script's own drawing of a blank still), so the box is visible and an admin can tell a blank upload from 'no media'; the frame is reported matched-fixture with this one region named as different.",
+  "status": "open",
+  "resolution": null
+}

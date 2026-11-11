@@ -1,0 +1,85 @@
+{
+  "package": "S-compose-post",
+  "branch": "pulse/S-compose-post",
+  "verifiedOn": "pulse/S-compose-post = pulse-redesign ee83451 + the S-compose-post commits; no hand-in file (no i18n, variants or shared change)",
+  "door": "URL only on a phone (owner answer Q5): /compose/posts/:publicId is reached from the desk rows and Új bejegyzés only; no new door",
+  "handIn": [],
+  "files": {
+    "frontend/src/features/compose/PostEditorPage.tsx": "render rewritten on the kit; everything from `export function PostEditorPage` to `bodyError` and from `readOnly` to `submitRef.current = submit` is byte-identical (hooks, idempotency keys, seed-once effect, autosave, guard, shortcut, submit). Screen push; ScreenHeader push (back row from routeMeta: VISSZA A PULTHOZ) with the display title and, on an existing post, the save as the trailing TextLink (Mentés dirty / Mentve disabled, busy while saving); removed = danger NoticeLine; cover = UserPhoto 16:9 feathered + SectionHeader (no rule) BORÍTÓKÉP with the TextLink x Kép eltávolítása + the description in cap text-2, or (no cover) Field Képleírás + FilePick link Kép választása (Feltöltés… while busy), + the cover failure NoticeLine; editor column 24 apart: type = SectionHeader TÍPUS + ChipRow radiogroup of Chip radios (lime mark, roving tabindex, arrow keys) on a new post, or the statement (strong rule, TÍPUS with the kind in cap-m text-1, the frozen hint) on an existing one; Field Cím with KÖTELEZŐ marker and the chars-left hint; TextArea Szöveg minRows 7 with the counter as labelTrailing (COUNTER_CLASS tone kept); markdown refusal NoticeLine compact; warn refusal NoticeLine; the always-rendered aria-live 44 pt autosave row (NoticeLine info Mentés… / danger failed / ok Automatikus mentés · Mentve HH:MM); then the lime pill Piszkozat létrehozása (new) or Rule strong + the lime pill Közzététel (draft) + ListRow Levétel with its sub (or Visszaállítás, subLines 2, when taken down); the stale Sheet with the server title and a strong TextLink A szerveren lévő átvétele. Loading = the real header + skeleton blocks; gone = header + EmptyState h1.",
+    "docs/pipeline/pulse/pkg/S-compose-post/budget.json": "deleted by check-pulse --fix-down (50 -> 0)",
+    "docs/pipeline/pulse/pkg/S-compose-post/states.json": "overrides compose-post-1 (fixture: title edit + the PUT answered from the recorded GET, clock 09:40, cover masked) and compose-post-2 (arrived by key) + 9 undrawn states + notCapturable",
+    "docs/pipeline/pulse/pkg/S-compose-post/requests/R-S-compose-post-01.json": "mutation-outcome bodies (stale 409, publish refusals) for the fixture checker"
+  },
+  "verdicts": {
+    "compose-post-1": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-compose-post/compose-post-1.png",
+      "pair": ".pulse/pairs/S-compose-post/compose-post-1.pair.png (cover masked) and compose-post-1.unmasked.overview.png (cover shown)",
+      "fixture": "states.json overrides.compose-post-1: GET /compose/posts/{draftPost} edit /post/title = Téli tömegelő – piszkozat; PUT /compose/posts/{draftPost} answered from the recorded GET (the page reads only success); steps: type x into Szöveg, advance 1.7 s, Backspace, advance 1.7 s, click the h1 (blur), advance 6 s (toasts gone). pulse-fixture-check OK",
+      "geometry": "47 compared, 38 matched, 8 deviating = width only (the h1, the description, the hints, the markdown source, the receipt and the Levétel title / sub are fixed 354 / 340 boxes in Figma against hugging text; dy <= 0.5), 1 unmatched (the text field's Underline rectangle: TextArea draws its line as the box's bottom border, it is at y 855 in the pair), 4 masked (the cover slot), 0 style mismatches"
+    },
+    "compose-post-2": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-compose-post/compose-post-2.png",
+      "pair": ".pulse/pairs/S-compose-post/compose-post-2.pair.png",
+      "geometry": "35 compared, 32 matched, 2 deviating = width only (h1 and the title hint), 1 unmatched (the TextArea underline, drawn as a border), 0 style mismatches"
+    },
+    "post-draft-recorded": { "verdict": "structure", "note": "the sandbox draft as recorded: PULSE homokozó title, 104 left, no receipt" },
+    "post-draft-nocover": { "verdict": "structure", "note": "seeded draft without a cover: Képleírás field + the Kép választása FilePick link, no pill added; the lime pill stays Közzététel" },
+    "post-public": { "verdict": "structure", "note": "published post: no pill, only the Levétel row with its reassurance" },
+    "post-autosave-failed": { "verdict": "structure", "note": "PUT 500 fixture: the danger NoticeLine A mentés nem sikerült … stays; the hook's error toast above the header" },
+    "post-dirty": { "verdict": "structure", "note": "title emptied: Mentés in full ink, 140 left, autosave off" },
+    "post-gone": { "verdict": "structure", "note": "404: the EmptyState is the h1 in the display face, the way back is the header row" },
+    "post-new-event": { "verdict": "structure", "note": "Esemény chosen (lime mark), no date field" },
+    "post-offline": { "verdict": "structure", "note": "offline: the shell's offline line, the save word busy, the autosave row reads Mentés… (TanStack holds the PUT while offline; the base build behaves the same)" },
+    "post-loading": { "verdict": "structure", "note": "not capturable (no delayed answer); code only" },
+    "post-stale-sheet": { "verdict": "structure", "note": "not capturable (R-S-compose-post-01); code only" },
+    "post-refusals": { "verdict": "structure", "note": "not capturable (R-S-compose-post-01); code only" },
+    "post-taken-down": { "verdict": "structure", "note": "not capturable (no recording with deletedAt); code only" },
+    "post-removed": { "verdict": "structure", "note": "not capturable (no recording with removedAt); code only" },
+    "post-cover-upload": { "verdict": "structure", "note": "file chooser not drivable; code only" },
+    "post-counter-tones": { "verdict": "structure", "note": "an 18 000+ character body cannot be typed by a step; code only" }
+  },
+  "probes": {
+    "all": "every captured state at 402: fonts, one lime pill at most, zero boxed surfaces, no overflow, every target >= 44, no undeclared console error or request (.pulse/shots/S-compose-post/*.probe.json)",
+    "focusWalk": "compose-post-1 11 stops, compose-post-2 11 stops, post-draft-nocover 13 stops, none without visible focus (.pulse/shots/S-compose-post/focus/)",
+    "reducedMotion": "no running infinite animation on any state (.pulse/shots/S-compose-post/rm/)",
+    "scrollEnd": "compose-post-1 at 402 x 874 scrolled to the end: the last content (the Levétel sub) ends at 723, the bar at 782 (.pulse/shots/S-compose-post/end/)",
+    "w360_w430": "every state captured at 360 and 430: probes pass, nothing overflows (.pulse/shots/S-compose-post/w360, w430)",
+    "en_de": "every state captured in en and de: no key path, no truncated label; in en the header's Save word is 30 x 44 (the TextLink's 44 pt floor is an ::after layer the targets probe does not read - kit level, same cause as R-S-home-03; hu Mentve / Mentés and de Gespeichert / Speichern pass)",
+    "inventory": "compose-post-1 and every existing-post state: the Levétel button's accessible name now includes its sub line (ListRow: Levétel A levétel bármikor visszavonható.) - same control, same role; compose-post-2, post-new-event and post-gone equal the baseline",
+    "ledger": "door to=/compose 2 -> 0 in this file: the back link is now the ScreenHeader push row (routeMeta maps /compose/posts/:publicId to /compose) on the editor and on the gone page - the door survives in the kit header; focus-visible 4 -> 0: the raw textarea, file label and back link carried their own focus classes, now TextArea (focus = the lime line), FilePick and the header back control draw the kit focus; motion-reduce 1 -> 0: the spinning Loader2 of the saving state is gone - the word Mentés… is the progress",
+    "liveSmoke": "pulse-verify --live --smoke: compose-post-2, post-draft-recorded and post-gone rendered against the live backend with C's jar, no undeclared error; no write made (.pulse/shots/S-compose-post/live/)",
+    "build": "pulse-verify: build green in 14 s (verify:gates chain + tsc -b + vite build) on the merge b6571f8"
+  },
+  "liveWrites": [],
+  "deviations": [
+    "Q4 kept behaviour: the save control stays a real control. On an existing post it is the push row's trailing word (Mentés dirty / Mentve disabled, busy while saving); on a new post it is the end pill Piszkozat létrehozása (the old header pill beside the h1 is gone, the h1 has its line to itself as both frames draw it)",
+    "Q4 kept behaviour: Piszkozat létrehozása is enabled on an empty form as today; the server refuses it",
+    "Q4 undrawn: the cover-less upload block is Field Képleírás + a FilePick TEXT LINK (Kép választása / Feltöltés…), not a pill - the screen keeps Közzététel as its one lime pill",
+    "Decision: the cover is UserPhoto feather (kit gap G-data 11, as on the post page and the feed): compose-post-1 draws the sample still glowing out of the black with no visible rectangle; the body script's note says a real upload fills the 16:9 slot as a plain rectangle - feather keeps the 16:9 crop and drops only the hard edge, so the editor's preview looks like what the visitor meets",
+    "Q4 kept behaviour: Esemény is drawn and selectable; no date field (PLAN 4.3)",
+    "Q4 undrawn: the kind words are a radiogroup of Chip radios with roving tabindex and arrow keys (the old Segmented's keyboard behaviour), the mark lime as the frame draws it (Segmented draws only an ink mark)",
+    "Q4 undrawn: the stale Sheet's action is a strong TextLink, not a lime pill (the page's Közzététel pill stays visible under the scrim; one lime pill on screen)",
+    "Q4 undrawn: removed = danger NoticeLine under the header + disabled fields, no cover block, no lifecycle; taken down = only the Visszaállítás row (subLines 2); refusals = warn NoticeLine between the text and the autosave row; markdown refusal = compact danger NoticeLine",
+    "Q4 kept behaviour: offline the PUT is held by TanStack Query (networkMode online), so the autosave row reads Mentés… and the header word shows busy dots until the network returns - not the failed line the prep expected; unchanged from the base build",
+    "Removed by the frames: the kind glyphs (kindIcons.ts stays, ComposePage reads it), the Pencil / image tiles, the Globe / EyeOff / RotateCcw glyphs on the lifecycle buttons, the Trash2 icon of the gone state, the gone state's second back link (the header's row replaces it)"
+  ],
+  "copyQuestions": [],
+  "proposedCopy": [],
+  "requests": ["R-S-compose-post-01 (open, not blocking)"],
+  "budget": { "before": 50, "after": 0 },
+  "fix2": {
+    "date": "2026-10-17",
+    "review": ".pulse/review/S-compose-post/REVIEW.md (re-check 2026-10-17)",
+    "fixed": [
+      "diff 1 (blocking): the cover is drawn WHOLE at its own shape inside the 16:9 slot (coverPlacement in PostEditorPage.tsx): as wide as the slot unless that makes it taller than 240/354 of the slot width, then the height wins; taller than the slot = overflow with the frame 18 : 23 split, shorter = centred. compose-post-1: Image/cover-gym matched at 41,160,320,240 (delta 0 / 0.1). A 16:9 upload still fills the slot exactly. Feather kept: blend modes are banned in src, and without it the pure-black edge of the uploaded still shows as a rectangle on the canvas and over the caption. The caption is relative so it paints over the faded overflow. The slot mask in states.json is dropped."
+    ],
+    "notFixedHere": [
+      "diff 2 (minor): the error toast over the push row - toasts are fired by the frozen handlers and drawn by the shell ToastHost; request to the shell owner",
+      "diff 3 (minor): the seeded demo posts carry a 64 x 180 transparent placeholder cover - seed data (backend), not this screen",
+      "diff 4 (minor): the focus-walk probe misses the TextArea focus line, which the kit draws as ::after on the wrapper (lime 2 px on focus-within) - probe / kit, not this screen"
+    ],
+    "pairs": ".pulse/pairs/S-compose-post-fix2/"
+  }
+}

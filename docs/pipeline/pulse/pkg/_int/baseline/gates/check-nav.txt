@@ -1,0 +1,2 @@
+check-nav: 26 routes, 7 distinct tab targets, 10 exempt from the reachability rule (user 5 · coach 6 · admin 7)
+check-nav: OK — the bar matches the design, and every screen has a door

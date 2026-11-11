@@ -1,167 +1,214 @@
-// `UsersRound` and not a whistle: the mockups draw a whistle for the coach tab, but lucide has no
-// whistle glyph — the nearest matches are sirens. A round group of people says "my clients" at
-// 24 px more plainly than a siren says "coach", and the tab leads to the client roster.
 /*
- * THE HALADÁS ICON IS A DECISION, NOT A DEVIATION, because the mockups do not agree with each other.
+ * THE TAB TABLE AND THE VIEW MODEL — pure data, on purpose.
  *
- * A review reported that "every mockup draws HALADÁS as a three-bar column chart". Cropped and
- * enlarged four of them to check before changing it, and found three different icons:
+ * Two build gates import this file straight into bare Node (`check-nav-active.mjs`,
+ * `check-assets.mjs`) and a third reads it as text (`check-nav.mjs`). So it may hold package
+ * imports and TYPE-ONLY imports, erasable syntax, and nothing else: no image, no component, no
+ * extension-less relative runtime import. The imports below are erased before Node resolves them.
  *
- *   01-home.webp        three rising bars
- *   01b-home-empty.webp three rising bars
- *   05-haladas.webp     a bare zig-zag line, no axes
- *   03-nutrition.webp   a line inside axes, with an arrowhead
- *
- * Two to two, so the images cannot settle it and the plurality is not an argument — the model drew
- * whatever it drew on each pass. What settles it is the destination: the tab opens a screen whose
- * anchor is a LINE chart over time, and an icon should predict what it leads to. Bars would promise
- * a comparison of categories, which is the one thing that screen never shows.
- *
- * Left as `TrendingUp`. Recorded here so the next reviewer meets the reasoning rather than the
- * report, and so the same change is not made and unmade a third time.
+ * A tab names its icon by KEY. Which raster draws a key is decided in ONE place,
+ * `assets/pulse/navIcons.ts`; the bar (`ui/nav/BottomNav.tsx`) draws it and `check:assets` holds
+ * every key to its files on disk.
  */
-import { Home, Dumbbell, Salad, TrendingUp, UsersRound, Shield, User } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import type { NavIconKey, SwitchIconKey } from '../assets/pulse/navIcons.ts';
 
+/** The role an account holds, as `/auth/me` answers it in `roles` (the ladder user ⊂ coach ⊂ admin). */
 export type NavRole = 'user' | 'coach' | 'admin';
 
 /**
- * One tab, declared rather than resolved.
+ * Which bar is on screen: the member's own, the trainer's or the admin's.
+ *
+ * A VIEW GRANTS NOTHING. It is derived from the URL on the client, never sent to the server, and
+ * every route and endpoint keeps its own role check (plan decision R3; `check-routes` refuses a
+ * server read of a client view). It decides which tabs are drawn — nothing else.
+ */
+export type NavView = 'user' | 'trainer' | 'admin';
+
+/**
+ * One destination tab, declared rather than resolved.
  *
  * `labelKey` and not `label` is the whole reason this file exists apart from `AppLayout`: a
  * translation key is a static string a build gate can look up in all three bundles without
  * rendering React, while a resolved label is only knowable at runtime inside a component that
  * needs a provider, a session and a router. `check-nav.mjs` reads this table.
  */
-export interface NavTabSpec {
+export interface NavDestinationSpec {
+  kind?: 'tab';
+  /** Stable React key and the cell's identity in the gates; unique within a bar. */
+  key: string;
   to: string;
-  icon: LucideIcon;
+  /** Which raster draws the cell (`assets/pulse/navIcons.ts`). */
+  icon: NavIconKey;
   labelKey: string;
-  /** Only the index route needs it: without `end`, `/` matches every path below it. */
+  /** Without `end`, a tab prefix-matches every path below its `to`. */
   end?: boolean;
   /**
    * Other route prefixes this tab OWNS, for the active state only.
    *
    * `NavLink` decides `isActive` from its own `to`, which is right for navigation and wrong for
-   * belonging. Two measured consequences, both from the mockups:
-   *
-   *   `/library/:id`  — an exercise detail page lit NO tab at all. Six cells, all idle, on a
-   *                     screen the user reached by tapping one of them.
-   *   `/compose`      — the coach's marketplace desk lit no tab either, because `/coach` does not
-   *                     prefix-match `/compose`.
-   *
-   * A bar with nothing active is a bar that has stopped answering "where am I", which is the only
-   * question it exists to answer. Declared here beside the tab rather than computed in the bar,
-   * so `check-nav` can read the ownership as data — the same reason `labelKey` lives here.
+   * belonging: an exercise detail page lit NO tab at all, and the coach's desk lit nothing either.
+   * A bar with nothing active has stopped answering "where am I", which is the only question it
+   * exists to answer. Declared beside the tab so the gates can read the ownership as data.
    */
   owns?: readonly string[];
 }
 
 /**
- * THE BOTTOM BAR, PER ROLE.
+ * A SWITCH cell — not a destination but a way back to another view (frame `bars`, "Váltó cella").
  *
- * Five tabs for a member, six for a coach, seven for an admin — the shape the approved mockups
- * specify (`v4-vegleges/sotet/01-home.png`, `.../06-coach-dashboard.png`, `.../11-admin-attekintes.png`).
- *
- * The previous build declared three for a member and five for staff, and clamped with
- * `slice(0, 5)`. That clamp is gone: with the count declared here and asserted by a gate, a
- * runtime clamp would only hide the failure it was written to catch.
- *
- * SERIAL POSITION, carried forward. Recall across an ordered list is U-shaped — the first and last
- * slots are the two people remember. The sequence opens on Home and closes on Profil in all three
- * roles, and the role-specific tabs sit in the middle where a daily-loop destination must not.
- *
- * WHAT IS NOT HERE, AND WHY IT STILL HAS A DOOR.
- * Two destinations that used to hold a tab lost it to make room, and neither may become
- * unreachable — that is the defect this whole change exists to fix, and re-creating it one route
- * over would be worse than leaving the bar alone:
- *   · `/library` — reached from the workout screen's empty state and from Home's.
- *   · `/coach/plans` — reached from the coach dashboard.
- * `check-nav.mjs` asserts both links exist. If you remove one, the build fails rather than the
- * feature silently disappearing on a phone.
+ *   never lit         it is not where the user is; `isTabActive` answers false for it, always
+ *   never current     so it never carries `aria-current`
+ *   full name         its visible label is the destination ROLE ("↩ Tag", "↩ Edző"); its
+ *                     accessible name is the whole phrase (`nameKey`: "Vissza: tag nézet")
+ *   idle raster only  `icon` is a switch key, which has no lit raster (check:assets 4)
+ *   first             the switch cells open the bar, in a fixed 64 pt column, a hairline after them
  */
+export interface NavSwitchSpec {
+  kind: 'switch';
+  key: string;
+  to: string;
+  /** The view the switch returns to. */
+  view: NavView;
+  icon: SwitchIconKey;
+  /** The short visible label: the destination role. */
+  labelKey: string;
+  /** The accessible name: the full phrase. */
+  nameKey: string;
+}
+
+export type NavTabSpec = NavDestinationSpec | NavSwitchSpec;
+
+export const isSwitch = (tab: { kind?: string }): tab is NavSwitchSpec => tab.kind === 'switch';
+
 /**
  * Is this tab the one the user is currently inside?
  *
  * ═══ WHY IT LIVES HERE AND NOT IN THE BAR ══════════════════════════════════════════════════════
  *
- * The same reason `labelKey` does: this file is the pure one, so a gate can import it and assert
- * over it without a DOM. `check-nav-active.mjs` runs a table of routes through this function and
- * checks that exactly one tab lights on each — which is the guard that was missing when the bar
- * lit EDZÉS on `/library` while announcing no current page at all, and again when `/onboarding`
- * lit nothing for a brand-new member.
+ * This file is the pure one, so a gate can import it and assert over it without a DOM.
+ * `check-nav-active.mjs` runs a table of routes through this function and checks that exactly one
+ * tab lights on each, per view. The bar reads this ONE result for both the lit raster and
+ * `aria-current`.
  *
- * The bar is a renderer. What "active" means is a fact about routes and tabs, and facts belong
- * where they can be checked.
+ * ═══ THE THREE RULES ═══════════════════════════════════════════════════════════════════════════
  *
- * ═══ THE TWO RULES ═════════════════════════════════════════════════════════════════════════════
+ * A switch never lights — on any path, its own `to` included.
  *
- * `end` is the index route's flag: without it `/` prefix-matches every path in the app.
+ * `end` is the flag of a tab whose `to` is a prefix of a sibling's (`/` of everything, `/coach`
+ * of Tervek's `/coach/plans`, `/admin` of Fiókok's `/admin/accounts`).
  *
  * The prefix test is boundary-aware. `/coin` must not match `/coins` and `/m` must not match
- * `/measurements`, so a prefix counts only where the path ends there or continues with a slash —
- * `startsWith` alone is the bug this exists to avoid.
+ * `/measurements`, so a prefix counts only where the path ends there or continues with a slash.
  */
 export function isTabActive(
   /*
-   * Only the three fields the rule actually reads, so it serves BOTH shapes: `NavTabSpec` here,
-   * which carries a `labelKey`, and `NavTab` in the bar, which carries a resolved `label`. Naming
-   * either concrete type would have made the rule refuse the other one — and "active" has never
-   * been a question about a label.
+   * Only the fields the rule reads, so it serves BOTH shapes: `NavTabSpec` here, which carries a
+   * `labelKey`, and `NavTab` in the bar, which carries a resolved `label`.
    */
-  tab: Pick<NavTabSpec, 'to' | 'end' | 'owns'>,
+  tab: { kind?: string; to: string; end?: boolean; owns?: readonly string[] },
   pathname: string,
 ): boolean {
+  if (isSwitch(tab)) return false;
   const owns = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
   return (tab.end ? pathname === tab.to : owns(tab.to)) || (tab.owns?.some(owns) ?? false);
 }
 
-export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
+/**
+ * THE BOTTOM BAR, PER VIEW (design round A, frame `bars`; plan Phase 1 "Tab sets").
+ *
+ *   user     Kezdőlap · Edzés · Étkezés · Haladás · Profil — the SAME five for every role. The
+ *            trainer and admin views are entered from Profil (its NÉZETEK rows), not from a tab.
+ *   trainer  ↩ Tag | Kliensek · Tervek · Pult
+ *   admin    ↩ Tag · ↩ Edző | Moderáció · Fiókok · Piactér   (Szabályok, /admin/rules, is a door
+ *            row on Moderáció — not a tab; Moderáció stays lit under it)
+ *
+ * The bar renders whatever it is given: there is no runtime clamp, because a clamp hides the
+ * failure it was written to catch. `check-nav.mjs` asserts the counts and the switch order.
+ *
+ * `/notifications` is the one screen every view shares: it lights the tab of the view the user
+ * came from (Kezdőlap, Kliensek or Moderáció — owner answer Q6 for the member's bar).
+ *
+ * The public marketplace (`/m…`) is owned by nobody: those routes render in `PublicLayout`, which
+ * draws no bar.
+ */
+export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
   user: [
-    // `end` stops `/` prefix-matching every route below it, which is right — and it also stops
-    // onboarding from lighting anything, so the one screen a brand-new member sees first had a bar
-    // with nothing on it. `owns` is the exception list `end` cannot express.
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+    // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+    // lighting anything. `owns` is the exception list `end` cannot express.
+    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges', '/focus'] },
+    { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+    { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+    { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' },
+    { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+    { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins', '/rewards'] },
   ],
-  coach: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    // The marketplace desk and the plan library are the coach's work, reached from here and
-    // belonging here. `/compose` is the one the mockup names outright.
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+  trainer: [
+    { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
+    // `end`: Tervek's `/coach/plans` sits under `/coach`. The client pages are Kliensek's.
+    { key: 'clients', to: '/coach', icon: 'coach', labelKey: 'nav.clients', end: true, owns: ['/coach/clients', '/notifications'] },
+    { key: 'plans', to: '/coach/plans', icon: 'plans', labelKey: 'nav.plans' },
+    { key: 'desk', to: '/compose', icon: 'desk', labelKey: 'nav.desk' },
   ],
   admin: [
-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
-    { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
-    { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
-    { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
-    { to: '/coach', icon: UsersRound, labelKey: 'nav.coach', owns: ['/compose', '/m'] },
-    { to: '/admin', icon: Shield, labelKey: 'nav.admin' },
-    { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+    { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
+    { kind: 'switch', key: 'switch-trainer', to: '/coach', view: 'trainer', icon: 'switch-trainer', labelKey: 'nav.switch.trainer', nameKey: 'nav.switch.trainerName' },
+    // The style studio's only door is on Moderáció (its header link), and so are the point rules'
+    // ("Szabályok") and the statistics' ("Részletek" door rows), so all three belong here.
+    { key: 'moderation', to: '/admin', icon: 'admin', labelKey: 'nav.moderation', end: true, owns: ['/admin/styles', '/admin/rules', '/admin/stats', '/notifications'] },
+    { key: 'accounts', to: '/admin/accounts', icon: 'accounts', labelKey: 'nav.accounts' },
+    { key: 'market', to: '/admin/marketplace', icon: 'market', labelKey: 'nav.marketplace' },
   ],
 };
 
 /**
- * Where the bar stops being a floating pill and becomes a full-width slab.
+ * Where each view's screens live. A path belongs to the FIRST view whose prefix it is under
+ * (boundary-aware, as `isTabActive`); a path under none of them is the member's.
  *
- * Both approved mockups are right, for different roles: `02-workout-player.png` shows a member's
- * five-tab bar as an inset pill, and `11-admin-attekintes.png` shows an admin's seven-tab bar
- * running edge to edge with its longest labels truncated. Seven pill-shaped cells do not fit a
- * 320 px phone with margins on both sides; seven full-width cells do, at 44 px each with room to
- * spare. So the shape follows the count.
+ * `/compose` is the trainer's desk (the Pult tab — it reverses Q5 for `/compose` only, owner
+ * checkpoint C3); `/m` stays public and URL-only.
  */
-export const PILL_MAX_TABS = 5;
+export const VIEW_ROUTES: Readonly<Record<Exclude<NavView, 'user'>, readonly string[]>> = {
+  trainer: ['/coach', '/compose'],
+  admin: ['/admin'],
+};
+
+/** The screens every view shares: they show the bar of the view the user came from. */
+export const SHARED_ROUTES: readonly string[] = ['/notifications'];
+
+/** The role each view needs. A view the account cannot hold is never drawn. */
+const VIEW_ROLE: Readonly<Record<NavView, NavRole>> = { user: 'user', trainer: 'coach', admin: 'admin' };
+
+const under = (pathname: string, prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
+
+/** The views an account may switch between, in bar order. A member has one. */
+export function viewsFor(roles: readonly string[] | undefined): NavView[] {
+  const held = new Set(roles ?? []);
+  return (Object.keys(VIEW_ROLE) as NavView[]).filter((view) => view === 'user' || held.has(VIEW_ROLE[view]));
+}
+
+/**
+ * The view a pathname shows.
+ *
+ *   * a shared screen (`/notifications`) keeps the view the user came from (`lastView`);
+ *   * otherwise the URL decides: under `/coach` or `/compose` → trainer, under `/admin` → admin;
+ *   * a view the account does not hold falls back to the member's bar — a member who opens
+ *     `/coach` by URL sees their own bar and the page's refusal, never a trainer bar.
+ *
+ * Deep links, refresh and the back button work because nothing but the URL (and, for one shared
+ * screen, the tab's own sessionStorage) decides it.
+ */
+export function viewForPath(pathname: string, roles: readonly string[] | undefined, lastView?: NavView | null): NavView {
+  const allowed = viewsFor(roles);
+  if (SHARED_ROUTES.some((p) => under(pathname, p))) {
+    return lastView && allowed.includes(lastView) ? lastView : 'user';
+  }
+  for (const view of Object.keys(VIEW_ROUTES) as Exclude<NavView, 'user'>[]) {
+    if (VIEW_ROUTES[view].some((p) => under(pathname, p))) return allowed.includes(view) ? view : 'user';
+  }
+  return 'user';
+}
 
 /** The nav is a convenience, never a permission — every route and endpoint re-checks the role. */
-export function tabsForRole(role: string | undefined): readonly NavTabSpec[] {
-  if (role === 'admin') return NAV_TABS.admin;
-  if (role === 'coach') return NAV_TABS.coach;
-  return NAV_TABS.user;
+export function tabsForView(view: NavView): readonly NavTabSpec[] {
+  return NAV_TABS[view];
 }

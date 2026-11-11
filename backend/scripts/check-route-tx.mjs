@@ -33,6 +33,7 @@
 // Run: node scripts/check-route-tx.mjs
 import fs from 'node:fs';
 import { parseRoutes } from './lib/parse-routes.mjs';
+import { workerExports, reexportedTxFiles, facadeToTx } from './lib/worker-sources.mjs';
 
 const ROOT = 'src';
 const { routes, suspects, files } = parseRoutes(ROOT);
@@ -137,8 +138,40 @@ for (const r of routes) {
   }
 }
 
+/*
+ * ═══ EVERY NAMED CALL A ROUTE CAN MAKE RESOLVES TO A TRANSACTION PISCINA CAN FIND ═══════════════
+ *
+ * Since package B0 a named transaction may live in src/db/tx/<domain>.js. Piscina resolves a task
+ * by EXPORT NAME on worker.js, so a tx file worker.js does not re-export — or a facade name that
+ * matches no export at all — is a route that answers 500 on the first request, with every gate
+ * green, because the gates read the files and Piscina reads the module. The worker-side file list
+ * comes from the helper check-worker-tx and check-admin-audit share.
+ */
+let resolved = 0;
+{
+  const exportsByName = workerExports();
+  const reexported = reexportedTxFiles();
+  for (const [facadeName, txName] of facadeToTx()) {
+    const file = exportsByName.get(txName);
+    if (!file) {
+      problems.push(
+        `src/db/index.js maps db.${facadeName} to '${txName}', which no worker-side file exports.\n` +
+          '      Piscina resolves the task by export name on worker.js; this call fails at run time.',
+      );
+    } else if (file !== 'src/db/worker.js' && !reexported.has(file)) {
+      problems.push(
+        `db.${facadeName} runs '${txName}' from ${file}, which worker.js does not re-export.\n` +
+          `      Add \`export * from './tx/${file.split('/').pop()}';\` to src/db/worker.js.`,
+      );
+    } else {
+      resolved += 1;
+    }
+  }
+}
+
 console.log(
-  `check-route-tx: ${routes.length} routes — ${inspected} inspected db.writeTx result(s)`,
+  `check-route-tx: ${routes.length} routes — ${inspected} inspected db.writeTx result(s), ` +
+    `${resolved} named worker call(s) resolved`,
 );
 
 if (problems.length) {

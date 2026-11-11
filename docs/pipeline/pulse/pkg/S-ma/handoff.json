@@ -1,0 +1,71 @@
+{
+  "package": "S-ma",
+  "branch": "pulse/S-ma",
+  "base": "pulse-redesign 1b7759f",
+  "slot": "tracker-wt/slot-14 (slot-4 held S-day-settings with applied hand-ins, so it was not re-used)",
+  "build": "pulse-verify --package S-ma --port 5184: build green (13 gates + tsc -b + vite build), 7 of 7 captured (replay) with i18n.patch.json and R-S-ma-01 applied in the working tree; verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant",
+  "frames": {
+    "lifeos/ma-1": {
+      "state": "ma-1",
+      "verdict": "matched-fixture",
+      "why": "Header, ledger line, hero 3/10 with +18 and the 10-cell bar, MAI EDZÉS with the pill, the four habit rows and four task rows with Kész ma · 2, TÁPLÁLKOZÁS and the library row land on the frame within 1-2 pt (geometry: 103 matched, 44 deviating, 32 unmatched = the NAPI DOBÁS / FÓKUSZ / KÖVETKEZŐ blocks and the Naptár tab). Below FELADATOK the app is shorter by the three hidden blocks.",
+      "capture": ".pulse/shots/S-ma/ma-1.png",
+      "pairs": [
+        ".pulse/pairs/S-ma/ma-1.pair.png",
+        ".pulse/pairs/S-ma/ma-1.pair-1.png",
+        ".pulse/pairs/S-ma/ma-1.pair-2.png",
+        ".pulse/pairs/S-ma/ma-1.pair-3.png"
+      ]
+    },
+    "lifeos/ma-2": {
+      "state": "ma-2",
+      "verdict": "matched-fixture",
+      "why": "Rest day 5/5: hero, Pihenőnap with Holnap, five habit rows (two bad habits clean), two done tasks, TÁPLÁLKOZÁS match; +53 instead of +68 and Tökéletes nap without the amount (deviations 5, 6); NAPI DOBÁS hidden (geometry 84 matched, 11 unmatched).",
+      "capture": ".pulse/shots/S-ma/ma-2.png",
+      "pairs": [
+        ".pulse/pairs/S-ma/ma-2.pair.png",
+        ".pulse/pairs/S-ma/ma-2.pair-1.png",
+        ".pulse/pairs/S-ma/ma-2.pair-2.png"
+      ]
+    },
+    "lifeos/ma-3": {
+      "state": "ma-3",
+      "verdict": "matched-fixture",
+      "why": "New member 0/1: hero, Teljes test – alap, both empty states, TÁPLÁLKOZÁS 0 / cél 2600 match; the two pay micro lines are not drawn (R-S-ma-03), so TÁPLÁLKOZÁS sits higher.",
+      "capture": ".pulse/shots/S-ma/ma-3.png",
+      "pairs": [
+        ".pulse/pairs/S-ma/ma-3.pair.png",
+        ".pulse/pairs/S-ma/ma-3.pair-1.png",
+        ".pulse/pairs/S-ma/ma-3.pair-2.png"
+      ]
+    },
+    "lifeos/ma-4": {
+      "state": "ma-4",
+      "verdict": "matched-fixture for the drawn blocks; the frame subject (NAPI DOBÁS) unreachable until Phase 4",
+      "why": "The frame subject (pending daily draw above MAI EDZÉS) is Phase 4 and unreachable; every other block (hero 0/7, Alsótest – guggolás, five habits, three tasks) is drawn and matches the frame row by row, shifted up by the hidden draw block (geometry 24 matched because of the shift).",
+      "capture": ".pulse/shots/S-ma/ma-4.png",
+      "pairs": [
+        ".pulse/pairs/S-ma/ma-4.pair.png",
+        ".pulse/pairs/S-ma/ma-4.pair-1.png",
+        ".pulse/pairs/S-ma/ma-4.pair-2.png",
+        ".pulse/pairs/S-ma/ma-4.pair-3.png"
+      ]
+    }
+  },
+  "extraStates": [
+    "ma-relapse-sheet (kit ConfirmSheet before a relapse)",
+    "ma-failed (GET /lifeos/today 500: dash + Újra, the rest works)",
+    "ma-live-session (live seed: Folytatás)"
+  ],
+  "fixtureCheck": "pulse-merge-check S-ma --preflight refuses the fixtures (lifeos/today habits / tasks / startedOn / settledThrough, my-plans/today est_minutes / start_time, nutrition-log/<date> built from the recorded 2026-10-15): the freeze of user@ predates migration 032. fixture-schema-check.mjs: 17 bodies typed by LifeosToday / TodayDay / NutritionDay, tsc clean, 032 ranges OK -> matched-fixture under the rulings of 2026-10-17 / -18. Re-record GET /lifeos/today for a seeded account on the 032 backend to make them plain edits.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-ma/i18n.patch.json",
+    "docs/pipeline/pulse/pkg/S-ma/requests/R-S-ma-01.patch (blocking, merge with the package)",
+    "docs/pipeline/pulse/pkg/S-ma/requests/R-S-ma-02.patch (after S-tasks)",
+    "docs/pipeline/pulse/pkg/S-ma/requests/R-S-ma-03.json (backend)",
+    "docs/pipeline/pulse/pkg/S-ma/states.json",
+    "docs/pipeline/pulse/pkg/S-ma/work-package.json (frozenExcept: the three today hooks)"
+  ],
+  "deviations": "docs/pipeline/pulse/pkg/S-ma/deviations.md",
+  "status": "handoff"
+}

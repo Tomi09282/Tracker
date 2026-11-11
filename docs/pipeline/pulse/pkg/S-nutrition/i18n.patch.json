@@ -1,0 +1,54 @@
+{
+  "package": "S-nutrition",
+  "base": "929546c8d4027c44a0cb75b7915bc0a91d33eb52",
+  "namespaces": [
+    "nutrition"
+  ],
+  "set": [
+    {
+      "key": "nutrition.unitKcal",
+      "hu": "kcal",
+      "en": "kcal",
+      "de": "kcal",
+      "after": "nutrition.macroTargetShort",
+      "copy": "existing-literal",
+      "source": "NutritionPage.tsx literals ' kcal', '/ … kcal', '… kcal' (hybrid lines 176, 179, 304, 326, 417); frames nutrition-1 / nutrition-2 ('/ 2600 kcal', '222 kcal', '297 kcal')",
+      "untranslated": { "reason": "unit symbol" }
+    },
+    {
+      "key": "nutrition.unitG",
+      "hu": "g",
+      "en": "g",
+      "de": "g",
+      "after": "nutrition.unitKcal",
+      "copy": "existing-literal",
+      "source": "NutritionPage.tsx literals '{n}g' (hybrid lines 217, 223, 342, 417); frames nutrition-1 / nutrition-2 ('128 g', 'cél 180 g', '60 g', '180 g')",
+      "untranslated": { "reason": "unit symbol" }
+    },
+    {
+      "key": "nutrition.slash",
+      "hu": "/",
+      "en": "/",
+      "de": "/",
+      "after": "nutrition.unitG",
+      "copy": "existing-literal",
+      "source": "NutritionPage.tsx literal '/ {target} kcal' (hybrid line 179); frame nutrition-1 'Target line' ('/ 2600')",
+      "untranslated": { "reason": "punctuation" }
+    },
+    {
+      "key": "nutrition.resultMeta",
+      "hu": "{{kcal}} kcal · {{protein}} g P /100 g",
+      "en": "{{kcal}} kcal · {{protein}} g P /100 g",
+      "de": "{{kcal}} kcal · {{protein}} g P /100 g",
+      "after": "nutrition.slash",
+      "copy": "existing-literal",
+      "source": "NutritionPage.tsx literal '{kcal} kcal · {protein}g P /100g' (hybrid line 304), the search result's sub line (not drawn in a frame; Screens/nutrition.md); the unit gets the frames' space ('60 g')",
+      "untranslated": { "reason": "unit symbols and the protein abbreviation, no words" }
+    }
+  ],
+  "copyQuestions": [
+    { "where": "every gram figure", "frame": "nutrition-1", "note": "the frames write the unit with a space ('60 g', 'cél 180 g'); the live screen wrote '60g'. The frames' spacing is taken, also in the result line ('g P /100 g')." },
+    { "where": "macro over target", "frame": "nutrition-1", "note": "the old per-macro warning glyph is dropped (Pulse: no glyphs on the instrument); the figure and its bar turn warning instead." },
+    { "where": "calorie meter without a target", "frame": "nutrition-1", "note": "with no target for the date the calorie bar is left out (the kit bar would draw a 1 pt sliver = 0 % of nothing); the figure carries the unit and the no-target sentence stands under the day line." }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "package": "S-day-settings",
+  "branch": "pulse/S-day-settings",
+  "base": "cee908f",
+  "build": "pulse-verify --package S-day-settings --port 5184: build green in 18 s (all 13 gates + tsc -b + vite build) - 7 of 7 captured (replay), on pulse-redesign cee908f merged in, with B-core's lifeos-api.ts and every hand-in of this package applied in the working tree",
+  "frames": {
+    "lifeos/settings-day-v2": {
+      "state": "settings-day-v2",
+      "verdict": "structure",
+      "why": "Layout, type and positions match the frame (tile .pulse/shots/S-day-settings/settings-day-v2.tile-1.png; ink rows at 2x: eyebrows 391 / 689 and the switch mark 844 identical, the zone row text 2 px (1 pt) higher, the switch figures 2 px, the explanation 3 px (1.5 pt) - all inside the 2 pt tolerance). But the data comes from a contract stub of GET /me/prefs (the running backend has no B-core, the freeze has no recording), which R26 refuses: structure until recorded. No geometry JSON exists for the round-B frames (.pulse/geometry has none), so the comparison is the tile plus the ink-row measurement.",
+      "capture": ".pulse/shots/S-day-settings/settings-day-v2.png",
+      "pairs": [".pulse/pairs/S-day-settings/settings-day-v2.frame-app-diff.png", ".pulse/pairs/S-day-settings/settings-day-v2.app-figma.png"]
+    }
+  },
+  "extraStates": {
+    "settings-day-zone-sheet": { "verdict": "structure", "note": "undrawn: the kit picker sheet (Sheet + SearchField + radio ListRows + CheckMark); the zone in force first and ticked" },
+    "settings-day-zone-locked": { "verdict": "structure", "note": "timezoneChangeableAt ahead: the row's action off (40 %), sub line = the reason" },
+    "settings-day-unset": { "verdict": "structure", "note": "no zone stored: the dash; the silent first-time PATCH fires once and is refused by a 500 stub (empty body), nothing drawn" },
+    "settings-day-start-failed": { "verdict": "structure", "note": "PATCH 500 on 02:00: the mark stays on 04:00, the word flashes danger, Mentve drops, a danger NoticeLine" },
+    "settings-day-load-failed": { "verdict": "structure", "note": "GET 500: header + danger NoticeLine with Újra (44 pt floor as NotificationsPage)" },
+    "settings-day-profil-row": { "verdict": "structure", "note": "Profil: 'Nap és időzóna · Budapest · 04:00 ›' first under BEÁLLÍTÁSOK, as round A settings-v2-member / settings-v2-2 draw it (pair .pulse/pairs/S-day-settings/settings-profil-row.app-figma-roundA-member.png)" }
+  },
+  "variants": "en, de, width 360, width 430, reduced-motion + focus walk: every state captured (.pulse/shots/S-day-settings/v_*), 42 probe files, 0 failing (fonts, one-pill, boxed, overflow, targets, reduced motion)",
+  "probes": "settings-day-load-failed targets fixed (Újra min-w-11); all other probes passed from the first run",
+  "ledger": "pulse-ledger S-day-settings: 2 created files, nothing lost",
+  "fixtureCheck": "pulse-fixture-check S-day-settings: 6 problems = the 6 contract bodies of GET /me/prefs (expected, R26) - to be turned into edit lists after the recording",
+  "liveSmoke": "not run: http://localhost:3000/api/v1/me/prefs answers 404 (the dev backend does not run B-core yet). No live write was made.",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-day-settings/work-package.json (add to work-packages.json screens)",
+    "docs/pipeline/pulse/pkg/S-day-settings/i18n.patch.json (9 settings.day.* keys)",
+    "docs/pipeline/pulse/pkg/S-day-settings/shared.patch (SettingsPage.tsx: the Nap és időzóna row)",
+    "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-01.json + .patch (route /settings/day, routeMeta, check-nav-active) - blocking",
+    "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-02.json + .patch (Segmented figures prop)",
+    "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-03.json + .patch (AppLayout mounts useTimezoneBootstrap - needs GET /me/prefs recorded for every capture account first)"
+  ],
+  "deviations": [
+    "DEV-a: the tab bar has 5 tabs (Kezdőlap ... Profil); the frame draws round B's 6-tab user bar (Ma, Naptár). The bar is P1-nav's and changes in Phase 3 / 5 - not this package.",
+    "DEV-b: the zone row's chevron opens a zone picker the frame does not draw (Q4: a chevron that opens nothing would be a dead control). Built from the kit picker grammar; place names are the IANA database's English names (no localized city names exist on the platform; none invented); offsets 'GMT+2' / 'GMT−3' with a true minus.",
+    "DEV-c: '● Mentve' stands in the head whenever the value on screen is the server's (the frame's rest state); 'Mentés folyamatban' with the ink dot while a write is out; nothing on a failed write (the danger line says it).",
+    "DEV-d: the switch figures need R-S-day-settings-02 (Segmented figures = data-l mono); without it they render in Geist sans body-m.",
+    "DEV-e: undrawn states composed from the kit: loading (row + switch skeletons), failed read (NoticeLine + Újra), failed write (NoticeLine), zone locked (row disabled), zone not set (dash)."
+  ],
+  "proposedCopy": "settings.day.title, zone, zoneLimit, start, explain = visible proposed copy from the approved frames (hu verbatim; en / de written here) -> copy-to-approve.md; saved, search, noResults, failed reuse existing strings",
+  "status": "handoff"
+}

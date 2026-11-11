@@ -37,6 +37,73 @@ const SORTS = {
   newest: 'e.created_at DESC, e.id DESC',
 };
 
+/**
+ * The equipment slugs of one list row, as a JSON array, in the taxonomy's own sort order.
+ *
+ * The same `slug` vocabulary the `?equipment=` filter takes and `GET /taxonomies` lists, so the
+ * client can key a picture (or a label) on it without a second lookup. Labels are deliberately
+ * NOT carried: the list is the busiest response in the app, and the client already holds the
+ * translated taxonomy.
+ *
+ * A correlated scalar subquery, like `thumb_key`, rather than a join or a second query over the
+ * page's ids:
+ *   - a one-to-many JOIN in the main statement is how the GROUP BY and the keyset cursor start
+ *     duplicating or skipping rows (see the note on `annotateForClient`);
+ *   - a second statement would be a second pool call, so the page and its equipment would be two
+ *     read snapshots, and an `IN (?, ?, …)` list would prepare a new statement for every page size.
+ * One statement, one worker call, one snapshot. `json_group_array` over no rows is `[]`, so an
+ * exercise without equipment answers an empty array, never null. A static string: nothing in it
+ * varies per request, and it binds no parameter.
+ */
+const EQUIPMENT_SLUGS = `(SELECT json_group_array(q.slug ORDER BY q.sort_order, q.id)
+                FROM exercise_equipment_map x JOIN equipment q ON q.id = x.equipment_id
+               WHERE x.exercise_id = e.id)`;
+
+/** The subquery's JSON text as an array. Anything unexpected is no equipment, never a crash. */
+const parseSlugs = (raw) => {
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value.filter((s) => typeof s === 'string') : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * The muscles of one list row, as a JSON array of `{ slug, role }` - the primary muscles first,
+ * then the secondary ones, each group in the taxonomy's own sort order.
+ *
+ * It exists for the coach's exercise picker, which draws a small muscle map next to every result:
+ * the map needs only the slug (its vocabulary is `GET /taxonomies` and the `?muscle=` filter) and
+ * the role, so labels and `body_side` are deliberately NOT carried - the client holds the
+ * translated taxonomy, and which side of the figure a muscle is drawn on is the figure's own table.
+ * `GET /exercises/:id` is still the place for the full, labelled list.
+ *
+ * Built exactly like EQUIPMENT_SLUGS, for the same reasons: a correlated scalar subquery, never a
+ * one-to-many JOIN (that is how the GROUP BY and the keyset cursor start duplicating or skipping
+ * rows), one statement and one worker call. `json_group_array` over no rows is `[]`, so an
+ * exercise without muscles answers an empty array, never null. A static string that binds no
+ * parameter.
+ */
+const MUSCLE_ENTRIES = `(SELECT json_group_array(json_object('slug', g.slug, 'role', m.role)
+                                                  ORDER BY (m.role = 'primary') DESC, g.sort_order, g.id)
+                FROM exercise_muscle_map m JOIN muscle_groups g ON g.id = m.muscle_group_id
+               WHERE m.exercise_id = e.id)`;
+
+/** The subquery's JSON text as `{ slug, role }` entries. Anything unexpected is dropped, never a crash. */
+const parseMuscles = (raw) => {
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value)
+      ? value
+          .filter((m) => m && typeof m.slug === 'string' && (m.role === 'primary' || m.role === 'secondary'))
+          .map((m) => ({ slug: m.slug, role: m.role }))
+      : [];
+  } catch {
+    return [];
+  }
+};
+
 const ListQuery = z
   .object({
     q: z.string().trim().max(120).optional(),
@@ -215,7 +282,9 @@ router.get(
               COALESCE(t.normalized_name, tf.normalized_name, e.normalized_name) AS normalized_name,
               CASE WHEN t.lang IS NOT NULL THEN 1 ELSE 0 END                AS translated,
               (SELECT storage_key FROM exercise_media WHERE exercise_id = e.id AND deleted_at IS NULL
-                 ORDER BY position, id LIMIT 1) AS thumb_key
+                 ORDER BY position, id LIMIT 1) AS thumb_key,
+              ${EQUIPMENT_SLUGS} AS equipment,
+              ${MUSCLE_ENTRIES} AS muscles
          FROM exercises e
          ${searchJoin}
          ${langJoin}
@@ -232,6 +301,10 @@ router.get(
 
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
+    for (const row of page) {
+      row.equipment = parseSlugs(row.equipment);
+      row.muscles = parseMuscles(row.muscles);
+    }
     const last = page.at(-1);
     const nextCursor =
       hasMore && last

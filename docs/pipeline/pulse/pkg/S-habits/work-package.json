@@ -1,0 +1,40 @@
+{
+  "id": "S-habits",
+  "title": "LifeOS Phase 3 (Habits + tasks + Ma) screen package: Szokások at /habits (pushed from Ma), one habit at /habits/:id and the create / edit sheet (frame habit-form), built 1:1 to design round B's lifeos/habits-1, habit-detail and habit-form on the B-habits-tasks API (GET /habits, GET /habits/:id, POST /habits, PATCH /habits/:id, archive / restore, log / skip / relapse)",
+  "screens": ["habits", "habit-detail", "habit-form"],
+  "owns": [
+    "frontend/src/features/habits/**",
+    "docs/pipeline/pulse/pkg/S-habits/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"],
+    "requests": {
+      "R-S-habits-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /habits and /habits/:id routes, parent Ma = '/')"
+    }
+  },
+  "frames": ["lifeos/habits-1", "lifeos/habit-detail", "lifeos/habit-form"],
+  "inventory": "docs/brain/58-Pulse/Screens/habits.md does not exist yet: TRACKER-mockups/5-pulse/figma-build/lifeos/README-ma.md and pkg/B-habits-tasks/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/habits",
+  "dependsOn": ["B-habits-tasks", "G-lifeos", "B-core"],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 3)",
+  "i18nNamespaces": ["habits"],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-habits-tasks' Phase-3 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' WeekdayChips / TimeTrigger (ui/primitives) - merge both first; the slot holds both applied locally and uncommitted. habitsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 032 / habit routes yet: every capture of this package answers GET /habits and GET /habits/:id with contract bodies (states.json) and is reported matched-fixture at best until the integrator records them."
+}

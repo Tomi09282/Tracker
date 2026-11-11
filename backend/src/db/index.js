@@ -7,6 +7,23 @@ import path from 'node:path';
 import Piscina from 'piscina';
 import { env } from '../lib/env.js';
 
+/*
+ * ═══ WHY THE WORKERS WAIT ASYNCHRONOUSLY, AND CLOSE THEIR CONNECTIONS BEFORE THEY GO ══════════
+ *
+ * Terminating the pool segfaulted the process on Windows (exit 139 / 0xC0000005) once a worker had
+ * used its better-sqlite3 connection: `npm run migrate`, the seed scripts, and `npm run smoke`'s
+ * setup steps died AFTER finishing their work. Package B-core set
+ * `v8.setFlagsFromString('--no-parallel-scavenge')` here for it; package B-habits-tasks measured
+ * that this did not hold (with the flag: every teardown after one query against a migrated
+ * database crashed, 9 of 9; migrate still crashed on the pre-032 code) — and V8 does not support
+ * changing a flag after the VM has started. Bisected instead: the crash is the terminate of a
+ * worker that sits blocked in Atomics.wait (Piscina's default `atomics: 'sync'` idle wait).
+ * With `atomics: 'async'` (Atomics.waitAsync, the thread is not blocked) every run was clean:
+ * migrate -> seed-dev-users -> seed-exercises -> seed-demo, 4 of 4 chains, where seed-exercises
+ * had crashed 6 of 6. closePool() also lets every worker close its own connection first (a clean
+ * WAL checkpoint, no native handle alive at terminate).
+ */
+
 // Single-process default: leave one core for the event loop, but never fewer than 2 workers or
 // one slow query starves everything. Under cluster.js set DB_POOL_THREADS=2 per process so the
 // total thread count stays near the core count.
@@ -19,6 +36,9 @@ const pool = new Piscina({
   // the database.
   minThreads: threads,
   maxThreads: threads,
+  // 'async', not Piscina's default 'sync': see the block above. An idle worker waits for its next
+  // task with Atomics.waitAsync instead of blocking its thread in Atomics.wait.
+  atomics: 'async',
 });
 
 export const all = (sql, params = []) => pool.run({ sql, params }, { name: 'all' });
@@ -84,6 +104,13 @@ export const fileReport = (args) => pool.run(args, { name: 'fileReportTx' });
 export const resolveReport = (args) => pool.run(args, { name: 'resolveReportTx' });
 export const removeSubject = (args) => pool.run(args, { name: 'removeSubjectTx' });
 
+// Admin view of marketplace posts (package B-admin-posts, ./tx/admin-posts.js, re-exported by
+// worker.js): two snapshot READS (the list with its filtered total, the whole inspect page) and the
+// one write, lifting a take-down. The take-down itself is removeSubject above.
+export const adminPostList = (args) => pool.run(args, { name: 'adminPostListQuery' });
+export const adminPostDetail = (args) => pool.run(args, { name: 'adminPostDetailQuery' });
+export const restoreRemovedPost = (args) => pool.run(args, { name: 'restoreRemovedPostTx' });
+
 // Disabling an account. The last-admin guard is read under the write lock rather than pre-checked:
 // two admins disabling each other at the same instant would otherwise leave the product with none,
 // and enabling an account requires an admin — a state nothing could recover from.
@@ -120,7 +147,106 @@ export const setClientEquipment = (args) => pool.run(args, { name: 'setClientEqu
 export const exportMyData = (args) => pool.run(args, { name: 'exportMyDataQuery' });
 export const deleteMyAccount = (args) => pool.run(args, { name: 'deleteMyAccountTx' });
 
-export const closePool = () => pool.destroy();
+// LifeOS core (migration 031). The transactions live in ./tx/lifeos.js and are re-exported by
+// worker.js under these exact names — check-route-tx proves every name below resolves. Every coin
+// movement inside them goes through ONE postCoinEvent (cap -> event -> ledger).
+export const lifeosSettleState = (args) => pool.run(args, { name: 'lifeosSettleStateQuery' });
+export const lifeosToday = (args) => pool.run(args, { name: 'lifeosTodayQuery' });
+export const userPrefs = (args) => pool.run(args, { name: 'userPrefsQuery' });
+export const wallet = (args) => pool.run(args, { name: 'walletQuery' });
+export const pointRules = (args) => pool.run(args, { name: 'pointRulesQuery' });
+export const setUserPrefs = (args) => pool.run(args, { name: 'setUserPrefsTx' });
+export const setPointRules = (args) => pool.run(args, { name: 'setPointRulesTx' });
+export const closeLifeDay = (args) => pool.run(args, { name: 'closeLifeDayTx' });
+export const markLapsedDays = (args) => pool.run(args, { name: 'markLapsedDaysTx' });
+export const awardWorkout = (args) => pool.run(args, { name: 'awardWorkoutTx' });
+
+// LifeOS habits and tasks (migration 032): ./tx/lifeos-habits.js and ./tx/lifeos-tasks.js, re-exported
+// by worker.js. Habits pay at the day close (closeLifeDayTx), tasks on completion (completeTaskTx).
+export const habits = (args) => pool.run(args, { name: 'habitsQuery' });
+export const habit = (args) => pool.run(args, { name: 'habitQuery' });
+export const createHabit = (args) => pool.run(args, { name: 'createHabitTx' });
+export const updateHabit = (args) => pool.run(args, { name: 'updateHabitTx' });
+export const archiveHabit = (args) => pool.run(args, { name: 'archiveHabitTx' });
+export const setHabitCount = (args) => pool.run(args, { name: 'setHabitCountTx' });
+export const skipHabit = (args) => pool.run(args, { name: 'skipHabitTx' });
+export const recordRelapse = (args) => pool.run(args, { name: 'recordRelapseTx' });
+export const tasks = (args) => pool.run(args, { name: 'tasksQuery' });
+export const task = (args) => pool.run(args, { name: 'taskQuery' });
+export const createTask = (args) => pool.run(args, { name: 'createTaskTx' });
+export const updateTask = (args) => pool.run(args, { name: 'updateTaskTx' });
+export const deleteTask = (args) => pool.run(args, { name: 'deleteTaskTx' });
+export const completeTask = (args) => pool.run(args, { name: 'completeTaskTx' });
+export const reopenTask = (args) => pool.run(args, { name: 'reopenTaskTx' });
+export const materializeRecurringTasks = (args) => pool.run(args, { name: 'materializeRecurringTasksTx' });
+// LifeOS focus sessions (migration 035): ./tx/lifeos-focus.js. Only finishFocusTx moves coins (one
+// focus.finish event through postCoinEvent); a check-in raises the count the finish pays for.
+export const focusCurrent = (args) => pool.run(args, { name: 'focusCurrentQuery' });
+export const focusSession = (args) => pool.run(args, { name: 'focusQuery' });
+export const focusList = (args) => pool.run(args, { name: 'focusListQuery' });
+export const startFocus = (args) => pool.run(args, { name: 'startFocusTx' });
+export const checkinFocus = (args) => pool.run(args, { name: 'checkinFocusTx' });
+export const finishFocus = (args) => pool.run(args, { name: 'finishFocusTx' });
+export const cancelFocus = (args) => pool.run(args, { name: 'cancelFocusTx' });
+// LifeOS statistics (Haladás > Napok): ./tx/lifeos-stats.js — two reads, each one snapshot.
+export const lifeosDays = (args) => pool.run(args, { name: 'lifeosDaysQuery' });
+export const lifeosStats = (args) => pool.run(args, { name: 'lifeosStatsQuery' });
+
+// Admin accounts (package B-admin-accounts): ./tx/admin-accounts.js, re-exported by worker.js. Two
+// reads (the filtered list with its total, the whole inspect page - each ONE read snapshot) and four
+// named writes; the role / disable / coin writes of the same page keep the transactions they had.
+export const adminUsersList = (args) => pool.run(args, { name: 'adminUsersListQuery' });
+export const adminAccountDetail = (args) => pool.run(args, { name: 'adminAccountDetailQuery' });
+export const adminSetDisplayName = (args) => pool.run(args, { name: 'adminSetDisplayNameTx' });
+export const adminResetLockout = (args) => pool.run(args, { name: 'adminResetLockoutTx' });
+export const adminSignOutAll = (args) => pool.run(args, { name: 'adminSignOutAllTx' });
+export const adminForcePasswordChange = (args) => pool.run(args, { name: 'adminForcePasswordChangeTx' });
+
+// LifeOS challenges and rewards (migration 033): ./tx/lifeos-rewards.js, re-exported by worker.js.
+// The draw is made in the worker (crypto.randomInt); a pick creates a task, which pays on completion;
+// a redemption is the one LifeOS spend (redeemRewardTx: the balance guard is inside the INSERT).
+export const challenges = (args) => pool.run(args, { name: 'challengesQuery' });
+export const challenge = (args) => pool.run(args, { name: 'challengeQuery' });
+export const challengeToday = (args) => pool.run(args, { name: 'challengeTodayQuery' });
+export const createChallenge = (args) => pool.run(args, { name: 'createChallengeTx' });
+export const updateChallenge = (args) => pool.run(args, { name: 'updateChallengeTx' });
+export const setChallengeArchived = (args) => pool.run(args, { name: 'setChallengeArchivedTx' });
+export const deleteChallenge = (args) => pool.run(args, { name: 'deleteChallengeTx' });
+export const drawChallenge = (args) => pool.run(args, { name: 'drawChallengeTx' });
+export const rerollChallenge = (args) => pool.run(args, { name: 'rerollChallengeTx' });
+export const pickChallenge = (args) => pool.run(args, { name: 'pickChallengeTx' });
+export const rewards = (args) => pool.run(args, { name: 'rewardsQuery' });
+export const reward = (args) => pool.run(args, { name: 'rewardQuery' });
+export const redemptions = (args) => pool.run(args, { name: 'redemptionsQuery' });
+export const createReward = (args) => pool.run(args, { name: 'createRewardTx' });
+export const updateReward = (args) => pool.run(args, { name: 'updateRewardTx' });
+export const setRewardArchived = (args) => pool.run(args, { name: 'setRewardArchivedTx' });
+export const redeemReward = (args) => pool.run(args, { name: 'redeemRewardTx' });
+export const setRedemptionFulfilled = (args) => pool.run(args, { name: 'setRedemptionFulfilledTx' });
+// LifeOS calendar (migration 034): ./tx/lifeos-events.js, re-exported by worker.js. The calendar
+// moves no coins; materializeRemindersTx is the one write a read triggers (src/lifeos/reminders.js).
+export const calendar = (args) => pool.run(args, { name: 'calendarQuery' });
+export const event = (args) => pool.run(args, { name: 'eventQuery' });
+export const createEvent = (args) => pool.run(args, { name: 'createEventTx' });
+export const updateEvent = (args) => pool.run(args, { name: 'updateEventTx' });
+export const deleteEvent = (args) => pool.run(args, { name: 'deleteEventTx' });
+export const materializeReminders = (args) => pool.run(args, { name: 'materializeRemindersTx' });
+
+/**
+ * Drain and destroy the pool — but every worker closes its own connection FIRST (worker.js
+ * closeConnection): terminating a worker with an open better-sqlite3 handle segfaulted the process
+ * (conn.js closeDb has the measurement). One call per thread, all at once, held together by a
+ * shared counter so each worker runs exactly one. A failure there never blocks the shutdown.
+ */
+export async function closePool() {
+  const shared = new SharedArrayBuffer(4);
+  try {
+    await Promise.all(Array.from({ length: threads }, () => pool.run({ shared, threads }, { name: 'closeConnection' })));
+  } catch {
+    /* a worker that could not close is terminated below all the same */
+  }
+  return pool.destroy();
+}
 
 const MIGRATIONS_DIR = new URL('./migrations/', import.meta.url);
 

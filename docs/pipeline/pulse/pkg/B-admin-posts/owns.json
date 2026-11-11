@@ -1,0 +1,29 @@
+{
+  "id": "B-admin-posts",
+  "decision": "backend for the admin Marketplace posts inspect feature (owner decisions 2026-11-03 item 2 and 4): a searchable, filterable, keyset-paged list of every marketplace post in every state, one-request inspect page, restore of a moderator-removed post, an admin-readable media route, the per-admin limiter on the existing take-down route, and the visibility fix that hides the posts and the profile of a disabled or demoted author from every public read",
+  "owns": [
+    "backend/src/public/admin-posts.js",
+    "backend/src/db/tx/admin-posts.js",
+    "backend/src/public/visibility.js",
+    "backend/src/public/moderation.js",
+    "backend/scripts/smoke/admin-posts.js",
+    "docs/pipeline/pulse/pkg/B-admin-posts/**"
+  ],
+  "sharedEdits": {
+    "decision": "small registration edits in integrator-owned files, listed so the integrator can resolve conflicts",
+    "files": [
+      "backend/server.js (import + one app.use line)",
+      "backend/src/db/index.js (the facade lines for the new named transactions)",
+      "backend/src/db/worker.js (one export * line; the report-subject predicate of fileReportTx brought in line with PUBLIC_POST)",
+      "backend/scripts/smoke.js (SMOKE_ONLY hook + the section registration)",
+      "backend/scripts/smoke-run.mjs (the --only flag)",
+      "backend/scripts/check-routes.mjs (nothing expected; listed in case the gate needs an entry)"
+    ]
+  },
+  "migration": "none - 036 is NOT used (the triggers of 021/022 allow clearing removed_at/removed_by/removal_reason; see api.md section 6)",
+  "notInScope": [
+    "the screens (S-admin-posts lane)",
+    "the coordinated take-down of a post and its author profile in one transaction (two calls today: POST /admin/marketplace/remove with post_id, then with handle)",
+    "work-package.json entry - the integrator's, at merge"
+  ]
+}

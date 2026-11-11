@@ -1,0 +1,255 @@
+{
+  "package": "S-coins-xp",
+  "base": "1360558",
+  "namespaces": [
+    "coins"
+  ],
+  "set": [
+    {
+      "key": "coins.tab.overview",
+      "hu": "Áttekintés",
+      "en": "Overview",
+      "de": "Überblick",
+      "after": "coins.tab.statement",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 switch cell 1 (design round B, approved by the owner; README-jutalmak-ermek-admin.md 'Copy to approve (C5)')"
+    },
+    {
+      "key": "coins.debtCaption",
+      "hu": "Tartozás",
+      "en": "In debt",
+      "de": "Im Minus",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2-debt balance eyebrow 'Tartozás' (design round B, C5 list)"
+    },
+    {
+      "key": "coins.spendable",
+      "hu": "Elkölthető: {{count}} érme",
+      "en": "Spendable: {{count}} coins",
+      "de": "Verfügbar: {{count}} Münzen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'Elkölthető: 190 érme' and coins-1v2-debt 'Elkölthető: 0 érme' (f_app 'Elkölthető', C5 list)"
+    },
+    {
+      "key": "coins.debtNotice",
+      "hu": "Mínuszban vagy {{count}} érmével. Az új jóváírások előbb ezt egyenlítik ki; addig nem tudsz beváltani.",
+      "en": "You are {{count}} coins in debt. New credits pay this off first; until then you cannot redeem anything.",
+      "de": "Du bist mit {{count}} Münzen im Minus. Neue Gutschriften gleichen das zuerst aus; bis dahin kannst du nichts einlösen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2-debt Notice/warn (design round B, C5 list)"
+    },
+    {
+      "key": "coins.level.label",
+      "hu": "Szint",
+      "en": "Level",
+      "de": "Stufe",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'Ledger row/Szint'; nezetek/settings-v2-member ledger row SZINT"
+    },
+    {
+      "key": "coins.level.xp",
+      "hu": "{{xp}} / {{next}} XP",
+      "en": "{{xp}} / {{next}} XP",
+      "de": "{{xp}} / {{next}} XP",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'XP' note '2158 / 2500 XP'",
+      "untranslated": {
+        "reason": "two figures and the unit XP, the same in every language"
+      }
+    },
+    {
+      "key": "coins.level.toNext",
+      "hu": "Még {{count}} XP a {{level}}. szintig.",
+      "en": "{{count}} XP to level {{level}}.",
+      "de": "Noch {{count}} XP bis Stufe {{level}}.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'Még 342 XP az 5. szintig.' - the form with the article 'a' (a 2., 3., 4. ... szintig)"
+    },
+    {
+      "key": "coins.level.toNextAz",
+      "hu": "Még {{count}} XP az {{level}}. szintig.",
+      "en": "{{count}} XP to level {{level}}.",
+      "de": "Noch {{count}} XP bis Stufe {{level}}.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'Még 342 XP az 5. szintig.' verbatim - the form with the article 'az' (az 1., 5., 50. ... szintig)"
+    },
+    {
+      "key": "coins.week.title",
+      "hu": "Ezen a héten",
+      "en": "This week",
+      "de": "Diese Woche",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 section 'Ezen a héten' (the same words the retired coins.weekCaption carried)"
+    },
+    {
+      "key": "coins.week.capLine",
+      "hu": "Napi plafon {{cap}} érme · a tegnapi nap {{time}}-kor zárul.",
+      "en": "Daily cap {{cap}} coins · yesterday closes at {{time}}.",
+      "de": "Tageslimit {{cap}} Münzen · der gestrige Tag schließt um {{time}}.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-1v2 'Napi plafon 400 érme · a tegnapi nap 10:00-kor zárul.' (fix round 1)"
+    },
+    {
+      "key": "coins.day.today",
+      "hu": "Ma · {{date}}",
+      "en": "Today · {{date}}",
+      "de": "Heute · {{date}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 day head 'Ma · okt. 18.'"
+    },
+    {
+      "key": "coins.day.yesterday",
+      "hu": "Tegnap · {{date}}",
+      "en": "Yesterday · {{date}}",
+      "de": "Gestern · {{date}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 day head 'Tegnap · okt. 17.'"
+    },
+    {
+      "key": "coins.reason.workout.completed",
+      "hu": "Edzés kész",
+      "en": "Workout done",
+      "de": "Training erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Edzés kész' (reason workout.completed, B-core api.md)"
+    },
+    {
+      "key": "coins.reason.day.kcal_hit",
+      "hu": "Kalória cél",
+      "en": "Calorie goal",
+      "de": "Kalorienziel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Kalória cél' (day.kcal_hit)"
+    },
+    {
+      "key": "coins.reason.day.kcal_over",
+      "hu": "Büntetés · kalória túllépve",
+      "en": "Penalty · calories over",
+      "de": "Strafe · Kalorien überschritten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Büntetés · kalória túllépve' (day.kcal_over)"
+    },
+    {
+      "key": "coins.reason.day.perfect",
+      "hu": "Tökéletes nap",
+      "en": "Perfect day",
+      "de": "Perfekter Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Tökéletes nap' (day.perfect)"
+    },
+    {
+      "key": "coins.reason.task.done",
+      "hu": "Feladat kész",
+      "en": "Task done",
+      "de": "Aufgabe erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Feladat kész' (task.done, reserved for Phase 3)"
+    },
+    {
+      "key": "coins.reason.task.overdue",
+      "hu": "Büntetés · lejárt feladat",
+      "en": "Penalty · overdue task",
+      "de": "Strafe · überfällige Aufgabe",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Büntetés · lejárt feladat' (task.overdue, Phase 3)"
+    },
+    {
+      "key": "coins.reason.habit.done",
+      "hu": "Szokás teljesítve",
+      "en": "Habit done",
+      "de": "Gewohnheit erledigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Szokás teljesítve' (habit.done, Phase 3)"
+    },
+    {
+      "key": "coins.reason.habit.clean_day",
+      "hu": "Tiszta nap",
+      "en": "Clean day",
+      "de": "Sauberer Tag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Tiszta nap' (habit.clean_day, Phase 3)"
+    },
+    {
+      "key": "coins.reason.habit.missed",
+      "hu": "Büntetés · szokás kimaradt",
+      "en": "Penalty · habit missed",
+      "de": "Strafe · Gewohnheit verpasst",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Büntetés · szokás kimaradt' (habit.missed, Phase 3)"
+    },
+    {
+      "key": "coins.reason.streak.milestone",
+      "hu": "Sorozat-mérföldkő",
+      "en": "Streak milestone",
+      "de": "Serien-Meilenstein",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Sorozat-mérföldkő' (streak.milestone, Phase 3)"
+    },
+    {
+      "key": "coins.reason.reversal.credit",
+      "hu": "Visszavonás",
+      "en": "Reversal",
+      "de": "Rückbuchung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Visszavonás' (reversal.credit, Phase 3)"
+    },
+    {
+      "key": "coins.reason.reversal.debit",
+      "hu": "Visszavonás",
+      "en": "Reversal",
+      "de": "Rückbuchung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Visszavonás · Újranyitva: …' (reversal.debit: a reopened task takes its pay back, Phase 3)"
+    },
+    {
+      "key": "coins.reason.reward.redeem",
+      "hu": "Jutalom beváltva",
+      "en": "Reward redeemed",
+      "de": "Belohnung eingelöst",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/coins-2v2 'Jutalom beváltva' (reward.redeem, Phase 4)"
+    }
+  ],
+  "change": [],
+  "remove": [
+    {
+      "key": "coins.tab.store",
+      "reason": "'Bolt' named the first switch cell; design round B draws Áttekintés in its place (README open question 1: the theme packs are delisted by 030, Bolt was empty), and the store, when it lists anything, is a section of Áttekintés under its own coins.storeSection eyebrow - no code reads coins.tab.store after the rewrite"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "Áttekintés - SOROZAT and the Jutalmak door",
+      "note": "Not built in Phase 2: habits (Phase 3) and rewards (Phase 4) have no server yet; their copy (Sorozat, N NAP, fagyasztás, Jutalmak, N beváltható, szünetel) is added by the packages that build them."
+    },
+    {
+      "where": "Kimutatás - sub lines",
+      "note": "The frame's subs ('2140 / 2200 kcal', 'szokások, feladatok, edzés, kalória', '12 NAP · ×1,25') are not sent by the Phase-2 ledger (only sourceTitle for a workout); nothing is composed on the client."
+    }
+  ]
+}

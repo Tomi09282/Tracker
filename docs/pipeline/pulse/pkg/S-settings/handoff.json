@@ -1,0 +1,39 @@
+{
+  "id": "S-profile-v2",
+  "package": "S-settings",
+  "branch": "pulse/S-profile-v2",
+  "verifiedOn": "pulse-redesign 1360558 merged into the slot; i18n.patch.json applied with pulse-i18n --ref HEAD and requests/R-S-settings-01.patch applied to the working tree only",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-settings (replay); pairs in C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-settings/v2 (pair-<frame>.png = Figma | app | difference; aligned-*.png = the part below the ledger with the app shifted by the two ledger rows Phase 1 does not build)",
+  "frames": {
+    "settings-v2-1": { "verdict": "matched-fixture", "scope": "hero, name line, e-mail, role line, ÉRMÉK row, NÉZETEK rows and bar are identical to the frame; SZINT and JUTALMAK are not built (plan: Phase 2 / Phase 4 data), so NÉZETEK sits 155 pt higher - aligned-settings-v2-1-views.png matches row for row", "fixture": "states.json states.settings-v2-1 (auth/me name + address, wallet 19000 minor, onboarding equipment [2,3,5,6,10])", "geometry": "no geometry export exists for the round-A frames (.pulse/geometry has none): compared by pixels only" },
+    "settings-v2-2": { "verdict": "matched-fixture", "scope": "as settings-v2-1; BEÁLLÍTÁSOK lacks the Nap és időzóna row (Phase 2); row pitch 57 / 61 and the Kijelentkezés block match the frame (aligned-settings-v2-2-views.png 0.81 % pixels differ)" },
+    "settings-v2-member": { "verdict": "matched-fixture", "scope": "role line TAG, no NÉZETEK, BEÁLLÍTÁSOK rises; same two missing ledger rows and the missing Nap és időzóna row" },
+    "sheets": { "verdict": "matched-fixture", "scope": "the NameSheet over the dimmed page: title, close, field with the edited value, hint, Mentés pill - identical; the page under the scrim differs by the ledger rows only; the caret is not drawn in a still capture" },
+    "settings-equipment": { "verdict": "matched-fixture", "scope": "pushed header '< PROFIL / FELSZERELÉS', the 5 ESZKÖZ eyebrow with 'Felszerelés mentve', hint, the 16 words with the five lime marks: identical within 1 pt", "fixture": "onboarding equipment [2,3,5,6,10] + PATCH /onboarding 200 after two taps on Rúd" }
+  },
+  "states": {
+    "settings-recorded": "M's recording as it is",
+    "settings-admin": "admin@'s recording: 0 coins, 0 eszköz, both NÉZETEK rows",
+    "settings-wallet-failed": "wallet and onboarding reads fail: the em dash, no equipment count",
+    "settings-cues-sheet": "the CueSheet with the three existing switches (not drawn by round A; Sheet + ListRow + Switch from the kit)",
+    "settings-name-invalid": "one character: Mentés disabled",
+    "settings-name-refused": "PATCH /auth/me 500: sheet stays open, error dot in its header, draft kept",
+    "settings-equipment-error": "PATCH /onboarding 500 on the equipment page: the danger line",
+    "settings-equipment-recorded": "M's six recorded words",
+    "settings-1 / settings-2": "the superseded frames, captured for the record (verdict structure: round A replaces them)"
+  },
+  "requests": ["R-S-settings-01 (nav): the /settings/equipment route + routeMeta row + check-nav-active EXPECT row; proposedPatch requests/R-S-settings-01.patch - merge it together with this package"],
+  "deviationsQ4": [
+    "SZINT and JUTALMAK ledger rows are not drawn: their data does not exist before Phase 2 / Phase 4 (task: never fake numbers)",
+    "Nap és időzóna row is not drawn: arrives in Phase 2 (task)",
+    "Eredmények and Testsúly ledger rows of the old Profil are gone (plan Profile v2): achievements stay reachable in /coins (its Eredmények tab, via the ÉRMÉK row), weight in the Haladás tab - no capability is lost",
+    "The display name is no longer an inline field: the name line opens the NameSheet with the same logic (explicit save, server rule, disabled until changed and valid); a refused save now shows the sheet's error dot (before: nothing)",
+    "The cue switches moved from an inline section into the CueSheet opened by 'Edzés közbeni jelzések'; with every cue off the row shows no value (no word for 'off' exists in the copy)",
+    "Equipment moved to the pushed /settings/equipment page; its eyebrow is the live count ('5 eszköz') instead of 'Felszerelés'"
+  ],
+  "proposedCopy": ["settings.equipmentCount '{{count}} eszköz' (visible)", "settings.cues.row 'Edzés közbeni jelzések' (visible)", "settings.cues.sound 'Hang' (visible)"],
+  "i18n": "pkg/S-settings/i18n.patch.json: set 3, remove 2 (settings.unlockedNote, settings.cues.title), 1 copy question; pulse-i18n check --ref HEAD OK, check-i18n 842 keys each",
+  "liveSmoke": "none: every state is replay; nothing was written to the backend",
+  "lastBuild": "pulse-verify: build green in 15 s · 15 of 15 captured (replay)",
+  "gates": "npm run verify:gates -- --allow-dirty: 78 passed, 0 failed, 7 dormant, the tree back byte for byte"
+}

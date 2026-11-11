@@ -1,0 +1,110 @@
+{
+  "id": "S-lifeos-polish",
+  "title": "LifeOS frontend polish round: the independent reviews of the merged LifeOS screens (Ma, Szokasok, Feladatok + capture, Kihivasok, Jutalmak, Naptar, Fokusz, Halads > Napok) fixed on the current tree, on the B-lifeos-polish API",
+  "screens": [
+    "today",
+    "habits",
+    "tasks",
+    "capture",
+    "challenges",
+    "rewards",
+    "calendar",
+    "focus",
+    "progress"
+  ],
+  "owns": [
+    "backend/scripts/smoke/lifeos-polish.js",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/lifeos/rules.js",
+    "frontend/src/features/calendar/EventSheet.tsx",
+    "frontend/src/features/calendar/NextEventSection.tsx",
+    "frontend/src/features/challenges/ChallengesPage.tsx",
+    "frontend/src/features/challenges/TodayDraw.tsx",
+    "frontend/src/features/focus/FocusDone.tsx",
+    "frontend/src/features/focus/FocusSetup.tsx",
+    "frontend/src/features/focus/focusApi.ts",
+    "frontend/src/features/focus/focusFormat.ts",
+    "frontend/src/features/progress/DaysPage.tsx",
+    "frontend/src/features/progress/ProgressPage.tsx",
+    "frontend/src/features/rewards/RewardDetailPage.tsx",
+    "frontend/src/features/tasks/tasksData.ts",
+    "frontend/src/features/today/TodayEmpty.tsx",
+    "frontend/src/features/today/TodayHabits.tsx",
+    "frontend/src/features/today/TodayHero.tsx",
+    "frontend/src/features/today/TodayPage.tsx",
+    "frontend/src/features/today/TodayTasks.tsx",
+    "docs/pipeline/pulse/pkg/S-ma/make-states.mjs",
+    "docs/pipeline/pulse/pkg/S-ma/states.json",
+    "docs/pipeline/pulse/pkg/S-calendar/make-states.mjs",
+    "docs/pipeline/pulse/pkg/S-calendar/states.json",
+    "docs/pipeline/pulse/pkg/S-tasks/states.json",
+    "docs/pipeline/pulse/pkg/S-challenges/states.json",
+    "docs/pipeline/pulse/pkg/S-focus/states.json",
+    "docs/pipeline/pulse/pkg/S-rewards/states.json",
+    "docs/pipeline/pulse/pkg/S-lifeos-polish/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts"
+  ],
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "shared.patch": [
+      "frontend/src/lib/lifeos-api.ts"
+    ],
+    "requests": {
+      "R-S-lifeos-polish-01": "frontend/scripts/pulse-frames.json: setCheck in the boxed allow-list",
+      "R-S-lifeos-polish-02": "frontend/src/ui/shell/ScreenHeader.tsx: 44 pt back control",
+      "R-S-lifeos-polish-03": "frontend/scripts/pulse-shot.mjs: the targets probe reads the ::after target layer",
+      "R-S-lifeos-polish-04": "frontend/src/ui/data/Numeral.tsx: Fraction complete (closes R-S-focus-03)"
+    }
+  },
+  "frames": [
+    "lifeos/ma-1",
+    "lifeos/ma-2",
+    "lifeos/ma-3",
+    "lifeos/ma-4",
+    "lifeos/capture",
+    "lifeos/event-form",
+    "lifeos/focus-1",
+    "lifeos/focus-3",
+    "lifeos/progress-days",
+    "lifeos/rewards-1",
+    "lifeos/reward-detail",
+    "lifeos/habits-1",
+    "lifeos/habit-form"
+  ],
+  "route": "/",
+  "dependsOn": [
+    "B-lifeos-polish",
+    "S-ma",
+    "S-habits",
+    "S-tasks",
+    "S-challenges",
+    "S-rewards",
+    "S-calendar",
+    "S-focus",
+    "S-progress-days"
+  ],
+  "size": "L",
+  "i18nNamespaces": [
+    "today",
+    "rewards"
+  ],
+  "liveWrites": [],
+  "notes": "Polish round; carries the owns of the eight merged LifeOS screen packages (takenFrom in owns.json). The slot carries this entry in its WORKING TREE only; the integrator adds it at merge."
+}

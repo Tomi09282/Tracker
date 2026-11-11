@@ -1,0 +1,14 @@
+{
+  "id": "R-S-compose-profile-01",
+  "from": "S-compose-profile",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/ChipRow.tsx (Chip, through Segment layout=\"hug\")",
+  "need": "A 44 pt minimum width on a Chip's target. A chip's box is its word + 8 on either side, so a short word fails the 44 x 44 target probe: on compose-profile-1 the specialty \"Erő\" (word 25 pt) is a 41.5 x 44 button. The drawn layout (words 24 apart) can stay: the floor only needs to grow the invisible target (e.g. an ::after hit area of min-w-[var(--target-min)] centred on the word, as control.ts already does for the link variant), not the spacing.",
+  "evidence": ".pulse/shots/S-compose-profile/compose-profile-1.probe.json probes.targets.small = button \"Erő\" 41.47 x 44 (every hu state of this package; en / de pass)",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the chip stays the kit Chip; the targets probe fails on that one word in Hungarian and is reported in the hand-off",
+  "status": "open",
+  "resolution": null
+}

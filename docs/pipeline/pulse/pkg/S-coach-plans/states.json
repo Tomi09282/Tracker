@@ -1,0 +1,280 @@
+{
+  "about": "S-coach-plans - the frame data of coach-plans-1 and the undrawn states of Edzéstervek (/coach/plans, PLAN 4.1 rule 7). Every fixture is a list of edits over the recording of GET /api/v1/plans, or a stubbed answer (R26). Every state is replay. Accounts: C = coach@ (frame 1 and every state), R = demo.coach.szilagyi.reka@ (frame 2, empty library), M = user@ (forbidden). Nothing is written live by this package.",
+  "overrides": {
+    "coach-plans-1": {
+      "why": "The recording of C lists 11 plans, three of them the PULSE sandbox rows (_subcheck.dataNotDrawn.sandboxVisible); the frame draws 6. The edits keep six recorded rows in the recorded order, give them the drawn names, statuses, day counts and client names, and remove the other five. The frame's third client plan is ended (Lezárva); no recording holds an ended plan, so pulse-fixture-check refuses that value and the row stays active here (Aktív 5 / Piszkozat 1 instead of Aktív 4 / Piszkozat 1 / Lezárva 1). The one extra edit { \"pointer\": \"/plans/3/status\", \"value\": \"ended\" } is request R-S-coach-plans-01; a capture with it is .pulse/pairs/S-coach-plans/coach-plans-1.with-ended-edit.pair.png. Verdict matched-fixture with that one difference.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/1/name",
+              "value": "Felső/alsó szplit – 12 hetes blokk"
+            },
+            {
+              "pointer": "/plans/1/client_display_name",
+              "value": "Takács Dániel"
+            },
+            {
+              "pointer": "/plans/2/name",
+              "value": "Kezdő teljes test – 8 hét"
+            },
+            {
+              "pointer": "/plans/2/client_display_name",
+              "value": "Kiss Anna"
+            },
+            {
+              "pointer": "/plans/3/name",
+              "value": "Kezdő teljes test – 8 hét — Nagy Eszter"
+            },
+            {
+              "pointer": "/plans/3/client_display_name",
+              "value": "Nagy Eszter"
+            },
+            {
+              "pointer": "/plans/7/name",
+              "value": "Push / Pull / Láb – 6 nap"
+            },
+            {
+              "pointer": "/plans/7/status",
+              "value": "draft"
+            },
+            {
+              "pointer": "/plans/7/day_count",
+              "value": 6
+            },
+            {
+              "pointer": "/plans/8/name",
+              "value": "Felső/alsó szplit – 12 hetes blokk"
+            },
+            {
+              "pointer": "/plans/8/status",
+              "value": "active"
+            },
+            {
+              "pointer": "/plans/8/day_count",
+              "value": 7
+            },
+            {
+              "pointer": "/plans/10",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/6",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/5",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/4",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/0",
+              "remove": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "states": {
+    "coach-plans-recorded": {
+      "title": "Edzéstervek — a felvett könyvtár (11 terv, szünetelővel)",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 1700,
+      "reach": "seed",
+      "why": "the recording exactly as it is: 11 plans, Aktív 7 / Piszkozat 3 / Szünetel 1 - the bar takes the fourth (warn) part and the paused row's word is in the warning ink; the numeral holds two digits next to the still",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.newPlan"
+        }
+      }
+    },
+    "coach-plans-error": {
+      "title": "Edzéstervek — a lista nem töltődött be",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /plans fails: the danger notice line with Újra, no anchor, no pill, no list",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/plans",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "coach-plans-offline": {
+      "title": "Edzéstervek — offline",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 874,
+      "reach": "seed",
+      "why": "the network drops after the list is drawn: the shell's offline line, the pill in the kit's disabled look, the rows stay links",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.newPlan"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.newPlan"
+        }
+      }
+    },
+    "coach-plans-one": {
+      "title": "Edzéstervek — egyetlen terv",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a one-digit total and one status: the bar is one full part, the legend one entry, the Kliens-tervek section is absent",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/10",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/8",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/7",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/6",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/5",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/4",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/3",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/2",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/1",
+              "remove": true
+            },
+            {
+              "pointer": "/plans/0",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.newPlan"
+        }
+      }
+    },
+    "coach-plans-long-name": {
+      "title": "Edzéstervek — hosszú tervnév",
+      "account": "C",
+      "route": "/coach/plans",
+      "height": 1700,
+      "reach": "fixture",
+      "why": "a 120-character name is cut after two lines with an ellipsis, in the 263 client column and the 327 template column",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans",
+          "edits": [
+            {
+              "pointer": "/plans/1/name",
+              "value": "Felső/alsó szplit – 12 hetes blokk, negyedik hetente könnyített héttel és hosszú leírással, ami nem fér el két sorban sem"
+            },
+            {
+              "pointer": "/plans/9/name",
+              "value": "Kezdő teljes test – 8 hét, heti három edzéssel, a pihenőnapokon húsz-harminc perc sétával és egy nagyon hosszú névvel"
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.newPlan"
+        }
+      }
+    },
+    "coach-plans-forbidden": {
+      "title": "Edzéstervek — tag nyitja meg",
+      "account": "M",
+      "route": "/coach/plans",
+      "height": 874,
+      "reach": "seed",
+      "why": "a member opens the route: the forbidden empty state as the page's h1, no header, no pill; the 403 of GET /plans is expected",
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/plans",
+            "status": 403
+          }
+        ],
+        "console": [
+          "403"
+        ]
+      },
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "coaching.forbiddenTitle"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "loading": "plans.isPending: pulse-shot answers a recorded GET at once and has no delayed answer, so the skeleton (eyebrow block, one numeral block, two row skeletons, role=status) is checked in the code only - request R-S-coach-plans-02",
+    "creating": "the busy pill while POST /plans is in flight: same reason; the stubbed answer would also navigate to the editor at once"
+  }
+}

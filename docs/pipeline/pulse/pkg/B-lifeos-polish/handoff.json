@@ -1,0 +1,46 @@
+{
+  "id": "B-lifeos-polish",
+  "status": "done",
+  "base": "pulse-redesign ef45f10 (merged, already up to date)",
+  "migration": "none - 036 is NOT used (every fix is code; no data fix needed)",
+  "sourceOfFindings": ".pulse/review/security-lifeos/FINDINGS.md was never written (the reviewer stopped after attacks/12 at 23:25); the findings were taken from attacks/*.mjs and out-*.txt, every attack re-read and its defect fixed or rated below",
+  "changes": [
+    "lazy LifeOS start: lifeos-ledger.js readStartedPrefs - every LifeOS read / write (and the settle-state read) starts LifeOS at the user's logical today when a zone is stored and no start day is (031 backfill, seeded dev accounts); inside the write's own IMMEDIATE transaction; idempotent UPDATE ... WHERE lifeos_started_on IS NULL; PATCH /me/prefs with the stored zone starts it without spending the 24 h zone allowance; no catch-up (start = today)",
+    "GET /tasks (also before a zone) and GET /lifeos/today carry taskRules {lowMinor, midMinor, highMinor, latePct, overdueMinor} from the admin rule set (rules.js taskPointRules); GET /tasks gains rulesVersion",
+    "GET /lifeos/today nextEvent gains reminders (offsets ascending) and firstReminder {minutesBefore, at, time} (largest offset, wall clock in the zone) - S-calendar review DEV-k",
+    "challenge.picked gains title, valueMinor, paidMinor (drawState); challengeId was already in every task view",
+    "review 01: a streak milestone pays at most once per account per tier window (lifeos-items.js milestonePaidWithin); result rows still record milestoneDays",
+    "review 02 / 02b / 11: setUserPrefsTx refuses a zone or day-start change whose new today <= max(newest settled day, old boundary's settledThrough, start - 1) -> 409 DAY_SETTLED {changeableAt}; completeTaskTx / finishFocusTx refuse a settled today (409 DAY_LOCKED); postCoinEvent throws on a settled day (backstop)",
+    "review 05(a): the perfect day's anchor is a counted GOOD habit or the scheduled workout (a bad habit alone is zero effort)",
+    "review 07: workoutDoneOn needs a completed log with >= 1 working set done and >= workoutHalfPct of them (Ma workout.done and the perfect day)",
+    "review 08 (coins, same ledger): achievements count a session only with a working set done or >= 10 server-measured minutes (src/coins/achievements.js, unowned 019 file)",
+    "review 12: the day close also settles a habit archived after the day ended, and one archived during the day with a log on it; archive / restore run the lazy close first"
+  ],
+  "tests": {
+    "smoke": "805 passed, 0 failed (34 new in scripts/smoke/lifeos-polish.js; the existing achievement probe now plants a 12-minute session instead of an instant empty one)",
+    "regressions fail on the old code": "the new smoke + verify-031 + verify-day-close run against pulse-redesign ef45f10: 23 smoke FAILs, verify-031 1 FAIL, verify-day-close 2 FAILs - every fix has a check that is red before it",
+    "check:all steps": "check:modules / routes / admin-audit / worker-tx / route-tx / body-writes OK; check:gdpr OK (scratch DB migrated to 35); verify schema 23, migrations 6, 015 30, 019 56, 021 38, 022 44, 023 12, 024 37, 025 7, rekey 12, markdown 50, last-admin 6, gates 29, seats 20, equipment 28, 030 31, 031 84, lifeos-rules 108, 032 75, day-close 113, 033 128, 034 120, 035 93 - all 0 failed. The dev-DB probes (015, 024, 025, last-admin, gates, seats) ran against a scratch DB migrated to 35 + seed:dev-users (the worktree has no dev DB). verify:013 refuses on any fresh DB (it needs two free coach-client links and always picks the same pair: UNIQUE coach_clients) - pre-existing, unrelated (migration 013 chat), not touched",
+    "frontend build": "npm run build green with shared.patch applied (then reverted; the patch is the hand-in)"
+  },
+  "fivePass": {
+    "closeLifeDayTx (milestones, perfect-day anchor, archived habits)": "WIRING: no route of its own; ensureSettled runs it behind requireAuth + CSRF + the route's per-IP / per-account limiters. FORGE: no client value reaches it (user from the session, the day re-decided under the lock from the worker clock); milestone / anchor / archive rules read only stored rows. REPLAY: daily_summaries PK -> 'already'; the milestone window sees the first payout. RACE: IMMEDIATE, the window query and the payout under one write lock, the PK rolls a concurrent second close back whole. IDOR: every statement user-scoped (the milestone join also on r.user_id = e.user_id). EXTREMES: 20 habits crossing 7 days pay one 7-day milestone (smoke); the extra outside the cap is bounded by 25/7 + 100/30 + 500/100 coins a day.",
+    "setUserPrefsTx (decides which day writes land on)": "WIRING: requireAuth, CSRF, prefs per-IP 60 + per-account 30. FORGE: zone = regex + ICU, day start = literal union, .strict(); the new today from the worker clock. REPLAY: the same zone is a no-op (no allowance spent). RACE: IMMEDIATE; the settled-day guard and the 24 h check before the UPDATE under the same lock; trg_user_prefs_timezone_daily / started_once as backstops. IDOR: keyed on req.user.id, no id in the request. EXTREMES: Kiritimati -> Etc/GMT+12 (26 h) and DST-night day-start switches refused with changeableAt (smoke: westwards zone and dayStartHour 6 onto a settled day -> 409 DAY_SETTLED, nothing changed; eastwards 200).",
+    "completeTaskTx / finishFocusTx (pay on today)": "the five passes of B-habits-tasks / B-focus unchanged, plus: a settled today is refused inside the transaction before the first write (409 DAY_LOCKED) and postCoinEvent throws on a settled day, rolling the whole transaction back (smoke: a stuck account gets 409 and 0 coin events).",
+    "achievements evaluator (coins)": "FORGE: started_at / completed_at are the server's; no client figure. REPLAY / RACE: unchanged award-once (019 ledger natural key). One session at a time (/workouts/start resumes), so .sessions.100 costs 100 real ten-minute blocks. EXTREMES: 3 instant empty sessions pay 0 (smoke)."
+  },
+  "notFixed": [
+    "attack 09 (low, self-only): editing an event's time and reading Ma repeatedly writes one self-notification per edit (each edit is a new occurrence); bounded by the events write limiter, reaches no other account",
+    "attack 05(b) (low): complete -> reopen -> a replayed complete pays again - net one award per completed task (the seq rule); complete / reopen take no idempotency key, a state toggle by design",
+    "attack 04b (info): a JSON body with an own __proto__ key passes .strict() (zod skips it) but the parsed data carries nothing from it - no pollution; a reviver in the app's JSON parser would be the server owner's change",
+    "a bad habit may still have pointsPenalty 0 (f_app allows it); with the milestone window a free relapse no longer farms milestones"
+  ],
+  "handIn": [
+    "docs/pipeline/pulse/pkg/B-lifeos-polish/shared.patch (frontend/src/lib/lifeos-api.ts: DaySettledError, TaskPointRules, LifeosToday.taskRules, TasksResponse.rulesVersion / taskRules, ChallengeDraw.picked title / valueMinor / paidMinor, NextEvent.reminders / firstReminder; types only)"
+  ],
+  "followUps": [
+    "the new fields are REQUIRED in the types: the contract fixtures of S-ma, S-tasks, S-calendar, S-challenges, S-focus (states.json) need taskRules, nextEvent.reminders + firstReminder, picked.title / valueMinor / paidMinor and TasksResponse.rulesVersion / taskRules before their fixture-schema-check.mjs passes again (as challengeId: null was added at earlier merges)",
+    "frontend polish round: priority picker from taskRules, KOVETKEZO 'emlekezteto HH:MM' from nextEvent.firstReminder.time, the picked teaser from challenge.picked, Nap es idozona mapping 409 DAY_SETTLED (changeableAt) like TIMEZONE_TOO_SOON",
+    "work-packages.json entry from owns.json (takenFrom: B-focus / B-calendar / B-rewards-challenges / B-habits-tasks / B-core, all closed; src/coins/achievements.js unowned)",
+    "the dev backend picks the changes up only after a restart; no migration to apply"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "about": "Keys whose string is deliberately the same in Hungarian and in English or German (a borrowed word, a unit, a product name). Read by scripts/check-i18n.mjs as UNTRANSLATED_BY_DESIGN; written by scripts/pulse-i18n.mjs, never by hand. One reason per key. The gate fails on a key that is identical and not listed here, and on an entry whose key is gone or is translated now.",
+  "entries": {
+    "nav.admin": "a borrowed word in all three",
+    "nav.profile": "the same borrowing: hu \"Profil\" and de \"Profil\" are the same Latin word, and neither language has a native alternative anyone would recognise on a tab",
+    "nav.playground": "the QA page has no product name to translate",
+    "workout.kg": "SI unit",
+    "workout.metres": "SI unit",
+    "plans.blockKind.emom": "a training acronym, said the same in every gym",
+    "plans.blockKind.amrap": "the same",
+    "adminUsers.role.admin": "a borrowed word in all three",
+    "settings.role.admin": "the same borrowed word, on your own account chip",
+    "coins.item.theme.aurora.title": "the same product name, in the store",
+    "coins.item.theme.ember.title": "the same product name, in the store",
+    "nutrition.unitKcal": "unit symbol",
+    "nutrition.unitG": "unit symbol",
+    "nutrition.slash": "punctuation",
+    "nutrition.resultMeta": "unit symbols and the protein abbreviation, no words",
+    "coaching.nutrition.itemLine": "unit symbols; the live format (decimal point, glued unit) is kept 1:1 until the owner rules (client-detail-2 board note)",
+    "adminRules.unit.pct": "unit symbol",
+    "coins.level.xp": "two figures and the unit XP, the same in every language",
+    "tasks.priorityValue": "a template of two placeholders and a middle dot: no words to translate",
+    "rewards.times": "a count with the multiplication sign: the same in every language",
+    "adminUsers.profile": "the same word in Hungarian and in German"
+  }
+}

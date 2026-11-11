@@ -1,0 +1,24 @@
+{
+  "package": "S-tasks-fix",
+  "branch": "pulse/S-tasks-fix",
+  "base": "pulse-redesign 01c7931 (INT-ports) merged in",
+  "review": ".pulse/review/S-tasks/REVIEW.md",
+  "build": "pulse-verify --package S-tasks --port 5223: build green in 17 s, 11 of 11 states captured (replay) into .pulse/shots/S-tasks-fix",
+  "verifyGates": "verify:gates --allow-dirty: 78 passed, 0 failed, 7 dormant",
+  "findings": {
+    "1 no real user can create a task": "fixed in the package as an interim + request R-S-tasks-fix-01 (AppLayout mounts useTimezoneBootstrap; dayPrefs re-reads ['lifeos'] after a save). The task screens call useLifeosStart (the same once-per-load bootstrap + a re-read when the zone arrives); with no logical today the pills are off and 'Nap és időzóna ›' leads to the zone. States tasks-start (PATCH /me/prefs fired, GET /tasks re-read, 'Ma, október 19.' arrives) and task-form-no-zone.",
+    "2 capture sheet unreachable": "Feladatok's back row carries 'Rögzítés +' (opens the sheet, sets ?capture=1). Ma's door is request R-S-ma-02 (S-ma's TodayPage; its patch still applies on 01c7931; S-ma-fix owns the file). Once mounted on Ma the sheet's body also starts LifeOS there (CaptureBody is mounted while closed).",
+    "3 Fontosság without coin values": "client reads rules.taskLow / taskMid / taskHigh from GET /tasks when present; backend request R-S-tasks-fix-02. Until then a user with no tasks sees the words alone.",
+    "4 capture form": "Mikor? is the frame's three chips (Bármikor dropped). Hova? / Kezdés / Emlékeztető stay out until the Phase-5 event route: verdict stays 'differs'.",
+    "5 bottom bar": "not this package (nav / calendar phase).",
+    "6 hétfőnként": "copy question kept (deviation 5): seven weekday adverbs in three languages are not in any frame (R22).",
+    "7 empty head without date": "same root cause as 1; tasks-start shows 'Ma, október 19.' after the zone write.",
+    "8-10": "kit-level or capture artefacts, unchanged."
+  },
+  "frames": {
+    "lifeos/tasks-1": { "verdict": "matched-fixture", "geometry": "84 compared, 61 matched, 15 deviating, 7 unmatched (same as before; plus the new 'Rögzítés +' in the back row, deviation 8)", "pairs": [".pulse/pairs/S-tasks-fix/tasks-1.frame-app-diff-1.png", ".pulse/pairs/S-tasks-fix/tasks-1.frame-app-diff-2.png"] },
+    "lifeos/task-form": { "verdict": "matched-fixture", "geometry": "78 compared, 59 matched, 9 deviating, 10 unmatched", "pairs": [".pulse/pairs/S-tasks-fix/task-form.frame-app-diff-1.png"] },
+    "lifeos/capture": { "verdict": "differs", "geometry": "82 compared, 6 matched, 26 deviating, 50 unmatched: the sheet over Feladatok, not Ma (R-S-ma-02), and no Hova? row (Phase 5)", "pairs": [".pulse/pairs/S-tasks-fix/capture.frame-app-diff-1.png"] }
+  },
+  "requests": ["fix/requests/R-S-tasks-fix-01.json (+ .patch)", "fix/requests/R-S-tasks-fix-02.json", "../S-ma/requests/R-S-ma-02 (existing, S-ma's)"]
+}

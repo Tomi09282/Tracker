@@ -1,0 +1,26 @@
+{
+  "id": "G-data",
+  "kind": "kit gap lane (not a package of work-packages.json)",
+  "scope": ".pulse/prep/_kit-gaps.md section A: items 1, 2, 4, 5, 10, 11 and the ui/data + ui/feedback rows of item 13",
+  "new": [
+    "frontend/src/ui/data/Dot.tsx",
+    "frontend/src/ui/data/RoleKey.tsx",
+    "frontend/src/ui/data/StatusLine.tsx",
+    "frontend/src/ui/data/SplitBar.tsx",
+    "frontend/src/ui/data/FigureUnit.tsx",
+    "frontend/src/features/playground/kit/gap-data.tsx",
+    "docs/pipeline/pulse/kit/gap-data.md",
+    "docs/pipeline/pulse/pkg/G-data/**"
+  ],
+  "modified": [
+    "frontend/src/ui/data/ListRow.tsx",
+    "frontend/src/ui/data/RowStack.tsx",
+    "frontend/src/ui/data/LedgerRow.tsx",
+    "frontend/src/ui/data/SegmentBar.tsx",
+    "frontend/src/ui/data/MacroColumns.tsx",
+    "frontend/src/ui/data/Numeral.tsx",
+    "frontend/src/ui/feedback/EmptyState.tsx",
+    "frontend/src/ui/media/UserPhoto.tsx"
+  ],
+  "untouched": ["frontend/src/ui/data/Monogram.tsx (item 5 already present on pulse-redesign)"]
+}

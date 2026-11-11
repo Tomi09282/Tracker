@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-07",
+  "from": "S-workout",
+  "kind": "sandbox",
+  "blocking": false,
+  "target": ".pulse/rec (a live recording on demo.toth.reka@ - interval plan 12 and one voided set)",
+  "need": "pulse-fixture-check refuses the interval and withdrawn states: no recording of GET /workouts/current holds block_kind circuit, a number in target_seconds or a voided set. One recording of T running the sandbox interval plan with one set voided would make both legal edit lists.",
+  "evidence": "pulse-fixture-check S-workout: 7 type / enum problems in states.workout-interval-idle and workout-withdrawn",
+  "proposedApi": "record GET /workouts/current for T after starting plan 12 and voiding one set",
+  "proposedPatch": null,
+  "interim": "the two states run from the inline fixtures and are captured; their verdict is structure until the recording exists",
+  "status": "resolved",
+  "resolution": "INT 2026-10-17, orchestrator ruling: ALLOWED as matched-fixture. workout-withdrawn and workout-interval-idle rebuilt from the user@ recording with their edit lists and checked: tsc --strict against { log: WorkoutLog|null; exercises: LogExercise[]; sets: LogSet & {voided_reason} [] } (negative control on target_seconds rejects), plus the migration 010 constraints (block_kind IN single/superset/circuit/emom/amrap, target_seconds integer 1..7200, voided_reason set and <= 200 when voided_at is set, every recorded column present). The sandbox recording remains a nice-to-have."
+}

@@ -56,10 +56,21 @@ const dir = path.join(BRAIN, '20-Data-Model');
 await fs.mkdir(dir, { recursive: true });
 
 // Remove previously generated table notes so a dropped table does not linger as a ghost.
+//
+// One exception to "everything here is derived": a note may carry a hand-written tail below this
+// marker line (the exercise coverage numbers and the importer, for one). The tail is not derivable
+// from the schema, so it is lifted off the old note and appended to the regenerated one; deleting
+// the table still deletes the note, tail and all.
+const KEEP_MARKER = '<!-- brain:keep -->';
+const keptTails = new Map();
 for (const f of await fs.readdir(dir)) {
   if (f === 'ERD.md') continue;
   const body = await fs.readFile(path.join(dir, f), 'utf8').catch(() => '');
-  if (body.includes('type: table')) await fs.rm(path.join(dir, f));
+  if (body.includes('type: table')) {
+    const at = body.indexOf('\n' + KEEP_MARKER);
+    if (at !== -1) keptTails.set(f, body.slice(at + 1));
+    await fs.rm(path.join(dir, f));
+  }
 }
 
 for (const d of described) {
@@ -105,7 +116,7 @@ ${d.indexes.length ? `## Indexes\n\n${d.indexes.map((i) => `- \`${i.name}\`${i.u
 ${d.triggers.length ? `## Triggers\n\n${d.triggers.map((t) => `- \`${t.name}\``).join('\n')}\n` : ''}
 ${checks.length ? `## Constraints\n\n${checks.map((c) => `- \`${c}\``).join('\n')}\n` : ''}
 Back to [[ERD]].
-`,
+${keptTails.has(`${d.table}.md`) ? '\n' + keptTails.get(`${d.table}.md`) : ''}`,
   );
 }
 
@@ -160,6 +171,8 @@ const routers = [
   ['/api/v1', '../src/exercises/routes.js'],
   ['/api/v1', '../src/exercises/media.js'],
   ['/api/v1', '../src/admin/routes.js'],
+  ['/api/v1', '../src/admin/accounts.js'],
+  ['/api/v1', '../src/admin/statistics.js'],
   ['/api/v1', '../src/privacy/routes.js'],
   ['/api/v1', '../src/coaching/routes.js'],
   ['/api/v1', '../src/onboarding/routes.js'],
@@ -176,6 +189,19 @@ const routers = [
   ['/api/v1', '../src/public/compose.js'],
   ['/api/v1', '../src/public/compose-media.js'],
   ['/api/v1', '../src/public/moderation.js'],
+  // B-admin-posts: the admin side of marketplace posts. The file is not named *routes.js, so the
+  // cross-check below cannot notice it is missing: it has to be listed here by hand.
+  ['/api/v1', '../src/public/admin-posts.js'],
+  // LifeOS: routes.js holds /me/prefs, /lifeos/today and /admin/rules itself and mounts the rest
+  // with router.use(), which this walk does not descend into — so each sub-router is listed too.
+  ['/api/v1', '../src/lifeos/routes.js'],
+  ['/api/v1', '../src/lifeos/habit-routes.js'],
+  ['/api/v1', '../src/lifeos/task-routes.js'],
+  ['/api/v1', '../src/lifeos/challenge-routes.js'],
+  ['/api/v1', '../src/lifeos/reward-routes.js'],
+  ['/api/v1', '../src/lifeos/event-routes.js'],
+  ['/api/v1', '../src/lifeos/focus-routes.js'],
+  ['/api/v1', '../src/lifeos/stats-routes.js'],
 ];
 
 // Cross-check against server.js so adding a router without adding it here is caught here,

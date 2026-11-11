@@ -1,0 +1,28 @@
+{
+  "id": "B-admin-stats",
+  "status": "done",
+  "base": "pulse-int e2e1e4a (no commits behind at hand-in)",
+  "migration": "none",
+  "i18n": "none - backend only; the frames' new Hungarian copy (block labels, honesty note, 'Nem sikerult betolteni') belongs to S-admin-moderation's i18n.patch.json",
+  "changes": [
+    "GET /admin/stats gains an additive `panel` (users total / new 7 d, active coaches, completed workouts today / 7 d, pending moderation, open reports, the 30-day curve of people who logged something); every old key unchanged",
+    "NEW GET /admin/statistics?days=7|30|90 (backend/src/admin/statistics.js): USERS, ACTIVITY, COINS (+ integrity ok/not-ok), MARKETPLACE, COACHES, SYSTEM; every series dense and zero-filled, clock named per series; counts only",
+    "NEW backend/src/lib/ttl-cache.js: single-flight TTL cache (45 s statistics, 30 s panel scan half; the counters an admin acts on stay live)",
+    "NEW backend/src/coins/integrity.js: coinIntegrity() - the four reconciliation checks; GET /admin/coins/audit calls it (same response), the statistics page reduces the same checks, so they cannot drift",
+    "rate limits on the new route: 240 / 15 min per IP, 120 / 15 min per admin; assertAdmin DB re-check; no audit row (read)",
+    "smoke: scripts/smoke/admin-statistics.js (cache unit cases, authorisation matrix, strict window matrix, fixture vs independent oracle, live vs cached panel, stale then fresh across one TTL wait, integrity flip); three planted defects caught"
+  ],
+  "sharedFilesTouched": {
+    "backend/server.js": "one import + one app.use line after adminRoutes",
+    "backend/src/admin/routes.js": "one import; GET /admin/stats: `panelFigures()` added to the Promise.all and `panel` to the JSON (additive)",
+    "backend/src/coins/routes.js": "GET /admin/coins/audit body replaced by one coinIntegrity(50) call (same JSON); one import",
+    "backend/scripts/brain-gen.mjs": "one router line so brain:gen knows the new router (run `npm run brain:gen` at integration to add the route to 30-API/Endpoints.md)",
+    "backend/scripts/smoke.js": "one import-and-call block after the polish section"
+  },
+  "forTheIntegrator": [
+    "brain:gen has not been run here (docs/brain is the integrator's); the new router is registered in brain-gen.mjs",
+    "backend/scripts/verify-gates.mjs line ~447 plants a defect into the `/admin/stats` route text; it still passes (29 passed)",
+    "recommended later migration (not in this package): CREATE INDEX audit_log_created_idx ON audit_log (created_at) - the 24 h audit count is a covering-index scan of the whole log",
+    "recommended later: an index or a counter for the coach_posts state split if the marketplace grows (SCAN coach_posts with wide rows)"
+  ]
+}

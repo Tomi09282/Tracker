@@ -1,0 +1,77 @@
+{
+  "package": "S-client-detail-a",
+  "branch": "pulse/S-client-detail-a",
+  "verifiedOn": "pulse/S-client-detail-a @ c5c8a97 = pulse-redesign 0f1a869 + the S-client-detail-a commits, i18n.patch.json applied by pulse-sync",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-client-detail-a/i18n.patch.json"
+  ],
+  "files": {
+    "frontend/src/features/coaching/ClientDetailPage.tsx": "render rewritten on the kit: Screen push wide (R21), ScreenHeader push with no title (back row from routeMeta: KLIENSEIM -> /coach) whose children are the 124 pt textured Monogram with its full stop (lime = owns the account, warn = handover pending, both named by dotLabel), the display h1, the team · origin body line and, when pending, the warn NoticeLine with coaching.handoverBody; the numbers = strong Rule + three StatBlocks on a 3-column grid with num Numerals (Edzés / 28 nap from useClients() sessions_28d, an em dash while it loads / fails / the row is missing - never 0); the Answers table = RowStack open of two page-local fact rows (eyebrow in the first third, 22/28 value in the other two, the client's note, the 6 pt warn dot hanging before the value column; avoid also puts the value in the warning ink; +N for further areas) and the door ListRow 'Teljes kérdőív' (trailing Hiányos / warn dot); ClientEquipmentCard; the view block = strong Rule + Segmented rule (radiogroup) + the panel; the questionnaire Sheet as RowStack rows, a Kímélendő Section and the notes. Loading = back row + monogram block + name block + three numeral blocks; missing = EmptyState h1 with a back TextLink. Everything above the return unchanged except the added useClients() read (import only, PLAN 4.3). In the sheet the experience answer is the sub line of its row (de \"Trainingserfahrung\" was cut beside the long answer).",
+    "frontend/src/features/coaching/PlanTab.tsx": "render rewritten: PlanRow = ListRow (title, StatusLine sub: lime dot only for active, warn for paused, no dot for draft / ended; meta '7 nap · 7 napos ciklus · date' or the warn plans.needsStart), RowStack, the ONE lime pill (size lg, full width, no plus as drawn), Klónozás as a body TextLink with the chevron down / up and aria-expanded, the template list inline as a RowStack of ListRows (value = day count, busy, offline-disabled), EmptyState with no icon and no action. Hooks, mutations, offline guard unchanged.",
+    "frontend/src/features/coaching/ChatTab.tsx": "render rewritten: the door is a TextLink to={`/coach/clients/${linkId}/chat`} (literal kept, the ONLY door to the chat route), ChatPanel embedded as before (className max-h-[60vh], showBlockAction default); loading = two line blocks without a radius; gone = NoticeLine info role=status chat.unavailable.",
+    "frontend/src/features/coaching/ClientEquipmentCard.tsx": "render rewritten: Section 'Felszerelés' with the commit as its trailing TextLink 'Mentés' (disabled until the set differs, busy while saving), the cap hint 4 above a ChipRow wrap of Toggles (role checkbox, lime mark), the failure as a compact danger NoticeLine role=alert; loading / 404 / no-profile branches are Section-shaped. All state logic (draft, sameSet, functional updater, toast, 404 vs saveError) unchanged. The Mentés link carries min-w-11 justify-end so the en \"Save\" (30 pt of ink) still has a 44 pt target (the SettingsPage answer).",
+    "docs/pipeline/pulse/pkg/S-client-detail-a/budget.json": "deleted by check-pulse --fix-down (86 -> 0)",
+    "docs/pipeline/pulse/pkg/S-client-detail-a/states.json": "overrides.client-detail-1 (fixture: drawn name on /clients/1 and /clients, drawn start date on /plans) + 12 undrawn states + notCapturable",
+    "docs/pipeline/pulse/pkg/S-client-detail-a/i18n.patch.json": "three proposed, not visible accessible names: coaching.account.owned, coaching.account.pending (the monogram dot), coaching.moreFlagged (the +N count)",
+    "docs/pipeline/pulse/pkg/S-client-detail-a/requests/": "R-S-client-detail-a-01 (fixture: the drawn caution limitation and its sentence), R-S-client-detail-a-02 (ChatPanel anchor prop for the embedded Üzenetek view)"
+  },
+  "verdicts": {
+    "client-detail-1": "matched-fixture with one named difference: the recording holds the limitation as avoid / \"meniszkusz\" and pulse-fixture-check refuses the drawn caution + two-line note (R-S-client-detail-a-01), so the value reads \"Térd — Kerülendő\" in the warning ink and every box from Teljes kérdőív down sits 18 pt higher (geometry: 91 compared, 36 matched, 39 deviating = dy -18 or text-box width only, 1 style = that colour, 15 unmatched = rules / marks / glyphs shifted by the same 18). With the two drawn edits applied ad hoc the probe matched 79+ and the rest was width-only (client-detail-1.with-drawn-note.*). The geometry probe is therefore red on the committed fixture.",
+    "cd-recorded": "structure (recorded client Teszt Elek, undrawn data)",
+    "cd-handover-pending": "structure (undrawn, fixture)",
+    "cd-sheet": "structure (undrawn)",
+    "cd-clone-open": "structure (undrawn)",
+    "cd-plan-empty": "structure (undrawn, fixture)",
+    "cd-plan-no-start": "structure (undrawn, fixture)",
+    "cd-equipment-changed": "structure (undrawn)",
+    "cd-equipment-saved": "structure (undrawn, fixture 200)",
+    "cd-equipment-failed": "structure (undrawn, fixture 500)",
+    "cd-chat-tab": "structure (undrawn, R-S-client-detail-a-02)",
+    "cd-offline": "structure (undrawn)",
+    "cd-missing": "structure (undrawn, fixture 404; inventory = baseline)"
+  },
+  "ledger": {
+    "door to=/coach 1 -> 0": "the back link is now the ScreenHeader push back control, read from app/routeMeta.ts ('/coach/clients/:id' -> '/coach', coaching.title); same target, same name",
+    "role tablist / tab / tabpanel, aria-selected, aria-controls, aria-labelledby, tabIndex 1 -> 0": "the four views are the kit Segmented (client-detail-1 draws the hug segSwitch on a hairline): role radiogroup named coaching.tabs, each option role radio + aria-checked, one tab stop with roving tabindex, arrows move AND select and wrap - the same keyboard contract as the old custom tablist. The panel loses its tabpanel role (no tabs any more); the view still resets to Terv on every visit",
+    "aria-live 1 -> 0": "the equipment save failure is a NoticeLine role=alert (an assertive live region) instead of a polite live paragraph"
+  },
+  "inventory": "every state: 32 / 32 controls (the cd-* states as their baselines); the only difference is the four view options tab -> radio (same names, same order) - see ledger. cd-missing equal to its baseline.",
+  "budget": {
+    "before": 86,
+    "after": 0
+  },
+  "requests": [
+    "R-S-client-detail-a-01 (open, non-blocking)",
+    "R-S-client-detail-a-02 (open, non-blocking)"
+  ],
+  "deviations": [
+    "Q4 kept behaviour: the 'Teljes kérdőív' door sits as the last row of the Answers table, as the frame draws it (the frame's board note calls it a proposal; on the old page it was under Felszerelés)",
+    "Q4 undrawn: handover pending = the monogram's full stop in warn + the warn notice line with coaching.handoverBody (replaces the amber ring, the badge and the amber card)",
+    "Q4 undrawn: a Kerülendő (avoid) limitation keeps a stronger weight than the drawn Óvatosan: the same warn dot, and the value in the warning ink (text, not a fill)",
+    "Q4 undrawn: further flagged areas = '+N' in mono warning ink after the value (named for screen readers) and a warn dot on the door row; a draft questionnaire = the micro word 'Hiányos' on the door row and a warn NoticeLine inside the sheet",
+    "Q4 undrawn: the questionnaire sheet lists the answers as rows (question = title, answer = value; the equipment answer as the sub line), the flagged areas as a Kímélendő section of rows with the warn dot, the client's notes as eyebrow + body",
+    "Q4 undrawn: the equipment save is the section head's text link 'Mentés' (drawn) - the old filled button is gone (one pill per screen); failure = a danger notice line under the chips",
+    "Q4 undrawn: Üzenetek = the Teljes beszélgetés text link + the embedded ChatPanel, which repeats the client's monogram and name (R-S-client-detail-a-02)",
+    "the pill draws no plus glyph and the active plan status is a lime dot, not a check - the frame wins over the inventory",
+    "the old 'Edzés / 28 nap' tile always read 0 (it read sessions_28d from GET /clients/:id, which never returns it); it now reads the roster row, so the seed shows 15 as drawn",
+    "Q4 undrawn: the questionnaire experience answer is the sub line of its row, not the trailing value (the longest question with the longest answer)"
+  ],
+  "proposedCopy": [
+    "coaching.account.owned (visible: false)",
+    "coaching.account.pending (visible: false)",
+    "coaching.moreFlagged (visible: false)"
+  ],
+  "liveSmoke": "node scripts/pulse-verify.mjs --package S-client-detail-a --live --smoke (rerun on c5c8a97): 6 of 6 states ok, no failures, no undeclared request or console error (client-detail-1, cd-recorded, cd-handover-pending, cd-plan-empty, cd-plan-no-start, cd-missing). No live write was made: the equipment save and plan creation states run on fixtures in replay.",
+  "lastBuild": "pulse-verify: build green in 14 s · 13 of 13 captured (replay) (on c5c8a97 with the patch applied)",
+  "variants": {
+    "hu 402 + focus walk": "13/13 ok, all probes pass except the client-detail-1 geometry above",
+    "en": "13/13 ok; first run found the en \"Save\" link 30 pt wide (targets) - fixed, de / 360 / 430 / rm runs are after the fix",
+    "de": "13/13 ok, only client-detail-1 geometry (other strings)",
+    "w360": "13/13 ok, all probes pass",
+    "w430": "13/13 ok, all probes pass",
+    "de w360": "13/13 ok, all probes pass",
+    "reduced-motion + focus walk": "13/13 ok; cd-chat-tab focusWalk once reported the embedded ChatPanel composer textarea without visible focus - the kit TextArea draws its focus line on the wrapper (focus-within:after), which the probe does not see; the same probe passed on the final hu focus-walk run",
+    "scroll-end": "13/13 ok"
+  },
+  "localeDefects": "kept 1:1: the questionnaire equipment answer and the client note come from the server in Hungarian in every language (e.g. de sheet \"Rúd, Kézisúlyzó ...\")"
+}

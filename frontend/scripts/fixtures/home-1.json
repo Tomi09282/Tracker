@@ -1,0 +1,42 @@
+{
+  "state": "home-1",
+  "what": "Kezdőlap — edzésnap: Friday 9 October 2026, the plan's \"Felsőtest – húzás\" day, no session started yet (the approved Home frame).",
+  "why": "The seed always leaves user@ mid-session and today's plan day is decided by the SERVER clock, so this state cannot be reached without ending the session (a write) on a Friday.",
+  "how": "The page clock of the state is the frame's day (pulse-frames.json, \"clock\"), so the week strip asks for the week of 5 October and the header prints the Friday. The session is taken away, and today's row is rewritten into the Friday row of the same plan: its values are the ones the recorded week (GET /my-plans/week?from=2026-10-05, row 4) carries for that day.",
+  "fixtures": [
+    {
+      "method": "GET",
+      "path": "/api/v1/workouts/current",
+      "edits": [
+        { "pointer": "/log", "value": null },
+        { "pointer": "/exercises", "value": [] },
+        { "pointer": "/sets", "value": [] }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/my-plans/today",
+      "edits": [
+        { "pointer": "/date", "value": "2026-10-09" },
+        { "pointer": "/days/0/date", "value": "2026-10-09" },
+        { "pointer": "/days/0/day_name", "value": "Felsőtest – húzás" },
+        { "pointer": "/days/0/is_rest", "value": 0 },
+        { "pointer": "/days/0/est_minutes", "value": 65 },
+        { "pointer": "/days/0/start_time", "value": "18:00" },
+        { "pointer": "/days/0/exercise_count", "value": 5 },
+        { "pointer": "/days/0/log_id", "value": null },
+        { "pointer": "/days/0/log_status", "value": null }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/my-plans/week",
+      "edits": [
+        { "pointer": "/occurrences/4/log_id", "value": null },
+        { "pointer": "/occurrences/4/log_status", "value": null },
+        { "pointer": "/occurrences/5/log_id", "value": null },
+        { "pointer": "/occurrences/5/log_status", "value": null }
+      ]
+    }
+  ]
+}

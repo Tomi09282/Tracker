@@ -1,0 +1,14 @@
+{
+  "id": "R-S-nutrition-01",
+  "from": "S-nutrition",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/Field.tsx",
+  "need": "The unit right after the typed value INSIDE the underline field: nutrition-2 draws '180 g' with the 'g' in text-2 directly after the digits (one space) and the valid tick at the line's end. Field's only slot is `trailing`, flush right, so the unit lands beside the tick about 100 pt from the digits. The value itself must stay the bare number (Number('180 g') would break the page's grams check). Kit-gaps G1 (.pulse/prep/_kit-gaps.md, section A.13 'Field unit').",
+  "evidence": "nutrition-2@2x.png y 728-750: Value '180 g' (24,728 40x22, chars 3-5 in #a9b09d), Valid mark 167,729; geometry .pulse/geometry/nutrition-2.json node 'Value'; capture .pulse/shots/S-nutrition/nutrition-2.tile-1.png (app: '180 ......... g ✓')",
+  "proposedApi": "<Field unit?: string /> - drawn after the value in body text-2, 4 pt apart (one space), the input sized to its content (field-sizing: content, or a measured width), before `trailing`; read with the value (aria-describedby or an sr-only suffix)",
+  "proposedPatch": null,
+  "interim": "the unit sits in `trailing`, 10 before the tick (visible: 'g' at x ~156 instead of ~54); the value and the check are untouched",
+  "status": "open",
+  "resolution": null
+}

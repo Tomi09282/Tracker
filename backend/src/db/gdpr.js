@@ -112,6 +112,29 @@ export const EXPORT_TABLES = [
   ['coin_purchases', 'SELECT * FROM coin_purchases WHERE user_id = ?'],
   ['coin_entitlements', 'SELECT * FROM coin_entitlements WHERE user_id = ?'],
   ['achievements', 'SELECT * FROM user_achievements WHERE user_id = ?'],
+  // LifeOS core (031): the day boundary, every award / penalty / reversal, every settled day.
+  ['lifeos_prefs', 'SELECT * FROM user_prefs WHERE user_id = ?'],
+  ['coin_events', 'SELECT * FROM coin_events WHERE user_id = ?'],
+  ['daily_summaries', 'SELECT * FROM daily_summaries WHERE user_id = ?'],
+  // LifeOS habits and tasks (032): what they wanted to do, what they said each day, what each
+  // settled day decided, and their tasks (client_key is their own idempotency key, not a secret).
+  ['habits', 'SELECT * FROM habits WHERE user_id = ?'],
+  ['habit_logs', 'SELECT * FROM habit_logs WHERE user_id = ?'],
+  ['habit_day_results', 'SELECT * FROM habit_day_results WHERE user_id = ?'],
+  ['tasks', 'SELECT * FROM tasks WHERE user_id = ?'],
+  // LifeOS challenges and rewards (033): their challenge pool, each day's draw and pick, what they
+  // save up for, and their redemption receipts (client_key / request_id are their own identifiers).
+  ['challenges', 'SELECT * FROM challenges WHERE user_id = ?'],
+  ['challenge_draws', 'SELECT * FROM challenge_draws WHERE user_id = ?'],
+  ['rewards', 'SELECT * FROM rewards WHERE user_id = ?'],
+  ['reward_redemptions', 'SELECT * FROM reward_redemptions WHERE user_id = ?'],
+  // LifeOS calendar (034): their events, the reminder offsets they chose, and the record of every
+  // reminder the server delivered to them (the dedupe; client_key is their own idempotency key).
+  ['events', 'SELECT * FROM events WHERE user_id = ?'],
+  ['event_reminders', 'SELECT * FROM event_reminders WHERE user_id = ?'],
+  ['reminder_deliveries', 'SELECT * FROM reminder_deliveries WHERE user_id = ?'],
+  // LifeOS focus sessions (035): their blocks, check-ins and what each finish paid for.
+  ['focus_sessions', 'SELECT * FROM focus_sessions WHERE user_id = ?'],
   ['coach_profile', 'SELECT * FROM coach_profiles WHERE user_id = ?'],
   ['coach_posts', 'SELECT * FROM coach_posts WHERE author_user_id = ?'],
   ['exercises_authored', 'SELECT * FROM exercises WHERE owner_id = ?'],

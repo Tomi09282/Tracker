@@ -2,22 +2,27 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Bell } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { BadgeCount } from '../../ui/primitives/BadgeCount';
+import { control } from '../../ui/primitives/control';
 import { useUnreadCount } from './useChat';
 
 /**
- * The notification bell.
+ * The notification bell — kit `iconBtn('bell', count)`, frames `home-1..3` and `coach-dashboard-1`.
  *
- * IT IS NOT A NAV TAB, and that was the decision that unblocked Phase 3's layout. A notification
- * centre is a transient inbox rather than a destination, both platform idioms put it in a header,
- * and — measured — the bottom bar was already full: a coach fills all five slots, and an admin was
- * already losing their own tab to the clamp. See [[Messaging and Notifications]].
+ * A bare 24 pt glyph in a 44 x 44 hit frame (the icon-button look of `control()`; it is a route,
+ * so it is the router's link wearing the recipe), with the lime count on its top-right corner.
+ * No disc, no rim: nothing is enclosed.
  *
- * The badge is CAPPED at 99+ by the server, which reports `capped` rather than a bigger number.
- * Unbounded digits break the bar's layout, and the difference between 100 and 342 unread changes
- * no decision anyone makes.
+ * IT IS NOT A NAV TAB. A notification centre is a transient inbox rather than a destination, both
+ * platform idioms put it in a header, and the bottom bar has no room for it. See
+ * [[Messaging and Notifications]].
  *
- * The count is never rendered from a locally-adjusted number. Optimistic decrement is where badges
- * start lying, and the server's count is capped anyway, so local arithmetic would drift.
+ * The badge is CAPPED at 99+ by the server, which reports `capped` rather than a bigger number. The
+ * count is never rendered from a locally-adjusted number: optimistic decrement is where badges start
+ * lying. Hidden at 0.
+ *
+ * The count is the kit's `BadgeCount` (lane F8): it places itself on the button's corner (left edge
+ * at 26, top at 0 of the 44 frame, a wider "99+" growing to the right) and hides at 0.
  */
 export function NotificationBell({ className }: { className?: string }) {
   const { t } = useTranslation();
@@ -28,36 +33,11 @@ export function NotificationBell({ className }: { className?: string }) {
     <Link
       to="/notifications"
       aria-label={unread > 0 ? t('notifications.withUnread', { count: unread }) : t('notifications.title')}
-      // A RESTING HOLDER, not a bare glyph. The bell sits over the aurora on both screens that
-      // draw it, and an unfilled 20px icon on a moving gradient has no edge of its own — the
-      // mockups give it a translucent disc with a rim, which is also what makes the badge read as
-      // riding something rather than floating. Circular here, unlike the section-head squircles:
-      // this holder stands in for a person's inbox, and the image keeps that family round.
-      className={cn(
-        'relative grid size-11 place-items-center rounded-chip text-text-2',
-        'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-2',
-        'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-        className,
-      )}
+      data-kit="iconBtn"
+      className={cn(control({ variant: 'link', shape: 'icon' }), 'relative', className)}
     >
-      <Bell className="size-icon-m" aria-hidden />
-      {unread > 0 ? (
-        <span
-          // `aria-hidden` because the count is already in the link's label. A screen reader hearing
-          // "3" floating beside "Notifications, 3 unread" is reading the same fact twice.
-          //
-          // OUTSIDE the holder's corner and ACCENT-filled, as both mockups draw it. Tucked inside
-          // at `right-1 top-1` it sat on the glyph and obscured the thing it was counting, and
-          // `--danger` is reserved for destructive and irreversible: unread news is neither.
-          aria-hidden
-          className={cn(
-            'text-micro absolute -right-1 -top-1 grid min-w-4 place-items-center rounded-full px-1',
-            'bg-accent text-accent-fg tabular-nums',
-          )}
-        >
-          {data?.capped ? '99+' : unread}
-        </span>
-      ) : null}
+      <Bell aria-hidden />
+      <BadgeCount count={unread} capped={data?.capped} />
     </Link>
   );
 }

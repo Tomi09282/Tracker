@@ -1,0 +1,14 @@
+{
+  "id": "R-S-day-settings-03",
+  "from": "S-day-settings",
+  "kind": "shell",
+  "blocking": false,
+  "target": "frontend/src/app/AppLayout.tsx",
+  "need": "The silent first-time time-zone write on app start (plan 'the client silently sends the browser IANA zone (PATCH /me/prefs)'; api.md 'LifeOS starts the first time a zone is known'). The hook useTimezoneBootstrap lives in features/settings/dayPrefs.ts; it needs ONE call in the signed-in shell. It reads GET /me/prefs (shared cache with the page and the Profil row) and, only when the stored zone is null, PATCHes the browser's zone once per page load - a stored zone is never overwritten, a failure is left for the next start, nothing is drawn.",
+  "evidence": "B-core api.md 'PATCH /me/prefs' and 'The day'; dayPrefs.ts useTimezoneBootstrap",
+  "proposedApi": "useTimezoneBootstrap() inside AppLayout()",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-03.patch",
+  "interim": "Applied in the slot only. CAPTURE IMPACT: with the mount, EVERY signed-in screen fires GET /me/prefs, so every replay capture needs that GET in the freeze (or a default stub in pulse-frames.json) for each capture account, recorded with a non-null timezone - otherwise the capture fails 'unrecorded', and a null zone would fire the PATCH, which replay blocks. Record it (--record --only-missing on the B-core backend) before or with this mount. The Profil row (shared.patch) has the same need on /settings.",
+  "status": "deferred",
+  "resolution": "Deferred at the merge (merge-S-day-settings): with the mount EVERY signed-in screen fires GET /me/prefs, so every one of the 59 replay states would need that GET recorded for its account, and an account whose stored zone is null would fire the PATCH, which a capture blocks. The freeze holds GET /me/prefs only for the accounts this merge recorded. Apply this patch once GET /me/prefs is recorded for every capture account with a non-null zone (or a default stub exists); until then a zone is stored only from the Nap és időzóna page."
+}

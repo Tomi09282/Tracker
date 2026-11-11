@@ -1,0 +1,3 @@
+[
+  { "element": "E15", "live": false, "reason": "one Pulse look — Toast (variants/E12E16.tsx) is a line of the kit's toast band (noticeLine + rule + countdown) and no longer reads its letter; the behaviour is the frozen letter C's: Undo undoes and closes the line" }
+]

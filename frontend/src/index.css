@@ -1,12 +1,9 @@
 @import 'tailwindcss';
 
-/* Self-hosted fonts — the strict CSP allows no third-party font or style origin.
-   Inter ships as a variable font (one file, every weight); Space Grotesk is display-only, so
-   we pull just the three weights the type scale actually uses. */
-@import '@fontsource-variable/inter/index.css';
-@import '@fontsource/space-grotesk/500.css';
-@import '@fontsource/space-grotesk/600.css';
-@import '@fontsource/space-grotesk/700.css';
+/* The three Pulse faces — Big Shoulders Display, Geist, Geist Mono — self-hosted and declared by
+   hand in ui/tokens/fonts.css (the strict CSP allows no third-party font or style origin). The
+   family tokens of tokens.css name them; the type-binding block below gives each step its face. */
+@import './ui/tokens/fonts.css';
 
 @import './ui/tokens/tokens.css';
 
@@ -21,15 +18,19 @@
     background: var(--surface-0);
     color: var(--text-1);
     font-family: var(--font-body);
+    /* The size every element WITHOUT a type class inherits: the Pulse body, 16 / 22. (It was the
+       old 15 / 22 while the bridge stood; the legacy step left in the closing cleanup.) */
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  /* Display face is opt-in per element (headings, brand, big numbers) — never global. */
-  .font-display,
-  h1, h2, h3 {
+  /* The display face is opt-in — never global, and never by TAG. `h1, h2, h3` used to be in this
+     selector; in Pulse a heading is whatever its role says (a sheet title, a name and the greeting
+     are the text face), so the tag decides nothing and the role classes carry the family: see the
+     type-binding block below. */
+  .font-display {
     font-family: var(--font-display);
   }
 
@@ -49,7 +50,8 @@
   }
 
   ::selection {
-    background: var(--accent-subtle);
+    /* The lamp at 20 % — the value the retired `--accent-subtle` wash carried. */
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
     color: var(--text-1);
   }
 
@@ -76,13 +78,36 @@
   img, video { display: block; max-width: 100%; height: auto; }
 }
 
+/*
+ * Family and case of the type ramp, bound ONCE.
+ *
+ * Tailwind attaches size, line-height, weight and tracking to a `text-<step>` utility. It has no
+ * way to attach a family or a case, and in Pulse both are part of the role: an eyebrow in the text
+ * face is not an eyebrow. Written at every call site (`font-display text-eyebrow uppercase`) the
+ * role would be re-decided by every screen; bound here it cannot drift.
+ *
+ * In `components`, so an explicit `font-body` or `normal-case` utility at a call site still wins.
+ * Only `.text-<step>` selectors, only these two properties, only between the two markers:
+ * `check:type-scale` reads this block and compares it with the ramp, in both directions.
+ * The ten legacy steps are deliberately absent — they keep whatever face their call site names.
+ */
+@layer components {
+  /* type-binding:start */
+  .text-giant, .text-hero, .text-stat, .text-num, .text-display-xl, .text-display, .text-eyebrow { font-family: var(--font-display); }
+  .text-data-l, .text-data, .text-micro { font-family: var(--font-mono); }
+  .text-display-xl, .text-display, .text-eyebrow, .text-micro { text-transform: uppercase; }
+  /* type-binding:end */
+}
+
 @layer utilities {
   /* Capacitor safe areas. */
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
   /*
-   * The screen's horizontal gutter: 16px mobile, 24px from the tablet breakpoint up.
+   * The screen's horizontal gutter: 24px, and 16px on a viewport narrower than 376px (23.5rem) —
+   * the Pulse grid (supported phone widths 360-430). The breakpoint is a literal because a media
+   * query cannot read a custom property; the two gutter values are steps of the spacing grid.
    *
    * ═══ AND THE LANDSCAPE NOTCH, WHICH THIS HAD NEVER ACCOUNTED FOR ═══════════════════════════
    *
@@ -95,15 +120,16 @@
    * an edge case here — it is how somebody reads their next set.
    *
    * `max()` rather than addition: the inset REPLACES the gutter when it is larger, so the safe edge
-   * never gets 16px of padding stacked on top of a 44px cutout. On every device with no inset the
-   * value is unchanged, which is why this costs nothing everywhere else.
+   * never gets the gutter stacked on top of a 44px cutout. On every device with no inset the
+   * value is unchanged, which is why this costs nothing everywhere else. BOTH rules below keep
+   * both `max()` forms — `check-safe-area` reads every `.screen-x` block.
    */
   .screen-x {
-    padding-inline: max(--spacing(4), env(safe-area-inset-left)) max(--spacing(4), env(safe-area-inset-right));
+    padding-inline: max(--spacing(6), env(safe-area-inset-left)) max(--spacing(6), env(safe-area-inset-right));
   }
-  @media (width >= 48rem) {
+  @media (width < 23.5rem) {
     .screen-x {
-      padding-inline: max(--spacing(6), env(safe-area-inset-left)) max(--spacing(6), env(safe-area-inset-right));
+      padding-inline: max(--spacing(4), env(safe-area-inset-left)) max(--spacing(4), env(safe-area-inset-right));
     }
   }
 
@@ -142,13 +168,6 @@
   @keyframes stripe-flow {
     from { background-position: 0 0; }
     to { background-position: 32px 0; }
-  }
-
-  /* E11-D: an unread badge announces itself once, then sits still. */
-  @keyframes badge-pop {
-    0% { transform: scale(0.4); }
-    60% { transform: scale(1.15); }
-    100% { transform: scale(1); }
   }
 
   /* E18-B: a slow breath instead of a sweep. Opacity stays well above 0.2 — the Bible forbids

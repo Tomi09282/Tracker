@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview", "--prefix", "frontend"],
       "port": 4173
+    },
+    {
+      "name": "tracker-backend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/dev-stack.mjs", "--backend"],
+      "port": 3000
     }
   ]
 }

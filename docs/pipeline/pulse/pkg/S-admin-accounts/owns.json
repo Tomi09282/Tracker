@@ -1,0 +1,16 @@
+{
+  "id": "S-admin-accounts",
+  "decision": "owner decisions 2026-11-03: accounts are editable only through the safe set (display name, role with the admin's own password for a grant, disable and enable with a REQUIRED reason, coin adjustment, reset login lockout, sign out all sessions, force password change); the e-mail is read-only; lists have search + filters + 'Tovabbiak' paging and every inspect page has a back button; approved Figma frames admin-accounts-v2, admin-account-detail-1, -2a..-2d, -3a, -3b",
+  "owns": [
+    "frontend/src/features/admin/AdminAccountsPage.tsx",
+    "frontend/src/features/admin/UserSearch.tsx",
+    "frontend/src/features/admin/accounts/**",
+    "docs/pipeline/pulse/pkg/S-admin-accounts/**"
+  ],
+  "sharedEdits": {
+    "decision": "small edits to integrator-owned files, each listed so the integrator can resolve conflicts",
+    "files": []
+  },
+  "handIn": { "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"] },
+  "notInScope": ["backend/** (B-admin-accounts, merged)", "Piacter post pages (S-admin-posts)", "Moderacio panel and statistics (S-admin-moderation)"]
+}

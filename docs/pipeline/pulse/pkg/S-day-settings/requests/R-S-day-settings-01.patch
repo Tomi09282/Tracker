@@ -1,0 +1,46 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 3aead8f..33b117b 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -89,6 +89,7 @@ const EXPECT_BY_VIEW = {
+     ['/settings', '/settings'],
+     ['/coins', '/settings'],
+     ['/settings/equipment', '/settings'],
++    ['/settings/day', '/settings'],
+   ],
+   trainer: [
+     ['/coach', '/coach'],
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 43d1816..65601c9 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -58,6 +58,7 @@ export const ROUTE_META = {
+   '/library/:id': { parent: '/library', parentLabelKey: 'nav.library' },
+   '/coins': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/settings/equipment': { parent: '/settings', parentLabelKey: 'nav.profile' },
++  '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/notifications': {
+     parent: '/',
+     parentLabelKey: 'nav.home',
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7e844d3..6bd7db9 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -92,6 +92,9 @@ const SettingsPage = lazy(() =>
+ const EquipmentPage = lazy(() =>
+   import('../features/settings/EquipmentSection').then((m) => ({ default: m.EquipmentPage })),
+ );
++const DaySettingsPage = lazy(() =>
++  import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
++);
+ 
+ const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
+ 
+@@ -146,6 +149,7 @@ export const router = createBrowserRouter([
+       { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },
+       { path: 'settings', element: suspended(<SettingsPage />) },
+       { path: 'settings/equipment', element: suspended(<EquipmentPage />) },
++      { path: 'settings/day', element: suspended(<DaySettingsPage />) },
+       { path: 'playground', element: suspended(<PlaygroundPage />) },
+       { path: 'admin', element: suspended(<AdminPage />) },
+       // The admin bar's Fiókok and Piactér tabs (design round A): sections of /admin that became

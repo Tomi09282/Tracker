@@ -1,0 +1,52 @@
+diff --git a/frontend/src/features/playground/kit/actions.tsx b/frontend/src/features/playground/kit/actions.tsx
+index a587723..927ee47 100644
+--- a/frontend/src/features/playground/kit/actions.tsx
++++ b/frontend/src/features/playground/kit/actions.tsx
+@@ -1,5 +1,6 @@
+ import { Bell, ChevronRight, Plus, X } from 'lucide-react';
+ import type { ReactNode } from 'react';
++import { BadgeCount } from '../../../ui/primitives/BadgeCount';
+ import { Pressable } from '../../../ui/primitives/Pressable';
+ import { TextLink } from '../../../ui/primitives/TextLink';
+ 
+@@ -24,8 +25,8 @@ import { TextLink } from '../../../ui/primitives/TextLink';
+  * a keyboard — the recipe answers to them with the same declarations as the real `:active` and
+  * `:focus-visible` (see `control.ts`). Disabled and busy are the real props.
+  *
+- * The words are the board's sample data, as drawn. The two bells carry no count here: the badge
+- * is `BadgeCount`, the selection lane's component.
++ * The words are the board's sample data, as drawn. The two bells carry the board's counts, 2 and
++ * 99+, through `BadgeCount`, the selection lane's component (handed in by F8).
+  */
+ 
+ export interface KitSpecimen {
+@@ -91,9 +92,11 @@ export const specimens: KitSpecimen[] = [
+       <Row gap="gap-4">
+         <Pressable variant="link" shape="icon" aria-label="Értesítések">
+           <Bell aria-hidden />
++          <BadgeCount count={2} />
+         </Pressable>
+         <Pressable variant="link" shape="icon" aria-label="Értesítések">
+           <Bell aria-hidden />
++          <BadgeCount count={120} capped />
+         </Pressable>
+         <Pressable variant="link" shape="icon" aria-label="Bezárás">
+           <X aria-hidden />
+diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
+index e988645..f37ece7 100644
+--- a/frontend/src/ui/tokens/tokens.css
++++ b/frontend/src/ui/tokens/tokens.css
+@@ -787,6 +787,13 @@
+ 
+ /* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */
+ /* lane:F8 */
++:root {
++  /* The count badge (`BadgeCount`, kit `badgeCount`): 18 high and at least 18 wide, the figure 5
++     from either edge. 5 is off the 4 pt grid on purpose: it is what centres one digit of `tab-on`
++     in an 18 pt circle, and the kit draws it so (app-kit.js `badgeCount`, pad [0, 5]). */
++  --badge-h: 18px;
++  --badge-pad-x: 5px;
++}
+ /* /lane:F8 */
+ 
+ /* F9 — structure: SectionHeader, Rule, RowStack, ListRow, EmptyState, Skeleton, NoticeLine, Monogram */

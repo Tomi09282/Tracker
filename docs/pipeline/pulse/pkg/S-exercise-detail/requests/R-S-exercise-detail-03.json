@@ -1,0 +1,14 @@
+{
+  "id": "R-S-exercise-detail-03",
+  "from": "S-exercise-detail",
+  "kind": "capture",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-frames.json resolve",
+  "need": "the moderation states of S-exercise-detail read the seed rows 1657 (Demó – Bolgár kitörés), 1658 (Demó – Kötélhúzás ülve, széles fogás), 1660 (Demó – Névtelen gépes gyakorlat) as coach@ by literal id, and ed-lang-mark reads 80 (Bent Over Barbell Row) in de; ids change with a reseed and the list endpoint does not return pending / rejected rows, so a resolve entry needs the admin queue (GET /api/v1/admin/moderation as admin@, list /queue, where name) for 1657 / 1658 and has no list for the rejected 1660.",
+  "evidence": "docs/pipeline/pulse/pkg/S-exercise-detail/states.json; .pulse/rec/coach/GET_exercises_1657_*, _1658_*, _1660_*",
+  "proposedApi": "resolve.exPendingBolgar / exPendingKotel from /admin/moderation; the rejected row by a coach-scoped list if one is ever added",
+  "proposedPatch": null,
+  "interim": "literal ids, valid for the current freeze",
+  "status": "open",
+  "resolution": null
+}

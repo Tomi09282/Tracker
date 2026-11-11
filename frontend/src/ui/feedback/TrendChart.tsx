@@ -1,7 +1,9 @@
-import { useId } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { plot, linePath, areaPath, longestGapDays } from './chartGeometry';
+import { cn } from '../../lib/cn';
 import { formatMeasure } from '../../lib/measure';
+import { GAP_DAYS, longestGapDays, plot, scaleTicks, type Inset, type PlotBox } from './chartGeometry';
+import { SPARK_PAD, TrendLine } from './Sparkline';
 
 export interface TrendPoint {
   date: string;
@@ -12,8 +14,8 @@ export interface TrendPoint {
  * How to colour a change. **The app does not always know which way is good**, and pretending it
  * does is a way to be wrong at somebody about their own body.
  *
- *   'up'      — more is better (a lift, a distance). Green up, grey down.
- *   'down'    — less is better (a time). Green down, grey up.
+ *   'up'      — more is better (a lift, a distance). Success ink up, secondary ink down.
+ *   'down'    — less is better (a time). Success ink down, secondary ink up.
  *   'neutral' — the app has no opinion, so neither does the colour.
  *
  * Body measurements default to `neutral` and that is not a cop-out: a person gaining 3 kg may be
@@ -25,33 +27,26 @@ export interface TrendPoint {
 export type TrendDirection = 'up' | 'down' | 'neutral';
 
 /**
- * ONE line chart, for every series in the product.
+ * The two ways the Pulse frames compose a chart. Same line, same scale, same axis grammar; they
+ * differ in who prints the name and the value.
  *
- * PLAIN SVG, no charting library. The whole thing is a path, a dot and two labels — a dependency
- * for that would cost more in bundle size than the entire workout player.
- *
- * TWO POINTS IS NOT A TREND. It refuses to draw below three, and says so rather than rendering a
- * line between two dots that a reader will interpret as a direction.
- *
- * ACCESSIBILITY IS NOT THE SVG. A line is unreadable to a screen reader whatever you put in its
- * title, so the same data renders as a real (visually hidden) table. That is the actual content;
- * the drawing is a summary of it.
- *
- * This was extracted FROM `ProgressChart`, which is now a thin mapper over it. Body measurements
- * needed the same picture and the alternative was a second chart — where the x axis would
- * eventually go back to being an index, because the reason it is time lives in a comment on the
- * one that exists.
+ *   'titled' — the chart carries its own head: name on the left, the change, the `num` value and
+ *              the unit on one baseline on the right; a 96 pt plot with the kit's sparkline (end dot
+ *              only); a hairline rule over the dates; the break as a warning dot + label between
+ *              them. `client-detail-3`, "Chart/Bench Press". The default, so every existing caller
+ *              keeps its name and value on screen.
+ *   'stage'  — the screen's anchor: the name and the giant value stand ABOVE it in the screen's own
+ *              stat block, so the head holds only the change (left) and the scale's unit (right);
+ *              a taller plot with a hairline per scale value, a dot on every reading and a 4 pt lime
+ *              end dot; the break named in the warning ink between the dates. `progress-1`,
+ *              "Trend/Testsúly" > "Chart".
  */
-export function TrendChart({
-  series,
-  unit,
-  label,
-  direction = 'neutral',
-  className,
-  emptyKey = 'progress.notEnough',
-}: {
+export type TrendChartVariant = 'titled' | 'stage';
+
+export interface TrendChartProps {
   series: TrendPoint[];
   unit: string;
+  /** The metric or exercise name. Printed in the head (`titled`), and always the caption of the hidden table. */
   label: string;
   direction?: TrendDirection;
   className?: string;
@@ -67,236 +62,237 @@ export function TrendChart({
    * keeps every existing caller unchanged; new surfaces pass their own.
    */
   emptyKey?: string;
-}) {
+  /** Default `'titled'`. Added by the Pulse restyle (F14); see `TrendChartVariant`. */
+  variant?: TrendChartVariant;
+  /**
+   * Height of the plot in pt. Default 96 (`titled`, the frame's) / 185 (`stage`: `progress-1` sizes
+   * it so the block under the chart closes above the fold of an 874 pt phone; a screen may pass the
+   * 160 – 200 its own fold calls for).
+   */
+  height?: number;
+}
+
+/*
+ * The frame's numbers, in pt (`.pulse/geometry/client-detail-3.json` and `progress-1.json`; the kit's
+ * construction in `figma-build/app/client-detail-3.body.js` and `progress-1.body.js`).
+ *
+ * `scaleCol`: the plot is the content width minus this column; the scale values stand in it,
+ * right-aligned to the content edge (354 - 300 and 354 - 310 at a 402 pt screen).
+ * `designW`: the plot's width at 402 pt — the width the per-side air is measured against.
+ */
+const TITLED = { height: 96, scaleCol: 54, designW: 300, pad: SPARK_PAD as number | Inset } as const;
+const STAGE = { height: 185, scaleCol: 44, designW: 310, pad: { top: 5.5, right: 4, bottom: 5.5, left: 2 } as Inset } as const;
+
+/** A signed change in the reader's own number format, with a true minus (U+2212), as the frames print it. */
+const signed = (delta: number, lang: string) =>
+  `${delta > 0 ? '+' : delta < 0 ? '−' : ''}${formatMeasure(Math.abs(delta), lang)}`;
+
+/**
+ * ONE line chart, for every series in the product.
+ *
+ * PLAIN SVG, no charting library. The whole thing is a line, a dot and a few labels — a dependency
+ * for that would cost more in bundle size than the entire workout player.
+ *
+ * TWO POINTS IS NOT A TREND. It refuses to draw below three, and says so rather than rendering a
+ * line between two dots that a reader will interpret as a direction.
+ *
+ * ACCESSIBILITY IS NOT THE SVG. A line is unreadable to a screen reader whatever you put in its
+ * title, so the same data renders as a real (visually hidden) table. That is the actual content;
+ * the drawing is a summary of it.
+ *
+ * THE PULSE CHART (Pulse System §7): no area under the line, no box around it, hairline axes, a
+ * 1.5 px line, ONE end dot that carries the live reading, and a pause of 14+ days drawn dotted in
+ * the quiet ink instead of a straight solid segment that reads as steady progress. Positions still
+ * come from `chartGeometry.plot()` — x is TIME, see there why.
+ */
+export function TrendChart({
+  series,
+  unit,
+  label,
+  direction = 'neutral',
+  className,
+  emptyKey = 'progress.notEnough',
+  variant = 'titled',
+  height,
+}: TrendChartProps) {
   const { t, i18n } = useTranslation();
-  const gradientId = useId();
+  const lang = i18n.language;
 
   if (series.length < 3) {
-    // `text-2`, not `text-3`. This is a SENTENCE the reader has to act on ("three training days
-    // are needed"), not chrome — and the ink ramp's third step is declared for placeholders, idle
-    // nav and timestamps. It also measures 3.8:1, below the app's own AA_NORMAL.
-    return <p className="text-caption text-text-2">{t(emptyKey, { count: series.length })}</p>;
+    // The secondary ink: this is a SENTENCE the reader has to act on ("three training days are
+    // needed"), not a hint — and the third ink step measures under the app's AA floor.
+    return <p className="text-cap text-text-2">{t(emptyKey, { count: series.length })}</p>;
   }
 
-  // The viewBox is fixed and the SVG scales; nothing here depends on measured pixels, so it renders
-  // identically before and after layout and needs no resize observer.
-  const W = 300;
-  const H = 90;
-  const PAD = 4;
-
-  // Geometry lives in a pure module so the one thing a chart can silently get wrong — where the
-  // points go — is testable without a DOM. See `chartGeometry.ts` for why x is TIME, not index.
-  const pts = plot(series, { w: W, h: H, pad: PAD });
-  const line = linePath(pts);
-  const area = areaPath(pts, H);
+  const geo = variant === 'stage' ? STAGE : TITLED;
+  const H = height ?? geo.height;
+  // Positions are computed in the frame's own box and drawn with x as a fraction of it (see
+  // `TrendLine`), so the chart reflows with the screen width while every stroke keeps its size.
+  const box: PlotBox = { w: geo.designW, h: H, pad: geo.pad };
+  const pts = plot(series, box);
+  const ticks = scaleTicks(series.map((p) => p.value), box);
   const gap = longestGapDays(series);
 
   /*
-   * THE SCALE. Three ticks, and one source for both the label and the line it labels.
-   *
-   * `at` is a fraction of the plot box measured from the TOP, which is the direction SVG y runs
-   * and the direction CSS `top` runs — so the same number positions the gridline inside the
-   * stretched SVG and the HTML label beside it, and the two cannot drift apart. Writing them as
-   * separate numbers is precisely the "two things that must agree" defect this codebase keeps
-   * finding.
-   *
-   * The values come from the data's own range rather than from a rounded axis, because the plot
-   * already maps min→bottom and max→top: inventing nicer round numbers would put the labels
-   * somewhere the line never goes. Three is the count the mockup shows and about the most a
-   * 90px-tall chart can carry without the labels touching.
+   * The scale's figures. The titled chart prints them as the head prints its value (`108`,
+   * `100,3`, `92,5` — client-detail-3); the stage chart holds one decimal across the whole scale
+   * as soon as one of them needs it (`88,6`, `85,8`, `83,0` — progress-1), because three figures
+   * stacked in one column read as a measuring stick and a stick has one precision.
    */
-  const values = series.map((p) => p.value);
-  const lo = Math.min(...values);
-  const hi = Math.max(...values);
-  const TICKS =
-    hi === lo
-      ? // A flat series has no range to divide. One tick through the middle says "this is the
-        // value and it did not move", where three identical labels would look like a broken axis.
-        [{ at: 0.5, value: lo }]
-      : [
-          { at: 0, value: hi },
-          { at: 0.5, value: (hi + lo) / 2 },
-          { at: 1, value: lo },
-        ];
+  const fixed = variant === 'stage' && ticks.some((tk) => Math.round(tk.value * 10) % 10 !== 0) ? 1 : 0;
+  const tickText = (v: number) =>
+    fixed
+      ? (Math.round(v * 10) / 10).toLocaleString(lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+      : formatMeasure(v, lang);
 
   const first = series[0];
   const last = series[series.length - 1];
   const delta = last.value - first.value;
+  const good = direction === 'neutral' ? false : direction === 'up' ? delta > 0 : delta < 0;
+  // The change over the WHOLE window, not since the previous point: where they started versus where
+  // they are is the question being asked. Hidden when it is zero.
+  const change =
+    delta !== 0 ? (
+      <span data-part="change" className={cn('text-data-l', good ? 'text-success' : 'text-text-2')}>
+        {signed(delta, lang)}
+      </span>
+    ) : null;
 
-  const good =
-    direction === 'neutral' ? false : direction === 'up' ? delta > 0 : delta < 0;
+  const scale = ticks.map((tk, i) => (
+    <span
+      key={i}
+      className="text-data absolute end-0 -translate-y-1/2 text-text-3"
+      style={{ top: tk.y }}
+    >
+      {tickText(tk.value)}
+    </span>
+  ));
+
+  // The break, named. The dotted stretch makes a pause visible; saying how long it was is what
+  // stops a reader taking the drop after it for lost progress rather than two weeks off.
+  const breakText = gap >= GAP_DAYS ? t('progress.gap', { count: gap }) : null;
+
+  // The two dates are the same length (ISO, mono), so `justify-between` centres the break between
+  // them — where both frames put it — and it can never run into either date. The last date ends
+  // where the line ends; on a narrow phone the room under the scale column is given up first (the
+  // spacer shrinks, the dates and the break do not), so the break is never cut to an ellipsis.
+  const dates = (marker: ReactNode) => (
+    <div className="flex h-[18px] items-center">
+      <div className="flex shrink-0 grow items-center justify-between gap-2">
+        <span className="text-data text-text-3">{first.date}</span>
+        {marker}
+        <span className="text-data text-text-3">{last.date}</span>
+      </div>
+      <span aria-hidden className="min-w-0" style={{ flex: `0 1 ${geo.scaleCol}px` }} />
+    </div>
+  );
+
+  const table = (
+    // THE ACTUAL CONTENT for anyone not looking at the picture.
+    <table className="sr-only">
+      <caption>{label}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{t('progress.date')}</th>
+          <th scope="col">{label}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {series.map((p, i) => (
+          <tr key={`${p.date}-${i}`}>
+            <th scope="row">{p.date}</th>
+            <td>
+              {formatMeasure(p.value, lang)} {unit}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
+  if (variant === 'stage') {
+    return (
+      <figure data-kit="trendChart" data-variant="stage" className={cn('flex flex-col gap-2', className)}>
+        {/* The name and the value are the screen's stat block above; here they are only the caption
+            a screen reader announces. The unit on the right labels the SCALE, not the metric. */}
+        <figcaption className="flex h-5 items-baseline justify-between gap-2">
+          <span className="sr-only">{label}</span>
+          {change ?? <span />}
+          <span className="text-cap text-text-3">{unit}</span>
+        </figcaption>
+
+        <div className="relative" style={{ height: H }}>
+          {/* One hairline per scale value, behind the line; the lowest one is the axis and is
+              drawn in the stronger hairline. Snapped to the pixel grid so a 1 pt rule is one
+              crisp pixel row. */}
+          <svg
+            height={H}
+            className="absolute start-0 top-0 block"
+            style={{ width: `calc(100% - ${geo.scaleCol}px)` }}
+            aria-hidden
+            focusable="false"
+          >
+            {ticks.map((tk, i) => {
+              const y = Math.round(tk.y - 0.5) + 0.5;
+              return (
+                <line
+                  key={i}
+                  x1="0"
+                  x2="100%"
+                  y1={y}
+                  y2={y}
+                  strokeWidth={1}
+                  className={i === ticks.length - 1 ? 'stroke-hair-strong' : 'stroke-hair'}
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute start-0 top-0" style={{ width: `calc(100% - ${geo.scaleCol}px)` }}>
+            <TrendLine pts={pts} width={geo.designW} height={H} fluid line="ink" readings={2} end={{ r: 4, tone: 'live' }} />
+          </div>
+          {scale}
+        </div>
+
+        {dates(breakText ? <span className="text-cap text-warning">{breakText}</span> : null)}
+        {table}
+      </figure>
+    );
+  }
 
   return (
-    <figure className={className}>
-      <figcaption className="text-caption flex items-baseline justify-between gap-2 text-text-2">
-        {/* THE UNIT BELONGS TO THE SCALE, and it is printed once.
-            It was on the tick column, then here beside the label as `Testsúly (kg)`, and the
-            headline on the right has always ended `82,4 kg` — so the word `kg` appeared twice on
-            one line, eight characters apart, in a card whose whole job is one number. The mockup
-            prints it once at the top of the tick gutter, where it labels the AXIS rather than the
-            metric, and the headline keeps its own because a value without a unit is not a value.
-        */}
-        <span>{label}
-        </span>
-        {/* THE ANSWER, at the size of an answer.
-            It began at the figcaption's 12px — smaller than the date labels under its own axis —
-            and was raised to `text-title-3` (17px). That was still wrong by comparison: the
-            `SummaryTile` figures sitting BELOW this chart are `text-title-1` (26px), so the
-            screen's anchor carried a smaller number than the two secondary readings it anchors.
-            The spec calls this "the card's largest number", and now it is one. */}
-        {/* `title-2`, not `title-1`, and the step down is measured rather than felt.
-            Cap heights in `05-haladas.webp`: `Haladás` 49px, `82,4 kg` 40px, `84 cm` 35px — three
-            distinct steps, 1 : 0.82 : 0.71. Against a 26px h1 the only assignment on this scale
-            that preserves that order is 26 → 20 → 17, so the chart's headline is `title-2` and the
-            tiles below it are `title-3`.
-            It was 12px once, then `title-3`, then `title-1` to stop the tiles out-shouting it —
-            each fix judged against one neighbour at a time. Judged against BOTH, at `title-1` it
-            tied the screen's own h1, which is the one size an answer inside a card must not be. */}
-        <span className="text-title-2 font-display tabular-nums text-text-1">
-          {formatMeasure(last.value, i18n.language)} {unit}
-          {/* The change over the WHOLE window, not since the previous point. A single-session dip
-              is noise; where they started versus where they are is the question being asked.
-              Held at caption size so it annotates the value rather than competing with it. */}
-          {delta !== 0 ? (
-            <span className={good ? 'text-caption ml-1 text-success' : 'text-caption ml-1 text-text-2'}>
-              {delta > 0 ? '+' : ''}
-              {formatMeasure(delta, i18n.language)}
-            </span>
-          ) : null}
+    <figure data-kit="trendChart" data-variant="titled" className={cn('flex flex-col gap-4', className)}>
+      {/* The head: ONE baseline, 40 pt down a 44 pt row. The `num` figure's line box rises 3 pt
+          above the row (its baseline sits 43 pt into its 48 pt line), which the negative margin
+          gives back so the baselines meet where the frame puts them. */}
+      <figcaption className="flex h-11 items-baseline gap-2">
+        <span className="text-body-m min-w-0 flex-1 truncate text-text-1">{label}</span>
+        {change}
+        <span className="ms-px -mt-0.75 flex items-baseline gap-0.75">
+          <span className="text-num text-text-1">{formatMeasure(last.value, lang)}</span>
+          <span className="text-cap text-text-2">{unit}</span>
         </span>
       </figcaption>
 
-      {/* THE LINE USED TO FLOAT IN AN UNMARKED BOX.
-          Three paths and one dot, with no scale of any kind: a reader could see that the value went
-          down and had no way to tell whether the dip was 400 grams or four kilos. A trend chart
-          without a scale is a shape, not a measurement.
-
-          The tick labels are HTML rather than <text>, and that is forced: the SVG carries
-          `preserveAspectRatio="none"` so it can fill any width, which stretches everything inside
-          it — including glyphs. The gridlines are horizontal lines and stretch harmlessly; type
-          does not. So the gutter is a flex sibling positioned to the same fractions the lines use,
-          and both stay honest at every width. */}
-      <div className="mt-2 flex items-stretch gap-2">
-        <div className="text-caption relative w-8 shrink-0 tabular-nums text-text-3">
-          {/* Above the topmost tick, where it labels the axis rather than the metric — which is
-              where the mockup puts it and why the caption no longer repeats it. */}
-          {unit ? (
-            <span className="absolute end-0 top-0 -translate-y-full pb-0.5">{unit}</span>
-          ) : null}
-          {TICKS.map((tick) => (
-            <span
-              key={tick.at}
-              className="absolute end-0 -translate-y-1/2"
-              style={{ top: `${tick.at * 100}%` }}
-            >
-              {formatMeasure(tick.value, i18n.language)}
-            </span>
-          ))}
+      <div className="relative" style={{ height: H }}>
+        <div style={{ width: `calc(100% - ${geo.scaleCol}px)` }}>
+          <TrendLine pts={pts} width={geo.designW} height={H} fluid line="ink" end={{ r: 3, tone: 'live' }} />
         </div>
-
-        <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full flex-1"
-        preserveAspectRatio="none"
-        role="presentation"
-        aria-hidden
-      >
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {/* Behind the data, never over it. Three lines only — one per tick — because a grid
-            dense enough to read values off is a table, and this is a shape with a scale on it. */}
-        {TICKS.map((tick) => (
-          <line
-            key={tick.at}
-            x1="0"
-            x2={W}
-            y1={PAD + tick.at * (H - PAD * 2)}
-            y2={PAD + tick.at * (H - PAD * 2)}
-            stroke="var(--surface-border)"
-            strokeWidth="1"
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
-        <path d={area} fill={`url(#${gradientId})`} />
-        <path
-          d={line}
-          fill="none"
-          stroke="var(--accent)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          // `preserveAspectRatio="none"` stretches the box, which would stretch the stroke with it.
-          // This keeps the line one consistent weight at every screen width.
-          vectorEffect="non-scaling-stroke"
-        />
-        {/* A DOT PER READING, not one on the last.
-            Every earlier measurement was a bare vertex of the polyline, so a run of readings a day
-            apart and a run three weeks apart drew the same line — which defeats the honest time
-            axis the geometry module exists to provide. The dots are what make "these four are
-            clustered and that one is alone" visible. The last one is larger: it is the value in
-            the headline, and the eye should be able to find it without counting.
-            Keyed by date AND index, because a metric with two readings on the same day would
-            collide on a bare date key. Fill-only, so no `vectorEffect`: it governs stroke scaling
-            and these have no stroke — it stays load-bearing on the <path> above. */}
-        {pts.map((p, i) => (
-          <circle
-            key={`${p.date}-${i}`}
-            cx={p.x}
-            cy={p.y}
-            r={i === pts.length - 1 ? 3.5 : 2}
-            fill="var(--accent)"
-          />
-        ))}
-      </svg>
+        {scale}
       </div>
 
-      {/* `items-center`, not the default stretch: the chip is taller than bare date text, and
-          stretch would hang the two dates from the top of the row instead of on its centre line.
-          `tabular-nums` keeps the two equal-length ISO dates provably equal-width, which is what
-          holds the chip in the middle rather than letting it drift with the digits. */}
-      <div className="text-caption flex items-center justify-between gap-2 tabular-nums text-text-3">
-        <span>{first.date}</span>
-        {/* A break that dominates the window is NAMED, not merely drawn. The honest x axis makes the
-            gap visible; saying how long it was is what stops a reader interpreting the drop after it
-            as lost progress rather than as two weeks off. Two weeks because a week is ordinary. */}
-        {/* A CHIP, not loose text. It sat as the middle child of a `justify-between` row with no
-            container of its own, so it drifted left and right as the two date labels changed width
-            and read as a stray amber sentence rather than as a marker on the axis. A filled pill is
-            an object: it holds its shape, it centres, and it says "this is about the gap between
-            those two dates" by looking like a thing placed between them. */}
-        {gap >= 14 ? (
-          <span className="text-caption shrink-0 rounded-chip bg-warning-subtle px-2 py-0.5 text-warning">
-            {t('progress.gap', { count: gap })}
-          </span>
-        ) : null}
-        <span>{last.date}</span>
+      {/* The axis: a hairline, 6 under it the first date, the break, the last date. */}
+      <div className="flex flex-col gap-1.5">
+        <div className="h-px bg-hair" />
+        {dates(
+          breakText ? (
+            <span className="text-cap-m flex items-center gap-1.5 text-text-1">
+              <span className="size-[var(--dot)] shrink-0 rounded-full bg-warning" aria-hidden />
+              <span>{breakText}</span>
+            </span>
+          ) : null,
+        )}
       </div>
-
-      {/* THE ACTUAL CONTENT for anyone not looking at the picture. */}
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t('progress.date')}</th>
-            <th scope="col">{label}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.map((p) => (
-            <tr key={p.date}>
-              <th scope="row">{p.date}</th>
-              <td>
-                {formatMeasure(p.value, i18n.language)} {unit}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {table}
     </figure>
   );
 }
-

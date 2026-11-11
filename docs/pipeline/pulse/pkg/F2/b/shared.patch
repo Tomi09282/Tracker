@@ -1,0 +1,105 @@
+diff --git a/frontend/package.json b/frontend/package.json
+index 713a599..86be12d 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -14,6 +14,7 @@
+     "check:autosave": "node scripts/verify-autosave.mjs",
+     "check:safe-area": "node scripts/check-safe-area.mjs",
+     "verify:outbox": "node scripts/verify-outbox.mjs",
++    "verify:gates": "node scripts/verify-gates.mjs",
+     "check:nav": "node scripts/check-nav.mjs",
+     "verify:nav-gate": "node scripts/verify-nav-gate.mjs",
+     "check:aurora": "node scripts/check-aurora.mjs",
+diff --git a/frontend/scripts/data/elements-dormant.json b/frontend/scripts/data/elements-dormant.json
+index 257f455..ba2072d 100644
+--- a/frontend/scripts/data/elements-dormant.json
++++ b/frontend/scripts/data/elements-dormant.json
+@@ -1,5 +1,5 @@
+ {
+-  "about": "Feedback elements that exist in the catalogue and that no component reads. Read by scripts/check-element-roster.mjs as DORMANT; written by scripts/pulse-variants.mjs, never by hand. One reason per element: it tells a reviewer whether the entry is a gap to close or a row to delete, and it is a promise that the studio labels the element as inert. The gate fails on an unread element that is not listed here, and on an entry whose element has a reader.",
++  "about": "Feedback elements that exist in the catalogue and that no component of the PRODUCT reads: nothing reads them at all, or only a component that /playground mounts does (\"playground only\"). Read by scripts/check-element-roster.mjs as DORMANT; written by scripts/pulse-variants.mjs, never by hand. One reason per element: it tells a reviewer whether the entry is a gap to close or a row to delete, and it is a promise that the studio labels the element as inert. The gate fails on such an element that is not listed here, and on an entry whose element a product component reads.",
+   "entries": {
+     "E23": "Like / reaction — reactions were CUT from Phase 6, so nothing renders one to style",
+     "E24": "Follow button — following exists in the schema and has no screen; the button is unbuilt",
+diff --git a/frontend/scripts/data/safe-area-exempt.json b/frontend/scripts/data/safe-area-exempt.json
+index bc1e9fb..c91dd2e 100644
+--- a/frontend/scripts/data/safe-area-exempt.json
++++ b/frontend/scripts/data/safe-area-exempt.json
+@@ -1,7 +1,17 @@
+ {
+-  "about": "Edge-pinned elements that are exempt from the safe-area inset rule, as \"<file under src>:<edge>\". Read by scripts/check-safe-area.mjs as EXEMPT; changed through a hand-in patch applied by the integrator, never by hand in a slot. One reason per entry: an exemption is a written decision. The gate fails on an entry whose file no longer exists.",
++  "about": "Edge-pinned elements that are exempt from the safe-area inset rule. Read by scripts/check-safe-area.mjs as EXEMPT; changed through a hand-in patch applied by the integrator, never by hand in a slot. Key: \"<file under src>:<top|bottom>\" for the ONE element that file pins to that edge, or \"<file under src>:<top|bottom>@<class>\" for the element(s) pinned to that edge that carry <class> — required when the file pins several elements to the edge, so an entry written for a scrim cannot wave a sheet through. One reason per entry: an exemption is a written decision. The gate fails on an entry whose file is gone AND on an entry that exempts nothing (the element accounts for its inset now, or is no longer pinned).",
+   "entries": {
+-    "ui/feedback/variants/E14E20.tsx:top": "the sheet pins to the BOTTOM; its top-0 case is the centred dialog, which never touches an edge",
+-    "ui/shell/OfflineIndicator.tsx:bottom": "sticky to the top of the layout column; it never reaches the bottom edge"
++    "ui/data/DataTable.tsx:top": "a table head, sticky inside the table's own scroll container: it sticks to that box and never reaches the screen edge",
++    "ui/feedback/variants/E14E20.tsx:top@bg-scrim": "the scrims behind the sheet and behind the open FAB cover the whole screen, unsafe areas included, on purpose; they hold no content",
++    "ui/feedback/variants/E14E20.tsx:bottom@bg-scrim": "the same two scrims, at the bottom edge",
++    "ui/feedback/variants/E14E20.tsx:top@place-items-center": "the wrapper that centres the dialog variant: the panel sits in the middle with 16 px of padding around it and never touches an edge",
++    "ui/feedback/variants/E14E20.tsx:bottom@place-items-center": "the same centring wrapper, at the bottom edge",
++    "ui/feedback/variants/E8E9.tsx:top@bg-scrim": "the scrim behind the select sheet covers the whole screen on purpose; it holds no content",
++    "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
++    "ui/shell/AuroraBackdrop.tsx:top": "a backdrop paints under the notch on purpose; it holds no content",
++    "ui/shell/AuroraBackdrop.tsx:bottom": "the same backdrop, under the home indicator",
++    "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",
++    "ui/shell/CommandPalette.tsx:bottom": "the same scrim; the dialog is anchored to the top and never reaches the bottom edge",
++    "ui/shell/OfflineIndicator.tsx:top": "the sticky wrapper is a grid row that opens from 0fr and must not pad; the row inside it pads by env(safe-area-inset-top)"
+   }
+ }
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index c71f580..de31784 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -121,14 +121,14 @@ export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
+     // `end` stops `/` prefix-matching every route below it, which is right — and it also stops
+     // onboarding from lighting anything, so the one screen a brand-new member sees first had a bar
+     // with nothing on it. `owns` is the exception list `end` cannot express.
+-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
++    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
+     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
+     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
+     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+   ],
+   coach: [
+-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
++    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
+     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
+     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
+@@ -138,7 +138,7 @@ export const NAV_TABS: Record<NavRole, readonly NavTabSpec[]> = {
+     { to: '/settings', icon: User, labelKey: 'nav.profile', owns: ['/coins'] },
+   ],
+   admin: [
+-    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding'] },
++    { to: '/', icon: Home, labelKey: 'nav.home', end: true, owns: ['/onboarding', '/notifications'] },
+     { to: '/workout', icon: Dumbbell, labelKey: 'nav.workout', owns: ['/library'] },
+     { to: '/nutrition', icon: Salad, labelKey: 'nav.nutritionShort' },
+     { to: '/progress', icon: TrendingUp, labelKey: 'nav.progress' },
+diff --git a/frontend/src/ui/feedback/catalog.ts b/frontend/src/ui/feedback/catalog.ts
+index 7da2e9f..be04754 100644
+--- a/frontend/src/ui/feedback/catalog.ts
++++ b/frontend/src/ui/feedback/catalog.ts
+@@ -16,13 +16,16 @@ export interface CatalogEntry {
+   /** Which phase implements the component this element belongs to. */
+   phase: number;
+   /**
+-   * Does any component actually READ this variant?
++   * Does a component the PRODUCT renders actually read this variant?
+    *
+-   * Three entries are false. They have rows in `element_style_config`, labels here, and a settable
+-   * endpoint — and nothing anywhere consults them, so an admin can pick a variant, watch it save
+-   * and see it audited while the product does not change by a pixel. The studio labels those inert
+-   * rather than pretending, and `scripts/check-element-roster.mjs` holds this field to the measured
+-   * `useElementVariant` call sites so it cannot quietly become a lie in either direction.
++   * False for an element nothing reads — a row in `element_style_config`, a label here, a settable
++   * endpoint, and no consumer — and false for an element only `/playground` mounts: there a read
++   * exists, and no user ever sees what it steers. Either way an admin could pick a variant, watch
++   * it save and see it audited while the product does not change by a pixel. The studio labels
++   * those inert rather than pretending, and `scripts/check-element-roster.mjs` holds this field to
++   * the measured `useElementVariant` call sites whose component is imported outside the playground,
++   * so it cannot quietly become a lie in either direction. The flag is flipped by `pulse-variants`,
++   * together with the entry in `scripts/data/elements-dormant.json`; never by hand.
+    */
+   live: boolean;
+   variants: Record<Variant, string>;

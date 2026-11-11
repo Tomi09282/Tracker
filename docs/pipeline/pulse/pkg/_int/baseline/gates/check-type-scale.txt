@@ -1,0 +1,1 @@
+check-type-scale: OK — 10 step(s), declared and merged alike

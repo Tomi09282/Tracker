@@ -1,0 +1,37 @@
+{
+  "package": "S-client-detail-a",
+  "base": "277d804",
+  "namespaces": ["coaching"],
+  "set": [
+    {
+      "key": "coaching.account.owned",
+      "hu": "A kliens saját fiókkal rendelkezik",
+      "en": "The client owns their account",
+      "de": "Der Kunde verwaltet sein eigenes Konto",
+      "copy": "proposed",
+      "visible": false,
+      "source": "accessible name of the lime full stop on the 124 pt monogram (client-detail-1 node 'Status dot · owns the account'); ClientDetailPage.tsx"
+    },
+    {
+      "key": "coaching.account.pending",
+      "hu": "Az átadás még függőben van",
+      "en": "The handover is still pending",
+      "de": "Die Übergabe steht noch aus",
+      "copy": "proposed",
+      "visible": false,
+      "source": "accessible name of the warn full stop on the monogram while must_change_credentials = 1 (the visible sentence is coaching.handoverBody); ClientDetailPage.tsx"
+    },
+    {
+      "key": "coaching.moreFlagged",
+      "hu": "+{{count}} további kímélendő terület",
+      "en": "+{{count}} more areas to protect",
+      "de": "+{{count}} weitere zu schonende Bereiche",
+      "copy": "proposed",
+      "visible": false,
+      "source": "accessible name of the '+N' count after the promoted limitation (the old tile drew the same count unnamed); ClientDetailPage.tsx"
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "R-S-coach-chat-03",
+  "from": "S-coach-chat-fix",
+  "kind": "defect-in-frozen-logic",
+  "blocking": false,
+  "target": "frontend/src/features/chat/ChatPanel.tsx (the mark-read effect above the return: useEffect on [unreadCount, markRead], marked.current reset in onSettled)",
+  "what": "Independent review finding 3. When POST /api/v1/conversations/:id/read does not clear the unread count, the effect re-fires on the next render: the guard `marked.current` is reset in onSettled, i.e. also after a FAILED read POST (5xx, offline, rate limit). The reviewer's capture stub answered about 5 700 read POSTs in 20 s on Kovács Eszter's thread and the page never settled. With the real server a successful call clears the count, so a user does not see it; a failing read endpoint would be hammered. Pre-existing (same code at the base 0860942). The fix round did not change it: the logic above a page's return is frozen for screen packages (PLAN 4.1 / 4.3).",
+  "proposal": "Reset `marked.current` only in onSuccess (a failed read stays failed for the visit, the next new unread message can try again), or key the guard on the newest unread message id. One line; owner of the decision: INT or a logic follow-up.",
+  "interim": "Unchanged behaviour; the capture stub answers the read POST with 204 and the real server clears the count on the first call."
+}

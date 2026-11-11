@@ -1,0 +1,128 @@
+{
+  "commit": "0860942f73a1b3730e28cd56d825ae4cd4024790",
+  "dirty": false,
+  "chain": "npm run check:tokens && npm run check:i18n && npm run check:nav && npm run check:nav-active && npm run check:interval && npm run check:elements && npm run check:autosave && npm run check:type-scale && npm run check:aurora && npm run check:safe-area && npm run verify:outbox && tsc -b && vite build",
+  "gates": [
+    {
+      "name": "check:tokens",
+      "command": "node scripts/check-tokens.mjs",
+      "exit": 0,
+      "stdout": "gates/check-tokens.txt",
+      "stdoutBytes": 59,
+      "stdoutSha256": "835f5d2e4ea177820353e04c7903f07bed9498615a3cd0d0d38e122660cf96ca",
+      "stderrBytes": 0,
+      "firstLine": "check-tokens: OK — no raw values outside the token layer",
+      "summary": "check-tokens: OK — no raw values outside the token layer"
+    },
+    {
+      "name": "check:i18n",
+      "command": "node scripts/check-i18n.mjs",
+      "exit": 0,
+      "stdout": "gates/check-i18n.txt",
+      "stdoutBytes": 61,
+      "stdoutSha256": "2dc5e91b24302b3425067ab96aa5371b0ffefa9d163fc2ac9f0776a2fee1c4fa",
+      "stderrBytes": 0,
+      "firstLine": "check-i18n: OK — 3 language(s) (hu, en, de), 876 keys each",
+      "summary": "check-i18n: OK — 3 language(s) (hu, en, de), 876 keys each"
+    },
+    {
+      "name": "check:nav",
+      "command": "node scripts/check-nav.mjs",
+      "exit": 0,
+      "stdout": "gates/check-nav.txt",
+      "stdoutBytes": 188,
+      "stdoutSha256": "51b461ef80d09a7b51ccc456587d755a52a44e2ae8cbe07df2371ecabccc04d7",
+      "stderrBytes": 0,
+      "firstLine": "check-nav: 26 routes, 7 distinct tab targets, 10 exempt from the reachability rule (user 5 · coach 6 · admin 7)",
+      "summary": "check-nav: OK — the bar matches the design, and every screen has a door"
+    },
+    {
+      "name": "check:nav-active",
+      "command": "node scripts/check-nav-active.mjs",
+      "exit": 0,
+      "stdout": "gates/check-nav-active.txt",
+      "stdoutBytes": 75,
+      "stdoutSha256": "f826487b4926afcdd8d47bc7932e5ffb0664a9021b8274c824ec74e1118ed866",
+      "stderrBytes": 0,
+      "firstLine": "check-nav-active: OK — 64 assertions, every route lights exactly one tab",
+      "summary": "check-nav-active: OK — 64 assertions, every route lights exactly one tab"
+    },
+    {
+      "name": "check:interval",
+      "command": "node scripts/check-interval.mjs",
+      "exit": 0,
+      "stdout": "gates/check-interval.txt",
+      "stdoutBytes": 3406,
+      "stdoutSha256": "7293cf974616b5ceb1e23fbc5879129b8ca47039cd0325bada25feebe4546a42",
+      "stderrBytes": 0,
+      "firstLine": "PASS  a Tabata block is runnable  (8 rounds)",
+      "summary": "check-interval: OK — 50 schedule assertions"
+    },
+    {
+      "name": "check:elements",
+      "command": "node scripts/check-element-roster.mjs",
+      "exit": 0,
+      "stdout": "gates/check-elements.txt",
+      "stdoutBytes": 266,
+      "stdoutSha256": "744a705db11187b33793bdc21e14940da035ebdcf0d109c373e6b6b19774ba0e",
+      "stderrBytes": 0,
+      "firstLine": "check-element-roster: 27 in the catalogue — 24 with live consumers, 20 previewable, 3 declared dormant",
+      "summary": "check-element-roster: OK — the four frontend copies agree, and nothing inert is undeclared"
+    },
+    {
+      "name": "check:autosave",
+      "command": "node scripts/verify-autosave.mjs",
+      "exit": 0,
+      "stdout": "gates/check-autosave.txt",
+      "stdoutBytes": 1832,
+      "stdoutSha256": "d6db5e7b6b9a0f8334b1676be7ad17cda5a05210be112593f65e44bdc1c8a39d",
+      "stderrBytes": 0,
+      "firstLine": "PASS  the hook still single flight raises a flag rather than queueing  (if (inFlight.current) {)",
+      "summary": "verify-autosave: 21 passed, 0 failed"
+    },
+    {
+      "name": "check:type-scale",
+      "command": "node scripts/check-type-scale.mjs",
+      "exit": 0,
+      "stdout": "gates/check-type-scale.txt",
+      "stdoutBytes": 63,
+      "stdoutSha256": "7dffa1dfad3175ce4e8381f7af84b77ada3b952da0fe7a3167386bfef6ed97ec",
+      "stderrBytes": 0,
+      "firstLine": "check-type-scale: OK — 10 step(s), declared and merged alike",
+      "summary": "check-type-scale: OK — 10 step(s), declared and merged alike"
+    },
+    {
+      "name": "check:aurora",
+      "command": "node scripts/check-aurora.mjs",
+      "exit": 0,
+      "stdout": "gates/check-aurora.txt",
+      "stdoutBytes": 71,
+      "stdoutSha256": "1d0abf3d77d3657678931b229af9b4583ecfff9ec8989864e39f6ab43ed08c83",
+      "stderrBytes": 0,
+      "firstLine": "check-aurora: 9 backdrop mount(s), no ancestor paints over any of them",
+      "summary": "check-aurora: 9 backdrop mount(s), no ancestor paints over any of them"
+    },
+    {
+      "name": "check:safe-area",
+      "command": "node scripts/check-safe-area.mjs",
+      "exit": 0,
+      "stdout": "gates/check-safe-area.txt",
+      "stdoutBytes": 149,
+      "stdoutSha256": "50e3aff732a3e07f4f5a2c69fc2ead87db0d7abe5328da4837be762ef265efdd",
+      "stderrBytes": 0,
+      "firstLine": "check-safe-area: viewport-fit cover, 8 file(s) use an inset, 2 exemption(s)",
+      "summary": "check-safe-area: OK — every edge-pinned element accounts for its inset"
+    },
+    {
+      "name": "verify:outbox",
+      "command": "node scripts/verify-outbox.mjs",
+      "exit": 0,
+      "stdout": "gates/verify-outbox.txt",
+      "stdoutBytes": 1620,
+      "stdoutSha256": "46709f82edc4ec71515db70a715a01d39348642ec381ed4b05040707b81f3321",
+      "stderrBytes": 0,
+      "firstLine": "PASS  a set check is queueable",
+      "summary": "outbox: 31 passed, 0 failed"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "R-S-rewards-02",
+  "from": "S-rewards",
+  "kind": "screen",
+  "blocking": true,
+  "target": "frontend/src/features/settings/SettingsPage.tsx",
+  "need": "The Profil JUTALMAK ledger row of design round A (frames nezetek/settings-v2-1 / -2 / -member: ledgerRow('Jutalmak', 'elérhető', '2'); plan 'Profile v2' item 2: JUTALMAK ('N elérhető' -> /rewards, P4)). One row after SZINT inside the same closed RowStack, drawn only once GET /rewards answers: SettingsPage calls useRewards() (features/rewards/rewardsApi.ts) and renders <RewardsLedgerRow count={rewards.data.redeemableCount} /> (features/rewards/RewardsLedgerRow.tsx: the kit LedgerRow, label rewards.title, note rewards.available, the count, to='/rewards'). A server without migration 033 answers 404 (no retry) and the row is not drawn - never a fake figure. The decision stays in SettingsPage because a RowStack child that renders nothing would still get a rule. This row is the inbound link of /rewards (check-nav).",
+  "evidence": "kepernyok-2x/nezetek/settings-v2-member@2x.png (the JUTALMAK row 'elérhető 2'); the README of round B: 'Jutalmak door on Érmék ... JUTALMAK row on Profil'; api.md: redeemableCount is Profil's 'N elérhető'",
+  "proposedApi": "import { useRewards } from '../rewards/rewardsApi'; import { RewardsLedgerRow } from '../rewards/RewardsLedgerRow'; const rewards = useRewards(); ... {rewards.data ? <RewardsLedgerRow count={rewards.data.redeemableCount} /> : null}",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-rewards/requests/R-S-rewards-02.patch",
+  "interim": "Applied to the slot's working tree only (never committed there). Merged without it, /rewards has no door on a phone (check-nav would need a NO_INBOUND row). Side effect to know: every Profil capture now also reads GET /rewards; in a replay without a recording it is a 404 and the row is simply absent.",
+  "status": "open"
+}

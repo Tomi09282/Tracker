@@ -1,0 +1,191 @@
+diff --git a/frontend/src/features/capture/CaptureSheet.tsx b/frontend/src/features/capture/CaptureSheet.tsx
+index 2998efb..0259f25 100644
+--- a/frontend/src/features/capture/CaptureSheet.tsx
++++ b/frontend/src/features/capture/CaptureSheet.tsx
+@@ -7,22 +7,29 @@ import { Field } from '../../ui/primitives/Field';
+ import { Pressable } from '../../ui/primitives/Pressable';
+ import { DueChips, DueFields, FieldGroup, dueOnFor, type DueChoice } from '../tasks/formParts';
+ import { mintClientKey, retryable, useCreateTask, useTasks } from '../tasks/tasksData';
++import { mintEventKey, retryable as eventRetryable, useCreateEvent } from '../calendar/calendarApi';
++import { captureEventBody, captureEventDay, captureWords } from '../calendar/captureEvent';
+ 
+ /** The server's bound on a task title (`POST /tasks`, api.md). */
+ const TITLE_MAX = 120;
+ 
+ type TimeMode = 'at' | 'allDay';
+ 
++/** Where a capture goes (frame capture "Hova?"): a task (POST /tasks) or an event (POST /events). */
++type Target = 'task' | 'event';
++
++
+ /**
+  * "Van valami a fejedben?" — the quick capture, frame `lifeos/capture` (design round B;
+  * `capture.body.js`): the kit bottom sheet, opened by "Rögzítés +" on Ma (package S-ma mounts it;
+  * until then `/tasks?capture=1`). Its body 16 apart:
+  *
+  *   Mi az?        one field, focused, with the frame's example line as its hint
+- *   (Hova?)       WHERE it goes. The approved frame offers Feladat / Esemény; an event needs the
+- *                 Phase-5 route (`POST /events`), so in Phase 3 the only destination is a task and
+- *                 a one-option switch would be a control that chooses nothing: the group is not
+- *                 drawn until Esemény can work (package deviation; plan: "hide that option").
++ *   Hova?         WHERE it goes: Feladat / Esemény, an equal-cell segmented switch (S-calendar,
++ *                 plan Phase 5: the event half writes `POST /events`). Esemény offers Ma · Holnap ·
++ *                 Dátum (an event has a day; no Bármikor), Időpontban / Egész nap, and the start
++ *                 field says "Emlékeztető 1 órával előtte" (the reminder it sets); an event at a time
++ *                 lasts an hour, its page edits the rest.
+  *   Mikor?        Ma · Holnap · Dátum as lime-marked chips, then Bármikor — a task with no deadline
+  *                 (f_app's "Csak jegyzet" was exactly that: a dateless task; the frame's words for
+  *                 it are tasks-1's tab "Bármikor"). Under it, for a day: Időpontban / Egész nap (a
+@@ -45,7 +52,10 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void })
+   const tasks = useTasks();
+   const today = tasks.data?.today ?? null;
+   const create = useCreateTask();
++  const createEvent = useCreateEvent();
+   const [clientKey] = useState(mintClientKey);
++  const [eventKey] = useState(mintEventKey);
++  const [target, setTarget] = useState<Target>('task');
+   const [text, setText] = useState('');
+   const [due, setDue] = useState<DueChoice>('today');
+   const [mode, setMode] = useState<TimeMode>('allDay');
+@@ -53,10 +63,27 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void })
+   const [time, setTime] = useState('');
+   const [tried, setTried] = useState(false);
+ 
++  const words = captureWords(t);
+   const textError = tried && !text.trim() ? t('capture.textRequired') : undefined;
+   const dateError = tried && due === 'date' && !date ? t('tasks.dateRequired') : undefined;
++  const isEvent = target === 'event';
++  // An event needs a day (no Bármikor) and, at a time, its start.
++  const eventDue: DueChoice = isEvent && due === 'none' ? 'today' : due;
++  const startError = tried && isEvent && mode === 'at' && !time ? words.startRequired : undefined;
++  const write = isEvent ? createEvent : create;
++
++  const submitEvent = () => {
++    setTried(true);
++    if (!text.trim() || (eventDue === 'date' && !date) || (mode === 'at' && !time)) return;
++    // An event lands on the CALENDAR day (captureEvent.ts); at a time it lasts an hour, one reminder.
++    const day = captureEventDay(eventDue === 'none' ? 'today' : eventDue, date);
++    createEvent.mutate(captureEventBody(eventKey, text.trim().slice(0, TITLE_MAX), day, mode === 'at' ? time : null), {
++      onSuccess: onClose,
++    });
++  };
+ 
+   const submit = () => {
++    if (isEvent) return submitEvent();
+     setTried(true);
+     // "Időpontban" with no time chosen is a task due by the end of the day (as "Egész nap").
+     if (!today || !text.trim() || (due === 'date' && !date)) return;
+@@ -77,8 +104,16 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void })
+       open={open}
+       onClose={onClose}
+       title={t('capture.title')}
+-      status={create.isPending ? 'busy' : create.isError ? 'error' : 'idle'}
+-      onRetry={create.isError && retryable(create.error) ? submit : undefined}
++      status={write.isPending ? 'busy' : write.isError ? 'error' : 'idle'}
++      onRetry={
++        isEvent
++          ? createEvent.isError && eventRetryable(createEvent.error)
++            ? submit
++            : undefined
++          : create.isError && retryable(create.error)
++            ? submit
++            : undefined
++      }
+     >
+       <Field
+         label={t('capture.what')}
+@@ -90,17 +125,32 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void })
+         onChange={(e) => setText(e.target.value)}
+       />
+ 
++      <FieldGroup label={words.where}>
++        {() => (
++          <Segmented
++            layout="cells"
++            label={words.where}
++            value={target}
++            onChange={setTarget}
++            options={[
++              { value: 'task', label: words.task },
++              { value: 'event', label: words.event },
++            ]}
++          />
++        )}
++      </FieldGroup>
++
+       <FieldGroup label={t('capture.when')}>
+         {() => (
+           <div className="flex flex-col">
+             <DueChips
+               label={t('capture.when')}
+-              choices={['today', 'tomorrow', 'date', 'none']}
++              choices={isEvent ? ['today', 'tomorrow', 'date'] : ['today', 'tomorrow', 'date', 'none']}
+               words={{ none: t('tasks.tab.anytime') }}
+-              value={due}
++              value={eventDue}
+               onChange={setDue}
+             />
+-            {due !== 'none' ? (
++            {eventDue !== 'none' ? (
+               <Segmented
+                 className="self-start"
+                 label={t('capture.when')}
+@@ -121,20 +171,23 @@ function CaptureBody({ open, onClose }: { open: boolean; onClose: () => void })
+         onDate={setDate}
+         time={time}
+         onTime={setTime}
+-        showDate={due === 'date'}
+-        showTime={due !== 'none' && mode === 'at'}
+-        timeLabel={t('tasks.dueTime')}
++        showDate={eventDue === 'date'}
++        showTime={eventDue !== 'none' && mode === 'at'}
++        timeLabel={isEvent ? words.start : t('tasks.dueTime')}
++        timeOptional={!isEvent}
++        timeHint={isEvent ? words.reminderHint : undefined}
++        timeError={startError}
+         min={today ?? undefined}
+         dateError={dateError}
+       />
+ 
+-      {create.isError ? (
++      {write.isError ? (
+         <NoticeLine tone="danger" role="alert">
+-          {t('tasks.failed')}
++          {isEvent ? words.failed : t('tasks.failed')}
+         </NoticeLine>
+       ) : null}
+ 
+-      <Pressable variant="primary" size="lg" className="w-full" busy={create.isPending} disabled={!today} onClick={submit}>
++      <Pressable variant="primary" size="lg" className="w-full" busy={write.isPending} disabled={!isEvent && !today} onClick={submit}>
+         {t('common.save')}
+       </Pressable>
+     </Sheet>
+diff --git a/frontend/src/features/tasks/formParts.tsx b/frontend/src/features/tasks/formParts.tsx
+index f05b5c5..c64a010 100644
+--- a/frontend/src/features/tasks/formParts.tsx
++++ b/frontend/src/features/tasks/formParts.tsx
+@@ -128,6 +128,7 @@ export function DueFields({
+   min,
+   dateError,
+   timeError,
++  timeHint,
+   timeOptional = true,
+ }: {
+   date: string;
+@@ -141,6 +142,8 @@ export function DueFields({
+   min?: DayKey;
+   dateError?: string;
+   timeError?: string;
++  /** A line under the time field (capture, an event: "Emlékeztető 1 órával előtte"). */
++  timeHint?: string;
+   /** An empty time is allowed (task-form: due by the end of the day): "opcionális" stands in it. */
+   timeOptional?: boolean;
+ }) {
+@@ -167,6 +170,7 @@ export function DueFields({
+           value={time}
+           onChange={onTime}
+           placeholder={timeOptional ? t('tasks.optional') : undefined}
++          hint={timeHint}
+           error={timeError}
+           className="w-[165px] min-w-0 shrink"
+         />

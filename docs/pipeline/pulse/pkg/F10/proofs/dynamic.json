@@ -1,0 +1,196 @@
+{
+  "changing": {
+    "frames": [
+      {
+        "file": "changing-0.png",
+        "rolling": 0,
+        "out": 0,
+        "anims": []
+      },
+      {
+        "file": "changing-1.png",
+        "rolling": 0,
+        "out": 0,
+        "anims": []
+      },
+      {
+        "file": "changing-2.png",
+        "rolling": 20,
+        "out": 10,
+        "anims": [
+          "CSSTransition",
+          "in",
+          "in",
+          "in",
+          "out",
+          "out",
+          "out",
+          "in",
+          "out",
+          "in",
+          "in",
+          "in",
+          "out",
+          "out",
+          "out",
+          "in",
+          "in",
+          "in",
+          "out",
+          "out",
+          "out"
+        ]
+      },
+      {
+        "file": "changing-3.png",
+        "rolling": 0,
+        "out": 0,
+        "anims": []
+      },
+      {
+        "file": "changing-4.png",
+        "rolling": 0,
+        "out": 0,
+        "anims": []
+      }
+    ],
+    "settledAfterStop": true,
+    "numeralsAfterStop": [
+      {
+        "kit": "statBlock",
+        "text": "Egyenleged190",
+        "x": 473,
+        "y": 660,
+        "w": 147.58,
+        "h": 129.67
+      },
+      {
+        "kit": "numeral",
+        "text": "190",
+        "x": 473,
+        "y": 688,
+        "w": 147.58,
+        "h": 101.67
+      },
+      {
+        "kit": "statBlock",
+        "text": "Heti edzés2 / 42/4",
+        "x": 473,
+        "y": 821.67,
+        "w": 169.31,
+        "h": 127.2
+      },
+      {
+        "kit": "fraction",
+        "text": "2 / 42/4",
+        "x": 473,
+        "y": 849.67,
+        "w": 169.31,
+        "h": 99.2
+      },
+      {
+        "kit": "numeral",
+        "text": "2:592:59",
+        "x": 473,
+        "y": 1018.88,
+        "w": 217.16,
+        "h": 101.67
+      },
+      {
+        "kit": "numeral",
+        "text": "1840kcal",
+        "x": 473,
+        "y": 1152.55,
+        "w": 354,
+        "h": 39.34
+      }
+    ]
+  },
+  "reducedMotion": {
+    "runningScriptAnimations": 1,
+    "outgoingLayers": 0
+  },
+  "fallback": {
+    "native": {
+      "trims": true,
+      "coins": [
+        {
+          "kit": "statBlock",
+          "text": "Egyenleged190",
+          "x": 24,
+          "y": 178,
+          "w": 147.58,
+          "h": 129.67
+        },
+        {
+          "kit": "numeral",
+          "text": "190",
+          "x": 24,
+          "y": 206,
+          "w": 147.58,
+          "h": 101.67
+        }
+      ],
+      "home": [
+        {
+          "kit": "statBlock",
+          "text": "Heti edzés2 / 42/4",
+          "x": 24,
+          "y": 152,
+          "w": 169.31,
+          "h": 127.2
+        },
+        {
+          "kit": "fraction",
+          "text": "2 / 42/4",
+          "x": 24,
+          "y": 180,
+          "w": 169.31,
+          "h": 99.2
+        }
+      ]
+    },
+    "withoutTextBox": {
+      "trims": false,
+      "marginTop": "-2.602px",
+      "marginBottom": "-6.198px",
+      "coins": [
+        {
+          "kit": "statBlock",
+          "text": "Egyenleged190",
+          "x": 24,
+          "y": 178,
+          "w": 147.58,
+          "h": 129.69
+        },
+        {
+          "kit": "numeral",
+          "text": "190",
+          "x": 24,
+          "y": 206,
+          "w": 147.58,
+          "h": 101.69
+        }
+      ],
+      "home": [
+        {
+          "kit": "statBlock",
+          "text": "Heti edzés2 / 42/4",
+          "x": 24,
+          "y": 152,
+          "w": 169.31,
+          "h": 127.22
+        },
+        {
+          "kit": "fraction",
+          "text": "2 / 42/4",
+          "x": 24,
+          "y": 180,
+          "w": 169.31,
+          "h": 99.22
+        }
+      ]
+    }
+  },
+  "errors": []
+}

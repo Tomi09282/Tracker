@@ -1,0 +1,143 @@
+tree <base worktree, 0860942> (F1.4 codemod applied in memory)
+record 0860942f73a1b3730e28cd56d825ae4cd4024790
+
+rule                    record  grep, no comments  ratchet   diff
+surface                     97                 97       97      0
+summary-tile                12                 12       12      0
+gauge                        8                  8        8      0
+aurora                       9                  9        9      0
+legacy-type                612                572      572    -40
+font-display-class          29                 29       29      0
+legacy-radius              199                175      175    -24
+wash                       214                201      205     -9
+legacy-variant             152                  —      152      0
+pill-size                   59                  —       58     -1
+pressable-no-variant        30                  —       30      0
+legacy-chip-call             3                  3        3      0
+shaped-skeleton             94                  —       94      0
+raw-form                    22                 22       22      0
+blur-shadow                 27                 26       28      1
+reserved-surface-1          30                 28       29     -1
+reserved-surface-2-3        92                 85       84     -8
+black-white                  1                  1        1      0
+legacy-var                 185                  —      153    -32
+heading-icon                48                  —       48      0
+
+── legacy-type: 36 line(s) or file(s) differ
+  comment  features/chat/NotificationsPage.tsx:199  grep 2 / ratchet 0   {/* `text-body-s`, one step above the timestamp beside it. Both lines were `text-caption`,
+  comment  features/coaching/ClientDetailPage.tsx:116  grep 1 / ratchet 0   bucket and would drop `text-micro-legacy`. */}
+  comment  features/coaching/ClientDetailPage.tsx:397  grep 1 / ratchet 0   recipe's px-3 py-1 at `text-caption` is that pill, and it is the only place the
+  comment  features/coaching/Monogram.tsx:21  grep 1 / ratchet 0   * scale is custom: it files `text-title-1` and `text-text-1` in the same bucket and keeps only the
+  comment  features/coins/CoinsPage.tsx:282  grep 2 / ratchet 0   `text-micro-legacy` and its tracking — `text-title-2` set in caps has none. */}
+  comment  features/compose/ComposePage.tsx:105  grep 1 / ratchet 0   * `text-body-s` — twMerge holds size and colour in one group. Never `text-accent` on this wash
+  comment  features/compose/ProfileEditorPage.tsx:401  grep 1 / ratchet 0   the legend was promoted to `text-title-3`. The mockup draws an unbroken box with the title
+  comment  features/library/LibraryPage.tsx:203  grep 1 / ratchet 0   eyebrow over a chip strip, not the component's default `text-title-2` h2. */}
+  comment  features/marketplace/CoachProfilePage.tsx:180  grep 1 / ratchet 0   // `text-body-s` under `cn`'s twMerge, which shares one group for every `text-*`.
+  comment  features/marketplace/MarketplacePage.tsx:65  grep 1 / ratchet 0   * chip's own `text-body-s` under twMerge's single text-* group, rendering the selected chip a size
+  comment  features/marketplace/MarketplacePage.tsx:365  grep 1 / ratchet 0   question, not its last: with the footer at the meta line's `text-caption text-text-3`
+  comment  features/marketplace/PostPage.tsx:185  grep 1 / ratchet 0   makes Space Grotesk opt-in for big numbers. Not the display SIZE: `text-display-legacy` is
+  comment  features/nutrition/NutritionPage.tsx:244  grep 1 / ratchet 0   `size-11 rounded-field bg-accent-subtle` mark, same `text-title-2` heading. Nothing
+  comment  features/plans/PlanEditorPage.tsx:374  grep 1 / ratchet 0   `text-body-s` and leaves the label at the inherited size. */}
+  comment  features/plans/PlanListPage.tsx:41  grep 1 / ratchet 0   * It used to be a map of hand-written class strings at `text-micro-legacy px-2 py-1`; the recipe is
+  comment  features/plans/PlanListPage.tsx:42  grep 1 / ratchet 0   * `text-caption px-3 py-1` with the same tones, and the mockup's pill is the roomier one. The
+  comment  features/workout/WorkoutPlayer.tsx:461  grep 1 / ratchet 0   `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro-legacy`
+  comment  features/workout/WorkoutPlayer.tsx:463  grep 1 / ratchet 0   case; `text-caption` is the step for metadata under a thing. */}
+  comment  features/workout/WorkoutPlayer.tsx:528  grep 1 / ratchet 0   // `text-body-s` and render this chip a different size from its neighbours.
+  comment  lib/cn.ts:8  grep 2 / ratchet 0   * stock Tailwind's names. This project's scale is custom — `text-title-1`, `text-body-s`,
+  comment  lib/cn.ts:9  grep 1 / ratchet 0   * `text-caption` — and so are its ink tokens, `text-text-1` / `text-text-2` / `text-text-3`. To an
+  comment  lib/cn.ts:15  grep 1 / ratchet 0   *   cn('text-title-1 tabular-nums', 'text-text-1')  ->  'tabular-nums text-text-1'
+  comment  lib/cn.ts:16  grep 1 / ratchet 0   *   cn('text-body-s',               'text-text-2')  ->  'text-text-2'
+  comment  lib/cn.ts:17  grep 1 / ratchet 0   *   cn('text-caption',              'text-warning') ->  'text-warning'
+  comment  lib/cn.ts:18  grep 1 / ratchet 0   *   cn('text-micro-legacy uppercase',      'text-text-3')  ->  'uppercase text-text-3'
+  comment  ui/data/SectionHeader.tsx:39  grep 1 / ratchet 0   * Most call sites want the default heading: an `h2` at `text-title-2`, truncating so a trailing
+  comment  ui/data/SummaryTile.tsx:31  grep 1 / ratchet 0   * It also drops the step to `text-micro-legacy`, because DESIGN.md §2 owns uppercase labels there an
+  comment  ui/data/SummaryTile.tsx:32  grep 1 / ratchet 0   * `text-caption` carries no tracking — caps at 12/500 with 0 tracking set solid, which is the
+  comment  ui/data/SummaryTile.tsx:62  grep 1 / ratchet 0   * `text-title-1` is not a t-shirt size, so it falls through to the text-COLOUR group and collides
+  comment  ui/data/SummaryTile.tsx:63  grep 1 / ratchet 0   * with `text-text-1`: `cn('text-title-1 …', 'text-text-1')` returns the colour and drops the size.
+  comment  ui/feedback/TrendChart.tsx:143  grep 1 / ratchet 0   and was raised to `text-title-3` (17px). That was still wrong by comparison: the
+  comment  ui/feedback/TrendChart.tsx:144  grep 1 / ratchet 0   `SummaryTile` figures sitting BELOW this chart are `text-title-1` (26px), so the
+  comment  ui/feedback/variants/E12E16.tsx:543  grep 2 / ratchet 0   {/* `text-body-legacy`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
+  comment  ui/primitives/control.ts:96  grep 1 / ratchet 0   * eventual `text-*` colour-group fix (lib/cn.ts) will let it survive alongside `text-body-s`.
+  comment  ui/primitives/control.ts:97  grep 1 / ratchet 0   * Until that lands `text-body-s` swallows it — exactly as it already swallows `secondary`'s
+  comment  ui/primitives/control.ts:149  grep 1 / ratchet 0   * today's twMerge config `text-caption` and `text-danger` share one class group, and if the sizes
+
+── legacy-radius: 21 line(s) or file(s) differ
+  comment  features/compose/ComposePage.tsx:388  grep 1 / ratchet 0   {/* A rounded SQUARE, not a circle: `--radius-chip` is `--radius-full` in four of five
+  comment  features/compose/ComposePage.tsx:391  grep 2 / ratchet 0   as another kind tile. `rounded-card` and not `rounded-field` — Neon declares
+  comment  features/compose/ComposePage.tsx:475  grep 1 / ratchet 0   {/* Same rounded square as the section tile above — the row's one circle is
+  comment  features/library/SectionBadge.tsx:12  grep 1 / ratchet 0   * `size-11`, `rounded-field`, `--tile-tint` / `--tile-tint-fg` — is now what every screen renders,
+  comment  features/nutrition/NutritionPage.tsx:244  grep 1 / ratchet 0   `size-11 rounded-field bg-accent-subtle` mark, same `text-title-2` heading. Nothing
+  comment  features/nutrition/NutritionPage.tsx:246  grep 1 / ratchet 0   rounded square and not a disc. */}
+  comment  features/onboarding/OnboardingPage.tsx:301  grep 1 / ratchet 0   {/* `rounded-field`, not `shape="icon"`'s `rounded-chip`: --radius-chip is --radius-full,
+  comment  features/progress/ProgressPage.tsx:681  grep 1 / ratchet 0   * accent wash and labels a number, the section badge is a rounded SQUARE on a neutral inset fill
+  comment  features/progress/ProgressPage.tsx:688  grep 2 / ratchet 0   *   - `rounded-field` — the corner runs 18px of that 69, 26% of the side. `rounded-field` is
+  comment  features/progress/ProgressPage.tsx:689  grep 1 / ratchet 0   *     12/44 = 27%; `rounded-card` would be 16/44 = 36%, visibly rounder than the image. It is also
+  comment  features/settings/CueSettings.tsx:67  grep 1 / ratchet 0   // `rounded-field`, like every other 44px glyph square on this screen. `--radius-card`
+  comment  features/settings/SettingsPage.tsx:54  grep 1 / ratchet 0   * It draws itself from `--tile-tint` / `--tile-tint-fg` at `rounded-field`, which is exactly what
+  comment  features/workout/WorkoutPlayer.tsx:359  grep 1 / ratchet 0   // draws ONE rounded track with `Elöl` in an inner pill, not the filled-accent chip pair
+  comment  ui/data/SectionHeader.tsx:29  grep 1 / ratchet 0   * RADIUS: `rounded-field`. The badge corner measures 18 of 69px in `05-haladas.webp`, 26% of the
+  comment  ui/data/SectionHeader.tsx:30  grep 2 / ratchet 0   * side; `rounded-field` is 12/44 = 27%, `rounded-card` 16/44 = 36% and visibly rounder than the
+  comment  ui/data/SectionHeader.tsx:31  grep 1 / ratchet 0   * image. The coaching copy's `rounded-card` was an argument against `rounded-chip` — a 44px circle
+  comment  ui/data/SectionHeader.tsx:33  grep 1 / ratchet 0   * — and `rounded-field` keeps that distinction just as well.
+  comment  ui/data/SummaryTile.tsx:137  grep 1 / ratchet 0   // holders as rounded squares, and `--radius-card` on a 44px box is the ~30% they show.
+  comment  ui/feedback/TrendChart.tsx:103  grep 1 / ratchet 0   * The values come from the data's own range rather than from a rounded axis, because the plot
+  comment  ui/muscle-map/MuscleMap.tsx:46  grep 1 / ratchet 0   * them), while 02-workout-player.webp draws one rounded TRACK with the active label in an
+  comment  ui/muscle-map/shapes.ts:210  grep 1 / ratchet 0   * chest reading as a single rounded plate.
+
+── wash: 17 line(s) or file(s) differ
+  comment  features/compose/ComposePage.tsx:98  grep 1 / ratchet 0   * button alone. `bg-accent-subtle` is DESIGN.md §5.6's selected state, so the row now reads in
+  rule     features/library/ExerciseDetailPage.tsx:191  grep 0 / ratchet 1   'bg-scrim text-text-1 hover:bg-scrim-strong hover:text-text-1',
+  comment  features/library/SectionBadge.tsx:13  grep 1 / ratchet 0   * including the two that were on `bg-accent-subtle`.
+  comment  features/marketplace/MarketplacePage.tsx:57  grep 1 / ratchet 0   * `bg-accent-subtle` is DESIGN.md §5.6's selected state; `primary` is not available here because
+  comment  features/marketplace/MarketplacePage.tsx:64  grep 1 / ratchet 0   * chips already inherit from `body` — and writing `text-on-accent-subtle` here would collapse the
+  comment  features/nutrition/NutritionPage.tsx:244  grep 1 / ratchet 0   `size-11 rounded-field bg-accent-subtle` mark, same `text-title-2` heading. Nothing
+  comment  features/progress/ProgressPage.tsx:677  grep 1 / ratchet 0   * The three hand-written spans this replaces were `rounded-chip bg-accent-subtle`, and
+  comment  features/workout/SetRow.tsx:555  grep 1 / ratchet 0   // Solid, not `bg-warning-subtle`: the record ROW is already warning-subtle, so a
+  comment  features/workout/WorkoutPlayer.tsx:524  grep 1 / ratchet 0   // `selected` rather than a hand-written `bg-accent-subtle`: the variant carries the
+  comment  features/workout/WorkoutPlayer.tsx:525  grep 1 / ratchet 0   // `hover:bg-accent-subtle` half a call site forgets, without which the current chip
+  rule     ui/TokenProof.tsx:155  grep 0 / ratchet 1   <p className="text-title-3 mt-1 text-accent-hover">accent-400</p>
+  comment  ui/data/SectionHeader.tsx:24  grep 1 / ratchet 0   * this exact element — and the file promoted into here simply carried home's `bg-accent-subtle`
+  rule     ui/feedback/variants/E14E20.tsx:346  grep 0 / ratchet 1   variant === 'D' && 'bg-scrim-strong',
+  comment  ui/primitives/control.ts:83  grep 1 / ratchet 0   * The selected state of a filter chip / toggle — DESIGN §5.6, `bg-accent-subtle` + accent ink.
+  comment  ui/primitives/control.ts:87  grep 1 / ratchet 0   * `hover:bg-accent-subtle` the selected chip REVERTS to `surface-2` under the pointer, which
+  comment  ui/primitives/control.ts:162  grep 1 / ratchet 0   // `text-on-accent-subtle`, NOT `text-accent` — DESIGN §7 #63. The wash is the accent at 20%,
+  rule     ui/primitives/control.ts:67  grep 0 / ratchet 1   'bg-accent text-accent-fg shadow-[var(--shadow-glow)] hover:bg-accent-hover active:bg-accent-pressed
+
+── legacy-variant: 2 line(s) or file(s) differ
+  file     features/library/ExerciseDetailPage.tsx  record 3 / ratchet 2
+  file     features/marketplace/PublicChrome.tsx  record 2 / ratchet 3
+
+── pill-size: 3 line(s) or file(s) differ
+  file     features/compose/ComposePage.tsx  record 5 / ratchet 4
+  file     features/library/ExerciseDetailPage.tsx  record 1 / ratchet 0
+  file     features/marketplace/PublicChrome.tsx  record 0 / ratchet 1
+
+── blur-shadow: 5 line(s) or file(s) differ
+  comment  features/compose/useComposeFlow.ts:48  grep 1 / ratchet 0   * Autosave was cut deliberately: an in-flight create plus a blur-triggered second create meant the
+  rule     ui/feedback/variants/E12E16.tsx:150  grep 0 / ratchet 1   boxShadow: pressed
+  rule     ui/feedback/variants/E17E19.tsx:141  grep 0 / ratchet 1   boxShadow: 'var(--shadow-glow)',
+  rule     ui/feedback/variants/E4Toggle.tsx:315  grep 0 / ratchet 1   style={{ boxShadow: haloShadow }}
+  rule     ui/primitives/control.ts:67  grep 1 / ratchet 0   'bg-accent text-accent-fg shadow-[var(--shadow-glow)] hover:bg-accent-hover active:bg-accent-pressed
+
+── reserved-surface-1: 3 line(s) or file(s) differ
+  rule     features/library/LibraryPage.tsx:191  grep 0 / ratchet 1   className="grid size-6 place-items-center rounded-chip bg-text-3 text-surface-1"
+  comment  ui/feedback/variants/E12E16.tsx:237  grep 1 / ratchet 0   // the app is built from. This component used to hand-write `border bg-surface-1
+  comment  ui/primitives/surfaceRecipe.ts:11  grep 1 / ratchet 0   * A card used to be two properties — `bg-surface-1` plus a border — and hand-writing two
+
+── reserved-surface-2-3: 8 line(s) or file(s) differ
+  comment  features/coaching/ClientDetailPage.tsx:438  grep 1 / ratchet 0   // a plain filled pill), and `secondary`'s `hover:bg-surface-2` was never overridden —
+  comment  features/compose/ComposePage.tsx:101  grep 1 / ratchet 0   * The two `hover:` repeats are load-bearing — `secondary` ships `hover:bg-surface-2` and `cn` is
+  comment  features/compose/ComposePage.tsx:241  grep 1 / ratchet 0   // ships `hover:border-*` and `hover:bg-surface-2`, and `cn` is twMerge, which drops a
+  comment  features/library/LibraryPage.tsx:180  grep 1 / ratchet 0   * a target that clears the floor. Not `bg-surface-2` — `--field-bg` IS `surface-2`,
+  comment  features/marketplace/CoachProfilePage.tsx:175  grep 1 / ratchet 0   // `bg-surface-2` directly, so these were the one element on the public screens that
+  comment  features/marketplace/MarketplacePage.tsx:59  grep 1 / ratchet 0   * The two `hover:` repeats are load-bearing: `secondary` ships `hover:bg-surface-2`, and `cn` is
+  comment  features/progress/ProgressPage.tsx:691  grep 1 / ratchet 0   *   - `bg-surface-2` — the badge fill samples the same value as the date field's inset next to it,
+  rule     ui/primitives/Switch.tsx:71  grep 1 / ratchet 0   checked ? 'bg-accent' : 'bg-surface-3',
+
+── legacy-var, per token name (record kind / record / ratchet) — only the names that differ
+  --card-pad                     layout               11   10
+  --card-radius                  not listed            0    4
+  --focus-ring                   state                31    0
+  --nav-fg-active                not listed            0    1
+  --nav-fg-idle                  not listed            0    1
+  --sheet-bg                     opaque                6    0

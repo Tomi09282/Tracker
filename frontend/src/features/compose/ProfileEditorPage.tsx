@@ -1,13 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { ArrowLeft, Eye, Globe, Medal, Pencil, Check } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { useNavigate } from 'react-router';
+import { ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { Field } from '../../ui/primitives/Field';
+import { TextArea } from '../../ui/primitives/TextArea';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Switch } from '../../ui/primitives/Switch';
+import { CheckMark } from '../../ui/primitives/CheckMark';
+import { Chip, ChipRow } from '../../ui/primitives/ChipRow';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Section } from '../../ui/data/SectionHeader';
+import { ListRow } from '../../ui/data/ListRow';
+import { RowStack } from '../../ui/data/RowStack';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { DocRenderer } from '../marketplace/DocRenderer';
 import { useTaxonomy } from '../marketplace/usePublic';
 import { HandleField } from './HandleField';
@@ -25,13 +35,35 @@ import {
 } from './useCompose';
 
 /**
- * The identity line's disclosure — handle and city, the two things the anchor DISPLAYS.
+ * A counter with its figure in ink and its words quiet — "4 / 6 kiválasztva", "7552 karakter
+ * maradt" (compose-profile-1). The words come from ONE translated string, so the figure is found in
+ * it rather than assumed to lead: German puts it in the middle ("Noch 7552 Zeichen"). A string that
+ * does not hold the figure is drawn in one ink. Near or past a cap the whole counter takes the
+ * warning / danger colour of `counterTone` instead.
+ */
+function InkCounter({ text, figure, tone }: { text: string; figure: string; tone?: string }) {
+  const at = text.indexOf(figure);
+  if (tone) return <span className={`text-data ${tone}`}>{text}</span>;
+  if (at < 0) return <span className="text-data text-text-2">{text}</span>;
+  return (
+    <span className="text-data text-text-2">
+      {text.slice(0, at)}
+      <span className="text-text-1">{figure}</span>
+      {text.slice(at + figure.length)}
+    </span>
+  );
+}
+
+/**
+ * The identity line's disclosure — the rename of the handle the anchor DISPLAYS (compose-profile-2,
+ * "Nyilvános név módosítása").
  *
  * ═══ IT IS FOLDED AWAY ON PURPOSE ══════════════════════════════════════════════════════════════
  *
  * A LISTED profile's rename retires the old handle for a year and spends a cooldown the coach then
- * cannot spend again for thirty days. That does not belong as an always-open box beside a headline,
- * where it is one absent-minded edit away from happening.
+ * cannot spend again for thirty days. That does not belong as an always-open field beside a headline,
+ * where it is one absent-minded edit away from happening. So it is a strong TEXT action, never a
+ * second pill: the screen's one lime pill is `Mentés`.
  *
  * ═══ AND `from` IS THE DEFENCE AGAINST THIS VERY SCREEN ════════════════════════════════════════
  *
@@ -40,28 +72,20 @@ import {
  * no longer matches and refuses, naming the handle that is actually there. Without it, this form
  * would happily revert that rename and burn both names for a month while showing a success.
  *
- * ═══ THE CITY LIVES HERE TOO ═══════════════════════════════════════════════════════════════════
- *
- * The anchor renders `@kovacspeter · Szeged` and the mockup offers no way to change either. Both
- * editors are behind this one disclosure rather than back in the field stack, because a screen that
- * displays a value and cannot edit it is a screen that grows the field back.
+ * The city the anchor also displays is picked in the row under this panel (`CityRow`): it is saved
+ * by `Mentés` with the rest of the form, while the rename acts on its own.
  */
 function IdentityDisclosure({
   current,
   listed,
-  city,
-  onCity,
   onClose,
 }: {
   current: string;
   listed: boolean;
-  city: string;
-  onCity: (next: string) => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const ctx = useComposeContext();
-  const taxonomy = useTaxonomy();
   const rename = useRenameHandle();
   const [next, setNext] = useState(current);
 
@@ -73,103 +97,170 @@ function IdentityDisclosure({
   const retireDays = Math.round((ctx.data?.handleCooldownS ?? 31536000) / 86400);
 
   return (
-    <Surface as="section" className="flex flex-col gap-group">
-      <h2 className="text-title-3 text-text-1">{t('compose.handleChangeTitle')}</h2>
+    <Section title={t('compose.handleChangeTitle')}>
+      {/* The form, 4 apart: the field, its status line, the warning, the refusal, the two actions. */}
+      <div className="flex flex-col gap-1">
+        <HandleField
+          label={t('compose.handle')}
+          value={next}
+          onChange={setNext}
+          ownHandle={current}
+          hint={t('compose.handleHint')}
+          autoFocus
+        />
 
-      <HandleField
-        label={t('compose.handle')}
-        value={next}
-        onChange={setNext}
-        ownHandle={current}
-        hint={t('compose.handleHint')}
-        autoFocus
-      />
+        {/*
+          The warning appears only for a LISTED profile, because only a listed profile pays. An
+          unpublished one releases its handle immediately and has no cooldown — telling its owner
+          about a thirty-day wait would be a lie that discourages a free action.
+        */}
+        {listed ? (
+          <NoticeLine tone="warn">
+            {t('compose.handleCooldownWarning', { days: cooldownDays, retireDays, handle: current })}
+          </NoticeLine>
+        ) : null}
 
-      {/*
-        The warning appears only for a LISTED profile, because only a listed profile pays. An
-        unpublished one releases its handle immediately and has no cooldown — telling its owner
-        about a thirty-day wait would be a lie that discourages a free action.
-      */}
-      {listed ? (
-        <p className="text-caption rounded-card border-[length:var(--border-width)] border-[var(--warning-border)] bg-warning-subtle p-3 text-text-1">
-          {t('compose.handleCooldownWarning', { days: cooldownDays, retireDays, handle: current })}
-        </p>
-      ) : null}
+        {conflict ? (
+          <NoticeLine tone="danger" role="alert">
+            {t(`compose.reason.${conflict.reason}`, {
+              defaultValue: t('compose.reason.generic'),
+              handle: (conflict as { handle?: string }).handle,
+              date:
+                typeof (conflict as { eligibleAt?: number }).eligibleAt === 'number'
+                  ? new Date((conflict as { eligibleAt: number }).eligibleAt * 1000).toLocaleDateString()
+                  : undefined,
+            })}
+          </NoticeLine>
+        ) : null}
 
-      {conflict ? (
-        <p className="text-body-s text-danger" role="alert">
-          {t(`compose.reason.${conflict.reason}`, {
-            defaultValue: t('compose.reason.generic'),
-            handle: (conflict as { handle?: string }).handle,
-            date:
-              typeof (conflict as { eligibleAt?: number }).eligibleAt === 'number'
-                ? new Date((conflict as { eligibleAt: number }).eligibleAt * 1000).toLocaleDateString()
-                : undefined,
-          })}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-tight">
-        <Pressable
-          variant="primary"
-          density="compact"
-          busy={rename.isPending}
-          disabled={next === current || next.length === 0}
-          onClick={() => rename.mutate({ from: current, to: next }, { onSuccess: onClose })}
-        >
-          {t('compose.handleChangeConfirm')}
-        </Pressable>
-        <Pressable variant="ghost" density="compact" onClick={onClose}>
-          {t('common.cancel')}
-        </Pressable>
+        <div className="flex items-center gap-6">
+          <TextLink
+            text="body"
+            weight="strong"
+            busy={rename.isPending}
+            disabled={next === current || next.length === 0}
+            onClick={() => rename.mutate({ from: current, to: next }, { onSuccess: onClose })}
+          >
+            {t('compose.handleChangeConfirm')}
+          </TextLink>
+          <TextLink text="body" onClick={onClose}>
+            {t('common.cancel')}
+          </TextLink>
+        </div>
       </div>
-
-      {/* The city the anchor shows. Its first option means NO city and reads `Bárhol`. */}
-      <CityPicker value={city} onChange={onCity} cities={taxonomy.data?.cities} />
-    </Surface>
-  );
-}
-
-/** The one city control, so create and edit cannot style or label it two ways. */
-function CityPicker({
-  value,
-  onChange,
-  cities,
-}: {
-  value: string;
-  onChange: (next: string) => void;
-  cities: { key: string; name: string }[] | undefined;
-}) {
-  const { t } = useTranslation();
-  return (
-    <label className="flex flex-col gap-tight">
-      <span className="text-body-s text-text-2">{t('compose.city')}</span>
-      <select
-        className="text-body min-h-[var(--control-h)] rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">{t('marketplace.everywhere')}</option>
-        {cities?.map((c) => (
-          <option key={c.key} value={c.key}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-    </label>
+    </Section>
   );
 }
 
 /**
- * Create or edit the public profile.
+ * The city the anchor shows — a row with its value and the chevron (compose-profile-2 "Város"),
+ * opening the bottom sheet of cities (Pulse: pickers are sheets). The first option means NO city and
+ * reads `Bárhol`. A tap chooses and closes; the choice is saved by `Mentés`, as it always was.
+ *
+ * The sheet is the kit's `Sheet` with the radio rows `SelectSheet` draws (the chosen one in ink with
+ * the lime tick, the others quiet, ArrowUp / ArrowDown between them); only the trigger differs: the
+ * frame draws a list row here, not an underline field.
+ */
+function CityRow({
+  value,
+  onChange,
+  cities,
+  disabled,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  cities: { key: string; name: string }[] | undefined;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const rows = useRef<(HTMLButtonElement | HTMLAnchorElement | null)[]>([]);
+  const options = [{ key: '', name: t('marketplace.everywhere') }, ...(cities ?? [])];
+  const chosen = options.find((c) => c.key === value) ?? options[0];
+
+  const onRowsKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const list = rows.current.filter((r): r is HTMLButtonElement => !!r);
+    const at = list.findIndex((r) => r === document.activeElement);
+    const next = list[(at + (e.key === 'ArrowDown' ? 1 : -1) + list.length) % list.length];
+    if (next) {
+      e.preventDefault();
+      next.focus();
+    }
+  };
+
+  return (
+    <>
+      <ListRow
+        title={t('compose.city')}
+        value={chosen.name}
+        chevron
+        disabled={disabled}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+      />
+      <Sheet open={open} onClose={() => setOpen(false)} title={t('compose.city')}>
+        <div onKeyDown={onRowsKey}>
+          <RowStack as="div" role="radiogroup" aria-label={t('compose.city')}>
+            {options.map((c, i) => {
+              const on = c.key === chosen.key;
+              return (
+                <ListRow
+                  key={c.key || '-'}
+                  title={c.name}
+                  tone={on ? 'default' : 'muted'}
+                  role="radio"
+                  aria-checked={on}
+                  tabIndex={on ? 0 : -1}
+                  actionRef={(el) => {
+                    rows.current[i] = el;
+                  }}
+                  onClick={() => {
+                    onChange(c.key);
+                    setOpen(false);
+                  }}
+                  trailing={on ? <CheckMark done /> : undefined}
+                />
+              );
+            })}
+          </RowStack>
+        </div>
+      </Sheet>
+    </>
+  );
+}
+
+/**
+ * The anchor's frame: the pushed header (`VISSZA A PULTHOZ`, from routeMeta) 16 above whatever
+ * stands under it — the monogram, or its skeleton.
+ */
+function Top({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <ScreenHeader kind="push" />
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Create or edit the public profile — Pulse frames `compose-profile-1` (the whole form) and
+ * `compose-profile-2` (the identity panel open, a new handle typed).
  *
  * ═══ THE ANCHOR IS THE PERSON ══════════════════════════════════════════════════════════════════
  *
- * This screen edits a person, so the top third is that person: a large monogram in a thick ring,
- * the display name in the biggest type on the screen, and the handle-and-city line under it. There
- * is no separate `h1` — the display name IS the heading, which is why typing in the name field
- * visibly rewrites the anchor. It doubles as a live preview of the marketplace card, which is what
- * made the separate rendered preview card removable.
+ * This screen edits a person, so the top is that person as a stranger will meet them: the 176 pt
+ * textured monogram (its lime full stop says the profile is live), the display name as the ONLY
+ * heading — typing in the name field visibly rewrites it — and `@handle · city` under it. That line
+ * is the door to the folded identity panel: quiet with a chevron while closed, ink when open.
+ *
+ * ═══ READING ORDER ═════════════════════════════════════════════════════════════════════════════
+ *
+ * Who you are — things that act on their own: the rename, the city row, the public switch — then
+ * what `Mentés` saves: the name, the one-line pitch, the specialties as words with the lime mark,
+ * the bio as markdown source in an eight-line window. Then THE lime pill, and `Előnézet` as text
+ * under it. Nothing is enclosed: rules, rows and underlines only.
  *
  * ═══ THE HANDLE IS ASKED FOR ONCE ══════════════════════════════════════════════════════════════
  *
@@ -251,18 +342,34 @@ export function ProfileEditorPage() {
   const visibleSpecialties = allSpecialties ? ordered : ordered.slice(0, 6);
 
   if (loaded.isPending) {
-    // The anchor, then the field stack — the two shapes that actually arrive.
+    // The anchor, then the field stack — the shapes that actually arrive. The way back works while
+    // it loads. Blocks where the text will be; nothing round, nothing spinning.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-section py-6">
-        <div className="flex flex-col items-center gap-tight">
-          <Skeleton className="size-32 rounded-chip" />
-          <Skeleton className="mt-2 h-8 w-48 rounded-card" />
-          <Skeleton className="h-4 w-32 rounded-card" />
+      <Screen top="push" role="status" aria-busy="true">
+        <span className="sr-only">{t('common.loading')}</span>
+        <Top>
+          <div className="flex flex-col gap-6">
+            <MonogramSkeleton size={176} />
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+        </Top>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-3 w-36" />
+            <Skeleton className="h-4 w-full" />
+          </div>
         </div>
-        <Skeleton className="h-64 rounded-card" />
-      </div>
+      </Screen>
     );
   }
+
 
   const submit = () => {
     // Empty string means CLEARED, and the server takes null for that. Sending '' would fail a
@@ -289,301 +396,257 @@ export function ProfileEditorPage() {
 
   const cityName = taxonomy.data?.cities.find((c) => c.key === city)?.name ?? t('marketplace.everywhere');
 
+  const liveConflict = conflictOf(setLive.error);
+  const showCity = isNew || (!readOnly && identityOpen);
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      <Link to="/compose" className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight self-start text-accent">
-        <ArrowLeft className="size-icon-s" aria-hidden />
-        {t('compose.backToDesk')}
-      </Link>
+    <Screen top="push">
+      {/* ── the anchor: back row 16 above the 176 pt monogram, the name 24 under it, the identity
+          line 4 under the name (its 44 pt target overhangs invisibly, above and below) ───────── */}
+      <Top>
+        {/* One line, the same shape the post editor's takedown line uses. The FULL explanation
+            (`compose.removedBody`) is the desk's job per the spec; this screen only says why
+            nothing here can be typed into. */}
+        {readOnly ? (
+          <NoticeLine tone="danger" role="status">
+            {t('compose.removedTitle')}
+          </NoticeLine>
+        ) : null}
 
-      {/* One line, the same shape the post editor's takedown banner uses. The FULL explanation
-          (`compose.removedBody`) is the desk's takedown card's job per the spec; this screen only
-          says why nothing here can be typed into. */}
-      {readOnly ? (
-        <Surface
-          as="p"
-          className="text-body-s border-[var(--danger-border)] bg-danger-subtle text-text-1"
-          role="status"
-        >
-          {t('compose.removedTitle')}
-        </Surface>
-      ) : null}
-
-      {/* ── the anchor ───────────────────────────────────────────────────────────────────────
-          No camera badge and no `Kép cseréje`: there is no avatar upload on the coach profile,
-          only post covers. A control that promises an upload the API refuses is worse than a
-          monogram — so the monogram is what ships until the endpoint exists. */}
-      <div className="flex flex-col items-center gap-tight">
-        <span
-          aria-hidden
-          className="relative inline-flex size-32 items-center justify-center rounded-chip border-4 border-accent bg-surface-2"
-        >
-          <span className="text-display font-display text-accent">{initialsOf(displayName)}</span>
-        </span>
-
-        <h1 className="text-title-1 mt-2 text-center text-text-1">
-          {displayName.trim() === '' ? t('compose.createProfile') : displayName}
-        </h1>
-
-        {/* THE IDENTITY LINE STAYS EVEN WHEN NOTHING CAN BE EDITED. It is the anchor's second half
-            — the live preview of the marketplace card — so a takedown turns the trigger into plain
-            text rather than removing the line. */}
-        {isNew ? null : readOnly ? (
-          <span className="text-body-s text-text-2">
-            @{profile?.handle} · {cityName}
-          </span>
-        ) : (
-          <Pressable
-            variant="ghost"
-            density="compact"
-            aria-expanded={identityOpen}
-            onClick={() => setIdentityOpen((v) => !v)}
-          >
-            @{profile?.handle} · {cityName}
-          </Pressable>
-        )}
-      </div>
-
-      {isNew ? (
-        <div className="flex flex-col gap-group">
-          <HandleField
-            label={t('compose.handle')}
-            value={handle}
-            onChange={setHandle}
-            hint={t('compose.handleHint')}
+        <div className="flex flex-col gap-6">
+          {/* No camera badge and no `Kép cseréje`: there is no avatar upload on the coach profile,
+              only post covers. The lime full stop says the profile is live — the switch row below
+              says it in words, so the dot is decoration here. */}
+          <Monogram
+            initials={initialsOf(displayName)}
+            size={176}
+            dot={profile !== null && profile.publishedAt !== null}
+            className="self-start"
           />
-          <CityPicker value={city} onChange={setCity} cities={taxonomy.data?.cities} />
+
+          <div className="flex flex-col">
+            <h1 className="text-title text-text-1">
+              {displayName.trim() === '' ? t('compose.createProfile') : displayName}
+            </h1>
+
+            {/* THE IDENTITY LINE STAYS EVEN WHEN NOTHING CAN BE EDITED. It is the anchor's second
+                half — the live preview of the marketplace card — so a takedown turns the trigger
+                into plain text rather than removing the line. On create there is no handle yet. */}
+            {isNew ? null : readOnly ? (
+              <p className="text-body mt-1 truncate text-text-2">
+                @{profile?.handle} · {cityName}
+              </p>
+            ) : (
+              <TextLink
+                text="body"
+                weight="regular"
+                tone={identityOpen ? 'default' : 'quiet'}
+                trail={identityOpen ? <ChevronUp aria-hidden /> : <ChevronDown aria-hidden />}
+                aria-expanded={identityOpen}
+                className="-mb-2.75 -mt-1.75 self-start"
+                onClick={() => setIdentityOpen((v) => !v)}
+              >
+                @{profile?.handle} · {cityName}
+              </TextLink>
+            )}
+          </div>
         </div>
-      ) : !readOnly && identityOpen ? (
-        <IdentityDisclosure
-          current={profile?.handle ?? ''}
-          listed={profile?.listedAt !== null}
-          city={city}
-          onCity={setCity}
-          onClose={() => setIdentityOpen(false)}
-        />
-      ) : null}
+      </Top>
 
-      {/* ── the two fields a coach actually retypes ──────────────────────────────────────────── */}
-      <div className="flex flex-col gap-group">
-        {/* The server enforces a minimum here, so the control says so semantically AND visibly:
-            `aria-required` is the half a screen reader needs, `marker` is the half the mockup
-            draws — the right-aligned counterpart to the `Nem kötelező` on the field below. */}
-        <Field
-          label={t('compose.displayName')}
-          aria-required
-          marker={t('compose.required')}
-          value={displayName}
-          maxLength={limits?.displayNameMax}
-          disabled={readOnly}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
+      {/* ── who you are: the parts that act on their own (rename, city, the public switch), then
+          what `Mentés` saves (name, pitch) — the panel 20 above the rows, the rest 24 apart ────── */}
+      <div className="flex flex-col gap-5">
+        {isNew ? (
+          <HandleField label={t('compose.handle')} value={handle} onChange={setHandle} hint={t('compose.handleHint')} />
+        ) : !readOnly && identityOpen ? (
+          <IdentityDisclosure
+            current={profile?.handle ?? ''}
+            listed={profile?.listedAt !== null}
+            onClose={() => setIdentityOpen(false)}
+          />
+        ) : null}
 
-        {/* `Nem kötelező` belongs on the LABEL row, not in the hint slot: it answers a question
-            asked before typing, and the hint answers one asked while typing. The hint earns its own
-            line by saying WHERE the text lands, which is the one thing the label cannot. */}
-        <Field
-          label={t('compose.headline')}
-          marker={t('compose.optional')}
-          hint={t('compose.headlineHint')}
-          value={headline}
-          maxLength={limits?.headlineMax}
-          disabled={readOnly}
-          onChange={(e) => setHeadline(e.target.value)}
-        />
+        <div className="flex flex-col gap-6">
+          {showCity || profile ? (
+            <div className="flex flex-col gap-1">
+              <RowStack as="div" open close>
+                {showCity ? <CityRow value={city} onChange={setCity} cities={taxonomy.data?.cities} /> : null}
+
+                {/* ONE FACT, TWO SCREENS. This switch and the desk's status control read and
+                    write the SAME published flag, and unpublishing here takes the whole back
+                    catalogue dark exactly as it does there. Hidden on create: nothing to publish
+                    yet. A noun phrase, not the desk's verb, and the sub line says the consequence. */}
+                {profile ? (
+                  <ListRow
+                    title={t('compose.publicProfile')}
+                    titleId="compose-public-label"
+                    sub={t('compose.publicProfileHint')}
+                    control={
+                      <Switch
+                        checked={profile.publishedAt !== null}
+                        disabled={setLive.isPending || readOnly}
+                        labelledBy="compose-public-label"
+                        onChange={(nextOn) => setLive.mutate(nextOn)}
+                      />
+                    }
+                  />
+                ) : null}
+              </RowStack>
+
+              {setLive.data && typeof setLive.data.postsWentDark === 'number' && setLive.data.postsWentDark > 0 ? (
+                <NoticeLine role="status">{t('compose.wentDark', { count: setLive.data.postsWentDark })}</NoticeLine>
+              ) : null}
+
+              {liveConflict ? (
+                <NoticeLine tone="danger" role="alert">
+                  {t(`compose.reason.${liveConflict.reason}`, {
+                    defaultValue: t('compose.reason.generic'),
+                    version: liveConflict.activeVersion,
+                    when: liveConflict.eligibleAt ? new Date(liveConflict.eligibleAt * 1000).toLocaleDateString() : '',
+                  })}
+                </NoticeLine>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* The server enforces a minimum here, so the control says so semantically AND visibly:
+              `aria-required` for a screen reader, the `Kötelező` marker on the label row for
+              everyone else. */}
+          <Field
+            label={t('compose.displayName')}
+            aria-required
+            marker={t('compose.required')}
+            value={displayName}
+            maxLength={limits?.displayNameMax}
+            disabled={readOnly}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+
+          {/* One logical line that wraps (a 54-character pitch takes two rows, the underline under
+              the second). `Nem kötelező` on the label row answers a question asked before typing;
+              the hint says WHERE the text lands. */}
+          <TextArea
+            singleLine
+            label={t('compose.headline')}
+            marker={t('compose.optional')}
+            markerTone="quiet"
+            hint={t('compose.headlineHint')}
+            value={headline}
+            maxLength={limits?.headlineMax}
+            disabled={readOnly}
+            onChange={(e) => setHeadline(e.target.value)}
+          />
+        </div>
       </div>
 
-      {/* ── specialties, in their own box ────────────────────────────────────────────────────── */}
-      {/*
-        A SECTION AND A HEADING, NOT A FIELDSET AND A LEGEND. A rendered `<legend>` is positioned by
-        the browser over the fieldset's block-start border and the border is drawn with a gap behind
-        it, so the card's top edge was cut open on both sides of the word — a gap that widened when
-        the legend was promoted to `text-title-3`. The mockup draws an unbroken box with the title
-        INSIDE it. A legend also shrink-to-fits, which is why no `justify-between` could push the
-        counter to the card's right edge.
-
-        The chip set is labelled on the list instead, with `role="group"`: the chips are `Pressable`s
-        carrying `aria-pressed`, i.e. toggle buttons, so there is no form-control grouping to
-        preserve — and `role="group"` is what actually gets the name announced.
-      */}
-      <Surface
-        as="section"
-        aria-labelledby="compose-specialties"
-        className="flex w-full min-w-0 flex-col gap-group"
+      {/* ── specialties: words, no capsules — the chosen ones in ink with the lime mark; the
+          count on the eyebrow's baseline; `Több` opens the rest of the taxonomy (no way back) ──── */}
+      <Section
+        title={t('compose.specialties')}
+        trailing={
+          <InkCounter
+            text={t('compose.specialtiesCount', { n: specialties.length, max: specialtyMax })}
+            figure={`${specialties.length} / ${specialtyMax}`}
+          />
+        }
       >
-        {/* A CARD HEADING, not a field label. `Szakterületek` and `Bemutatkozás` are the two
-            sections of this form and the mockup draws them identically — same size, same
-            full-strength ink, same neutral glyph. The count is its own element hard against the
-            card's trailing edge, which is where the mockup puts it; folded into the title string it
-            read as part of the heading. */}
-        <div className="flex w-full items-baseline justify-between gap-2">
-          <h2
-            id="compose-specialties"
-            className="text-title-3 flex items-center gap-tight text-text-1"
-          >
-            <Medal className="size-icon-m shrink-0 text-text-2" aria-hidden />
-            {t('compose.specialties')}
-          </h2>
-          <span className="text-body-s shrink-0 text-text-3">
-            {t('compose.specialtiesCount', { n: specialties.length, max: specialtyMax })}
-          </span>
-        </div>
-        <ul role="group" aria-labelledby="compose-specialties" className="flex flex-wrap gap-tight">
-          {visibleSpecialties.map((s) => {
-            const on = specialties.includes(s.key);
-            return (
-              <li key={s.key}>
-                <Pressable
-                  shape="chip"
-                  density="compact"
-                  variant={on ? 'primary' : 'secondary'}
-                  aria-pressed={on}
-                  disabled={readOnly}
-                  onClick={() => toggleSpecialty(s.key)}
-                  icon={on ? <Check className="size-icon-s" aria-hidden /> : undefined}
-                >
-                  {t(s.i18nKey, { defaultValue: s.key })}
-                </Pressable>
-              </li>
-            );
-          })}
+        <div className="-mt-3 flex flex-col">
+          <ChipRow wrap label={t('compose.specialties')} disabled={readOnly}>
+            {visibleSpecialties.map((s) => (
+              <Chip
+                key={s.key}
+                selected={specialties.includes(s.key)}
+                disabled={readOnly}
+                onClick={() => toggleSpecialty(s.key)}
+              >
+                {t(s.i18nKey, { defaultValue: s.key })}
+              </Chip>
+            ))}
+          </ChipRow>
           {allSpecialties || ordered.length <= 6 ? null : (
-            <li>
-              <Pressable shape="chip" density="compact" variant="ghost" onClick={() => setAllSpecialties(true)}>
-                {t('common.more')}
-              </Pressable>
-            </li>
+            <TextLink
+              text="body"
+              trail={<ChevronDown aria-hidden />}
+              className="-mb-2.75 self-start"
+              onClick={() => setAllSpecialties(true)}
+            >
+              {t('common.more')}
+            </TextLink>
           )}
-        </ul>
-      </Surface>
+        </div>
+      </Section>
 
-      {/* ── the bio ──────────────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-tight">
-        {/* Still a `<label>` — `htmlFor` is what ties it to the textarea — but drawn as the
-            section heading it is, matching `Szakterületek` above. The pencil loses its filled
-            accent badge: the mockup draws a bare muted outline glyph, and a tinted holder here
-            claimed more weight than the specialties medal beside it. */}
-        <label htmlFor="compose-bio" className="text-title-3 flex items-center gap-tight text-text-1">
-          <Pencil className="size-icon-m shrink-0 text-text-2" aria-hidden />
-          {t('compose.bio')}
-        </label>
-        {/* Three visible lines, not six, and no formatting toolbar: the markdown is the coach's
-            own and the preview is one tap away. */}
-        {/* `disabled:*` on the class string as well as the attribute — the post editor's body
-            carries both, and without the utilities a disabled textarea looks identical to an
-            editable one (DESIGN.md rule 45). */}
-        <textarea
-          id="compose-bio"
-          className="text-body min-h-24 rounded-field border-[length:var(--border-width)] border-[var(--field-border)] bg-[var(--field-bg)] p-3 text-text-1 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] disabled:pointer-events-none disabled:opacity-45"
+      {/* ── the bio: markdown SOURCE in the plain UI face, an eight-line window that scrolls
+          inside; the characters-left counter on the eyebrow's baseline (warning near the cap,
+          danger past it — a counter loud from the first character is one people stop seeing) ──── */}
+      <Section
+        title={t('compose.bio')}
+        trailing={
+          limits ? (
+            <InkCounter
+              text={t('compose.charsLeft', { n: Math.max(0, limits.bioMax - bio.length) })}
+              figure={String(Math.max(0, limits.bioMax - bio.length))}
+              tone={counterTone(bio.length, limits.bioMax) === 'calm' ? undefined : COUNTER_CLASS[counterTone(bio.length, limits.bioMax)]}
+            />
+          ) : undefined
+        }
+      >
+        {/* The section's eyebrow names it; the field's own label stays for assistive tech. The
+            frame starts the text at the window's top, so the field (11 pt pad) sits 11 higher. */}
+        <TextArea
+          labelHidden
+          label={t('compose.bio')}
+          minRows={8}
+          maxRows={8}
           value={bio}
           disabled={readOnly}
+          className="-mt-2.75"
           onChange={(e) => setBio(e.target.value)}
         />
-        {/* `self-end`, not `text-right`: it shrinks the box to the text so the muted line stops
-            spanning the column, and the last character lands on the textarea's trailing edge where
-            the mockup draws it. `PostEditorPage`'s body counter is the same shape. */}
-        <span
-          className={cn('text-caption self-end', limits ? COUNTER_CLASS[counterTone(bio.length, limits.bioMax)] : 'text-text-3')}
-        >
-          {limits ? t('compose.charsLeft', { n: Math.max(0, limits.bioMax - bio.length) }) : ''}
-        </span>
-      </div>
+      </Section>
 
-      {/* ── one fact, two screens ────────────────────────────────────────────────────────────
-          This switch and the desk's `Élő` / `Rejtve` pill read and write the SAME published flag,
-          and unpublishing here takes the whole back catalogue dark exactly as it does there. It is
-          hidden on create because there is nothing to publish yet. */}
-      {profile ? (
-        <Surface as="section" className="flex flex-col gap-tight">
-          <div className="flex items-center gap-group">
-            <Globe className="size-icon-m shrink-0 text-text-2" aria-hidden />
-            <span className="min-w-0 flex-1">
-              {/* A NOUN PHRASE, not the desk's verb. `Profil közzététele` labels the desk's publish
-                  BUTTON; on a switch row it reads as a pending action rather than as the state the
-                  toggle beside it already shows. */}
-              <span id="compose-public-label" className="text-body block text-text-1">
-                {t('compose.publicProfile')}
-              </span>
-              {/* And the sub-line explains the CONSEQUENCE instead of restating the toggle. `Élő` /
-                  `Rejtve` said in words exactly what the switch position said in shape. */}
-              <span className="text-caption block text-text-3">
-                {t('compose.publicProfileHint')}
-              </span>
-            </span>
-            <Switch
-              checked={profile.publishedAt !== null}
-              disabled={setLive.isPending || readOnly}
-              labelledBy="compose-public-label"
-              onChange={(nextOn) => setLive.mutate(nextOn)}
-            />
-          </div>
-
-          {setLive.data && typeof setLive.data.postsWentDark === 'number' && setLive.data.postsWentDark > 0 ? (
-            <p className="text-caption text-text-2" role="status">
-              {t('compose.wentDark', { count: setLive.data.postsWentDark })}
-            </p>
-          ) : null}
-
-          {conflictOf(setLive.error) ? (
-            <p className="text-caption text-danger" role="alert">
-              {t(`compose.reason.${conflictOf(setLive.error)?.reason}`, {
-                defaultValue: t('compose.reason.generic'),
-              })}
-            </p>
-          ) : null}
-        </Surface>
-      ) : null}
-
-      {/* TWO EQUAL TRACKS, edge to edge. `flex flex-wrap` let both buttons hug their text and sit
-          against the left margin with the right third of the row empty — and it could wrap them
-          onto two lines, which the mockup never shows. A grid keeps the pair on one row at any
-          label length; `w-full` is the house form at the same shape in `ModerationQueue`. */}
-      <div className="grid grid-cols-2 gap-tight">
+      {/* ── THE lime pill ends the form; the preview toggle is text under it ───────────────────── */}
+      <div className="flex flex-col gap-3">
         <Pressable
           variant="primary"
+          size="lg"
           className="w-full"
           busy={create.isPending || save.isPending}
-          // `Előnézet` beside it stays live: rendering the bio is not an edit.
+          // `Előnézet` under it stays live: rendering the bio is not an edit.
           disabled={readOnly}
           onClick={submit}
         >
           {isNew ? t('compose.createProfile') : t('compose.save')}
         </Pressable>
-        <Pressable variant="secondary" className="w-full" onClick={() => setShowPreview((v) => !v)}>
-          <Eye className="size-icon-s" aria-hidden />
+        <TextLink text="body" lead={<Eye aria-hidden />} className="self-start" onClick={() => setShowPreview((v) => !v)}>
           {showPreview ? t('compose.hidePreview') : t('compose.showPreview')}
-        </Pressable>
+        </TextLink>
+
+        {markdownReason && !conflict ? (
+          <NoticeLine tone="danger" role="alert">
+            {t(`compose.markdown.${markdownReason}`, { defaultValue: t('compose.markdown.generic') })}
+          </NoticeLine>
+        ) : null}
+
+        {conflict ? (
+          <NoticeLine tone="warn" role="alert">
+            {t(`compose.reason.${conflict.reason}`, {
+              defaultValue: t('compose.reason.generic'),
+              key: conflict.key,
+            })}
+          </NoticeLine>
+        ) : null}
       </div>
 
-      {markdownReason && !conflict ? (
-        <p className="text-body-s text-danger" role="alert">
-          {t(`compose.markdown.${markdownReason}`, { defaultValue: t('compose.markdown.generic') })}
-        </p>
-      ) : null}
-
-      {conflict ? (
-        <Surface
-          as="p"
-          className="text-body-s border-[var(--warning-border)] bg-warning-subtle text-text-1"
-          role="alert"
-        >
-          {t(`compose.reason.${conflict.reason}`, {
-            defaultValue: t('compose.reason.generic'),
-            key: conflict.key,
-          })}
-        </Surface>
-      ) : null}
-
       {showPreview ? (
-        <Surface as="section" className="flex flex-col gap-group">
-          <h2 className="text-title-3 text-text-1">{t('compose.preview')}</h2>
+        <Section title={t('compose.preview')}>
           {preview.data ? (
             <DocRenderer doc={preview.data.doc} />
           ) : (
-            <p className="text-caption text-text-3">{t('compose.previewEmpty')}</p>
+            <p className="text-cap text-text-3">{t('compose.previewEmpty')}</p>
           )}
-        </Surface>
+        </Section>
       ) : null}
-    </div>
+    </Screen>
   );
 }

@@ -28,7 +28,13 @@ const db = new Database(tmp);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// THE CHAIN STOPS BEFORE 030. Migration 030 retired the only two items this script buys (Aurora
+// and Ember) and refuses to put them back on sale, so on the full chain every purchase below would
+// be refused for that reason instead of exercising the guard it names. The 019 guards are attacked
+// on the schema they were written for; verify-030 attacks 030 on the full chain and re-proves the
+// receipt guard, the history and an unrelated item's purchase there.
 for (const f of (await fs.readdir(MIGRATIONS)).filter((n) => /^\d+_.*\.sql$/.test(n)).sort()) {
+  if (Number.parseInt(f, 10) >= 30) continue;
   db.exec(await fs.readFile(path.join(MIGRATIONS, f), 'utf8'));
 }
 

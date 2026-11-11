@@ -2,43 +2,21 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import argon2 from 'argon2';
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
-import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { ERR, sendError, sendStepUpFailed, asyncRoute } from '../lib/http.js';
 import { requireAuth, requireRole, invalidateSvCache } from '../auth/middleware.js';
 import { resolveLang, languages } from '../lib/lang.js';
-import { encodeCursor, decodeCursor, MAX_PAGE } from '../lib/cursor.js';
 import { assertAdmin } from '../lib/assert-admin.js';
+import { adminReadIpLimiter, adminReadLimiter, adminWriteIpLimiter, adminWriteLimiter } from './limiters.js';
 import { DETAIL_COLUMNS, DETAIL_JOINS, exerciseBody, withInstructions } from '../exercises/detail.js';
+import { panelFigures } from './statistics.js';
+import { idString, parseId } from './params.js';
+import { reasonText } from '../lib/reason-text.js';
 
 const router = Router();
 
-const limiter = (limit, keyGenerator) =>
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit,
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: () => process.env.NODE_ENV === 'test',
-    ...(keyGenerator ? { keyGenerator } : {}),
-  });
-
-/**
- * ═══ READS AND WRITES DO NOT SHARE A BUDGET ════════════════════════════════════════════════════
- *
- * They used to: one `adminLimiter` at 120 per 15 minutes per IP covered all eight routes here,
- * reads included. Opening the dashboard costs three requests — stats, metrics, users — so a working
- * admin session spends the write budget on looking at things, and the limiter that is supposed to
- * bound damage is exhausted by the page that shows there is none.
- *
- * And it was IP-only. A per-IP limit stops one machine; it does not stop one principal with a
- * laptop, a phone and a VPN, which is the shape of an actual compromised admin session.
- */
-const adminReadIpLimiter = limiter(600);
-const adminReadLimiter = limiter(300, (req) => `adm-r:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
-const adminWriteIpLimiter = limiter(120);
-const adminWriteLimiter = limiter(60, (req) => `adm-w:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
-
+// The four budgets (reads 600/IP + 300/admin, writes 120/IP + 60/admin per 15 minutes) live in
+// admin/limiters.js, shared with admin/accounts.js; see the note there.
 
 router.get(
   '/admin/stats',
@@ -51,7 +29,7 @@ router.get(
 
     // One round trip per metric would be several worker hops; these are cheap indexed counts,
     // so they run in parallel across the pool.
-    const [users, exercises, media, moderation, translations, sessions, audit] = await Promise.all([
+    const [users, exercises, media, moderation, translations, sessions, audit, panel] = await Promise.all([
       db.get(`SELECT COUNT(*) AS total,
                      SUM(role = 'coach') AS coaches,
                      SUM(role = 'admin') AS admins,
@@ -68,9 +46,12 @@ router.get(
       db.get('SELECT COUNT(*) AS rows, COUNT(DISTINCT lang) AS langs FROM exercise_translations'),
       db.get('SELECT COUNT(*) AS active FROM refresh_tokens WHERE revoked = 0 AND expires_at > unixepoch()'),
       db.get('SELECT COUNT(*) AS events_24h FROM audit_log WHERE created_at >= unixepoch() - 86400'),
+      // B-admin-stats: the Moderation panel's figures, ADDITIVE (every key above is unchanged).
+      // Built in statistics.js; its scan half goes through a 30 s single-flight cache.
+      panelFigures(),
     ]);
 
-    res.json({ users, exercises, media, moderation, translations, sessions, audit });
+    res.json({ users, exercises, media, moderation, translations, sessions, audit, panel });
   }),
 );
 
@@ -135,7 +116,7 @@ router.get(
   adminReadLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
-    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const id = idString.parse(req.params.id);
     const lang = await resolveLang(req);
     const { fallback } = await languages();
 
@@ -164,7 +145,7 @@ router.get(
 const DecisionSchema = z
   .object({
     decision: z.enum(['approve', 'reject']),
-    reason: z.string().trim().max(500).optional(),
+    reason: reasonText(500, { min: 0 }).optional(),
   })
   .strict()
   .refine((d) => d.decision !== 'reject' || (d.reason && d.reason.length > 0), {
@@ -182,7 +163,7 @@ router.post(
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return;
-    const id = z.coerce.number().int().positive().parse(req.params.id);
+    const id = idString.parse(req.params.id);
     const body = DecisionSchema.parse(req.body);
 
     // ═══ THIS USED TO BE A writeTx PAIR, AND IT REFUSED AFTER IT HAD COMMITTED ═════════════════
@@ -258,8 +239,10 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = RoleSchema.safeParse(req.body);
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
@@ -278,7 +261,7 @@ router.post(
       const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
       if (!actor || !(await argon2.verify(actor.password_hash, body.data.password))) {
         req.log.warn({ actorId: req.user.id, targetId: id.data }, 'admin grant refused: step-up failed');
-        return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+        return sendStepUpFailed(res);
       }
     }
 
@@ -326,8 +309,13 @@ const sendDisableOutcome = (res, result) => {
   });
 };
 
-const DisableBody = z.object({ reason: z.string().trim().min(1).max(2000) }).strict();
-const EnableBody = z.object({}).strict();
+// lib/reason-text.js: no NUL, no bidi override, no lone surrogate in an append-only audit row.
+const DisableBody = z.object({ reason: reasonText(2000) }).strict();
+// Enabling asks for a reason exactly like disabling does (owner, 2026-11-03): a restore is a judgement
+// too, and the audit row should carry it. The 3a frame's end action 'Engedélyezés' opens a reason sheet.
+// `password` is the actor's OWN password, read only when the account coming back is an ADMIN (see
+// the enable route): letting a stopped admin back in hands over everything a grant does.
+const EnableBody = z.object({ reason: reasonText(2000), password: z.string().min(1).max(200).optional() }).strict();
 
 /**
  * Stop an account.
@@ -353,8 +341,10 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const body = DisableBody.safeParse(req.body);
     if (!body.success) return sendError(res, 400, ERR.VALIDATION);
 
@@ -377,8 +367,11 @@ router.post(
 /**
  * Let an account back in.
  *
- * No reason required, deliberately, and the asymmetry is the point: the heavy act is stopping
- * somebody, and requiring paperwork to undo a mistake makes the mistake likelier to stand.
+ * A reason is REQUIRED (owner decision 2026-11-03). This used to carry the opposite argument — the
+ * heavy act is stopping somebody, and paperwork to undo a mistake makes the mistake likelier to
+ * stand — and it was weighed again: an enable is a judgement about a person who was stopped for a
+ * reason, the audit row is where a later admin reads why they came back, and the reason sheet is one
+ * field. The transaction refuses an empty reason in both directions (`needs_reason`).
  */
 router.post(
   '/admin/users/:id/enable',
@@ -387,19 +380,51 @@ router.post(
   adminWriteIpLimiter,
   adminWriteLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.coerce.number().int().positive().safeParse(req.params.id);
-    if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
-    if (!EnableBody.safeParse(req.body ?? {}).success) return sendError(res, 400, ERR.VALIDATION);
+    // A canonical decimal id or nothing (admin/params.js): '0x10' and ' 5' used to reach accounts 16
+    // and 5 here. A non-id keeps the 404 this route always answered for one.
+    const id = { data: parseId(req.params.id) };
+    if (id.data === null) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    const body = EnableBody.safeParse(req.body ?? {});
+    if (!body.success) return sendError(res, 400, ERR.VALIDATION);
+
+    // ═══ RE-ENABLING AN ADMIN IS A GRANT (security review admin v2, 2026-11-04, attack 06) ══════
+    //
+    // Measured: the owner disables admin X (compromised); a stolen session of admin B re-enables X
+    // with a reason and no password - while granting admin to anybody asks B for B's password. X
+    // signs in as an admin, and keeps that power after the owner revokes B's sessions: exactly the
+    // "second admin that outlives the stolen session" the grant step-up exists to stop.
+    //
+    // So the same step-up: a supplied password is checked here (wrong = the generic 401), and the
+    // TRANSACTION refuses to bring back an account whose role is admin unless it was - the role is
+    // read under the write lock, so a demote/promote racing this request cannot slip past it.
+    let stepUp = false;
+    if (body.data.password !== undefined) {
+      const actor = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+      if (!actor?.password_hash || !(await argon2.verify(actor.password_hash, body.data.password))) {
+        req.log.warn({ actorId: req.user.id, targetId: id.data }, 'account enable refused: step-up failed');
+        return sendStepUpFailed(res);
+      }
+      stepUp = true;
+    }
 
     const result = await db.setAccountDisabled({
       actorId: req.user.id,
       targetId: id.data,
       disabled: false,
-      reason: null,
+      reason: body.data.reason,
+      stepUp,
       requestId: res.locals.requestId,
       ip: req.ip ?? null,
     });
 
+    if (result.outcome === 'step_up_required') {
+      return res.status(401).json({
+        error: 're-enabling an admin requires your password',
+        code: ERR.UNAUTHORIZED,
+        reason: 'step_up_required',
+        requestId: res.locals.requestId,
+      });
+    }
     if (result.outcome !== 'applied') return sendDisableOutcome(res, result);
     invalidateSvCache(id.data);
     req.log.info({ targetId: id.data }, 'account enabled');
@@ -409,115 +434,9 @@ router.post(
 
 /* ── user search ─────────────────────────────────────────────────────────────────────────────── */
 
-/**
- * The columns an admin may sort by, as a MAP from a client key to SQL.
- *
- * The client never sends SQL and never sends a column name that reaches a query. It sends a key,
- * and a key that is not in this object is a 400 — so there is no interpolation to get wrong and no
- * "sanitise the sort parameter" step that somebody later relaxes.
- *
- * `email` sorts on the same expression its unique index is built on, so the sort is answered from
- * the index rather than by a temp b-tree.
- */
-const USER_SORTS = {
-  created: { sql: 'u.created_at', tiebreak: 'u.id' },
-  email: { sql: 'lower(trim(u.email))', tiebreak: 'u.id' },
-  role: { sql: 'u.role', tiebreak: 'u.id' },
-};
-
-const userQuery = z
-  .object({
-    // Bounded and regex-shaped. This is fed to a LIKE, so the bound is what stops a pathological
-    // pattern, and the character class is what stops a wildcard being smuggled in: `%` and `_` are
-    // LIKE metacharacters, and a search for `%` would match every account in the product.
-    q: z.string().trim().min(1).max(80).regex(/^[\w@.\-+ ]+$/u).optional(),
-    sort: z.enum(['created', 'email', 'role']).optional(),
-    dir: z.enum(['asc', 'desc']).optional(),
-    role: z.enum(['user', 'coach', 'admin']).optional(),
-    state: z.enum(['all', 'enabled', 'disabled']).optional(),
-    cursor: z.string().max(200).optional(),
-  })
-  .strict();
-
-/**
- * Find an account.
- *
- * ═══ THE PROJECTION IS THE SMALLEST THING THAT ANSWERS THE QUESTION ════════════════════════════
- *
- * An admin looking up a user needs to identify them, see their standing, and act. They do not need
- * the person's measurements, their food log, their photos or their conversations, and this endpoint
- * cannot reach any of it. The columns below are the whole projection, and `password_hash`,
- * `session_version` and `next_login_at` are deliberately absent — a support screen that leaks a
- * hash is a support screen that has to be treated as a credential store.
- *
- * ═══ AND THE PAGINATION IS THE ONE THE CODEBASE ALREADY HAS ════════════════════════════════════
- *
- * `lib/cursor.js` encodes an opaque keyset tuple and caps the page at MAX_PAGE. It had zero admin
- * callers: the three existing admin list routes use three different dialects — a raw integer
- * cursor, a hardcoded LIMIT 50 with no cursor at all, and a limit with no cursor. A fourth would
- * have been the eleventh time this project reimplemented something it already had.
- */
-router.get(
-  '/admin/users',
-  requireAuth,
-  requireRole('admin'),
-  adminReadIpLimiter,
-  adminReadLimiter,
-  asyncRoute(async (req, res) => {
-    if (!(await assertAdmin(req, res))) return;
-    const parsed = userQuery.safeParse(req.query);
-    if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
-    const { q, role, state = 'all' } = parsed.data;
-    const sortKey = parsed.data.sort ?? 'created';
-    const desc = (parsed.data.dir ?? 'desc') === 'desc';
-    const order = USER_SORTS[sortKey];
-
-    // The keyset cursor carries the SORTED value and the tiebreak id, so a page boundary cannot
-    // skip or repeat a row when two accounts share a timestamp — which every seeded batch does.
-    const after = parsed.data.cursor ? decodeCursor(parsed.data.cursor) : null;
-    const cursorOk = Array.isArray(after) && after.length === 2;
-
-    // Every fragment below is a FIXED string chosen by a key, never assembled from request text.
-    const cmp = desc ? '<' : '>';
-    const dir = desc ? 'DESC' : 'ASC';
-    const rows = await db.all(
-      `SELECT u.id, u.email, u.role, u.created_at AS createdAt, u.disabled_at AS disabledAt,
-              u.must_change_credentials AS mustChange,
-              EXISTS (SELECT 1 FROM coach_profiles c WHERE c.user_id = u.id) AS hasProfile,
-              (SELECT COUNT(*) FROM coach_clients k
-                WHERE k.coach_id = u.id AND k.status = 'active')            AS clientCount
-         FROM users u
-        WHERE (? IS NULL OR lower(trim(u.email)) LIKE '%' || lower(?) || '%')
-          AND (? IS NULL OR u.role = ?)
-          AND (? = 'all'
-            OR (? = 'enabled'  AND u.disabled_at IS NULL)
-            OR (? = 'disabled' AND u.disabled_at IS NOT NULL))
-          AND (? = 0 OR (${order.sql}, ${order.tiebreak}) ${cmp} (?, ?))
-        ORDER BY ${order.sql} ${dir}, ${order.tiebreak} ${dir}
-        LIMIT ?`,
-      [
-        q ?? null, q ?? '',
-        role ?? null, role ?? null,
-        state, state, state,
-        cursorOk ? 1 : 0, cursorOk ? after[0] : null, cursorOk ? after[1] : null,
-        MAX_PAGE + 1,
-      ],
-    );
-
-    const page = rows.slice(0, MAX_PAGE);
-    const last = page[page.length - 1];
-    res.json({
-      users: page,
-      // The cursor encodes the SORT VALUE, not the row id — a cursor built from the id would walk
-      // the wrong order the moment the sort key is anything but `created`.
-      nextCursor:
-        rows.length > MAX_PAGE && last
-          ? encodeCursor([sortKey === 'email' ? String(last.email).trim().toLowerCase() : sortKey === 'role' ? last.role : last.createdAt, last.id])
-          : null,
-      sort: { key: sortKey, direction: desc ? 'desc' : 'asc' },
-    });
-  }),
-);
+// GET /admin/users (the account list) and GET /admin/users/:id (the inspect page) live in
+// admin/accounts.js since package B-admin-accounts: search over e-mail and display name, role and
+// state filters, five sort keys with a keyset cursor each, a total count.
 
 /* ── metrics ─────────────────────────────────────────────────────────────────────────────────── */
 

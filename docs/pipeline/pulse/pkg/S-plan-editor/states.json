@@ -1,0 +1,706 @@
+{
+  "about": "S-plan-editor - the frame data of plan-editor-2 / -3 and the undrawn states of the Tervszerkesztő (/coach/plans/:id, PLAN 4.1 rule 7). Accounts: C = coach@ (every state), M = user@ (the member who opens an editor URL). The three frames and every replay state use the member's plan (planOfMember = 1), recorded, never written. Every mutating state (add / delete + Undo / reorder / rename / status / copy / clone) is listed under notCapturable with the sandbox object it would use (scratch plan 10): no live write was made by this package.",
+  "overrides": {
+    "plan-editor-2": {
+      "why": "The frame draws the superset's first row SELECTED (its two reorder arrows shown) - one more step taps that row. The recording names the superset rows \"Bicepszhajlítás gépen\" / \"Facepull\"; the frame \"Bicepszhajlítás kézisúlyzóval\" / \"Arcig húzás\": two name edits over the recording of GET /plans/1.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans/1",
+          "edits": [
+            {
+              "pointer": "/exercises/13/name",
+              "value": "Bicepszhajlítás kézisúlyzóval"
+            },
+            {
+              "pointer": "/exercises/14/name",
+              "value": "Arcig húzás"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            },
+            "expanded": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Bicepszhajlítás kézisúlyzóval"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Bicepszhajlítás kézisúlyzóval"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": "^Bicepszhajlítás kézisúlyzóval"
+        },
+        "expanded": true
+      }
+    },
+    "plan-editor-3": {
+      "why": "The frame's results are illustrative: three rows, the area flag in the caution (warning) ink, the third with \"1 eszköz hiányzik\". The recording of GET /exercises?q=guggolás&for_client=1 holds 24 results, the first \"Guggolás\" with a danger flag. Edits: the three drawn names, the stabilising-only knee conflict (warning ink), one missing kit item on the third, the other 21 rows removed.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "q": "guggolás"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Guggolás rúddal"
+            },
+            {
+              "pointer": "/exercises/0/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Fej fölötti guggolás"
+            },
+            {
+              "pointer": "/exercises/1/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Goblet guggolás"
+            },
+            {
+              "pointer": "/exercises/2/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/2/missing_equipment",
+              "value": [
+                "bodyweight"
+              ]
+            },
+            {
+              "pointer": "/exercises/23",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/22",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/21",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/20",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/19",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/18",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/17",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/16",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/15",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/14",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/13",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/12",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/11",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/10",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/9",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/8",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/7",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/6",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/5",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/4",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/3",
+              "remove": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "states": {
+    "plan-editor-empty": {
+      "title": "Tervszerkesztő — üres terv (nulla nap)",
+      "account": "C",
+      "route": "/coach/plans/11",
+      "height": 874,
+      "reach": "sandbox",
+      "why": "the zero-day sandbox plan (emptyPlan, id 11), read only: the strip of empty slots (\"+\" over the track), the \"A terv még üres\" empty state in the place of the day list, no duplicate row, the \"+ Nap hozzáadása\" link",
+      "arrived": {
+        "text": {
+          "key": "plans.noDaysTitle"
+        }
+      }
+    },
+    "plan-editor-template": {
+      "title": "Tervszerkesztő — sablon (scratch terv), első nap nyitva",
+      "account": "C",
+      "route": "/coach/plans/10",
+      "height": 1400,
+      "reach": "sandbox",
+      "why": "the scratch template plan (scratchPlan, id 10), read only: a template has no client, so no start-date line; its first day opened",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": " · 1\\. nap$"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": " 1\\. nap"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": " 1\\. nap"
+        },
+        "expanded": true
+      }
+    },
+    "plan-editor-3-tall": {
+      "title": "Tervszerkesztő — gyakorlatkereső, 240 pt-tal magasabb ablakban (a frame görgetett mintája)",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 1114,
+      "reach": "seed",
+      "why": "plan-editor-3 is the page scrolled by 240 (the day-1 rule at y 100, in the app at y 340), and a step cannot scroll by a number (request R-S-plan-editor-01). The same steps and fixture at 402 x 1114: its rows 240..1114 are the frame's 0..874, cut out and paired with the frame by the package (the bar is fixed to the bottom, so it lands where the frame draws it).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "q": "guggolás"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Guggolás rúddal"
+            },
+            {
+              "pointer": "/exercises/0/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Fej fölötti guggolás"
+            },
+            {
+              "pointer": "/exercises/1/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Goblet guggolás"
+            },
+            {
+              "pointer": "/exercises/2/conflicts",
+              "value": [
+                {
+                  "body_area": "knee",
+                  "severity": "avoid",
+                  "relation": "stabilises"
+                }
+              ]
+            },
+            {
+              "pointer": "/exercises/2/missing_equipment",
+              "value": [
+                "bodyweight"
+              ]
+            },
+            {
+              "pointer": "/exercises/23",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/22",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/21",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/20",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/19",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/18",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/17",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/16",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/15",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/14",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/13",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/12",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/11",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/10",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/9",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/8",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/7",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/6",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/5",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/4",
+              "remove": true
+            },
+            {
+              "pointer": "/exercises/3",
+              "remove": true
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Alsótest – erő 1\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Alsótest – erő 1\\. nap"
+            },
+            "expanded": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": "Gyakorlat",
+            "nth": 0
+          },
+          "arrived": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Gyakorlat keresése"
+          }
+        },
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": "Gyakorlat keresése",
+            "text": "guggolás"
+          },
+          "arrived": {
+            "role": "button",
+            "name": "Mégse"
+          }
+        }
+      ],
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": "Gyakorlat keresése"
+      }
+    },
+    "plan-editor-status-sheet": {
+      "title": "Tervszerkesztő — állapot lap nyitva",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "seed",
+      "why": "the status word opens the sheet: four status words, the current one (Aktív) marked; nothing is sent until Mentés",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "plans.status.active"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "plans.statusTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog",
+        "name": {
+          "key": "plans.statusTitle"
+        }
+      }
+    },
+    "plan-editor-renamed": {
+      "title": "Tervszerkesztő — átnevezve, Mentés aktív",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "seed",
+      "why": "typing over the name makes a plan-level change pending: the Mentés pill turns lime (the one lime pill); the pill is never pressed, nothing is written",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "plans.newName"
+            },
+            "text": "Felső/alsó szplit – 13 hetes blokk"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.save"
+        }
+      }
+    },
+    "plan-editor-offline": {
+      "title": "Tervszerkesztő — offline, nyitott nap",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 2078,
+      "reach": "seed",
+      "why": "the network drops with day 5 open: every control that writes is disabled (trash, arrows, + Gyakorlat, the add-block links, Klónozás, the duplicate row); opening and closing days, collapsing a block and typing the name still work",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            },
+            "expanded": true
+          }
+        },
+        {
+          "offline": true,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.deleteBlock"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.deleteBlock"
+        },
+        "disabled": true
+      }
+    },
+    "plan-editor-block-collapsed": {
+      "title": "Tervszerkesztő — összecsukott blokk",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 2078,
+      "reach": "seed",
+      "why": "day 5 open, its first block collapsed: the block head alone with a chevron-down",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "re": "^Felsőtest – húzás 5\\. nap"
+            },
+            "expanded": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "plans.collapseBlock"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.collapseBlock"
+            },
+            "expanded": false
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.collapseBlock"
+        },
+        "expanded": false
+      }
+    },
+    "plan-editor-clone-open": {
+      "title": "Tervszerkesztő — klónozás nyitva",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 1300,
+      "reach": "seed",
+      "why": "Klónozás opens the panel: the deep-copy hint, one row per client, \"Másolat sablonként\"; nothing is cloned",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "plans.cloneOpen"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "plans.cloneOpen"
+            },
+            "expanded": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "plans.cloneAsTemplate"
+        }
+      }
+    },
+    "plan-editor-missing": {
+      "title": "Tervszerkesztő — a terv nem érhető el",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /plans/:id refused (not yours / archived / never existed): the one message, no back link, no pill",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans/1",
+          "status": 404,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/plans/1",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "plans.missingTitle"
+        }
+      }
+    },
+    "plan-editor-needs-start": {
+      "title": "Tervszerkesztő — kliens-terv kezdődátum nélkül",
+      "account": "C",
+      "route": "/coach/plans/{planOfMember}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a client plan with no start date: the danger notice line under the strip says why it cannot be activated",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/plans/1",
+          "edits": [
+            {
+              "pointer": "/plan/starts_on",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "plans.needsStart"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "plan-editor-loading": "needs a held answer (the same request as R-S-coach-plans-02).",
+    "plan-editor-new-draft": "reachable only through \"Új terv\" (a create = a write); the focus + select-all effect above the return is unchanged.",
+    "plan-editor-mutations": "add day (slot / link), delete day + Undo, add block x3, delete block + Undo, reorder blocks, pick exercise, delete exercise + Undo, reorder exercises, status save, rename save, copy cycle (+ cycleGrew line), clone to a client / as template: all on the scratch template plan (scratchPlan, id 10) with --live; not run by this package (no live write made). The handlers above the return are unchanged."
+  }
+}

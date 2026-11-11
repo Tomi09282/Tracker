@@ -1,0 +1,7 @@
+[
+  {
+    "element": "E2",
+    "live": false,
+    "reason": "one Pulse look — CopyButton (variants/E2CopyButton.tsx) is the kit's iconBtn('copy') (a bare glyph; the tick in lime when done, the warning in danger when refused) and no longer reads its letter"
+  }
+]

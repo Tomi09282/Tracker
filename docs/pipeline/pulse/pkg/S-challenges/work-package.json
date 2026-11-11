@@ -1,0 +1,60 @@
+{
+  "id": "S-challenges",
+  "title": "LifeOS Phase 4 screen package: MAI DOBÁS at /challenges (frame lifeos/challenges-1: the daily draw of up to three challenges as a single-choice list, one reroll, the mandatory pick with the one lime pill 'Ezt vállalom') and KIHÍVÁSOK at /challenges/pool (frame lifeos/challenges-2: AKTÍV n / 50 with the five-segment weight and the coin value, ARCHIVÁLT with Visszaállítás, the header plus opening the challenge sheet for create / edit / archive / delete), on the B-rewards-challenges API; the Ma page's NAPI DOBÁS block (frames lifeos/ma-4 pending draw, lifeos/ma-1 picked teaser) is exported as TodayDraw for S-ma's TodayPage to mount",
+  "screens": [
+    "challenges",
+    "challenges-pool"
+  ],
+  "owns": [
+    "frontend/src/features/challenges/**",
+    "docs/pipeline/pulse/pkg/S-challenges/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "requests": {
+      "R-S-challenges-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /challenges and /challenges/pool routes, parent Ma = '/')",
+      "R-S-challenges-02": "frontend/src/features/today/TodayPage.tsx, TodayTasks.tsx, model.ts (S-ma, merged): mount TodayDraw twice (place 'open' above MAI EDZÉS for ma-4, 'settled' after FELADATOK for ma-1); FELADATOK and the MA a/b count leave out the task a pick became (challengeId), which NAPI DOBÁS shows"
+    },
+    "states.json": "docs/pipeline/pulse/pkg/S-challenges/states.json"
+  },
+  "frames": [
+    "lifeos/challenges-1",
+    "lifeos/challenges-2",
+    "lifeos/ma-4"
+  ],
+  "inventory": "docs/brain/58-Pulse/Screens/challenges.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-naptar-fokusz-kihivas.md (challenges-1, challenges-2), README-ma.md (ma-1, ma-4) and docs/pipeline/pulse/pkg/B-rewards-challenges/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/challenges",
+  "dependsOn": [
+    "B-rewards-challenges",
+    "B-core",
+    "S-ma"
+  ],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 4)",
+  "i18nNamespaces": [
+    "challenges"
+  ],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries this entry in its WORKING TREE only): the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge it first; the slot holds it applied locally and uncommitted. challengesApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 033: every capture answers the challenge reads with contract bodies (states.json) checked against the lifeos-api types - matched-fixture at best until recorded.",
+  "wave": 7
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'BSD'; src: url('bsd.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+#out { white-space: pre; }
+</style></head>
+<body><span style="font-family:BSD;font-weight:900">0</span><div id="out"></div>
+<script>
+(async () => {
+  await document.fonts.load('900 124px BSD');
+  await document.fonts.load('700 124px BSD');
+  const S = 1000, W = 1400, H = 1600, BASE = 1200;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const cx = c.getContext('2d', { willReadFrequently: true });
+  const res = {};
+  for (const wght of [900]) {
+    const g = {};
+    for (const ch of ['0','1','2','3','4','5','6','7','8','9',',','.',':','/','%','+','\u2212','-','\u2013','H','190','83,1','2:59','1840','2/4']) {
+      cx.clearRect(0, 0, W, H);
+      cx.font = wght + ' ' + S + 'px BSD';
+      cx.fillStyle = '#000';
+      cx.textBaseline = 'alphabetic';
+      const X = 200;
+      cx.fillText(ch, X, BASE);
+      const adv = cx.measureText(ch).width;
+      const d = cx.getImageData(0, 0, W, H).data;
+      let l = W, r = -1, t = H, b = -1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { if (d[(y * W + x) * 4 + 3] > 127) { if (x < l) l = x; if (x > r) r = x; if (y < t) t = y; if (y > b) b = y; } }
+      g[ch] = { adv: +(adv / S).toFixed(4), lsb: +((l - X) / S).toFixed(4), inkR: +((r + 1 - X) / S).toFixed(4), rsb: +((X + adv - r - 1) / S).toFixed(4), top: +((BASE - t) / S).toFixed(4), bot: +((b + 1 - BASE) / S).toFixed(4) };
+    }
+    res[wght] = g;
+  }
+  document.getElementById('out').textContent = 'RESULT' + JSON.stringify(res) + 'END';
+})();
+</script></body></html>

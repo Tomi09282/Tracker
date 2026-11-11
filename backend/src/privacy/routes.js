@@ -13,7 +13,7 @@ import { z } from 'zod';
 import argon2 from 'argon2';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
-import { ERR, sendError, asyncRoute } from '../lib/http.js';
+import { ERR, sendError, sendStepUpFailed, asyncRoute } from '../lib/http.js';
 import { requireAuth, invalidateSvCache, clearAuthCookies } from '../auth/middleware.js';
 
 const router = Router();
@@ -133,7 +133,7 @@ router.post(
     const me = await db.get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
     if (!me) return sendError(res, 401, ERR.UNAUTHORIZED, 'unauthorized');
     if (!(await argon2.verify(me.password_hash, body.data.password))) {
-      return sendError(res, 401, ERR.UNAUTHORIZED, 'invalid credentials');
+      return sendStepUpFailed(res);
     }
 
     const result = await db.deleteMyAccount({

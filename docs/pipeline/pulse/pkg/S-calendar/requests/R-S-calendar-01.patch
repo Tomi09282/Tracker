@@ -1,0 +1,139 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 8b7a133..8fb3486 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -88,6 +88,8 @@ const EXPECT_BY_VIEW = {
+     ['/library', '/workout'],
+     ['/library/1467', '/workout'],
+     ['/nutrition', '/nutrition'],
++    ['/calendar', '/calendar'],
++    ['/calendar/events/12', '/calendar'],
+     ['/progress', '/progress'],
+     ['/settings', '/settings'],
+     ['/coins', '/settings'],
+diff --git a/frontend/scripts/check-nav.mjs b/frontend/scripts/check-nav.mjs
+index 13e42b9..084e608 100644
+--- a/frontend/scripts/check-nav.mjs
++++ b/frontend/scripts/check-nav.mjs
+@@ -57,7 +57,7 @@ const LOCALES = ['hu', 'en', 'de'];
+  * source; this is the assertion. The member's bar is the same for every role in Phase 1; the
+  * trainer and admin bars open with their switch cells.
+  */
+-const EXPECTED_COUNT = { user: 5, trainer: 4, admin: 5 };
++const EXPECTED_COUNT = { user: 6, trainer: 4, admin: 5 };
+ 
+ /**
+  * The switch cells each view's bar OPENS with, in order: the view each one returns to. A switch
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 71fa271..a5a6bf3 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -138,6 +138,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+     { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
++    { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+     { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
+   ],
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 736ac7a..cd12eb0 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -62,6 +62,7 @@ export const ROUTE_META = {
+   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
++  '/calendar/events/:id': { parent: '/calendar', parentLabelKey: 'nav.calendar' },
+   '/notifications': {
+     parent: '/',
+     parentLabelKey: 'nav.today',
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7d7a905..c61eb8f 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -99,6 +99,10 @@ const DaySettingsPage = lazy(() =>
+   import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
+ );
+ const TasksPage = lazy(() => import('../features/tasks/TasksPage').then((m) => ({ default: m.TasksPage })));
++const CalendarPage = lazy(() => import('../features/calendar/CalendarPage').then((m) => ({ default: m.CalendarPage })));
++const EventDetailPage = lazy(() =>
++  import('../features/calendar/EventDetailPage').then((m) => ({ default: m.EventDetailPage })),
++);
+ const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
+ const HabitDetailPage = lazy(() =>
+   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+@@ -153,6 +157,8 @@ export const router = createBrowserRouter([
+       { path: 'library', element: suspended(<LibraryPage />) },
+       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+       { path: 'nutrition', element: suspended(<NutritionPage />) },
++      { path: 'calendar', element: suspended(<CalendarPage />) },
++      { path: 'calendar/events/:id', element: suspended(<EventDetailPage />) },
+       { path: 'progress', element: suspended(<ProgressPage />) },
+       { path: 'coins', element: suspended(<CoinsPage />) },
+       { path: 'compose', element: suspended(<ComposePage />) },
+diff --git a/frontend/src/assets/pulse/navIcons.ts b/frontend/src/assets/pulse/navIcons.ts
+index 9e9cb23..0a87b9a 100644
+--- a/frontend/src/assets/pulse/navIcons.ts
++++ b/frontend/src/assets/pulse/navIcons.ts
+@@ -22,6 +22,7 @@
+  *   desk             desk + lit             hero-stopwatch (photo, cropped); lit = lime tint
+  *   accounts         accounts + lit         hero-plates (photo, cropped); lit = lime tint
+  *   market           market + lit           coin; lit = lime tint
++ *   calendar         calendar + lit         medal and its lit twin (round B: "Naptár → érem"); lit = raster
+  *
+  * ═══ THE THREE WAYS A CELL LIGHTS ══════════════════════════════════════════════════════════════
+  *
+@@ -37,7 +38,7 @@
+ import type { PulseSlot, TabIconKey } from './slots.ts';
+ 
+ /** The destination cells whose master is not made yet. */
+-export const PLACEHOLDER_NAV_KEYS = ['plans', 'desk', 'accounts', 'market'] as const;
++export const PLACEHOLDER_NAV_KEYS = ['plans', 'desk', 'accounts', 'market', 'calendar'] as const;
+ 
+ /** The switch cells: idle raster only, never lit. */
+ export const SWITCH_ICON_KEYS = ['switch-user', 'switch-trainer'] as const;
+@@ -69,6 +70,7 @@ export const NAV_ICON_SOURCE: Readonly<Record<NavIconKey | SwitchIconKey, NavIco
+   desk: { slot: 'hero-stopwatch', lit: 'tint', crop: 'cover', placeholder: true },
+   accounts: { slot: 'hero-plates', lit: 'tint', crop: 'cover', placeholder: true },
+   market: { slot: 'coin', lit: 'tint', placeholder: true },
++  calendar: { slot: 'medal', lit: 'raster', placeholder: true },
+   'switch-user': { slot: 'tab-profile', lit: 'none', placeholder: true },
+   'switch-trainer': { slot: 'tab-coach', lit: 'none', placeholder: true },
+ };
+diff --git a/frontend/src/i18n/de.json b/frontend/src/i18n/de.json
+index 625010c..d5f8221 100644
+--- a/frontend/src/i18n/de.json
++++ b/frontend/src/i18n/de.json
+@@ -52,6 +52,7 @@
+   },
+   "nav": {
+     "nutritionShort": "Essen",
++    "calendar": "Kalender",
+     "profile": "Profil",
+     "today": "Heute",
+     "library": "Übungen",
+diff --git a/frontend/src/i18n/en.json b/frontend/src/i18n/en.json
+index cf117b8..9acbcd2 100644
+--- a/frontend/src/i18n/en.json
++++ b/frontend/src/i18n/en.json
+@@ -52,6 +52,7 @@
+   },
+   "nav": {
+     "nutritionShort": "Food",
++    "calendar": "Calendar",
+     "profile": "Profile",
+     "today": "Today",
+     "library": "Exercises",
+diff --git a/frontend/src/i18n/hu.json b/frontend/src/i18n/hu.json
+index 5a268dd..b39d85e 100644
+--- a/frontend/src/i18n/hu.json
++++ b/frontend/src/i18n/hu.json
+@@ -52,6 +52,7 @@
+   },
+   "nav": {
+     "nutritionShort": "Étkezés",
++    "calendar": "Naptár",
+     "profile": "Profil",
+     "today": "Ma",
+     "library": "Gyakorlatok",

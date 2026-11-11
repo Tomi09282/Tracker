@@ -1,0 +1,14 @@
+{
+  "id": "R-S-settings-01",
+  "from": "S-profile-v2",
+  "kind": "nav",
+  "blocking": false,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs",
+  "need": "The route /settings/equipment for the pushed Felszerelés page of design round A (frame settings-equipment; plan Phase 1 'Profile v2': Felszerelés -> new /settings/equipment page, the existing EquipmentSection moved there). Three data lines: the lazy route (EquipmentPage is exported from features/settings/EquipmentSection.tsx, an S-settings file), its routeMeta row (parent /settings, parentLabelKey nav.profile - the header draws '< PROFIL' and the Profil tab stays lit; the /settings tab already owns /settings/* by prefix), and the EXPECT row ['/settings/equipment', '/settings'] of check-nav-active (completeness against the router). The door is the literal to=\"/settings/equipment\" on Profil's Felszerelés row (SettingsPage.tsx), so check-nav needs no change.",
+  "evidence": "kepernyok-2x/nezetek/settings-equipment@2x.png; figma-build/nezetek/settings-equipment.part.js (screenHead('push', 'Felszerelés', { parent: 'Profil' })); capture .pulse/shots/S-settings/settings-equipment.overview.png with the patch applied in the slot",
+  "proposedApi": "{ path: 'settings/equipment', element: suspended(<EquipmentPage />) } + ROUTE_META['/settings/equipment'] = { parent: '/settings', parentLabelKey: 'nav.profile' }",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-settings/requests/R-S-settings-01.patch",
+  "interim": "The patch is applied to the slot's working tree only (never committed there), so the page is built and captured. Merged WITHOUT this request, the Felszerelés row would open the app's not-found fallback: S-profile-v2 must be merged together with it.",
+  "status": "merged",
+  "resolution": "Applied by the integrator in the same squash merge as pulse/S-profile-v2 (kept as pkg/_int/S-profile-v2-R-S-settings-01.patch)."
+}

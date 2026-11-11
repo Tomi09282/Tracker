@@ -1,0 +1,44 @@
+{
+  "id": "S-day-settings",
+  "title": "LifeOS Phase 2 (Core) screen package: \"Nap és időzóna\" at /settings/day, built 1:1 to design round B's settings-day-v2 on GET / PATCH /me/prefs (B-core) - the time-zone row with the once-a-day limit and its zone picker sheet, the day start as a segmented switch of figures with autosave and the one-line LifeOS explanation; the Profil row \"Nap és időzóna\" (hand-in) and the silent first-time browser-zone write on app start (hook here, mount by request)",
+  "screens": ["settings-day"],
+  "owns": [
+    "frontend/src/features/settings/DaySettingsPage.tsx",
+    "frontend/src/features/settings/dayPrefs.ts",
+    "docs/pipeline/pulse/pkg/S-day-settings/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"],
+    "requests": {
+      "R-S-day-settings-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /settings/day route)",
+      "R-S-day-settings-02": "frontend/src/ui/feedback/variants/E6Segmented.tsx (Segmented figures prop)",
+      "R-S-day-settings-03": "frontend/src/app/AppLayout.tsx (mount useTimezoneBootstrap)",
+      "R-S-day-settings-04": "frontend/src/features/settings/SettingsPage.tsx (the Profil row; filed by the integrator from the package's shared.patch, PLAN 4.4 item 4)"
+    }
+  },
+  "frames": ["lifeos/settings-day-v2"],
+  "inventory": "docs/brain/58-Pulse/Screens/settings-day.md (does not exist yet: the frame README README-jutalmak-ermek-admin.md and api.md are the inventory)",
+  "account": "user@tracker.local",
+  "route": "/settings/day",
+  "dependsOn": ["B-core", "S-profile-v2"],
+  "size": "S",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 2)",
+  "i18nNamespaces": ["settings"],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry, so pulse-sync / pulse-i18n / pulse-verify could not resolve it - the slot carried this entry in its WORKING TREE only, never committed): the integrator adds it at merge. Builds against B-core's frontend/src/lib/lifeos-api.ts (B-core shared.patch) - merge B-core first. dayPrefs.ts holds the hooks (useDayPrefs, useSaveDayPrefs, useTimezoneBootstrap) under a non-use* file name, so the frozen features/**/use*.ts glob does not need an exception. GET /me/prefs is not in the freeze (the running backend has no B-core yet): every capture of this package answers it with a contract stub (see states.json) and is reported structure, never matched, until the integrator records it."
+}

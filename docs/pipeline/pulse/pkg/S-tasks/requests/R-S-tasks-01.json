@@ -1,0 +1,13 @@
+{
+  "id": "R-S-tasks-01",
+  "from": "S-tasks",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs, frontend/scripts/check-nav.mjs",
+  "need": "The route /tasks (Feladatok, frame lifeos/tasks-1), pushed from Ma (README-ma: 'Feladatok (pushed, ‹ MA)'). Five data lines, made on pulse-redesign 1b7759f next to the merged S-habits rows: the lazy route (TasksPage exported from features/tasks/), its routeMeta row ('/tasks' -> parent '/', label tasks.tab.today = 'Ma'), '/tasks' in the home tab's owns (now ['/onboarding', '/notifications', '/habits', '/tasks']), the EXPECT row of check-nav-active, and one NO_INBOUND_BY_DESIGN row in check-nav for '/tasks' in the shape of the merged /habits row, until S-ma's Ma page draws its doors (the FELADATOK head and 'Kész ma · N ›'). The verify-gates probe re-anchor this request carried before is no longer needed: R-S-habits-01 merged the same line.",
+  "evidence": "kepernyok-2x/lifeos/tasks-1@2x.png; figma-build/lifeos/tasks-1.part.js (screenHead('push', 'Feladatok', { parent: 'Ma' })); captures and pairs in .pulse/pairs/S-tasks/ with the patch applied in the slot; verify-gates --allow-dirty 78 passed, 0 failed with it applied on 1b7759f",
+  "proposedApi": "{ path: 'tasks', element: suspended(<TasksPage />) } + ROUTE_META['/tasks'] = { parent: '/', parentLabelKey: 'tasks.tab.today' } + home tab owns '/tasks'",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-tasks/requests/R-S-tasks-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there), so the page is built and captured. Merged WITHOUT it the page exists but no URL opens it: merge together with this package. /tasks?capture=1 opens the CaptureSheet over Feladatok until S-ma mounts it on Ma ('Rögzítés +'). If S-ma names the home tab 'Ma' with its own key, tasks.tab.today can be replaced by it.",
+  "status": "open"
+}

@@ -1,0 +1,273 @@
+{
+  "about": "S-exercise-detail - the undrawn states of Gyakorlat részletei (PLAN 4.1 rule 7). The two frame states (exercise-detail-1 / -2) stay as pulse-frames.json declares them: account M, the recorded detail of the bench press and of the pull-ups. The moderation states are LIVE rows of the seed read as their author (account C = coach@, seed-demo.mjs): 1657 Demó – Bolgár kitörés (pending, image, front + back muscles), 1658 Demó – Kötélhúzás ülve (pending, image, back-only muscles = the dark Elöl view), 1660 Demó – Névtelen gépes gyakorlat (rejected with the moderator reason, nothing tagged). Literal ids are the ids of this freeze (no resolve entry exists for them in pulse-frames.json; a reseed needs new ids). Two states are edit lists over the recorded bench press (R26). The page is read-only: no state writes.",
+  "overrides": {
+    "exercise-detail-1": {
+      "why": "the back control is named by its key (nav.library), so the same assertion holds in en / de; the markup is the same link",
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "nav.library"
+        }
+      }
+    },
+    "exercise-detail-2": {
+      "why": "names by key (nav.library, muscleMap.back) so the en / de runs arrive too; the switch is the kit Segmented (role radio, aria-checked)",
+      "opened": {
+        "role": "link",
+        "name": {
+          "key": "nav.library"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  },
+  "states": {
+    "ed-loading": {
+      "title": "Gyakorlat részletei — betöltés (nem szám azonosító)",
+      "account": "M",
+      "route": "/library/abc",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the loading skeleton. A non-numeric id keeps the query disabled (known defect, unchanged), which is the one way to hold the loading state in a replay; a numeric id answers at once.",
+      "arrived": {
+        "url": "/library/abc"
+      }
+    },
+    "ed-not-found": {
+      "title": "Gyakorlat részletei — nem található",
+      "account": "M",
+      "route": "/library/999999",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the live 404 of an id that does not exist (the same state a failed read and a forbidden row land in - known defect, unchanged)",
+      "arrived": {
+        "text": {
+          "key": "library.emptyTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/exercises/999999",
+            "status": 404
+          }
+        ]
+      }
+    },
+    "ed-rejected": {
+      "title": "Gyakorlat részletei — elutasított beküldés indoklással",
+      "account": "C",
+      "route": "/library/1660",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the author opens a rejected submission - the danger notice with the moderator reason under the header; no muscles, no equipment, two steps, no substitutes; text not translated (translated 0, no other language) -> the EN mark",
+      "arrived": {
+        "text": {
+          "key": "library.rejectedTitle"
+        }
+      }
+    },
+    "ed-pending": {
+      "title": "Gyakorlat részletei — ellenőrzésre vár, képpel",
+      "account": "C",
+      "route": "/library/1657",
+      "height": 1300,
+      "reach": "seed",
+      "why": "undrawn: a submission waiting for review - the info notice line; the uploaded image takes its block between the header and the stage and Eszköz is not shown (unchanged rule); front + back muscles",
+      "arrived": {
+        "text": {
+          "key": "library.pendingReview"
+        }
+      }
+    },
+    "ed-dark-view": {
+      "title": "Gyakorlat részletei — minden célizom a hátul nézetben",
+      "account": "C",
+      "route": "/library/1658",
+      "height": 1300,
+      "reach": "seed",
+      "why": "undrawn: every highlighted muscle is on the back (lats + rear delts) - on Elöl the figure stands unlit, the role key and the other-side caption stay",
+      "arrived": {
+        "text": {
+          "key": "library.pendingReview"
+        }
+      }
+    },
+    "ed-description": {
+      "title": "Gyakorlat részletei — csak leírás, lépések nélkül",
+      "account": "M",
+      "route": "/library/{exBench}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "undrawn: no steps but a description - one paragraph under a strong rule, no heading (R22: no invented heading)",
+      "arrived": {
+        "text": "Hátközépre célzó evezés kábelen, széles fogással."
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises/{exBench}",
+          "edits": [
+            {
+              "pointer": "/exercise/description",
+              "value": "Hátközépre célzó evezés kábelen, széles fogással."
+            },
+            {
+              "pointer": "/exercise/instructions",
+              "value": []
+            }
+          ]
+        }
+      ]
+    },
+    "ed-no-muscles": {
+      "title": "Gyakorlat részletei — izomcsoport nélkül",
+      "account": "M",
+      "route": "/library/{exBench}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "undrawn: no muscle tagged - no stage, no figure; Eszköz becomes a ruled section of its own",
+      "arrived": {
+        "text": {
+          "key": "library.equipment"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises/{exBench}",
+          "edits": [
+            {
+              "pointer": "/muscles",
+              "value": []
+            }
+          ]
+        }
+      ]
+    },
+    "ed-lang-mark": {
+      "title": "Gyakorlat részletei — német felület, nem fordított szöveg",
+      "account": "M",
+      "route": "/library/80",
+      "lang": "de",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the exercise text is not in the interface language (translated 0 in de) - the language codes as a third item of the meta line in the warning ink. Literal id 80 = the row the freeze recorded in de ('Bent Over Barbell Row'); ids are only stable inside one freeze",
+      "arrived": {
+        "text": "EN / HU"
+      }
+    },
+    "ed-offline": {
+      "title": "Gyakorlat részletei — offline",
+      "account": "M",
+      "route": "/library/{exBench}",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the shell offline line over the cached detail; the page adds nothing",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "text": {
+              "key": "offline.title"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "offline.title"
+          }
+        }
+      ]
+    }
+  }
+}

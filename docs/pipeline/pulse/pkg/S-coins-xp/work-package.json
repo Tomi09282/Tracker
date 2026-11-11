@@ -1,0 +1,42 @@
+{
+  "id": "S-coins-xp",
+  "title": "LifeOS Phase 2 (Core) screen package: the coins page refreshed to design round B (coins-1v2, coins-1v2-debt, coins-2v2) - balance with an honest debt state, spendable, LEVEL figure + XP SegmentBar, this week's day columns, the statement grouped by local day with the new reason labels; the Profil SZINT row (hand-in)",
+  "screens": ["coins"],
+  "owns": [
+    "frontend/src/features/coins/CoinsPage.tsx",
+    "frontend/src/features/coins/CoinBalance.tsx",
+    "frontend/src/features/coins/WeekColumns.tsx",
+    "frontend/src/features/coins/statement.ts",
+    "docs/pipeline/pulse/pkg/S-coins-xp/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"],
+    "requests": ["requests/R-S-coins-xp-01.json (SettingsPage.tsx SZINT row)"],
+    "states.json": "docs/pipeline/pulse/pkg/S-coins-xp/states.json"
+  },
+  "frames": ["lifeos/coins-1v2", "lifeos/coins-1v2-debt", "lifeos/coins-2v2", "nezetek/settings-v2-member (SZINT row only)"],
+  "inventory": "docs/brain/58-Pulse/Screens/coins.md",
+  "account": "user@tracker.local",
+  "route": "/coins",
+  "dependsOn": ["B-core", "S-coins"],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 2)",
+  "i18nNamespaces": ["coins"],
+  "liveWrites": [],
+  "notes": "Ownership of CoinsPage.tsx and CoinBalance.tsx passes from the closed S-coins to this package (one file, one owner); B-core is a backend lane outside work-packages.json - drop it from dependsOn if the model refuses it. Proposed by the package itself (the orchestrator's task named the id, work-packages.json had no entry, so pulse-sync / pulse-i18n could not resolve it): the integrator adds this entry at merge. Builds against B-core's frontend/src/lib/lifeos-api.ts (B-core shared.patch) - merge B-core first."
+}

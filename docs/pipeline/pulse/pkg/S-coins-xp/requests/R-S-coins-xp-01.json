@@ -1,0 +1,13 @@
+{
+  "id": "R-S-coins-xp-01",
+  "from": "S-coins-xp",
+  "kind": "screen",
+  "blocking": false,
+  "target": "frontend/src/features/settings/SettingsPage.tsx",
+  "need": "The Profil SZINT ledger row of design round A (frame nezetek/settings-v2-member; plan 'Profile v2' item 2: SZINT (level + XP bar -> /coins, P2)), now that the wallet carries a level (B-core, migration 031). One LedgerRow after ERMEK inside the same closed RowStack: label coins.level.label, the kit ProgressBar (120 pt, ink, accessible name coins.level.xp '2158 / 2500 XP') in the middle column, the level as the num figure, the row links to /coins. Drawn only when readLevel(wallet) (features/coins/statement.ts, an S-coins-xp file) returns a level: an older server sends none and nothing is invented. The page header comment's SZINT line is updated to say so.",
+  "evidence": "kepernyok-2x/nezetek/settings-v2-member@2x.png; pair .pulse/pairs/S-coins-xp/settings-v2-member.pair.png (state settings-xp-level in pkg/S-coins-xp/states.json, wallet fixture of the 031 shape) captured with the patch applied in the slot",
+  "proposedApi": "import { readLevel, type WalletRead } from '../coins/statement'; import { ProgressBar } from '../../ui/data/ProgressBar'; const level = readLevel(wallet.data as WalletRead | undefined);",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-coins-xp/requests/R-S-coins-xp-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there). Merged without it, the coins page is complete and Profil simply has no SZINT row, as today.",
+  "status": "open"
+}

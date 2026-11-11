@@ -1,0 +1,115 @@
+── verify-gates: 54 probe(s) in frontend (4456937, dirty tree allowed) ──
+
+PASS  [check:nav] a screen that loses its only link is caught
+        said: "/coins" is a route nobody links to.
+PASS  [check:nav] a child's back-link does not keep its parent reachable
+        said: "/coach/plans" is a route nobody links to.
+PASS  [check:nav] an OPEN exemption fails the day its route gets a door
+        said: "/compose" has a door now (verify-gates-probe.tsx), and NO_INBOUND_BY_DESIGN still lists it as an OPEN gap.
+PASS  [check:nav] a required door that is not in its named file is caught
+        said: the required door to "/library" is gone from features/workout/WorkoutPlayer.tsx.
+SKIP  [check:nav] deleting the redirect of the idle Edzés tab is caught
+        dormant — REQUIRED_DOORS is empty until the D2 redirect lands (F16)
+PASS  [check:nav] the clamp coming back is caught
+        said: BottomNav clamps its tab list again.
+PASS  [check:nav] a tab count that drifts from the design is caught
+        said: the admin bar has 6 tabs, and the approved design has 7.
+PASS  [check:nav] a tab pointing at a route that does not exist is caught
+        said: the bar has a tab for "/progres", and the router has no such path
+PASS  [check:nav] a tab label key missing from a bundle is caught
+        said: the bar asks for "nav.nutritionTiny", which is missing from: hu, en, de
+PASS  [check:nav] dropping the horizontal safe area of the bar is caught
+        said: BottomNav never mentions safe-area-inset-left in its code.
+PASS  [check:nav] a comment that names the inset does not stand in for the inset
+        said: BottomNav never mentions safe-area-inset-left in its code.
+PASS  [check:nav] a pushed screen whose parent is not a route is caught
+        said: routeMeta sends "/coins" back to "/nowhere", which is not a router path
+SKIP  [check:nav] a pushed screen whose parent is not a route is caught
+        dormant — src/app/routeMeta.ts has not landed yet (F11)
+PASS  [check:nav-active] a route added to the signed-in layout with no row is caught
+        said: user: /verify-gates-probe has a row in the table  (a route with no row is a screen nobody chose a tab for — today it lights NOTHING. Add the row, or a
+PASS  [check:nav-active] a screen that stops lighting its tab is caught
+        said: user on /library lights exactly one tab  (lit 0: nothing)
+PASS  [check:nav-active] Értesítések without its Kezdőlap tab is caught
+        said: user on /notifications lights exactly one tab  (lit 0: nothing)
+PASS  [check:nav-active] a pushed screen that lights another tab than its parent is caught
+        said: user: /coins lights the tab of its parent /  (the screen lights /settings, its parent lights /)
+SKIP  [check:nav-active] a pushed screen that lights another tab than its parent is caught
+        dormant — src/app/routeMeta.ts has not landed yet (F11)
+PASS  [check:safe-area] the bottom inset removed from the bar is caught
+        said: ui/nav/BottomNav.tsx:85 pins a fixed element to the bottom edge (bottom-0) and never accounts for the bottom inset.
+PASS  [check:safe-area] an inset token whose chain no longer ends in env() is caught
+        said: It uses var(--content-pad-b), which does not reach env(safe-area-inset-bottom) in src/ui/tokens/tokens.css.
+PASS  [check:safe-area] an inset token re-declared without env() is caught
+        said: It uses var(--content-pad-b), which does not reach env(safe-area-inset-bottom) in src/ui/tokens/tokens.css.
+PASS  [check:safe-area] pb-[var(--card-pad)] on a fixed bottom-0 element is caught
+        said: pins a fixed element to the bottom edge (bottom-0) and never accounts for the bottom inset.
+PASS  [check:safe-area] a sticky top-0 element with no inset is caught
+        said: verify-gates-probe.tsx:1 pins a sticky element to the top edge (top-0) and never accounts for the top inset.
+PASS  [check:safe-area] a fixed element on an arbitrary bottom-[…] with no inset is caught
+        said: verify-gates-probe.tsx:1 pins a fixed element to the bottom edge (bottom-[calc(var(--nav-h)+12px)]) and never accounts for the bottom inset.
+PASS  [check:safe-area] an exemption that exempts nothing is caught
+        said: EXEMPT has "features/workout/RestTimer.tsx:top", and it exempts nothing: the element it names (line 62) accounts for its inset through env(safe-area-i
+PASS  [check:safe-area] a file-wide exemption on a file with several pinned elements is caught
+        said: EXEMPT has the file-wide entry "features/workout/RestTimer.tsx:bottom", and features/workout/RestTimer.tsx pins 2 elements to the bottom edge
+PASS  [check:safe-area] a scaffold that pads its top with a literal env() is caught
+        said: src/ui/shell/Screen.tsx pads the top with a literal env(safe-area-inset-top).
+SKIP  [check:safe-area] a scaffold that loses its top-inset token is caught
+        dormant — src/ui/shell/Screen.tsx has not landed yet (F11)
+PASS  [check:safe-area] viewport-fit=cover leaving index.html is caught
+        said: index.html has no `viewport-fit=cover` — every env(safe-area-inset-*) in this codebase
+PASS  [check:safe-area] a gutter that forgets the landscape notch is caught
+        said: src/index.css: a .screen-x rule sets a horizontal gutter with no left/right inset.
+PASS  [check:elements] an element only the playground renders, marked live, is caught
+        said: the catalogue marks E1 live, and only the playground renders what reads them:
+PASS  [check:elements] an element the product reads, marked not live, is caught
+        said: E2 is read by a component the product renders (CopyButton in ui/feedback/variants/E2CopyButton.tsx; imported by features/coaching/CoachDashboard.tsx)
+PASS  [check:elements] an element nothing reads, marked live, is caught
+        said: the catalogue marks E23 live, and no component calls useElementVariant on them.
+PASS  [check:elements] an inert element missing from the dormant list is caught
+        said: E1 are read only by components the playground mounts, and DORMANT does not list them.
+PASS  [check:elements] an element the product reads, listed as dormant, is caught
+        said: DORMANT still lists E2, which product components read — delete the entries, and let the
+PASS  [check:elements] a playground demo missing from PREVIEWABLE is caught
+        said: the Demo switch handles E1 but PREVIEWABLE omits them — the playground files
+PASS  [check:i18n] a key deleted from one bundle is caught
+        said: de: missing 1 key(s) — nav.home
+PASS  [check:i18n] a key no code references is caught (the exported consumer scan)
+        said: nav.verifyGatesProbe is in every bundle and referenced by no code — delete it or use it
+PASS  [check:i18n] a key the code references and no bundle has is caught
+        said: verify-gates-probe.tsx:1 references t('nav.verifyGatesProbe') and no bundle has it — the user sees the key path
+PASS  [check:tokens] a raw colour in a component is caught
+        said: src\verify-gates-probe.tsx:1  [raw-hex]  #CBFF2E
+PASS  [check:tokens] a var() that names no token is caught
+        said: src\verify-gates-probe.tsx:1  [undeclared-token]  var(--verify-gates-probe)
+PASS  [check:interval] a timer that stops on the wrong segment is caught
+        said: FAIL  a boundary belongs to the NEXT segment  (0)
+PASS  [check:autosave] the autosave hook drifting from its audited transcription is caught
+        said: FAIL  the hook still single flight raises a flag rather than queueing  (if (inFlight.current) {)
+PASS  [verify:outbox] a money endpoint added to the offline queue is caught
+        said: FAIL  a coin transfer is NOT
+PASS  [check:aurora] a wrapper that paints over the backdrop is caught
+        said: app/AppLayout.tsx:54 — <div> wraps the AuroraBackdrop mounted on line 58 and paints `bg-surface-1` over it. A negative-z backdrop is covered by any op
+PASS  [check:type-scale] a type step declared without a cn.ts entry is caught
+        said: `text-verifygates` is declared in src/ui/tokens/tokens.css but not listed in src/lib/cn.ts.
+PASS  [check:type-scale] a type step written as min(…) is caught
+        said: `--text-display` is `min(2.125rem, 31vw)` (src/ui/tokens/tokens.css:29) — a type step must be a plain length in rem, px or em.
+PASS  [check:type-scale] a cn.ts entry with no step behind it is caught
+        said: `verifygates` is listed in src/lib/cn.ts but no --text-verifygates exists in src/ui/tokens/tokens.css.
+SKIP  [check:type-scale] .text-eyebrow dropped from the type-binding block is caught
+        dormant — no type-binding block yet (it lands with the Pulse ramp, F1.4)
+SKIP  [check:type-scale] the type-binding block deleted under a declared Pulse ramp is caught
+        dormant — no type-binding block yet (it lands with the Pulse ramp, F1.4)
+PASS  [check:canvas] the splash colour of the manifest changed alone is caught
+        said: `background_color` is #123456 (public/manifest.webmanifest:12), and `--surface-0` is #0B0D10 (src/ui/tokens/tokens.css:227).
+PASS  [check:canvas] the title-bar colour of the manifest changed alone is caught
+        said: `theme_color` is #123456 (public/manifest.webmanifest:11), and `--surface-0` is #0B0D10 (src/ui/tokens/tokens.css:227).
+PASS  [check:canvas] the theme-color meta tag changed alone is caught
+        said: `<meta name="theme-color">` is #123456 (index.html:9), and `--surface-0` is #0B0D10 (src/ui/tokens/tokens.css:227).
+PASS  [check:canvas] the canvas token changed without its three copies is caught
+        said: `<meta name="theme-color">` is #0B0D10 (index.html:9), and `--surface-0` is #123456 (src/ui/tokens/tokens.css:227).
+
+PASS  the tree is back byte for byte: git status is identical to the start, 25 file hash(es) identical, 12 gate(s) green again
+
+verify-gates: 48 passed, 0 failed, 6 dormant
+verify-gates: recorded as green for this content (35 gate and anchored files) — `--fresh` now answers yes

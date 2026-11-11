@@ -1,0 +1,64 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 8b7a133..77b9b8f 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -91,6 +91,8 @@ const EXPECT_BY_VIEW = {
+     ['/progress', '/progress'],
+     ['/settings', '/settings'],
+     ['/coins', '/settings'],
++    ['/rewards', '/settings'],
++    ['/rewards/7', '/settings'],
+     ['/settings/equipment', '/settings'],
+     ['/settings/day', '/settings'],
+   ],
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 71fa271..1e54f02 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -139,7 +139,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+-    { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins'] },
++    { key: 'profile', to: '/settings', icon: 'profile', labelKey: 'nav.profile', owns: ['/coins', '/rewards'] },
+   ],
+   trainer: [
+     { kind: 'switch', key: 'switch-user', to: '/', view: 'user', icon: 'switch-user', labelKey: 'nav.switch.user', nameKey: 'nav.switch.userName' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 736ac7a..51a0b4c 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -59,6 +59,8 @@ export const ROUTE_META = {
+   '/coins': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/settings/equipment': { parent: '/settings', parentLabelKey: 'nav.profile' },
+   '/settings/day': { parent: '/settings', parentLabelKey: 'nav.profile' },
++  '/rewards': { parent: '/settings', parentLabelKey: 'nav.profile' },
++  '/rewards/:id': { parent: '/rewards', parentLabelKey: 'rewards.title' },
+   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7d7a905..1629ce6 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -104,6 +104,11 @@ const HabitDetailPage = lazy(() =>
+   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+ );
+ 
++const RewardsPage = lazy(() => import('../features/rewards/RewardsPage').then((m) => ({ default: m.RewardsPage })));
++const RewardDetailPage = lazy(() =>
++  import('../features/rewards/RewardDetailPage').then((m) => ({ default: m.RewardDetailPage })),
++);
++
+ const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
+ 
+ export const router = createBrowserRouter([
+@@ -155,6 +160,8 @@ export const router = createBrowserRouter([
+       { path: 'nutrition', element: suspended(<NutritionPage />) },
+       { path: 'progress', element: suspended(<ProgressPage />) },
+       { path: 'coins', element: suspended(<CoinsPage />) },
++      { path: 'rewards', element: suspended(<RewardsPage />) },
++      { path: 'rewards/:id', element: suspended(<RewardDetailPage />) },
+       { path: 'compose', element: suspended(<ComposePage />) },
+       { path: 'compose/profile', element: suspended(<ProfileEditorPage />) },
+       { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },

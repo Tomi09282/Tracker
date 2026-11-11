@@ -1,0 +1,19 @@
+{
+  "package": "S-coach-plans",
+  "base": "805e0a0ccc6bbaa3356030f886cec5591276be9a",
+  "namespaces": ["plans"],
+  "set": [],
+  "change": [],
+  "remove": [
+    {
+      "key": "plans.create",
+      "reason": "'Létrehozás' was the submit label of the create card the redesign merged away; after the rewrite of PlanListPage no code reads it (check-i18n: referenced by no code)"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "PlanListPage 'Új terv' (POST /plans refused)",
+      "note": "A failed create shows no message today and none is drawn in coach-plans-1 / coach-plans-2; a message would be new copy. Kept silent until the owner decides."
+    }
+  ]
+}

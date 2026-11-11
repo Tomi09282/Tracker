@@ -1,22 +1,19 @@
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import {
-  Bell,
-  BellOff,
-  Check,
-  ChevronLeft,
-  CircleCheck,
-  Dumbbell,
-  History,
-  MessageSquare,
-  Salad,
-  Trophy,
-} from 'lucide-react';
-import { cn } from '../../lib/cn';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { useNavigate } from 'react-router';
+import { Bell, Dumbbell, MessageCircle, Salad, Trophy } from 'lucide-react';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Numeral } from '../../ui/data/Numeral';
+import { Section } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { Dot } from '../../ui/data/Dot';
+import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { useNotifications, useMarkNotificationsRead, type AppNotification } from './useChat';
 
 const ago = (unix: number, t: (k: string, o?: Record<string, unknown>) => string) => {
@@ -37,16 +34,17 @@ type Glyph = ComponentType<{ className?: string; strokeWidth?: number }>;
  * `chat.message` today and will write `chat.attachment` tomorrow, and a map keyed on exact strings
  * would silently drop the second one back to the fallback.
  *
- * The fallback is the bell — the same glyph as the anchor, which is the honest answer to "this is
- * a notification and we have nothing more specific to say about it".
+ * The fallback is the bell — the honest answer to "this is a notification and we have nothing more
+ * specific to say about it". The message glyph is `message-circle`, the one the frames draw (the
+ * kit's `icons.json` has no `message-square`).
  */
 const TYPE_ICON: Record<string, Glyph> = {
-  chat: MessageSquare,
+  chat: MessageCircle,
   plan: Dumbbell,
   workout: Dumbbell,
   nutrition: Salad,
   record: Trophy,
-  coach: MessageSquare,
+  coach: MessageCircle,
 };
 
 const iconFor = (type: string): Glyph => TYPE_ICON[type.split('.')[0]] ?? Bell;
@@ -75,183 +73,62 @@ function useOnline() {
   return online;
 }
 
-/**
- * The bell anchor: the badge the user just tapped, enlarged.
- *
- * A count is the only number this screen owns, so it gets the count and not a chart. `count` is
- * `null` for two different facts that must not be drawn the same way — loading, and a fetch that
- * failed. Nothing-to-show and could-not-load are different, and `0` is a claim.
- */
-function BellAnchor({
-  count,
-  loading = false,
-  label,
-  caption,
-}: {
-  count: number | null;
-  loading?: boolean;
-  label?: string;
-  /**
-   * The unit under the numeral. Split out of the count rather than interpolated into it: the
-   * figure is the anchor and the caption says what it counts, so a bare `3` never stands alone as
-   * the largest element on the screen. Absent while the count is unknown — there is nothing to
-   * name yet.
-   */
-  caption?: string;
-}) {
-  const silent = count === 0;
-  return (
-    <div
-      className="flex flex-col items-center gap-tight"
-      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
-    >
-      <span
-        className={cn(
-          'relative grid size-28 place-items-center rounded-full',
-          // A quiet, untinted bell while the count is unknown: an accent circle over a skeleton
-          // numeral would announce news the screen cannot yet confirm.
-          count == null ? 'bg-surface-2 text-text-3' : 'bg-accent-subtle text-accent',
-        )}
-      >
-        {silent ? (
-          <BellOff size={56} strokeWidth={1.5} aria-hidden />
-        ) : (
-          <Bell size={56} strokeWidth={1.5} aria-hidden />
-        )}
-        {count != null && count > 0 ? (
-          <span
-            aria-hidden
-            className="absolute right-2 top-2 size-6 rounded-full bg-accent border-[length:var(--border-width)] border-[var(--surface-0)]"
-          />
-        ) : null}
-      </span>
-
-      {loading ? (
-        <Skeleton className="mt-2 h-12 w-16" />
-      ) : count != null ? (
-        <>
-          <span className="text-timer tabular-nums text-text-1">{count}</span>
-          {caption ? <span className="text-body text-text-2">{caption}</span> : null}
-        </>
-      ) : null}
-    </div>
-  );
-}
+type T = (k: string, o?: Record<string, unknown>) => string;
 
 /**
- * The empty and error bodies — WORDS ONLY, no mark of their own.
+ * One notification as a kit row (notifications-1 `listRow`): the type glyph as the bare lead, the
+ * server's title, its body as the sub line when there is one, and the age at the end.
  *
- * `EmptyState` was doing this job and drawing a second struck-through bell in a tinted circle
- * directly under the anchor, which is already a struck-through bell in a tinted circle at count 0.
- * Worse, its inline mark is 120px against the anchor's 112px, so the duplicate was the LARGER of
- * the two and the anchor stopped being the anchor. The spec is explicit that the two strings
- * replace the list, not the mark: there is one bell on this screen and it is above.
+ * Unread: the 6 pt lime dot, 8, then the age in mono `text-1` — the dot is the only unread mark.
+ * Read: the age as the row's value (mono `text-2`), no mark. A row with `link_path` is one target
+ * (the whole row navigates); a row without one is static, with no press state.
  *
- * `EmptyState` itself is not wrong — it requires an `icon`, which is right for the screens that
- * have no other mark. This screen does, so it does not use it.
+ * `link_path` is validated server-side to start with a single `/` — an absolute URL in a
+ * notification is an open redirect, and the CHECK constraint is what makes rendering it as a
+ * router link safe rather than merely conventional. It is only ever a `to`, never an `href`.
  */
-function StatelessBlock({
-  title,
-  body,
-  action,
-}: {
-  title: string;
-  body?: string;
-  action?: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-tight py-12 text-center">
-      <h2 className="text-title-3 text-text-1">{title}</h2>
-      {body ? <p className="text-body-s measure text-text-2">{body}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
-    </div>
-  );
-}
-
-/** One row. Same shape unread and read; the surface, the border and the right-edge mark differ. */
-function NotificationRow({
-  n,
-  t,
-}: {
-  n: AppNotification;
-  t: (k: string, o?: Record<string, unknown>) => string;
-}) {
+function NotificationItem({ n, t }: { n: AppNotification; t: T }) {
   const Icon = iconFor(n.type);
+  const age = ago(n.created_at, t);
   const unread = n.read_at == null;
-
-  const inner = (
-    <>
-      {/* ONE holder treatment, read and unread alike. A solid accent fill on the unread rows put a
-          second accent surface inside a row whose own fill is already `accent-subtle`, so the
-          loudest thing on the screen was the type glyph rather than the news. The read state is
-          carried by the row's fill and by the mark at the trailing edge, which is where it is
-          legible. `on-accent-subtle` rather than `text-accent`: accent-on-accent-wash is a
-          contrast failure, not a preference (DESIGN.md 63). */}
-      <span
-        aria-hidden
-        className="grid size-11 shrink-0 place-items-center rounded-field bg-accent-subtle text-on-accent-subtle"
-      >
-        <Icon className="size-icon-m" strokeWidth={2} />
+  const row = {
+    lead: <Icon />,
+    title: n.title,
+    sub: n.body || undefined,
+    value: unread ? undefined : age,
+    trailing: unread ? (
+      <span className="inline-flex items-center gap-2">
+        <Dot />
+        <span className="text-data whitespace-nowrap text-text-1">{age}</span>
       </span>
-
-      <span className="flex min-w-0 flex-1 flex-col gap-tight">
-        <span className="text-body-strong truncate text-text-1">{n.title}</span>
-        {/* `text-body-s`, one step above the timestamp beside it. Both lines were `text-caption`,
-            so preview and metadata rendered identically and the row had two ranks where the
-            mockup draws three: title, preview, then the smallest text in the row. */}
-        {n.body ? <span className="text-body-s truncate text-text-2">{n.body}</span> : null}
-      </span>
-
-      <span className="flex shrink-0 flex-col items-end gap-tight">
-        <span className="text-caption text-text-3">{ago(n.created_at, t)}</span>
-        {/* The chevron is gone — at the far right of a row whose left side already says
-            everything, it was carrying the has-a-destination distinction badly. What replaces
-            it is the PRESS STATE: a row with `link_path` is a Link and moves under a finger, a
-            row without one has no press state and no pointer. The dot and the check are the
-            read state, which is a different fact and gets a different mark. */}
-        {unread ? (
-          <span aria-hidden className="size-2 rounded-full bg-accent" />
-        ) : (
-          <Check className="size-icon-s text-success" aria-hidden />
-        )}
-      </span>
-    </>
-  );
-
-  const shape = cn(
-    'flex min-h-[var(--target-min)] w-full items-center gap-group text-left',
-    unread && 'border-[var(--accent-border)] bg-accent-subtle',
-  );
-
-  // `link_path` is validated server-side to start with a single `/` — an absolute URL in a
-  // notification is an open redirect, and the CHECK constraint is what makes rendering it as a
-  // router link safe rather than merely conventional.
-  return n.link_path ? (
-    <Surface as={Link} to={n.link_path} interactive className={shape}>
-      {inner}
-    </Surface>
-  ) : (
-    <Surface className={shape}>{inner}</Surface>
-  );
+    ) : undefined,
+  };
+  return n.link_path ? <ListRow {...row} to={n.link_path} /> : <ListRow {...row} />;
 }
 
 /**
- * The notification inbox.
+ * The notification inbox — notifications-1 (arrival, 2 unread) and notifications-2 (empty).
  *
- * MARKING READ HAPPENS ON A DELIBERATE ACT, not on arrival. An inbox that clears its own badge the
- * instant it mounts clears it for a mis-tap and for a background prefetch alike — and the badge is
- * the only thing that ever told the user there was something to see.
+ * ═══ THE COMPOSITION (figma-build/app/notifications-N.body.js) ═════════════════════════════════
  *
- * So: opening the screen marks read ONCE, and only after the list has actually rendered something.
- * That is the honest reading of "the user has seen it".
+ *   Screen top="push"          the pushed header at y 64, blocks 32 apart, side 24
+ *   ScreenHeader kind="push"   "‹ KEZDŐLAP" + ÉRTESÍTÉSEK; the way back stays the history (the bell
+ *                              lives on Home and on the coach dashboard)
+ *   the anchor                 the giant numeral in its 100 pt slot, 8, the caption; 20 under it the
+ *                              ONE lime pill while something is unread
+ *   the list                   unread rows under a strong rule, then the "Korábbiak" section of read
+ *                              rows; one ruled list when only one group exists
+ *   empty / error              the same strong rule, then the empty text (or the error line + Újra)
+ *
+ * MARKING READ HAPPENS ONCE, after the list has actually rendered something — the honest reading of
+ * "the user has seen it". A badge cleared on mount would be cleared by a mis-tap and a prefetch.
  *
  * ═══ AND THAT IS WHY THE ANCHOR FREEZES ════════════════════════════════════════════════════════
  *
- * With the count promoted to the largest element on the screen, following the live unread query
- * would mean showing `3` for one frame and then dropping to `0` while the user is still reading
- * it — the redesign's own anchor destroying itself on paint. The anchor holds the ARRIVAL count
- * for the duration of the visit. The rows lose their unread tint as they are marked, which is
- * where that state change belongs and where it is legible.
+ * Following the live unread query would mean showing `2` for one frame and then dropping to `0`
+ * while the user is still reading it. The anchor holds the ARRIVAL count for the visit; the rows
+ * lose their dot as they are marked, which is where that state change belongs. The numeral is
+ * therefore `static`: a roll would animate the freeze.
  */
 export function NotificationsPage() {
   const { t } = useTranslation();
@@ -278,139 +155,123 @@ export function NotificationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unread.length, online]);
 
+  // The frame names the parent ("KEZDŐLAP", since LifeOS Phase 3 the Ma page); the step stays the history, because the bell is also
+  // on the coach dashboard and a fixed link would send a coach to the member's Home.
   const header = (
-    <header className="flex items-center gap-tight">
-      {/* The back TEXT link became the control. One icon, at the target floor, where a thumb
-          reaches on a phone held in one hand — and `secondary`, so it has a resting holder: a
-          `ghost` chevron is invisible until hover, which on a phone never happens. `CoinsPage`
-          draws its back control the same way. */}
-      <Pressable
-        shape="icon"
-        variant="secondary"
-        aria-label={t('common.back')}
-        onClick={() => navigate(-1)}
-      >
-        <ChevronLeft className="size-icon-m" aria-hidden />
-      </Pressable>
-      <h1 className="text-title-1 font-display flex-1 text-center text-text-1">
-        {t('notifications.title')}
-      </h1>
-      {/* Balances the control so the title is centred on the column rather than on what is left
-          of it. */}
-      <span aria-hidden className="size-11 shrink-0" />
-    </header>
+    <ScreenHeader kind="push" title={t('notifications.title')} back={{ onClick: () => navigate(-1), label: t('nav.today') }} />
   );
 
   if (isPending) {
     return (
-      <div className="col-mobile screen-x flex flex-col gap-section py-6">
+      <Screen top="push">
         {header}
-        <BellAnchor count={null} loading />
-        {/* No mark-read button while there is no count to justify one. */}
-        <div className="flex flex-col gap-group">
-          <Skeleton className="h-20 w-full rounded-card" />
-          <Skeleton className="h-20 w-full rounded-card" />
-        </div>
-      </div>
+        {/* A placeholder at the numeral's size where the count goes: no caption and no pill while
+            there is no count to justify them. */}
+        <Skeleton className="h-25 w-14" />
+        <RowStack as="div" open role="status" aria-label={t('common.loading')}>
+          <ListRowSkeleton sub index={0} />
+          <ListRowSkeleton sub index={1} />
+        </RowStack>
+      </Screen>
     );
   }
 
+  const count = arrival.current ?? 0;
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
+    <Screen top="push">
       {header}
 
-      {/* Error shows the bell with NO numeral rather than a `0`: could-not-load and
-          nothing-to-show are different facts and must not be drawn the same. */}
-      <BellAnchor
-        count={isError ? null : (arrival.current ?? 0)}
-        // No `{{count}}` and no plural suffix: the numeral is drawn above this line, and a
-        // suffixed key would read as dead to `check-i18n`'s unused-key pass, which matches on the
-        // literal key path.
-        caption={isError ? undefined : t('notifications.unreadLabel')}
-        label={
-          !isError && arrival.current
-            ? // The one accessible name this screen has for the count. It is the bell link's
-              // label elsewhere, which is exactly what this element is: the bell, enlarged.
-              t('notifications.withUnread', { count: arrival.current })
-            : undefined
-        }
-      />
+      {/* Error shows NO numeral and no caption rather than a `0`: could-not-load and nothing-to-show
+          are different facts. The pill is still offered while cached unread rows stand (a later
+          poll that failed). */}
+      {!isError || unread.length > 0 ? (
+        <div className="flex flex-col gap-5">
+          {isError ? null : (
+            <div
+              // The frame's `Stat/Olvasatlan` (numeral + body caption, no eyebrow): composed here
+              // because the kit `StatBlock` requires an eyebrow and sets its caption at `cap`.
+              // The block carries the display face as the kit's `statBlock` does; the caption names its own.
+              data-kit="statBlock"
+              className="flex w-fit flex-col items-start gap-2"
+              style={{ fontFamily: 'var(--font-display)' }}
+              // The one accessible name this screen has for the count — the bell link's label
+              // elsewhere, which is exactly what this is: the bell's count, enlarged.
+              {...(count > 0 ? { role: 'img', 'aria-label': t('notifications.withUnread', { count }) } : { 'aria-hidden': true })}
+            >
+              {/* The frame holds the figure in a 100 pt slot, so a round "0" (ink 101.7) puts the
+                  caption exactly where the "2" puts it: nothing below moves between states. */}
+              <div className="h-25">
+                <Numeral size="giant" value={count} tone={count === 0 ? 'pending' : 'ink'} />
+              </div>
+              {/* No `{{count}}` and no plural suffix: the numeral is drawn above this line. */}
+              <p className="font-body text-body text-text-2">{t('notifications.unreadLabel')}</p>
+            </div>
+          )}
 
-      {/* The primary action, above the list rather than below an unbounded one, and only while
-          something is unread. Disabled offline, because marking read is a server write. */}
-      {unread.length > 0 ? (
-        <Pressable
-          variant="primary"
-          className="w-full"
-          busy={markRead.isPending}
-          disabled={!online}
-          onClick={() => markRead.mutate(undefined)}
-          icon={<CircleCheck className="size-icon-m" aria-hidden />}
-        >
-          {t('notifications.markAllRead')}
-        </Pressable>
+          {/* The primary action, only while something is unread. Disabled offline, because marking
+              read is a server write. */}
+          {unread.length > 0 ? (
+            <Pressable
+              variant="primary"
+              size="lg"
+              className="w-full"
+              busy={markRead.isPending}
+              disabled={!online}
+              onClick={() => markRead.mutate(undefined)}
+            >
+              {t('notifications.markAllRead')}
+            </Pressable>
+          ) : null}
+        </div>
       ) : null}
 
       {isError ? (
         // A failed fetch leaves `notifications` empty, so without this branch the body said
-        // `Nincs értesítés` under an anchor that had just refused to claim a count — the screen
-        // contradicting itself in two blocks. Could-not-load and nothing-to-show are different
-        // facts, and only one of them has an action that can fix it.
-        <StatelessBlock
-          title={t('auth.errors.generic')}
-          action={
-            <Pressable variant="secondary" onClick={() => void refetch()}>
-              {t('common.retry')}
-            </Pressable>
-          }
-        />
-      ) : notifications.length === 0 ? (
-        // No action suggested, because there is none. An empty state that invents a next step for
-        // a screen with nothing to do is noise.
-        <StatelessBlock
-          title={t('notifications.emptyTitle')}
-          body={t('notifications.emptyBody')}
-        />
-      ) : (
-        <div className="flex flex-col gap-section">
-          {unread.length > 0 ? (
-            <ul className="flex flex-col gap-group">
-              {unread.map((n) => (
-                <li key={n.id}>
-                  <NotificationRow n={n} t={t} />
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {read.length > 0 ? (
-            <div className="flex flex-col gap-group">
-              {/* The `KORÁBBIAK` divider. The word is announced rather than hidden: it is the
-                  only thing that says the rows below are already-seen news, and the list order
-                  alone does not carry that. The hairline the label replaces was never in the
-                  design — the icon holder is the break. */}
-              {unread.length > 0 ? (
-                <div className="flex items-center gap-tight">
-                  <span
-                    aria-hidden
-                    className="grid size-11 shrink-0 place-items-center rounded-field bg-surface-2 text-text-3"
-                  >
-                    <History className="size-icon-m" strokeWidth={2} />
-                  </span>
-                  <p className="text-micro uppercase text-text-3">{t('notifications.earlier')}</p>
-                </div>
-              ) : null}
-              <ul className="flex flex-col gap-group">
-                {read.map((n) => (
-                  <li key={n.id}>
-                    <NotificationRow n={n} t={t} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+        // "Nincs értesítés" under an anchor that had just refused to claim a count. Only this one
+        // has an action that can fix it — a text link, not a second pill.
+        <div className="flex flex-col gap-6">
+          <Rule strong />
+          <EmptyState
+            title={t('auth.errors.generic')}
+            action={
+              // min-w-11: "Újra" is 30 pt of ink; the target still has to be 44 wide.
+              <TextLink text="body" className="min-w-11" onClick={() => void refetch()}>
+                {t('common.retry')}
+              </TextLink>
+            }
+          />
         </div>
+      ) : notifications.length === 0 ? (
+        // No action suggested, because there is none.
+        <div className="flex flex-col gap-6">
+          <Rule strong />
+          <EmptyState measure="narrow" title={t('notifications.emptyTitle')} body={t('notifications.emptyBody')} />
+        </div>
+      ) : unread.length > 0 && read.length > 0 ? (
+        <>
+          <RowStack open>
+            {unread.map((n) => (
+              <NotificationItem key={n.id} n={n} t={t} />
+            ))}
+          </RowStack>
+          {/* "Korábbiak" only when both groups exist: it is the only thing that says the rows below
+              are already-seen news. */}
+          <Section title={t('notifications.earlier')}>
+            <RowStack>
+              {read.map((n) => (
+                <NotificationItem key={n.id} n={n} t={t} />
+              ))}
+            </RowStack>
+          </Section>
+        </>
+      ) : (
+        <RowStack open>
+          {notifications.map((n) => (
+            <NotificationItem key={n.id} n={n} t={t} />
+          ))}
+        </RowStack>
       )}
-    </div>
+    </Screen>
   );
 }

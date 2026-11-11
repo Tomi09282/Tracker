@@ -1,161 +1,100 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
-import {
-  ArrowLeft,
-  BadgeCheck,
-  CalendarDays,
-  ChevronRight,
-  ClipboardList,
-  Dumbbell,
-  ListChecks,
-  MessageSquare,
-  Salad,
-  ShieldAlert,
-  Target,
-  TrendingUp,
-  TriangleAlert,
-  UserX,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { cn } from '../../lib/cn';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { chip } from '../../ui/primitives/control';
-import { Surface } from '../../ui/primitives/Surface';
-import { SummaryTile } from '../../ui/data/SummaryTile';
+import { useParams } from 'react-router';
+import { ArrowLeft } from 'lucide-react';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Sheet } from '../../ui/feedback/variants/E14E20';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { Monogram } from './Monogram';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
+import { Numeral } from '../../ui/data/Numeral';
+import { StatBlock } from '../../ui/data/StatBlock';
+import { Rule } from '../../ui/data/Rule';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { Section } from '../../ui/data/SectionHeader';
+import { Dot } from '../../ui/data/Dot';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { NutritionTab } from './NutritionTab';
 import { ProgressTab } from './ProgressTab';
 import { PlanTab } from './PlanTab';
 import { ChatTab } from './ChatTab';
 import { usePlans } from '../plans/usePlans';
-import { useClient, useClientOnboarding, type ClientOnboarding } from './useCoaching';
+import { useClient, useClientOnboarding, useClients, type ClientOnboarding } from './useCoaching';
 import { ClientEquipmentCard } from './ClientEquipmentCard';
 import { personLabel } from '../../lib/person';
 
-/* ── tabs ─────────────────────────────────────────────────────────────────────────────────────
-   The glyphs are the ones the rest of the product already spends on these two nouns: the clipboard
-   is `Tervek` three rows above this strip, and the salad is `ÉTKEZÉS` in the bottom bar. `Terv` was
-   a dumbbell, which on THIS screen already means "completed sessions" — the same glyph for two
-   different facts, a thumb's width apart. */
-const TABS = [
-  { key: 'plan', icon: ClipboardList },
-  { key: 'nutrition', icon: Salad },
-  { key: 'progress', icon: TrendingUp },
-  { key: 'chat', icon: MessageSquare },
-] as const;
+/* ── views ────────────────────────────────────────────────────────────────────────────────────
+   The four working views of the client, switched by the page-level `Segmented` (client-detail-1:
+   the hug switch seated on a full-width hairline, the ink mark on the line). Words only: Pulse
+   draws no glyph in a switch, so the icons the old chip tabs carried are gone with them. */
+const TABS = [{ key: 'plan' }, { key: 'nutrition' }, { key: 'progress' }, { key: 'chat' }] as const;
 type TabKey = (typeof TABS)[number]['key'];
 
 type Limitation = ClientOnboarding['limitations'][number];
 
 /* ── pieces ───────────────────────────────────────────────────────────────────────────────── */
 
-/** One label/value line. It exists ONLY inside the questionnaire sheet now. */
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-1">
-      <span className="text-body-s text-text-2">{label}</span>
-      <span className="text-body text-right font-medium text-text-1">{value}</span>
-    </div>
-  );
-}
-
 /**
- * A promoted questionnaire answer: the caption above, the answer below, an icon holder beside.
+ * One answer of the questionnaire that changes what gets written (client-detail-1, "Answers"):
+ * the eyebrow in the first third of the content width (the stat grid's column, 118 at 402), the
+ * value in the other two as a 22 / 28 title, the client's own note under it. Not a kit component:
+ * the Figma file builds it locally on the page (`answer()` in client-detail-1.body.js), so it is
+ * composed here from the type steps, and promoted to the kit when a second screen needs it.
  *
- * Two tones, because `Kerülendő` and `Óvatosan` are different instructions and flattening them into
- * one amber would tell a coach that a knee to be careful with and a knee that must not run are the
- * same fact. `strong` is `avoid` only.
+ * `dot` hangs a 6 pt warn dot in the gap BEFORE the value column, so every value keeps one edge.
+ * `strong` (a `Kerülendő` area) also puts the value in the warning ink: `avoid` and `caution` are
+ * two weights of the same instruction and must not read as the same fact.
  */
-function AnswerTile({
-  icon: Icon,
-  caption,
+function FactRow({
+  label,
   value,
   note,
   extra,
-  tone = 'neutral',
-  className,
+  dot = false,
+  strong = false,
 }: {
-  icon: LucideIcon;
-  caption: string;
+  label: string;
   value: string;
   note?: string | null;
-  /** How many further flagged areas this tile is NOT showing. */
-  extra?: number;
-  tone?: 'neutral' | 'soft' | 'strong';
-  className?: string;
+  extra?: ReactNode;
+  dot?: boolean;
+  strong?: boolean;
 }) {
-  // `strong` fills the card; `soft` keeps the ordinary card and spends the amber on the glyph and
-  // the caption only. Two visibly different weights of the SAME alert colour, because
-  // `kerülendő` and `óvatosan` are two weights of the same instruction — reaching for danger red
-  // would file "be careful with this knee" alongside "this operation failed".
-  const shell = tone === 'strong' ? 'border-warning-border bg-warning-subtle' : '';
-  // THE HOLDER HAS TO SPLIT BY TONE, because on `strong` the CARD is already a 12% amber wash: a
-  // 12% disc on a 12% card composites about ten points of amber and stops reading as an object at
-  // all. `--on-warning` exists for exactly this — a filled puck with dark ink, which is the one
-  // element the mockup lets pop out of the amber card. `soft` keeps its wash: there the card is an
-  // ordinary surface and the tint is the whole signal.
-  const holder =
-    tone === 'neutral'
-      ? 'bg-accent-subtle text-accent'
-      : tone === 'strong'
-        ? 'bg-warning text-on-warning'
-        : 'bg-[var(--warning-subtle)] text-warning';
-  const captionTone = tone === 'neutral' ? 'text-text-3' : 'text-warning';
-
   return (
-    <Surface className={cn('flex items-start gap-tight', shell, className)}>
-      <span className={cn('inline-grid size-11 shrink-0 place-items-center rounded-chip', holder)} aria-hidden>
-        <Icon className="size-icon-m" strokeWidth={2} />
-      </span>
-      <div className="min-w-0 flex-1">
-        {/* Concatenated, not `cn`: twMerge files a custom type scale and a colour in the same
-            bucket and would drop `text-micro`. */}
-        <p className={`text-micro uppercase ${captionTone}`}>{caption}</p>
-        <p className="text-body-strong mt-1 text-text-1">
+    <div className="grid grid-cols-3 py-3.5">
+      {/* pr-5: the label ends before the dot that hangs 14 in front of the value column */}
+      <p className="text-eyebrow break-words pt-1.5 pr-5 text-text-2">{label}</p>
+      <div className="relative col-span-2 flex min-w-0 flex-col gap-1">
+        {dot ? <Dot tone="warn" className="absolute -left-3.5 top-[11px]" /> : null}
+        <p className={strong ? 'text-title break-words text-warning' : 'text-title break-words text-text-1'}>
           {value}
-          {extra && extra > 0 ? (
-            // The remainder is a COUNT rather than a silence. A coach who reads one limitation and
-            // assumes it is the whole list is exactly the failure this data exists to prevent.
-            <span className="text-micro ms-2 rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 align-middle tabular-nums text-warning">
-              +{extra}
-            </span>
-          ) : null}
+          {extra}
         </p>
-        {/* The client's own words, in the client's own language. Never translated — a
-            machine-translated injury description is worse than the original. */}
-        {note ? <p className="text-body-s mt-1 text-text-2">{note}</p> : null}
+        {/* The client's own words, in the client's own language. Never translated. */}
+        {note ? <p className="text-cap text-text-2">{note}</p> : null}
       </div>
-    </Surface>
+    </div>
   );
 }
 
 /* ── the page ─────────────────────────────────────────────────────────────────────────────── */
 
 /**
- * One client, in full.
+ * One client, in full — Pulse client-detail-1.
  *
- * ═══ THE ELEVEN-ROW TABLE IS GONE ══════════════════════════════════════════════════════════════
+ * The anchor is the person, drawn as type: the 124 pt monogram whose full stop carries the account
+ * state (lime = the client owns the account, warn = the coach still knows the password). Then
+ * ruled ledgers, nothing enclosed: three numbers on one line, the two answers that change what
+ * gets written with the door to the whole questionnaire as the last row of their table, the
+ * equipment editor, and the four views of the client under one switch.
  *
- * This screen was wall-to-wall label/value rows: goal, weekly sessions, location, experience,
- * session length, height, weight, birth year, sex, equipment, free-text notes, plus a Több/Kevesebb
- * toggle — and the plan list, the reason a coach opens the page at all, started underneath all of
- * it.
- *
- * Two answers were promoted to tiles (goal, and the worst limitation), one number became a stat
- * tile, and the remaining rows moved behind the `Kérdőív` disclosure — into a SHEET rather than a
- * route, because the coach reads the questionnaire *against* the plan list and must not lose their
- * place in it.
- *
- * ═══ THE ANCHOR IS A PERSON, NOT THEIR DATA ════════════════════════════════════════════════════
- *
- * A large monogram in a status ring. Every other candidate anchor — a chart, a ring of numbers —
- * would have made the screen about the data instead. The ring is not decoration: it carries the
- * handover state, accent for an account the client owns and amber for one whose password the coach
- * still knows.
+ * The questionnaire opens in a SHEET rather than a route: the coach reads it against the plan
+ * list and must not lose their place in it.
  */
 export function ClientDetailPage() {
   const { t } = useTranslation();
@@ -164,26 +103,38 @@ export function ClientDetailPage() {
   const { data, isPending, isError } = useClient(Number.isFinite(linkId) ? linkId : null);
   const onboarding = useClientOnboarding(Number.isFinite(linkId) ? linkId : null);
   // NO SECOND ENDPOINT. `GET /plans` is the query `PlanTab` already runs; asking for it here too
-  // hits the same react-query key, so the `TERV` tile costs one cache read rather than a request.
+  // hits the same react-query key, so the `TERV` number costs one cache read rather than a request.
   const plans = usePlans();
+  // The 28-day count lives on the roster row only (GET /clients/:id does not compute it), so it is
+  // read from the roster query the coach dashboard already caches: a deep link and in-app
+  // navigation show the same number, and it is an em dash while it loads or fails — never a 0.
+  const roster = useClients();
   const [tab, setTab] = useState<TabKey>('plan');
   const [profileOpen, setProfileOpen] = useState(false);
 
   if (isPending) {
-    // Same geometry as the real thing: a circle where the avatar goes, a title bar, three tiles.
+    // The page's own geometry: the real back row, a block where the monogram goes, the name line,
+    // three numeral blocks on the stat grid. Never a spinner.
     return (
-      <div className="col-wide screen-x flex flex-col gap-section py-6">
-        <Skeleton className="h-6 w-24" />
-        <div className="flex flex-col items-center gap-group">
-          <Skeleton className="size-[132px] rounded-full" />
-          <Skeleton className="h-7 w-64" />
+      <Screen top="push" width="wide">
+        <ScreenHeader kind="push">
+          <div className="flex pt-1 pb-4">
+            <MonogramSkeleton size={124} />
+          </div>
+          <Skeleton className="h-[34px] w-64" />
+        </ScreenHeader>
+        <div className="flex flex-col gap-4" role="status" aria-label={t('common.loading')}>
+          <Rule strong />
+          <div className="grid grid-cols-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-[39px] w-9" />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-group">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-[140px] rounded-card" />
-          ))}
-        </div>
-      </div>
+      </Screen>
     );
   }
 
@@ -192,23 +143,18 @@ export function ClientDetailPage() {
   // to be — and it is also the role gate: the link id is what carries the proof of access.
   if (isError || !data?.client) {
     return (
-      <div className="col-wide screen-x flex flex-col gap-group py-6">
+      <Screen top="push" width="wide">
         <EmptyState
-          icon={UserX}
           heading="h1"
           title={t('coaching.clientMissingTitle')}
           body={t('coaching.clientMissingBody')}
           action={
-            <Pressable
-              variant="secondary"
-              onClick={() => history.back()}
-              icon={<ArrowLeft className="size-icon-s" aria-hidden />}
-            >
+            <TextLink text="body" lead={<ArrowLeft />} onClick={() => history.back()}>
               {t('common.back')}
-            </Pressable>
+            </TextLink>
           }
         />
-      </div>
+      </Screen>
     );
   }
 
@@ -216,8 +162,8 @@ export function ClientDetailPage() {
   const pending = c.must_change_credentials === 1;
   const p = onboarding.data?.profile ?? null;
 
-  /* `Régi, már nem fáj` never surfaces here — it is filtered out before the tile is built.
-     `Kerülendő` outranks `Óvatosan`, so the tile promotes the worst one and counts the rest. */
+  /* `Régi, már nem fáj` never surfaces here — it is filtered out before the row is built.
+     `Kerülendő` outranks `Óvatosan`, so the row promotes the worst one and counts the rest. */
   const flagged = (p?.limitations ?? [])
     .filter((l: Limitation) => l.severity !== 'past')
     .sort((a: Limitation, b: Limitation) =>
@@ -227,231 +173,135 @@ export function ClientDetailPage() {
   const multiFlag = flagged.length > 1;
 
   const planCount = plans.data?.plans.filter((x) => x.coach_client_id === linkId).length ?? 0;
+  const sessions28d = roster.data?.clients.find((x) => x.link_id === linkId)?.sessions_28d;
 
   return (
-    <div className="col-wide screen-x flex flex-col gap-section py-6">
-      <Link
-        to="/coach"
-        className="text-body-s inline-flex min-h-[var(--target-min)] items-center gap-2 self-start text-text-2"
-      >
-        <ArrowLeft className="size-icon-s" aria-hidden />
-        {t('coaching.title')}
-      </Link>
-
-      {/* ── anchor + identity ──────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-group text-center">
-        <div className="relative">
-          <div
-            className={cn(
-              'grid size-[132px] place-items-center rounded-full border-4',
-              pending ? 'border-[var(--warning)]' : 'border-accent',
-            )}
-          >
-            <Monogram person={c} size="lg" />
-          </div>
-          {/* Decorative: when it is amber, the banner directly below says the same thing in
-              words, and when it is a check there is nothing to announce. */}
-          <span
-            aria-hidden
-            className={cn(
-              'absolute bottom-0 right-0 grid size-8 place-items-center rounded-chip',
-              'border-[length:var(--border-width)] border-[var(--surface-border)] bg-surface-1',
-              pending ? 'text-warning' : 'text-accent',
-            )}
-          >
-            {pending ? (
-              <TriangleAlert className="size-icon-s" strokeWidth={2} />
-            ) : (
-              <BadgeCheck className="size-icon-s" strokeWidth={2} />
-            )}
-          </span>
-        </div>
-
-        <div className="flex flex-col items-center gap-tight">
-          {/* Wraps, never truncates: the e-mail is the client's name on this screen. */}
-          <h1 className="text-title-1 break-words text-text-1">{personLabel(c)}</h1>
-          <div className="text-body-s flex flex-wrap items-center justify-center gap-tight text-text-2">
-            {c.team_name ? (
-              <span className="rounded-chip bg-surface-2 px-3 py-2 text-text-1">{c.team_name}</span>
-            ) : null}
-            <span>{t(`coaching.origin.${c.origin}`)}</span>
-          </div>
-        </div>
-      </div>
-
-      {pending ? (
-        <Surface className="flex items-start gap-group border-warning-border bg-warning-subtle">
-          <span
-            aria-hidden
-            className="inline-grid size-11 shrink-0 place-items-center rounded-chip bg-[var(--warning-subtle)] text-warning"
-          >
-            <TriangleAlert className="size-icon-m" strokeWidth={2} />
-          </span>
-          <p className="text-body-s measure text-text-2">{t('coaching.handoverBody')}</p>
-        </Surface>
-      ) : null}
-
-      {/* ── the three numbers ────────────────────────────────────────────────────────────────
-          `align="center"` and `captionCase="upper"` on all three, as 07-coach-client-detail-terv.webp
-          draws them: puck over figure over an eyebrow (`EDZÉS / 28 NAP`), one axis per tile. The
-          caption is an eyebrow here rather than metadata because it names the METRIC — the header
-          above already carries the client, so these three lines are the only labels in the block.
-
-          THE CAPTIONS HAVE THEIR OWN KEYS. They used to borrow `coaching.sessions`,
-          `onboarding.field.sessions_per_week` and `nav.plans` — strings written to name other
-          things, each a word longer than a third of a phone's width holds at 11px. Two of the three
-          wrapped, so the row lost its shared baseline. `PlanListPage` made the same move when it
-          stopped captioning its anchor with `nav.plans`. */}
-      <div className="grid grid-cols-3 gap-group">
-        <SummaryTile
-          icon={Dumbbell}
-          align="center"
-          captionCase="upper"
-          value={c.sessions_28d ?? 0}
-          // The window is part of the fact. A bare "6 edzés" reads as a lifetime total.
-          caption={`${t('coaching.tile.sessions')} / ${t('plans.dayCount', { count: 28 })}`}
-        />
-        <SummaryTile
-          icon={CalendarDays}
-          align="center"
-          captionCase="upper"
-          // A dash rather than a zero when there is no questionnaire: nobody answered, which is
-          // not the same claim as "they train zero times a week".
-          value={p?.sessions_per_week ?? '—'}
-          caption={t('coaching.tile.weekly')}
-        />
-        <SummaryTile
-          icon={ClipboardList}
-          align="center"
-          captionCase="upper"
-          value={plans.isPending ? '—' : planCount}
-          caption={t('coaching.tile.plans')}
-        />
-      </div>
-
-      {/* ── the two answers that change what gets written ──────────────────────────────────── */}
-      {onboarding.isPending ? (
-        <div className="grid grid-cols-2 gap-group">
-          <Skeleton className="h-[104px] rounded-card" />
-          <Skeleton className="h-[104px] rounded-card" />
-        </div>
-      ) : !p ? (
-        <Surface>
-          <p className="text-body-s text-text-2">{t('coaching.noProfile')}</p>
-        </Surface>
-      ) : (
-        // Two columns at phone width, not from `sm` up: this project has no custom `sm`, so the
-        // prefix meant 640px and the pair stacked on every phone the app is used on. The three
-        // stat tiles directly above already commit to an unconditional `grid-cols-3`.
-        <div className={cn('grid gap-group', worst && 'grid-cols-2')}>
-          <AnswerTile
-            icon={Target}
-            caption={t('onboarding.field.primary_goal')}
-            value={p.primary_goal ? t(`onboarding.goal.${p.primary_goal}`) : '—'}
+    <Screen top="push" width="wide">
+      {/* ── identity: back to Klienseim (app/routeMeta.ts) → the monogram → the name → team · origin */}
+      <ScreenHeader kind="push">
+        <div className="flex pt-1 pb-4">
+          <Monogram
+            person={c}
+            size={124}
+            dot={pending ? 'warn' : true}
+            dotLabel={t(pending ? 'coaching.account.pending' : 'coaching.account.owned')}
           />
-          {worst ? (
-            <AnswerTile
-              icon={ShieldAlert}
-              tone={worst.severity === 'avoid' ? 'strong' : 'soft'}
-              caption={t('coaching.limitations')}
-              value={`${t(`onboarding.area.${worst.body_area}`)} — ${t(`onboarding.sev.${worst.severity}`)}`}
-              note={worst.note}
-              extra={flagged.length - 1}
-            />
-          ) : null}
         </div>
-      )}
+        {/* Wraps, never truncates: the e-mail is the client's name on this screen. */}
+        <h1 className="text-display break-words text-text-1">{personLabel(c)}</h1>
+        <p className="text-body text-text-2">
+          {c.team_name ? `${c.team_name} · ` : null}
+          {t(`coaching.origin.${c.origin}`)}
+        </p>
+        {pending ? (
+          <NoticeLine tone="warn" role="status" className="mt-1">
+            {t('coaching.handoverBody')}
+          </NoticeLine>
+        ) : null}
+      </ScreenHeader>
 
-      {/* ── the equipment row, come back as an editor ──────────────────────────────────────────
-          The eleven-row table above this comment is gone on purpose (see the note at the top of
-          this component) — equipment was one of its rows, and this card is that row's return,
-          not the table's. It reads and writes through its own queries, so it renders its own
-          skeleton/no-profile/error states independently of the tiles above. */}
+      {/* ── the three numbers, read-only: eyebrow over an ink-tight numeral, no tiles ──────────── */}
+      <div className="flex flex-col gap-4">
+        <Rule strong />
+        <div className="grid grid-cols-3">
+          <StatBlock
+            className="w-full"
+            // The window is part of the fact. A bare "6 edzés" reads as a lifetime total.
+            label={`${t('coaching.tile.sessions')} / ${t('plans.dayCount', { count: 28 })}`}
+          >
+            <Numeral size="num" value={sessions28d ?? '—'} />
+          </StatBlock>
+          <StatBlock className="w-full" label={t('coaching.tile.weekly')}>
+            {/* A dash rather than a zero when there is no questionnaire: nobody answered, which is
+                not the same claim as "they train zero times a week". */}
+            <Numeral size="num" value={p?.sessions_per_week ?? '—'} />
+          </StatBlock>
+          <StatBlock className="w-full" label={t('coaching.tile.plans')}>
+            <Numeral size="num" value={plans.isPending ? '—' : planCount} />
+          </StatBlock>
+        </div>
+      </div>
+
+      {/* ── the two answers that change what gets written + the door to the whole questionnaire */}
+      <RowStack open as="div">
+        {onboarding.isPending ? (
+          <>
+            <ListRowSkeleton index={0} />
+            <ListRowSkeleton index={1} />
+          </>
+        ) : !p ? (
+          <p className="text-body py-4 text-text-2">{t('coaching.noProfile')}</p>
+        ) : (
+          <>
+            <FactRow
+              label={t('onboarding.field.primary_goal')}
+              value={p.primary_goal ? t(`onboarding.goal.${p.primary_goal}`) : '—'}
+            />
+            {worst ? (
+              <FactRow
+                label={t('coaching.limitations')}
+                value={`${t(`onboarding.area.${worst.body_area}`)} — ${t(`onboarding.sev.${worst.severity}`)}`}
+                note={worst.note}
+                dot
+                strong={worst.severity === 'avoid'}
+                extra={
+                  multiFlag ? (
+                    // The remainder is a COUNT rather than a silence: a coach who reads one
+                    // limitation and assumes it is the whole list is the failure this data exists
+                    // to prevent.
+                    <span
+                      className="text-data ms-2 align-middle text-warning"
+                      aria-label={t('coaching.moreFlagged', { count: flagged.length - 1 })}
+                    >
+                      +{flagged.length - 1}
+                    </span>
+                  ) : null
+                }
+              />
+            ) : null}
+          </>
+        )}
+        <ListRow
+          title={t('coaching.profileFull')}
+          onClick={() => setProfileOpen(true)}
+          chevron
+          trailing={
+            p?.status === 'draft' || multiFlag ? (
+              <span className="flex items-center gap-1.5">
+                {/* A further flagged area is not only a count on the row above: the door to the
+                    full list carries the warn dot too. */}
+                {multiFlag ? <Dot tone="warn" /> : null}
+                {p?.status === 'draft' ? (
+                  <span className="text-micro text-text-2">{t('coaching.profileIncomplete')}</span>
+                ) : null}
+              </span>
+            ) : undefined
+          }
+        />
+      </RowStack>
+
+      {/* ── the equipment editor: its own queries, its own skeleton / no-profile / 404 states ──── */}
       <ClientEquipmentCard key={linkId} linkId={linkId} />
 
-      {/* ── everything else the client answered ────────────────────────────────────────────── */}
-      <Pressable
-        variant="secondary"
-        onClick={() => setProfileOpen(true)}
-        className={cn(
-          'h-auto w-full justify-between rounded-card px-4 py-3 whitespace-normal',
-          // A tile that shows one of several limitations must not be the only signal that there
-          // are more. The door to the full list takes the alert tone too.
-          multiFlag && 'border-[var(--warning-border)]',
-        )}
-      >
-        <span className="flex min-w-0 items-center gap-tight">
-          <ListChecks className="size-icon-m shrink-0 text-text-2" aria-hidden />
-          {/* Its own key. The sheet this row opens is titled `Kérdőív`; the row is the door to the
-              WHOLE of it, and one key serving both made the row and its destination the same
-              word. */}
-          <span className="text-body truncate text-text-1">{t('coaching.profileFull')}</span>
-        </span>
-        <span className="flex shrink-0 items-center gap-tight">
-          {/* A word, not a bare glyph. `Hiányos` is the state itself; a lone triangle needed an
-              `aria-label` to say anything and said nothing at all to a sighted reader who has not
-              met it before. The full sentence still lives inside the sheet, where acting on the
-              incomplete answers begins. */}
-          {/* The `chip` recipe, not a hand-rolled pill. 8px/2px rendered a 16px slab — tighter
-              than every other status chip in the app and than the one the mockup draws; the
-              recipe's px-3 py-1 at `text-caption` is that pill, and it is the only place the
-              warning tone is spelled out. */}
-          {p?.status === 'draft' ? (
-            <span className={chip({ tone: 'warning' })}>{t('coaching.profileIncomplete')}</span>
-          ) : null}
-          <ChevronRight className="size-icon-m text-text-3" aria-hidden />
-        </span>
-      </Pressable>
-
-      {/* ── the four working surfaces ──────────────────────────────────────────────────────── */}
-      {/* `role="tablist"` with real keyboard semantics rather than four buttons that merely look
-          like tabs — arrow keys move between them, which is what a screen-reader user will try
-          first. */}
-      <div className="flex flex-col gap-group">
-        <div
-          role="tablist"
-          aria-label={t('coaching.tabs')}
-          className="-mx-1 flex gap-tight overflow-x-auto px-1 py-1"
-          onKeyDown={(e) => {
-            const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-            if (!dir) return;
-            e.preventDefault();
-            const i = TABS.findIndex((x) => x.key === tab);
-            setTab(TABS[(i + dir + TABS.length) % TABS.length].key);
-          }}
-        >
-          {TABS.map(({ key, icon: Icon }: { key: TabKey; icon: LucideIcon }) => (
-            <Pressable
-              key={key}
-              role="tab"
-              id={`tab-${key}`}
-              aria-selected={tab === key}
-              aria-controls={`panel-${key}`}
-              tabIndex={tab === key ? 0 : -1}
-              // The selected tab is a SELECTION, not the screen's action. As a filled `primary` it
-              // was a second one beside `Új terv a kliensnek` — and the wider of the two — which
-              // is the one-primary-per-screen rule failing where it is most visible.
-              //
-              // `selected` is the recipe's own state and replaces the hand-rolled pair it used to
-              // carry. Two things the call site was getting wrong: `border-accent` drew a hard
-              // outline the design system does not put on a selected chip (the mockup's `Terv` is
-              // a plain filled pill), and `secondary`'s `hover:bg-surface-2` was never overridden —
-              // twMerge cannot see through a modifier — so pointing at the ALREADY-selected tab
-              // turned it grey, which reads as "you are about to deselect".
-              variant="secondary"
-              shape="chip"
-              density="compact"
-              selected={tab === key}
-              className="shrink-0"
-              onClick={() => setTab(key)}
-              icon={<Icon className="size-icon-s" aria-hidden />}
-            >
-              {t(`coaching.tab.${key}`)}
-            </Pressable>
-          ))}
+      {/* ── the four views of the client ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
+          <Rule strong />
+          {/* The hug switch does not wrap: where the four words are wider than the column (de at
+              360: "Nachrichten" ends past the edge) the switch scrolls sideways inside this box
+              instead of being cut by the screen. The 8 / 4 of padding given back in negative
+              margins keep the focus ring of the first option and its top / bottom unclipped. */}
+          <div className="-mx-2 -my-1 overflow-x-auto px-2 py-1">
+            <Segmented
+              rule
+              label={t('coaching.tabs')}
+              options={TABS.map(({ key }) => ({ value: key, label: t(`coaching.tab.${key}`) }))}
+              value={tab}
+              onChange={setTab}
+            />
+          </div>
         </div>
-
-        <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} className="min-h-40">
+        <div className="min-h-40">
           {tab === 'progress' ? (
             <ProgressTab linkId={linkId} />
           ) : tab === 'plan' ? (
@@ -459,9 +309,8 @@ export function ClientDetailPage() {
           ) : tab === 'chat' ? (
             <ChatTab linkId={linkId} />
           ) : (
-            // ALL FOUR TABS HAVE A FEATURE, and TypeScript is what said so: with nutrition wired,
-            // `tab` narrowed to `never` in the fallback and the "arrives in phase N" placeholder
-            // stopped compiling.
+            // ALL FOUR VIEWS HAVE A FEATURE, and TypeScript is what said so: with nutrition wired,
+            // `tab` narrowed to `never` in the fallback.
             <NutritionTab linkId={linkId} />
           )}
         </div>
@@ -470,80 +319,91 @@ export function ClientDetailPage() {
       {/* ── the questionnaire, in full ─────────────────────────────────────────────────────── */}
       <Sheet open={profileOpen} onClose={() => setProfileOpen(false)} title={t('coaching.profileTitle')}>
         {p ? (
-          <div className="flex flex-col gap-group">
-            {/* The full sentence lives HERE, where acting on incomplete answers actually begins.
-                On the page it is a glyph; a coach about to write a plan gets the whole warning. */}
-            {p.status === 'draft' ? (
-              <Surface className="flex items-start gap-tight border-warning-border bg-warning-subtle">
-                <TriangleAlert className="size-icon-m mt-0.5 shrink-0 text-warning" strokeWidth={2} aria-hidden />
-                <p className="text-body-s text-text-1">{t('coaching.profileDraft')}</p>
-              </Surface>
-            ) : null}
+          <div className="flex flex-col gap-section">
+            {/* The full sentence lives HERE, where acting on incomplete answers actually begins. */}
+            {p.status === 'draft' ? <NoticeLine tone="warn">{t('coaching.profileDraft')}</NoticeLine> : null}
 
-            <div className="flex flex-col">
-              <Row
-                label={t('onboarding.step.goal.title')}
+            <RowStack as="div">
+              <ListRow
+                title={t('onboarding.step.goal.title')}
+                lines={2}
                 value={p.primary_goal ? t(`onboarding.goal.${p.primary_goal}`) : '—'}
               />
-              <Row
-                label={t('onboarding.sessionsPerWeek')}
+              <ListRow
+                title={t('onboarding.sessionsPerWeek')}
+                lines={2}
                 value={p.sessions_per_week ? String(p.sessions_per_week) : '—'}
               />
-              <Row
-                label={t('onboarding.location')}
+              <ListRow
+                title={t('onboarding.location')}
+                lines={2}
                 value={p.training_location ? t(`onboarding.loc.${p.training_location}`) : '—'}
               />
-              <Row
-                label={t('onboarding.experience')}
-                value={p.experience ? t(`onboarding.exp.${p.experience}`) : '—'}
+              <ListRow
+                // The longest question with the longest answer: the answer goes to the sub line (as the
+                // equipment answer does), so the question never loses a word to the value column (de
+                // "Trainingserfahrung" was cut beside "Fortgeschritten — 1–3 Jahre").
+                title={t('onboarding.experience')}
+                lines={2}
+                sub={p.experience ? t(`onboarding.exp.${p.experience}`) : '—'}
               />
-              <Row
-                label={t('onboarding.sessionMinutes')}
+              <ListRow
+                title={t('onboarding.sessionMinutes')}
+                lines={2}
                 value={p.session_minutes ? `${p.session_minutes} ${t('common.minutesShort')}` : '—'}
               />
-              <Row label={t('onboarding.heightCm')} value={p.height_cm ? `${p.height_cm} cm` : '—'} />
-              <Row label={t('onboarding.weightKg')} value={p.bodyweight_kg ? `${p.bodyweight_kg} kg` : '—'} />
-              <Row label={t('onboarding.birthYear')} value={p.birth_year ? String(p.birth_year) : '—'} />
-              <Row label={t('onboarding.sex')} value={p.sex ? t(`onboarding.sexOpt.${p.sex}`) : '—'} />
-              <Row
-                label={t('onboarding.equipment')}
-                value={
+              <ListRow title={t('onboarding.heightCm')} lines={2} value={p.height_cm ? `${p.height_cm} cm` : '—'} />
+              <ListRow
+                title={t('onboarding.weightKg')}
+                lines={2}
+                value={p.bodyweight_kg ? `${p.bodyweight_kg} kg` : '—'}
+              />
+              <ListRow title={t('onboarding.birthYear')} lines={2} value={p.birth_year ? String(p.birth_year) : '—'} />
+              <ListRow title={t('onboarding.sex')} lines={2} value={p.sex ? t(`onboarding.sexOpt.${p.sex}`) : '—'} />
+              <ListRow
+                title={t('onboarding.equipment')}
+                lines={2}
+                subLines={3}
+                sub={
                   p.equipment.length
                     ? p.equipment.map((e: ClientOnboarding['equipment'][number]) => e.name).join(', ')
                     : '—'
                 }
               />
-            </div>
+            </RowStack>
 
             {/* Every flagged area, not just the promoted one. */}
             {flagged.length ? (
-              <Surface
-                elevation="inset"
-                className="flex flex-col gap-tight border-warning-border bg-warning-subtle"
-              >
-                <p className="text-micro uppercase text-warning">{t('coaching.limitations')}</p>
-                {flagged.map((l: Limitation) => (
-                  <p key={l.body_area} className="text-body-s text-text-1">
-                    <span className="font-medium">{t(`onboarding.area.${l.body_area}`)}</span>
-                    {' — '}
-                    {t(`onboarding.sev.${l.severity}`)}
-                    {l.note ? <span className="text-text-2"> · {l.note}</span> : null}
-                  </p>
-                ))}
-              </Surface>
+              <Section title={t('coaching.limitations')}>
+                <RowStack as="div">
+                  {flagged.map((l: Limitation) => (
+                    <ListRow
+                      key={l.body_area}
+                      title={
+                        <span className="flex items-center gap-2">
+                          <Dot tone="warn" />
+                          {`${t(`onboarding.area.${l.body_area}`)} — ${t(`onboarding.sev.${l.severity}`)}`}
+                        </span>
+                      }
+                      sub={l.note ?? undefined}
+                      subLines={2}
+                    />
+                  ))}
+                </RowStack>
+              </Section>
             ) : null}
 
             {p.notes ? (
-              <div className="flex flex-col gap-tight">
-                <span className="text-body-s text-text-2">{t('onboarding.notes')}</span>
+              <div className="flex flex-col gap-2">
+                <p className="text-eyebrow text-text-2">{t('onboarding.notes')}</p>
                 <p className="text-body whitespace-pre-wrap text-text-1">{p.notes}</p>
               </div>
             ) : null}
           </div>
         ) : (
-          <p className="text-body-s text-text-2">{t('coaching.noProfile')}</p>
+          <p className="text-body text-text-2">{t('coaching.noProfile')}</p>
         )}
       </Sheet>
-    </div>
+    </Screen>
   );
 }

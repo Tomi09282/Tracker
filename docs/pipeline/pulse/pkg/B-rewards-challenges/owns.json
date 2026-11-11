@@ -1,0 +1,52 @@
+{
+  "id": "B-rewards-challenges",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 4 'Rewards + challenges' (backend half); owner 2026-10-18 (design round B and the economy sheet approved), .pulse/owner-answers.md last sections; backend changes allowed by the owner's lifting of the backend rule for the LifeOS backend packages",
+  "owns": [
+    "backend/package.json",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-rewards-challenges.js",
+    "backend/scripts/verify-033.mjs",
+    "backend/src/coins/routes.js",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/lifeos-items.js",
+    "backend/src/db/lifeos-rewards-items.js",
+    "backend/src/db/migrations/033_lifeos_rewards_challenges.sql",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/tx/lifeos-rewards.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/challenges.js",
+    "backend/src/lifeos/challenge-routes.js",
+    "backend/src/lifeos/rewards.js",
+    "backend/src/lifeos/reward-routes.js",
+    "backend/src/lifeos/routes.js",
+    "backend/src/lifeos/rules.js",
+    "docs/pipeline/pulse/pkg/B-rewards-challenges/**"
+  ],
+  "takenFrom": {
+    "B-habits-tasks (closed, merged 4c3e668)": [
+      "backend/package.json",
+      "backend/scripts/smoke.js",
+      "backend/src/coins/routes.js",
+      "backend/src/db/gdpr.js",
+      "backend/src/db/index.js",
+      "backend/src/db/lifeos-items.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/src/db/worker.js",
+      "backend/src/lifeos/routes.js",
+      "backend/src/lifeos/rules.js"
+    ]
+  },
+  "sharedWith": {
+    "note": "B-calendar (034) and B-focus (035) run in parallel and also add lines to backend/package.json, scripts/smoke.js, src/db/gdpr.js, src/db/index.js, src/db/worker.js, src/db/tx/lifeos.js (GET /lifeos/today) and src/lifeos/routes.js. Every edit here is ADDITIVE (new lines in their own block), so the integrator's merge is a union of blocks."
+  },
+  "handIn": {
+    "shared.patch": ["frontend/src/lib/lifeos-api.ts"]
+  },
+  "notInScope": [
+    "every LifeOS screen (MAI DOBÁS, Kihívások, Jutalmak, jutalom részletek, Új jutalom; the NAPI DOBÁS block on Ma, Profil's JUTALMAK row, the Érmék door) - the frontend lanes, against api.md and lifeos-api.ts",
+    "seed-demo data for the round-B captures (the challenge pool and the reward shop of the persona) - owned by the seed script's owner; a request in forOrchestrator",
+    "calendar / events / reminders (Phase 5, 034), focus (Phase 6, 035)",
+    "work-packages.json entry - the integrator's, at merge (as for B-core / B-habits-tasks)"
+  ]
+}

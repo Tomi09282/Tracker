@@ -1,0 +1,40 @@
+diff --git a/frontend/src/features/today/TodayPage.tsx b/frontend/src/features/today/TodayPage.tsx
+index be3e37a..9a2b0d7 100644
+--- a/frontend/src/features/today/TodayPage.tsx
++++ b/frontend/src/features/today/TodayPage.tsx
+@@ -17,6 +17,7 @@ import { TodayNutrition } from './TodayNutrition';
+ import { TodayTasks } from './TodayTasks';
+ import { TodayWorkout } from './TodayWorkout';
+ import { TodayDraw } from '../challenges/TodayDraw';
++import { TodayFocus } from '../focus/TodayFocus';
+ import { useLifeosToday } from './useLifeosToday';
+ 
+ /**
+@@ -36,6 +37,7 @@ import { useLifeosToday } from './useLifeosToday';
+  *   TodayHabits                SZOKÁSOK (Összes ›): tap to log
+  *   TodayTasks                 FELADATOK (Rögzítés +): tap to complete, "Kész ma · 2 ›"
+  *   TodayDraw settled          NAPI DOBÁS once picked: the teaser, "elvállalva" (ma-1: after FELADATOK)
++ *   TodayFocus                 FÓKUSZ ("ma 50 perc"): the open block or the door, -> /focus (S-focus)
+  *   TodayNutrition             TÁPLÁLKOZÁS (Megnyitás ›): Kalória, Fehérje
+  *   NextEventSection           KÖVETKEZŐ (Naptár ›): the next event within 7 days (S-calendar)
+  *   the library row            "Gyakorlatok" with the barbell still, last (owner, 2026-10-17)
+@@ -48,8 +50,9 @@ import { useLifeosToday } from './useLifeosToday';
+  * NextEventSection.tsx, plan phase 5): the next event within 7 days, after TÁPLÁLKOZÁS; not drawn
+  * without one.
+  *
+- * NOT YET: FÓKUSZ (phase 6) has no server yet, so it is not drawn — no teaser, no placeholder (D3:
+- * never a control that does nothing).
++ * TodayFocus (FÓKUSZ) is package S-focus' block (features/focus/TodayFocus.tsx, plan phase 6): the open
++ * or planned block, or the door to /focus, from `GET /lifeos/today`'s `focus` field; before migration 035
++ * the field is absent and nothing is drawn.
+  *
+  * ═══ DATA ══════════════════════════════════════════════════════════════════════════════════════
+  *
+@@ -113,6 +116,7 @@ export function TodayPage() {
+           <TodayHabits habits={day.habits ?? null} timeZone={timeZone} onFirst={() => setNewHabit((n) => Math.abs(n) + 1)} />
+           <TodayTasks tasks={day.tasks ?? null} today={day.today} timeZone={timeZone} onCapture={() => setCapturing(true)} />
+           <TodayDraw day={day} place="settled" />
++          <TodayFocus focus={day.focus} />
+         </>
+       ) : null}
+ 

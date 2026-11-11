@@ -1,0 +1,39 @@
+diff --git a/frontend/src/app/AppLayout.tsx b/frontend/src/app/AppLayout.tsx
+--- a/frontend/src/app/AppLayout.tsx
++++ b/frontend/src/app/AppLayout.tsx
+@@ -4,6 +4,7 @@
+ import { ViewContext } from './viewContext';
+ import { CommandPalette } from '../ui/shell/CommandPalette';
+ import { ShellProvider } from '../ui/shell/Screen';
++import { useTimezoneBootstrap } from '../features/settings/dayPrefs';
+ 
+ /**
+  * The layout of every signed-in screen: the screen and the tab bar.
+@@ -30,6 +31,10 @@
+   // A view grants nothing — every route and endpoint re-checks the role on the server.
+   const view = useView();
+   const tabs = useNavTabs(view);
++  // LifeOS starts the first time the server knows the user's zone: when none is stored, the
++  // browser's zone is sent once, silently (B-core api.md "The day"; dayPrefs.ts). Mounted here,
++  // once, so every signed-in screen - Ma first - has a logical today without a visit to Profil.
++  useTimezoneBootstrap();
+ 
+   return (
+     <ViewContext.Provider value={view}>
+diff --git a/frontend/src/features/settings/dayPrefs.ts b/frontend/src/features/settings/dayPrefs.ts
+--- a/frontend/src/features/settings/dayPrefs.ts
++++ b/frontend/src/features/settings/dayPrefs.ts
+@@ -44,7 +44,12 @@
+   return useMutation({
+     mutationFn: async (patch: UserPrefsPatch) =>
+       (await apiWithRefresh<{ prefs: UserPrefs }>('/me/prefs', { method: 'PATCH', body: patch })).prefs,
+-    onSuccess: (prefs) => qc.setQueryData(DAY_PREFS_KEY, prefs),
++    onSuccess: (prefs) => {
++      qc.setQueryData(DAY_PREFS_KEY, prefs);
++      // A new zone or day start moves the logical today (and the first one starts LifeOS): every
++      // LifeOS read (Ma, Feladatok, Szokások) answers for the new day.
++      void qc.invalidateQueries({ queryKey: ['lifeos'] });
++    },
+   });
+ }
+ 

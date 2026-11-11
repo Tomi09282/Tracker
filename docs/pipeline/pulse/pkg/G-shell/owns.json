@@ -1,0 +1,19 @@
+{
+  "id": "G-shell",
+  "kind": "kit-gap lane (not a package of work-packages.json)",
+  "scope": ".pulse/prep/_kit-gaps.md section A: items 3, 6, 7, 12, 13 (identity header) + request R-S-auth-01",
+  "owns": [
+    "frontend/src/ui/shell/Screen.tsx",
+    "frontend/src/ui/shell/ScreenHeader.tsx",
+    "frontend/src/ui/primitives/control.ts",
+    "frontend/src/ui/primitives/Pressable.tsx",
+    "frontend/src/ui/primitives/TextLink.tsx",
+    "frontend/src/ui/primitives/ChipRow.tsx",
+    "frontend/src/features/playground/kit/G-shell.tsx",
+    "docs/pipeline/pulse/kit/G-shell.md",
+    "docs/pipeline/pulse/pkg/G-shell/**"
+  ],
+  "handIn": {
+    "docs/pipeline/pulse/pkg/G-shell/shared.patch": "frontend/src/features/auth/AuthPage.tsx: the password reveal takes glyph=\"field\" (R-S-auth-01)"
+  }
+}

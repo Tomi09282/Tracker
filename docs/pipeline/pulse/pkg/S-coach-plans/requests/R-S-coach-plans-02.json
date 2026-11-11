@@ -1,0 +1,14 @@
+{
+  "id": "R-S-coach-plans-02",
+  "from": "S-coach-plans",
+  "kind": "tool",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (feed rules)",
+  "need": "A fixture rule that holds an answer (e.g. { \"method\": \"GET\", \"path\": \"/api/v1/plans\", \"hold\": true } or a delay on the virtual clock) so a loading skeleton and a busy pill can be captured. Today every recorded or stubbed answer is fulfilled at once, so isPending and a pending POST are not reachable in a capture.",
+  "evidence": "pulse-shot.mjs answer(): status / body / from / edits only; states.json notCapturable.loading and .creating",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the loading skeleton (role=status + common.loading, eyebrow block, numeral block, two ListRowSkeleton) and the busy pill (Pressable busy) are checked in code only and reported as structure",
+  "status": "open",
+  "resolution": null
+}

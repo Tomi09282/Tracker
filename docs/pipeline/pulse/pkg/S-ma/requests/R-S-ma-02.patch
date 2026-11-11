@@ -1,0 +1,45 @@
+diff --git a/frontend/src/features/today/TodayPage.tsx b/frontend/src/features/today/TodayPage.tsx
+index 6120020..e1ddaaf 100644
+--- a/frontend/src/features/today/TodayPage.tsx
++++ b/frontend/src/features/today/TodayPage.tsx
+@@ -1,4 +1,6 @@
++import { useState } from 'react';
+ import { useTranslation } from 'react-i18next';
++import { CaptureSheet } from '../capture/CaptureSheet';
+ import { NotificationBell } from '../chat/NotificationBell';
+ import { ListRow } from '../../ui/data/ListRow';
+ import { RowStack } from '../../ui/data/RowStack';
+@@ -10,7 +12,7 @@ import { dayCount, dayLabel, earnedTodayMinor } from './model';
+ import { TodayHabits, TodayHabitsSkeleton } from './TodayHabits';
+ import { TodayHero } from './TodayHero';
+ import { TodayNutrition } from './TodayNutrition';
+-import { TodayTasks, type CaptureDoor } from './TodayTasks';
++import { TodayTasks } from './TodayTasks';
+ import { TodayWorkout } from './TodayWorkout';
+ import { useLifeosToday } from './useLifeosToday';
+ 
+@@ -46,11 +48,12 @@ import { useLifeosToday } from './useLifeosToday';
+  * A failed LifeOS read: the ledger line and the hero print the dash (the danger line with "Újra" under
+  * the hero) and the habit / task sections wait — the session, the food and the library still work.
+  *
+- * "Rögzítés" goes to the tasks page (`capture`, default `/tasks`) until S-tasks' capture sheet is
+- * merged; request R-S-ma-02 then opens the sheet over Ma instead.
++ * "Rögzítés" opens the capture sheet (S-tasks, frame lifeos/capture) over Ma.
+  */
+-export function TodayPage({ capture = { to: '/tasks' } }: { capture?: CaptureDoor }) {
++export function TodayPage() {
+   const { t, i18n } = useTranslation();
++  const [capturing, setCapturing] = useState(false);
++  const capture = { onClick: () => setCapturing(true) };
+   const lifeos = useLifeosToday();
+   const day = lifeos.data;
+ 
+@@ -105,6 +108,8 @@ export function TodayPage({ capture = { to: '/tasks' } }: { capture?: CaptureDoo
+           chevron
+         />
+       </RowStack>
++
++      <CaptureSheet open={capturing} onClose={() => setCapturing(false)} />
+     </Screen>
+   );
+ }

@@ -1,0 +1,13 @@
+{
+  "id": "R-F2c-01",
+  "from": "F2c",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/verify-gates.mjs",
+  "need": "A notice, not a need: R-F5-01 (the three check:assets probes of lane F5) is APPLIED on pulse/F2c. Do not apply docs/pipeline/pulse/pkg/F5/requests/R-F5-01.patch again in the F2:c merge - the squash already carries it - and close R-F5-01.",
+  "evidence": "pulse/F2c commit 6e793a1: git apply of the request's own patch (byte-identical to the inbox copy, cmp clean), no hand edit. node scripts/verify-gates.mjs --list shows assets/tab-without-lit-raster, assets/blend-mode and assets/accent-moved-alone as armed; the full run in the slot (--allow-dirty, hand-ins applied, budgets from --init) said 78 passed, 0 failed, 4 dormant - docs/pipeline/pulse/pkg/F2/c/verify-gates.run.txt.",
+  "proposedApi": null,
+  "interim": "nothing waits",
+  "status": "done",
+  "resolution": "Done in the F2:c merge commit (2026-10-14): R-F5-01.patch was NOT applied a second time. The squash of pulse/F2c (1bbccfd) carries its hunks; a reverse check of the patch holds and a forward apply is refused. R-F5-01 is closed as done."
+}

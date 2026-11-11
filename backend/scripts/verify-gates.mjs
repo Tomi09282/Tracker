@@ -98,6 +98,11 @@ const TOUCHED = [
   'src/coaching/routes.js',
   'src/theme/routes.js',
   'src/db/gdpr.js',
+  'src/chat/routes.js',
+  'src/db/tx/lifeos.js',
+  'src/db/index.js',
+  'src/db/tx/admin-accounts.js',
+  'src/admin/accounts.js',
 ];
 const beforeAll = Object.fromEntries(await Promise.all(TOUCHED.map(async (f) => [f, await digest(path.resolve(f))])));
 
@@ -246,6 +251,29 @@ await mutate({
   to: '    const parsed = feedQuery.safeParse(req.query);\n    const who = req.user?.id ?? null;',
   gate: 'scripts/check-routes.mjs',
   expect: 'req.user',
+});
+
+/*
+ * The client's VIEW (user / trainer / admin) is presentation only and must never reach a handler.
+ * Planted where it would be most tempting: the conversation list, whose `?side=` filter is the
+ * legitimate way the trainer view narrows the list — a `?view=` read next to it is the forgery.
+ */
+await mutate({
+  label: 'a handler reading req.query.view is caught — the client view grants nothing',
+  file: 'src/chat/routes.js',
+  from: '    const { side } = ListQuery.parse(req.query);',
+  to: "    const { side } = ListQuery.parse(req.query);\n    const view = req.query.view === 'coach' ? 'coach' : side;",
+  gate: 'scripts/check-routes.mjs',
+  expect: "reads the client's view (req.query.view)",
+});
+
+await mutate({
+  label: "a handler reading an X-View header is caught — the same rule over a header",
+  file: 'src/chat/routes.js',
+  from: '    const { side } = ListQuery.parse(req.query);',
+  to: "    const { side } = ListQuery.parse(req.query);\n    const view = req.get('X-View');",
+  gate: 'scripts/check-routes.mjs',
+  expect: "reads the client's view (an 'x-view' header)",
 });
 
 console.log('\n── check-admin-audit: the log that has to be there when somebody asks ──────────');
@@ -422,6 +450,115 @@ await mutate({
   to: 'router.get(\n  `/admin/stats`,',
   gate: 'scripts/check-routes.mjs',
   expect: 'CANNOT PARSE',
+});
+
+console.log('\n── the worker is more than worker.js (package B0: src/db/tx/*.js) ──────────────');
+
+/*
+ * Since B0 the named transactions may live in src/db/tx/<domain>.js, re-exported by worker.js. The
+ * three worker gates read the worker side through scripts/lib/worker-sources.mjs. If the helper —
+ * or a gate — went back to reading worker.js alone, every probe aimed at worker.js above would
+ * still pass and a defect in a tx file would sail through. These plant the defect IN a tx file.
+ */
+await mutate({
+  label: 'a conditional return after a write inside a tx/*.js transaction is caught',
+  file: 'src/db/tx/lifeos.js',
+  // closeLifeDayTx, right after its first write (the summary INSERT): returning here would commit
+  // a settled day with none of its coins — and this is not a changes === 0 probe.
+  from: "    const day = { localDate, sourceType: 'day',",
+  to: "    if (kcalOutcome === 'no_data') return { outcome: 'closed_empty' };\n    const day = { localDate, sourceType: 'day',",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+/*
+ * Package B-habits-tasks: a write through a shared helper (postCoinEvent, settleHabitsOn, ...) is
+ * a write. The first probe returns on a refused-looking condition right after the task's coins
+ * were posted (the UPDATE and the award already ran — the exemption must not apply); the second
+ * one plants the return in a transaction whose body holds no `.run(` at all.
+ */
+await mutate({
+  label: 'a conditional return after a helper write (postCoinEvent) in a tx/*.js transaction is caught',
+  file: 'src/db/tx/lifeos-tasks.js',
+  from: "    return { outcome: 'completed', late, event, task: viewOf(userId, taskId, prefs, rules, now) };",
+  to: "    if (!event) return { outcome: 'capped' };\n    return { outcome: 'completed', late, event, task: viewOf(userId, taskId, prefs, rules, now) };",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+await mutate({
+  label: 'a transaction whose ONLY write is a helper call (materializeFor) is still checked',
+  file: 'src/db/tx/lifeos-tasks.js',
+  // materializeRecurringTasksTx: its only write is materializeFor -> INSERT; a return planted
+  // after it must be seen although the transaction body holds no `.run(` at all.
+  from: "    const created = materializeFor(userId, today);\n",
+  to: "    const created = materializeFor(userId, today);\n    if (created.length === 0) return { outcome: 'nothing' };\n",
+  gate: 'scripts/check-worker-tx.mjs',
+  expect: 'conditional return AFTER a write',
+});
+
+await mutate({
+  label: 'an admin transaction in a tx/*.js file that stops auditing is caught',
+  file: 'src/db/tx/lifeos.js',
+  // setPointRulesTx, the one admin write of the LifeOS core.
+  from: "`INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'lifeos.rules.set'",
+  to: "`INSERT INTO audit_trail (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'lifeos.rules.set'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'reaches no INSERT INTO audit_log',
+});
+
+await mutate({
+  label: 'an account-admin transaction (tx/admin-accounts.js) that stops auditing is caught',
+  file: 'src/db/tx/admin-accounts.js',
+  from: "`INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'user.lockout.reset'",
+  to: "`INSERT INTO audit_trail (actor_id, action, target_type, target_id, detail, request_id, ip)\n       VALUES (?, 'user.lockout.reset'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'reaches no INSERT INTO audit_log',
+});
+
+await mutate({
+  label: 'two account writes sharing one audit action string are caught',
+  file: 'src/db/tx/admin-accounts.js',
+  from: "VALUES (?, 'user.sessions.revoke'",
+  to: "VALUES (?, 'user.lockout.reset'",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: "'user.lockout.reset' is written from 2 different places",
+});
+
+await mutate({
+  label: 'the account inspect read without its database admin re-check is caught',
+  file: 'src/admin/accounts.js',
+  from: "    if (!(await assertAdmin(req, res))) return;\n    const p = idParams.safeParse(req.params);\n    if (!p.success) return sendError(res, 400, ERR.VALIDATION);\n",
+  to: "    const p = idParams.safeParse(req.params);\n    if (!p.success) return sendError(res, 400, ERR.VALIDATION);\n",
+  gate: 'scripts/check-admin-audit.mjs',
+  expect: 'authorises from the JWT alone',
+});
+
+await mutate({
+  label: 'an account write without its rate limiters is caught',
+  file: 'src/admin/accounts.js',
+  from: "'/admin/users/:id/signout-all',\n  requireAuth,\n  requireRole('admin'),\n  adminWriteIpLimiter,\n  adminWriteLimiter,\n",
+  to: "'/admin/users/:id/signout-all',\n  requireAuth,\n  requireRole('admin'),\n",
+  gate: 'scripts/check-routes.mjs',
+  expect: 'is a write with no rate limiter',
+});
+
+await mutate({
+  label: 'a tx file worker.js does not re-export is caught (Piscina could not find its tasks)',
+  file: 'src/db/worker.js',
+  from: "export * from './tx/lifeos.js';",
+  to: '',
+  gate: 'scripts/check-route-tx.mjs',
+  expect: 'does not re-export',
+});
+
+await mutate({
+  label: 'a facade name that matches no worker export is caught',
+  file: 'src/db/index.js',
+  from: "pool.run(args, { name: 'awardWorkoutTx' })",
+  to: "pool.run(args, { name: 'awardWorkoutsTx' })",
+  gate: 'scripts/check-route-tx.mjs',
+  expect: 'which no worker-side file exports',
 });
 
 console.log('\n── and nothing was left behind ────────────────────────────────────────────────');

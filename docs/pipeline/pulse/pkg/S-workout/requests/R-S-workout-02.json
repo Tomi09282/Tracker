@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-02",
+  "from": "S-workout",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/control.ts + Pressable.tsx (lane A1 / G-inputs)",
+  "need": "The active set check is the small lime pill as an icon-only 56 x 44 (r 28, 24 pt tick, stroke 2.5, glow). size=\"sm\" hugs a label with 24 padding (72 wide).",
+  "evidence": "workout-1.json node \"Button/primary · Kész\" 322,497,56,44; .pulse/pairs/S-workout/workout-1.pair.png",
+  "proposedApi": "<Pressable variant=\"primary\" size=\"sm\" shape=\"icon\"> = 56 x 44 pill, glyph 24",
+  "proposedPatch": null,
+  "interim": "SetRow.tsx sets w-14 px-0 through className on the sm pill",
+  "status": "closed",
+  "resolution": "landed with the gap lanes (G-shell / G-inputs) on pulse-redesign; adopted in pulse/S-workout"
+}

@@ -1,32 +1,29 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import {
-  Users,
-  KeyRound,
-  UserPlus,
-  TriangleAlert,
-  Archive,
-  Ticket,
-  ClipboardList,
-  Plus,
-} from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { Archive, ChevronRight, Plus } from 'lucide-react';
 import { NotificationBell } from '../chat/NotificationBell';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
-import { Surface } from '../../ui/primitives/Surface';
-import { SectionHeader } from '../../ui/data/SectionHeader';
-import { SummaryTile } from '../../ui/data/SummaryTile';
-import { Gauge } from '../../ui/feedback/Gauge';
-import { CountUp } from '../../ui/feedback/CountUp';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Section } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { StatBlock } from '../../ui/data/StatBlock';
+import { Numeral } from '../../ui/data/Numeral';
+import { LedgerRow } from '../../ui/data/LedgerRow';
+import { SplitBar } from '../../ui/data/SplitBar';
+import { Monogram } from '../../ui/data/Monogram';
+import { Pic } from '../../ui/media/Pic';
 import { CopyButton } from '../../ui/feedback/variants/E2CopyButton';
 import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { Monogram } from './Monogram';
 import { useOnline } from '../plans/useOnline';
-import { useSession } from '../auth/useSession';
+import { hasRole, useSession } from '../auth/useSession';
 import { personLabel } from '../../lib/person';
 import {
   useClients,
@@ -41,38 +38,47 @@ import {
 } from './useCoaching';
 
 /**
- * The donut's vocabulary.
+ * The team split's vocabulary.
  *
- * A team is a CATEGORY, not a status, so the colours are drawn from the neutral end of the
- * semantic set — accent, info, success — and never from warning or danger. This screen spends amber
- * on "this account cannot log in" and on "this client trained zero times"; a team wearing the same
- * amber would make both of those unreadable.
- *
- * The greys close the ring: the folded tail and the no-team bucket are the absence of a team, and
- * they read that way.
+ * A team is a CATEGORY, not a status, so its part of the split is a step of ink by its place
+ * (`SplitBar`'s default tone: 1 · .64 · .40 · .24 …) — never lime and never warn. This screen spends
+ * amber on "this account cannot log in" and on "this client trained zero times"; a team wearing the
+ * same amber would make both of those unreadable. The largest teams come first, so the folded tail
+ * and the no-team bucket close the bar at the quietest steps — the absence of a team reads that way.
  */
-const TEAM_COLORS = ['var(--accent)', 'var(--info)', 'var(--success)'] as const;
-const TAIL_COLOR = 'var(--text-2)';
-const UNASSIGNED_COLOR = 'var(--text-3)';
-
 /** The largest few keep their own segment; everything past that folds into one. */
-const LEGEND_TEAMS = TEAM_COLORS.length;
+const LEGEND_TEAMS = 3;
 
 /**
- * Coach dashboard — the redesign of Bible blueprint 6.
+ * One join code's line: "3 / 20 felhasználva" with the figure in ink and the word in the quiet ink,
+ * as coach-dashboard-1 draws it. The string is the one translated sentence; the figure is split off
+ * only when the sentence starts with it (it does in hu / en / de), otherwise it is drawn whole.
+ */
+function CodeUses({ text, figure }: { text: string; figure: string }) {
+  if (!text.startsWith(figure)) return <>{text}</>;
+  return (
+    <>
+      {figure}
+      <span className="text-text-2">{text.slice(figure.length)}</span>
+    </>
+  );
+}
+
+/**
+ * Coach dashboard — [[58-Pulse/Screens/coach-dashboard]], frames coach-dashboard-1 (the roster),
+ * coach-dashboard-2 (the code, shown once) and coach-dashboard-3 (an account awaiting handover).
  *
- * ═══ WHAT LEFT THE SCROLL ══════════════════════════════════════════════════════════════════════
+ * ═══ THE ORDER OF THE PAGE ═════════════════════════════════════════════════════════════════════
  *
- * Two forms and two explanatory paragraphs. `Csapat neve` + `Létrehozás` now live behind the
- * CSAPATOK tile, and `E-mail címek` + `Fiókok létrehozása` behind the ghost `Előre létrehozott
- * fiókok` button. Both are setup acts performed a handful of times per coach, and they were costing
- * the DAILY screen four controls and two paragraphs above the roster — the one thing the coach
- * opens this page to read.
+ * Header (the greeting grammar of Home, the bell, the one door to the plan library) → the ONE hero:
+ * how many clients, the stopwatch glowing out of the black and the team split under it → the
+ * handover notice when an account is not yet its owner's → the ROSTER, what the coach opens this
+ * page for → the two counts as a ledger → the join codes with the screen's one lime pill and the
+ * door to the pre-made accounts. Nothing is enclosed: rules, rows and space.
  *
- * The team sub-headings left the roster too. Their information is the donut's legend now, which
- * says the same split in one glance instead of one grey heading per team on a list that is
- * scrolled every day. The list being flat is what makes a zero-session row visible: every row now
- * looks identical except the one that is amber.
+ * Two forms and two explanatory paragraphs live behind sheets: `Csapat neve` + `Létrehozás` behind
+ * the CSAPATOK ledger row, `E-mail címek` + `Fiókok létrehozása` behind the pre-made accounts door.
+ * Both are setup acts performed a handful of times per coach.
  *
  * ACTIVITY IS A COUNT OF COMPLETED SESSIONS IN 28 DAYS, never a percentage. A percentage needs a
  * denominator, and "how many were prescribed" is the schedule rule — arithmetic over a window
@@ -105,18 +111,13 @@ export function CoachDashboard() {
   const [teamsOpen, setTeamsOpen] = useState(false);
   const [pregenOpen, setPregenOpen] = useState(false);
 
-  if (user && user.role !== 'coach' && user.role !== 'admin') {
+  if (user && !hasRole(user, 'coach')) {
+    // The whole page for a non-coach, so its title is the page heading. The route is a
+    // convenience; the server enforces the role regardless.
     return (
-      <div className="col-wide screen-x py-6">
-        {/* The whole page for a non-coach, so its title is the page heading. The route is a
-            convenience; the server enforces the role regardless. */}
-        <EmptyState
-          icon={Users}
-          title={t('coaching.forbiddenTitle')}
-          body={t('coaching.forbiddenBody')}
-          heading="h1"
-        />
-      </div>
+      <Screen top="root">
+        <EmptyState heading="h1" title={t('coaching.forbiddenTitle')} body={t('coaching.forbiddenBody')} />
+      </Screen>
     );
   }
 
@@ -140,7 +141,7 @@ export function CoachDashboard() {
   const collator = new Intl.Collator(i18n.language, { sensitivity: 'base', numeric: true });
   const rows = [...(clients.data?.clients ?? [])].sort(
     (a, b) =>
-      // Teams first and in the same grouping the server sent, so the sheet's segments and the list
+      // Teams first and in the same grouping the server sent, so the split's parts and the list
       // still agree; unassigned clients last, which is what `t.name IS NULL` meant in SQL.
       Number(a.team_name === null) - Number(b.team_name === null) ||
       collator.compare(a.team_name ?? '', b.team_name ?? '') ||
@@ -149,9 +150,9 @@ export function CoachDashboard() {
   const awaitingHandover = rows.filter((c) => c.must_change_credentials === 1);
   const liveCodes = (codes.data?.codes ?? []).filter((c) => !c.revoked_at && c.uses < c.max_uses);
 
-  /* ── the anchor's arithmetic ──────────────────────────────────────────────────────────────
-     One segment per team, largest first, with everything past the legend cap folded into a single
-     segment. Shrinking the labels instead would produce a key nobody can read on a phone. */
+  /* ── the hero's arithmetic ────────────────────────────────────────────────────────────────
+     One part per team, largest first, with everything past the legend cap folded into a single
+     part. Shrinking the labels instead would produce a key nobody can read on a phone. */
   const byTeam = new Map<string, number>();
   for (const c of rows) byTeam.set(c.team_name ?? '', (byTeam.get(c.team_name ?? '') ?? 0) + 1);
 
@@ -162,39 +163,22 @@ export function CoachDashboard() {
   const tail = namedTeams.slice(LEGEND_TEAMS).reduce((sum, [, n]) => sum + n, 0);
 
   const legend = [
-    ...namedTeams.slice(0, LEGEND_TEAMS).map(([name, count], i) => ({
-      key: `team-${name}`,
-      label: name,
-      count,
-      color: TEAM_COLORS[i],
-    })),
-    ...(tail > 0
-      // Its own noun, not `coaching.teams`: that string already captions the CSAPATOK tile eight
-      // pixels below with a different number in it, and one word over two quantities is a
-      // contradiction the reader has to resolve. This segment is an other-bucket, so it says so.
-      ? [{ key: 'tail', label: t('coaching.otherTeams'), count: tail, color: TAIL_COLOR }]
-      : []),
-    ...(unassigned > 0
-      ? [
-          {
-            key: 'unassigned',
-            label: t('coaching.unassigned'),
-            count: unassigned,
-            color: UNASSIGNED_COLOR,
-          },
-        ]
-      : []),
+    ...namedTeams.slice(0, LEGEND_TEAMS).map(([name, count]) => ({ label: name, count })),
+    // Its own noun, not `coaching.teams`: that string already labels the CSAPATOK ledger row with a
+    // different number in it, and one word over two quantities is a contradiction the reader has
+    // to resolve. This part is an other-bucket, so it says so.
+    ...(tail > 0 ? [{ label: t('coaching.otherTeams'), count: tail }] : []),
+    ...(unassigned > 0 ? [{ label: t('coaching.unassigned'), count: unassigned }] : []),
   ];
 
-  const teamCount = teams.data?.teams.length ?? 0;
-
+  // The screen's ONE lime pill, in the join-code section's head (coach-dashboard-1 "Új kód").
   const mintPill = (
     <Pressable
       variant="primary"
-      shape="chip"
+      size="sm"
       busy={createCode.isPending}
       disabled={offline}
-      icon={<Plus className="size-icon-m" strokeWidth={2} aria-hidden />}
+      icon={<Plus size={16} strokeWidth={2.25} aria-hidden />}
       onClick={async () => {
         const result = await createCode.mutateAsync({ kind: 'multi', max_uses: 20 });
         setMintedCode(result.code);
@@ -209,303 +193,232 @@ export function CoachDashboard() {
      panel carries its own dismiss that says what is being destroyed. */
   const holdingSecrets = (pregenerate.data?.created.length ?? 0) > 0;
 
+  /* ── the roster section ───────────────────────────────────────────────────────────────────
+     The count trails the eyebrow only once the list has landed: a 0 printed for "not known yet"
+     is a wrong number, not a placeholder. */
+  const roster = (
+    <Section
+      title={t('coaching.roster')}
+      trailing={clients.data ? <span className="text-data text-text-2">{rows.length}</span> : undefined}
+    >
+      {clients.isPending ? (
+        <div role="status" aria-busy="true">
+          <span className="sr-only">{t('common.loading')}</span>
+          <RowStack as="div">
+            {[0, 1, 2].map((i) => (
+              <ListRowSkeleton key={i} sub leadSlot index={i} />
+            ))}
+          </RowStack>
+        </div>
+      ) : clients.isError ? (
+        // The header, the counts and the codes still render from whatever resolved; only the list
+        // says it failed, and it says so with the one action that can fix it.
+        <EmptyState
+          title={t('auth.errors.generic')}
+          action={
+            <TextLink text="body" onClick={() => void clients.refetch()}>
+              {t('common.retry')}
+            </TextLink>
+          }
+        />
+      ) : rows.length === 0 ? (
+        <EmptyState title={t('coaching.emptyTitle')} body={t('coaching.emptyBody')} />
+      ) : (
+        <RowStack>
+          {rows.map((c) => (
+            // The LINK id, not the client's user id. They are different id spaces and the route
+            // takes the link, because the link is what carries the proof that this coach may see
+            // this client. The name and the activity line are the link; the archive glyph is its
+            // own target beside it, never inside it.
+            <ListRow
+              key={c.link_id}
+              to={`/coach/clients/${c.link_id}`}
+              leadSlot
+              lead={<Monogram person={c} size={28} />}
+              title={personLabel(c)}
+              subFace="data"
+              sub={
+                <>
+                  {/* A client with none gets the alert ink on the whole line rather than a zero in
+                      the same grey as everything else — the whole value of this line is that the
+                      quiet ones stand out of a flat list. */}
+                  <span className={c.sessions_28d === 0 ? 'text-warning' : undefined}>
+                    {t('coaching.sessions28d', { count: c.sessions_28d ?? 0 })}
+                  </span>
+                  {/* The tag stands 16 after the count, as drawn: a real space (one mono cell of the
+                      13 pt line, 7.8) keeps the two words apart for a screen reader, 8 more make 16. */}
+                  {c.must_change_credentials === 1 ? (
+                    <>
+                      {' '}
+                      <span className="ms-2 text-micro text-warning">{t('coaching.pending')}</span>
+                    </>
+                  ) : null}
+                </>
+              }
+              control={
+                // Destructive, so it never fires from the row: it opens the confirmation. Quiet
+                // (`text-3`) like the chevron beside it. Its 44 pt target runs into both of the
+                // row's gaps (as drawn: 323-367, touching the text column and the chevron), so the
+                // name and the activity line keep the drawn 235 pt column.
+                <Pressable
+                  variant="link"
+                  shape="icon"
+                  tone="faint"
+                  className="-mx-4"
+                  aria-label={t('coaching.archive')}
+                  disabled={offline}
+                  onClick={() => setConfirmArchive(c)}
+                >
+                  <Archive aria-hidden />
+                </Pressable>
+              }
+              chevron
+            />
+          ))}
+        </RowStack>
+      )}
+    </Section>
+  );
+
   return (
-    <div className="col-wide screen-x flex flex-col gap-section py-6">
+    <Screen top="root" width="wide">
       {/* The bell rides this screen's OWN heading rather than a global app bar. An app bar would
           cost vertical space on every screen including the workout player, whose height is the
           thing its entire layout is built around. */}
-      <header className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-micro uppercase text-accent">{t('coaching.eyebrow')}</p>
-          <h1 className="text-title-1 mt-1 text-text-1">{t('coaching.title')}</h1>
-          {/* THE PLAN LIBRARY'S DOOR.
-              `/coach/plans` held its own bottom-bar tab until the bar became role-shaped, and it
-              is the worse of the two losses: its only other in-app link is the back arrow on the
-              plan EDITOR, which you can only see once you are already inside a plan, plus the
-              command palette, which is desktop-only. Without this the whole plan library is
-              unreachable on a phone. A real anchor, not a button that navigates — a page you can
-              middle-click is a page. `check-nav.mjs` asserts this link. */}
-          <Link
-            to="/coach/plans"
-            className="text-body-s mt-1 inline-flex min-h-[var(--target-min)] items-center gap-2 text-accent"
-          >
-            <ClipboardList className="size-icon-s" aria-hidden />
-            {t('nav.plans')}
-          </Link>
-        </div>
-        <NotificationBell className="-mr-2 shrink-0" />
-      </header>
+      <ScreenHeader kind="greet" title={t('coaching.title')} sub={t('coaching.eyebrow')} trailing={<NotificationBell />}>
+        {/* THE PLAN LIBRARY'S DOOR.
+            `/coach/plans` held its own bottom-bar tab until the bar became role-shaped, and it is
+            the worse of the two losses: its only other in-app link is the back arrow on the plan
+            EDITOR, which you can only see once you are already inside a plan, plus the command
+            palette, which is desktop-only. Without this the whole plan library is unreachable on a
+            phone. A real anchor, not a button that navigates — a page you can middle-click is a
+            page. `check-nav.mjs` asserts this link. */}
+        <TextLink to="/coach/plans" text="body" trail={<ChevronRight />} className="self-start">
+          {t('nav.plans')}
+        </TextLink>
+      </ScreenHeader>
 
-      {/* ── anchor ─────────────────────────────────────────────────────────────────────────── */}
+      {/* ── the hero ─────────────────────────────────────────────────────────────────────────
+          A numeral drawn at zero is a decoration pretending to be data, so an empty or failed
+          roster gets no hero at all. While the roster loads: one block at the numeral's cap height
+          and one for the bar; the still is withheld (Pulse draws no skeleton for an image). */}
       {clients.isPending ? (
-        <div className="flex flex-col items-center gap-group">
-          <Skeleton className="size-[208px] rounded-full" />
-          <Skeleton className="h-4 w-64" />
+        <div aria-hidden className="flex flex-col gap-5">
+          <StatBlock label={t('coaching.clients')}>
+            <Skeleton className="h-[102px] w-[53px]" />
+          </StatBlock>
+          <Skeleton className="h-1.5 w-full" />
         </div>
       ) : rows.length > 0 ? (
-        // A ring drawn at zero is a decoration pretending to be data, so an empty roster gets no
-        // donut at all — see the empty branch further down.
-        <div className="flex flex-col items-center gap-group">
-          <Gauge
-            className="size-[208px]"
-            label={t('coaching.clients')}
-            segments={legend.map((l) => ({
-              value: l.count / rows.length,
-              color: l.color,
-              label: l.label,
-            }))}
-          >
-            <div className="flex flex-col items-center">
-              <p className="text-display font-display tabular-nums text-text-1">
-                <CountUp to={rows.length} />
-              </p>
-              <p className="text-micro uppercase text-text-3">{t('coaching.clients')}</p>
-            </div>
-          </Gauge>
-
+        // coach-dashboard-1 "Hero stage": the stopwatch is absolute, its lit right edge 34 past the
+        // gutter (the scaffold clips it at the screen edge), nothing written on its lit area.
+        <div className="relative flex flex-col gap-5">
+          <Pic slot="hero-stopwatch" width={239} priority bleed className="absolute -right-[34px] -top-[58px]" />
+          <StatBlock label={t('coaching.clients')} className="relative">
+            <Numeral size="giant" value={rows.length} mode="roll" from={0} />
+          </StatBlock>
           {/* The legend is the roster's team key — the flat list below carries no team of its own. */}
-          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-tight">
-            {legend.map((l) => (
-              <li key={l.key} className="text-body-s flex items-center gap-tight text-text-2">
-                <span
-                  aria-hidden
-                  className="size-3 shrink-0 rounded-full"
-                  style={{ background: l.color }}
-                />
-                <span className="truncate">{l.label}</span>
-                <span className="font-medium tabular-nums text-text-1">{l.count}</span>
-              </li>
-            ))}
-          </ul>
+          <SplitBar className="relative" label={t('coaching.clients')} parts={legend} />
         </div>
       ) : null}
-
-      {/* ── inventory ────────────────────────────────────────────────────────────────────────
-          Gated on the queries the TILES read, not on the roster's. Waiting only on `clients` made
-          the pair paint `0` and then count up to the real number the moment `teams` or `codes`
-          landed — a visible flash of wrong data in the one place the screen animates a figure. */}
-      {clients.isPending || teams.isPending || codes.isPending ? (
-        // 88px, not the 140 the stacked tile measured: `layout="row"` sets the puck beside the
-        // figure instead of above it, so the card lost a 44px row and a gap. Card pad 16×2 + the
-        // figure/caption column (32 + 8 + 14) — the puck is 44 and no longer the tallest thing.
-        <div className="grid grid-cols-2 gap-group">
-          <Skeleton className="h-22 rounded-card" />
-          <Skeleton className="h-22 rounded-card" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-group">
-          {/* Pressable wraps the tile rather than reimplementing it: one tile component, one
-              44px floor, one set of interaction states. */}
-          <Pressable
-            variant="ghost"
-            className={cn(
-              'group h-full w-full flex-col items-stretch whitespace-normal rounded-card p-0',
-              'text-left hover:bg-transparent',
-            )}
-            onClick={() => setTeamsOpen(true)}
-          >
-            <SummaryTile
-              icon={Ticket}
-              // 06-coach-dashboard.webp draws this pair with the puck BESIDE the figure and the
-              // caption as an eyebrow (`CSAPATOK`) — the donut above already owns the screen's
-              // centred column, so a second centred stack under it competes with it.
-              layout="row"
-              captionCase="upper"
-              value={teamCount}
-              caption={t('coaching.teams')}
-              className={cn(
-                'h-full w-full transition-colors duration-[var(--duration-fast)]',
-                'ease-[var(--ease-standard)] group-hover:border-[var(--surface-border-strong)]',
-                'group-hover:bg-surface-2',
-              )}
-            />
-          </Pressable>
-
-          <SummaryTile
-            icon={KeyRound}
-            layout="row"
-            captionCase="upper"
-            value={liveCodes.length}
-            caption={t('coaching.activeCodes')}
-            className="h-full"
-          />
-        </div>
-      )}
 
       {/* The one alert that is real today: accounts the coach created whose password the coach
-          still knows. Until the client changes it, that account is not yet theirs. */}
+          still knows. Until the client changes it, that account is not yet theirs. It stands
+          between two section rules, right above the list it is about (coach-dashboard-3). */}
       {awaitingHandover.length > 0 ? (
-        <Surface className="flex items-start gap-group border-warning-border bg-warning-subtle">
-          <span
-            aria-hidden
-            className="inline-grid size-11 shrink-0 place-items-center rounded-card bg-[var(--warning-subtle)] text-warning"
-          >
-            <TriangleAlert className="size-icon-m" strokeWidth={2} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-title-3 text-text-1">
-              {t('coaching.handoverTitle', { count: awaitingHandover.length })}
-            </p>
-            {/* Its own key, not the client-detail one. The detail screen wants the full
-                explanation — a coach standing on one account is about to act on it — while the
-                dashboard is a roster and this is a count with a consequence. One key served both
-                and the roster inherited a three-line paragraph. */}
-            <p className="text-body-s measure mt-1 text-text-2">{t('coaching.handoverShort')}</p>
-          </div>
-        </Surface>
-      ) : null}
+        <div className="flex flex-col gap-4">
+          <Rule strong />
+          {/* Its own short key, not the client-detail one: the dashboard is a roster and this is a
+              count with a consequence. */}
+          <NoticeLine tone="warn" detail={t('coaching.handoverShort')}>
+            {t('coaching.handoverTitle', { count: awaitingHandover.length })}
+          </NoticeLine>
+          {roster}
+        </div>
+      ) : (
+        roster
+      )}
 
-      {/* ── join codes ─────────────────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-group">
-        <SectionHeader icon={KeyRound} title={t('coaching.joinCodes')} action={mintPill} />
+      {/* ── access: the two counts, then the join codes and the pre-made accounts door ─────── */}
+      <div className="flex flex-col gap-4">
+        {/* A failed or pending read prints the dash, never a 0. "Élő kódok" opens nothing: no
+            chevron, the figure in the same column. */}
+        <RowStack open close as="div">
+          <LedgerRow
+            label={t('coaching.teams')}
+            value={teams.data?.teams.length}
+            failed={teams.isError}
+            busy={teams.isPending}
+            mode="roll"
+            onClick={() => setTeamsOpen(true)}
+          />
+          <LedgerRow
+            label={t('coaching.activeCodes')}
+            value={codes.data ? liveCodes.length : undefined}
+            failed={codes.isError}
+            busy={codes.isPending}
+            mode="roll"
+            chevronSpace
+          />
+        </RowStack>
 
-        {/* No live codes: the heading and the pill stay, the row list simply does not render. The
-            explainer paragraph that used to sit here is stated where it matters instead — inside
-            the `A kód elkészült` sheet, at the one moment the code is visible. */}
-        {liveCodes.length > 0 ? (
-          <ul className="flex flex-col gap-tight">
+        {/* No live codes: the heading, the pill and the door stay, the code rows simply do not
+            render. The code itself is unrecoverable, so a row names a code by what it does. */}
+        <Section rule={false} trailingInFlow title={t('coaching.joinCodes')} trailing={mintPill}>
+          <RowStack>
             {liveCodes.map((c) => (
-              <Surface
-                as="li"
+              <ListRow
                 key={c.id}
-                pad="none"
-                className="flex min-h-[var(--target-min)] items-center justify-between gap-tight py-2 pl-4 pr-2"
-              >
-                {/* The code itself is unrecoverable, so the row identifies it by what it does
-                    rather than by what it is. */}
-                <span className="text-body min-w-0 truncate text-text-1">
-                  {t('coaching.codeUses', { used: c.uses, max: c.max_uses })}
-                </span>
-                <Pressable
-                  shape="chip"
-                  density="compact"
-                  variant="secondary"
-                  busy={revokeCode.isPending}
-                  disabled={offline}
-                  onClick={() => revokeCode.mutate(c.id)}
-                >
-                  {t('coaching.revoke')}
-                </Pressable>
-              </Surface>
-            ))}
-          </ul>
-        ) : null}
-
-        <Pressable
-          variant="ghost"
-          shape="chip"
-          className="self-start"
-          icon={<UserPlus className="size-icon-m" strokeWidth={2} aria-hidden />}
-          onClick={() => setPregenOpen(true)}
-        >
-          {t('coaching.pregenTitle')}
-        </Pressable>
-      </section>
-
-      {/* ── roster ─────────────────────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col gap-group">
-        <SectionHeader
-          icon={Users}
-          title={t('coaching.roster')}
-          action={
-            <span className="text-body shrink-0 tabular-nums text-text-3">{rows.length}</span>
-          }
-        />
-
-        {clients.isPending ? (
-          <Skeleton className="h-[228px] rounded-card" />
-        ) : clients.isError ? (
-          // The shell, the header and the tiles still render from whatever resolved; only the
-          // list says it failed, and it says so with the one action that can fix it.
-          <Surface pad="none">
-            <EmptyState
-              icon={Users}
-              title={t('auth.errors.generic')}
-              action={
-                <Pressable variant="secondary" onClick={() => void clients.refetch()}>
-                  {t('common.retry')}
-                </Pressable>
-              }
-            />
-          </Surface>
-        ) : rows.length === 0 ? (
-          <Surface pad="none">
-            <EmptyState icon={Users} title={t('coaching.emptyTitle')} body={t('coaching.emptyBody')} />
-          </Surface>
-        ) : (
-          <Surface pad="none">
-            <ul>
-              {rows.map((c) => (
-                <li
-                  key={c.link_id}
-                  className={cn(
-                    'flex items-center gap-tight py-2 pl-4 pr-2',
-                    'border-t border-[var(--surface-border)] first:border-t-0',
-                  )}
-                >
-                  <Monogram person={c} />
-
-                  {/* The LINK id, not the client's user id. They are different id spaces and the
-                      route takes the link, because the link is what carries the proof that this
-                      coach may see this client.
-                      The whole text column is the target: it is the one row a coach taps all day,
-                      on a phone, one-handed. */}
-                  <Link
-                    to={`/coach/clients/${c.link_id}`}
-                    className="flex min-h-[var(--target-min)] min-w-0 flex-1 flex-col justify-center"
-                  >
-                    <span className="text-body block truncate text-text-1">{personLabel(c)}</span>
-                    <span className="text-caption mt-1 flex flex-wrap items-center gap-tight text-text-3">
-                      {/* A client with none gets the alert tone rather than a zero in the same
-                          grey as everything else — the whole value of this line is that the quiet
-                          ones stand out of a flat list. */}
-                      <span className={c.sessions_28d === 0 ? 'text-warning' : undefined}>
-                        {t('coaching.sessions28d', { count: c.sessions_28d ?? 0 })}
-                      </span>
-                      {c.must_change_credentials === 1 ? (
-                        <span className="text-micro uppercase rounded-chip bg-[var(--warning-subtle)] px-2 py-0.5 text-warning">
-                          {t('coaching.pending')}
-                        </span>
-                      ) : null}
-                    </span>
-                  </Link>
-
-                  {/* Destructive, so it is never in the primary position and never fires without
-                      a confirmation. `secondary` rather than `ghost`: the mockup contains every
-                      roster row's action in a resting surface, and that container is the only
-                      thing telling the coach the row HAS an action — a ghost glyph reads as
-                      decoration until a pointer touches it, which a thumb never does. */}
-                  <Pressable
-                    shape="icon"
-                    variant="secondary"
-                    aria-label={t('coaching.archive')}
+                title={
+                  <CodeUses
+                    text={t('coaching.codeUses', { used: c.uses, max: c.max_uses })}
+                    figure={`${c.uses} / ${c.max_uses}`}
+                  />
+                }
+                control={
+                  // One tap, no confirmation (today's behaviour). The 44 pt target overhangs the
+                  // 56 pt row by its padding, as drawn.
+                  <TextLink
+                    tone="danger"
+                    className="-my-1"
+                    busy={revokeCode.isPending}
                     disabled={offline}
-                    onClick={() => setConfirmArchive(c)}
+                    onClick={() => revokeCode.mutate(c.id)}
                   >
-                    <Archive className="size-icon-m" strokeWidth={2} aria-hidden />
-                  </Pressable>
-                </li>
-              ))}
-            </ul>
-          </Surface>
-        )}
-      </section>
+                    {t('coaching.revoke')}
+                  </TextLink>
+                }
+              />
+            ))}
+            <ListRow title={t('coaching.pregenTitle')} onClick={() => setPregenOpen(true)} chevron />
+          </RowStack>
+        </Section>
+      </div>
 
       {/* ── sheets ─────────────────────────────────────────────────────────────────────────── */}
       <Sheet open={mintedCode !== null} onClose={() => setMintedCode(null)} title={t('coaching.codeReady')}>
-        <p className="text-body-s measure text-text-2">{t('coaching.codeOnce')}</p>
-        <Surface elevation="inset" className="mt-4 flex items-center justify-between gap-3">
-          <span className="text-title-3 tabular-nums text-text-1">{mintedCode}</span>
-          {/* `common.copy`, not `common.save`. `label` is this button's aria-label in every state
-              and its visible word after a successful copy, so `Mentés` had the one control whose
-              whole job is the clipboard announcing a different verb than the one it performs. */}
-          <CopyButton value={mintedCode ?? ''} label={t('common.copy')} />
-        </Surface>
+        <p className="text-body text-text-2">{t('coaching.codeOnce')}</p>
+        <RowStack open close as="div">
+          <ListRow
+            title={<span className="text-data-l">{mintedCode}</span>}
+            // `common.copy`, not `common.save`. `label` is this button's aria-label in every state
+            // and its visible word after a successful copy.
+            // The 44 pt control overhangs the 56 pt row by its padding (coach-dashboard-2: the row
+            // between the two rules is 56).
+            control={
+              <span className="-my-1 flex">
+                <CopyButton value={mintedCode ?? ''} label={t('common.copy')} />
+              </span>
+            }
+          />
+        </RowStack>
       </Sheet>
 
+      {/* The submit links of the two forms are text links, not pills: the page's Új kód pill stays
+          on screen under the scrim, and Pulse allows one lime pill. */}
       <Sheet open={teamsOpen} onClose={() => setTeamsOpen(false)} title={t('coaching.teams')}>
         <form
-          className="flex flex-col gap-group"
+          className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
             if (!teamName.trim()) return;
@@ -513,21 +426,17 @@ export function CoachDashboard() {
             setTeamName('');
           }}
         >
-          <Field
-            label={t('coaching.teamName')}
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            leading={<Ticket className="size-icon-m" aria-hidden />}
-          />
-          <Pressable
+          <Field label={t('coaching.teamName')} value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+          <TextLink
             type="submit"
-            variant="primary"
+            text="body"
+            weight="strong"
+            className="self-start"
             busy={createTeam.isPending}
             disabled={!teamName.trim() || offline}
-            className="self-start"
           >
             {t('coaching.createTeam')}
-          </Pressable>
+          </TextLink>
         </form>
       </Sheet>
 
@@ -543,7 +452,7 @@ export function CoachDashboard() {
         title={t('coaching.pregenTitle')}
       >
         <form
-          className="flex flex-col gap-group"
+          className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
             const emails = pregenEmails
@@ -560,45 +469,45 @@ export function CoachDashboard() {
             hint={t('coaching.pregenHint')}
             value={pregenEmails}
             onChange={(e) => setPregenEmails(e.target.value)}
-            leading={<UserPlus className="size-icon-m" aria-hidden />}
           />
-          <Pressable
+          <TextLink
             type="submit"
-            variant="primary"
+            text="body"
+            weight="strong"
+            className="self-start"
             busy={pregenerate.isPending}
             disabled={!pregenEmails.trim() || offline}
-            className="self-start"
           >
             {t('coaching.pregenCreate')}
-          </Pressable>
+          </TextLink>
         </form>
 
         {holdingSecrets ? (
-          <Surface className="mt-4 flex flex-col gap-tight border-warning-border bg-warning-subtle">
-            <p className="text-body-s text-text-1">{t('coaching.tempOnce')}</p>
-            <ul className="flex flex-col gap-tight">
+          <div className="flex flex-col gap-4">
+            <NoticeLine tone="warn">{t('coaching.tempOnce')}</NoticeLine>
+            <RowStack as="div">
               {(pregenerate.data?.created ?? []).map((c) => (
-                <li key={c.userId} className="flex items-center justify-between gap-3">
-                  <span className="text-body-s min-w-0 truncate text-text-1">{personLabel(c)}</span>
-                  <span className="text-body-s shrink-0 tabular-nums text-text-1">
-                    {c.temporaryPassword}
-                  </span>
-                  <CopyButton value={`${c.email} / ${c.temporaryPassword}`} label={t('common.copy')} />
-                </li>
+                <ListRow
+                  key={c.userId}
+                  title={personLabel(c)}
+                  value={c.temporaryPassword}
+                  control={<CopyButton value={`${c.email} / ${c.temporaryPassword}`} label={t('common.copy')} />}
+                />
               ))}
-            </ul>
+            </RowStack>
             {/* The only way out while the panel is up, and it names the cost. */}
-            <Pressable
-              variant="danger"
-              className="mt-2 self-start"
+            <TextLink
+              text="body"
+              tone="danger"
+              className="self-start"
               onClick={() => {
                 pregenerate.reset();
                 setPregenOpen(false);
               }}
             >
               {t('common.dismiss')}
-            </Pressable>
-          </Surface>
+            </TextLink>
+          </div>
         ) : null}
       </Sheet>
 
@@ -607,19 +516,20 @@ export function CoachDashboard() {
         onClose={() => setConfirmArchive(null)}
         title={t('coaching.archiveConfirmTitle')}
       >
-        <div className="flex items-center gap-tight">
-          {confirmArchive ? <Monogram person={confirmArchive} /> : null}
-          <p className="text-body-s measure text-text-2">
+        <div className="flex items-center gap-4">
+          {confirmArchive ? <Monogram person={confirmArchive} size={28} /> : null}
+          <p className="text-body text-text-2">
             {t('coaching.archiveConfirmBody', { email: confirmArchive ? personLabel(confirmArchive) : '' })}
           </p>
         </div>
-        <div className="mt-4 flex flex-wrap gap-tight">
-          {/* The row's icon was guarded and this was not, so the sheet could be opened online and
+        <div className="flex flex-col items-start">
+          {/* The row's glyph was guarded and this was not, so the sheet could be opened online and
               fired offline: the archive is dropped and the sheet closes as if it worked. There is
               no queued-write store behind the coaching endpoints, so the guard has to sit on the
               control that actually mutates. */}
-          <Pressable
-            variant="danger"
+          <TextLink
+            text="body"
+            tone="danger"
             busy={archiveClient.isPending}
             disabled={offline}
             onClick={async () => {
@@ -628,12 +538,12 @@ export function CoachDashboard() {
             }}
           >
             {t('coaching.archive')}
-          </Pressable>
-          <Pressable variant="ghost" onClick={() => setConfirmArchive(null)}>
+          </TextLink>
+          <TextLink text="body" onClick={() => setConfirmArchive(null)}>
             {t('common.cancel')}
-          </Pressable>
+          </TextLink>
         </div>
       </Sheet>
-    </div>
+    </Screen>
   );
 }

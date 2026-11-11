@@ -1,0 +1,29 @@
+{
+  "about": "The structure lane's kit capture (PLAN.md 3.4, 5.2 row 2): /playground in the board layout at 1300 x 5094, scale 1 — the size of the Figma component board, where the five board cells of this lane sit (sect, listRow, emptyState, skel, noticeLine); tiled with docs/pipeline/pulse/pkg/_int/kit-board-tiles.mjs. The cells no board cell names (row states, the control row, the loading row, the rules, the notice and section forms the frames draw) are drawn by the host in the list layout only, which carries the legacy feedback matrix and never settles for a capture. Opened through the remembered layout (localStorage) like F7's kit-board state; the playground sits behind RequireAuth and reads nothing the account owns; it replays from the freeze.",
+  "states": {
+    "F9-kit": {
+      "title": "Pulse kit — board layout (the structure lane's cells)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "the component board is a specimen sheet, not a screen: the host lays every lane's specimens out where the Figma board draws them",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ]
+    }
+  }
+}

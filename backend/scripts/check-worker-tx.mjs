@@ -17,9 +17,28 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { blankComments } from './lib/parse-routes.mjs';
+import { workerSources, writingFunctions } from './lib/worker-sources.mjs';
 
-const FILE = 'src/db/worker.js';
-const raw = fs.readFileSync(FILE, 'utf8');
+// EVERY worker-side file, not just worker.js: the named transactions of package B0 onwards live in
+// src/db/tx/<domain>.js (re-exported from worker.js). The list comes from the shared helper so the
+// three gates that read the worker cannot disagree about where it is.
+const problems = [];
+let transactions = 0;
+
+/*
+ * A WRITE IS `.run(` — OR A CALL TO A FUNCTION THAT RUNS ONE. Since package B-habits-tasks the
+ * LifeOS day close writes through shared helpers (postCoinEvent, settleHabitsOn, settleTasksOn,
+ * ...): its body holds no `.run(` until the summary INSERT at the very end, so a conditional return
+ * placed after `settleHabitsOn(ctx)` — habit results and coins already written — was invisible
+ * to a gate that only looked for `.run(` (verify-gates' tx/*.js probe went green on exactly that).
+ * The writer set is computed from the worker-side sources themselves, transitively.
+ */
+const writers = writingFunctions(blankComments);
+const writeCall = new RegExp(`\\.run\\(|\\b(?:${[...writers].join('|') || '(?!)'})\\(`, 'g');
+let filesScanned = 0;
+
+for (const { file: FILE, src: raw } of workerSources()) {
+filesScanned += 1;
 
 /**
  * ═══ COMMENTS ARE BLANKED BEFORE ANY OF THIS COUNTS ANYTHING ═══════════════════════════════════
@@ -57,9 +76,6 @@ function bodyEnd(from) {
   return src.length;
 }
 
-const problems = [];
-let transactions = 0;
-
 const open = /conn\.transaction\(\(\)\s*=>\s*\{/g;
 let m;
 while ((m = open.exec(src))) {
@@ -69,7 +85,8 @@ while ((m = open.exec(src))) {
   const body = src.slice(start, end);
   const bodyLineOffset = src.slice(0, start).split('\n').length;
 
-  const firstWrite = body.search(/\)\s*\.run\(|\.run\(/);
+  writeCall.lastIndex = 0;
+  const firstWrite = body.search(writeCall);
   if (firstWrite === -1) continue; // a read-only transaction has nothing to commit wrongly
 
   // Every `return` after the first write.
@@ -106,7 +123,7 @@ while ((m = open.exec(src))) {
      *
      * So the exemption now requires that exactly one write precedes this return.
      */
-    const writesBefore = (body.slice(0, absolute).match(/\.run\(/g) ?? []).length;
+    const writesBefore = (body.slice(0, absolute).match(writeCall) ?? []).length;
     const window = `${prev}\n${line}`;
     if (writesBefore <= 1 && /\.changes\s*===\s*0|changes\s*===\s*0/.test(window)) continue;
 
@@ -119,7 +136,9 @@ while ((m = open.exec(src))) {
   }
 }
 
-console.log(`check-worker-tx: ${transactions} transaction bodies scanned`);
+}
+
+console.log(`check-worker-tx: ${transactions} transaction bodies scanned in ${filesScanned} file(s)`);
 if (problems.length) {
   console.log('');
   for (const p of problems) console.log(`  ${p}`);

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "about": "F15 stage 1: the capture states of the mannequin proof cells on the kit page (/playground#kit-mannequin, specimens.tsx). Header copied from frontend/scripts/pulse-frames.json.",
+  "accounts": {
+    "M": "user@tracker.local",
+    "C": "coach@tracker.local",
+    "A": "admin@tracker.local",
+    "N": "demo.nagy.balazs@tracker.local",
+    "R": "demo.coach.szilagyi.reka@tracker.local",
+    "K": "demo.kovacs.eszter@tracker.local",
+    "T": "demo.toth.reka@tracker.local"
+  },
+  "defaults": {
+    "width": 402,
+    "height": 874,
+    "scale": 2,
+    "insets": [
+      62,
+      34
+    ],
+    "lang": "hu",
+    "stubs": [
+      {
+        "method": "POST",
+        "path": "/api/v1/notifications/read",
+        "status": 204,
+        "why": "the notifications page marks everything read on opening (NotificationsPage.tsx:273); the page does not read the answer"
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/conversations/*/read",
+        "status": 204,
+        "why": "the read receipt a thread with unread messages fires on opening (ChatPanel.tsx:115); the page does not read the answer"
+      }
+    ],
+    "expect": {
+      "requests": [],
+      "console": []
+    },
+    "probes": {
+      "boxedAllow": [
+        "btnPrimary",
+        "uiSwitch",
+        "sheet",
+        "badgeCount",
+        "skel",
+        "segBar",
+        "progressBar",
+        "macroCol",
+        "stepper",
+        "toast",
+        "noticeLine",
+        "pic",
+        "tabBar"
+      ]
+    }
+  },
+  "resolve": {},
+  "states": {
+    "kit-s1": {
+      "frame": null,
+      "title": "F15 stage 1 — mannequin specimens and proof cells (the render + traced regions)",
+      "package": "F15",
+      "account": "M",
+      "route": "/playground#kit-mannequin",
+      "width": 1300,
+      "height": 4400,
+      "scale": 2,
+      "insets": [
+        0,
+        0
+      ],
+      "reach": "seed",
+      "arrived": {
+        "role": [
+          "img",
+          "image"
+        ],
+        "name": {
+          "key": "muscleMap.frontTitle"
+        }
+      }
+    },
+    "kit-s1-focus": {
+      "frame": null,
+      "title": "F15 stage 1 — keyboard focus: a tap on Nyak, a second tap, then Tab onto Mell",
+      "package": "F15",
+      "account": "M",
+      "route": "/playground#kit-mannequin",
+      "width": 1300,
+      "height": 4400,
+      "scale": 2,
+      "insets": [
+        0,
+        0
+      ],
+      "reach": "seed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.neck"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "muscle.neck"
+            },
+            "pressed": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.neck"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "absent": {
+              "role": "button",
+              "name": {
+                "key": "muscle.neck"
+              },
+              "pressed": true
+            }
+          }
+        },
+        {
+          "press": "Tab",
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "muscle.chest"
+            },
+            "focused": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "muscle.chest"
+        },
+        "focused": true
+      },
+      "opened": {
+        "role": [
+          "img",
+          "image"
+        ],
+        "name": {
+          "key": "muscleMap.frontTitle"
+        }
+      }
+    }
+  }
+}

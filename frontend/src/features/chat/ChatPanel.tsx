@@ -1,12 +1,17 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { initialsOf, personLabel } from '../../lib/person';
-import { Ban, Check, Flag, MessageSquare, Send, Undo2 } from 'lucide-react';
+import { Ban, Check, Flag, Send, Undo2 } from 'lucide-react';
+import type { CSSProperties, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { TextArea } from '../../ui/primitives/TextArea';
 import { EmptyState } from '../../ui/feedback/EmptyState';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
+import { Dock } from '../../ui/shell/Dock';
 import {
   useMessages,
   useSendMessage,
@@ -18,6 +23,36 @@ import {
 } from './useChat';
 
 const BODY_MAX = 4000;
+
+/**
+ * The thread's top edge. The scroller starts at the rule and the list carries 32 pt of top padding,
+ * so a thread that fits begins 32 under the rule, exactly where the mask turns opaque: untouched.
+ * A longer thread slides up under the hairline; the first 8 pt are fully transparent and the next
+ * 24 fade in, so a line leaving the column disappears instead of being sliced in half at the rule.
+ * A mask reads only alpha (`currentColor` = keep).
+ */
+const THREAD_MASK = 'linear-gradient(to bottom, transparent, transparent 8px, currentColor 32px)';
+const THREAD_FADE: CSSProperties = { maskImage: THREAD_MASK, WebkitMaskImage: THREAD_MASK };
+
+/**
+ * The composer's top edge. The kit field scrolls its value inside its own 11 pt top pad once the
+ * draft passes five lines, and the line leaving through it used to be cut flush against the label's
+ * descenders, so it read as struck through the label. At rest the fade covers exactly that pad (the
+ * first line starts below it and is untouched); once the value is scrolled, the field's `onScroll`
+ * swaps in the stronger fade, so the leaving line is gone under the label and the line below it
+ * fades in - the usual "more above" edge. The underline is the wrapper's pseudo-element, outside
+ * the textarea, so it is never masked.
+ */
+const COMPOSER_MASK_REST = 'linear-gradient(to bottom, transparent, currentColor 11px)';
+const COMPOSER_MASK_SCROLLED = 'linear-gradient(to bottom, transparent, transparent 8px, currentColor 24px)';
+const COMPOSER_FADE: CSSProperties = { maskImage: COMPOSER_MASK_REST, WebkitMaskImage: COMPOSER_MASK_REST };
+
+/** Presentational only: the field's mask follows its own scroll position (no state, no re-render). */
+function fadeComposerEdge(el: HTMLTextAreaElement) {
+  const mask = el.scrollTop > 0 ? COMPOSER_MASK_SCROLLED : COMPOSER_MASK_REST;
+  el.style.setProperty('mask-image', mask);
+  el.style.setProperty('-webkit-mask-image', mask);
+}
 
 /**
  * Day grouping, in the reader's own timezone.
@@ -33,30 +68,71 @@ const timeOf = (unix: number, locale: string) =>
   new Date(unix * 1000).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 
 
+/** One calendar day of the thread, oldest message first. */
+interface ThreadDay {
+  key: string;
+  label: string;
+  messages: Message[];
+}
+
 /**
- * The conversation, per blueprint 8 and [[55-Screens/coach-chat]].
+ * The API answers newest first; the thread reads oldest first, one block per calendar day. Pure
+ * and UI-only: the query, its key and its order are untouched. The pending (optimistic) message
+ * carries `Date.now()` and so lands in today's block, at its end.
+ */
+function groupByDay(messages: Message[], locale: string): ThreadDay[] {
+  const days: ThreadDay[] = [];
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    const key = dayKey(m.created_at);
+    const last = days[days.length - 1];
+    if (last && last.key === key) last.messages.push(m);
+    else days.push({ key, label: dayLabel(m.created_at, locale), messages: [m] });
+  }
+  return days;
+}
+
+/**
+ * The conversation, per [[58-Pulse/Screens/coach-chat]] and the frames `coach-chat-1` / `-2`.
  *
  * ONE COMPONENT FOR BOTH SIDES. A coach reaches it through a client, a client through their coach,
- * and neither needs a different thread renderer — the only difference is which bubbles are "mine",
- * which the server already answers with `sender_is_coach` semantics carried in `mine`.
+ * and neither needs a different thread renderer — the only difference is which messages are
+ * "mine", which the server already answers with `sender_is_coach` semantics carried in `mine`.
  *
- * ═══ THE ANCHOR IS A PERSON ════════════════════════════════════════════════════════════════════
+ * ═══ NO BUBBLES ═════════════════════════════════════════════════════════════════════════════════
  *
- * A conversation is not a countable goal and not a trend, so neither a ring nor a chart earns the
- * top third. It is a person, and the anchor is that person: a monogram inside a thick ring with
- * their name beneath it in the largest type the panel owns.
+ * Pulse encloses nothing, so the two voices are told apart by side, ink and space alone: theirs
+ * on the left in `text-1`, mine on the right in `text-2`, at most 280 wide with balanced lines,
+ * one mono stamp 4 under each message. The read state is the WORD "Olvasva" with a check in the
+ * same quiet ink — no green; the delivery state is the word "Kézbesítve". The only filled shape
+ * is the send pill, lit only while there is something to send.
  *
- * WHAT IS DELIBERATELY NOT DRAWN: the presence dot on the ring and the `Utoljára aktív` line. The
- * messages API answers `read_at` and says nothing about last-seen, so both would be invented. An
- * "active now" the product cannot walk back is worse than an anchor with one element fewer.
+ * ═══ THE DAYS ARE BLOCKS, OLDEST FIRST ═══════════════════════════════════════════════════════════
  *
- * ═══ THE LIST IS COLUMN-REVERSE ════════════════════════════════════════════════════════════════
+ * Each calendar day is a block: its centred mono date FIRST, 12 above the day's first message,
+ * 20 between messages of a day, 32 between days. The old renderer drew the date after the first
+ * message of its day inside a reversed list and it read as the date of the NEXT message; now the
+ * messages are grouped (`groupByDay`) and drawn in reading order.
  *
- * That is the whole trick: the browser pins a reversed flex column to its bottom for free, so a
- * new message appears without a scroll calculation, and scrolling UP to read history does not
- * fight it. The server already returns newest-first, so no reversing happens in JavaScript either.
- * It is also why the bubble's meta line lives INSIDE the bubble — an outside line doubles the
- * thread's vertical rhythm and breaks the reversal.
+ * ═══ THE SCROLLER IS COLUMN-REVERSE ══════════════════════════════════════════════════════════════
+ *
+ * The scroller holds ONE child, the chronological list, in a reversed flex column: the browser
+ * pins it to the bottom for free, so the newest message stands on the composer, a new one appears
+ * without a scroll calculation, and older days leave through the top as the frame draws them.
+ * Scrolling up to read history does not fight it.
+ *
+ * ═══ TWO FORMS, ONE SWITCH ═══════════════════════════════════════════════════════════════════════
+ *
+ * `showBlockAction` already meant "the host owns a real top bar". So it also picks the form:
+ *   false  the conversation SCREEN (`ChatPage`): the page draws the header, the identity and
+ *          `Letiltás`; the panel is the thread that fills the screen and the composer docked
+ *          above the tab bar (`Dock`).
+ *   true   EMBEDDED in someone else's page (`coaching/ChatTab`): the panel draws its corner
+ *          `Letiltás`, the identity (monogram 64 + name) and keeps the composer in flow — a dock
+ *          would pin it to the bottom of the client page.
+ *
+ * WHAT IS DELIBERATELY NOT DRAWN: a presence dot and an `Utoljára aktív` line. The messages API
+ * answers `read_at` and says nothing about last-seen, so both would be invented.
  */
 export function ChatPanel({
   conversationId,
@@ -76,6 +152,9 @@ export function ChatPanel({
    * — `ChatPage` does — because a panel embedded in someone else's screen can only ever draw
    * half of one: the left half of that row is a back link, and the panel has nowhere to go back
    * to. `Feloldás` is unaffected; lifting a block belongs beside the closed composer.
+   *
+   * It also picks the panel's FORM (see the component's note): false = the screen form, thread
+   * filling the screen and the composer in a `Dock`; true = the embedded form, composer in flow.
    */
   showBlockAction?: boolean;
   /**
@@ -135,189 +214,193 @@ export function ChatPanel({
     }
   };
 
-  return (
-    <div className={cn('flex min-h-0 flex-col gap-section', className)}>
-      {/* ── the corner action ─────────────────────────────────────────────────────────────────
-          `Letiltás` used to sit under the composer, one mis-tap from send. Blocking is rare and
-          semi-irreversible, so it belongs in a corner. The row keeps its height when the chip is
-          gone (blocked conversations lose it) so the anchor does not jump on a state change.
+  const days = groupByDay(messages, i18n.language);
+  const reportOf = (m: Message) => () => {
+    report.mutate({ id: m.id, reason: 'abuse' }, { onSuccess: () => setReported((r) => [...r, m.id]) });
+  };
 
-          Only when the host has no bar of its own. On the chat ROUTE this row is the left-empty
-          half of a bar the page draws properly, back link and all — see `showBlockAction`. */}
-      {showBlockAction ? (
-        <div className="flex min-h-11 items-start justify-end">
-          {blocked ? null : (
-            <Pressable shape="chip" density="compact" variant="ghost" onClick={() => block.mutate(true)}>
-              <Ban className="size-icon-s" aria-hidden />
-              {t('chat.block')}
-            </Pressable>
-          )}
-        </div>
-      ) : null}
-
-      {/* ── the anchor ────────────────────────────────────────────────────────────────────────
-          The ring is drawn with padding on an accent-filled circle rather than a border width, so
-          it stays a ring in every theme pack — `--border-width` is a hairline in four of the five
-          and a ring at 1px is not an anchor. The name IS the heading; there is no second one. */}
-      <div className="flex flex-col items-center gap-tight">
-        <span aria-hidden className="inline-flex rounded-full bg-accent p-1">
-          <span className="text-display font-display grid size-28 place-items-center rounded-full bg-surface-2 text-accent">
-            {name ? initialsOf(name) : ''}
-          </span>
-        </span>
-        {name ? (
-          <h2 className="text-title-1 font-display text-center text-text-1">{name}</h2>
-        ) : (
-          <Skeleton className="h-7 w-40" />
-        )}
-      </div>
-
-      {/* ── the thread ───────────────────────────────────────────────────────────────────────
-          The skeleton is two bubbles at the width and height real ones use, one left and one
-          right, so nothing moves when the data lands. */}
-      {isPending ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-tight">
-          <Skeleton className="h-16 w-2/3 rounded-card" />
-          <Skeleton className="ms-auto h-16 w-2/3 rounded-card" />
-        </div>
-      ) : messages.length === 0 ? (
-        <EmptyState icon={MessageSquare} title={t('chat.emptyTitle')} body={t('chat.emptyBody')} />
-      ) : (
-        <ol
-          // `min-h-32` is a floor, not a box. The screen note retires the bordered scrolling box
-          // and lets the page scroll — but this panel is still embedded in a host that caps its
-          // height, and a flex child with `min-h-0` will happily shrink to nothing under a cap.
-          // A floor makes the panel overflow its cap rather than crush the thread to a sliver,
-          // which is the failure mode you can see and fix instead of the one you cannot.
-          className="flex min-h-32 flex-1 gap-tight overflow-y-auto overscroll-contain"
-          // Inline rather than the Tailwind reverse-column utility: the token gate's
-          // `undefined-utility` rule matches anything shaped like a `col-*` class, and that
-          // utility's name collides with it. The rule is right to be broad — `col-mobile` and
-          // `col-wide` are real project utilities and a typo in either must fail the build — so
-          // the exception lives here, named, rather than the rule being loosened for everybody.
-          style={{ flexDirection: 'column-reverse' }}
-          aria-label={t('chat.thread')}
-        >
-          {messages.map((m, i) => {
+  // ── the thread ─────────────────────────────────────────────────────────────────────────────
+  // Loading: two quiet text lines on the two sides, standing on the composer like real messages.
+  // Empty: the kit's text-only empty state where the thread would be (8 under the rule, as drawn).
+  const thread = isPending ? (
+    <div className={cn('flex min-h-0 flex-1 flex-col justify-end gap-5', showBlockAction && 'min-h-32')}>
+      <Skeleton className="h-4 w-2/3" />
+      <Skeleton className="ms-auto h-4 w-2/3" />
+    </div>
+  ) : messages.length === 0 ? (
+    <div className="min-h-0 flex-1 pt-2">
+      <EmptyState title={t('chat.emptyTitle')} body={t('chat.emptyBody')} />
+    </div>
+  ) : (
+    <div
+      // The scroller: ONE child in a reversed column, so the list is pinned to the bottom (the
+      // newest message on the composer) and older days leave through the top. In the embedded
+      // form the host caps the height; `min-h-32` keeps the thread from being crushed to a sliver.
+      //
+      // Inline rather than the Tailwind reverse-column utility: the token gate's
+      // `undefined-utility` rule matches anything shaped like a `col-*` class, and that
+      // utility's name collides with it. The rule is right to be broad — `col-mobile` and
+      // `col-wide` are real project utilities and a typo in either must fail the build — so
+      // the exception lives here, named, rather than the rule being loosened for everybody.
+      //
+      // THE CLIP EDGE IS THE RULE. The scroller is pulled up over the 24 the column leaves above
+      // it (`-mt-6`) and the list carries that 24 + 8 as its own top padding, so a thread that
+      // fits stands exactly where it did (32 under the rule, as the frame draws it), while a
+      // longer one slides up to the hairline instead of being cut 32 below it in the open — the
+      // old cut left a row of sliced descenders floating under the rule. The fade (8 clear + 24 soft) lies
+      // inside that padding: at rest it covers nothing, while scrolling it lets a line leave
+      // softly instead of in half.
+      style={{ flexDirection: 'column-reverse', ...THREAD_FADE }}
+      className={cn('-mt-6 flex min-h-0 flex-1 overflow-y-auto overscroll-contain', showBlockAction && 'min-h-32')}
+    >
+      <ol aria-label={t('chat.thread')} className="flex flex-col gap-5 pt-8">
+        {days.map((day, d) =>
+          day.messages.map((m, i) => {
             const mine = m.sender_id === meId || m.id < 0;
-            const previous = messages[i + 1];
-            const newDay = !previous || dayKey(previous.created_at) !== dayKey(m.created_at);
             return (
-              <li key={m.id} className="flex flex-col">
-                <Bubble
+              // One item per message, as before; the first message of a day carries the day's
+              // date above it and stands 32 below the day before (20 + 12).
+              <li key={m.id} className={cn('flex flex-col gap-3', i === 0 && d > 0 && 'mt-3')}>
+                {i === 0 ? <p className="text-micro text-center text-text-2">{day.label}</p> : null}
+                <ThreadMessage
                   message={m}
                   mine={mine}
                   pending={m.id < 0}
                   reported={reported.includes(m.id)}
                   locale={i18n.language}
-                  onReport={
-                    mine || m.deleted_at
-                      ? undefined
-                      : () => {
-                          report.mutate(
-                            { id: m.id, reason: 'abuse' },
-                            { onSuccess: () => setReported((r) => [...r, m.id]) },
-                          );
-                        }
-                  }
+                  onReport={mine || m.deleted_at ? undefined : reportOf(m)}
                 />
-                {/* The divider renders AFTER the bubble in DOM order because the list is reversed,
-                    which puts it visually above — the same trick that pins the thread to the
-                    bottom without a scroll calculation. */}
-                {newDay ? (
-                  <p className="text-caption my-2 text-center text-text-3">
-                    {dayLabel(m.created_at, i18n.language)}
-                  </p>
-                ) : null}
               </li>
             );
-          })}
-        </ol>
-      )}
+          }),
+        )}
+      </ol>
+    </div>
+  );
 
-      {/* ── the composer ────────────────────────────────────────────────────────────────────── */}
-      {blocked ? (
-        <Surface elevation="inset" className="flex items-center justify-between gap-tight">
-          <p className="text-body-s text-text-2">{t('chat.blocked')}</p>
-          {/* Only the person who blocked can lift it. Being blocked is not a state you undo. */}
-          {blockedByMe ? (
-            <Pressable shape="chip" density="compact" variant="secondary" onClick={() => block.mutate(false)}>
-              <Undo2 className="size-icon-s" aria-hidden />
-              {t('chat.unblock')}
-            </Pressable>
-          ) : null}
-        </Surface>
+  // ── the composer ───────────────────────────────────────────────────────────────────────────
+  // The kit's field (label, the 44 line that grows by whole lines, the underline) with the send
+  // pill standing on its underline 20 to the right, and under the field the hint and the counter.
+  // A failed send puts the danger line above it; a blocked conversation replaces it with one
+  // quiet line — and `Feloldás` only for the person who blocked. Being blocked is not undone.
+  const composer = blocked ? (
+    <NoticeLine
+      action={
+        blockedByMe ? (
+          <TextLink lead={<Undo2 />} onClick={() => block.mutate(false)}>
+            {t('chat.unblock')}
+          </TextLink>
+        ) : undefined
+      }
+    >
+      {t('chat.blocked')}
+    </NoticeLine>
+  ) : (
+    <div className="flex flex-col gap-2">
+      {failed ? (
+        <NoticeLine tone="danger" role="alert">
+          {t('chat.sendFailed')}
+        </NoticeLine>
+      ) : null}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-5 gap-y-2">
+        {/* A visible label, not a placeholder: a placeholder is not a label and it disappears
+            on the first keystroke — which is exactly when the counter below starts moving. */}
+        <TextArea
+          id={composerId}
+          label={t('chat.compose')}
+          aria-describedby={hintId}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.slice(0, BODY_MAX))}
+          // Enter sends, Shift+Enter breaks the line. On a phone the on-screen keyboard's
+          // return key inserts a newline instead, which is why the send button is not optional.
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              void submit();
+            }
+          }}
+          maxLength={BODY_MAX}
+          maxRows={5}
+          style={COMPOSER_FADE}
+          onScroll={(e) => fadeComposerEdge(e.currentTarget)}
+        />
+        {/* The screen's one lime shape, and only while there is something to send: the kit's
+            small pill with the paper plane the hint below names, standing on the underline. */}
+        <Pressable
+          variant="primary"
+          size="sm"
+          className="self-end"
+          aria-label={t('chat.send')}
+          busy={send.isPending}
+          disabled={!draft.trim()}
+          onClick={() => void submit()}
+        >
+          <Send className="size-5" aria-hidden />
+        </Pressable>
+        <div className="flex items-start justify-between gap-2">
+          {/* The plane-button affordance, wired to the field with `aria-describedby`. */}
+          <span id={hintId} className="text-cap min-w-0 text-text-3">
+            {t('chat.composeHint')}
+          </span>
+          {/* Numerals, and `aria-hidden`: the input's own `maxLength` is what assistive tech
+              reads, and a counter that announced itself on every keystroke would be unusable. */}
+          <span aria-hidden className="text-data shrink-0 text-text-3">
+            {draft.length} / {BODY_MAX}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── the screen form: the thread fills what the page leaves it, the composer is docked ───────
+  if (!showBlockAction) {
+    return (
+      <div className={cn('flex min-h-0 flex-col', className)}>
+        {thread}
+        <Dock>{composer}</Dock>
+      </div>
+    );
+  }
+
+  // ── the embedded form (the client detail's Üzenetek tab) ────────────────────────────────────
+  return (
+    <div className={cn('flex min-h-0 flex-col gap-6', className)}>
+      {/* `Letiltás` in the far corner, nowhere near send. The row keeps its height when the
+          link is gone (blocked), so the identity does not jump on a state change. */}
+      <div className="flex min-h-11 items-start justify-end">
+        {blocked ? null : (
+          <TextLink lead={<Ban />} onClick={() => block.mutate(true)}>
+            {t('chat.block')}
+          </TextLink>
+        )}
+      </div>
+
+      {/* The person as type: the monogram (no dot — beside a chat partner a dot reads as
+          "online", which the product cannot know) and the name. */}
+      {name ? (
+        <div className="flex flex-col gap-3">
+          <Monogram initials={initialsOf(name)} size={64} className="self-start" />
+          <h2 className="text-title truncate text-text-1">{name}</h2>
+        </div>
       ) : (
-        <div className="flex flex-col gap-tight">
-          {failed ? (
-            <p role="alert" className="text-caption text-danger">
-              {t('chat.sendFailed')}
-            </p>
-          ) : null}
-          {/* A visible label, not a placeholder: a placeholder is not a label and it disappears
-              on the first keystroke — which is exactly when the counter below starts moving. */}
-          <label htmlFor={composerId} className="text-body-s text-text-2">
-            {t('chat.compose')}
-          </label>
-          <div className="flex items-end gap-tight">
-            <textarea
-              id={composerId}
-              aria-describedby={hintId}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value.slice(0, BODY_MAX))}
-              // Enter sends, Shift+Enter breaks the line. On a phone the on-screen keyboard's
-              // return key inserts a newline instead, which is why the send button is not optional.
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  void submit();
-                }
-              }}
-              rows={1}
-              maxLength={BODY_MAX}
-              className={cn(
-                'min-h-[var(--target-min)] max-h-32 flex-1 resize-none rounded-field px-3 py-3',
-                'bg-[var(--field-bg)] text-body text-text-1',
-                'border-[length:var(--border-width)] border-[var(--field-border)]',
-                'transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
-                'outline-none focus-visible:border-accent focus-visible:outline-2',
-                'focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
-              )}
-            />
-            {/* Round, filled, and the only primary action in the panel. */}
-            <Pressable
-              shape="icon"
-              variant="primary"
-              className="rounded-full"
-              aria-label={t('chat.send')}
-              busy={send.isPending}
-              disabled={!draft.trim()}
-              onClick={() => void submit()}
-            >
-              <Send className="size-icon-m" aria-hidden />
-            </Pressable>
-          </div>
-          <div className="flex items-center justify-between gap-tight">
-            {/* The plane-button affordance, wired to the field with `aria-describedby` rather than
-                left loose in the reading order — the same shape `Field` gives its hint. A sentence
-                about an icon, announced with no owner, is noise to the one reader who cannot see
-                the icon. */}
-            <span id={hintId} className="text-caption text-text-3">
-              {t('chat.composeHint')}
-            </span>
-            {/* Numerals, and `aria-hidden`: the input's own `maxLength` is what assistive tech
-                reads, and a counter that announced itself on every keystroke would be unusable. */}
-            <p aria-hidden className="text-caption tabular-nums text-text-3">
-              {draft.length} / {BODY_MAX}
-            </p>
-          </div>
+        <div className="flex flex-col gap-3">
+          <MonogramSkeleton size={64} className="self-start" />
+          <Skeleton className="h-7 w-40" />
         </div>
       )}
+
+      {thread}
+      {composer}
     </div>
   );
 }
 
-function Bubble({
+/**
+ * One message, no bubble: the text (`body`, balanced, at most 280) and 4 under it the mono stamp.
+ * Theirs on the left in `text-1`; mine on the right in `text-2`. `data-kit="chatMsg"` names it
+ * for the geometry probe.
+ */
+function ThreadMessage({
   message,
   mine,
   pending,
@@ -333,78 +416,67 @@ function Bubble({
   onReport?: () => void;
 }) {
   const { t } = useTranslation();
+  const side = mine ? 'items-end text-right' : 'items-start text-left';
 
   // A withdrawn message keeps its place. The thread must still show that something was there and
-  // taken back; erasing the row would make it lie about what happened. No bubble fill: it is a
-  // record of a message, not a message.
+  // taken back; erasing the row would make it lie about what happened.
   if (message.deleted_at) {
     return (
-      <p className={cn('text-caption max-w-[80%] px-3 py-2 italic text-text-3', mine ? 'ms-auto' : 'me-auto')}>
-        {t('chat.withdrawn')}
-      </p>
+      <div data-kit="chatMsg" className={cn('flex flex-col', side)}>
+        <p className="text-cap max-w-70 italic text-text-3">{t('chat.withdrawn')}</p>
+      </div>
     );
   }
 
-  return (
-    <Surface
-      pad="none"
-      rim={false}
-      className={cn(
-        // Bubbles stop well short of the column so the two sides read as two voices rather than
-        // as one full-width transcript.
-        'group max-w-[80%] px-3 py-2',
-        mine
-          ? 'ms-auto border-[var(--accent-border)] bg-accent-subtle text-on-accent-subtle'
-          : 'me-auto',
-        pending && 'opacity-60',
-      )}
-    >
-      {/* Text renders as TEXT. No dangerouslySetInnerHTML anywhere in this component, and no
-          auto-linking: a clickable URL in a message from someone you have not met is an
-          exfiltration surface, and this product has a report flow precisely because not every
-          message is friendly. */}
-      <p className="text-body whitespace-pre-wrap break-words">{message.body}</p>
+  const time = timeOf(message.created_at, locale);
+  // Two states, not one. A sent message with no read stamp used to show a bare time, which reads
+  // the same as a message that never left. `Kézbesítve` is the honest middle step. `!pending` is
+  // load-bearing: the optimistic message also has a null `read_at`, and "Küldés… Kézbesítve"
+  // would claim a delivery that has not happened.
+  let stamp: ReactNode;
+  if (pending) stamp = <span className="text-text-3">{t('chat.sending')}</span>;
+  else if (mine && message.read_at)
+    stamp = (
+      <>
+        <span className="text-text-3">{time} ·</span>
+        <Check className="size-3 shrink-0 text-text-2" strokeWidth={2.5} aria-hidden />
+        <span className="text-text-2">{t('chat.read')}</span>
+      </>
+    );
+  else if (mine) stamp = <span className="text-text-3">{`${time} · ${t('chat.delivered')}`}</span>;
+  else stamp = <span className="text-text-3">{time}</span>;
 
-      {/* The meta line lives inside the bubble and is right-aligned on both sides — see the
-          column-reverse note on the panel. */}
-      <div className="text-caption mt-1 flex items-center justify-end gap-tight text-text-3">
-        {/* Reporting is no longer a chip riding every bubble: nine persistent `Jelentés` chips
-            made every message look like evidence. It stays in the DOM and in tab order — a
-            keyboard user must be able to reach it — but it is only PAINTED on hover or focus. */}
+  return (
+    <div data-kit="chatMsg" className={cn('group flex flex-col gap-1', side, pending && 'opacity-60')}>
+      {/* Text renders as TEXT. No dangerouslySetInnerHTML, and no auto-linking: a clickable URL in
+          a message from someone you have not met is an exfiltration surface. */}
+      <p className={cn('text-body max-w-70 whitespace-pre-wrap break-words text-balance', mine ? 'text-text-2' : 'text-text-1')}>
+        {message.body}
+      </p>
+      <div className="text-micro relative flex items-center gap-1.25">
+        {stamp}
+        {/* Reporting is not drawn at rest: a persistent `Jelentés` on every message makes every
+            message look like evidence. It stays in the DOM and in the tab order — a keyboard user
+            must reach it — and appears on pointer hover or keyboard focus. Hidden, it takes no
+            tap either (`pointer-events-none`): the unpainted control used to file a report on an
+            accidental touch. It stands beside the stamp, out of flow, so its 44 pt target does
+            not open the 16 pt stamp row. */}
         {onReport ? (
-          <Pressable
-            shape="chip"
-            density="compact"
-            variant="ghost"
-            className={cn(
-              'me-auto opacity-0 transition-opacity duration-[var(--duration-fast)]',
-              'ease-[var(--ease-standard)] group-hover:opacity-100 group-focus-within:opacity-100',
-            )}
+          <TextLink
+            lead={<Flag />}
             disabled={reported}
             onClick={onReport}
+            className={cn(
+              'pointer-events-none absolute start-full top-1/2 ms-3 -translate-y-1/2 whitespace-nowrap opacity-0',
+              'transition-opacity duration-[var(--duration-fast)] ease-[var(--ease-standard)]',
+              'group-focus-within:pointer-events-auto group-focus-within:opacity-100',
+              'group-hover:pointer-events-auto group-hover:opacity-100',
+            )}
           >
-            <Flag className="size-icon-s" aria-hidden />
             {reported ? t('chat.reported') : t('chat.report')}
-          </Pressable>
-        ) : null}
-        <span className="tabular-nums">
-          {pending ? t('chat.sending') : timeOf(message.created_at, locale)}
-        </span>
-        {/* Two states, not one. A sent message with no read stamp used to show a bare time, which
-            reads the same as a message that never left. `Kézbesítve` is the honest middle step.
-            The green is on the CHECK only — the word sits at the bubble's own ink, so the state
-            label outranks the timestamp beside it rather than the other way round.
-            `!pending` is load-bearing: the optimistic bubble also has a null `read_at`, and
-            "Küldés… Kézbesítve" on one line would claim a delivery that has not happened. */}
-        {mine && message.read_at ? (
-          <span className="flex items-center gap-tight text-on-accent-subtle">
-            <Check className="size-icon-s text-success" aria-hidden />
-            {t('chat.read')}
-          </span>
-        ) : mine && !pending ? (
-          <span className="text-on-accent-subtle">{t('chat.delivered')}</span>
+          </TextLink>
         ) : null}
       </div>
-    </Surface>
+    </div>
   );
 }

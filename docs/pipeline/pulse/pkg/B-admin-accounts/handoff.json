@@ -1,0 +1,24 @@
+{
+  "id": "B-admin-accounts",
+  "status": "done",
+  "base": "pulse-int e2e1e4a",
+  "migration": "none - 036 is NOT used",
+  "changes": [
+    "GET /admin/users (moved to admin/accounts.js): displayName per row; q over e-mail AND display name, accent- and case-insensitive (fold_text SQL function registered per worker connection), % _ and backslash escaped (the old _ wildcard bug and its false comment are gone); role and state filters; sort name|created|email|role|clients with a keyset cursor each ([sort, dir, value, id], text values bounded to 80 characters); total of the filtered set; page cap 24 unchanged; a bad cursor is a 400",
+    "GET /admin/users/:id: ONE read snapshot - identity, disabled reason/by/at from the audit row, sessions, lockout, coaching (links as coach and client, seat cap, subscription without provider ids), marketplace summary, coin balance + last 3 entries + count, activity COUNTS ONLY, last 5 audit events",
+    "PATCH /admin/users/:id/name (shared validator lib/display-name.js, also used by PATCH /auth/me), POST reset-lockout, signout-all, force-password-change: named IMMEDIATE transactions in db/tx/admin-accounts.js, actor re-read as an enabled admin WITH the session version, replay = replayed:true, unique audit actions user.name.change / user.lockout.reset / user.sessions.revoke / user.password.force",
+    "POST /admin/users/:id/enable now REQUIRES a reason (route and transaction); POST /admin/users/:id/coins refuses the admin's own account (409 cannot_adjust_own_coins, inside adminAdjustCoinsTx)",
+    "admin rate-limit budgets moved to admin/limiters.js so both admin routers share one set of buckets"
+  ],
+  "tests": {
+    "smoke": "972 passed, 0 failed (160 new in scripts/smoke/admin-accounts.js); smoke:limits 7 passed (2 new)",
+    "plantedDefects": "node scripts/verify-admin-accounts.mjs: 16 planted defects, every one turns the named check red (16 caught, 0 not proven)",
+    "gates": "check:modules/routes/admin-audit/worker-tx/route-tx/body-writes/gdpr OK; verify:gates (backend) 33 passed incl. 4 new probes; frontend build green, verify:gates 78 passed 0 failed 7 dormant; every verify:* of check:all green on a fresh DB migrated to 35 + seed:dev-users except verify:013, which refuses on a fresh DB (needs two free coach-client links; pre-existing, unrelated)"
+  },
+  "sharedEdits": "see owns.json sharedEdits; also scripts/brain-gen.mjs (one router line) and scripts/verify-gates.mjs (4 probes + 2 TOUCHED paths), scripts/smoke-limits.js (one block)",
+  "followUps": [
+    "brain:gen to refresh 30-API/Endpoints.md (admin/accounts.js is listed in brain-gen now)",
+    "audit_log has no (target_type, target_id) index: the 'last 5 events' read walks by id descending; add one in a later migration if the log grows",
+    "frames: 3b still draws Erme-korrekcio on the own account - the server answers 409 cannot_adjust_own_coins; the frontend should hide that row"
+  ]
+}

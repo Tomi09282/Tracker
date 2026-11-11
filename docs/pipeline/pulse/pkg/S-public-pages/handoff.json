@@ -1,0 +1,76 @@
+{
+  "id": "S-public-pages",
+  "branch": "pulse/S-public-pages",
+  "verifiedOn": "pulse-redesign 1dad0a4 merged into the slot by pulse-sync (HEAD 83e9cb7 before the hand-off commit); the final pulse-verify ran on the synced branch",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-public-pages (replay, final); variants S-public-pages-en, -de, -w360 (360 x 640); the hybrid 'before' in S-public-pages-before. Pairs: C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-public-pages",
+  "frames": {
+    "post-detail-1": {
+      "verdict": "matched-fixture",
+      "fixture": "states.json overrides.post-detail-1 (title 'október 30.', eventAt 2026-10-30, priceMinor 12000 - the seed stores the 100x price and an event 21 days after the freeze)",
+      "why": "21 layers compared, every one within 1 pt of the frame except the unit 'Ft' (dx -2.1: the kit Numeral sets a num unit 4 after the ink, the frame 6). The 10 'deviating' rows are text runs measured against Figma's fixed 354 / 322 wide text boxes (dw only, dx dy 0 / 0.5). The title sets as drawn: GUGGOLÁS-TECHNIKA / MŰHELY – / OKTÓBER 30. The cover slot is masked (seed covers are 320 x 180 near-black placeholders)."
+    },
+    "post-detail-2": {
+      "verdict": "matched-fixture",
+      "fixture": "states.json overrides.post-detail-2 (priceMinor 45000)",
+      "why": "25 compared; all within 1 pt except 'Ft' (dx -2.5, kit unit gap). Unmatched: the Figma wrapper 'Section/Így működik' (the app's h2 sits in a <section>, same box). The ordered list numerals, the hanging quote mark and the balanced quote match the frame's positions."
+    },
+    "post-detail-3": {
+      "verdict": "structure",
+      "why": "a type specimen, not a screen (reach: specimen). The four samples were fed by the fixture kept in unrecorded-post-detail-3.json (refused by pulse-fixture-check: no recording carries h3 / strong / em / link, R-S-public-pages-02) and captured: .pulse/pairs/S-public-pages/specimen/ - h3 bodyB text-1, bold run SemiBold text-1, italic run Regular text-2 (the proposal), link label text-1 underlined + host in cap text-2, never lime. The final frame-state capture shows the programme post (no override)."
+    },
+    "coach-profile-1": {
+      "verdict": "matched",
+      "why": "seed replay; 35 compared, 19 matched + 5 sameSlotOtherString (the seed's post titles / dates differ from the frame's); the box-for-box proof on the frame's own data is coach-profile-1-frame-data (21 matched, 1 other, the rest measurement artefacts). The frame's 40 pt bottom fade is a frame-only device (the app has no bar there) and its 4th row is hidden by it; the app shows the 4th row's top under the fold."
+    },
+    "coach-profile-2": {
+      "verdict": "matched",
+      "why": "seed replay, bio opened by Több; 48 compared, 23 matched + 5 other strings (seed post titles / dates); the 'Szeptember 14.' seed title wraps to two lines so the last row moves 19 down. coach-profile-2-frame-data: 0 unmatched, every layer within 1 pt."
+    }
+  },
+  "states": {
+    "coach-profile-1-frame-data": { "verdict": "matched-fixture", "frame": "coach-profile-1", "fixture": "states.json (post titles and dates as drawn)", "why": "21 of 35 matched, 1 other string, 11 dw-only text runs, 4 'style' rows = the kicker colour read from the run's first ink (the export reports #f2f5ea for the whole run; the frame and the app draw the kind in text-1 and the date in text-2), 2 unmatched = the frame-only bottom fade and the chevron under it." },
+    "coach-profile-2-frame-data": { "verdict": "matched-fixture", "frame": "coach-profile-2", "fixture": "as above", "why": "27 of 48 matched, 0 unmatched, every deviation dw-only or the kicker colour as above." },
+    "public-post-gone": { "verdict": "structure", "frameless": true, "why": "the back row, the display line as the page's h1, one body line, 'Vissza a piactérre' text link with the arrow; no icon, no retry. Bodiless 404 fixture (R-S-public-pages-01)." },
+    "public-coach-gone": { "verdict": "structure", "frameless": true, "why": "as the post." },
+    "post-announcement": { "verdict": "structure", "frameless": true, "why": "seed: KÖZLEMÉNY · BUDAPEST as one eyebrow line, no meta, no price block; the page ends with the body." },
+    "post-tag-only": { "verdict": "structure", "frameless": true, "why": "no cover: the kind line starts 32 under the top bar; no meta, no price; looks complete." },
+    "post-long-title": { "verdict": "structure", "frameless": true, "why": "140 characters at displayXL 48 / 48 wrap over several lines, never cut; the meta stays on the kind line." },
+    "coach-unverified": { "verdict": "structure", "frameless": true, "why": "seed (Fehér Tamás): no lime tick, the credential line is the city alone; bio p + ol -> Több." },
+    "coach-minimal": { "verdict": "structure", "frameless": true, "why": "monogram, name, the city line, BEJEGYZÉSEI with 'Még nincs közzétett bejegyzése.'; no headline, specialty line, bio or expander." },
+    "coach-short-bio-long-name": { "verdict": "structure", "frameless": true, "why": "a one-paragraph bio shows whole with no expander; a 120-character name wraps the display h1 over several lines." }
+  },
+  "notCapturable": "post / coach loading (no delayed answer in pulse-shot): built from the kit and checked in the code - the real top bar, MonogramSkeleton 176 / text-line blocks, ListRowSkeleton (kicker / sub leadSlot), role=status + common.loading; no cover block, no radius.",
+  "probes": "every captured state at 402 (hu), 360 x 640, en and de: fonts, pill (0 lit pills on both pages), boxed, overflow and targets pass; geometry red only for the rows listed per frame.",
+  "inventory": "post-detail-1/-2: the coach row's accessible name was 'Kovács Péter Ellenőrzött edző Ellenőrzött edző' (the badge's label and the words), now 'Kovács Péter Ellenőrzött edző' - same link, same target. coach-profile-1/-2: inventory = baseline.",
+  "budget": { "before": 60, "after": 0, "file": "deleted (check-pulse --fix-down S-public-pages)" },
+  "requests": [
+    "requests/R-S-public-pages-01.json (a recorded 404 never settles in a capture: publicGet does not read the body; non-blocking, interim bodiless 404 fixtures)",
+    "requests/R-S-public-pages-02.json (recordings with h3 / strong / em / link and with null city / headline; non-blocking, interim: post-detail-3 structure, the 'no city' variants not captured)"
+  ],
+  "deviationsQ4": [
+    "Post: the extra images 2..n stay as a 3-column grid of square desaturated UserPhoto thumbs under the price (no frame draws them; the API can return them).",
+    "Coach bio: the collapsed form is now the first PARAGRAPH clamped to two lines (headings skipped, as coach-profile-1 draws), not the first 44 px of the whole document; Több appears when the document holds more than that paragraph or the paragraph overflows; a bio with no paragraph shows whole with no expander.",
+    "DocRenderer em: Regular in text-2, not italic (post-detail-3 PROPOSAL awaiting the owner: Geist has no italic cut).",
+    "DocRenderer link: ink label underlined + host in cap text-2 (was lime); rel / target / safeHref unchanged.",
+    "DocRenderer has two ADDITIVE optional props, variant ('post' | 'bio', default 'post') and clamp (2 | 3); doc and className unchanged. ProfileEditorPage's preview keeps the post look.",
+    "PublicChrome exports keep their names and props, their render changed and reaches the feed (/m, MarketplacePage, S-marketplace): PublicTopBar = ScreenHeader push with the bare back chevron; cta 'primary' (the feed) = the small lime pill link (PressableLink primary sm), cta 'secondary' = the body text link; VerifiedBadge = the 16 px lime check (was the filled badge); TileHolder / KindTile = a bare sized box with a 20 px text-2 glyph (no tint, no radius); InitialsAvatar = Monogram 28 (textClassName ignored).",
+    "Post: the city is now printed by its native name from the taxonomy (was the raw key 'budapest' / 'pecs'), as the coach page already did.",
+    "Post price: the formatted price is split with Intl formatToParts into the Numeral figure and the currency as its unit, always after the figure (en: '45,000' + 'HUF'); the whole formatted string stays the screen-reader text.",
+    "Post title: a hyphenated compound of up to 18 characters is not broken at its hyphen and the space before a dash is non-breaking; text-wrap: pretty (frame: GUGGOLÁS-TECHNIKA / MŰHELY – / OKTÓBER 30.).",
+    "Gone pages: no icon (EmptyState icon is deprecated), the back-to-feed link is a TextLink with the arrow lead."
+  ],
+  "removedNotControls": [
+    "the bordered / filled Surface cards of the coach row, the price and the post rows; the tinted tiles of the list marks and the h2 Target glyph; the ring around the coach initials; the specialty chips (now one running eyebrow line, still not focusable); the MapPin / Calendar / Users / Bookmark glyphs"
+  ],
+  "proposedCopy": [],
+  "i18n": "no key added, changed or removed; no i18n.patch.json",
+  "keepLiteral": [],
+  "handIn": "none: no i18n.patch.json, variants.json or shared.patch - every change is in the four owned files and this folder",
+  "unrecordedStates": "unrecorded-post-detail-3.json (the post-detail-3 specimen override refused by pulse-fixture-check)",
+  "knownLimits": [
+    "The feathered 4:3 cover is unproven with a real photograph: every seeded cover is a 320 x 180 near-black placeholder and the slot is masked in every comparison.",
+    "At 360 x 640 the post's right-hand meta (city · date · capacity) wraps to two right-aligned lines.",
+    "The frame-state arrival of coach-profile-1/-2 in pulse-frames.json names 'Több' in Hungarian; this package's overrides use common.more / common.less so en / de run."
+  ],
+  "lastBuild": "pulse-verify --package S-public-pages on the synced branch (pulse-redesign 1dad0a4 merged): build green in 13 s, 15 of 15 captured (replay)"
+}

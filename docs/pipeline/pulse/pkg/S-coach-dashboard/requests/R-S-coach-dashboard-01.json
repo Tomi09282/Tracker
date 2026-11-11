@@ -1,0 +1,14 @@
+{
+  "id": "R-S-coach-dashboard-01",
+  "from": "S-coach-dashboard",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/control.ts (variant link, shape icon, glyph axis)",
+  "need": "A 20 pt CENTRED glyph for the bare icon button. coach-dashboard-1 / -3 draw the roster row's archive control as Button/archive 44 x 44 at x 323 with glyph/archive 20 x 20 at x 335 (centred, stroke 1.5, text-3). The glyph axis has m (24 centred), sm (16 centred) and field (20, pushed against the right edge, text-2) - none is 20 centred, so the row draws the 24 pt glyph (2 pt larger on every side, stroke 1.75) and the geometry probe lists the six glyph/archive boxes as unmatched.",
+  "evidence": ".pulse/geometry/coach-dashboard-1.json nodes 'Button/archive' / 'glyph/archive'; figma-build/app/coach-dashboard-1.body.js clientRow(): glyph('archive', 20, P.t3, 1.5); .pulse/pairs/S-coach-dashboard/coach-dashboard-1.tile-1.png",
+  "proposedApi": "glyph: 'md' -> '[&_svg]:size-5 [&_svg]:stroke-[1.5]' (centred, keeps the tone axis), used as <Pressable variant=\"link\" shape=\"icon\" glyph=\"md\" tone=\"faint\">",
+  "proposedPatch": null,
+  "interim": "glyph m (24 pt, stroke 1.75) at the same centre (345, row centre); the target is the drawn 44 x 44 at 323-367",
+  "status": "open",
+  "resolution": null
+}

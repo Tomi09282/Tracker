@@ -1,0 +1,41 @@
+{
+  "package": "F2",
+  "stage": "a",
+  "branch": "pulse/F2a",
+  "verifiedOn": "pulse-redesign 0f1539f (F1.1) merged into the branch",
+  "mergeConstraint": "before F1.3",
+  "files": {
+    "frontend/scripts/check-type-scale.mjs": "changed: leg 2 (a --text-<step> must be a plain length) is a failure instead of a silent skip; leg 3 (family and case binding) added, dormant until the Pulse ramp exists and mandatory from the first Pulse-only step or the first marker",
+    "frontend/scripts/check-canvas.mjs": "new: --surface-0 of the unconditional :root rule == <meta name=\"theme-color\"> == manifest theme_color == manifest background_color",
+    "docs/pipeline/pulse/pkg/F2/a/shared.patch": "hand-in: frontend/package.json gets the script check:canvas and its place in build (after check:type-scale, before check:aurora)",
+    "docs/pipeline/pulse/pkg/F2/a/.gitattributes": "*.patch -text, so a checkout under core.autocrlf=true does not rewrite the patch to CRLF",
+    "docs/pipeline/pulse/pkg/F2/a/probe.mjs": "the probe runner of this stage (run from frontend/)",
+    "docs/pipeline/pulse/pkg/F2/a/probe-record.json": "its last record"
+  },
+  "handIn": ["docs/pipeline/pulse/pkg/F2/a/shared.patch"],
+  "gatesOnThisTree": {
+    "check:type-scale": "OK — 10 step(s), declared and merged alike (binding leg dormant, and it prints that)",
+    "check:canvas": "OK — #0B0D10 in all four places"
+  },
+  "probes": {
+    "runner": "node ../docs/pipeline/pulse/pkg/F2/a/probe.mjs   (cwd frontend/)",
+    "result": "3 baselines green, 19 planted defects red each with its named message, 1 control green; the five input files byte-identical before and after",
+    "planCases": {
+      "check:canvas — change one manifest colour": ["canvas-manifest-background", "canvas-manifest-theme"],
+      "check:type-scale — a step declared without a cn.ts entry": ["type-step-not-listed", "type-pulse-step-not-listed"],
+      "check:type-scale — .text-eyebrow dropped from the binding": ["type-eyebrow-not-display", "type-eyebrow-not-upper"],
+      "check:type-scale — --text-giant written as min(…)": ["type-giant-as-min", "type-fluid-step-unlisted"]
+    },
+    "pulseStage": "The binding leg cannot be planted in a tree that has no Pulse ramp. The runner builds the F1.4 state on a copy (16 Pulse steps of PLAN.md 3.3, the three homonyms renamed to -legacy, TYPE_STEPS to match, the type-binding block) and runs the real gate script on it: 26 steps, bound 5 display / 3 mono / 4 upper case. Once the tree declares --text-giant the runner uses the tree itself.",
+    "inTree": "Two defects were also planted in the slot tree itself and restored byte for byte (sha256 equal, git status clean): the manifest background_color changed alone -> check-canvas exit 1; --text-giant: min(124px, 31vw) declared with cn.ts untouched -> the gate of aebd701 exit 0 (the hole), the gate of this stage exit 1."
+  },
+  "build": "npm run build exit 0 in the slot with shared.patch applied (12 gate scripts incl. check:canvas, then tsc -b and vite build); the patch was reversed afterwards and package.json is byte-identical",
+  "forIntegrator": [
+    "Apply shared.patch in the merge commit (git apply --3way). It also applies on the F1.2 package.json (dependency lines are a different hunk).",
+    "F1.3: --surface-0, the theme-color meta tag and both manifest colours change in ONE commit, all four as hex literals. The token must sit in a :root rule at the top level or inside @layer only. A copy left on #0B0D10 fails the build with the file and line.",
+    "F1.4: the binding is ONE pair of markers, /* type-binding:start */ … /* type-binding:end */, directly inside @layer components, in src/index.css or src/ui/tokens/tokens.css. Between them only .text-<step> selectors; the values exactly var(--font-display), var(--font-mono), uppercase. Display: giant num display-xl display eyebrow. Mono: data-l data micro. Upper case: display-xl display eyebrow micro. The gate prints the block to paste when it is missing.",
+    "F1.4: every name in the --text- namespace that is not an ink token (--text-1/2/3) or a --text-x--modifier is a step and must be a plain rem/px/em length. The fluid cap of the giant numeral is --giant-fluid, outside the namespace.",
+    "ROSTER in check-type-scale.mjs is the design written once (Pulse System §2.2). A change of face or case of a step is an edit of ROSTER and of the block in the same commit.",
+    "The other lanes' shared.patch files (F2 b and c, F5) change the same build line of package.json; they have to be cut against the base that already carries check:canvas."
+  ]
+}

@@ -1,0 +1,14 @@
+diff --git a/frontend/scripts/pulse-frames.json b/frontend/scripts/pulse-frames.json
+index 86e79f0..b3e95f9 100644
+--- a/frontend/scripts/pulse-frames.json
++++ b/frontend/scripts/pulse-frames.json
+@@ -52,7 +52,8 @@
+         "toast",
+         "noticeLine",
+         "pic",
+-        "tabBar"
++        "tabBar",
++        "setCheck"
+       ]
+     }
+   },

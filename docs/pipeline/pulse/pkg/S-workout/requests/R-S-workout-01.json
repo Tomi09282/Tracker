@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-01",
+  "from": "S-workout",
+  "kind": "shell",
+  "blocking": false,
+  "target": "frontend/src/ui/shell/Screen.tsx (lane G-shell)",
+  "need": "A Screen that cannot grow: the player is one viewport tall by law (frames workout-1/2, Q7). Screen fill is a minimum and pads the bottom by --page-pad-b - --content-pad-b (48), so the rest band would end 48 instead of 28 above the bar.",
+  "evidence": ".pulse/shots/S-workout/workout-2.png (rest band 617-754, bar 782); WorkoutPlayer.tsx PLAYER_COLUMN",
+  "proposedApi": "<Screen fill=\"fixed\"> = height calc(var(--viewport-h) - var(--content-pad-b)), bottom pad 0, overflow-y clip, min-h-0 children",
+  "proposedPatch": null,
+  "interim": "WorkoutPlayer.tsx passes the height, pb-0 and overflow-y-clip through Screen className (PLAYER_COLUMN); delete it when the prop lands",
+  "status": "closed",
+  "resolution": "landed with the gap lanes (G-shell / G-inputs) on pulse-redesign; adopted in pulse/S-workout"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "S-tasks",
+  "title": "LifeOS Phase 3 screen package: Feladatok at /tasks (pushed from Ma, frame lifeos/tasks-1) with the five-tab Segmented filter Ma / Közelgő / Lejárt / Bármikor / Kész, task rows that complete / reopen on the check and open the task sheet on the row; TaskSheet (frame lifeos/task-form: Cím, Fontosság, Határidő, Dátum + Határidő ideje, the G-lifeos RecurrencePicker, Jegyzet, one lime pill; edit and delete of an existing task); CaptureSheet (frame lifeos/capture: one field routed to a task through POST /tasks; Esemény hidden until the Phase-5 event route) for the Ma page to mount",
+  "screens": [
+    "tasks",
+    "task-form",
+    "capture"
+  ],
+  "owns": [
+    "frontend/src/features/tasks/**",
+    "frontend/src/features/capture/**",
+    "docs/pipeline/pulse/pkg/S-tasks/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "requests": {
+      "R-S-tasks-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs, frontend/scripts/check-nav.mjs (the /tasks route, owned by the home tab; a NO_INBOUND entry until S-ma draws its doors; made next to the merged S-habits rows)",
+      "R-S-tasks-02": "frontend/src/ui/primitives/DateTrigger.tsx (additive glyph prop: the trailing chevron of task-form / capture)"
+    }
+  },
+  "frames": [
+    "lifeos/tasks-1",
+    "lifeos/task-form",
+    "lifeos/capture"
+  ],
+  "inventory": "docs/brain/58-Pulse/Screens/tasks.md does not exist: the frame README figma-build/lifeos/README-ma.md (tasks-1, task-form, capture rows) and docs/pipeline/pulse/pkg/B-habits-tasks/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/tasks",
+  "dependsOn": [
+    "B-habits-tasks",
+    "G-lifeos"
+  ],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 3)",
+  "i18nNamespaces": [
+    "tasks",
+    "capture"
+  ],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-habits-tasks' frontend/src/lib/lifeos-api.ts (its shared.patch) and G-lifeos' RecurrencePicker / TimeTrigger / weekdays.ts - merge both first; the slot holds them as uncommitted interim copies. tasksData.ts holds the hooks under a non-use* file name. GET /tasks is not in the freeze (the running dev backend has no migration 032): every capture answers it with a contract body checked against TasksResponse (fixture-schema-check.mjs) - matched-fixture at best until recorded. CaptureSheet is exported for S-ma (the Ma page's FELADATOK 'Rögzítés +'); /tasks?capture=1 opens it over Feladatok until Ma mounts it."
+}

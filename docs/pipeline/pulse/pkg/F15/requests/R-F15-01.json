@@ -1,0 +1,14 @@
+{
+  "id": "R-F15-01",
+  "from": "F15",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/features/playground/kit/mannequin.tsx",
+  "need": "The kit host lists features/playground/kit/*.tsx; every other kit lane owns its file there (work-packages.json), F15 does not, and a shared.patch may not create a file. Either create the one-line file of the proposed patch (it re-exports frontend/src/ui/muscle-map/specimens.tsx, the lane's specimens), or add frontend/src/features/playground/kit/mannequin.tsx to F15's owns so stage 1 can write it.",
+  "evidence": "node scripts/pulse-owns-check.mjs --owner frontend/src/features/playground/kit/mannequin.tsx -> 'the integrator'; PLAN.md 2.2 (lane agents write features/playground/kit/<lane>.tsx); work-packages.json F15.owns has no kit file",
+  "proposedApi": "features/playground/kit/mannequin.tsx: export { specimens, KitSpecimen, default } from ui/muscle-map/specimens",
+  "proposedPatch": "docs/pipeline/pulse/pkg/F15/requests/R-F15-01.patch",
+  "interim": "the specimens are in frontend/src/ui/muscle-map/specimens.tsx and were captured through a temporary playground view (commit 029c894, removed again before hand-off); nothing waits for this",
+  "status": "open",
+  "resolution": null
+}

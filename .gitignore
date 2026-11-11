@@ -8,7 +8,10 @@ build/
 !.env.example
 
 # runtime data (encrypted DB, WAL/SHM sidecars) and logs
-backend/data/
+# `backend/data/*` and not `backend/data/`: git cannot re-include a file whose parent DIRECTORY is
+# ignored. The one thing under data/ that IS source is the shipped exercise translations.
+backend/data/*
+!backend/data/exercise-translations/
 backend/logs/
 backend/storage/
 backend/seed/cache/
@@ -36,3 +39,6 @@ graphify-out/*
 !graphify-out/graph.json
 !graphify-out/graph.html
 !graphify-out/GRAPH_REPORT.md
+
+# Pulse redesign run state (locks, status files, recordings, captures). Machine-local, never committed.
+.pulse/

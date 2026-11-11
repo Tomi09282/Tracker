@@ -1,0 +1,2040 @@
+{
+  "about": "S-progress-days - Haladás > Napok (/progress/days), design round B frame lifeos/progress-days, and its undrawn states. The running dev backend has no migration 035 / GET /lifeos/stats (B-focus is not merged), so the read is answered by contract bodies typed by lib/lifeos-api.ts (B-focus Phase-6 block, LifeosStatsResponse) carrying the frame's figures (progress-days.part.js D14, WEEKS, HAB, KC); every other request replays the freeze of account M. Nothing is written. When the integrator records GET /lifeos/stats for a seeded account, these bodies become edit lists over the recording.",
+  "states": {
+    "progress-days": {
+      "title": "Haladás > Napok — a keret (vasárnap, október 18.)",
+      "frame": "lifeos/progress-days",
+      "account": "M",
+      "route": "/progress/days",
+      "height": 1628,
+      "reach": "fixture",
+      "why": "the frame state: 490 this week, 14 day columns, 4 weeks, 4 habits, 13 kcal days. GET /lifeos/stats is answered by a contract body (the dev backend has no migration 035) -> matched-fixture at best",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/stats",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "startedOn": "2026-08-03",
+            "week": {
+              "from": "2026-10-12",
+              "to": "2026-10-18",
+              "netMinor": 49000,
+              "avgPerDayMinor": 7000,
+              "daysElapsed": 7,
+              "prevWeekNetMinor": 33900
+            },
+            "days": [
+              {
+                "date": "2026-10-05",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-06",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-07",
+                "status": "closed",
+                "netMinor": -2000,
+                "earnedMinor": 0,
+                "lostMinor": 2000,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-08",
+                "status": "closed",
+                "netMinor": 5500,
+                "earnedMinor": 5500,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-09",
+                "status": "closed",
+                "netMinor": 12000,
+                "earnedMinor": 12000,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-10",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-11",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-12",
+                "status": "closed",
+                "netMinor": 5300,
+                "earnedMinor": 5300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-13",
+                "status": "closed",
+                "netMinor": 9300,
+                "earnedMinor": 9300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-14",
+                "status": "closed",
+                "netMinor": 6800,
+                "earnedMinor": 6800,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-15",
+                "status": "closed",
+                "netMinor": 15700,
+                "earnedMinor": 15700,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-16",
+                "status": "closed",
+                "netMinor": 2200,
+                "earnedMinor": 2200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-17",
+                "status": "closed",
+                "netMinor": 5700,
+                "earnedMinor": 5700,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-18",
+                "status": "open",
+                "netMinor": 4000,
+                "earnedMinor": 4000,
+                "lostMinor": 0,
+                "perfect": false
+              }
+            ],
+            "weeks": [
+              {
+                "weekStart": "2026-10-12",
+                "weekEnd": "2026-10-18",
+                "isoYear": 2026,
+                "isoWeek": 42,
+                "netMinor": 49000,
+                "earnedMinor": 49000,
+                "lostMinor": 0,
+                "perfectDays": 1,
+                "penalties": 0,
+                "current": true
+              },
+              {
+                "weekStart": "2026-10-05",
+                "weekEnd": "2026-10-11",
+                "isoYear": 2026,
+                "isoWeek": 41,
+                "netMinor": 33900,
+                "earnedMinor": 35900,
+                "lostMinor": 2000,
+                "perfectDays": 1,
+                "penalties": 1,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-28",
+                "weekEnd": "2026-10-04",
+                "isoYear": 2026,
+                "isoWeek": 40,
+                "netMinor": 41200,
+                "earnedMinor": 41200,
+                "lostMinor": 0,
+                "perfectDays": 2,
+                "penalties": 0,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-21",
+                "weekEnd": "2026-09-27",
+                "isoYear": 2026,
+                "isoWeek": 39,
+                "netMinor": 20500,
+                "earnedMinor": 23500,
+                "lostMinor": 3000,
+                "perfectDays": 0,
+                "penalties": 3,
+                "current": false
+              }
+            ],
+            "habits": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "rows": [
+                {
+                  "id": 1,
+                  "name": "Reggeli nyújtás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 12,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "name": "2 liter víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 5,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 3,
+                  "name": "Esti olvasás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 0,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "missed"
+                    }
+                  ]
+                },
+                {
+                  "id": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 9,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                }
+              ]
+            },
+            "kcal": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "targetKcal": 2200,
+              "days": [
+                {
+                  "date": "2026-10-05",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2050,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-06",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2180,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-07",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2390,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-08",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2120,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-09",
+                  "targetKcal": 2200,
+                  "eatenKcal": 1980,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-10",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2240,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-11",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2160,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-12",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2310,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-13",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2090,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-14",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2200,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-15",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2170,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-16",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2470,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-17",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2140,
+                  "outcome": "hit"
+                }
+              ],
+              "overDays": 4,
+              "hitDays": 9,
+              "trackedDays": 13,
+              "windowDays": 13,
+              "penaltyMinor": 1000,
+              "rewardMinor": 2000
+            },
+            "overview": {
+              "xp": 2140,
+              "level": 4,
+              "bounds": {
+                "levelFloorXp": 1800,
+                "nextLevelXp": 2600
+              },
+              "balanceMinor": 112000,
+              "spendableMinor": 112000,
+              "daysTracked": 77,
+              "perfectDays": 9,
+              "workouts": 31,
+              "focusSessions": 12,
+              "focusMinutes": 540,
+              "bestStreak": {
+                "habitId": 1,
+                "name": "Reggeli nyújtás",
+                "days": 14
+              },
+              "activeStreaks": [
+                {
+                  "habitId": 1,
+                  "name": "Reggeli nyújtás",
+                  "streak": 12,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 2,
+                  "name": "2 liter víz",
+                  "streak": 5,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "streak": 9,
+                  "freezes": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "progressDays.week.label"
+        }
+      }
+    },
+    "progress-days-failed": {
+      "title": "Haladás > Napok — a lekérés nem sikerült",
+      "account": "M",
+      "route": "/progress/days",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a failed read: the header and switch, the danger line with \"Újra\" (GET /lifeos/stats answered 500)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/stats",
+          "status": 500,
+          "body": {
+            "error": "internal error",
+            "code": "internal",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/lifeos/stats",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      }
+    },
+    "progress-days-not-started": {
+      "title": "Haladás > Napok — nincs még időzóna",
+      "account": "M",
+      "route": "/progress/days",
+      "height": 874,
+      "reach": "fixture",
+      "why": "LifeOS not started (no zone): the door row to \"Nap és időzóna\"",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/stats",
+          "body": {
+            "started": false,
+            "today": null,
+            "startedOn": null,
+            "week": null,
+            "days": [],
+            "weeks": [],
+            "habits": null,
+            "kcal": null,
+            "overview": {
+              "xp": 2140,
+              "level": 4,
+              "bounds": {
+                "levelFloorXp": 1800,
+                "nextLevelXp": 2600
+              },
+              "balanceMinor": 112000,
+              "spendableMinor": 112000,
+              "daysTracked": 77,
+              "perfectDays": 9,
+              "workouts": 31,
+              "focusSessions": 12,
+              "focusMinutes": 540,
+              "bestStreak": {
+                "habitId": 1,
+                "name": "Reggeli nyújtás",
+                "days": 14
+              },
+              "activeStreaks": [
+                {
+                  "habitId": 1,
+                  "name": "Reggeli nyújtás",
+                  "streak": 12,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 2,
+                  "name": "2 liter víz",
+                  "streak": 5,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "streak": 9,
+                  "freezes": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "settings.day.title"
+        }
+      }
+    },
+    "progress-door": {
+      "title": "Haladás — Test, a kapcsoló Napok cellájával",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "seed",
+      "why": "the door: the Haladás page switch now has four cells (Test · Napok · Fotók · Megosztás), as the frame draws it",
+      "arrived": {
+        "text": {
+          "key": "progressDays.tab"
+        }
+      }
+    },
+    "progress-door-open": {
+      "title": "Haladás — a Napok cella megnyitja a Napok oldalt",
+      "account": "M",
+      "route": "/progress",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the door works: Napok on the Haladás switch opens /progress/days (GET /lifeos/stats answered by the frame contract body)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/stats",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "startedOn": "2026-08-03",
+            "week": {
+              "from": "2026-10-12",
+              "to": "2026-10-18",
+              "netMinor": 49000,
+              "avgPerDayMinor": 7000,
+              "daysElapsed": 7,
+              "prevWeekNetMinor": 33900
+            },
+            "days": [
+              {
+                "date": "2026-10-05",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-06",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-07",
+                "status": "closed",
+                "netMinor": -2000,
+                "earnedMinor": 0,
+                "lostMinor": 2000,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-08",
+                "status": "closed",
+                "netMinor": 5500,
+                "earnedMinor": 5500,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-09",
+                "status": "closed",
+                "netMinor": 12000,
+                "earnedMinor": 12000,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-10",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-11",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-12",
+                "status": "closed",
+                "netMinor": 5300,
+                "earnedMinor": 5300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-13",
+                "status": "closed",
+                "netMinor": 9300,
+                "earnedMinor": 9300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-14",
+                "status": "closed",
+                "netMinor": 6800,
+                "earnedMinor": 6800,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-15",
+                "status": "closed",
+                "netMinor": 15700,
+                "earnedMinor": 15700,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-16",
+                "status": "closed",
+                "netMinor": 2200,
+                "earnedMinor": 2200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-17",
+                "status": "closed",
+                "netMinor": 5700,
+                "earnedMinor": 5700,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-18",
+                "status": "open",
+                "netMinor": 4000,
+                "earnedMinor": 4000,
+                "lostMinor": 0,
+                "perfect": false
+              }
+            ],
+            "weeks": [
+              {
+                "weekStart": "2026-10-12",
+                "weekEnd": "2026-10-18",
+                "isoYear": 2026,
+                "isoWeek": 42,
+                "netMinor": 49000,
+                "earnedMinor": 49000,
+                "lostMinor": 0,
+                "perfectDays": 1,
+                "penalties": 0,
+                "current": true
+              },
+              {
+                "weekStart": "2026-10-05",
+                "weekEnd": "2026-10-11",
+                "isoYear": 2026,
+                "isoWeek": 41,
+                "netMinor": 33900,
+                "earnedMinor": 35900,
+                "lostMinor": 2000,
+                "perfectDays": 1,
+                "penalties": 1,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-28",
+                "weekEnd": "2026-10-04",
+                "isoYear": 2026,
+                "isoWeek": 40,
+                "netMinor": 41200,
+                "earnedMinor": 41200,
+                "lostMinor": 0,
+                "perfectDays": 2,
+                "penalties": 0,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-21",
+                "weekEnd": "2026-09-27",
+                "isoYear": 2026,
+                "isoWeek": 39,
+                "netMinor": 20500,
+                "earnedMinor": 23500,
+                "lostMinor": 3000,
+                "perfectDays": 0,
+                "penalties": 3,
+                "current": false
+              }
+            ],
+            "habits": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "rows": [
+                {
+                  "id": 1,
+                  "name": "Reggeli nyújtás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 12,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "name": "2 liter víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 5,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 3,
+                  "name": "Esti olvasás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 0,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "missed"
+                    }
+                  ]
+                },
+                {
+                  "id": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 9,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                }
+              ]
+            },
+            "kcal": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "targetKcal": 2200,
+              "days": [
+                {
+                  "date": "2026-10-05",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2050,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-06",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2180,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-07",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2390,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-08",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2120,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-09",
+                  "targetKcal": 2200,
+                  "eatenKcal": 1980,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-10",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2240,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-11",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2160,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-12",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2310,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-13",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2090,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-14",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2200,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-15",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2170,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-16",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2470,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-17",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2140,
+                  "outcome": "hit"
+                }
+              ],
+              "overDays": 4,
+              "hitDays": 9,
+              "trackedDays": 13,
+              "windowDays": 13,
+              "penaltyMinor": 1000,
+              "rewardMinor": 2000
+            },
+            "overview": {
+              "xp": 2140,
+              "level": 4,
+              "bounds": {
+                "levelFloorXp": 1800,
+                "nextLevelXp": 2600
+              },
+              "balanceMinor": 112000,
+              "spendableMinor": 112000,
+              "daysTracked": 77,
+              "perfectDays": 9,
+              "workouts": 31,
+              "focusSessions": 12,
+              "focusMinutes": 540,
+              "bestStreak": {
+                "habitId": 1,
+                "name": "Reggeli nyújtás",
+                "days": 14
+              },
+              "activeStreaks": [
+                {
+                  "habitId": 1,
+                  "name": "Reggeli nyújtás",
+                  "streak": 12,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 2,
+                  "name": "2 liter víz",
+                  "streak": 5,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "streak": 9,
+                  "freezes": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progressDays.tab" }
+          },
+          "arrived": {
+            "text": {
+              "key": "progressDays.week.label"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progressDays.tab" },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progressDays.tab" },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progressDays.tab" },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "progress-days-back": {
+      "title": "Haladás > Napok — a Fotók cella visszavisz a Fotók nézetre",
+      "account": "M",
+      "route": "/progress/days",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the way back: Fotók on the Napok switch returns to /progress with the Fotók view open (replace, no extra history step)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/stats",
+          "body": {
+            "started": true,
+            "today": "2026-10-18",
+            "startedOn": "2026-08-03",
+            "week": {
+              "from": "2026-10-12",
+              "to": "2026-10-18",
+              "netMinor": 49000,
+              "avgPerDayMinor": 7000,
+              "daysElapsed": 7,
+              "prevWeekNetMinor": 33900
+            },
+            "days": [
+              {
+                "date": "2026-10-05",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-06",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-07",
+                "status": "closed",
+                "netMinor": -2000,
+                "earnedMinor": 0,
+                "lostMinor": 2000,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-08",
+                "status": "closed",
+                "netMinor": 5500,
+                "earnedMinor": 5500,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-09",
+                "status": "closed",
+                "netMinor": 12000,
+                "earnedMinor": 12000,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-10",
+                "status": "closed",
+                "netMinor": 3200,
+                "earnedMinor": 3200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-11",
+                "status": "closed",
+                "netMinor": 6000,
+                "earnedMinor": 6000,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-12",
+                "status": "closed",
+                "netMinor": 5300,
+                "earnedMinor": 5300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-13",
+                "status": "closed",
+                "netMinor": 9300,
+                "earnedMinor": 9300,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-14",
+                "status": "closed",
+                "netMinor": 6800,
+                "earnedMinor": 6800,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-15",
+                "status": "closed",
+                "netMinor": 15700,
+                "earnedMinor": 15700,
+                "lostMinor": 0,
+                "perfect": true
+              },
+              {
+                "date": "2026-10-16",
+                "status": "closed",
+                "netMinor": 2200,
+                "earnedMinor": 2200,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-17",
+                "status": "closed",
+                "netMinor": 5700,
+                "earnedMinor": 5700,
+                "lostMinor": 0,
+                "perfect": false
+              },
+              {
+                "date": "2026-10-18",
+                "status": "open",
+                "netMinor": 4000,
+                "earnedMinor": 4000,
+                "lostMinor": 0,
+                "perfect": false
+              }
+            ],
+            "weeks": [
+              {
+                "weekStart": "2026-10-12",
+                "weekEnd": "2026-10-18",
+                "isoYear": 2026,
+                "isoWeek": 42,
+                "netMinor": 49000,
+                "earnedMinor": 49000,
+                "lostMinor": 0,
+                "perfectDays": 1,
+                "penalties": 0,
+                "current": true
+              },
+              {
+                "weekStart": "2026-10-05",
+                "weekEnd": "2026-10-11",
+                "isoYear": 2026,
+                "isoWeek": 41,
+                "netMinor": 33900,
+                "earnedMinor": 35900,
+                "lostMinor": 2000,
+                "perfectDays": 1,
+                "penalties": 1,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-28",
+                "weekEnd": "2026-10-04",
+                "isoYear": 2026,
+                "isoWeek": 40,
+                "netMinor": 41200,
+                "earnedMinor": 41200,
+                "lostMinor": 0,
+                "perfectDays": 2,
+                "penalties": 0,
+                "current": false
+              },
+              {
+                "weekStart": "2026-09-21",
+                "weekEnd": "2026-09-27",
+                "isoYear": 2026,
+                "isoWeek": 39,
+                "netMinor": 20500,
+                "earnedMinor": 23500,
+                "lostMinor": 3000,
+                "perfectDays": 0,
+                "penalties": 3,
+                "current": false
+              }
+            ],
+            "habits": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "rows": [
+                {
+                  "id": 1,
+                  "name": "Reggeli nyújtás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 12,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 2,
+                  "name": "2 liter víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 5,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "partial"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                },
+                {
+                  "id": 3,
+                  "name": "Esti olvasás",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 0,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "missed"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "missed"
+                    }
+                  ]
+                },
+                {
+                  "id": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "streak": {
+                    "current": 9,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "cells": [
+                    {
+                      "date": "2026-10-05",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-06",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-07",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-08",
+                      "state": "relapse"
+                    },
+                    {
+                      "date": "2026-10-09",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-10",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-11",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-12",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-13",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-14",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-15",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-16",
+                      "state": "done"
+                    },
+                    {
+                      "date": "2026-10-17",
+                      "state": "done"
+                    }
+                  ]
+                }
+              ]
+            },
+            "kcal": {
+              "from": "2026-10-05",
+              "to": "2026-10-17",
+              "targetKcal": 2200,
+              "days": [
+                {
+                  "date": "2026-10-05",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2050,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-06",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2180,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-07",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2390,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-08",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2120,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-09",
+                  "targetKcal": 2200,
+                  "eatenKcal": 1980,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-10",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2240,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-11",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2160,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-12",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2310,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-13",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2090,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-14",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2200,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-15",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2170,
+                  "outcome": "hit"
+                },
+                {
+                  "date": "2026-10-16",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2470,
+                  "outcome": "over"
+                },
+                {
+                  "date": "2026-10-17",
+                  "targetKcal": 2200,
+                  "eatenKcal": 2140,
+                  "outcome": "hit"
+                }
+              ],
+              "overDays": 4,
+              "hitDays": 9,
+              "trackedDays": 13,
+              "windowDays": 13,
+              "penaltyMinor": 1000,
+              "rewardMinor": 2000
+            },
+            "overview": {
+              "xp": 2140,
+              "level": 4,
+              "bounds": {
+                "levelFloorXp": 1800,
+                "nextLevelXp": 2600
+              },
+              "balanceMinor": 112000,
+              "spendableMinor": 112000,
+              "daysTracked": 77,
+              "perfectDays": 9,
+              "workouts": 31,
+              "focusSessions": 12,
+              "focusMinutes": 540,
+              "bestStreak": {
+                "habitId": 1,
+                "name": "Reggeli nyújtás",
+                "days": 14
+              },
+              "activeStreaks": [
+                {
+                  "habitId": 1,
+                  "name": "Reggeli nyújtás",
+                  "streak": 12,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 2,
+                  "name": "2 liter víz",
+                  "streak": 5,
+                  "freezes": 0
+                },
+                {
+                  "habitId": 4,
+                  "name": "Nincs telefon az ágyban",
+                  "streak": 9,
+                  "freezes": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progress.tab.photos" }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": { "key": "progress.tab.photos" },
+                "selected": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": { "key": "progress.tab.photos" },
+                "checked": true
+              },
+              {
+                "role": [
+                  "tab",
+                  "radio",
+                  "button"
+                ],
+                "name": { "key": "progress.tab.photos" },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progress.tab.photos" },
+            "selected": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progress.tab.photos" },
+            "checked": true
+          },
+          {
+            "role": [
+              "tab",
+              "radio",
+              "button"
+            ],
+            "name": { "key": "progress.tab.photos" },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  }
+}

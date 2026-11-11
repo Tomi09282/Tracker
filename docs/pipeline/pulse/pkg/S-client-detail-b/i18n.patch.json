@@ -1,0 +1,20 @@
+{
+  "package": "S-client-detail-b",
+  "base": "a2f6874",
+  "namespaces": ["coaching"],
+  "set": [
+    {
+      "key": "coaching.nutrition.itemLine",
+      "hu": "{{grams}}g · {{kcal}} kcal · {{protein}}g P",
+      "en": "{{grams}}g · {{kcal}} kcal · {{protein}}g P",
+      "de": "{{grams}}g · {{kcal}} kcal · {{protein}}g P",
+      "after": "coaching.nutrition.activate",
+      "copy": "existing-literal",
+      "source": "NutritionTab.tsx item sub line (the JSX literals 'g', 'kcal', 'g P'); frame client-detail-2 prints it 1:1 ('60g · 222 kcal · 8.1g P')",
+      "untranslated": { "reason": "unit symbols; the live format (decimal point, glued unit) is kept 1:1 until the owner rules (client-detail-2 board note)" }
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": []
+}

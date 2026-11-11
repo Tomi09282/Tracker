@@ -1,0 +1,759 @@
+{
+  "about": "S-auth - the states of /login and /register the two frames do not draw (PLAN 4.1 rule 7), and the typed values of auth-2. Every state is signed out (account null) and replay: the only GETs are /config and the declared 401 on /auth/me. No form is ever submitted to the server: every submit outcome is a mutation-outcome fixture (a status and the error envelope of backend/src/lib/http.js sendError), answered in the browser, so no login or registration budget is spent and no account is created. The busy state (a request in flight) cannot be held by the capture tool and is reported as structure.",
+  "overrides": {
+    "auth-2": {
+      "why": "auth-2 draws the register form filled: takacs.daniel@pelda.hu with the format tick and 14 masked characters. The values are typed by the capture (no request is sent). A last click on the wordmark takes the focus off the password field, as the frame draws both fields at rest.",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample-1"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "re": "^tracker$"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "states": {
+    "auth-login-autofilled": {
+      "title": "Belépés - kitöltve (the autofilled swap of the frame)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample-1"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "re": "^tracker$"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.login"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-login-revealed": {
+      "title": "Belépés - jelszó megjelenítve",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample-1"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.hidePassword"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.hidePassword"
+        },
+        "pressed": true
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-login-required": {
+      "title": "Belépés - üres beküldés (inline field errors)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.passwordRequired"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "auth.errors.emailRequired"
+          }
+        },
+        {
+          "text": {
+            "key": "auth.errors.passwordRequired"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-login-format": {
+      "title": "Belépés - hibás e-mail formátum",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.emailFormat"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.emailFormat"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-login-invalid": {
+      "title": "Belépés - hibás adatok (inventory frame 3, 401)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "status": 401,
+          "body": {
+            "error": "invalid credentials",
+            "code": "unauthorized",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.invalidCredentials"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.invalidCredentials"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/auth/login",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-login-ratelimited": {
+      "title": "Belépés - túl sok próbálkozás (429)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "status": 429,
+          "body": {
+            "error": "too many attempts, try again later",
+            "code": "rate_limited",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.rateLimited"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.rateLimited"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/auth/login",
+            "status": 429
+          }
+        ]
+      }
+    },
+    "auth-login-generic": {
+      "title": "Belépés - általános hiba (500)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/login",
+          "status": 500,
+          "body": {
+            "error": "internal error",
+            "code": "internal_error",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.login"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.generic"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.generic"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/auth/login",
+            "status": 500
+          }
+        ]
+      }
+    },
+    "auth-register-pristine": {
+      "title": "Regisztráció - üres (the pristine swap of the frame)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/register",
+      "height": 874,
+      "reach": "seed",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "auth.register"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ]
+      }
+    },
+    "auth-register-taken": {
+      "title": "Regisztráció - foglalt e-mail (409)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/register",
+      "height": 874,
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/register",
+          "status": 409,
+          "body": {
+            "error": "email already registered",
+            "code": "conflict",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample-1"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.register"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.emailTaken"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.emailTaken"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/auth/register",
+            "status": 409
+          }
+        ]
+      }
+    },
+    "auth-register-ratelimited": {
+      "title": "Regisztráció - túl sok próbálkozás (429, the longest line of the alert slot)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/register",
+      "height": 874,
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/auth/register",
+          "status": 429,
+          "body": {
+            "error": "too many attempts, try again later",
+            "code": "rate_limited",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            },
+            "text": "takacs.daniel@pelda.hu"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.email"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "auth.password"
+            },
+            "text": "Pulse-sample-1"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "auth.showPassword"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "auth.register"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "auth.errors.rateLimited"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "auth.errors.rateLimited"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          },
+          {
+            "method": "POST",
+            "path": "/api/v1/auth/register",
+            "status": 429
+          }
+        ]
+      }
+    },
+    "auth-login-offline": {
+      "title": "Belépés - offline (the app-level strip above the screen)",
+      "package": "S-auth",
+      "account": null,
+      "route": "/login",
+      "height": 874,
+      "reach": "seed",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "text": {
+              "key": "offline.title"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "offline.title"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/auth/me",
+            "status": 401
+          }
+        ],
+        "console": [
+          "ERR_INTERNET_DISCONNECTED"
+        ]
+      }
+    }
+  }
+}

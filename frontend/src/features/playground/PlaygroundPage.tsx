@@ -1,23 +1,15 @@
-import { useState } from 'react';
-import { Share2 } from 'lucide-react';
+import { Suspense, lazy, useState } from 'react';
+import type { KitLayout } from './PulseKit';
 import { CATALOG, VARIANTS, type Variant } from '../../ui/feedback/catalog';
 import { VariantOverride, useElementVariant } from '../../ui/feedback/ElementStyleProvider';
 import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
-import { Dumbbell } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { FeedbackButton } from '../../ui/feedback/variants/E1Button';
 import { CopyButton } from '../../ui/feedback/variants/E2CopyButton';
-import { Toggle } from '../../ui/feedback/variants/E4Toggle';
-import { Checkbox } from '../../ui/feedback/variants/E5Checkbox';
-import { IconButton } from '../../ui/feedback/variants/E3IconButton';
 import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { FeedbackField } from '../../ui/feedback/variants/E7Field';
-import { Heart, Play, Pause, Trash2, Flame } from 'lucide-react';
-import { Tabs } from '../../ui/feedback/variants/E10Tabs';
-import { InteractiveCard, Toast, Progress, type ToastData } from '../../ui/feedback/variants/E12E16';
-import { Sheet, SwipeItem, Fab } from '../../ui/feedback/variants/E14E20';
-import { Slider, SkeletonBlock, PullToRefresh } from '../../ui/feedback/variants/E17E19';
-import { Select, DatePicker } from '../../ui/feedback/variants/E8E9';
+import { Heart } from 'lucide-react';
+import { Toast, type ToastData } from '../../ui/feedback/variants/E12E16';
+import { Sheet } from '../../ui/feedback/variants/E14E20';
 import { BottomNav } from '../../ui/nav/BottomNav';
 
 /**
@@ -37,28 +29,31 @@ import { BottomNav } from '../../ui/nav/BottomNav';
  * `catalog.ts` as `live`, beside its labels, where the gate holds it to the measured call sites.
  * This set stays what it always was: which elements this page can DEMONSTRATE.
  */
-export const PREVIEWABLE = new Set([
-  'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10',
-  'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20',
-]);
+export const PREVIEWABLE = new Set(['E2', 'E6', 'E7', 'E11', 'E14', 'E15']);
+
+/*
+ * The Pulse kit specimen host, the first section of this page. Its own chunk: the style studio
+ * imports `Demo` from this file and must not carry every lane's specimens with it.
+ */
+const PulseKit = lazy(() => import('./PulseKit'));
+
+/*
+ * The kit layout is remembered on this device, never put in the URL (PLAN.md 0.1 ruling 25). It is
+ * also what lets the capture tool open the board directly (`localStorage` of the `kit-board` state):
+ * the feedback matrix below runs JavaScript loops that never let the list page settle, while the
+ * board, which replaces the page, does.
+ */
+const KIT_LAYOUT_KEY = 'tracker.playground.kit-layout';
+
+function readKitLayout(): KitLayout {
+  try {
+    return localStorage.getItem(KIT_LAYOUT_KEY) === 'board' ? 'board' : 'list';
+  } catch {
+    return 'list';
+  }
+}
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/**
- * E19's demo alternates success and failure, pull by pull.
- *
- * Half of what pull-to-refresh has to communicate is that the refresh did NOT work — a gesture
- * that silently returns you to stale data is worse than one that never ran. With `onRefresh`
- * always resolving, that half of every variant was unreachable from the one screen where these
- * are judged. Module scope rather than component state on purpose: it is not rendered, so it must
- * not re-render anything, and it survives the five `VariantOverride` tiles independently.
- */
-let e19Attempt = 0;
-// E1's five variants differ most in how they say NO — a shake, a red flood from the contact point,
-// a red sweep, a bar that completes in danger, a badge that slides in. None of that could be seen
-// while the demo's action could only ever resolve. Alternating means the two outcomes are one tap
-// apart, which is what makes them comparable rather than merely reachable.
-let e1Attempt = 0;
 
 /**
  * One live, interactive instance of an element.
@@ -69,13 +64,8 @@ let e1Attempt = 0;
  * committing a change is the component every user will get, not a picture of it.
  */
 export function Demo({ id }: { id: string }) {
-  const [toggled, setToggled] = useState(false);
-  const [checked, setChecked] = useState(false);
   const [seg, setSeg] = useState<'all' | 'mine'>('all');
   const [text, setText] = useState('');
-  const [playing, setPlaying] = useState(false);
-  const [tab, setTab] = useState<'a' | 'b'>('a');
-  const [picked, setPicked] = useState(false);
   const [sheet, setSheet] = useState(false);
   // The sheet's five variants differ on the way in AND on how they answer, and a demo that only
   // opens one shows exactly half of each. These two drive the panel through the states.
@@ -86,51 +76,10 @@ export function Demo({ id }: { id: string }) {
     setSheetStatus(outcome);
   };
   const [toasts, setToasts] = useState<ToastData[]>([]);
-  const [pct, setPct] = useState(45);
-  const [sel, setSel] = useState<string | null>('a');
-  const [date, setDate] = useState<Date | null>(new Date());
-  const [weight, setWeight] = useState(60);
 
   switch (id) {
-    case 'E1':
-      return (
-        <FeedbackButton
-          variant="primary"
-          icon={<Share2 size={20} strokeWidth={2} aria-hidden />}
-          onAction={() =>
-            wait(900).then(() => {
-              if (e1Attempt++ % 2 === 1) throw new Error('demo failure');
-            })
-          }
-        >
-          Save
-        </FeedbackButton>
-      );
     case 'E2':
       return <CopyButton value="tracker-demo-value" label="Copied" />;
-    case 'E4':
-      return <Toggle checked={toggled} onChange={(v) => { setToggled(v); return wait(700); }} label="Demo toggle" />;
-    case 'E5':
-      return <Checkbox checked={checked} onChange={setChecked} label="Demo checkbox" />;
-    case 'E3':
-      return (
-        <IconButton
-          aria-label="Play"
-          toggled={playing}
-          onClick={() => setPlaying((v) => !v)}
-          // The status layer is the half of E3 a still screenshot cannot show, so the demo
-          // exercises BOTH outcomes: starting playback succeeds, stopping it fails. Presses
-          // therefore alternate spinner→tick and spinner→warning+shake. `playing` is read
-          // pre-toggle, which is what makes it alternate without a second piece of state.
-          onAction={() =>
-            wait(700).then(() => {
-              if (playing) throw new Error('demo failure');
-            })
-          }
-          icon={<Play size={20} strokeWidth={2} aria-hidden />}
-          altIcon={<Pause size={20} strokeWidth={2} aria-hidden />}
-        />
-      );
     case 'E6':
       return (
         <Segmented
@@ -154,34 +103,11 @@ export function Demo({ id }: { id: string }) {
           className="w-full"
         />
       );
-    case 'E10':
-      return (
-        <Tabs
-          label="Demo tabs"
-          value={tab}
-          onChange={setTab}
-          items={[
-            { value: 'a', label: 'Plan', icon: <Flame size={16} strokeWidth={2} aria-hidden /> },
-            { value: 'b', label: 'Log', badge: 3 },
-          ]}
-        />
-      );
-    case 'E12':
-      return (
-        <InteractiveCard selected={picked} onClick={() => setPicked((v) => !v)}>
-          <span className="text-body-s text-text-1">Interactive card</span>
-        </InteractiveCard>
-      );
-    case 'E13':
-      return (
-        <SwipeItem onComplete={() => undefined} onDelete={() => undefined}>
-          <span className="text-body-s text-text-1">Swipe me</span>
-        </SwipeItem>
-      );
     case 'E14':
       return (
         <>
           <Pressable
+            variant="link"
             onClick={() => {
               setSheetStatus('idle');
               setSheet(true);
@@ -196,16 +122,16 @@ export function Demo({ id }: { id: string }) {
             status={sheetStatus}
             onRetry={() => void driveSheet('success')}
           >
-            <p className="text-body-s text-text-2">Escape closes this, and focus lands inside it.</p>
+            <p className="text-cap text-text-2">Escape closes this, and focus lands inside it.</p>
             {/* Both outcomes, one tap apart, because that is the only way to compare five
                 variants' answers rather than five variants' entrances. E hands the whole panel
                 over to the state; the other four keep the content and put a badge in the header,
                 each settling on its own axis. */}
             <div className="mt-4 flex gap-tight">
-              <Pressable density="compact" onClick={() => void driveSheet('success')}>
+              <Pressable variant="link" onClick={() => void driveSheet('success')}>
                 Succeed
               </Pressable>
-              <Pressable density="compact" variant="secondary" onClick={() => void driveSheet('error')}>
+              <Pressable variant="link" onClick={() => void driveSheet('error')}>
                 Fail
               </Pressable>
             </div>
@@ -216,7 +142,7 @@ export function Demo({ id }: { id: string }) {
       return (
         <div className="w-full">
           <Pressable
-            density="compact"
+            variant="link"
             onClick={() =>
               setToasts((t) => [
                 ...t,
@@ -233,78 +159,20 @@ export function Demo({ id }: { id: string }) {
           </div>
         </div>
       );
-    case 'E16':
-      return (
-        <div className="flex w-full items-center gap-3">
-          <Progress value={pct} label="Demo progress" />
-          <Pressable shape="icon" aria-label="Advance" onClick={() => setPct((v) => (v >= 100 ? 0 : v + 25))}>
-            <Play size={20} strokeWidth={2} aria-hidden />
-          </Pressable>
-        </div>
-      );
-    case 'E8':
-      return (
-        <Select
-          label="Demo select"
-          value={sel}
-          onChange={setSel}
-          options={[
-            { value: 'a', label: 'Barbell' },
-            { value: 'b', label: 'Dumbbell' },
-            { value: 'c', label: 'Kettlebell' },
-          ]}
-        />
-      );
-    case 'E9':
-      return <DatePicker label="Demo date" value={date} onChange={setDate} />;
     case 'E11':
       return (
         // Rendered inline rather than fixed, so five copies do not stack on the viewport edge.
-        <div className="relative h-20 w-full overflow-hidden rounded-field">
+        // One Pulse look: E11 reads no letter any more, so the five columns are the same bar.
+        <div className="relative h-20 w-full overflow-hidden">
           <BottomNav
+            inline
             tabs={[
-              { to: '/playground', icon: Flame, label: 'One', end: true },
-              { to: '/library', icon: Dumbbell, label: 'Two', badge: 2 },
+              { key: 'one', to: '/playground', icon: 'home', label: 'One', end: true },
+              { key: 'two', to: '/library', icon: 'training', label: 'Two' },
             ]}
           />
         </div>
       );
-    case 'E17':
-      return (
-        <Slider
-          label="Weight"
-          value={weight}
-          onChange={setWeight}
-          min={0}
-          max={200}
-          step={2.5}
-          format={(v) => `${v} kg`}
-          ends={[<Flame key="a" size={16} strokeWidth={2} aria-hidden />, <Flame key="b" size={22} strokeWidth={2.5} aria-hidden />]}
-        />
-      );
-    case 'E18':
-      return (
-        <div className="w-full space-y-2">
-          {[0, 1, 2].map((i) => (
-            <SkeletonBlock key={i} index={i} className={i === 0 ? 'h-4 w-2/3' : 'h-3 w-1/2'} />
-          ))}
-        </div>
-      );
-    case 'E19':
-      return (
-        <PullToRefresh
-          onRefresh={() =>
-            wait(900).then(() => {
-              // Odd pulls succeed, even pulls fail, so both outcomes are one gesture apart.
-              if (e19Attempt++ % 2 === 1) throw new Error('demo failure');
-            })
-          }
-        >
-          <span className="text-body-s block text-text-2">Pull down from the top</span>
-        </PullToRefresh>
-      );
-    case 'E20':
-      return <span className="text-body-s text-text-3">Rendered fixed to the viewport, bottom-right</span>;
     default:
       return null;
   }
@@ -315,7 +183,7 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
   const active = useElementVariant(id);
   if (active !== variant) return null;
   return (
-    <span className="text-micro uppercase rounded-chip bg-accent-subtle px-1.5 text-accent">
+    <span className="text-micro text-accent">
       active
     </span>
   );
@@ -330,6 +198,17 @@ function ActiveBadge({ id, variant }: { id: string; variant: Variant }) {
  */
 export function PlaygroundPage() {
   const motionSafe = useMotionSafe();
+  // List or board. The board replaces the whole page: it is drawn at the document's origin, 1300
+  // wide, so a capture of it lines up with the Figma component board pixel for pixel.
+  const [kitLayout, setKitLayoutState] = useState<KitLayout>(readKitLayout);
+  const setKitLayout = (next: KitLayout) => {
+    setKitLayoutState(next);
+    try {
+      localStorage.setItem(KIT_LAYOUT_KEY, next);
+    } catch {
+      /* storage refused (a private window): the choice lasts for this visit only */
+    }
+  };
   /*
    * ═══ THREE GROUPS, BECAUSE THERE ARE THREE ANSWERS ════════════════════════════════════════════
    *
@@ -346,15 +225,26 @@ export function PlaygroundPage() {
   const liveNoDemo = CATALOG.filter((e) => e.live && !PREVIEWABLE.has(e.id));
   const inert = CATALOG.filter((e) => !e.live && !PREVIEWABLE.has(e.id));
 
+  if (kitLayout === 'board') {
+    return (
+      <Suspense fallback={null}>
+        <PulseKit layout="board" onLayoutChange={setKitLayout} />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="col-wide screen-x py-6">
-      <p className="text-micro uppercase text-accent">QA matrix</p>
-      <h1 className="text-title-1 mt-1 text-text-1">Feedback playground</h1>
+      <Suspense fallback={null}>
+        <PulseKit layout="list" onLayoutChange={setKitLayout} />
+      </Suspense>
+      <p className="text-micro text-accent">QA matrix</p>
+      <h1 className="text-title mt-1 text-text-1">Feedback playground</h1>
       <p className="text-body measure mt-2 text-text-2">
         Every element against all five of its variants. The variant marked <em>active</em> is the
         one the admin setting currently applies across the whole product.
       </p>
-      <p className="text-body-s mt-2 text-text-3">
+      <p className="text-cap mt-2 text-text-3">
         Reduced motion is currently <strong className="text-text-1">{motionSafe ? 'off' : 'on'}</strong> —
         with it on, every state change below still happens, it just does not travel.
       </p>
@@ -362,18 +252,18 @@ export function PlaygroundPage() {
       {previewable.map((entry) => (
         <section key={entry.id} className="mt-8">
           <div className="flex items-baseline gap-2">
-            <h2 className="text-title-3 text-text-1">{entry.name}</h2>
-            <span className="text-caption tabular-nums text-text-3">{entry.id}</span>
+            <h2 className="text-body-b text-text-1">{entry.name}</h2>
+            <span className="text-data text-text-3">{entry.id}</span>
           </div>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {VARIANTS.map((v) => (
               <div
                 key={v}
-                className="rounded-card border border-[var(--surface-border)] bg-surface-1 p-4"
+                className="border border-hair p-4"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-micro uppercase text-text-3">
+                  <span className="text-micro text-text-3">
                     {v} · {entry.variants[v]}
                   </span>
                   <ActiveBadge id={entry.id} variant={v} />
@@ -391,36 +281,10 @@ export function PlaygroundPage() {
         </section>
       ))}
 
-      {/* THE FAB NEEDS BOTH A PRESS AND A SELECTION TO BE JUDGEABLE.
-          `actions` is what makes A a speed-dial and B a morph-sheet, and for those two the outcome
-          arrives from the action you PICKED. For C, D and E there is no menu, so the press itself
-          is the work. Supplying both means every variant reaches busy → tick and busy → warning,
-          which is where their gestures differ — a spin, a swallow, a roll-through, a snap.
-          `Exercise` succeeds and `Note` fails, so the two outcomes are one tap apart. */}
-      <Fab
-        label="Demo action"
-        onPress={() => wait(800)}
-        actions={[
-          {
-            label: 'Exercise',
-            icon: <Dumbbell size={20} strokeWidth={2} aria-hidden />,
-            onSelect: () => wait(800),
-          },
-          {
-            label: 'Note',
-            icon: <Trash2 size={20} strokeWidth={2} aria-hidden />,
-            onSelect: () =>
-              wait(800).then(() => {
-                throw new Error('demo failure');
-              }),
-          },
-        ]}
-      />
-
       {liveNoDemo.length > 0 ? (
         <section className="mt-10">
-          <h2 className="text-title-3 text-text-1">Shipping, with no demo on this page</h2>
-          <p className="text-body-s measure mt-1 text-text-2">
+          <h2 className="text-body-b text-text-1">Shipping, with no demo on this page</h2>
+          <p className="text-cap measure mt-1 text-text-2">
             Real components read these variants, so changing them in the studio changes the product.
             They just have no tile here yet — a gap in this page, not in the app. They were listed
             under &ldquo;not yet built&rdquo; until the roster was measured against the actual call
@@ -430,12 +294,12 @@ export function PlaygroundPage() {
             {liveNoDemo.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
+                className="flex items-center justify-between gap-2 border border-hair px-3 py-2"
               >
-                <span className="text-body-s text-text-2">
+                <span className="text-cap text-text-2">
                   <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
                 </span>
-                <span className="text-micro uppercase rounded-chip bg-success-subtle px-1.5 text-success">live</span>
+                <span className="text-micro text-success">live</span>
               </li>
             ))}
           </ul>
@@ -443,8 +307,8 @@ export function PlaygroundPage() {
       ) : null}
 
       <section className="mt-10">
-        <h2 className="text-title-3 text-text-1">Catalogued, and nothing reads them</h2>
-        <p className="text-body-s measure mt-1 text-text-2">
+        <h2 className="text-body-b text-text-1">Catalogued, and nothing reads them</h2>
+        <p className="text-cap measure mt-1 text-text-2">
           These rows exist in <code>element_style_config</code> and no component consults them, so an
           admin can pick a variant, watch it save and see it audited while the product does not
           change by a pixel. Saying so beats a card that looks finished — and the studio marks them
@@ -454,12 +318,12 @@ export function PlaygroundPage() {
           {inert.map((e) => (
             <li
               key={e.id}
-              className="flex items-center justify-between gap-2 rounded-field border border-[var(--surface-border)] bg-surface-1 px-3 py-2"
+              className="flex items-center justify-between gap-2 border border-hair px-3 py-2"
             >
-              <span className="text-body-s text-text-2">
+              <span className="text-cap text-text-2">
                 <span className="tabular-nums text-text-3">{e.id}</span> · {e.name}
               </span>
-              <span className="text-micro uppercase text-text-3">phase {e.phase}</span>
+              <span className="text-micro text-text-3">phase {e.phase}</span>
             </li>
           ))}
         </ul>

@@ -1,0 +1,268 @@
+{
+  "about": "F13's extra states (PLAN 4.4 item 6): the status zone in the built app. F13-kit-board is the kit board (F7) with the toast band in the board's root-screen cell and this lane's specimens after the board. F13-kit-tail is the same page photographed 9000 tall, for the specimens after the board. F13-equipment-toast is the client page after the coach saves an equipment change - the PATCH is answered by an inline fixture, nothing is saved - so the real band shows the board's own message \"Felszerelés mentve\". F13-offline-toast is the same, then the network is cut (CDP offline): the offline line opens and the band stands under it - the two never overlap. F13-undo-live is the acceptance click script, live, on the SCRATCH template plan only (sandbox key scratchPlan): delete its first day, see the band with Visszavonás, undo, see the day back. (style-studio-2 cannot be used: E1 is dormant since F2, so the studio refuses to switch it.)",
+  "states": {
+    "F13-kit-board": {
+      "title": "Pulse kit — board layout, with the toast band in the root-screen cell and the status specimens after the board",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 5094,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "F7's kit-board state, repeated because a package's run merges only its own states",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ]
+    },
+    "F13-kit-tail": {
+      "title": "Pulse kit — board layout, the whole page: the status specimens listed after the board (below 5094)",
+      "account": "M",
+      "route": "/playground",
+      "width": 1300,
+      "height": 9000,
+      "scale": 1,
+      "reach": "specimen",
+      "why": "the specimens no board cell names are drawn after the board, below its 5094 pt; a taller viewport photographs them in place",
+      "localStorage": {
+        "tracker.playground.kit-layout": "board"
+      },
+      "arrived": [
+        {
+          "role": "button",
+          "name": "Board",
+          "pressed": true
+        },
+        {
+          "role": "heading",
+          "name": "Pulse · Open Field"
+        }
+      ]
+    },
+    "F13-equipment-toast": {
+      "title": "Kliens — felszerelés mentve: the toast band over the header zone, raised by the real page (the board's own message)",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "saving a client's equipment notifies the client: the PATCH is answered by the inline fixture and nothing is saved",
+      "fixtures": [
+        {
+          "label": "save",
+          "method": "PATCH",
+          "path": "/api/v1/clients/*/onboarding/equipment",
+          "status": 200
+        }
+      ],
+      "opened": {
+        "role": "checkbox",
+        "name": "Kettlebell"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell",
+            "checked": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "coaching.equipmentSaved"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "coaching.equipmentSaved"
+        }
+      }
+    },
+    "F13-offline-toast": {
+      "title": "Kliens — a toast up, then the network cut: the offline line opens and the band stands under it",
+      "account": "C",
+      "route": "/coach/clients/{linkOfMember}",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the offline line and a toast at once must not overlap: the save is answered by the inline fixture, then CDP cuts the network (no request leaves the page after that)",
+      "fixtures": [
+        {
+          "label": "save",
+          "method": "PATCH",
+          "path": "/api/v1/clients/*/onboarding/equipment",
+          "status": 200
+        }
+      ],
+      "opened": {
+        "role": "checkbox",
+        "name": "Kettlebell"
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "checkbox",
+            "name": "Kettlebell"
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": "Kettlebell",
+            "checked": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.save"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "coaching.equipmentSaved"
+            }
+          }
+        },
+        {
+          "offline": true,
+          "arrived": [
+            {
+              "text": {
+                "key": "offline.title"
+              }
+            },
+            {
+              "text": {
+                "key": "coaching.equipmentSaved"
+              }
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "text": {
+            "key": "offline.title"
+          }
+        },
+        {
+          "text": {
+            "key": "coaching.equipmentSaved"
+          }
+        }
+      ]
+    },
+    "F13-undo-live": {
+      "title": "Tervszerkesztő (scratch plan) — delete a day, the band says Nap törölve with Visszavonás, undo brings the day back",
+      "account": "C",
+      "route": "/coach/plans/{scratchPlan}",
+      "height": 874,
+      "reach": "seed",
+      "why": "acceptance: an Undo toast still undoes - live, on the sandbox scratch template plan only, never on a member's plan",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "plans.deleteDay"
+        },
+        "nth": 0
+      },
+      "writes": [
+        {
+          "method": "DELETE",
+          "path": "/api/v1/plans/{scratchPlan}/days/*"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/plans/{scratchPlan}/days"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/plans/{scratchPlan}/blocks"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/plans/{scratchPlan}/exercises"
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "plans.deleteDay"
+            },
+            "nth": 0
+          },
+          "arrived": [
+            {
+              "text": {
+                "key": "plans.dayDeleted"
+              }
+            },
+            {
+              "role": "button",
+              "name": {
+                "key": "common.undo"
+              }
+            }
+          ]
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.undo"
+            }
+          },
+          "arrived": [
+            {
+              "absent": {
+                "role": "button",
+                "name": {
+                  "key": "common.undo"
+                }
+              }
+            },
+            {
+              "text": "Homokozó A – nyomás"
+            }
+          ]
+        }
+      ],
+      "arrived": [
+        {
+          "absent": {
+            "role": "button",
+            "name": {
+              "key": "common.undo"
+            }
+          }
+        },
+        {
+          "text": "Homokozó A – nyomás"
+        }
+      ]
+    }
+  }
+}

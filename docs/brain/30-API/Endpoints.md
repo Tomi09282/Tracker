@@ -1,15 +1,15 @@
 ---
 type: api-index
 title: API surface
-count: 171
+count: 239
 tags: [api, moc, generated]
 ---
 
-# API surface — 171 endpoints
+# API surface — 239 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-08-12.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-11-08.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.
@@ -18,36 +18,63 @@ protection the code does not have.
 |---|---|---|
 | GET | `/api/v1/admin/coins/audit` | `requireAuth` |
 | GET | `/api/v1/admin/coins/ledger` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/media/:key` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/posts` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/posts/:publicId` | `requireAuth` |
+| POST | `/api/v1/admin/marketplace/posts/:publicId/restore` | `requireAuth` |
 | POST | `/api/v1/admin/marketplace/remove` | `requireAuth` |
 | GET | `/api/v1/admin/marketplace/reports` | `requireAuth` |
 | POST | `/api/v1/admin/marketplace/reports/:id/resolve` | `requireAuth` |
 | GET | `/api/v1/admin/metrics` | `requireAuth` |
 | GET | `/api/v1/admin/moderation` | `requireAuth` |
+| GET | `/api/v1/admin/moderation/:id` | `requireAuth` |
 | POST | `/api/v1/admin/moderation/:id` | `requireAuth` |
+| GET | `/api/v1/admin/rules` | `requireAuth` |
+| PUT | `/api/v1/admin/rules` | `requireAuth` |
+| GET | `/api/v1/admin/statistics` | `requireAuth` |
 | GET | `/api/v1/admin/stats` | `requireAuth` |
 | GET | `/api/v1/admin/users` | `requireAuth` |
+| GET | `/api/v1/admin/users/:id` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/coins` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/disable` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/enable` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/force-password-change` | `requireAuth` |
+| PATCH | `/api/v1/admin/users/:id/name` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/reset-lockout` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/role` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/signout-all` | `requireAuth` |
 | POST | `/api/v1/auth/change-credentials` | `requireAuth` |
 | POST | `/api/v1/auth/login` | — |
 | POST | `/api/v1/auth/logout` | — |
 | POST | `/api/v1/auth/logout-all` | `requireAuth` |
 | GET | `/api/v1/auth/me` | `requireAuth` |
+| PATCH | `/api/v1/auth/me` | `requireAuth` |
 | POST | `/api/v1/auth/refresh` | — |
 | POST | `/api/v1/auth/register` | — |
+| GET | `/api/v1/calendar` | `requireAuth` |
 | GET | `/api/v1/calendar-feeds` | `requireAuth` |
 | POST | `/api/v1/calendar-feeds` | `requireAuth` |
 | POST | `/api/v1/calendar-feeds/:id/revoke` | `requireAuth` |
 | GET | `/api/v1/calendar/:token.ics` | — |
+| GET | `/api/v1/challenges` | `requireAuth` |
+| POST | `/api/v1/challenges` | `requireAuth` |
+| DELETE | `/api/v1/challenges/:id` | `requireAuth` |
+| GET | `/api/v1/challenges/:id` | `requireAuth` |
+| PATCH | `/api/v1/challenges/:id` | `requireAuth` |
+| POST | `/api/v1/challenges/:id/archive` | `requireAuth` |
+| POST | `/api/v1/challenges/:id/restore` | `requireAuth` |
+| GET | `/api/v1/challenges/today` | `requireAuth` |
+| POST | `/api/v1/challenges/today/draw` | `requireAuth` |
+| POST | `/api/v1/challenges/today/pick` | `requireAuth` |
+| POST | `/api/v1/challenges/today/reroll` | `requireAuth` |
 | GET | `/api/v1/chat-media/:key` | `requireAuth` |
 | GET | `/api/v1/clients` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/clients/:id` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/clients/:id/archive` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/clients/:id/onboarding` | `requireAuth`, `requireCoach` |
-| GET | `/api/v1/clients/:id/records` | `requireAuth` |
+| GET | `/api/v1/clients/:id/records` | `requireAuth`, `requireCoach` |
 | GET | `/api/v1/clients/:id/workouts` | `requireAuth`, `requireCoach` |
+| PATCH | `/api/v1/clients/:linkId/onboarding/equipment` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/clients/pregenerate` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/coaches/:linkId/leave` | `requireAuth` |
 | GET | `/api/v1/coins/achievements` | `requireAuth` |
@@ -84,6 +111,10 @@ protection the code does not have.
 | POST | `/api/v1/conversations/:id/messages` | `requireAuth` |
 | POST | `/api/v1/conversations/:id/read` | `requireAuth` |
 | POST | `/api/v1/conversations/:id/unblock` | `requireAuth` |
+| POST | `/api/v1/events` | `requireAuth` |
+| DELETE | `/api/v1/events/:id` | `requireAuth` |
+| GET | `/api/v1/events/:id` | `requireAuth` |
+| PATCH | `/api/v1/events/:id` | `requireAuth` |
 | GET | `/api/v1/exercises` | `requireAuth` |
 | POST | `/api/v1/exercises` | `requireAuth` |
 | DELETE | `/api/v1/exercises/:id` | `requireAuth` |
@@ -91,16 +122,37 @@ protection the code does not have.
 | PATCH | `/api/v1/exercises/:id` | `requireAuth` |
 | POST | `/api/v1/exercises/:id/media` | `requireAuth`, `multipartCsrf`, `multerMiddleware` |
 | POST | `/api/v1/exercises/:id/submit` | `requireAuth` |
+| GET | `/api/v1/focus` | `requireAuth` |
+| POST | `/api/v1/focus` | `requireAuth` |
+| GET | `/api/v1/focus/:id` | `requireAuth` |
+| POST | `/api/v1/focus/:id/cancel` | `requireAuth` |
+| POST | `/api/v1/focus/:id/checkin` | `requireAuth` |
+| POST | `/api/v1/focus/:id/finish` | `requireAuth` |
+| GET | `/api/v1/focus/current` | `requireAuth` |
 | GET | `/api/v1/foods` | `requireAuth` |
 | POST | `/api/v1/foods` | `requireAuth` |
 | DELETE | `/api/v1/foods/:id` | `requireAuth` |
+| GET | `/api/v1/habits` | `requireAuth` |
+| POST | `/api/v1/habits` | `requireAuth` |
+| GET | `/api/v1/habits/:id` | `requireAuth` |
+| PATCH | `/api/v1/habits/:id` | `requireAuth` |
+| POST | `/api/v1/habits/:id/archive` | `requireAuth` |
+| POST | `/api/v1/habits/:id/log` | `requireAuth` |
+| POST | `/api/v1/habits/:id/relapse` | `requireAuth` |
+| POST | `/api/v1/habits/:id/restore` | `requireAuth` |
+| POST | `/api/v1/habits/:id/skip` | `requireAuth` |
 | GET | `/api/v1/invite-codes` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/invite-codes` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/invite-codes/:id/revoke` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/join` | `requireAuth` |
 | GET | `/api/v1/languages` | — |
+| GET | `/api/v1/lifeos/days` | `requireAuth` |
+| GET | `/api/v1/lifeos/stats` | `requireAuth` |
+| GET | `/api/v1/lifeos/today` | `requireAuth` |
 | POST | `/api/v1/me/delete` | `requireAuth` |
 | GET | `/api/v1/me/export` | `requireAuth` |
+| GET | `/api/v1/me/prefs` | `requireAuth` |
+| PATCH | `/api/v1/me/prefs` | `requireAuth` |
 | GET | `/api/v1/me/theme` | `requireAuth` |
 | PUT | `/api/v1/me/theme` | `requireAuth` |
 | GET | `/api/v1/measurement-metrics` | `requireAuth` |
@@ -173,9 +225,25 @@ protection the code does not have.
 | GET | `/api/v1/public/taxonomy` | — |
 | GET | `/api/v1/records` | `requireAuth` |
 | POST | `/api/v1/reports` | `requireAuth` |
+| GET | `/api/v1/rewards` | `requireAuth` |
+| POST | `/api/v1/rewards` | `requireAuth` |
+| GET | `/api/v1/rewards/:id` | `requireAuth` |
+| PATCH | `/api/v1/rewards/:id` | `requireAuth` |
+| POST | `/api/v1/rewards/:id/archive` | `requireAuth` |
+| POST | `/api/v1/rewards/:id/redeem` | `requireAuth` |
+| POST | `/api/v1/rewards/:id/restore` | `requireAuth` |
+| GET | `/api/v1/rewards/redemptions` | `requireAuth` |
+| POST | `/api/v1/rewards/redemptions/:id/fulfilled` | `requireAuth` |
 | POST | `/api/v1/sets/:id/check` | `requireAuth` |
 | POST | `/api/v1/sets/:id/void` | `requireAuth` |
 | GET | `/api/v1/sources` | — |
+| GET | `/api/v1/tasks` | `requireAuth` |
+| POST | `/api/v1/tasks` | `requireAuth` |
+| DELETE | `/api/v1/tasks/:id` | `requireAuth` |
+| GET | `/api/v1/tasks/:id` | `requireAuth` |
+| PATCH | `/api/v1/tasks/:id` | `requireAuth` |
+| POST | `/api/v1/tasks/:id/complete` | `requireAuth` |
+| POST | `/api/v1/tasks/:id/reopen` | `requireAuth` |
 | GET | `/api/v1/taxonomies` | `requireAuth` |
 | GET | `/api/v1/teams` | `requireAuth`, `requireCoach` |
 | POST | `/api/v1/teams` | `requireAuth`, `requireCoach` |

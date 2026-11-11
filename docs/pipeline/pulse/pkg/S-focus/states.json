@@ -1,0 +1,1260 @@
+{
+  "about": "S-focus - Fókusz (/focus): design round B frames lifeos/focus-1 (setup), focus-2 (running), focus-3 (finished) and their undrawn states. The running dev backend has no migration 035 (B-focus is not merged), so GET /focus/current and the POST /focus/41/finish outcome are contract bodies typed by lib/lifeos-api.ts (B-focus Phase-6 block) carrying the frames' block (21:10-22:00, 50 minutes, every 15, +23); GET /coins/wallet is an edit list over the freeze of account M; every other request replays the freeze. The clock is pinned per state (Europe/Budapest). Only focus-3 fires a write, and it is answered by its fixture.",
+  "states": {
+    "focus-1": {
+      "title": "Fókusz — beállítás (21:10, 50 perc, 15 percenként)",
+      "frame": "lifeos/focus-1",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:10:00.000Z",
+      "reach": "fixture",
+      "why": "the frame state: no open block, the title typed, 50 perc and 15 perc chosen (the defaults), \"21:10 → 22:00\", \"Várhatóan +23 érme\". GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792437000,
+            "session": null,
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "focus.what"
+            },
+            "text": "Szakdolgozat – 3. fejezet"
+          },
+          "arrived": {
+            "text": {
+              "key": "focus.duration"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "key": "focus.title"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "focus.duration"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.what"
+        }
+      }
+    },
+    "focus-2": {
+      "title": "Fókusz — fut (34:42, az 1. ellenőrzés esedékes)",
+      "frame": "lifeos/focus-2",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:25:18.000Z",
+      "reach": "fixture",
+      "why": "the frame state: 15 of 50 minutes, 34:42 left, the first check-in due (the prompt \"1 / 3\", the lime pill live). GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792437918,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "active",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 15,
+              "remainingSeconds": 2082,
+              "checkinMinutes": 15,
+              "checkinsDone": 0,
+              "checkinsMax": 3,
+              "checkinDue": true,
+              "nextCheckinAt": 1792437900,
+              "lastCheckinAt": null,
+              "expectedMinor": 2300,
+              "payoutNowMinor": 500,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.checkinCta"
+        }
+      }
+    },
+    "focus-3": {
+      "title": "Kész fókusz — +23 érme, 3/3, 4. szint",
+      "frame": "lifeos/focus-3",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T20:00:30.000Z",
+      "reach": "fixture",
+      "why": "the frame state: the block ran out at 22:00 with three check-ins answered; \"Befejezés\" answers with the paid block (the POST /focus/41/finish outcome, schema-checked against FocusFinishResponse) and the wallet after it (level 4, 74 %). GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792440030,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "ended",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 50,
+              "remainingSeconds": 0,
+              "checkinMinutes": 15,
+              "checkinsDone": 3,
+              "checkinsMax": 3,
+              "checkinDue": false,
+              "nextCheckinAt": null,
+              "lastCheckinAt": 1792439720,
+              "expectedMinor": 2300,
+              "payoutNowMinor": 2300,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/focus/41/finish",
+          "body": {
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "done",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 50,
+              "remainingSeconds": 0,
+              "checkinMinutes": 15,
+              "checkinsDone": 3,
+              "checkinsMax": 3,
+              "checkinDue": false,
+              "nextCheckinAt": null,
+              "lastCheckinAt": 1792439720,
+              "expectedMinor": 2300,
+              "payoutNowMinor": null,
+              "closedAt": 1792440030,
+              "closedOn": "2026-10-19",
+              "paidMinutes": 50,
+              "paidCheckins": 3,
+              "awardedMinor": 2300,
+              "capped": false
+            },
+            "awardedMinor": 2300,
+            "capped": false
+          }
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/coins/wallet",
+          "edits": [
+            {
+              "pointer": "/xp",
+              "value": 2266
+            },
+            {
+              "pointer": "/level",
+              "value": 4
+            },
+            {
+              "pointer": "/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/bounds/nextLevelXp",
+              "value": 2500
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "focus.finish"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "focus.doneTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.credited"
+        }
+      }
+    },
+    "focus-waiting": {
+      "title": "Fókusz — fut, az ellenőrzés még nem esedékes (1 / 3 kész)",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:30:00.000Z",
+      "reach": "fixture",
+      "why": "undrawn: the first check-in answered at 15:10, the next one earned at 30:00 - the pill is off until then. GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792438200,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "active",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 20,
+              "remainingSeconds": 1800,
+              "checkinMinutes": 15,
+              "checkinsDone": 1,
+              "checkinsMax": 3,
+              "checkinDue": false,
+              "nextCheckinAt": 1792438800,
+              "lastCheckinAt": 1792437910,
+              "expectedMinor": 2300,
+              "payoutNowMinor": 900,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.checkinCta"
+        }
+      }
+    },
+    "focus-no-checkins": {
+      "title": "Fókusz — fut, ellenőrzés nélkül",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:25:18.000Z",
+      "reach": "fixture",
+      "why": "undrawn: a block started with \"Nincs\" - no ELLENŐRZÉS section. GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792437918,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "active",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 15,
+              "remainingSeconds": 2082,
+              "checkinMinutes": 0,
+              "checkinsDone": 0,
+              "checkinsMax": 0,
+              "checkinDue": false,
+              "nextCheckinAt": null,
+              "lastCheckinAt": null,
+              "expectedMinor": 1700,
+              "payoutNowMinor": 500,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.live"
+        }
+      }
+    },
+    "focus-planned": {
+      "title": "Fókusz — következő blokk 14:00-kor",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T11:20:00.000Z",
+      "reach": "fixture",
+      "why": "undrawn: a planned block (Ma: \"Következő blokk · 25 perc · +8 érme · 14:00\") - the whole plan in the pending tone, only \"Feladás\". GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792408800,
+            "session": {
+              "id": 41,
+              "title": "Mélymunka – szakdolgozat",
+              "status": "planned",
+              "startsAt": 1792411200,
+              "endsAt": 1792412700,
+              "startTime": "14:00",
+              "endTime": "14:25",
+              "plannedMinutes": 25,
+              "elapsedMinutes": 0,
+              "remainingSeconds": 1500,
+              "checkinMinutes": 10,
+              "checkinsDone": 0,
+              "checkinsMax": 2,
+              "checkinDue": false,
+              "nextCheckinAt": 1792411800,
+              "lastCheckinAt": null,
+              "expectedMinor": 1200,
+              "payoutNowMinor": null,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.giveUp"
+        }
+      }
+    },
+    "focus-ended": {
+      "title": "Fókusz — lejárt, Befejezésre vár",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T20:00:30.000Z",
+      "reach": "fixture",
+      "why": "undrawn: the block ran out while the page was closed (status ended): 00:00, the line full, Befejezés pays it, Feladás drops it. GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792440030,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "ended",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 50,
+              "remainingSeconds": 0,
+              "checkinMinutes": 15,
+              "checkinsDone": 3,
+              "checkinsMax": 3,
+              "checkinDue": false,
+              "nextCheckinAt": null,
+              "lastCheckinAt": 1792439720,
+              "expectedMinor": 2300,
+              "payoutNowMinor": 2300,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.ended"
+        }
+      }
+    },
+    "focus-give-up": {
+      "title": "Fókusz — Feladás megerősítése",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:25:18.000Z",
+      "reach": "fixture",
+      "why": "focus-2's \"Feladás → ConfirmSheet\": the kit sheet over the running block; nothing is sent. GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": true,
+            "today": "2026-10-19",
+            "now": 1792437918,
+            "session": {
+              "id": 41,
+              "title": "Szakdolgozat – 3. fejezet",
+              "status": "active",
+              "startsAt": 1792437000,
+              "endsAt": 1792440000,
+              "startTime": "21:10",
+              "endTime": "22:00",
+              "plannedMinutes": 50,
+              "elapsedMinutes": 15,
+              "remainingSeconds": 2082,
+              "checkinMinutes": 15,
+              "checkinsDone": 0,
+              "checkinsMax": 3,
+              "checkinDue": true,
+              "nextCheckinAt": 1792437900,
+              "lastCheckinAt": null,
+              "expectedMinor": 2300,
+              "payoutNowMinor": 500,
+              "closedAt": null,
+              "closedOn": null,
+              "paidMinutes": null,
+              "paidCheckins": null,
+              "awardedMinor": null,
+              "capped": false
+            },
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "focus.giveUp"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog"
+      }
+    },
+    "focus-no-zone": {
+      "title": "Fókusz — nincs időzóna",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:10:00.000Z",
+      "reach": "fixture",
+      "why": "undrawn: started false (no time zone yet) - the info line with the door to \"Nap és időzóna\", the pill off. GET /focus/current is answered by a contract body checked against FocusCurrentResponse (lib/lifeos-api.ts, B-focus): the running dev backend has no migration 035 -> matched-fixture at best.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "body": {
+            "started": false,
+            "today": null,
+            "session": null,
+            "todayMinutes": 0,
+            "rules": {
+              "pointsPerHour": 20,
+              "checkinPoint": 2,
+              "maxMinutesPerDay": 480,
+              "minCheckinGapMinutes": 5,
+              "minMinutes": 5,
+              "maxMinutes": 720,
+              "maxCheckinMinutes": 180
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "focus.noZone"
+        }
+      }
+    },
+    "ma-focus": {
+      "title": "Ma — a FÓKUSZ blokk (következő blokk 14:00)",
+      "frame": "lifeos/ma-1",
+      "account": "M",
+      "route": "/",
+      "height": 2248,
+      "clock": "2026-10-19T13:20:00+02:00",
+      "reach": "fixture",
+      "why": "Ma's FÓKUSZ section (lifeos/ma-1 y 1576, R-S-focus-02 applied): Ma's own ma-1 fixtures (pkg/S-ma/states.json) with the Phase-6 focus field added (an edit the recording cannot hold before migration 035; schema-checked against TodayFocus) - a planned 25-minute block at 14:00, 50 minutes paid today. (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish) (the whole frame lifeos/ma-1: S-ma's ma-1 fixtures, S-lifeos-polish)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/lifeos/today",
+          "edits": [
+            {
+              "pointer": "/started",
+              "value": true
+            },
+            {
+              "pointer": "/startedOn",
+              "value": "2026-08-03"
+            },
+            {
+              "pointer": "/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/settledThrough",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/wallet/balanceMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/spendableMinor",
+              "value": 19000
+            },
+            {
+              "pointer": "/wallet/xp",
+              "value": 2158
+            },
+            {
+              "pointer": "/wallet/level",
+              "value": 4
+            },
+            {
+              "pointer": "/wallet/bounds/levelFloorXp",
+              "value": 1600
+            },
+            {
+              "pointer": "/wallet/bounds/nextLevelXp",
+              "value": 2500
+            },
+            {
+              "pointer": "/wallet/today",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/wallet/todayEarnedMinor",
+              "value": 1000
+            },
+            {
+              "pointer": "/workout/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/workout/due",
+              "value": true
+            },
+            {
+              "pointer": "/workout/done",
+              "value": false
+            },
+            {
+              "pointer": "/habits",
+              "value": [
+                {
+                  "id": 1,
+                  "name": "Olvasás 20 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 1,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "done",
+                    "doneAt": 1792388400
+                  },
+                  "streak": {
+                    "current": 14,
+                    "best": 14,
+                    "freezes": 0,
+                    "multiplierBp": 12500,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 1300,
+                  "fullMinor": 1300
+                },
+                {
+                  "id": 2,
+                  "name": "Víz",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 8,
+                  "unit": "pohár",
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 2,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 5,
+                    "status": "pending",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 9,
+                    "best": 9,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 500,
+                  "fullMinor": 1000
+                },
+                {
+                  "id": 3,
+                  "name": "Nyújtás 10 perc",
+                  "kind": "good",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 10,
+                  "pointsPenalty": 5,
+                  "reminderTime": "21:30",
+                  "sortOrder": 3,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": null,
+                  "streak": {
+                    "current": 31,
+                    "best": 45,
+                    "freezes": 1,
+                    "multiplierBp": 15000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": 0,
+                  "fullMinor": 1500
+                },
+                {
+                  "id": 6,
+                  "name": "Esti nassolás",
+                  "kind": "bad",
+                  "scheduleType": "daily",
+                  "weekdayMask": 127,
+                  "timesPerWeek": null,
+                  "targetCount": 1,
+                  "unit": null,
+                  "pointsSuccess": 15,
+                  "pointsPenalty": 5,
+                  "reminderTime": null,
+                  "sortOrder": 6,
+                  "startedOn": "2026-08-03",
+                  "archived": false,
+                  "scheduledToday": true,
+                  "log": {
+                    "date": "2026-10-19",
+                    "count": 1,
+                    "status": "relapse",
+                    "doneAt": null
+                  },
+                  "streak": {
+                    "current": 4,
+                    "best": 4,
+                    "freezes": 0,
+                    "multiplierBp": 10000,
+                    "weekStreak": null
+                  },
+                  "weekDone": null,
+                  "previewMinor": -1000,
+                  "fullMinor": 1500
+                }
+              ],
+              "add": true
+            },
+            {
+              "pointer": "/tasks",
+              "value": {
+                "due": [
+                  {
+                    "id": 11,
+                    "title": "Befizetni a villanyszámlát",
+                    "notes": null,
+                    "priority": 3,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "17:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 2000,
+                    "lateNow": false,
+                    "payoutNowMinor": 2000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 12,
+                    "title": "Bevásárlás: zab, tojás, túró",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "19:00",
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 13,
+                    "title": "Felhívni anyát",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": "20:00",
+                    "recurrence": {
+                      "type": "weekly",
+                      "weekdayMask": 9
+                    },
+                    "isTemplate": false,
+                    "parentTaskId": 113,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1000,
+                    "lateNow": false,
+                    "payoutNowMinor": 1000,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 14,
+                    "title": "Kiválogatni a téli ruhákat",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": 500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 951,
+                    "title": "Lift helyett lépcső egész nap",
+                    "notes": null,
+                    "priority": 2,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": null,
+                    "completedOn": null,
+                    "overdueOn": null,
+                    "valueMinor": 1500,
+                    "lateNow": false,
+                    "payoutNowMinor": 1500,
+                    "paidMinor": null,
+                    "overduePenaltyMinor": null,
+                    "challengeId": 31
+                  }
+                ],
+                "overdue": [],
+                "completedToday": [
+                  {
+                    "id": 15,
+                    "title": "Kivinni a szemetet",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792390200,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  },
+                  {
+                    "id": 16,
+                    "title": "Időpontot foglalni a fodrászhoz",
+                    "notes": null,
+                    "priority": 1,
+                    "points": null,
+                    "dueOn": "2026-10-19",
+                    "dueTime": null,
+                    "recurrence": null,
+                    "isTemplate": false,
+                    "parentTaskId": null,
+                    "completedAt": 1792395000,
+                    "completedOn": "2026-10-19",
+                    "overdueOn": null,
+                    "valueMinor": 500,
+                    "lateNow": false,
+                    "payoutNowMinor": null,
+                    "paidMinor": 500,
+                    "overduePenaltyMinor": null,
+                    "challengeId": null
+                  }
+                ],
+                "anytimeCount": 0,
+                "openCount": 5
+              },
+              "add": true
+            },
+            {
+              "pointer": "/taskRules",
+              "value": {
+                "lowMinor": 500,
+                "midMinor": 1000,
+                "highMinor": 2000,
+                "latePct": 50,
+                "overdueMinor": 500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/dayRules",
+              "value": {
+                "habitMinor": 1000,
+                "streakTier1Days": 7,
+                "streakTier1MultBp": 12500,
+                "perfectDayMinor": 2500
+              },
+              "add": true
+            },
+            {
+              "pointer": "/challenge",
+              "value": {
+                "date": "2026-10-19",
+                "state": "picked",
+                "poolCount": 8,
+                "options": [
+                  {
+                    "id": 31,
+                    "name": "Lift helyett lépcső egész nap",
+                    "category": "movement",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": true
+                  },
+                  {
+                    "id": 33,
+                    "name": "Olvass el 20 oldalt",
+                    "category": "mind",
+                    "points": 15,
+                    "weight": 2,
+                    "valueMinor": 1500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  },
+                  {
+                    "id": 34,
+                    "name": "10 000 lépés",
+                    "category": "movement",
+                    "points": 25,
+                    "weight": 2,
+                    "valueMinor": 2500,
+                    "archived": false,
+                    "archivedAt": null,
+                    "chosen": false
+                  }
+                ],
+                "rerollsLeft": 1,
+                "picked": {
+                  "challengeId": 31,
+                  "taskId": 951,
+                  "pickedAt": 1792386000,
+                  "done": false,
+                  "taskDeleted": false,
+                  "title": "Lift helyett lépcső egész nap",
+                  "valueMinor": 1500,
+                  "paidMinor": null
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/nextEvent",
+              "value": {
+                "eventId": 14,
+                "date": "2026-10-19",
+                "title": "Vacsora Annával",
+                "location": "Trattoria Toscana",
+                "allDay": false,
+                "startAt": 1792431000,
+                "endAt": 1792438200,
+                "startTime": "19:30",
+                "endTime": "21:30",
+                "recurring": false,
+                "reminders": [
+                  60
+                ],
+                "firstReminder": {
+                  "minutesBefore": 60,
+                  "at": 1792427400,
+                  "time": "18:30"
+                }
+              },
+              "add": true
+            },
+            {
+              "pointer": "/focus",
+              "value": {
+                "current": {
+                  "id": 42,
+                  "title": "Mélymunka – szakdolgozat",
+                  "status": "planned",
+                  "startsAt": 1792411200,
+                  "endsAt": 1792412700,
+                  "startTime": "14:00",
+                  "endTime": "14:25",
+                  "plannedMinutes": 25,
+                  "elapsedMinutes": 0,
+                  "remainingSeconds": 1500,
+                  "checkinMinutes": 0,
+                  "checkinsDone": 0,
+                  "checkinsMax": 0,
+                  "checkinDue": false,
+                  "nextCheckinAt": null,
+                  "lastCheckinAt": null,
+                  "expectedMinor": 800,
+                  "payoutNowMinor": null,
+                  "closedAt": null,
+                  "closedOn": null,
+                  "paidMinutes": null,
+                  "paidCheckins": null,
+                  "awardedMinor": null,
+                  "capped": false
+                },
+                "todayMinutes": 50,
+                "todaySessions": 1,
+                "todayEarnedMinor": 2300,
+                "maxMinutesPerDay": 480
+              },
+              "add": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/my-plans/today",
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/days/0/day_name",
+              "value": "Felsőtest – húzás"
+            },
+            {
+              "pointer": "/days/0/is_rest",
+              "value": 0
+            },
+            {
+              "pointer": "/days/0/est_minutes",
+              "value": 65
+            },
+            {
+              "pointer": "/days/0/start_time",
+              "value": "18:00"
+            },
+            {
+              "pointer": "/days/0/exercise_count",
+              "value": 5
+            },
+            {
+              "pointer": "/days/0/log_id",
+              "value": null
+            },
+            {
+              "pointer": "/days/0/log_status",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/workouts/current",
+          "edits": [
+            {
+              "pointer": "/log",
+              "value": null
+            },
+            {
+              "pointer": "/exercises",
+              "value": []
+            },
+            {
+              "pointer": "/sets",
+              "value": []
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-19",
+          "from": {
+            "path": "/api/v1/nutrition-log/2026-10-15"
+          },
+          "edits": [
+            {
+              "pointer": "/date",
+              "value": "2026-10-19"
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1240
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 86
+            },
+            {
+              "pointer": "/targets/kcal_target",
+              "value": 2600
+            },
+            {
+              "pointer": "/targets/protein_g_target",
+              "value": 180
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "home.start"
+        }
+      }
+    },
+    "focus-failed": {
+      "title": "Fókusz — a lekérés nem sikerült",
+      "account": "M",
+      "route": "/focus",
+      "height": 874,
+      "clock": "2026-10-19T19:10:00.000Z",
+      "reach": "fixture",
+      "why": "undrawn: GET /focus/current answered 500 - the danger line with \"Újra\".",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/focus/current",
+          "status": 500,
+          "body": {
+            "error": "Internal error",
+            "code": "internal",
+            "requestId": "fixture"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/focus/current",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      }
+    }
+  }
+}

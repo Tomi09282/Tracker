@@ -1,0 +1,26 @@
+{
+  "id": "F13",
+  "verifiedOn": { "branch": "pulse/F13", "mergedBase": "521d143", "build": "pulse-verify --all: build green in 26 s, 55 of 59 captured (replay); the 4 failures are not this package's: workout-2 / onboarding-2 / onboarding-3 have no fixture file yet, style-studio-2 cannot switch E1 (dormant since F2)" },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/F13/variants.json (E15 live:false)",
+    "docs/pipeline/pulse/pkg/F13/i18n.patch.json (remove common.undone, its only consumer was E15 variant D)",
+    "docs/pipeline/pulse/pkg/F13/shared.patch (scripts/data/safe-area-exempt.json: the OfflineIndicator reason; features/playground/kit/shell.tsx: --band-pad-t on the device + the band in the board's root-screen cell)"
+  ],
+  "contract": "toast(message, kind?, options | fn) unchanged; kinds success/error/info/record; Undo (undoes and closes, letter C); 4 s timer, pause keeps the time left; cap 3 = three lines in one band; no countdown under reduced motion; placement accepted, not rendered (R5)",
+  "measured": {
+    "band (specimen, insets 62/34)": "band 0,0 402x120 #0b0d0a pt 68 pb 7; line 24,68 354x44; dot 24,87 6x6 rgb(52,211,153); text 38,81 288x18 Geist 13/18 500 #f2f5ea; rule 24,112 354x1 white 14 %; countdown 24,112 232x1 rgb(169,176,157); close 334,68 44x44 — equal to style-studio-2.json",
+    "record line": "trophy 24,282 16x16 (frame 24,82); text 48,281 278x18 (frame 48,81 278x18)",
+    "offline line": "line 24,y 354x44, dot +19, text +14/+13 — equal to the board's Notice/warn"
+  },
+  "states": {
+    "F13-kit-board": "replay ok; tiles in .pulse/pairs/F13/board-tiles",
+    "F13-kit-tail": "replay ok (the board names the off-board specimens, it does not draw them; they are captured by evidence/f13-shot.mjs)",
+    "F13-equipment-toast": "replay + inline fixture (PATCH answered), ok — the real band on the client page",
+    "F13-offline-toast": "replay + fixture, then CDP offline: the offline line and the band one under the other, ok",
+    "F13-undo-live": "LIVE, ok: DELETE /api/v1/plans/10/days/54, then the undo POSTed the day, 2 blocks and 2 exercises back — all on the sandbox scratchPlan (id 10); never the member's plan"
+  },
+  "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/F13 (index.json: band-style-studio-2 5.44 %, band-record-workout-2 1.38 %, app-band-equipment-vs-style-studio-2 6.06 %, offline-line-vs-board-warn 12.13 %, kit-board-root-screen-band 11.45 % of pixels differ by more than 8)",
+  "sweep": "59 frame states in replay: inventories equal to the baseline on 51; the 4 that differ (workout-3, settings-1/2, style-studio-1) differ by earlier merged packages (D2 redirect, theme removal, dormant elements); nothing of the status zone shows at rest",
+  "budget": "pkg/F13/budget.json 59 -> 29 sites (CommandPalette and OfflineIndicator at 0; what is left is E12/E16 in E12E16.tsx, F20's)",
+  "requests": []
+}

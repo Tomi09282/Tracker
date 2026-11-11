@@ -1,0 +1,15 @@
+{
+  "state": "coach-dashboard-2",
+  "what": "Edzői kezdőlap — A kód elkészült: the sheet that shows a freshly minted join code once.",
+  "why": "Minting a code is a write the UI cannot undo (a code can be revoked, never deleted), so no capture mints one. The POST is answered here.",
+  "how": "POST /invite-codes answers 201 { id, code } (backend/src/coaching/routes.js:250); the code string is the one the frame draws. The list behind the sheet is the recorded one: the new row the frame shows first is NOT added (that needs an inserted row, which pulse-fixture-check cannot judge yet — request R-F3-01).",
+  "open": "pulse-fixture-check refuses a 2xx body for an endpoint that was never recorded. This sheet cannot exist without the code string, and a code is never minted live: the ruling is the integrator's (R-F3-01).",
+  "fixtures": [
+    {
+      "method": "POST",
+      "path": "/api/v1/invite-codes",
+      "status": 201,
+      "body": { "id": 900001, "code": "K7MPX-R4TQ2-HB9WD-6NJEV" }
+    }
+  ]
+}

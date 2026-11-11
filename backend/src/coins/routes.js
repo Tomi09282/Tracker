@@ -34,11 +34,15 @@
 // operations rather than a false replay, and one principal cannot squat another's key.
 import { Router } from 'express';
 import { z } from 'zod';
+import { idParams, idString } from '../admin/params.js';
+import { reasonText } from '../lib/reason-text.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
 import { assertAdmin } from '../lib/assert-admin.js';
 import { requireAuth, requireRole } from '../auth/middleware.js';
+import { ensureSettled } from '../lifeos/settle.js';
+import { coinIntegrity } from './integrity.js';
 
 const router = Router();
 
@@ -95,7 +99,8 @@ const adminCoinAccountLimiter = rateLimit({
 
 /* ── validation ─────────────────────────────────────────────────────────────────────────────── */
 
-const idParam = z.object({ id: z.coerce.number().int().positive().max(2_147_483_647) }).strict();
+// A canonical decimal id (admin/params.js): z.coerce read '0x10' as 16 and ' 5' as 5.
+const idParam = idParams;
 
 /**
  * The client's half of an idempotency key.
@@ -127,7 +132,8 @@ const adminAdjustBody = z
       .min(-1_000_000)
       .max(1_000_000)
       .refine((n) => n !== 0, { message: 'a zero adjustment moves nothing' }),
-    note: z.string().trim().min(1).max(280),
+    // lib/reason-text.js: no NUL, no bidi override, no lone surrogate in the ledger and audit row.
+    note: reasonText(280),
     idempotency_key: clientKey,
   })
   .strict();
@@ -141,8 +147,9 @@ const pageQuery = z
 
 const adminLedgerQuery = z
   .object({
-    user_id: z.coerce.number().int().positive().max(2_147_483_647).optional(),
-    actor_id: z.coerce.number().int().positive().max(2_147_483_647).optional(),
+    // canonical decimal ids (admin/params.js): z.coerce read user_id=0x10 as account 16
+    user_id: idString.optional(),
+    actor_id: idString.optional(),
     cursor: z.coerce.number().int().min(1).max(9_007_199_254_740_991).optional(),
     limit: z.coerce.number().int().min(1).max(50).optional(),
   })
@@ -151,21 +158,25 @@ const adminLedgerQuery = z
 /* ── the wallet ─────────────────────────────────────────────────────────────────────────────── */
 
 /**
- * The balance.
+ * The balance — and, since 031, the rest of the Érmék screen's header.
  *
  * Scoped to the caller by construction: there is no wallet id in this product, so the query has
  * nothing to accept and nothing to check. A row always exists — `trg_user_opens_wallet` sees to
  * that — so a missing wallet is a bug, not a state, and 0 is the honest answer either way.
+ *
+ * THE BALANCE MAY BE BELOW ZERO (plan L3: LifeOS penalties and reversals are not capped at zero;
+ * spends are). `spendableMinor` = max(0, balance) is what a purchase can use. XP is the sum of the
+ * XP-earning LifeOS events, the level floor(sqrt(xp / 100)); `bounds` are the current level's
+ * floor and the next level's threshold, in XP. The due days settle FIRST (plan L6), so the number
+ * includes yesterday once yesterday has closed.
  */
 router.get(
   '/coins/wallet',
   requireAuth,
   readLimiter,
   asyncRoute(async (req, res) => {
-    const wallet = await db.get('SELECT balance_minor FROM coin_wallets WHERE user_id = ?', [
-      req.user.id,
-    ]);
-    res.json({ balanceMinor: wallet?.balance_minor ?? 0 });
+    await ensureSettled(req.user.id, { requestId: res.locals.requestId, log: req.log });
+    res.json(await db.wallet({ userId: req.user.id }));
   }),
 );
 
@@ -188,12 +199,34 @@ router.get(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { cursor, limit = 25 } = parsed.data;
 
+    // A LifeOS movement (ref_type 'coin_event', migration 031) carries what paid for it: the
+    // logical day, the source and — where the source has one — its title, read through the SAME
+    // owner as the ledger row (anti-IDOR: a source id never reaches another account's row).
     const entries = await db.all(
       `SELECT l.id, l.amount_minor AS amountMinor, l.reason_key AS reasonKey,
               l.ref_type AS refType, l.ref_id AS refId, l.note, l.created_at AS createdAt,
-              r.label AS reasonLabel
+              r.label AS reasonLabel,
+              COALESCE(e.local_date, rr.local_date) AS localDate,
+              COALESCE(e.source_type, CASE WHEN rr.id IS NOT NULL THEN 'reward' END) AS sourceType,
+              COALESCE(e.source_id, rr.reward_id) AS sourceId,
+              e.reverses_event_id AS reversesEventId,
+              CASE WHEN rr.id IS NOT NULL THEN rr.name_snapshot ELSE CASE e.source_type
+                WHEN 'workout_log' THEN (SELECT COALESCE(w.title, w.day_name_snapshot, w.plan_name_snapshot)
+                                           FROM workout_logs w
+                                          WHERE w.id = e.source_id AND w.client_user_id = l.user_id)
+                WHEN 'task' THEN (SELECT t.title FROM tasks t WHERE t.id = e.source_id AND t.user_id = l.user_id)
+                WHEN 'habit_day' THEN (SELECT h.name FROM habit_day_results r JOIN habits h ON h.id = r.habit_id
+                                        WHERE r.id = e.source_id AND r.user_id = l.user_id AND h.user_id = l.user_id)
+                WHEN 'focus' THEN (SELECT f.title FROM focus_sessions f WHERE f.id = e.source_id AND f.user_id = l.user_id)
+              END END AS sourceTitle
          FROM coin_ledger l
          JOIN coin_reasons r ON r.key = l.reason_key
+         LEFT JOIN coin_events e
+                ON l.ref_type = 'coin_event' AND e.id = l.ref_id AND e.user_id = l.user_id
+         -- Phase 4 (033): a reward spend points at its receipt; the receipt's day, reward and name
+         -- (snapshot) are read through the same owner as the ledger row.
+         LEFT JOIN reward_redemptions rr
+                ON l.ref_type = 'reward_redemption' AND rr.id = l.ref_id AND rr.user_id = l.user_id
         WHERE l.user_id = ? AND (? IS NULL OR l.id < ?)
         ORDER BY l.id DESC
         LIMIT ?`,
@@ -398,6 +431,15 @@ router.post(
         return sendError(res, 403, ERR.FORBIDDEN, 'forbidden');
       case 'missing':
         return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+      // An admin may not move their own wallet; the guard is inside the transaction, this is its
+      // answer. Same 409 shape as the account routes (`reason` names the rule).
+      case 'self':
+        return res.status(409).json({
+          error: 'conflict',
+          code: ERR.CONFLICT,
+          reason: 'cannot_adjust_own_coins',
+          requestId: res.locals.requestId,
+        });
       case 'out_of_bounds':
         return sendError(res, 400, ERR.VALIDATION, 'that amount is outside what one adjustment may move');
       case 'insufficient':
@@ -438,6 +480,13 @@ router.get(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const { user_id: userId, actor_id: actorId, cursor, limit = 25 } = parsed.data;
 
+    // An account's statement for an account that does not exist is a 404, not an empty statement:
+    // the ledger page drew "ERME egyenleg -" for any id while the account page said "not found".
+    // (Its rows cannot outlive it - coin_ledger.user_id is ON DELETE CASCADE - so nothing is hidden.)
+    if (userId !== undefined && !(await db.get('SELECT 1 AS ok FROM users WHERE id = ?', [userId]))) {
+      return sendError(res, 404, ERR.NOT_FOUND, 'not found');
+    }
+
     const entries = await db.all(
       `SELECT l.id, l.user_id AS userId, l.amount_minor AS amountMinor,
               l.reason_key AS reasonKey, l.ref_type AS refType, l.ref_id AS refId,
@@ -470,51 +519,9 @@ router.get(
   asyncRoute(async (req, res) => {
     if (!(await assertAdmin(req, res))) return undefined;
 
-    // 1. A wallet that disagrees with its ledger. There is no AFTER DELETE recompute, so a
-    //    hand-deleted row leaves the cache high until the next movement heals it downward — this
-    //    is what makes that window visible rather than silent.
-    const drifting = await db.all(
-      `SELECT w.user_id AS userId, w.balance_minor AS balanceMinor,
-              COALESCE((SELECT SUM(l.amount_minor) FROM coin_ledger l WHERE l.user_id = w.user_id), 0)
-                AS ledgerSumMinor
-         FROM coin_wallets w
-        WHERE w.balance_minor <> COALESCE(
-              (SELECT SUM(l.amount_minor) FROM coin_ledger l WHERE l.user_id = w.user_id), 0)
-        LIMIT 50`,
-    );
-
-    // 2. Money and receipts must be one-to-one in both directions.
-    const unpaidPurchases = await db.all(
-      `SELECT p.id AS purchaseId, p.user_id AS userId
-         FROM coin_purchases p
-        WHERE NOT EXISTS (SELECT 1 FROM coin_ledger l
-                           WHERE l.reason_key = 'store.purchase'
-                             AND l.ref_type = 'coin_purchase' AND l.ref_id = p.id)
-        LIMIT 50`,
-    );
-    const orphanDebits = await db.all(
-      `SELECT l.id AS entryId, l.user_id AS userId
-         FROM coin_ledger l
-        WHERE l.reason_key = 'store.purchase'
-          AND NOT EXISTS (SELECT 1 FROM coin_purchases p WHERE p.id = l.ref_id)
-        LIMIT 50`,
-    );
-
-    // 3. Nobody owns anything nobody paid for.
-    const unbackedEntitlements = await db.all(
-      `SELECT e.id AS entitlementId, e.user_id AS userId
-         FROM coin_entitlements e
-        WHERE e.revoked_at IS NULL
-          AND NOT EXISTS (SELECT 1 FROM coin_purchases p
-                           WHERE p.id = e.purchase_id AND p.user_id = e.user_id)
-        LIMIT 50`,
-    );
-
-    const clean =
-      drifting.length === 0 &&
-      unpaidPurchases.length === 0 &&
-      orphanDebits.length === 0 &&
-      unbackedEntitlements.length === 0;
+    // The four checks live in coins/integrity.js: the admin Statistics page reduces the SAME
+    // checks to ok / not ok, and two copies of a reconciliation drift.
+    const { clean, drifting, unpaidPurchases, orphanDebits, unbackedEntitlements } = await coinIntegrity(50);
 
     res.json({ clean, drifting, unpaidPurchases, orphanDebits, unbackedEntitlements });
   }),

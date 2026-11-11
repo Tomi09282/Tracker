@@ -1,0 +1,209 @@
+{
+  "what": "Big Shoulders Display Variable (the shipped @fontsource-variable woff2, latin subset), weight 900, as Chrome renders it",
+  "how": "headless Chrome 155, canvas fillText at 1000 px, ink box by alpha>127 pixel scan; advance by measureText; font ascent/descent by measureText.fontBoundingBox; text-box trim by getBoundingClientRect",
+  "units": "em (1000 px = 1 em)",
+  "fields": {
+    "adv": "advance width",
+    "lsb": "left side bearing",
+    "inkR": "ink right edge from the origin",
+    "rsb": "right side bearing",
+    "top": "ink top above the baseline",
+    "bot": "ink bottom below the baseline"
+  },
+  "font": {
+    "ascent": 0.984,
+    "descent": 0.213,
+    "cap": 0.8,
+    "capSource": "text-box: trim-both cap alphabetic at 124 px -> 99.2 px tall"
+  },
+  "textBoxTrimSupported": true,
+  "domAt124": {
+    "plain190": [
+      0,
+      -20,
+      155.02,
+      148
+    ],
+    "trimmed190": [
+      0,
+      108,
+      155.02,
+      99.2
+    ],
+    "trimmed83comma1": [
+      0,
+      211.2,
+      184.7,
+      99.2
+    ],
+    "note": "[left, top, width, height] in px, line-height 108"
+  },
+  "figmaCheck": {
+    "home-1 \"2\" lsb": "5.0 pt = 0.0403 em (table 0.040)",
+    "coins-1 \"190\" ink": "147.6 x 101.7 (table: 1.19 em x 0.82 em = 147.6 x 101.7)",
+    "progress-1 \"83,1\" ink height": "118 (table: 0.81 + 0.142 = 0.952 em = 118.0)",
+    "home-1 baseline in the 108 line": "102.0 (Chrome: (108 - 1.197 x 124) / 2 + 0.984 x 124 = 101.8)"
+  },
+  "glyphs": {
+    "0": {
+      "adv": 0.507,
+      "lsb": 0.04,
+      "inkR": 0.467,
+      "rsb": 0.04,
+      "top": 0.81,
+      "bot": 0.01
+    },
+    "1": {
+      "adv": 0.274,
+      "lsb": 0.03,
+      "inkR": 0.234,
+      "rsb": 0.04,
+      "top": 0.8,
+      "bot": 0
+    },
+    "2": {
+      "adv": 0.49,
+      "lsb": 0.04,
+      "inkR": 0.461,
+      "rsb": 0.029,
+      "top": 0.81,
+      "bot": 0
+    },
+    "3": {
+      "adv": 0.504,
+      "lsb": 0.03,
+      "inkR": 0.464,
+      "rsb": 0.04,
+      "top": 0.8,
+      "bot": 0.01
+    },
+    "4": {
+      "adv": 0.511,
+      "lsb": 0.03,
+      "inkR": 0.501,
+      "rsb": 0.01,
+      "top": 0.8,
+      "bot": 0
+    },
+    "5": {
+      "adv": 0.515,
+      "lsb": 0.04,
+      "inkR": 0.475,
+      "rsb": 0.04,
+      "top": 0.8,
+      "bot": 0.01
+    },
+    "6": {
+      "adv": 0.4985,
+      "lsb": 0.04,
+      "inkR": 0.466,
+      "rsb": 0.0325,
+      "top": 0.81,
+      "bot": 0.01
+    },
+    "7": {
+      "adv": 0.485,
+      "lsb": 0.02,
+      "inkR": 0.455,
+      "rsb": 0.03,
+      "top": 0.8,
+      "bot": 0
+    },
+    "8": {
+      "adv": 0.5005,
+      "lsb": 0.038,
+      "inkR": 0.463,
+      "rsb": 0.0375,
+      "top": 0.81,
+      "bot": 0.01
+    },
+    "9": {
+      "adv": 0.499,
+      "lsb": 0.032,
+      "inkR": 0.459,
+      "rsb": 0.04,
+      "top": 0.81,
+      "bot": 0.01
+    },
+    ",": {
+      "adv": 0.251,
+      "lsb": 0.04,
+      "inkR": 0.211,
+      "rsb": 0.04,
+      "top": 0.142,
+      "bot": 0.142
+    },
+    ".": {
+      "adv": 0.25,
+      "lsb": 0.04,
+      "inkR": 0.21,
+      "rsb": 0.04,
+      "top": 0.139,
+      "bot": 0
+    },
+    ":": {
+      "adv": 0.25,
+      "lsb": 0.04,
+      "inkR": 0.21,
+      "rsb": 0.04,
+      "top": 0.439,
+      "bot": 0
+    },
+    "/": {
+      "adv": 0.41,
+      "lsb": 0.03,
+      "inkR": 0.38,
+      "rsb": 0.03,
+      "top": 0.8,
+      "bot": 0.2
+    },
+    "%": {
+      "adv": 0.682,
+      "lsb": 0.03,
+      "inkR": 0.642,
+      "rsb": 0.04,
+      "top": 0.805,
+      "bot": 0.006
+    },
+    "+": {
+      "adv": 0.536,
+      "lsb": 0.04,
+      "inkR": 0.496,
+      "rsb": 0.04,
+      "top": 0.585,
+      "bot": -0.129
+    },
+    "−": {
+      "adv": 0.516,
+      "lsb": 0.04,
+      "inkR": 0.476,
+      "rsb": 0.04,
+      "top": 0.423,
+      "bot": -0.291
+    },
+    "-": {
+      "adv": 0.446,
+      "lsb": 0.03,
+      "inkR": 0.416,
+      "rsb": 0.03,
+      "top": 0.42,
+      "bot": -0.288
+    },
+    "–": {
+      "adv": 0.546,
+      "lsb": 0.03,
+      "inkR": 0.516,
+      "rsb": 0.03,
+      "top": 0.42,
+      "bot": -0.288
+    },
+    "H": {
+      "adv": 0.485,
+      "lsb": 0.04,
+      "inkR": 0.445,
+      "rsb": 0.04,
+      "top": 0.8,
+      "bot": 0
+    }
+  }
+}

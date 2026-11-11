@@ -1,0 +1,41 @@
+{
+  "package": "S-admin",
+  "base": "bdfa1b9c600fe9a9582c31c28811e681074a3d48",
+  "namespaces": [
+    "admin",
+    "adminUsers"
+  ],
+  "set": [
+    {
+      "key": "admin.marketplace.report",
+      "hu": "Bejelentés",
+      "en": "Report",
+      "de": "Meldung",
+      "after": "admin.marketplace.title",
+      "copy": "proposed",
+      "visible": true,
+      "source": "the display title of the pushed report page, frame admin-view-3-report (design round A, approved by the owner); its README lists the word as invented and awaiting C5 (copy approval); MarketplaceQueue.tsx MarketplaceReport"
+    }
+  ],
+  "change": [],
+  "remove": [
+    {
+      "key": "admin.title",
+      "reason": "'Áttekintés' was the title of the one admin screen; /admin is the Moderáció tab now and is titled by admin.section.moderation (admin-view-1); after the rewrite of AdminPage no code reads it"
+    },
+    {
+      "key": "admin.sections",
+      "reason": "the accessible name of the local section switch / rail of AdminShell, which is gone (the sections are routes of the admin bar); no code reads it"
+    },
+    {
+      "key": "admin.marketplace.cancel",
+      "reason": "'Mégse' closed the in-row decision form; the decision is on the pushed report page now, whose back control leaves it (admin-view-3-report draws no Mégse); no code reads it"
+    }
+  ],
+  "copyQuestions": [
+    {
+      "where": "admin-view-3-report title 'Bejelentés'",
+      "note": "In the approved frame, listed by the round-A README as invented copy; en 'Report' / de 'Meldung' are proposals."
+    }
+  ]
+}

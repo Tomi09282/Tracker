@@ -1,0 +1,28 @@
+{
+  "id": "B-core",
+  "status": "done",
+  "changes": [
+    "B0: getDb / stmt / rethrow moved to backend/src/db/conn.js; worker.js imports and re-exports them and re-exports src/db/tx/lifeos.js (Piscina names = exports)",
+    "B0: scripts/lib/worker-sources.mjs is the one answer to 'where is the worker code' (worker.js + src/db/tx/*.js, the facade map, the re-exported tx files); check-worker-tx and check-admin-audit read every file through it; check-route-tx also proves every facade name resolves to an export Piscina can reach (a tx file worker.js does not re-export, or a name no file exports, fails)",
+    "verify-gates: four probes planted in the worker side - a conditional return after a write in tx/lifeos.js, a lost audit insert in the admin rules tx, a dropped re-export, a facade name with no export (27 passed)",
+    "migration 031: user_prefs (row per user by trigger + backfill from onboarding_profiles.timezone; day start 0/2/4/6; start day write-once; zone once per 24 h), point_rule_sets (append-only, version 1 = f_app defaults + dailyEarnCap 400), coin_reasons.xp / .spend + 14 LifeOS reasons, coin_events (shape / reversal-truthful / seq / daily-cap / immutable triggers, reverses_event_id UNIQUE ON DELETE CASCADE, natural-key, day and XP indexes), daily_summaries (PK = idempotency, immutable), never-negative -> spend-covered, ref-truthful recreated with the coin_event clause",
+    "src/lifeos/dates.js (f_app dates.ts, wall-clock day start, DST-safe instantFor, settledThroughFor, dueDays), rules.js (DEFAULT_RULES, ranges, the strict zod schema, basis-point multipliers, item caps, the formulas), settle.js (ensureSettled with the per-process memo, awardWorkoutInBackground)",
+    "src/db/tx/lifeos.js: setUserPrefsTx, setPointRulesTx (DB role + session re-check, expectedVersion, audit with diff), closeLifeDayTx (kcal outcome via nutrition/daySql.js, workout due via plans/occurrences.js + workout_logs, perfect day needs the workout), markLapsedDaysTx, awardWorkoutTx, the reads (settle state, today, wallet, prefs, rules); every coin movement through one postCoinEvent (cap -> event -> ledger)",
+    "routes: GET / PATCH /me/prefs, GET /lifeos/today, GET / PUT /admin/rules (src/lifeos/routes.js, mounted in server.js); GET /coins/wallet answers balance (may be < 0), spendable, xp, level, bounds, cap, today's earnings, the week; GET /coins/ledger joins the event's day / source / workout title; POST /workouts/:id/finish awards in the background; POST /nutrition-log refuses a future local date; plans/schedule.js reads user_prefs.timezone (the rule itself moved to the pure plans/occurrences.js); hasSeat exempts admins; an admin credit to an account in debt lands",
+    "db/index.js sets --no-parallel-scavenge before the pool's first worker: terminating a worker that held a large heap segfaulted `npm run migrate` (exit 139) once the worker imported the LifeOS modules - bisected, see the comment",
+    "verify-031 (82), verify-lifeos-rules (68, incl. DST 2026-03-29 / 2026-10-25 Europe/Budapest) in check:all; smoke/lifeos-core.js (32 assertions, five passes per endpoint); GDPR export: lifeos_prefs, coin_events, daily_summaries; point_rule_sets exempt with reason; verify-030 accepts user_version >= 30",
+    "docs: ADR-0022 (gamification ban reversed, one currency, the economy sheet); Feature inventory gamification section rewritten; api.md + frontend/src/lib/lifeos-api.ts (shared.patch)"
+  ],
+  "consumers": [
+    "the LifeOS screen lanes (Ma, Szabályok, Nap és időzóna, Érmék v2) build against api.md and lifeos-api.ts"
+  ],
+  "handIn": [
+    "docs/pipeline/pulse/pkg/B-core/shared.patch (adds frontend/src/lib/lifeos-api.ts, types only; npm run build green with it applied)"
+  ],
+  "followUps": [
+    "the dev backend on :3000 needs a restart on the merged code to run migration 031 and serve the new endpoints",
+    "work-packages.json has no B-core entry; the integrator adds one at merge",
+    "milestone3Bonus (500, f_app default) exceeds the 400-coin daily cap: as built the cap trims it - an owner decision for Phase 3",
+    "coins/admin audit reconciliation does not yet check 'every coin_event has its ledger row' (verify-031 does) - a candidate for the admin audit endpoint"
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "about": "S-admin-posts - the admin's marketplace posts. Captured LIVE against a scratch backend (own port, throwaway encrypted DB, seeded by seed-scratch.mjs with deterministic post ids Ax0000000001.. - squat, nov, half, cali, autumn, fast, mob, squat2, author-off): `node scripts/pulse-shot.mjs --package S-admin-posts --live --api http://localhost:3722 --serve . --port 5222`. Nothing is recorded into the freeze and no write is ever fired (the sheets are opened and filled, never confirmed). Account A = admin@.",
+  "states": {
+    "market-posts": {
+      "frame": "admin-v2/admin-market-v2",
+      "title": "Piactér - Posztok",
+      "account": "A",
+      "route": "/admin/marketplace?view=posts",
+      "height": 1290,
+      "reach": "live",
+      "why": "the Posztok view on the scratch DB: 33 posts, the first page of 20",
+      "arrived": {
+        "text": "Továbbiak"
+      }
+    },
+    "market-reports": {
+      "frame": "admin-v2/admin-market-v2-reports",
+      "title": "Piactér - Jelentések",
+      "account": "A",
+      "route": "/admin/marketplace",
+      "height": 874,
+      "reach": "live",
+      "why": "the Jelentések view: the open queue",
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "key": "adminPosts.view.posts"
+        }
+      }
+    },
+    "post-live": {
+      "frame": "admin-v2/admin-post-detail-1",
+      "title": "Poszt - élő, két bejelentéssel",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000001",
+      "height": 2406,
+      "reach": "live",
+      "why": "squat: live, an event with a city, time, capacity and price, 3 pictures, two reasons reported (scam by two, other by one)",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.manage.title"
+        }
+      }
+    },
+    "post-removed": {
+      "frame": "admin-v2/admin-post-detail-2",
+      "title": "Poszt - levéve",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000008",
+      "height": 2562,
+      "reach": "live",
+      "why": "squat2: taken down (the banner, the one lime pill 'Visszaállítás'), its two reasons closed (upheld, rejected)",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "adminPosts.restore.action"
+        }
+      }
+    },
+    "post-takedown-sheet": {
+      "frame": "admin-v2/admin-post-detail-2-takedown",
+      "title": "Poszt levétele - lap",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000001",
+      "height": 874,
+      "reach": "live",
+      "why": "the take-down sheet with the reason typed; never confirmed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^Poszt levétele "
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminPosts.takedown.post.title"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "adminPosts.takedown.reason"
+            },
+            "text": "Átverés: a megadott helyszín nem létezik."
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "adminPosts.takedown.reason"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "adminPosts.takedown.reason"
+        }
+      }
+    },
+    "post-restore-sheet": {
+      "frame": "admin-v2/admin-post-detail-2-restore",
+      "title": "Visszaállítás - lap",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000008",
+      "height": 874,
+      "reach": "live",
+      "why": "the restore confirmation over the removed page; never confirmed",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "adminPosts.restore.action"
+            }
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "key": "adminPosts.restore.title"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog",
+        "name": {
+          "key": "adminPosts.restore.title"
+        }
+      }
+    },
+    "post-draft": {
+      "frame": "admin-v2/admin-post-detail-2-draft",
+      "title": "Poszt - piszkozat",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000007",
+      "height": 1222,
+      "reach": "live",
+      "why": "mob: a draft that was never published: no cover, no body, no media (the server withholds them), no reports; the one act left is the author's profile",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.manage.draftNote"
+        }
+      }
+    },
+    "post-author-off": {
+      "frame": "admin-v2/admin-post-detail-3",
+      "title": "Poszt - a szerző le van tiltva",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Ax0000000009",
+      "height": 2524,
+      "reach": "live",
+      "why": "author-off: a live post whose author is disabled: the server hides it, the page says so and offers the take-down of post and profile together",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.detail.authorOff"
+        }
+      }
+    },
+    "posts-search": {
+      "frame": null,
+      "title": "Posztok - keresés és szűrő",
+      "account": "A",
+      "route": "/admin/marketplace?view=posts&q=guggol&state=live",
+      "height": 874,
+      "reach": "live",
+      "why": "the search and the state filter in the address: what the list returns after a back button",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.view.posts"
+        }
+      }
+    },
+    "posts-nomatch": {
+      "frame": null,
+      "title": "Posztok - nincs találat",
+      "account": "A",
+      "route": "/admin/marketplace?view=posts&q=zzzzqqq",
+      "height": 874,
+      "reach": "live",
+      "why": "no match: the empty state in the same language as the rest of the admin area",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.noMatchBody"
+        }
+      }
+    },
+    "post-gone": {
+      "frame": null,
+      "title": "Poszt - nem található",
+      "account": "A",
+      "route": "/admin/marketplace/posts/Zz0000000000",
+      "height": 874,
+      "reach": "live",
+      "why": "an unknown post id: the same 404 as a malformed one",
+      "arrived": {
+        "text": {
+          "key": "adminPosts.detail.goneTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/marketplace/posts/Zz0000000000",
+            "status": 404
+          }
+        ],
+        "console": [
+          "404"
+        ]
+      }
+    },
+    "post-forbidden": {
+      "frame": null,
+      "title": "Poszt - nem admin",
+      "account": "M",
+      "route": "/admin/marketplace/posts/Ax0000000001",
+      "height": 874,
+      "reach": "live",
+      "why": "a member opens the address: the refusal, and no request to the admin endpoints",
+      "arrived": {
+        "text": {
+          "key": "admin.forbiddenTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/marketplace/posts/Ax0000000001",
+            "status": 403
+          }
+        ],
+        "console": [
+          "403"
+        ]
+      }
+    }
+  }
+}

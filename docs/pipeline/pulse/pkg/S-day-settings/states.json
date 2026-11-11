@@ -1,0 +1,350 @@
+{
+  "about": "S-day-settings - 'Nap és időzóna' (/settings/day, design round B frame lifeos/settings-day-v2) and its undrawn states, plus the Profil row it adds. GET /me/prefs is recorded from the B-core dev backend (account M = user@); every state sets the frame's data (Europe/Budapest, GMT+2, day start 04:00) or its own case as EDITS over that recording (the recorded answer is the schema, lib/lifeos-api.ts UserPrefs), so a verdict can reach matched-fixture. Writes are only error outcomes with an empty body. Nothing is written live. (Integrator, merge-S-day-settings: the package's contract bodies became edit lists once the GET was recorded.)",
+  "states": {
+    "settings-day-v2": {
+      "title": "Nap és időzóna — alap (a keret)",
+      "frame": "lifeos/settings-day-v2",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the frame state: Budapest · GMT+2, the once-a-day sub line, day start 04:00 saved, the explanation line. Data from a contract stub (see about) -> structure, never matched",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": "Europe/Budapest"
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": 120
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "settings.day.saved"
+        }
+      }
+    },
+    "settings-day-zone-sheet": {
+      "title": "Nap és időzóna — időzóna-választó",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the zone row opens the kit picker sheet (not drawn by the frame): search field, every IANA zone as a radio row, Budapest ticked",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": "Europe/Budapest"
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": 120
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "hu": "Időzóna: Budapest",
+              "en": "Time zone: Budapest",
+              "de": "Zeitzone: Budapest"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": "Budapest GMT+2",
+        "checked": true
+      }
+    },
+    "settings-day-zone-locked": {
+      "title": "Nap és időzóna — az időzóna ma már nem módosítható",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "timezoneChangeableAt is ahead (the zone changed less than 24 h ago): the row keeps its words, its action is off (40 %), the sub line is the reason",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": "Europe/Budapest"
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": 120
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": 4102444800000
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "hu": "Időzóna: Budapest",
+          "en": "Time zone: Budapest",
+          "de": "Zeitzone: Budapest"
+        },
+        "disabled": true
+      }
+    },
+    "settings-day-unset": {
+      "title": "Nap és időzóna — még nincs időzóna",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a user whose zone was never stored: the place is the dash, no offset; the silent first-time write fires once and is refused here (500, empty body) - nothing is drawn for it",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": null
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": null
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": null
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/me/prefs",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/me/prefs",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "settings.day.zone"
+        }
+      }
+    },
+    "settings-day-start-failed": {
+      "title": "Nap és időzóna — a napkezdés mentése nem sikerült",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "a tap on 02:00 whose PATCH is refused: the mark stays on 04:00, the word flashes danger, the head drops \"Mentve\" and the danger line says it failed",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": "Europe/Budapest"
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": 120
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/me/prefs",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": "02:00"
+          },
+          "arrived": {
+            "text": {
+              "key": "settings.day.failed"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/me/prefs",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "settings.day.failed"
+        }
+      }
+    },
+    "settings-day-load-failed": {
+      "title": "Nap és időzóna — a beállítás nem tölthető be",
+      "account": "M",
+      "route": "/settings/day",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /me/prefs refused: the header stays, a danger line with \"Újra\" replaces both sections (no fake values)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/me/prefs",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.retry"
+        }
+      }
+    },
+    "settings-day-profil-row": {
+      "title": "Profil — a Nap és időzóna sor",
+      "account": "M",
+      "route": "/settings",
+      "height": 874,
+      "reach": "fixture",
+      "why": "the Profil row the package makes visible (shared.patch): \"Nap és időzóna · Budapest · 04:00 ›\" first under BEÁLLÍTÁSOK, as round A settings-v2-2 draws it",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/me/prefs",
+          "edits": [
+            {
+              "pointer": "/prefs/timezone",
+              "value": "Europe/Budapest"
+            },
+            {
+              "pointer": "/prefs/dayStartHour",
+              "value": 4
+            },
+            {
+              "pointer": "/prefs/utcOffsetMinutes",
+              "value": 120
+            },
+            {
+              "pointer": "/prefs/today",
+              "value": "2026-10-18"
+            },
+            {
+              "pointer": "/prefs/timezoneChangeableAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": "Budapest · 04:00"
+      }
+    }
+  }
+}

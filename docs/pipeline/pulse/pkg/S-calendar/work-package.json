@@ -1,0 +1,42 @@
+{
+  "id": "S-calendar",
+  "title": "LifeOS Phase 5 (Calendar) screen package: Naptár at /calendar (the user bar's fourth tab: DayRail week + the chosen day's agenda of events, the plan's workout and TEENDŐK), one event at /calendar/events/:id and the create / edit sheet (frame event-form), built 1:1 to design round B's lifeos/calendar-1, calendar-2, event-detail and event-form on the B-calendar API (GET /calendar, GET / POST / PATCH / DELETE /events); with requests for the final 6-tab user bar, the capture sheet's Esemény half and Ma's KÖVETKEZŐ",
+  "screens": ["calendar", "event-detail", "event-form"],
+  "owns": [
+    "frontend/src/features/calendar/**",
+    "docs/pipeline/pulse/pkg/S-calendar/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"],
+    "requests": {
+      "R-S-calendar-01": "frontend/src/app/router.tsx, routeMeta.ts, navTabs.ts, frontend/src/assets/pulse/navIcons.ts, frontend/scripts/check-nav.mjs, check-nav-active.mjs, the three bundles (nav.calendar): the routes /calendar and /calendar/events/:id, the final 6-tab user bar Ma · Edzés · Étkezés · Naptár · Haladás · Profil with the placeholder medal raster",
+      "R-S-calendar-02": "frontend/src/features/capture/CaptureSheet.tsx, frontend/src/features/tasks/formParts.tsx (S-tasks): the capture sheet's Hova? Feladat / Esemény switch, the event half writes POST /events",
+      "R-S-calendar-03": "frontend/src/features/today/TodayPage.tsx (S-ma): Ma mounts the package's NextEventSection (KÖVETKEZŐ, GET /lifeos/today nextEvent)"
+    }
+  },
+  "frames": ["lifeos/calendar-1", "lifeos/calendar-2", "lifeos/event-detail", "lifeos/event-form"],
+  "inventory": "docs/brain/58-Pulse/Screens/calendar.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-naptar-fokusz-kihivas.md and pkg/B-calendar/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/calendar",
+  "dependsOn": ["B-calendar", "G-lifeos", "S-tasks", "S-ma"],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 5)",
+  "i18nNamespaces": ["calendar"],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (work-packages.json had no entry; the slot carries it in its WORKING TREE only): the integrator adds it at merge. Builds against B-calendar's Phase-5 block of frontend/src/lib/lifeos-api.ts (its shared.patch) and imports S-tasks' TaskSheet / tasksData (the '+ Teendő' and the TEENDŐK rows): merge B-calendar, S-tasks and S-ma first. calendarApi.ts holds the hooks under a non-use* file name. The running dev backend has no migration 034: every state answers GET /calendar and GET /events/:id with contract bodies and is matched-fixture at best."
+}

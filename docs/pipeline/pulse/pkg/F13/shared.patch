@@ -1,0 +1,42 @@
+diff --git a/frontend/scripts/data/safe-area-exempt.json b/frontend/scripts/data/safe-area-exempt.json
+index c297f57..637ae25 100644
+--- a/frontend/scripts/data/safe-area-exempt.json
++++ b/frontend/scripts/data/safe-area-exempt.json
+@@ -10,6 +10,6 @@
+     "ui/feedback/variants/E8E9.tsx:bottom@bg-scrim": "the same scrim, at the bottom edge",
+     "ui/shell/CommandPalette.tsx:top": "the palette's scrim, desktop only (hidden below lg); the dialog inside starts 12vh down",
+     "ui/shell/CommandPalette.tsx:bottom": "the same scrim; the dialog is anchored to the top and never reaches the bottom edge",
+-    "ui/shell/OfflineIndicator.tsx:top": "the sticky wrapper is a grid row that opens from 0fr and must not pad; the row inside it pads by env(safe-area-inset-top)"
++    "ui/shell/OfflineIndicator.tsx:top": "the sticky wrapper is a grid row that opens from 0fr and must not pad; the offline line inside it pads by var(--band-pad-t), the status zone plus 6 (F13)"
+   }
+ }
+diff --git a/frontend/src/features/playground/kit/shell.tsx b/frontend/src/features/playground/kit/shell.tsx
+index f1159d4..5f56fdd 100644
+--- a/frontend/src/features/playground/kit/shell.tsx
++++ b/frontend/src/features/playground/kit/shell.tsx
+@@ -1,6 +1,7 @@
+ import { Ban, Bell, ChevronRight, Palette, Search } from 'lucide-react';
+ import type { ReactNode } from 'react';
+ import { Stepper } from '../../../ui/data/SegmentBar';
++import { ToastBand } from '../../../ui/feedback/ToastHost';
+ import { BottomNav } from '../../../ui/nav/BottomNav';
+ import type { NavTab } from '../../../ui/nav/BottomNav';
+ import { Pressable } from '../../../ui/primitives/Pressable';
+@@ -77,7 +78,7 @@ const ADMIN: NavTab[] = [TAB.home, TAB.training, TAB.nutrition, TAB.progress, TA
+  * mounts is pinned to the real viewport, so inside a specimen it is zero tall.
+  */
+ const DEVICE =
+-  '[--tabbar-offset:36px] [--fade-h:130px] [--dock-b:104px] [--dock-b-bare:50px] [--head-top-root:72px] [--head-top-push:64px] [--status-bar-h:0px]';
++  '[--tabbar-offset:36px] [--fade-h:130px] [--dock-b:104px] [--dock-b-bare:50px] [--head-top-root:72px] [--head-top-push:64px] [--status-bar-h:0px] [--band-pad-t:68px]';
+ 
+ /** A 402 wide strip as tall as the bar and its distance from the edge: the board's "Tab strip". */
+ function Strip({ children }: { children: ReactNode }) {
+@@ -169,6 +170,8 @@ export const specimens: KitSpecimen[] = [
+         <Screen top="root">
+           <ScreenHeader kind="root" title="Gyakorlatok" trailing={<SearchButton />} />
+         </Screen>
++        {/* The status zone's band (F13), drawn before the chrome as the board does: "Felszerelés mentve", ok. The board draws no countdown on its rule, so it is frozen at 0. */}
++        <ToastBand inline toasts={[{ id: 1, kind: 'success', message: 'Felszerelés mentve' }]} onDismiss={() => {}} still={0} />
+         <BottomNav inline tabs={ADMIN} at="/library" />
+       </Phone>
+     ),

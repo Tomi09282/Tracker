@@ -1,68 +1,54 @@
-import { useMemo } from 'react';
 import { Outlet } from 'react-router';
-import { useTranslation } from 'react-i18next';
-import { BottomNav, type NavTab } from '../ui/nav/BottomNav';
-import { tabsForRole } from './navTabs';
-import { useSession } from '../features/auth/useSession';
+import { BottomNav, useNavTabs } from '../ui/nav/BottomNav';
+import { useView } from './useView';
+import { ViewContext } from './viewContext';
 import { CommandPalette } from '../ui/shell/CommandPalette';
-import { AuroraBackdrop } from '../ui/shell/AuroraBackdrop';
+import { ShellProvider } from '../ui/shell/Screen';
+import { useTimezoneBootstrap } from '../features/settings/dayPrefs';
 
 /**
- * The authenticated shell.
+ * The layout of every signed-in screen: the screen and the tab bar.
  *
- * The bottom padding is not cosmetic: without reserving the bar's height plus the safe-area
- * inset, the last item of every scrolling list ends up underneath a fixed bar and cannot be
- * tapped — one of the most common mobile layout defects there is.
+ * ═══ WHAT IT DRAWS — AND WHAT IT DOES NOT ══════════════════════════════════════════════════════
  *
- * The tab table itself lives in `./navTabs` rather than here, because a build gate has to be able
- * to read it. This component's only job with it is resolving `labelKey` through `t()`.
+ * No background, no backdrop, no frame. The canvas is `body`'s own black (Pulse has no aurora and
+ * no surface behind a screen), so a wrapper here that painted anything would be the first card.
+ *
+ *   main     the screen, padded at the bottom by `--content-pad-b` — the bar and its distance from
+ *            the edge. A full-height screen subtracts EXACTLY this token, so the page never scrolls
+ *            by a few pixels; the extra air a scrolling page needs to bring its last block out of
+ *            the fade is the scaffold's (`Screen`), not the layout's
+ *   bar      the tab bar and its fade (`BottomNav`), mounted once, with the tabs of the current
+ *            VIEW (`useView`: derived from the URL; plan decision R2)
+ *
+ * `ShellProvider tabs` tells `Screen` and `Dock` that a tab bar stands at the bottom — a fact
+ * about the layout, never a prop a page has to remember. The top of a screen — its inset and the
+ * status-bar mask over it — is the scaffold's (`Screen`): a screen not yet on the scaffold keeps
+ * the top it had.
  */
 export function AppLayout() {
-  const { t } = useTranslation();
-  const { data: user } = useSession();
+  // The bar of the view the URL is in (`useView`): the member's, the trainer's or the admin's.
+  // A view grants nothing — every route and endpoint re-checks the role on the server.
+  const view = useView();
+  const tabs = useNavTabs(view);
+  // LifeOS starts the first time the server knows the user's zone: when none is stored, the
+  // browser's zone is sent once, silently (B-core api.md "The day"; dayPrefs.ts). Mounted here,
+  // once, so every signed-in screen - Ma first - has a logical today without a visit to Profil.
+  useTimezoneBootstrap();
 
-  const tabs: NavTab[] = useMemo(
-    () =>
-      tabsForRole(user?.role).map((spec) => ({
-        to: spec.to,
-        icon: spec.icon,
-        owns: spec.owns,
-        label: t(spec.labelKey),
-        end: spec.end,
-      })),
-    [user?.role, t],
-  );
-
-  /*
-   * NO BACKGROUND ON THE WRAPPER BELOW, AND THAT IS LOAD-BEARING.
-   *
-   * `AuroraBackdrop` is `fixed inset-0 -z-10`, and its own docblock states the precondition: it
-   * works "under a transparent body". This div is not the body — it is an opaque wrapper that used
-   * to sit between the two. A negative-z child paints AFTER its stacking context's background but
-   * BEFORE the background of any non-context ancestor, so `bg-surface-0` here painted straight over
-   * the aurora.
-   *
-   * The effect: the light this entire design floats over was invisible on every authenticated
-   * screen. The four public routes mount their own backdrop with no such wrapper, which is why the
-   * login screen looked right and nothing behind it did — and is why nobody caught it. Proved by
-   * setting this background to `transparent` in the live page and screenshotting: flat black became
-   * a warm field with the accent glow top-left and the info glow top-right.
-   *
-   * The base colour is not lost; `src/index.css` already paints `--surface-0` on `body`.
-   */
   return (
-    <div className="min-h-dvh">
-      {/* The four public screens render OUTSIDE this layout by design (router.tsx), so each of
-          them mounts its own — see AuroraBackdrop. Easy to miss, and the symptom is a screen
-          that is simply flat while every other one has depth. */}
-      <AuroraBackdrop />
-      <CommandPalette />
-      {/* The reserved space is a TOKEN, not an inline calc: a full-height screen has to subtract
-          exactly what this reserves, and two hand-written calcs drift. See --content-pad-b. */}
-      <main className="pb-[var(--content-pad-b)] lg:pb-[var(--content-pad-b-lg)]">
-        <Outlet />
-      </main>
-      <BottomNav tabs={tabs} />
-    </div>
+    <ViewContext.Provider value={view}>
+    <ShellProvider tabs>
+      <div className="min-h-dvh">
+        <CommandPalette />
+        {/* The reserved space is a TOKEN, not an inline calc: a full-height screen has to subtract
+            exactly what this reserves, and two hand-written calcs drift. See --content-pad-b. */}
+        <main className="pb-[var(--content-pad-b)]">
+          <Outlet />
+        </main>
+        <BottomNav tabs={tabs} />
+      </div>
+    </ShellProvider>
+    </ViewContext.Provider>
   );
 }

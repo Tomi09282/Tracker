@@ -1,0 +1,48 @@
+{
+  "package": "S-challenges",
+  "branch": "pulse/S-challenges",
+  "base": "05b830a",
+  "slot": "tracker-wt/slot-19 (new worktree off pulse-redesign 1b7759f; merged up to 179ff81 and 05b830a)",
+  "build": "pulse-verify --package S-challenges --port 5188: build green (all gates + tsc -b + vite build), 13 of 13 captured (replay), on pulse-redesign 05b830a with B-rewards-challenges' shared.patch (lib/lifeos-api.ts Phase-4 types), this package's i18n.patch.json, R-S-challenges-01 and R-S-challenges-02 and the work-packages entry applied in the working tree only; the same in German (--lang de, 13 of 13). verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant. Fixtures: fixture-schema-check.mjs 13 bodies, 033 ranges OK, tsc clean.",
+  "frames": {
+    "lifeos/challenges-1": {
+      "state": "challenges-1 (/challenges?option=2)",
+      "verdict": "matched-fixture",
+      "why": "Header (‹ MA, MAI DOBÁS, Kihívások ›), the rule line, HÁROM LEHETŐSÉG with okt. 21., three radio rows (+N text-1 chosen / text-3 others, ring / lime tick), Újradobás + még 1 maradt ma, the consequence line and the docked pill stand where the frame puts them: every compared y within 0.5 pt (geometry .pulse/geometry/lifeos/challenges-1.json from a read-only use_figma walk, decoded by geometry/decode.mjs). Remaining: the five-tab bar (Naptár is Phase 5) and Figma's fixed-width text boxes vs the DOM's hugging ones. Pixel share over 8: 7.1 %."
+    },
+    "lifeos/challenges-2": {
+      "state": "challenges-2 (/challenges/pool)",
+      "verdict": "matched-fixture",
+      "why": "Header with the plus, the rule line, AKTÍV 8 / 50 with eight rows (title, Kategória · súly N, the five 6 x 4 weight segments, +N mono right-aligned in 28), ARCHIVÁLT 2 with Visszaállítás: every y within 0.5 pt. Remaining: the frame's mid-swipe row (30 fekvőtámasz with Archiválás revealed) is drawn at rest — the kit has no swipe; archive lives in the sheet (deviations 3); the five-tab bar. Pixel share over 8: 6.9 %."
+    },
+    "lifeos/ma-4": {
+      "state": "ma-4-draw (/)",
+      "verdict": "matched-fixture",
+      "why": "NAPI DOBÁS above MAI EDZÉS: the eyebrow with ⇄ Újradobás · 1, Koppints egyre…, three ring rows with +N text-1; S-ma's blocks unchanged; every y within 1 pt. Remaining: the option sub lines are the category (Fegyelem / Mozgás / Elme) where the frame prints Test · reggel / Mozgás · bármikor / Pihenés · lefekvés előtt — the API has no time of day and those are not categories (deviations 2); the five-tab bar. Pixel share over 8: 6.1 %."
+    },
+    "lifeos/ma-1": {
+      "state": "ma-1-picked (/)",
+      "verdict": "matched-fixture (NAPI DOBÁS block only; FÓKUSZ / KÖVETKEZŐ are later phases)",
+      "why": "NAPI DOBÁS after FELADATOK with ELVÁLLALVA and the row Lift helyett lépcső egész nap / Mai kihívás · +15 érme, identical to the frame; below it the frame's FÓKUSZ and KÖVETKEZŐ do not exist yet."
+    },
+    "lifeos/ma-2": {
+      "state": "ma-2-done (/)",
+      "verdict": "matched-fixture (the challenge part)",
+      "why": "The challenge ticked (TELJESÍTVE) and Ma eddig +68 as drawn (the completed challenge's +15 now counts)."
+    }
+  },
+  "undrawnStates": ["challenges-1-open", "challenges-1-picked", "challenges-empty", "challenges-no-zone", "challenges-failed", "challenges-pool-empty", "challenge-sheet-new", "challenge-sheet-edit"],
+  "handIn": {
+    "work-package.json": "docs/pipeline/pulse/pkg/S-challenges/work-package.json — the work-packages.json entry (the slot carries it uncommitted)",
+    "i18n.patch.json": "40 challenges.* keys in hu / en / de (9 proposed, listed in copy-to-approve.md)",
+    "requests": {
+      "R-S-challenges-01": "routes /challenges and /challenges/pool, routeMeta, the Ma tab owning /challenges, check-nav-active rows, check-nav NO_INBOUND row (requests/R-S-challenges-01.patch, cut on 05b830a)",
+      "R-S-challenges-02": "TodayDraw on S-ma's TodayPage + FELADATOK / day count without the challenge task (requests/R-S-challenges-02.patch, cut on 05b830a)"
+    },
+    "states.json": "13 states, written by make-states.mjs; fixtures schema-checked by fixture-schema-check.mjs",
+    "geometry": "geometry/challenges-1.a.json, challenges-2.a.json + decode.mjs -> .pulse/geometry/lifeos/challenges-1.json, challenges-2.json (copy to frontend/scripts/pulse-geometry/lifeos/ with the others)"
+  },
+  "mergeOrder": "B-rewards-challenges first (its shared.patch to lib/lifeos-api.ts: without Task.challengeId / LifeosToday.challenge / the Challenge types tsc fails), then this package with its i18n patch and both requests.",
+  "recordAfterMerge": "GET /challenges/today, GET /challenges and GET /lifeos/today (with challenge) for user@ on a 033 backend; the contract bodies then become edit lists (R26).",
+  "pairs": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/pairs/S-challenges/"
+}

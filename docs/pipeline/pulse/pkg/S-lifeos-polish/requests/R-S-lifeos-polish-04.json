@@ -1,0 +1,12 @@
+{
+  "id": "R-S-lifeos-polish-04",
+  "from": "S-lifeos-polish",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/data/Numeral.tsx (Fraction)",
+  "need": "Closes R-S-focus-03 with a patch (review S-focus 1, blocking: the '3/3' of focus-3 is two-toned). Fraction gains `complete?: boolean`: the slash and the whole are text-1 like the part. FocusDone passes complete when the paid check-ins reach the maximum; a partial 1/4 stays two-toned. THE BUILD NEEDS THIS PATCH: FocusDone.tsx uses the prop.",
+  "evidence": "kepernyok-2x/lifeos/focus-3@2x.png y 457-505; .pulse/review/S-focus/REVIEW.md difference 1",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-lifeos-polish/requests/R-S-lifeos-polish-04.patch",
+  "interim": "applied in the slot working tree for the captures, never committed",
+  "status": "open"
+}

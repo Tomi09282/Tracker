@@ -1,0 +1,281 @@
+{
+  "about": "pulse-fixture-check refuses a null where the recordings of C hold a number / object, although the response type allows it (useCompose.ts ComposeContext: profile: {...publishedAt: number | null} | null, standing.guidelinesAcceptedAt: number | null). These five states are captured for the pictures with an ad-hoc frames file (.pulse/pairs/S-compose-hub/_adhoc-frames.json) and move into states once request R-S-compose-hub-02 lets the checker accept a schema-valid null (orchestrator ruling 2026-10-17 on schema-checked fixtures).",
+  "states": {
+    "hub-hidden": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — rejtett profil",
+      "why": "profile.publishedAt null: the status control reads Rejtve with the off dot; no gate; the pill stays",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/profile/publishedAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "compose.hidden"
+        }
+      }
+    },
+    "hub-hidden-sheet": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Profil lap — rejtett profil (Profil közzététele)",
+      "why": "the sheet of a hidden profile: the second row reads Profil közzététele in the main ink",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/profile/publishedAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "compose.hidden"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "dialog",
+            "name": {
+              "re": "."
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "dialog",
+        "name": {
+          "re": "."
+        }
+      }
+    },
+    "hub-gate-guidelines": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — irányelvek elfogadása",
+      "why": "standing.guidelinesAcceptedAt null: the notice line with the guidelines text, the accept pill takes the one lime slot, Új bejegyzés becomes the section text link",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/standing/guidelinesAcceptedAt",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": "^Elfogadom"
+        }
+      }
+    },
+    "hub-gate-noprofile": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — nincs profil",
+      "why": "profile null: no identity row, the notice line, the Profil létrehozása pill (a link)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/profile",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.createProfile"
+        }
+      }
+    },
+    "hub-takedown": {
+      "account": "C",
+      "route": "/compose",
+      "height": 874,
+      "reach": "fixture",
+      "title": "Piactéri pult — levett profil",
+      "why": "profileRemoved true and profile null: the danger notice line, no action, no identity row",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts",
+          "query": {
+            "state": "all"
+          },
+          "edits": [
+            {
+              "pointer": "/posts/3/title",
+              "value": "Novembertől két új időpont"
+            },
+            {
+              "pointer": "/posts/4/title",
+              "value": "Guggolás-technika műhely – október 30."
+            },
+            {
+              "pointer": "/posts/0",
+              "remove": true
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/context",
+          "edits": [
+            {
+              "pointer": "/quotas/publishedToday",
+              "value": 1
+            },
+            {
+              "pointer": "/profile",
+              "value": null
+            },
+            {
+              "pointer": "/profileRemoved",
+              "value": true
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "compose.newPost"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,480 @@
+{
+  "about": "S-compose-profile - the frame data of compose-profile-1 / -2 and the undrawn states of the Edzői profil szerkesztő (/compose/profile, URL only on a phone, owner answer Q5; PLAN 4.1 rule 7). Account C (coach@, the seeded profile of Kovács Péter). The profile has no sandbox twin: every capture is a replay of the recording, nothing is written live. Clicks that would write (Mentés, the public switch, Név módosítása) are never pressed except where a state answers the request with a fixture in the browser.",
+  "overrides": {
+    "compose-profile-1": {
+      "why": "the frame script as it is, with its arrived clause by key so the en / de captures arrive too",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "compose.displayName"
+        }
+      }
+    },
+    "compose-profile-2": {
+      "why": "the frame script as it is (open the identity line, type the new handle), by key so the en / de captures arrive too; the availability probe GET /compose/handle?handle=kovacs-peter-edzo is recorded",
+      "opened": {
+        "role": "textbox",
+        "name": {
+          "key": "compose.displayName"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            },
+            "text": "kovacs-peter-edzo"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "advance": 800,
+          "arrived": {
+            "text": {
+              "key": "compose.handleFree"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.handleFree"
+        }
+      }
+    }
+  },
+  "states": {
+    "profile-handle-own": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1089,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — a név panel nyitva, a saját név (Ez a jelenlegi neved.)",
+      "why": "the identity line opened and nothing typed: the field holds the current handle, the status line says it is yours, Név módosítása is disabled (nothing changed). No request",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.handleIsYours"
+        }
+      }
+    },
+    "profile-handle-malformed": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1089,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — hibás név (a pattern a szerver kontextusából)",
+      "why": "a handle that starts with a hyphen fails the server's handlePattern: the danger status line, no availability request",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            },
+            "text": "-x"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "advance": 800,
+          "arrived": {
+            "text": {
+              "key": "compose.handleMalformed"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.handleMalformed"
+        }
+      }
+    },
+    "profile-handle-taken": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1089,
+      "reach": "fixture",
+      "title": "Edzői profil szerkesztő — foglalt név",
+      "why": "the recorded availability answer for kovacs-peter-edzo edited to available: false: the danger status line Ez a név foglalt. The probe is advisory, Név módosítása stays enabled",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/handle",
+          "query": {
+            "handle": "kovacs-peter-edzo"
+          },
+          "edits": [
+            {
+              "pointer": "/available",
+              "value": false
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            },
+            "text": "kovacs-peter-edzo"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "advance": 800,
+          "arrived": {
+            "text": {
+              "key": "compose.handleTaken"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.handleTaken"
+        }
+      }
+    },
+    "profile-handle-unknown": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1089,
+      "reach": "fixture",
+      "title": "Edzői profil szerkesztő — az ellenőrzés nem sikerült",
+      "why": "the availability probe answers 500: a failed probe is never called taken, the warn status line says the save will tell",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/handle",
+          "query": {
+            "handle": "kovacs-peter-edzo"
+          },
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "method": "GET",
+            "path": "/api/v1/compose/handle",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            },
+            "text": "kovacs-peter-edzo"
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "advance": 4000,
+          "arrived": {
+            "text": {
+              "key": "compose.handleUnknown"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.handleUnknown"
+        }
+      }
+    },
+    "profile-city-sheet": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 874,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — a város választó (sheet)",
+      "why": "the identity line opened, the Város row tapped: the bottom sheet with the cities as rows, Budapest ticked. Nothing is saved until Mentés",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^@kovacs-peter"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.handle"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "re": "^(Város|City|Stadt)"
+            }
+          },
+          "arrived": {
+            "role": "dialog"
+          }
+        }
+      ],
+      "arrived": {
+        "role": "radio",
+        "name": "Budapest",
+        "checked": true
+      }
+    },
+    "profile-specialties-expanded": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1416,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — minden szakterület (Több után)",
+      "why": "Több reveals the other specialties of the taxonomy (14 in all); there is no way back, as today",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.more"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "public.specialty.endurance"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "public.specialty.calisthenics"
+        }
+      }
+    },
+    "profile-specialties-cap": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 1416,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — 6 / 6 szakterület (a plafon)",
+      "why": "the two unselected words tapped: the count reads 6 / 6; a further tap changes nothing (no message, as today). Nothing is sent before Mentés",
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "public.specialty.powerlifting"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "public.specialty.powerlifting"
+            },
+            "pressed": true
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "public.specialty.olympic_lifting"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "public.specialty.olympic_lifting"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "hu": "6 / 6 kiválasztva",
+          "en": "6 / 6 selected",
+          "de": "6 / 6 ausgewählt"
+        }
+      }
+    },
+    "profile-preview-open": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 2091,
+      "reach": "fixture",
+      "title": "Edzői profil szerkesztő — előnézet nyitva",
+      "why": "Előnézet tapped: after the 400 ms debounce the bio is rendered by DocRenderer. The preview POST is answered in the browser from the recorded profile (its doc is the server's render of the same bio source)",
+      "fixtures": [
+        {
+          "method": "POST",
+          "path": "/api/v1/compose/preview",
+          "from": {
+            "path": "/api/v1/compose/profile",
+            "pointer": "/profile"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "compose.showPreview"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "compose.hidePreview"
+            }
+          }
+        },
+        {
+          "advance": 1200,
+          "arrived": {
+            "role": "heading",
+            "name": {
+              "key": "compose.preview"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "heading",
+        "name": "Hogyan dolgozom"
+      }
+    },
+    "profile-offline": {
+      "account": "C",
+      "route": "/compose/profile",
+      "height": 874,
+      "reach": "seed",
+      "title": "Edzői profil szerkesztő — offline (a shell offline sora)",
+      "why": "the network cut after the page loaded: the shell's offline line; nothing page-level, the form stays editable (a save would wait as today)",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.displayName"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "offline.title"
+        }
+      }
+    }
+  }
+}

@@ -1,60 +1,54 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
-import { ArrowLeft, Bookmark, MapPin, BadgeCheck, UserX } from 'lucide-react';
+import { useParams } from 'react-router';
+import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
-import { DocRenderer } from './DocRenderer';
+import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Screen } from '../../ui/shell/Screen';
+import { Section } from '../../ui/data/SectionHeader';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { Rule } from '../../ui/data/Rule';
+import { Monogram, MonogramSkeleton } from '../../ui/data/Monogram';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { initialsOf } from '../../lib/person';
+import { DocRenderer, type BlockNode } from './DocRenderer';
 import { useCoach, useTaxonomy } from './usePublic';
 import type { PublicCoach, PublicPost } from './usePublic';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
-import { PublicTopBar, KindTile, TileHolder, InitialsAvatar, metaLine, postDate } from './PublicChrome';
+import { PublicTopBar, VerifiedBadge, postDate } from './PublicChrome';
 
 /**
- * A public coach profile, addressed by HANDLE.
+ * A public coach profile, addressed by HANDLE (coach-profile-1 / -2).
  *
- * ═══ THE ANCHOR IS A FACE, BECAUSE THE QUESTION IS ABOUT A PERSON ══════════════════════════════
+ * ═══ THE ANCHOR IS THE PERSON, DRAWN AS TYPE ═══════════════════════════════════════════════════
  *
  * A stranger arrives here asking one thing — who is this and should I trust them with my training
- * — so the top third holds the coach, not a number. There is nothing countable to ring and no
- * trend to plot on a page about a human.
- *
- * THE RING CARRIES NO VALUE. Everywhere else in this product a ring around something means
- * progress (E16, the daily rings on home and nutrition). Here it is a complete, decorative frame
- * whose only job is to give the verified badge something to sit on — a coach drawn with a
- * three-quarters-full ring reads as a coach who is three-quarters of something, and it must never
- * be wired to a percentage.
+ * — so the top of the page holds the coach, not a number. A coach has no photo field, so there is
+ * no portrait: the textured 176 pt monogram "KP." is the image, with the name locked under it in
+ * the display face, its K stem on the gutter under the monogram's K.
  *
  * ═══ NO FOLLOWER COUNT, AND ITS ABSENCE IS A DECISION ══════════════════════════════════════════
  *
  * There is no follower number, no "trending" badge and no rank. `ORDER BY follower_count DESC` is
  * a ranking anybody can buy at one free registration per follower, and a number that can be bought
- * is a number that will be. Following exists — privately, as a saved list on the follower's own
- * screen — and influences nothing anybody sees here.
+ * is a number that will be.
  *
- * ═══ AND THE BADGE IS ADMIN-GRANTED, WHICH THE SCHEMA ENFORCES ═════════════════════════════════
+ * ═══ AND THE TICK IS ADMIN-GRANTED, WHICH THE SCHEMA ENFORCES ══════════════════════════════════
  *
  * `trg_profile_verified_by_admin_*` refuses a badge granted by a non-admin, and
- * `trg_profile_verified_pair_*` refuses one with no granter recorded at all. So the tick here is
- * not a UI flag somebody could set — it is a database fact with a name attached to it.
+ * `trg_profile_verified_pair_*` refuses one with no granter recorded at all. So the lime tick of
+ * the credential line is not a UI flag somebody could set — it is a database fact.
  *
- * ═══ WHAT THE MOCKUP ASKS FOR AND THE SCHEMA CANNOT ANSWER ═════════════════════════════════════
+ * ═══ WHAT THE MOCKUP ONCE ASKED FOR AND THE SCHEMA CANNOT ANSWER ═══════════════════════════════
  *
- * The three summary tiles (`12 Év tapasztalat`, `48 Kliens`, `6 Program`) are NOT drawn.
+ * No summary tiles (`12 Év tapasztalat`, `48 Kliens`, `6 Program`) and no `Kapcsolatfelvétel`:
  * `PublicCoach` carries handle, display name, headline, doc, city, verified and published-at, and
- * nothing else — all three numbers are new fields, and two of them are claims a coach makes about
- * themselves. A self-entered "48 Kliens" sitting directly beneath an admin-granted verified badge
- * borrows that badge's credibility, and the badge is the one thing on this page the schema
- * actually enforces. Same for `Kapcsolatfelvétel`: the screen has no message path by decision, and
- * a filled primary button with no destination is a dead control on a public route.
+ * nothing else, and a self-entered client count beneath an admin-granted tick would borrow its
+ * credibility. The Pulse frames draw neither.
  *
- * THE COMPONENT IS NOT THE BLOCKER, AND THE DECISION IS STILL OPEN. `ui/data/SummaryTile` exists
- * and seven other features use it, so the row is one call away; a programme count is even
- * derivable here from `posts`. What is missing is the owner's answer to the note's warning —
- * whether the client and experience numbers are COMPUTED from real rows or TYPED by the coach —
- * and drawing one lone tile beside two absent ones is a different block, not a smaller one.
+ * ═══ PUBLIC: NO SESSION ════════════════════════════════════════════════════════════════════════
+ *
+ * Nothing here reads the session. `Belépés` is a plain link for everybody (`PublicTopBar`).
  */
 export function CoachProfilePage() {
   const { t } = useTranslation();
@@ -67,25 +61,19 @@ export function CoachProfilePage() {
     // An unpublished profile, a removed one and a handle nobody ever took are ONE answer — the
     // same rule the server follows, so the page cannot become an oracle the API refused to be.
     return (
-      <div className="col-mobile screen-x flex flex-col gap-section py-4">
-        <AuroraBackdrop />
-        <PublicTopBar backTo="/m" cta="secondary" />
+      <Screen top="push" as="main">
+        <PublicTopBar backTo="/m" cta="link" />
         <EmptyState
-          icon={UserX}
           title={t('marketplace.coachGoneTitle')}
           body={t('marketplace.coachGoneBody')}
           heading="h1"
           action={
-            <Link
-              to="/m"
-              className="text-body-s flex min-h-[var(--target-min)] items-center gap-tight text-accent"
-            >
-              <ArrowLeft className="size-icon-s" aria-hidden />
+            <TextLink to="/m" text="body" lead={<ArrowLeft />}>
               {t('marketplace.backToFeed')}
-            </Link>
+            </TextLink>
           }
         />
-      </div>
+      </Screen>
     );
   }
 
@@ -107,244 +95,221 @@ function CoachProfileView({
   const taxonomy = useTaxonomy();
 
   // `coach.city` is the city KEY — `public_cities.key`, CHECK-constrained to lowercase ASCII — so
-  // printing it straight through rendered `📍 budapest`, and `pecs` / `gyor` / `nyiregyhaza` with
+  // printing it straight through rendered `budapest`, and `pecs` / `gyor` / `nyiregyhaza` with
   // the Hungarian accents stripped. The taxonomy serves `name_native` beside the key and the query
   // has a one-hour staleTime, so this costs at most one request per session. The key stays as the
   // fallback while that request is in flight: a row that renders empty for a beat is worse than one
   // that renders a slug for a beat. Same lookup `ProfileEditorPage`'s city picker already does.
   const cityName =
     taxonomy.data?.cities.find((c) => c.key === coach.city)?.name ?? coach.city;
+  const verified = coach.verified === 1;
+  const hasBio = Array.isArray(coach.doc) && coach.doc.length > 0;
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-4">
-      <AuroraBackdrop />
-      <PublicTopBar backTo="/m" cta="secondary" />
-
-      <header className="flex flex-col items-center gap-group text-center">
-        {/* THE ANCHOR. A decorative frame, never a meter — see the docblock. */}
-        <div className="relative">
-          <div className="size-36 rounded-chip border-4 border-accent p-1">
-            <InitialsAvatar
-              name={coach.displayName}
-              className="size-full"
-              textClassName="text-display"
-            />
-          </div>
-          {coach.verified === 1 ? (
-            // On the ring's lower right, sitting in a punched-out hole so it reads as riding on
-            // the frame rather than floating over it. It no longer sits inline beside the name:
-            // that line is the one a visitor actually reads, and a glyph in it is a speed bump.
-            <span className="absolute bottom-0 right-0 grid size-9 place-items-center rounded-chip bg-surface-0">
-              <BadgeCheck
-                className="size-icon-l fill-accent text-accent-fg"
-                aria-label={t('marketplace.verified')}
-              />
-            </span>
-          ) : null}
+    <Screen top="push" as="main">
+      {/* IDENTITY: the top bar and the hero monogram 12 apart (coach-profile-1 "Hero"), then the
+          name, the headline and the credential line 24 under the monogram. */}
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <PublicTopBar backTo="/m" cta="link" />
+          <Monogram initials={initialsOf(coach.displayName)} size={176} dot className="self-start" />
         </div>
 
-        <div className="flex flex-col items-center gap-tight">
-          <h1 className="text-display text-text-1">{coach.displayName}</h1>
-          {coach.headline ? <p className="text-body text-text-2">{coach.headline}</p> : null}
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            {/* Placed by INK: the face's side bearing (about 0.047 em at 32) pulled back so the K
+                stem stands on the gutter, under the monogram's K. The name still wraps at the
+                column (a 120-character name takes several lines). */}
+            <h1 className="text-display -ml-0.5 text-text-1">{coach.displayName}</h1>
+            {coach.headline ? (
+              // The frames wrap the headline in a 300 pt box (a plain greedy wrap: balance would start line 2 with the dot).
+              <p className="text-body max-w-75 text-text-2">{coach.headline}</p>
+            ) : null}
+          </div>
 
-          {/* `@handle` gave up this slot. A handle is an address, not a credential, and it was
-              occupying the one line under the name a visitor reads. It still lives in the URL,
-              which is where it is useful. */}
-          {coach.verified === 1 || coach.city ? (
-            <p className="text-caption flex items-center gap-tight text-text-3">
-              {coach.verified === 1 ? <span>{t('marketplace.verified')}</span> : null}
-              {coach.verified === 1 && coach.city ? <span aria-hidden>·</span> : null}
-              {coach.city ? (
-                <span className="flex items-center gap-1">
-                  <MapPin className="size-icon-s" aria-hidden />
-                  {cityName}
+          {/* The credential: the lime tick is the ONE lit mark of the line (the same mark as on
+              the post's coach row), its ink on the gutter; the city follows after a dot.
+              Unverified: the city alone. Neither: no line. `@handle` is not drawn — it is an
+              address, not a credential, and it lives in the URL. */}
+          {verified || coach.city ? (
+            <p className="text-cap-m flex items-center gap-2">
+              {verified ? (
+                <span aria-hidden className="-ml-0.5 flex shrink-0">
+                  <VerifiedBadge />
                 </span>
               ) : null}
+              <span>
+                {verified ? <span className="text-text-1">{t('marketplace.verified')}</span> : null}
+                {coach.city ? (
+                  <span className="text-text-2">
+                    {verified ? ' · ' : ''}
+                    {cityName}
+                  </span>
+                ) : null}
+              </span>
             </p>
           ) : null}
         </div>
-      </header>
+      </div>
 
-      {specialties.length > 0 ? (
-        // They LOOK like filters and are not — nothing happens on tap, so they are list items
-        // rather than controls, and nothing here is focusable. A chip a screen reader announces
-        // as a button that does nothing is worse than a label.
-        <ul className="flex flex-wrap gap-tight">
-          {specialties.map((s) => (
-            // `Surface`, not a hand-written border+bg pair: the pair named `--surface-border` and
-            // `bg-surface-2` directly, so these were the one element on the public screens that
-            // would keep the old material the day the glass card changes. `inset` is the same
-            // surface-2 well they already were; `rim={false}` because a specular lip on a 40px
-            // pill is noise. The ink is the inherited `--text-1` the mockup draws, rather than
-            // the `text-text-2` this carried — a colour class here would also collapse
-            // `text-body-s` under `cn`'s twMerge, which shares one group for every `text-*`.
-            <Surface
-              key={s.key}
-              as="li"
-              elevation="inset"
-              rim={false}
-              pad="none"
-              className="text-body-s rounded-chip px-3 py-2"
-            >
-              {t(s.i18nKey, { defaultValue: s.key })}
-            </Surface>
-          ))}
-        </ul>
-      ) : null}
+      {/* BODY: the ruled introduction and the posts, 20 apart (not the page's 32). */}
+      <div className="flex flex-col gap-5">
+        {specialties.length > 0 || hasBio ? (
+          <div className="flex flex-col gap-4">
+            <Rule strong />
+            {specialties.length > 0 ? (
+              // Plain labels — they filter nothing — so ONE line of running text: the words in
+              // ink, quiet dots between, wrapping like a sentence. Not a list of chips, nothing
+              // focusable: a label a screen reader announces as a button that does nothing is
+              // worse than a label.
+              <p className="text-eyebrow text-text-1">
+                {specialties.map((s, i) => (
+                  <Fragment key={s.key}>
+                    {i > 0 ? (
+                      <span aria-hidden className="text-text-3">
+                        {' · '}
+                      </span>
+                    ) : null}
+                    {t(s.i18nKey, { defaultValue: s.key })}
+                  </Fragment>
+                ))}
+              </p>
+            ) : null}
+            {hasBio ? <Bio doc={coach.doc as BlockNode[]} /> : null}
+          </div>
+        ) : null}
 
-      <Bio coach={coach} />
-
-      <section className="flex flex-col gap-group">
-        <div className="flex items-center gap-tight">
-          {/* The same holder the post rows below use, not a second hand-built copy of it. */}
-          <TileHolder size="sm">
-            <Bookmark className="size-icon-m" strokeWidth={2} />
-          </TileHolder>
-          <h2 className="text-title-1 text-text-1">{t('marketplace.theirPosts')}</h2>
-        </div>
-
-        {posts.length === 0 ? (
-          <p className="text-caption text-text-3">{t('marketplace.noPostsYet')}</p>
-        ) : (
-          <ul className="flex flex-col gap-tight">
-            {posts.map((p) => (
-              <li key={p.id}>
-                {/* Kind, date, title. The two-line excerpt is gone for the same reason it is gone
-                    from the feed card: it is enough to choose from, and the excerpt belongs where
-                    the post is read. */}
-                <Surface
-                  as={Link}
+        {/* Head -> content is 16 (the Section), and the first row carries its own 10 pt padding: the
+            list is pulled up by that padding, so the kicker stands 16 under the eyebrow as drawn. */}
+        <Section title={t('marketplace.theirPosts')}>
+          {posts.length === 0 ? (
+            <p className="text-cap text-text-2">{t('marketplace.noPostsYet')}</p>
+          ) : (
+            <RowStack close className="-mt-2.5">
+              {posts.map((p) => (
+                // The feed's kicker (mono caps, the kind in ink, the date quiet) over the title in
+                // up to two lines. No kind glyph, no city, no price, no excerpt: enough to choose
+                // from; the excerpt belongs where the post is read.
+                <ListRow
+                  key={p.id}
                   to={`/m/p/${p.id}`}
-                  interactive
-                  className="flex items-center gap-tight"
-                >
-                  <KindTile kind={p.kind} size="sm" />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="text-caption text-text-3">
-                      {metaLine([
-                        t(`marketplace.kind.${p.kind}`, { defaultValue: p.kind }),
-                        postDate(p, i18n.language),
-                      ])}
-                    </span>
-                    <span className="text-body-strong truncate text-text-1">{p.title}</span>
-                  </span>
-                </Surface>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+                  kickerLead={t(`marketplace.kind.${p.kind}`, { defaultValue: p.kind })}
+                  kicker={postDate(p, i18n.language)}
+                  title={p.title}
+                  lines={2}
+                  chevron
+                />
+              ))}
+            </RowStack>
+          )}
+        </Section>
+      </div>
+    </Screen>
   );
 }
 
 /**
- * The bio, clamped to two lines with an expander.
+ * The bio, collapsed to the first two lines of its running text, with an expander.
  *
- * It used to run through `DocRenderer` in full — two paragraphs, a subheading, a bullet list, a
- * block quotation and an inline link — and that was the single largest contributor to the "the
- * whole UI is data fields" reading: an introduction rendered as a document. The full renderer
- * still runs on the post detail, where a reader has committed to reading.
+ * COLLAPSED = the first PARAGRAPH, clamped to two lines (coach-profile-1): headings are skipped,
+ * not flattened into the clamp. OPEN = the whole document in the bio look (coach-profile-2), with
+ * "Kevesebb" 4 under it.
  *
- * A CLAMP, NOT A TRUNCATION. A coach with a long bio keeps every word of it, one tap away;
- * silently dropping the rest would be the same defect in a quieter form. `max-h-11` is exactly two
- * lines of `--text-body`'s 22px leading, so the collapsed height is a type decision rather than a
- * guessed pixel.
+ * A CLAMP, NOT A TRUNCATION. A coach with a long bio keeps every word of it, one tap away.
  *
- * The expander only appears when there is something behind it — measured, not assumed. A `Több`
- * button over a one-line bio is a control that does nothing, which is the affordance defect this
- * design system spends most of its rules on.
+ * The expander only appears when there is something behind it: the document holds more than that
+ * paragraph, or the paragraph itself runs past two lines (measured while collapsed). A `Több`
+ * button over a one-line bio is a control that does nothing. A bio with no paragraph at all
+ * (headings and lists only) has nothing to clamp, so it shows whole, with no expander.
  */
-function Bio({ coach }: { coach: PublicCoach }) {
+function Bio({ doc }: { doc: BlockNode[] }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
+  const first = doc.find((b) => b.k === 'p');
 
   useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const p = ref.current?.querySelector('p');
+    if (!p) return;
     // Measured while collapsed, and never re-measured on expand: once it is known to overflow,
     // collapsing it again must offer the same control.
-    setOverflows(el.scrollHeight > el.clientHeight + 1);
-  }, [coach.doc]);
+    setOverflows(p.scrollHeight > p.clientHeight + 1);
+  }, [doc]);
 
-  if (!Array.isArray(coach.doc) || coach.doc.length === 0) return null;
+  if (!first) return <DocRenderer variant="bio" doc={doc} />;
+
+  const more = doc.length > 1 || overflows;
+
+  if (expanded) {
+    return (
+      <div className="flex flex-col gap-1">
+        <DocRenderer variant="bio" doc={doc} />
+        <TextLink className="self-start" trail={<ChevronUp />} aria-expanded onClick={() => setExpanded(false)}>
+          {t('common.less')}
+        </TextLink>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-tight">
-      <div ref={ref} className={expanded ? undefined : 'max-h-11 overflow-hidden'}>
-        {/* The same renderer as a post body — one component, so a coach cannot discover that one
-            field renders links and the other does not. */}
-        <DocRenderer doc={coach.doc} />
-      </div>
-
-      {overflows ? (
-        <Pressable
-          variant="ghost"
-          density="compact"
-          className="self-start"
-          aria-expanded={expanded}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? t('common.less') : t('common.more')}
-        </Pressable>
+    <div ref={ref} className="flex flex-col">
+      <DocRenderer variant="bio" doc={[first]} clamp={2} />
+      {more ? (
+        <TextLink className="self-start" trail={<ChevronDown />} aria-expanded={false} onClick={() => setExpanded(true)}>
+          {t('common.more')}
+        </TextLink>
       ) : null}
     </div>
   );
 }
 
 /**
- * The loading state, in the NEW geometry.
- *
- * The previous skeleton was a half-width bar and one block, which is not the shape of this screen
- * at all — and a skeleton that does not match causes exactly the layout shift it exists to
- * prevent. Circle, name, headline, caption, chip row, two bio lines, section heading, three rows.
+ * The loading state, in the page's own geometry: the real top bar, the monogram's ink block, the
+ * name and headline lines, the ruled introduction, then the posts head and three kicker rows.
+ * Blocks where the text will be; nothing round, nothing spinning.
  */
 function CoachProfileSkeleton() {
   const { t } = useTranslation();
 
   return (
-    <div
-      className="col-mobile screen-x flex flex-col gap-section py-4"
-      role="status"
-      aria-busy="true"
-    >
-      <AuroraBackdrop />
+    <Screen top="push" role="status" aria-busy="true">
       <span className="sr-only">{t('common.loading')}</span>
-      <PublicTopBar backTo="/m" cta="secondary" />
 
-      <div className="flex flex-col items-center gap-group">
-        <Skeleton className="size-36 rounded-chip" />
-        <div className="flex w-full flex-col items-center gap-tight">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-5 w-64" />
-          <Skeleton className="h-4 w-40" />
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <PublicTopBar backTo="/m" cta="link" />
+          <MonogramSkeleton size={176} />
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-4 w-40" />
+          </div>
+          <Skeleton className="h-3 w-44" />
         </div>
       </div>
 
-      <div className="flex gap-tight">
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-9 w-20 rounded-chip" />
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-tight">
-        <Skeleton className="h-5 w-full" />
-        <Skeleton className="h-5 w-3/4" />
-      </div>
-
-      <div className="flex flex-col gap-group">
-        <div className="flex items-center gap-tight">
-          <Skeleton className="size-11 rounded-card" />
-          <Skeleton className="h-8 w-40" />
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
+          <Rule strong />
+          <Skeleton className="h-4 w-72" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
         </div>
-        <div className="flex flex-col gap-tight">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-card" />
-          ))}
+        <div className="flex flex-col gap-4">
+          <Rule strong />
+          <Skeleton className="h-4 w-28" />
+          <RowStack as="div">
+            {[0, 1, 2].map((i) => (
+              <ListRowSkeleton key={i} kicker index={i} />
+            ))}
+          </RowStack>
         </div>
       </div>
-    </div>
+    </Screen>
   );
 }

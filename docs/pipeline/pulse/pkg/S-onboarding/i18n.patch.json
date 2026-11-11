@@ -1,0 +1,20 @@
+{
+  "package": "S-onboarding",
+  "base": "ba932df299c0cc35cdcb2b224c21c695d00e0136",
+  "namespaces": [
+    "onboarding"
+  ],
+  "set": [],
+  "change": [],
+  "remove": [],
+  "copyQuestions": [
+    {
+      "where": "Onboarding - GET /onboarding fails",
+      "note": "Kept as today (Q4): the skeleton stays, no message (no error copy exists, R22). common.retry with the query refetch would be the only existing string if the owner wants a way out."
+    },
+    {
+      "where": "Onboarding - Kész fails for another reason (network, server error)",
+      "note": "Kept as today: nothing is said and the pill is usable again. onboarding.saveError in the alert slot would be a reuse with a different meaning; not done without the owner."
+    }
+  ]
+}

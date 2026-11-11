@@ -1,0 +1,890 @@
+{
+  "about": "S-library - the undrawn states of Gyakorlatok (PLAN 4.1 rule 7) and the drawn rows of the three frames. The frames draw hand-picked rows, not the A-Z top of the seed: each frame state is reach fixture, an edit list over the recorded /api/v1/exercises answer of the same query (R26), so the verdict cap is matched-fixture. The search line is behind the header glyph on the Pulse page, so every opened / arrived that named the old visible textbox names the glyph button instead. Account M = user@.",
+  "overrides": {
+    "library-1": {
+      "why": "the frame draws Függő lábemelés / Rope Jumping (EN) / Vállnyomás kézisúlyzóval; the recorded top of lang=hu is 1 Leg Box Squat ... The search field is closed behind the glyph.",
+      "reach": "fixture",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "lang": "hu"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Függő lábemelés"
+            },
+            {
+              "pointer": "/exercises/0/difficulty",
+              "value": "advanced"
+            },
+            {
+              "pointer": "/exercises/0/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/0/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/0/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Rope Jumping"
+            },
+            {
+              "pointer": "/exercises/1/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/1/exercise_type",
+              "value": "cardio"
+            },
+            {
+              "pointer": "/exercises/1/translated",
+              "value": 0
+            },
+            {
+              "pointer": "/exercises/1/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Vállnyomás kézisúlyzóval"
+            },
+            {
+              "pointer": "/exercises/2/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/2/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/2/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/2/thumb_key",
+              "value": null
+            }
+          ]
+        }
+      ]
+    },
+    "library-2": {
+      "why": "chest rows of the frame (Fekvenyomás / gépen / kézisúlyzóval) over the recorded muscle=chest answer; the unfiltered answer keeps the library-1 edits (it is fired first).",
+      "reach": "fixture",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "lang": "hu",
+            "muscle": "chest"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Fekvenyomás"
+            },
+            {
+              "pointer": "/exercises/0/difficulty",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/0/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/0/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/0/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Fekvenyomás gépen"
+            },
+            {
+              "pointer": "/exercises/1/difficulty",
+              "value": "beginner"
+            },
+            {
+              "pointer": "/exercises/1/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/1/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/1/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Fekvenyomás kézisúlyzóval"
+            },
+            {
+              "pointer": "/exercises/2/difficulty",
+              "value": "beginner"
+            },
+            {
+              "pointer": "/exercises/2/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/2/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/2/thumb_key",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "lang": "hu"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Függő lábemelés"
+            },
+            {
+              "pointer": "/exercises/0/difficulty",
+              "value": "advanced"
+            },
+            {
+              "pointer": "/exercises/0/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/0/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/0/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Rope Jumping"
+            },
+            {
+              "pointer": "/exercises/1/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/1/exercise_type",
+              "value": "cardio"
+            },
+            {
+              "pointer": "/exercises/1/translated",
+              "value": 0
+            },
+            {
+              "pointer": "/exercises/1/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Vállnyomás kézisúlyzóval"
+            },
+            {
+              "pointer": "/exercises/2/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/2/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/2/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/2/thumb_key",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.chest"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.chest"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.chest"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.chest"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.chest"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.chest"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.chest"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    },
+    "library-3": {
+      "why": "lats rows of the frame (Felhúzás rúddal / Húzódzkodás / Széles fogású hátlehúzás) over the recorded muscle=lats answer.",
+      "reach": "fixture",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "lang": "hu",
+            "muscle": "lats"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Felhúzás rúddal"
+            },
+            {
+              "pointer": "/exercises/0/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/0/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/0/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/0/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Húzódzkodás"
+            },
+            {
+              "pointer": "/exercises/1/difficulty",
+              "value": "beginner"
+            },
+            {
+              "pointer": "/exercises/1/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/1/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/1/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Széles fogású hátlehúzás"
+            },
+            {
+              "pointer": "/exercises/2/difficulty",
+              "value": "beginner"
+            },
+            {
+              "pointer": "/exercises/2/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/2/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/2/thumb_key",
+              "value": null
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/exercises",
+          "query": {
+            "lang": "hu"
+          },
+          "edits": [
+            {
+              "pointer": "/exercises/0/name",
+              "value": "Függő lábemelés"
+            },
+            {
+              "pointer": "/exercises/0/difficulty",
+              "value": "advanced"
+            },
+            {
+              "pointer": "/exercises/0/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/0/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/0/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/1/name",
+              "value": "Rope Jumping"
+            },
+            {
+              "pointer": "/exercises/1/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/1/exercise_type",
+              "value": "cardio"
+            },
+            {
+              "pointer": "/exercises/1/translated",
+              "value": 0
+            },
+            {
+              "pointer": "/exercises/1/thumb_key",
+              "value": null
+            },
+            {
+              "pointer": "/exercises/2/name",
+              "value": "Vállnyomás kézisúlyzóval"
+            },
+            {
+              "pointer": "/exercises/2/difficulty",
+              "value": "intermediate"
+            },
+            {
+              "pointer": "/exercises/2/exercise_type",
+              "value": "strength"
+            },
+            {
+              "pointer": "/exercises/2/translated",
+              "value": 1
+            },
+            {
+              "pointer": "/exercises/2/thumb_key",
+              "value": null
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": [
+              "button",
+              "radio",
+              "tab"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            }
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "tab"
+                ],
+                "name": {
+                  "key": "muscleMap.back"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.lats"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "anyOf": [
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.lats"
+                },
+                "selected": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.lats"
+                },
+                "checked": true
+              },
+              {
+                "role": [
+                  "button",
+                  "radio",
+                  "checkbox",
+                  "option"
+                ],
+                "name": {
+                  "key": "muscle.lats"
+                },
+                "pressed": true
+              }
+            ]
+          }
+        }
+      ],
+      "arrived": {
+        "anyOf": [
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.lats"
+            },
+            "selected": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.lats"
+            },
+            "checked": true
+          },
+          {
+            "role": [
+              "button",
+              "radio",
+              "checkbox",
+              "option"
+            ],
+            "name": {
+              "key": "muscle.lats"
+            },
+            "pressed": true
+          }
+        ]
+      }
+    }
+  },
+  "states": {
+    "library-search": {
+      "title": "Gyakorlatok — keresés nyitva, beírt kifejezés",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the search line opens under the title from the header glyph and keeps the 300 ms debounce (behaviour wins, Q4)",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "library.search"
+            }
+          },
+          "arrived": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            },
+            "text": "fekvenyomás"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "library.clearSearch"
+            }
+          }
+        },
+        {
+          "advance": 400,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "library.clearSearch"
+            }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "searchbox",
+          "name": {
+            "key": "library.search"
+          }
+        },
+        {
+          "role": "button",
+          "name": {
+            "key": "library.clearSearch"
+          }
+        }
+      ]
+    },
+    "library-empty-term": {
+      "title": "Gyakorlatok — nincs találat (kifejezés)",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the empty result with the one text link that clears both filters",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "library.search"
+            }
+          },
+          "arrived": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "searchbox",
+            "name": {
+              "key": "library.search"
+            },
+            "text": "xyzq"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "library.clearSearch"
+            }
+          }
+        },
+        {
+          "advance": 400,
+          "arrived": {
+            "text": { "key": "library.emptyTitle" }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": { "key": "library.emptyTitle" }
+        },
+        {
+          "role": "button",
+          "name": {
+            "key": "library.clearFilters"
+          }
+        }
+      ]
+    },
+    "library-fullbody": {
+      "title": "Gyakorlatok — Teljes test kiválasztva",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: a muscle with no region on either side (full-body): the subject line and the clear link, nothing lit, whatever the list answers",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.full-body"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "muscle.full-body"
+            },
+            "pressed": true
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "button",
+          "name": {
+            "key": "muscle.full-body"
+          },
+          "pressed": true
+        },
+        {
+          "role": "button",
+          "name": {
+            "key": "library.clearFilters"
+          }
+        }
+      ]
+    },
+    "library-offside": {
+      "title": "Gyakorlatok — Mell kiválasztva, Hátul nézet",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: a front-only muscle stays the filter after the view turns to the back (chips are scoped to the visible side; nothing lit)",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "muscle.chest"
+            },
+            "nth": 0
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "muscle.chest"
+            },
+            "pressed": true
+          }
+        },
+        {
+          "click": {
+            "role": [
+              "radio",
+              "button"
+            ],
+            "name": {
+              "key": "muscleMap.back"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "muscleMap.back"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "role": "radio",
+          "name": {
+            "key": "muscleMap.back"
+          },
+          "checked": true
+        },
+        {
+          "role": "button",
+          "name": {
+            "key": "library.clearFilters"
+          }
+        }
+      ]
+    },
+    "library-offline": {
+      "title": "Gyakorlatok — offline",
+      "account": "M",
+      "route": "/library",
+      "height": 874,
+      "reach": "seed",
+      "why": "undrawn: the shell offline line over the cached list; the page adds nothing",
+      "opened": {
+        "role": "button",
+        "name": {
+          "key": "library.search"
+        }
+      },
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "text": { "key": "offline.title" }
+          }
+        }
+      ],
+      "arrived": [
+        {
+          "text": { "key": "offline.title" }
+        }
+      ]
+    }
+  }
+}

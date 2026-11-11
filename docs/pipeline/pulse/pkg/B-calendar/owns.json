@@ -1,0 +1,45 @@
+{
+  "id": "B-calendar",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 5 'Calendar' (backend half: migration 034, read-time occurrence expansion, GET /calendar, /events CRUD, reminders without push, GET /lifeos/today nextEvent); owner 2026-10-18 (design round B approved: lifeos/calendar-1, calendar-2, event-detail, event-form; the economy: the calendar pays nothing), .pulse/owner-answers.md last sections; backend changes allowed by the owner's lifting of the backend rule for the LifeOS backend packages",
+  "owns": [
+    "backend/package.json",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-calendar.js",
+    "backend/scripts/verify-034.mjs",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/lifeos-calendar.js",
+    "backend/src/db/migrations/034_lifeos_calendar.sql",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/tx/lifeos-events.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/**",
+    "backend/src/notifications/routes.js",
+    "docs/pipeline/pulse/pkg/B-calendar/**"
+  ],
+  "takenFrom": {
+    "B-habits-tasks (closed at merge)": [
+      "backend/package.json",
+      "backend/scripts/smoke.js",
+      "backend/src/db/gdpr.js",
+      "backend/src/db/index.js",
+      "backend/src/db/tx/lifeos.js",
+      "backend/src/db/worker.js",
+      "backend/src/lifeos/**"
+    ],
+    "no package entry (F5 notifications, pre-Pulse)": [
+      "backend/src/notifications/routes.js"
+    ]
+  },
+  "handIn": {
+    "shared.patch": ["frontend/src/lib/lifeos-api.ts"]
+  },
+  "notInScope": [
+    "the Naptár tab and every calendar screen (calendar-1 / calendar-2 / event-detail / event-form), the capture's Esemény half and Ma's KÖVETKEZŐ row: the frontend lanes, against api.md and lifeos-api.ts",
+    "the bell's glyph for the lifeos.* notification types (the type map's fallback until a lane adds one)",
+    "editing or deleting ONE occurrence of a recurring event (plan risk 6): every occurrence moves with the event",
+    "Web Push: reminders appear when the app asks (GET /lifeos/today, the unread poll), within 6 hours of their fire time",
+    "seed-demo calendar data for the round-B captures: owned by the seed script's owner; a request in forOrchestrator",
+    "work-packages.json entry: the integrator's, at merge (as for B-core / B-habits-tasks)"
+  ]
+}

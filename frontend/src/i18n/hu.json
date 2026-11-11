@@ -13,13 +13,13 @@
     "minutesShort": "perc",
     "dismiss": "Bezárás",
     "close": "Bezárás",
-    "prevMonth": "Előző hónap",
-    "nextMonth": "Következő hónap",
     "delete": "Törlés",
     "add": "Hozzáadás",
     "undo": "Visszavonás",
-    "undone": "Visszavonva",
-    "copy": "Másolás"
+    "copy": "Másolás",
+    "clearSearch": "Keresés törlése",
+    "showPassword": "Jelszó megjelenítése",
+    "hidePassword": "Jelszó elrejtése"
   },
   "auth": {
     "emailValid": "Az e-mail cím formátuma helyes",
@@ -52,8 +52,9 @@
   },
   "nav": {
     "nutritionShort": "Étkezés",
+    "calendar": "Naptár",
     "profile": "Profil",
-    "home": "Kezdőlap",
+    "today": "Ma",
     "library": "Gyakorlatok",
     "settings": "Beállítások",
     "admin": "Admin",
@@ -69,84 +70,145 @@
     "compose": "Publikálás",
     "composeProfile": "Nyilvános profil",
     "styleStudio": "Stílus stúdió",
-    "playground": "Playground"
+    "playground": "Playground",
+    "clients": "Kliensek",
+    "desk": "Pult",
+    "moderation": "Moderáció",
+    "accounts": "Fiókok",
+    "switch": {
+      "user": "Tag",
+      "trainer": "Edző",
+      "userName": "Vissza: tag nézet",
+      "trainerName": "Vissza: edzői nézet"
+    }
   },
   "home": {
     "greeting": "Szia!",
     "todayTitle": "Mai edzés",
     "emptyTitle": "Ma nincs betervezve edzés",
     "emptyBody": "Ha van aktív terved, a mai napja itt jelenik meg.",
-    "browseLibrary": "Gyakorlatok böngészése",
     "inProgress": "Edzés folyamatban",
     "resume": "Folytatás",
     "start": "Indítás",
     "done": "Kész",
     "restDay": "Pihenőnap",
-    "exerciseCount": "{{count}} gyakorlat",
-    "nothingScheduled": "Nincs betervezve",
-    "weeklyWorkouts": "Heti edzés"
+    "exerciseCount": "{{count}} gyakorlat"
+  },
+  "today": {
+    "hero": {
+      "label": "Ma",
+      "earned": "Ma eddig",
+      "done": "kész",
+      "half": "félúton",
+      "left": "hátra",
+      "onlyWorkout": "Ma egy tétel: az edzésed",
+      "perfect": "Tökéletes nap",
+      "sr": "Ma {{done}} kész a {{total}} tételből",
+      "perfectPays": "+{{coins}} érme napzáráskor"
+    },
+    "ledger": {
+      "coins": "érme",
+      "level": "szint",
+      "levelBar": "Szint előrehaladása"
+    },
+    "coinUnit": "érme",
+    "coins": "{{value}} érme",
+    "tomorrow": "Holnap: {{name}}",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "habits": {
+      "title": "Szokások",
+      "all": "Összes",
+      "emptyTitle": "Még nincs szokásod",
+      "emptyBody": "Kezdj eggyel, például a vízzel.",
+      "first": "Első szokás",
+      "pays": "+{{coins}} érme / nap · {{days}} nap után {{mult}}"
+    },
+    "habit": {
+      "done": "Kész",
+      "pending": "Ma még nincs kész",
+      "clean": "{{count}} napja tiszta",
+      "relapsed": "Ma {{count}} visszaesés",
+      "skipped": "Kihagyva",
+      "weekly": "Heti {{count}}× · {{done}}/{{count}} ezen a héten",
+      "days": "nap",
+      "weeks": "hét",
+      "freezes": "{{count}} fagyasztás",
+      "addOne": "{{name}}: {{count}}/{{target}}, koppints még egyért",
+      "relapseAsk": "Rögzítsem a visszaesést? Ez érmelevonással jár, és nullázza a sorozatot.",
+      "relapseConfirm": "Igen, visszaestem",
+      "relapseLogged": "Visszaesés rögzítve"
+    },
+    "tasks": {
+      "title": "Feladatok",
+      "capture": "Rögzítés",
+      "doneToday": "Kész ma · {{count}}",
+      "emptyTitle": "Nincs teendő",
+      "emptyBody": "Rögzíts bármit, határidővel együtt.",
+      "pays": "+{{min}}–{{max}} érme teendőnként"
+    },
+    "task": {
+      "low": "Alacsony",
+      "mid": "Közepes",
+      "high": "Fontos",
+      "today": "ma",
+      "todayAt": "ma {{time}}",
+      "doneAt": "kész {{time}}",
+      "daily": "naponta",
+      "weekly": "hetente",
+      "monthly": "havonta",
+      "every": {
+        "mon": "hétfőnként",
+        "tue": "keddenként",
+        "wed": "szerdánként",
+        "thu": "csütörtökönként",
+        "fri": "péntekenként",
+        "sat": "szombatonként",
+        "sun": "vasárnaponként"
+      }
+    },
+    "librarySub": "Könyvtár · keresés izom és eszköz szerint"
   },
   "settings": {
     "title": "Beállítások",
     "account": "Fiók",
-    "appearance": "Megjelenés",
-    "themePacks": "Témacsomagok",
-    "accentDefault": "Alapértelmezett",
-    "accentCustom": "Egyedi szín",
-    "contrastRatioPass": "Kontraszt: {{ratio}}:1 — megfelel a 4,5:1 minimumnak.",
-    "contrastRatioFail": "Kontraszt: {{ratio}}:1 — nem éri el a 4,5:1 minimumot. Válassz kontrasztosabb színt.",
-    "contrastInvalid": "Adj meg egy érvényes hexadecimális színt (#RRGGBB).",
-    "previewTitle": "Élő előnézet",
-    "previewBody": "Az egész app átszíneződik, amint választasz.",
-    "gradientPreview": "Gradiens előnézete",
-    "gradient": {
-      "title": "Gradiens",
-      "linear": "Lineáris",
-      "radial": "Sugaras",
-      "angle": "Szög",
-      "addStop": "Új színpont",
-      "reset": "Alapértelmezett",
-      "stopColor": "{{n}}. színpont színe",
-      "stopPosition": "{{n}}. színpont helye",
-      "removeStop": "{{n}}. színpont törlése"
-    },
     "cues": {
-      "title": "Hangok és rezgés",
       "speech": "Beszédhang",
       "speechHint": "Bemondja a kört és a pihenőt.",
       "tone": "Sípszó",
       "toneHint": "Rövid hang a visszaszámláláshoz.",
       "haptics": "Rezgés",
       "hapticsHint": "Rezgés a sorozat pipálásakor.",
-      "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés."
+      "hapticsUnavailable": "Ez a készülék nem tud rezegni — iPhone-on a sípszó marad az egyetlen nem vizuális jelzés.",
+      "row": "Edzés közbeni jelzések",
+      "sound": "Hang"
     },
-    "openAdmin": "Admin felület megnyitása",
     "equipment": "Felszerelés",
     "equipmentHint": "Amit el tudsz érni. Az edzésterved ehhez igazodik.",
     "equipmentSaved": "Felszerelés mentve",
+    "equipmentCount": "{{count}} eszköz",
     "displayName": "Megjelenített név",
     "displayNameHint": "Az edződ ezt látja az e-mail-címed helyett.",
     "displayNamePlaceholder": "Ahogy mások látnak",
-    "transparency": "Áttetsző felületek",
-    "transparencyHint": "Az üveghatás a kártyákon és a sávokon. Alapból a rendszer beállítását követi.",
-    "transparencySystem": "Rendszer",
-    "transparencyFull": "Mindig",
-    "transparencyNone": "Soha",
-    "saveTheme": "Téma mentése",
-    "themeSaveError": "A téma mentése nem sikerült — a választásod megmaradt, próbáld újra.",
     "role": {
       "user": "Tag",
       "coach": "Edző",
       "admin": "Admin"
     },
-    "themePack": {
-      "midnight": "Éjfél",
-      "solar": "Napfény",
-      "forest": "Erdő",
-      "neon": "Neon",
-      "mono": "Mono",
-      "aurora": "Aurora",
-      "ember": "Ember"
+    "views": {
+      "title": "Nézetek",
+      "coach": "Edzői nézet",
+      "admin": "Admin nézet"
+    },
+    "day": {
+      "title": "Nap és időzóna",
+      "zone": "Időzóna",
+      "zoneLimit": "Naponta egyszer módosítható",
+      "start": "Napkezdés",
+      "saved": "Mentve",
+      "explain": "Új nap {{start}}-kor · a tegnapi {{settle}}-ig még módosítható.",
+      "search": "Keresés",
+      "noResults": "Nincs találat",
+      "failed": "Nem sikerült a művelet. Próbáld újra."
     }
   },
   "library": {
@@ -179,22 +241,18 @@
   },
   "admin": {
     "eyebrow": "Adminisztráció",
-    "title": "Áttekintés",
-    "users": "Felhasználók",
-    "exercises": "Gyakorlatok",
-    "media": "Médiafájlok",
     "moderation": "Moderációs sor",
     "pendingCount": "{{count}} várakozik",
-    "queueEmptyTitle": "Nincs mit moderálni",
+    "queueEmptyTitle": "Nincs várakozó beküldés",
     "queueEmptyBody": "Minden beküldött gyakorlatot elbíráltál.",
     "approve": "Jóváhagyás",
     "reject": "Elutasítás",
     "reason": "Indoklás",
     "forbiddenTitle": "Nincs jogosultságod",
     "forbiddenBody": "Ez az oldal csak adminisztrátoroknak érhető el.",
-    "footer": "{{sessions}} aktív munkamenet · {{events}} naplóesemény az elmúlt 24 órában",
     "marketplace": {
       "title": "Piactéri bejelentések",
+      "report": "Bejelentés",
       "emptyTitle": "Nincs elintézendő bejelentés",
       "emptyBody": "Ha valaki bejelent egy bejegyzést vagy profilt, itt fog megjelenni.",
       "openLive": "Élő oldal megnyitása",
@@ -202,13 +260,12 @@
       "snapshotTruncated": "A szöveg hosszabb volt; a másolat le van vágva.",
       "reporters": "{{count}} különböző bejelentő",
       "decide": "Döntés",
-      "upholdAndRemove": "Helybenhagyás és eltávolítás",
+      "upholdAndRemove": "Helybenhagyás és levétel",
       "reject": "Elutasítás",
-      "cancel": "Mégse",
-      "removalReason": "Eltávolítás indoka",
+      "removalReason": "Levétel indoka",
       "removalReasonHint": "Ez az indok az audit-naplóba kerül. A szerző nem látja.",
       "resolutionNote": "Belső megjegyzés",
-      "reasonRequired": "Eltávolításhoz indok kell.",
+      "reasonRequired": "Levételhez indok kell.",
       "status": {
         "open": "Nyitott",
         "triaged": "Vizsgált",
@@ -226,12 +283,11 @@
         "ip_infringement": "Szerzői jog",
         "spam": "Kéretlen tartalom",
         "other": "Egyéb"
-      }
+      },
+      "reportersOne": "{{count}} különböző bejelentő"
     },
     "styleStudio": "Stílus stúdió",
-    "sections": "Szakaszok",
     "section": {
-      "overview": "Áttekintés",
       "accounts": "Fiókok",
       "moderation": "Moderáció",
       "marketplace": "Piactér"
@@ -246,16 +302,16 @@
     "reviewGoneBody": "Időközben valaki döntött róla. Frissítsd a listát.",
     "reasonHint": "A beküldő elolvassa, a saját gyakorlatánál jelenik meg.",
     "refreshQueue": "Sor frissítése",
-    "unit": {
-      "user": "Felhasználó",
-      "exercise": "Gyakorlat",
-      "media": "Médiafájl"
-    },
+    "unit": {},
     "legend": {
       "members": "Tagok",
       "coaches": "Edzők",
       "admins": "Adminok"
-    }
+    },
+    "pendingShown": "{{shown}} / {{total}} várakozik",
+    "queueCapped": "Az első {{count}} beküldést látod. Ha döntöttél, jön a következő.",
+    "decideFailed": "A döntés nem ment át. Próbáld újra.",
+    "decideOffline": "Nincs kapcsolat, a döntés nem ment át."
   },
   "muscle": {
     "chest": "Mell",
@@ -367,7 +423,8 @@
       "addMeal": "Étkezés hozzáadása",
       "mealDefault": "Étkezés",
       "draftNote": "Ez az étrend még vázlat — a kliens nem látja, amíg nem aktiválod.",
-      "activate": "Aktiválás"
+      "activate": "Aktiválás",
+      "itemLine": "{{grams}}g · {{kcal}} kcal · {{protein}}g P"
     },
     "profileFull": "Teljes kérdőív",
     "profileIncomplete": "Hiányos",
@@ -379,7 +436,12 @@
       "plans": "Terv"
     },
     "equipmentHint": "A kliens elérhető eszközei. A módosításról értesítést kap.",
-    "equipmentSaved": "Felszerelés mentve"
+    "equipmentSaved": "Felszerelés mentve",
+    "account": {
+      "owned": "A kliens saját fiókkal rendelkezik",
+      "pending": "Az átadás még függőben van"
+    },
+    "moreFlagged": "+{{count}} további kímélendő terület"
   },
   "onboarding": {
     "stepOf": "{{current}} / {{total}}. lépés",
@@ -426,7 +488,7 @@
         "body": "Ezek segítenek a súlyok és a haladás becslésében."
       },
       "limitations": {
-        "title": "Van sérülésed vagy korlátod?",
+        "title": "Van sérülésed vagy korlátod?",
         "body": "Amit itt megadsz, azt a terv és az edződ is figyelembe veszi."
       }
     },
@@ -500,8 +562,7 @@
     "sessionsPerWeekHint": "Ennyi napra osztjuk szét a heti terhelést."
   },
   "workout": {
-    "noneTitle": "Most nincs futó edzés",
-    "noneBody": "Indíts egyet a mai napból, vagy csinálj szabad edzést.",
+    "loadFailed": "Nem sikerült a művelet. Próbáld újra.",
     "freestyle": "Szabad edzés",
     "sets": "Sorozatok",
     "exercises": "Gyakorlatok",
@@ -526,7 +587,6 @@
     },
     "restOverSpoken": "Pihenő vége",
     "recordSpoken": "Új rekord",
-    "holdToCheck": "Tartsd nyomva a rögzítéshez",
     "undo": "Visszavonás",
     "seconds": "mp",
     "metres": "m",
@@ -573,7 +633,14 @@
       "offline": "Nincs kapcsolat",
       "failed": "Nem sikerült rögzíteni"
     },
-    "withdrawn": "Visszavonva"
+    "withdrawn": "Visszavonva",
+    "finish": {
+      "open": "Befejezés",
+      "title": "Edzés befejezése",
+      "summary": "{{done}} sorozat rögzítve · {{left}} hátravan",
+      "complete": "Befejezés",
+      "abandon": "Félbehagyás"
+    }
   },
   "plans": {
     "eyebrow": "Tervezés",
@@ -581,7 +648,6 @@
     "templates": "Sablonok",
     "clientPlans": "Kliens-tervek",
     "newName": "Új terv neve",
-    "create": "Létrehozás",
     "emptyTitle": "Még nincs terved",
     "emptyBody": "Hozz létre egy sablont, és építsd fel egyszer — utána bármelyik kliensnek adhatod.",
     "dayCount": "{{count}} nap",
@@ -598,8 +664,13 @@
     "needsStart": "Aktiváláshoz kell egy kezdődátum",
     "addExercise": "Gyakorlat",
     "findExercise": "Gyakorlat keresése",
+    "pickerNoMuscles": "Nincs izom megadva",
+    "pickerEmpty": "Nincs találat",
+    "pickerEmptyHint": "Próbálj másik szót; angol névvel is találhatsz.",
+    "pickerError": "A gyakorlatok nem töltődtek be.",
     "removeExercise": "Gyakorlat eltávolítása",
     "deleteBlock": "Blokk törlése",
+    "addBlock": "Blokk hozzáadása",
     "moveUp": "Feljebb",
     "moveDown": "Lejjebb",
     "rounds": "{{n}} kör",
@@ -753,15 +824,19 @@
       "open": "Megnyitás",
       "targetCaption": "cél {{value}}"
     },
-    "macroTargetShort": "cél"
+    "macroTargetShort": "cél",
+    "unitKcal": "kcal",
+    "unitG": "g",
+    "slash": "/",
+    "resultMeta": "{{kcal}} kcal · {{protein}} g P /100 g"
   },
   "coins": {
     "title": "Érmék",
     "balanceLabel": "{{count}} érme",
     "tab": {
-      "store": "Bolt",
       "achievements": "Eredmények",
-      "statement": "Kimutatás"
+      "statement": "Kimutatás",
+      "overview": "Áttekintés"
     },
     "owned": "Megvan",
     "storeEmptyTitle": "A bolt üres",
@@ -775,8 +850,6 @@
     "noHistoryTitle": "Még nincs mozgás",
     "noHistoryBody": "Az érmék akkor jelennek meg itt, amikor kiérdemelted vagy elköltötted őket.",
     "balanceCaption": "Egyenleged",
-    "weekCaption": "Ezen a héten",
-    "spentCaption": "Elköltve",
     "storeSection": "Megvásárolható",
     "item": {
       "theme": {
@@ -788,6 +861,52 @@
           "title": "Ember",
           "description": "Egyetlen meleg kiemelés."
         }
+      }
+    },
+    "debtCaption": "Tartozás",
+    "spendable": "Elkölthető: {{count}} érme",
+    "debtNotice": "Mínuszban vagy {{count}} érmével. Az új jóváírások előbb ezt egyenlítik ki; addig nem tudsz beváltani.",
+    "level": {
+      "label": "Szint",
+      "xp": "{{xp}} / {{next}} XP",
+      "toNext": "Még {{count}} XP a {{level}}. szintig.",
+      "toNextAz": "Még {{count}} XP az {{level}}. szintig."
+    },
+    "week": {
+      "title": "Ezen a héten",
+      "capLine": "Napi plafon {{cap}} érme · a tegnapi nap {{time}}-kor zárul."
+    },
+    "day": {
+      "today": "Ma · {{date}}",
+      "yesterday": "Tegnap · {{date}}"
+    },
+    "reason": {
+      "workout": {
+        "completed": "Edzés kész"
+      },
+      "day": {
+        "kcal_hit": "Kalória cél",
+        "kcal_over": "Büntetés · kalória túllépve",
+        "perfect": "Tökéletes nap"
+      },
+      "task": {
+        "done": "Feladat kész",
+        "overdue": "Büntetés · lejárt feladat"
+      },
+      "habit": {
+        "done": "Szokás teljesítve",
+        "clean_day": "Tiszta nap",
+        "missed": "Büntetés · szokás kimaradt"
+      },
+      "streak": {
+        "milestone": "Sorozat-mérföldkő"
+      },
+      "reversal": {
+        "credit": "Visszavonás",
+        "debit": "Visszavonás"
+      },
+      "reward": {
+        "redeem": "Jutalom beváltva"
       }
     }
   },
@@ -985,43 +1104,363 @@
     "variants": "Változatok",
     "commitNote": "Amit itt kiválasztasz, az a következő betöltésnél minden felhasználónál érvényes lesz — kódmódosítás és újratelepítés nélkül."
   },
-  "adminMetrics": {
-    "title": "Mérőszámok",
-    "window": "utolsó {{days}} nap",
-    "loggedPeople": "Naplózó emberek",
-    "loggedPeopleSub": "ma: {{today}}",
-    "signups": "Regisztrációk",
-    "activeCoaches": "Aktív edzők",
-    "activeCoachesSub": "{{withRole}} edző szerepkörrel",
-    "coinVelocity": "Érme-mozgás",
-    "coinVelocitySub": "mozgatott egység, előjel nélkül",
-    "completedWorkouts": "Befejezett edzések",
-    "cardHint": "A szám a kiválasztott időablakra vonatkozik.",
-    "clock": {
-      "local_date": "saját nap",
-      "utc": "UTC"
-    },
-    "notEnough": "Még kevés adat a grafikonhoz ({{count}} nap). Három napnyi mérés kell hozzá."
-  },
   "adminUsers": {
     "title": "Fiókok",
     "search": "Keresés e-mailben",
     "noneTitle": "Nincs találat",
-    "noneBody": "Próbáld meg az e-mail cím egy részletével.",
+    "noneBody": "Próbálj másik szót vagy szűrőt.",
     "disabled": "letiltva",
     "mustChange": "jelszócsere",
-    "moreMatches": "Több találat van, mint amennyi elfér egy oldalon — szűkíts a kereséssel.",
     "col": {
       "email": "E-mail",
       "role": "Szerepkör",
       "clients": "Kliensek",
-      "created": "Regisztrált"
+      "created": "Regisztrált",
+      "name": "Név"
     },
     "role": {
-      "user": "Felhasználó",
+      "user": "Tag",
       "coach": "Edző",
       "admin": "Admin"
+    },
+    "searchPlaceholder": "Keresés névben vagy e-mailben",
+    "filter": {
+      "role": "Szerep",
+      "state": "Állapot",
+      "sort": "Rendezés",
+      "all": "Mind",
+      "active": "Aktív",
+      "disabled": "Letiltott"
+    },
+    "count": "{{count}} fiók",
+    "countOne": "{{count}} fiók",
+    "more": "Továbbiak",
+    "failedTitle": "Nem sikerült betölteni",
+    "failedBody": "A fiókok most nem érhetők el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "failedDetailBody": "A fiók most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "failedLedgerBody": "A napló most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "goneTitle": "Ez a fiók nem található",
+    "goneBody": "Lehet, hogy közben törölték. Térj vissza a fiókok listájához.",
+    "account": "Fiók",
+    "readOnly": "csak olvasható",
+    "state": {
+      "active": "aktív"
+    },
+    "you": "te",
+    "disabledNotice": "Letiltva",
+    "sec": {
+      "account": "Fiók",
+      "coach": "Edzői oldal",
+      "activity": "Tevékenység",
+      "audit": "Napló"
+    },
+    "actions": "Műveletek",
+    "lastLogin": "Utolsó belépés",
+    "openSessions": "Nyitott munkamenet",
+    "lockout": {
+      "label": "Kizárás",
+      "none": "nincs",
+      "until": "zárolva {{time}}-ig",
+      "failed": "{{count}} hibás belépés",
+      "failedOne": "{{count}} hibás belépés",
+      "reset": "Kizárás feloldása",
+      "nothing": "nincs zárolás",
+      "message": "{{name}} újra próbálkozhat a belépéssel.",
+      "confirm": "Feloldás"
+    },
+    "mustChangeLabel": "Jelszócsere",
+    "mustChangeYes": "kötelező",
+    "mustChangeNo": "nem kötelező",
+    "tier": "Csomag",
+    "subscription": "Előfizetés",
+    "sub": {
+      "active": "aktív",
+      "trialing": "próbaidőszak",
+      "past_due": "fizetésre vár",
+      "canceled": "lemondva",
+      "none": "nincs"
+    },
+    "profile": "Profil",
+    "profileState": "Állapot",
+    "profileVerified": "ellenőrzött",
+    "profilePublished": "közzétett",
+    "profileUnpublished": "nem közzétett",
+    "profileRemoved": "levéve",
+    "posts": "Bejegyzések",
+    "openReports": "Nyitott bejelentés",
+    "countsOnly": "csak darabszám",
+    "act": {
+      "workouts": "Edzések",
+      "nutrition": "Étkezési napló",
+      "measurements": "Mérések",
+      "photos": "Fotók"
+    },
+    "privacy": "A tartalom privát: az admin csak a darabszámot látja.",
+    "auditLast": "utolsó 5 esemény",
+    "actorSystem": "Rendszer",
+    "audit": {
+      "user": {
+        "role": {
+          "change": "Szerepkör módosítva"
+        },
+        "disable": "Fiók letiltva",
+        "enable": "Fiók engedélyezve",
+        "name": {
+          "change": "Név módosítva"
+        },
+        "lockout": {
+          "reset": "Kizárás feloldva"
+        },
+        "sessions": {
+          "revoke": "Kijelentkeztetés mindenhonnan"
+        },
+        "password": {
+          "force": "Jelszócsere előírva"
+        },
+        "credentials": {
+          "change": "Jelszó módosítva"
+        }
+      },
+      "coin": {
+        "admin": {
+          "adjust": "Érme-korrekció"
+        }
+      },
+      "other": "Egyéb esemény"
+    },
+    "coin": {
+      "head": "Érme",
+      "balance": "egyenleg",
+      "fullLedger": "Teljes napló",
+      "entries": "{{count}} tétel",
+      "entriesOne": "{{count}} tétel",
+      "reason": {
+        "admin": {
+          "credit": "Admin-korrekció",
+          "debit": "Admin-korrekció"
+        },
+        "store": {
+          "purchase": "Vásárlás"
+        },
+        "achievement": {
+          "reward": "Eredmény jutalma"
+        },
+        "focus": {
+          "finish": "Fókuszblokk"
+        },
+        "habit": {
+          "relapse": "Visszaesés"
+        }
+      },
+      "title": "Érme-korrekció",
+      "direction": "Irány",
+      "credit": "Jóváírás",
+      "debit": "Levonás",
+      "amount": "Összeg",
+      "unit": "érme",
+      "balanceLabel": "Egyenleg:",
+      "note": "Megjegyzés",
+      "record": "Rögzítés"
+    },
+    "reason": "Indok",
+    "reasonHint": "Kötelező. Az audit naplóba kerül.",
+    "nameSheet": {
+      "title": "Név szerkesztése",
+      "label": "Megjelenített név",
+      "hint": "A felhasználó így látja magát. Az e-mail-cím nem módosítható.",
+      "invalid": "A névnek 2 és 120 karakter közöttinek kell lennie."
+    },
+    "roleSheet": {
+      "about": {
+        "user": "Saját edzés, étkezés, haladás",
+        "coach": "Kliensek és tervek",
+        "admin": "Teljes admin-hozzáférés"
+      },
+      "current": "Jelenlegi · {{text}}",
+      "password": "A saját jelszavad",
+      "passwordHint": "Admin jogot csak a saját jelszavad megadásával adhatsz."
+    },
+    "disable": {
+      "title": "Fiók letiltása",
+      "message": "{{name}} nem tud majd belépni, a nyitott munkamenetei megszűnnek.",
+      "link": "Letiltás",
+      "hint": "Nem tud belépni, a munkamenetei megszűnnek. Indok kell."
+    },
+    "enable": {
+      "title": "Fiók engedélyezése",
+      "message": "{{name}} újra beléphet.",
+      "link": "Engedélyezés",
+      "hint": "Újra beléphet. Az engedélyezéshez indok kell.",
+      "adminMessage": "{{name}} újra beléphet, és az admin jogát is visszakapja. Ehhez add meg a saját jelszavad.",
+      "passwordHint": "Letiltott admint csak a saját jelszavad megadásával engedélyezhetsz."
+    },
+    "signout": {
+      "sheetTitle": "Kijelentkeztetés",
+      "title": "Kijelentkeztetés mindenhonnan",
+      "open": "{{count}} nyitott munkamenet",
+      "openOne": "{{count}} nyitott munkamenet",
+      "none": "nincs nyitott munkamenet",
+      "message": "{{name}} minden munkamenete megszűnik, újra be kell lépnie.",
+      "selfMessage": "Minden munkameneted megszűnik, ezen az eszközön is. Újra be kell lépned.",
+      "confirm": "Kijelentkeztetés"
+    },
+    "password": {
+      "sheetTitle": "Jelszócsere",
+      "force": "Jelszócsere kötelező",
+      "forceSub": "A következő belépéskor új jelszót kell megadnia.",
+      "message": "{{name}} a következő belépéskor új jelszót kell, hogy megadjon; a munkamenetei megszűnnek.",
+      "selfMessage": "A következő belépéskor új jelszót kell megadnod; a munkameneteid megszűnnek.",
+      "confirm": "Előírás"
+    },
+    "selfNote": "A saját fiókodat itt nem módosíthatod.",
+    "err": {
+      "generic": "Nem sikerült. Próbáld újra.",
+      "stepUp": "Add meg a saját jelszavad.",
+      "password": "Hibás jelszó.",
+      "forbidden": "Ehhez nincs jogosultságod.",
+      "gone": "Ez a fiók már nem található.",
+      "insufficient": "Az egyenleg nem mehet nulla alá.",
+      "self": "Ezt a saját fiókodon nem teheted meg.",
+      "conflict": "A fiók állapota közben megváltozott. Nézd át, és próbáld újra.",
+      "rate": "Túl sok kérés. Várj egy kicsit.",
+      "invalid": "Ez így nem menthető. Ellenőrizd a mezőket.",
+      "offline": "Nincs kapcsolat, ezért a módosítás nem mentődött el."
+    },
+    "replayed": {
+      "disable": "Ez a fiók már le volt tiltva, ezért nem változott semmi.",
+      "enable": "Ez a fiók már engedélyezve volt, ezért nem változott semmi."
     }
+  },
+  "adminRules": {
+    "title": "Szabályok",
+    "defaults": "Alapértékek",
+    "version": "{{version}}. verzió",
+    "intro": "A szabályok minden felhasználóra érvényesek.",
+    "coin": "érme",
+    "section": {
+      "habit": "Szokás",
+      "task": "Feladat",
+      "workout": "Edzés",
+      "focus": "Fókusz",
+      "challenge": "Kihívás",
+      "kcal": "Kalória",
+      "perfectDay": "Tökéletes nap",
+      "streak": "Sorozat-szorzók",
+      "freeze": "Fagyasztás",
+      "dailyCap": "Napi plafon",
+      "save": "Mentés"
+    },
+    "rule": {
+      "habitSuccess": {
+        "title": "Teljesítés",
+        "sub": "alapérték új szokáshoz, érme"
+      },
+      "habitPenalty": {
+        "title": "Kihagyás",
+        "sub": "büntetés, érme"
+      },
+      "badHabitCleanDay": {
+        "title": "Tiszta nap",
+        "sub": "rossz szokásnál, érme"
+      },
+      "badHabitRelapseFactor": {
+        "title": "Visszaesés",
+        "sub": "büntetés-szorzó"
+      },
+      "badHabitRelapseDailyCap": {
+        "title": "Visszaesés plafonja",
+        "sub": "szokásonként naponta, érme"
+      },
+      "partialHabitMin": {
+        "title": "Részleges teljesítés",
+        "sub": "ettől fizet arányosan"
+      },
+      "taskLow": {
+        "title": "Alacsony"
+      },
+      "taskMid": {
+        "title": "Közepes"
+      },
+      "taskHigh": {
+        "title": "Magas"
+      },
+      "taskLate": {
+        "title": "Késve teljesítve",
+        "sub": "ennyit fizet a határidő után"
+      },
+      "taskOverdue": {
+        "title": "Lejárt feladat",
+        "sub": "egyszeri büntetés, érme"
+      },
+      "workoutComplete": {
+        "title": "Teljes edzés",
+        "sub": "edzésenként, érme"
+      },
+      "workoutFull": {
+        "title": "Teljesnek számít",
+        "sub": "a sorozatok aránya"
+      },
+      "workoutHalf": {
+        "title": "Részleges edzés",
+        "sub": "fél jóváírás ettől az aránytól"
+      },
+      "focusPerHour": {
+        "title": "Óránként",
+        "sub": "arányosan"
+      },
+      "focusCheckin": {
+        "title": "Visszaigazolás",
+        "sub": "bónusz · „Még rajta vagy?”"
+      },
+      "challenge": {
+        "title": "Napi kihívás",
+        "sub": "alapérték új kihíváshoz"
+      },
+      "kcalHit": {
+        "title": "Cél teljesítve"
+      },
+      "kcalMissed": {
+        "title": "Cél túllépve",
+        "sub": "büntetés"
+      },
+      "perfectDay": {
+        "title": "Bónusz",
+        "sub": "szokás, feladat, edzés, kalória"
+      },
+      "streakTier": {
+        "title": "{{days}} naptól",
+        "sub": "szorzó · egészre kerekítve"
+      },
+      "milestone": {
+        "title": "{{days}} napos mérföldkő",
+        "sub": "bónusz, érme"
+      },
+      "freezeEvery": {
+        "title": "Gyakoriság",
+        "sub": "ennyi naponként 1 fagyasztás"
+      },
+      "maxFreezes": {
+        "title": "Legfeljebb",
+        "sub": "tartalékban"
+      },
+      "dailyCap": {
+        "title": "Bevétel naponta",
+        "sub": "felhasználónként"
+      }
+    },
+    "unit": {
+      "pct": "%",
+      "days": "nap",
+      "count": "db"
+    },
+    "savedValue": "mentve {{value}}",
+    "changes": "{{count}} módosítás",
+    "note": "Megjegyzés",
+    "noteHint": "A {{version}}. verzióval az audit naplóba kerül.",
+    "appliesFrom": "A következő napzárástól érvényes.",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "stale": "A módosítás nem ment át. Frissítsd az oldalt, és nézd meg, mi az aktuális állapot.",
+    "savedToast": "Mentve"
   },
   "public": {
     "specialty": {
@@ -1039,6 +1478,671 @@
       "senior": "Szenior",
       "youth": "Ifjúsági",
       "calisthenics": "Saját testsúlyos"
+    }
+  },
+  "habits": {
+    "title": "Szokások",
+    "today": "Ma",
+    "todaySr": "Ma {{done}} kész a(z) {{count}} szokásból",
+    "longestLive": "Leghosszabb élő sorozat",
+    "good": "Jó szokások",
+    "bad": "Rossz szokások",
+    "new": "Új szokás",
+    "unitDay": "nap",
+    "unitWeek": "hét",
+    "freezes": "{{count}} fagyasztás",
+    "scheduleDaily": "Naponta",
+    "perWeek": "Heti {{count}}×",
+    "doneAt": "kész {{time}}",
+    "reminderAt": "emlékeztető {{time}}",
+    "weekDone": "{{done}}/{{target}} ezen a héten",
+    "cleanFor": "{{count}} napja tiszta",
+    "relapseToday": "Ma {{count}} visszaesés · {{coins}} érme",
+    "skipped": "Kihagyva",
+    "freezeRule": "{{every}} nap sorozat = 1 fagyasztás, legfeljebb {{max}}",
+    "archivedCount": "Archivált szokások · {{count}}",
+    "emptyTitle": "Még nincs szokásod",
+    "emptyBody": "Kezdj eggyel, például a vízzel.",
+    "first": "Első szokás",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "detail": {
+      "streak": "Sorozat",
+      "best": "Leghosszabb {{count}} nap",
+      "notYet": "Ma még nincs kész",
+      "doneAt": "Kész · {{time}}",
+      "coins": "{{coins}} érme",
+      "doneToday": "Kész mára",
+      "relapse": "Visszaestem",
+      "relapseBody": "Rögzítsem a visszaesést? Ez érmelevonással jár, és nullázza a sorozatot.",
+      "relapseYes": "Igen, visszaestem",
+      "weeks": "Elmúlt 12 hét",
+      "thisWeek": "ez a hét",
+      "keyStreak": "sorozat",
+      "keyDone": "kész",
+      "keyMissed": "kihagyva",
+      "keyToday": "ma",
+      "stripSr": "Elmúlt 12 hét: {{done}} kész a(z) {{count}} napból",
+      "coinsLabel": "Érme",
+      "coinsNote": "összesen, 12 hét",
+      "coinsSr": "{{coins}} érme a 12 hét alatt",
+      "daysLabel": "Napok",
+      "daysNote": "kész · 12 hét",
+      "daysSr": "{{done}} kész a(z) {{count}} napból",
+      "history": "Előzmények",
+      "milestone": "{{count}} napos bónusz",
+      "freezeEarned": "+1 fagyasztás",
+      "settings": "Beállítások",
+      "reminder": "Emlékeztető",
+      "archive": "Archiválás",
+      "archiveTitle": "Archiválod?",
+      "archiveBody": "A szokás eltűnik a napi listából, a történet megmarad.",
+      "restore": "Visszaállítás"
+    },
+    "outcome": {
+      "done": "Kész",
+      "clean": "Tiszta",
+      "relapse": "Visszaesés",
+      "missed": "Mulasztás",
+      "skipped": "Kihagyva",
+      "frozen": "Kihagyva · a fagyasztás megvédte a sorozatot"
+    },
+    "form": {
+      "editTitle": "Szokás szerkesztése",
+      "kind": "Típus",
+      "kindGood": "Jó szokás",
+      "kindBad": "Rossz szokás",
+      "name": "Név",
+      "nameRequired": "Adj nevet a szokásnak",
+      "schedule": "Ütemezés",
+      "weekdays": "Adott napok",
+      "timesPerWeek": "Heti N×",
+      "perWeek": "Hányszor egy héten?",
+      "perWeekHint": "Vasárnap zárásnál ellenőrizzük. Napi kihagyásért nincs levonás.",
+      "weekendHint": "Hétvégén nem számít, és nem is von le.",
+      "pickDay": "Válassz legalább egy napot",
+      "target": "Napi cél",
+      "unit": "Egység",
+      "unitPlaceholder": "pl. pohár",
+      "success": "Érme / teljesítés",
+      "successBad": "Érme / tiszta nap",
+      "penalty": "Levonás mulasztásért",
+      "penaltyBad": "Levonás alapja",
+      "max": "legfeljebb {{count}}",
+      "min": "Legalább 1",
+      "reminder": "Emlékeztető ideje",
+      "reminderHint": "Csak az ütemezett napokon, és csak amíg nincs kipipálva.",
+      "badExplain": "A rossz szokás minden nap számít. Ha nem esel vissza, a napzárásnál jár az érme. Visszaesésnél kétszeres levonás, és nullázódik a sorozat.",
+      "create": "Létrehozás"
+    },
+    "gone": "Ez a szokás nem érhető el"
+  },
+  "tasks": {
+    "title": "Feladatok",
+    "tab": {
+      "today": "Ma",
+      "upcoming": "Közelgő",
+      "overdue": "Lejárt",
+      "anytime": "Bármikor",
+      "done": "Kész"
+    },
+    "overdueCharged": "{{n}} lejárt teendő · {{coins}} érme levonva",
+    "overdueCount": "{{n}} lejárt teendő",
+    "overdueOpen": "Megnézem",
+    "todayHead": "Ma, {{date}}",
+    "add": "Új teendő",
+    "doneToday": "Kész ma",
+    "lateRule": "Késve teljesítve az érme fele jár.",
+    "dueToday": "ma",
+    "priority": {
+      "low": "Alacsony",
+      "mid": "Közepes",
+      "high": "Fontos"
+    },
+    "priorityValue": "{{label}} · {{coins}}",
+    "repeat": {
+      "daily": "naponta",
+      "weekly": "hetente",
+      "monthly": "havonta"
+    },
+    "repeatKind": {
+      "none": "Nincs",
+      "daily": "Naponta",
+      "weekly": "Hetente",
+      "monthly": "Havonta"
+    },
+    "repeatLabel": "Ismétlődés",
+    "repeatInterval": "Hány naponta?",
+    "repeatMonthDay": "A hónap hányadikán?",
+    "repeatNeedsDue": "Ismétlődő teendőhöz kell határidő",
+    "summary": {
+      "everyDay": "Minden nap",
+      "everyN": "{{n}} naponta",
+      "weekdays": "Hétköznap",
+      "weekly": "Minden {{days}}",
+      "monthly": "Minden hónap {{day}}."
+    },
+    "newTitle": "Új teendő",
+    "editTitle": "Teendő szerkesztése",
+    "fieldTitle": "Cím",
+    "priorityLabel": "Fontosság",
+    "dueLabel": "Határidő",
+    "due": {
+      "none": "Nincs",
+      "today": "Ma",
+      "tomorrow": "Holnap",
+      "date": "Dátum"
+    },
+    "date": "Dátum",
+    "dueTime": "Határidő ideje",
+    "notes": "Jegyzet",
+    "optional": "opcionális",
+    "create": "Létrehozás",
+    "titleRequired": "Adj címet a teendőnek",
+    "dateRequired": "Válassz napot",
+    "deleteTitle": "Törlöd?",
+    "deleteBody": "A teendő eltűnik a listából.",
+    "emptyTitle": "Nincs teendő",
+    "emptyBody": "Rögzíts bármit, határidővel együtt.",
+    "failed": "Nem sikerült a művelet. Próbáld újra."
+  },
+  "capture": {
+    "title": "Van valami a fejedben?",
+    "what": "Mi az?",
+    "example": "pl. felhívni anyát · vacsora pénteken",
+    "when": "Mikor?",
+    "atTime": "Időpontban",
+    "allDay": "Egész nap",
+    "textRequired": "Írj be valamit, vagy zárd be."
+  },
+  "challenges": {
+    "title": "Mai dobás",
+    "pool": "Kihívások",
+    "rule": "Naponta egyszer kötelező: válassz egyet.",
+    "options": "Három lehetőség",
+    "reroll": "Újradobás",
+    "rerollsLeft": "még {{count}} maradt ma",
+    "noPick": "Választás nélkül minden megnyitáskor visszajön.",
+    "take": "Ezt vállalom",
+    "state": {
+      "accepted": "elvállalva",
+      "done": "teljesítve"
+    },
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "noZone": "A napi dobás a nap és az időzóna beállítása után indul.",
+    "emptyTitle": "Még nincs kihívásod",
+    "emptyBody": "A napi dobás a saját kihívásaid közül választ.",
+    "poolRule": "A nagyobb súly gyakrabban kerül elő.",
+    "active": "Aktív",
+    "archived": "Archivált",
+    "archive": "Archiválás",
+    "restore": "Visszaállítás",
+    "weight": "súly {{count}}",
+    "category": {
+      "discipline": "Fegyelem",
+      "movement": "Mozgás",
+      "mind": "Elme",
+      "connection": "Kapcsolat",
+      "food": "Étkezés"
+    },
+    "new": "Új kihívás",
+    "limit": "Legfeljebb {{count}} aktív kihívásod lehet.",
+    "deleteAsk": "A belőle lett teendők megmaradnak.",
+    "form": {
+      "editTitle": "Kihívás szerkesztése",
+      "name": "Megnevezés",
+      "nameRequired": "Adj nevet a kihívásnak",
+      "category": "Kategória",
+      "points": "Érme / teljesítés",
+      "weight": "Súly",
+      "max": "legfeljebb {{count}}",
+      "create": "Létrehozás"
+    },
+    "today": {
+      "title": "Napi dobás",
+      "hint": "Koppints egyre: ma ez a küldetésed.",
+      "reroll": "Újradobás · {{count}}",
+      "picked": "Mai kihívás · {{coins}} érme"
+    },
+    "starter": {
+      "add": "Kezdő kihívások hozzáadása",
+      "s01": "Ágyazz be reggel",
+      "s02": "Tíz perc rendrakás",
+      "s03": "Húsz perc séta",
+      "s04": "Tíz fekvőtámasz",
+      "s05": "Olvass tíz oldalt",
+      "s06": "Öt perc csendes légzés",
+      "s07": "Hívj fel egy barátot",
+      "s08": "Írj egy kedves üzenetet",
+      "s09": "Igyál két pohár vizet",
+      "s10": "Főzz ma otthon"
+    }
+  },
+  "rewards": {
+    "title": "Jutalmak",
+    "available": "elérhető",
+    "new": "Új jutalom",
+    "spendable": "Elkölthető",
+    "coinUnit": "érme",
+    "xpNote": "A beváltás nem csökkenti az XP-t és a szintet.",
+    "shop": "Jutalombolt",
+    "byCost": "ár szerint",
+    "status": {
+      "ok": "beváltható",
+      "cooldown": "pihen · még {{count}} nap",
+      "redeemed": "beváltva",
+      "short": "még {{count}} érme"
+    },
+    "once": "egyszeri",
+    "redeemedCount": "{{count}}× beváltva",
+    "redeem": "Beváltás",
+    "progressSr": "Út a(z) {{name}} árához",
+    "confirmBody": "Beváltod {{count}} érméért?",
+    "confirmYes": "Beváltom",
+    "failed": "Nem sikerült a művelet. Próbáld újra.",
+    "emptyTitle": "Üres a bolt",
+    "emptyBody": "Tűzz ki célokat: mozi 600, új ruha 2000, kirándulás 5000. Az érméiddel váltod be.",
+    "archivedCount": "Archivált jutalmak · {{count}}",
+    "edit": "Szerkesztés",
+    "price": "Ár",
+    "many": "többször",
+    "onceValue": "egyszer",
+    "days": "{{count}} nap",
+    "noLimit": "nincs korlát",
+    "redeemedSoFar": "Beváltva eddig",
+    "times": "{{count}}×",
+    "statusOk": "Beváltható",
+    "afterRedeem": "elkölthető {{spendable}} érme, utána {{after}}",
+    "redeemCost": "Beváltás · {{count}} érme",
+    "redemptions": "Beváltások",
+    "fulfilled": "Teljesítve",
+    "costLine": "{{count}} érme",
+    "notYet": "még nem kaptad meg",
+    "fulfilledNote": "A teljesítés csak a te jelölésed: érmét nem mozgat.",
+    "archive": "Archiválás",
+    "archiveNote": "Eltűnik a boltból, a beváltások megmaradnak.",
+    "archiveTitle": "Archiválod?",
+    "archiveBody": "A jutalom eltűnik a boltból, a beváltások megmaradnak.",
+    "restore": "Visszaállítás",
+    "form": {
+      "editTitle": "Jutalom szerkesztése",
+      "name": "Név",
+      "description": "Leírás",
+      "cost": "Ár (érme)",
+      "costHint": "Kicsi 80–150 · közepes 300–600 · nagy 1500+",
+      "repeatable": "Beváltható",
+      "many": "Többször",
+      "once": "Egyszer",
+      "cooldown": "Pihenő két beváltás között",
+      "days": "nap",
+      "cooldownHint": "0 = nincs korlát",
+      "create": "Létrehozás",
+      "nameRequired": "Adj nevet a jutalomnak",
+      "costMin": "Legalább 1 érme",
+      "costMax": "Legfeljebb {{count}} érme"
+    },
+    "gone": "Ez a jutalom nem érhető el"
+  },
+  "calendar": {
+    "title": "Naptár",
+    "weekLine": "{{month}} · {{week}}. hét",
+    "prevWeek": "Előző hét",
+    "nextWeek": "Következő hét",
+    "busyDay": "van program",
+    "addEvent": "Esemény",
+    "addTask": "Teendő",
+    "allDay": "Egész nap",
+    "aboutMinutes": "~{{count}} perc",
+    "exerciseCount": "{{count}} gyakorlat",
+    "workoutDone": "Kész",
+    "coins": "+{{coins}} érme",
+    "workoutTag": "Edzés",
+    "restDay": "Pihenőnap – nincs ütemezett edzés.",
+    "nothing": "Erre a napra nincs semmi.",
+    "failed": "Ez most nem sikerült.",
+    "tasks": "Teendők",
+    "openCount": "{{count}} nyitott",
+    "noTasks": "Erre a napra nincs teendő.",
+    "due": "Határidő {{when}}",
+    "anytime": "Bármikor",
+    "taskDone": "{{title}} kész",
+    "recurring": "ismétlődő",
+    "repeat": {
+      "daily": "Naponta",
+      "weekly": "Hetente",
+      "monthly": "Havonta"
+    },
+    "rule": {
+      "daily": "minden nap",
+      "everyN": "{{count}} naponta",
+      "weekly": "minden {{days}}",
+      "weeklyTitle": "Minden héten, {{days}}",
+      "monthly": "minden hónap {{day}}",
+      "yearly": "minden évben, {{date}}",
+      "on": {
+        "mon": "hétfőn",
+        "tue": "kedden",
+        "wed": "szerdán",
+        "thu": "csütörtökön",
+        "fri": "pénteken",
+        "sat": "szombaton",
+        "sun": "vasárnap"
+      }
+    },
+    "reminder": {
+      "minutes": "{{count}} perccel",
+      "hours": "{{count}} órával",
+      "days": "{{count}} nappal",
+      "and": "és",
+      "before": "{{list}} előtte",
+      "atStart": "kezdéskor"
+    },
+    "detail": {
+      "edit": "Szerkesztés",
+      "details": "Részletek",
+      "notes": "Jegyzet",
+      "bell": "Értesítés a csengő alatt",
+      "until": "{{date}}-ig",
+      "remaining": "még {{count}} alkalom",
+      "delete": "Esemény törlése",
+      "deleteTitle": "Törlöd az eseményt?",
+      "deleteAll": "Minden alkalma törlődik.",
+      "missing": "Ez az esemény nem található."
+    },
+    "form": {
+      "newTitle": "Új esemény",
+      "editTitle": "Esemény szerkesztése",
+      "name": "Megnevezés",
+      "kind": "Időzítés",
+      "atTime": "Időpontban",
+      "allDay": "Egész nap",
+      "date": "Dátum",
+      "start": "Kezdés",
+      "end": "Vége",
+      "duration": "Időtartam",
+      "minutes": "{{count}} perc",
+      "hours": "{{count}} óra",
+      "days": "{{count}} nap",
+      "location": "Helyszín",
+      "repeat": "Ismétlődés",
+      "noRepeat": "Nem ismétlődik",
+      "repeatKind": {
+        "none": "Nincs",
+        "daily": "Naponta",
+        "weekly": "Hetente",
+        "monthly": "Havonta",
+        "yearly": "Évente"
+      },
+      "repeatDays": "Napok",
+      "until": "Utolsó alkalom",
+      "reminder": "Emlékeztető",
+      "atStart": "Kezdéskor",
+      "notes": "Jegyzet",
+      "optional": "opcionális",
+      "titleRequired": "Adj nevet az eseménynek",
+      "dateRequired": "Válassz dátumot",
+      "startRequired": "Add meg a kezdést",
+      "spanInvalid": "Legfeljebb 14 nap, a kezdés után",
+      "untilInvalid": "Az utolsó alkalom nem lehet a kezdés előtt",
+      "refused": "Ezt az eseményt így nem lehet menteni."
+    },
+    "capture": {
+      "where": "Hova?",
+      "task": "Feladat",
+      "event": "Esemény",
+      "reminderHint": "Emlékeztető 1 órával előtte"
+    },
+    "next": {
+      "title": "Következő"
+    }
+  },
+  "progressDays": {
+    "tab": "Napok",
+    "week": {
+      "label": "Ezen a héten",
+      "caption": "átlag {{avg}} / nap · előző hét {{prev}}"
+    },
+    "coins": "érme",
+    "weeks": {
+      "label": "Hetek",
+      "title": "{{week}}. hét",
+      "perfect": "{{count}} tökéletes nap",
+      "penalties": "{{count}} büntetés"
+    },
+    "legend": {
+      "done": "teljesítve",
+      "partial": "részben",
+      "missed": "kihagyva"
+    },
+    "kcal": {
+      "target": "cél {{kcal}} kcal",
+      "over": "{{n}} nap a cél fölött",
+      "ofBack": "a {{n}}-ból",
+      "ofFront": "a {{n}}-ből",
+      "perDay": "{{coins}} érme naponta"
+    },
+    "failed": "Nem sikerült a művelet. Próbáld újra."
+  },
+  "focus": {
+    "title": "Fókusz",
+    "what": "Min dolgozol?",
+    "duration": "Időtartam",
+    "checkin": "Ellenőrzés",
+    "none": "Nincs",
+    "minutes": "{{n}} perc",
+    "hours": "{{n}} óra",
+    "rule": "Várhatóan +{{coins}} érme: óránként {{perHour}}, jelzésenként +{{perCheckin}}.",
+    "ruleNoCheckin": "Várhatóan +{{coins}} érme: óránként {{perHour}}.",
+    "start": "Fókusz indítása",
+    "noZone": "Előbb állítsd be az időzónádat.",
+    "limit": "Mára elérted a fókuszblokkok számát.",
+    "startFailed": "Nem sikerült elindítani. Próbáld újra.",
+    "failed": "A fókusz betöltése nem sikerült.",
+    "live": "Fókuszban",
+    "planned": "Következő blokk",
+    "ended": "Lejárt az idő",
+    "left": "{{min}} perc {{sec}} másodperc van hátra",
+    "progress": "{{done}} / {{of}} perc",
+    "checkinAsk": "Rajta vagy még? Jelezz, és jár a +{{coins}} érme.",
+    "checkinCta": "Rajta vagyok",
+    "finish": "Befejezés",
+    "giveUp": "Feladás",
+    "giveUpTitle": "Feladod a blokkot?",
+    "giveUpBody": "A feladott blokk nem ér érmét.",
+    "writeFailed": "Nem sikerült. Próbáld újra.",
+    "doneTitle": "Kész fókusz",
+    "doneMeta": "{{span}} · feladás nélkül",
+    "unitMin": "perc",
+    "coins": "Érme",
+    "credited": "jóváírva",
+    "coinsPlus": "+{{n}} érme",
+    "every": "{{n}} percenként",
+    "level": "Szint",
+    "sum": "{{min}} perc × {{perHour}} érme/óra = {{a}} · {{n}} jelzés × {{p}} = {{b}}",
+    "sumNoCheckin": "{{min}} perc × {{perHour}} érme/óra = {{a}}",
+    "capped": "A napi érmeplafon vagy a napi fókuszkeret miatt kevesebb járt.",
+    "todayMinutes": "ma {{n}} perc"
+  },
+  "adminPosts": {
+    "view": {
+      "label": "Piactér nézet",
+      "reports": "Jelentések",
+      "posts": "Posztok"
+    },
+    "search": "Cím vagy @szerző",
+    "stateLabel": "Állapot",
+    "state": {
+      "all": "Mind",
+      "draft": "Piszkozat",
+      "live": "Élő",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve"
+    },
+    "more": "Továbbiak",
+    "countOf": "{{shown}} / {{total}} poszt",
+    "reportCount": "{{count}} jelentés",
+    "emptyTitle": "Még nincs poszt",
+    "emptyBody": "Amint egy edző közzétesz egy posztot vagy piszkozatot ment, itt jelenik meg.",
+    "noMatchBody": "Próbálj másik szót, vagy válassz másik állapotot.",
+    "errorTitle": "Nem sikerült betölteni",
+    "errorBody": "A piactér most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "detail": {
+      "title": "Poszt",
+      "goneTitle": "Ez a poszt nem található",
+      "goneBody": "Lehet, hogy már nem létezik, vagy hibás a hivatkozás.",
+      "privateDraft": "Nem nyilvános · csak a szerző látja.",
+      "authorOff": "A szerző le van tiltva, ezért a poszt nem látszik.",
+      "notShown": "A poszt most nem látszik a nyilvános oldalon.",
+      "profileOff": "A szerző profilját levették, ezért a poszt nem látszik."
+    },
+    "facts": {
+      "title": "Adatok",
+      "readOnly": "csak olvasható",
+      "kind": "Fajta",
+      "time": "Időpont",
+      "capacity": "Férőhely",
+      "seats": "{{count}} hely",
+      "price": "Ár"
+    },
+    "author": {
+      "title": "Szerző",
+      "disabled": "Letiltva"
+    },
+    "timeline": {
+      "title": "Állapot",
+      "created": "Létrehozva",
+      "published": "Közzétéve",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve",
+      "reason": "Indok: {{reason}}",
+      "notPublished": "Még nincs közzétéve."
+    },
+    "removed": {
+      "reason": "Indok"
+    },
+    "restore": {
+      "action": "Visszaállítás",
+      "hint": "A poszt újra megjelenik a nyilvános oldalon.",
+      "title": "Visszaállítod a posztot?",
+      "message": "A poszt újra megjelenik a nyilvános oldalon, a szerző profilján és a piactéren.",
+      "messageHidden": "A poszt visszaáll, de a nyilvános oldalon még nem látszik: a szerző vagy a profilja miatt."
+    },
+    "body": {
+      "title": "Szöveg",
+      "full": "Teljes szöveg"
+    },
+    "media": {
+      "title": "Média",
+      "count": "{{count}} kép",
+      "cover": "Borító",
+      "nth": "{{n}}. kép"
+    },
+    "reports": {
+      "title": "Jelentések",
+      "open": "{{count}} nyitott",
+      "closed": "{{count}} lezárt",
+      "both": "{{open}} nyitott / {{closed}} lezárt",
+      "severity": "Súlyosság",
+      "upholdAndTakeDown": "Helybenhagyás és levétel",
+      "upheld": "Helybenhagyva",
+      "rejected": "Elutasítva"
+    },
+    "manage": {
+      "title": "Kezelés",
+      "postSub": "Nyilvánosan eltűnik. Visszaállítható.",
+      "profileSub": "Posztjai is eltűnnek. Nem vonható vissza.",
+      "draftNote": "A piszkozat nem nyilvános, így nincs mit levenni."
+    },
+    "takedown": {
+      "post": {
+        "title": "Poszt levétele",
+        "message": "A poszt eltűnik a nyilvános oldalról. Később visszaállíthatod."
+      },
+      "profile": {
+        "title": "Szerző profiljának levétele",
+        "message": "A profil és a posztjai eltűnnek a nyilvános oldalról. Ezt itt nem lehet visszavonni."
+      },
+      "both": {
+        "title": "Poszt és szerzői profil levétele együtt",
+        "message": "A poszt és a szerző profilja is eltűnik a nyilvános oldalról. A poszt később visszaállítható, a profil itt nem."
+      },
+      "report": {
+        "title": "Helybenhagyás és levétel",
+        "message": "A bejelentés helybenhagyva, a poszt eltűnik a nyilvános oldalról. Később visszaállíthatod."
+      },
+      "reason": "Levétel indoka",
+      "reasonHint": "Kötelező. Az audit-naplóba kerül, a szerző nem látja."
+    },
+    "openPost": "Poszt megnyitása"
+  },
+  "adminStats": {
+    "title": "Statisztika",
+    "window": "Időablak",
+    "days": "{{count}} nap",
+    "details": "Részletek",
+    "detailsSub": "Felhasználók, aktivitás, érme, piactér",
+    "errorTitle": "Nem sikerült betölteni",
+    "errorBody": "A statisztika most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "panel": {
+      "users": "Felhasználó összesen",
+      "new7d": "Új 7 napban",
+      "activeCoaches": "Aktív edző",
+      "workouts": "Edzés ma\n/ 7 nap",
+      "pending": "Várakozó moderáció",
+      "openReports": "Nyitott jelentés",
+      "curve": "Aktív naplózók · {{count}} nap",
+      "curveToday": "{{count}} ma"
+    },
+    "section": {
+      "users": "Felhasználók",
+      "activity": "Aktivitás",
+      "coins": "Érme",
+      "marketplace": "Piactér",
+      "coaches": "Edzők",
+      "system": "Rendszer"
+    },
+    "users": {
+      "unit": "felhasználó",
+      "signups": "Új regisztráció",
+      "disabled": "Letiltott"
+    },
+    "activity": {
+      "people": "naplózó ember · {{count}} nap",
+      "today": "Naplózók ma",
+      "workouts": "Befejezett edzés",
+      "nutrition": "Táplálkozás-napló",
+      "note": "Nincs valódi napi aktív felhasználó: a termék nem tárol utolsó belépést. A szám azokat számolja, akik aznap naplóztak valamit."
+    },
+    "coins": {
+      "moved": "érme forgalom · {{count}} nap",
+      "minted": "Kibocsátás",
+      "mintedSub": "jóváírás",
+      "spent": "Költés",
+      "spentSub": "beváltás, vásárlás",
+      "integrity": "Integritás ellenőrzés",
+      "integritySub": "tárca = főkönyv · nyugta = vásárlás",
+      "integrityOk": "Rendben",
+      "integrityDrift": "Eltérés"
+    },
+    "market": {
+      "unit": "poszt",
+      "published": "Közzétett",
+      "scheduled": "Ütemezett",
+      "draft": "Piszkozat",
+      "withdrawn": "Visszavonva",
+      "removed": "Levéve",
+      "openReports": "Nyitott jelentés",
+      "resolved": "Elintézett jelentés"
+    },
+    "coaches": {
+      "withClients": "edző ügyféllel",
+      "perCoach": "Ügyfél / edző",
+      "perCoachSub": "aktív kapcsolatok átlaga",
+      "links": "Aktív kapcsolat"
+    },
+    "system": {
+      "sessions": "aktív munkamenet",
+      "audit": "Auditesemény",
+      "auditSub": "24 óra"
     }
   }
 }

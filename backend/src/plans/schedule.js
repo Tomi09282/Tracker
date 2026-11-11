@@ -18,42 +18,49 @@
 // Neither was visible by reading either copy alone; both were obvious the moment there was only
 // one. This is the same lesson as the ownership predicates and the design tokens: two things that
 // must agree will drift, and the only durable fix is that there is only one thing.
+//
+// Package B-core: the rule itself now lives in ./occurrences.js (pure, no imports) so the LifeOS
+// day close can run it INSIDE a worker transaction; this file reads the rows and calls it.
 import * as db from '../db/index.js';
+import { expandOccurrences } from './occurrences.js';
+import { calendarKeyFor } from '../lifeos/dates.js';
 
-const DAY_MS = 86400000;
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
-const utc = (date) => Date.parse(`${date}T00:00:00Z`);
 
 /**
  * The user's own calendar day.
  *
  * Derived from their stored timezone, never from the request — a client that reports its own date
  * can report any date, and "which day is this workout on" decides which occurrence gets consumed.
+ *
+ * The zone is user_prefs.timezone (migration 031, written by PATCH /me/prefs). Until 031 it was
+ * onboarding_profiles.timezone, which nothing ever wrote — so every date was a UTC date; 031
+ * backfilled what existed. This is the CALENDAR date in the zone, not the LifeOS logical day:
+ * a workout at 01:00 is logged on the date the clock shows.
  */
 export async function localDateFor(userId) {
-  const row = await db.get('SELECT timezone FROM onboarding_profiles WHERE user_id = ?', [userId]);
+  return (await localDateInfo(userId)).date;
+}
+
+/** The same date, plus whether it came from a stored zone (`zoned`) or is the UTC fallback. */
+export async function localDateInfo(userId) {
+  const row = await db.get('SELECT timezone FROM user_prefs WHERE user_id = ?', [userId]);
   const zone = row?.timezone;
-  if (!zone) return iso(Date.now());
+  if (!zone) return { date: iso(Date.now()), zoned: false };
   try {
-    // `en-CA` renders as YYYY-MM-DD, which is what the schema's `date(local_date)` CHECK wants.
-    return new Intl.DateTimeFormat('en-CA', { timeZone: zone }).format(new Date());
+    return { date: calendarKeyFor(new Date(), zone), zoned: true };
   } catch {
     // A stored zone the runtime does not recognise is data rot, not a request error. Fall back
     // rather than failing a workout the user is standing in the gym trying to start.
-    return iso(Date.now());
+    return { date: iso(Date.now()), zoned: false };
   }
 }
 
 /**
  * Every scheduled occurrence for one user in the window `[fromDate, fromDate + days)`.
  *
- * Three things it handles that a naive `starts_on + k*cycle` loop does not, each of which would
- * otherwise show someone the wrong day:
- *   - `ends_on`: a finished block stops producing occurrences — on BOTH paths below, which is
- *     precisely where the first version of this drifted.
- *   - exceptions: a `skip` removes the day; a `move` takes it off its original date AND puts it on
- *     the new one, so the window has to be searched from both directions.
- *   - rest days: they occur, and saying "rest day" is information. Hiding them looks like a bug.
+ * The rule (ends_on on both paths, skip / move exceptions searched from both directions, rest days
+ * that occur) is ./occurrences.js expandOccurrences — see it for what each part prevents.
  *
  * `days` is bounded by every caller — the ICS horizon is the largest at 120 — because the loop is
  * driven by a cycle length that ultimately came from a user.
@@ -92,67 +99,5 @@ export async function occurrencesBetween(userId, fromDate, days) {
     ),
   ]);
 
-  const skipped = new Set(exceptions.filter((e) => e.action === 'skip').map((e) => `${e.day_id}:${e.occurrence_date}`));
-  const movedFrom = new Map(
-    exceptions.filter((e) => e.action === 'move').map((e) => [`${e.day_id}:${e.occurrence_date}`, e.moved_to_date]),
-  );
-  const logByOccurrence = new Map(logs.map((l) => [`${l.plan_day_id}:${l.occurrence_date}`, l]));
-
-  const out = [];
-  const start = utc(fromDate);
-
-  const emit = (d, plan, date, moved) => {
-    const log = logByOccurrence.get(`${d.id}:${date}`);
-    out.push({
-      date,
-      day_id: d.id,
-      day_name: d.name,
-      slot: d.slot,
-      is_rest: d.is_rest,
-      est_minutes: d.est_minutes,
-      start_time: d.start_time,
-      exercise_count: d.exercise_count,
-      plan_id: plan.id,
-      plan_name: plan.name,
-      ...(moved ? { moved: true } : {}),
-      log_id: log?.id ?? null,
-      log_status: log?.status ?? null,
-    });
-  };
-
-  for (let offset = 0; offset < days; offset += 1) {
-    const date = iso(start + offset * DAY_MS);
-    for (const plan of plans) {
-      if (date < plan.starts_on) continue;
-      if (plan.ends_on && date > plan.ends_on) continue;
-      const elapsed = Math.floor((utc(date) - utc(plan.starts_on)) / DAY_MS);
-      const index = ((elapsed % plan.cycle_days) + plan.cycle_days) % plan.cycle_days;
-
-      for (const d of planDays.filter((x) => x.plan_id === plan.id && x.day_index === index)) {
-        const key = `${d.id}:${date}`;
-        if (skipped.has(key)) continue;
-        // A moved day leaves its original date and appears on the new one — which may fall outside
-        // this window, and that is correct: it is simply not in this week any more.
-        if ((movedFrom.get(key) ?? date) !== date) continue;
-        emit(d, plan, date, false);
-      }
-    }
-  }
-
-  // Days moved ONTO a date inside the window, FROM ANYWHERE — including from before it. This pass
-  // is the one the ICS copy lacked, and without it a session dragged backwards out of the window
-  // and forwards into it disappeared instead of moving.
-  for (const e of exceptions.filter((x) => x.action === 'move' && x.moved_to_date)) {
-    if (e.moved_to_date < fromDate || utc(e.moved_to_date) >= start + days * DAY_MS) continue;
-    const d = planDays.find((x) => x.id === e.day_id);
-    if (!d) continue;
-    const plan = plans.find((p) => p.id === d.plan_id);
-    if (!plan) continue;
-    // A move cannot outlive its block. Without this the moved half ignored `ends_on` while the
-    // scheduled half honoured it — the exact bug that started the consolidation.
-    if (plan.ends_on && e.moved_to_date > plan.ends_on) continue;
-    emit(d, plan, e.moved_to_date, true);
-  }
-
-  return out.sort((a, b) => a.date.localeCompare(b.date) || a.slot - b.slot);
+  return expandOccurrences({ plans, planDays, exceptions, logs }, fromDate, days);
 }

@@ -1,0 +1,57 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 2a2f01a..161a7f9 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -85,6 +85,7 @@ const EXPECT_BY_VIEW = {
+     ['/tasks', '/'],
+     ['/challenges', '/'],
+     ['/challenges/pool', '/'],
++    ['/focus', '/'],
+     ['/workout', '/workout'],
+     ['/workout/42', '/workout'],
+     ['/library', '/workout'],
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 8b35485..e20f75b 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   user: [
+     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+     // lighting anything. `owns` is the exception list `end` cannot express.
+-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges'] },
++    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges', '/focus'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'calendar', to: '/calendar', icon: 'calendar', labelKey: 'nav.calendar' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 9d9b86d..5608678 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -64,6 +64,7 @@ export const ROUTE_META = {
+   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
++  '/focus': { parent: '/', parentLabelKey: 'nav.today' },
+   '/calendar/events/:id': { parent: '/calendar', parentLabelKey: 'nav.calendar' },
+   '/challenges': { parent: '/', parentLabelKey: 'nav.today' },
+   '/challenges/pool': { parent: '/challenges', parentLabelKey: 'challenges.title' },
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 614754e..98c618c 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -116,6 +116,7 @@ const ChallengesPage = lazy(() =>
+ const ChallengePoolPage = lazy(() =>
+   import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
+ );
++const FocusPage = lazy(() => import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })));
+ const RewardsPage = lazy(() => import('../features/rewards/RewardsPage').then((m) => ({ default: m.RewardsPage })));
+ const RewardDetailPage = lazy(() =>
+   import('../features/rewards/RewardDetailPage').then((m) => ({ default: m.RewardDetailPage })),
+@@ -167,6 +168,7 @@ export const router = createBrowserRouter([
+       { path: 'habits', element: suspended(<HabitsPage />) },
+       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+       { path: 'tasks', element: suspended(<TasksPage />) },
++      { path: 'focus', element: suspended(<FocusPage />) },
+       { path: 'challenges', element: suspended(<ChallengesPage />) },
+       { path: 'challenges/pool', element: suspended(<ChallengePoolPage />) },
+       { path: 'library', element: suspended(<LibraryPage />) },

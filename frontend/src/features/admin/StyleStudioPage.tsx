@@ -1,133 +1,66 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LucideIcon } from 'lucide-react';
-import {
-  Calendar,
-  Check,
-  ChevronDown,
-  CircleCheck,
-  CircleGauge,
-  Coins,
-  Columns3,
-  Copy,
-  CreditCard,
-  Heart,
-  Hourglass,
-  List,
-  Loader2,
-  MessageSquare,
-  MousePointerClick,
-  Palette,
-  PanelBottom,
-  PanelTop,
-  Plus,
-  Pointer,
-  RectangleHorizontal,
-  RefreshCw,
-  SlidersHorizontal,
-  SquareCheck,
-  SquareStack,
-  TextCursorInput,
-  Timer,
-  ToggleRight,
-  Trophy,
-  UserPlus,
-} from 'lucide-react';
-import { cn } from '../../lib/cn';
 import { CATALOG, VARIANTS, type Variant } from '../../ui/feedback/catalog';
 import { VariantOverride } from '../../ui/feedback/ElementStyleProvider';
 import { Demo, PREVIEWABLE } from '../../features/playground/PlaygroundPage';
-import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
+import { UnlitPills } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { ChipRow, Chip } from '../../ui/primitives/ChipRow';
+import { CheckMark } from '../../ui/primitives/CheckMark';
+import { Numeral } from '../../ui/data/Numeral';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow } from '../../ui/data/ListRow';
+import { Section, SectionHeader } from '../../ui/data/SectionHeader';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 import { useToast } from '../../ui/feedback/ToastHost';
+import { cn } from '../../lib/cn';
 import { useElementStyles, useSetElementVariant } from './useElementStyles';
 
 /**
- * The Element Style Studio — F9.
+ * The Element Style Studio (`/admin/styles`) — Pulse frames `style-studio-1` / `style-studio-2`.
  *
  * ═══ IT REUSES THE PLAYGROUND'S PREVIEW, IT DOES NOT REBUILD IT ════════════════════════════════
  *
- * `PlaygroundPage` has rendered every element against every variant since Phase 1, with real
- * interactive components inside a `VariantOverride`. Writing a second preview harness here would be
- * the eleventh time this project reimplemented something it already had — and the two would drift,
- * so the thing an admin previewed would stop being the thing users get. `Demo` is exported and used
- * directly.
+ * `Demo` (exported by `PlaygroundPage`) renders an element under a `VariantOverride`, so what is on
+ * a stage here is the real component, pressable, not a picture of it. The hero shows the active
+ * variant at 150 % (the wrapper is scaled, never a second copy); each variant row shows the same
+ * demo under ITS letter in a 142 pt stage that clips. Row specimens rest unlit (`UnlitPills`, the
+ * frames set `effects = []`): the hero holds the one glowing control.
  *
- * ═══ THE HERO IS THE ANSWER TO THE QUESTION PEOPLE ARRIVE WITH ═════════════════════════════════
+ * ═══ THE HONEST STUDIO (owner answer Q3 a) ═════════════════════════════════════════════════════
  *
- * They came to ask one thing about one element — what does this control do when you press it, and
- * can it do something better — so the screen opens with the element AS IT SHIPS RIGHT NOW, live and
- * pressable, alone on a stage. The previous design made you find that among five equal cards by
- * looking for the one with an accent border. Size is doing real work here too: these variants are
- * differences in MOTION, and a sheen sweep inside a small square is a rectangle that flickers.
+ * Under one Pulse look per element no component reads a variant any more: every catalogue entry is
+ * `live: false` (`catalog.ts`, held to the call sites by `check-element-roster.mjs`). The screen
+ * says so instead of pretending: the hero and the section head carry "nem használt", the
+ * consequence note gives way to `studio.inertExplain` and the five commit controls are disabled.
+ * The hero then shows nothing beside the letter: `studio.noPreview` ("…the components read it")
+ * would contradict `inertExplain` four lines lower, so it is kept for a LIVE element without a
+ * stage. Nothing of that is special-cased: it is the same `entry.live` branch the page has always
+ * had, so an element that gets a consumer again lights up here without a code change.
  *
- * The hero is wrapped in the same `VariantOverride` the cards below use, so it is the truth rather
- * than a screenshot of it.
+ * The lime dot after a letter marks the ACTIVE variant (the kit's `Numeral dot`, screen note "one
+ * meaning of active: accent everywhere"), not liveness: the stored letter is real whether or not a
+ * component reads it, so the giant letter and the active row's letter are lit as the frames draw.
  *
- * ═══ THREE ELEMENTS CHANGE NOTHING, AND THE SCREEN SAYS SO ═════════════════════════════════════
+ * ═══ THE GRAMMAR OF THE FRAMES ═════════════════════════════════════════════════════════════════
  *
- * E23, E24 and E27 have rows in `element_style_config`, labels in the catalogue and a settable
- * endpoint — and no component anywhere calls `useElementVariant` on them. Measured, not assumed;
- * `scripts/check-element-roster.mjs` holds `catalog.live` to the actual call sites and fails the
- * build if either side moves.
+ *   header      `ScreenHeader kind="section"`: MEGJELENÉS is a category, not a way back (no chevron)
+ *   hero        the element · id on the eyebrow line with the state tag on its baseline; the ACTIVE
+ *               LETTER as the giant numeral and the specimen standing on its baseline; the variant
+ *               name as the caption
+ *   chooser     27 text options on one bleeding rail (`ChipRow`, lime mark = the subject); from
+ *               1024 pt the 27-row column beside the workspace (R21), with the active letter of
+ *               every live entry
+ *   Változatok  strong rule, eyebrow, the note, then the five variants as ONE ruled table: letter
+ *               (48 pt numeral), name (eyebrow) + tag, the stage line with the commit TEXT on the
+ *               right edge — or, on the active row, a state: the lime tick and "Ez az aktív"
  *
- * A studio that rendered all 27 identically would let an admin pick a variant, watch it save, see it
- * audited, and change nothing at all. So an inert element is labelled inert — on the chip AND in the
- * workspace heading — and its commit buttons are dead. The entry stays visible because deleting it
- * would be worse: the setting is real, it is simply not wired to anything yet.
- *
- * ═══ ONE MEANING OF "ACTIVE" ═══════════════════════════════════════════════════════════════════
- *
- * Accent, everywhere: the selected chip, the active card's border, the `aktív` chip on it. An
- * earlier pass had the confirmation chip in success-green while the border stayed accent, which is
- * two colours claiming the same state on one screen. Green stays what it is everywhere else in the
- * app — the colour of something that just happened — and that is the toast's job here.
+ * Nothing is enclosed: no surface, no card, no chip outline. The commit is a text link because the
+ * lime shapes on this screen are specimens, not actions.
  */
-/**
- * A glyph per element, for the chip rail.
- *
- * The rail's 32px holder used to carry the element's ACTIVE LETTER, so no chip said what its
- * element actually is — a rail of 27 identical squares reading `A`, `C`, `·`. The mockup draws the
- * element itself in that slot (a hand-tap on `E1 Gomb`, a switch on `E4 Kapcsoló`, a card outline
- * on `E12 Kártya`), which is what makes the rail scannable at a glance.
- *
- * It lives HERE and not beside `CATALOG`, which is where it belongs: `catalog.ts` is parity-checked
- * data read by `check-element-roster.mjs`, and this screen is the only consumer. The `??` fallback
- * means a catalogue entry added without a glyph gets a generic mark rather than an empty square,
- * so the two files cannot go out of step in a way that breaks the rail.
- */
-const ELEMENT_ICON: Record<string, LucideIcon> = {
-  E1: Pointer,
-  E2: Copy,
-  E3: MousePointerClick,
-  E4: ToggleRight,
-  E5: SquareCheck,
-  E6: Columns3,
-  E7: TextCursorInput,
-  E8: ChevronDown,
-  E9: Calendar,
-  E10: PanelTop,
-  E11: PanelBottom,
-  E12: CreditCard,
-  E13: List,
-  E14: SquareStack,
-  E15: MessageSquare,
-  E16: CircleGauge,
-  E17: SlidersHorizontal,
-  E18: RectangleHorizontal,
-  E19: RefreshCw,
-  E20: Plus,
-  E21: CircleCheck,
-  E22: Timer,
-  E23: Heart,
-  E24: UserPlus,
-  E25: Coins,
-  E26: Trophy,
-  E27: Hourglass,
-};
-
 export function StyleStudioPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -150,287 +83,172 @@ export function StyleStudioPage() {
     );
   };
 
+  /** The accessible name of a chooser option: an element nothing reads says so in its name. */
+  const optionName = (e: (typeof CATALOG)[number]) => (e.live ? undefined : `${e.id} ${e.name} — ${t('studio.inertShort')}`);
+
+  // The state tag of the hero, on the eyebrow's baseline. Lower-case words about this one element,
+  // in the mono `micro` role the frames draw ("aktív"); omitted while the styles are loading.
+  const heroTag = styles.isPending ? null : !entry.live ? (
+    <span className="text-micro text-text-2">{t('studio.inertShort')}</span>
+  ) : active ? (
+    <span className="text-micro text-text-2">{t('studio.active')}</span>
+  ) : null;
+
   return (
-    <div className="col-wide screen-x flex flex-col gap-section py-6">
-      <header className="flex flex-col gap-tight">
-        <p className="text-micro uppercase text-accent">{t('studio.eyebrow')}</p>
-        <h1 className="text-title-1 text-text-1">{t('studio.title')}</h1>
-        <p className="text-body-s measure text-text-2">{t('studio.intro')}</p>
-      </header>
+    <Screen top="push" width="wide">
+      <ScreenHeader kind="section" eyebrow={t('studio.eyebrow')} title={t('studio.title')}>
+        <p className="text-body text-text-2">{t('studio.intro')}</p>
+      </ScreenHeader>
 
-      {/* ── the anchor ─────────────────────────────────────────────────────────────────────────
-          What is live right now, at a size where a motion difference is legible. The label names
-          the element, the chip names the state, the caption names the running variant. */}
-      <Surface as="section" className="flex flex-col gap-group">
-        <div className="flex items-start justify-between gap-tight">
-          <span className="text-micro uppercase tabular-nums text-text-3">
-            {entry.name} · {entry.id}
-          </span>
-          {/* The state chips are NOT uppercased, unlike the label to their left. `aktív` and
-              `nem használt` are words about this one element, not eyebrows opening a section, and
-              both mockups draw them lowercase — the caps had been making a five-letter status read
-              louder than the element it describes. */}
-          {!entry.live ? (
-            <span className="text-micro rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
-              {t('studio.inertShort')}
-            </span>
-          ) : active ? (
-            <span className="text-micro rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
-              {t('studio.active')}
-            </span>
-          ) : null}
-        </div>
+      {/* ── the anchor and (on a phone) the chooser, 20 apart ─────────────────────────────────── */}
+      <div className="flex flex-col gap-5">
+        <section aria-label={`${entry.name} · ${entry.id}`} className="flex flex-col gap-2">
+          <SectionHeader rule={false} title={`${entry.name} · ${entry.id}`} trailing={heroTag} />
 
-        <div className="grid min-h-40 place-items-center py-2">
-          {styles.isPending ? (
-            // Control-shaped and control-sized, so the live component does not shove the caption
-            // down when it arrives.
-            <Skeleton className="h-11 w-32 rounded-button" />
-          ) : previewable && active ? (
-            /* THE HERO IS DRAWN HALF AGAIN AS LARGE — and by scaling the WRAPPER, never by sizing
-               a second copy of the component. What is on this stage has to stay the real,
-               pressable thing the rows below render, or the anchor is a picture of the truth
-               rather than the truth. Unscaled it was pixel-identical to the five thumbnails and
-               the hero was distinguished only by the air around it, while these variants are
-               differences in MOTION: a sheen sweep inside a control-sized box is a rectangle that
-               flickers.
-
-               The 2/3 box is what makes 150% safe. A demo that asks for `w-full` — E7's field,
-               E13's swipe row — fills two thirds of the stage and lands back at exactly the
-               stage's width once scaled, instead of painting half its width outside the card. */
-            <div className="flex w-2/3 origin-center scale-150 justify-center">
-              <VariantOverride styles={{ [entry.id]: active }}>
-                <Demo id={entry.id} />
-              </VariantOverride>
+          {/* The live-element line: the active letter on the left, the specimen standing on its
+              baseline at the right edge. Both bottom-aligned, so the pill's foot is the D's. */}
+          {styles.isPending || active || entry.live ? (
+            <div className="flex min-h-24 items-end justify-between gap-4">
+              {styles.isPending ? (
+                <>
+                  <Skeleton className="h-24 w-16" />
+                  <Skeleton className="h-14 w-32" />
+                </>
+              ) : (
+                <>
+                  {active ? <Numeral size="giant" value={active} dot /> : null}
+                  {previewable && active ? (
+                    /* 112 pt of layout, drawn at 150 % from its bottom-right corner: a pill lands
+                       168 x 84 on the right edge, and a demo that asks for the full width (E7's
+                       field) fills 168 and never reaches the letter. */
+                    <div className="flex w-28 shrink-0 origin-bottom-right scale-150 justify-end">
+                      <VariantOverride styles={{ [entry.id]: active }}>
+                        <Demo id={entry.id} />
+                      </VariantOverride>
+                    </div>
+                  ) : entry.live ? (
+                    <p className="text-cap min-w-0 flex-1 text-text-3">{t('studio.noPreview')}</p>
+                  ) : null}
+                </>
+              )}
             </div>
-          ) : (
-            <p className="text-caption measure text-center text-text-3">{t('studio.noPreview')}</p>
-          )}
-        </div>
-
-        {styles.isPending ? (
-          <Skeleton className="mx-auto h-4 w-40" />
-        ) : (
-          <p className="text-body-s text-center text-text-2">
-            {active ? `${active} · ${entry.variants[active]}` : '·'}
-          </p>
-        )}
-      </Surface>
-
-      <div className="flex flex-col gap-section lg:flex-row lg:gap-6">
-        {/* ── the element chooser ───────────────────────────────────────────────────────────────
-            A radiogroup, not a set of buttons: it is a single choice with one selected member, and
-            screen readers should hear it that way.
-
-            THE TWENTY-SEVEN-ROW LIST BECAME A RAIL ON A PHONE. As a column it filled the entire
-            screen before any preview appeared, and the studio is opened to change ONE element —
-            usually right after somebody asked about that specific control. Above lg it is the same
-            vertical list it has always been; this is one control that changes shape, not two. */}
-        <nav className="lg:w-64 lg:shrink-0" aria-label={t('studio.elementList')}>
-          <ul
-            role="radiogroup"
-            aria-label={t('studio.elementList')}
-            className="flex gap-tight overflow-x-auto lg:flex-col lg:overflow-visible"
-          >
-            {CATALOG.map((e) => {
-              const on = e.id === selected;
-              const Glyph = ELEMENT_ICON[e.id] ?? Palette;
-              return (
-                <li key={e.id}>
-                  <Pressable
-                    variant="ghost"
-                    // The SELECTED WASH (DESIGN §5.6), not `secondary`. A surface-1 fill behind a
-                    // ghost chip is a near-invisible difference in dark mode, so the accent
-                    // hairline was doing all the work of saying which element is open — and the
-                    // mockup draws the selected chip as an unmistakable filled panel. `selected`
-                    // also carries the hover half: without it the chosen chip reverted to
-                    // surface-2 under the pointer, which reads as "about to deselect".
-                    selected={on}
-                    density="compact"
-                    role="radio"
-                    aria-checked={on}
-                    // Inert elements are muted rather than marked with a glyph of their own (the
-                    // holder is the element's now), so the fact has to reach a screen reader some
-                    // other way — the chip says it in its name instead of on its face.
-                    aria-label={e.live ? undefined : `${e.id} ${e.name} — ${t('studio.inertShort')}`}
-                    className={cn(
-                      'h-auto w-28 shrink-0 flex-col gap-tight py-2 text-center',
-                      'lg:w-full lg:flex-row-reverse lg:justify-between lg:text-left',
-                      'border-[length:var(--border-width)]',
-                      on ? 'border-accent' : 'border-[var(--surface-border)]',
-                      // The whole chip carries the inert signal, which is what the spec asks for:
-                      // "their own muted treatment rather than dropping the signal".
-                      !e.live && 'opacity-60',
-                    )}
-                    onClick={() => setSelected(e.id)}
-                  >
-                    {/* The holder carries the ELEMENT — what this chip is about. It used to carry
-                        the active LETTER, which meant no chip on the rail said what it was: 27
-                        identical squares reading `A`, `C` or `·`. The letter has not gone; see the
-                        wide-rail span below. */}
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'inline-flex size-8 shrink-0 items-center justify-center rounded-chip',
-                        e.live && on ? 'bg-accent-subtle text-accent' : 'bg-surface-2 text-text-3',
-                      )}
-                    >
-                      <Glyph className="size-icon-s" strokeWidth={2} />
-                    </span>
-                    <span className={cn('w-full truncate lg:flex-1', !e.live && 'text-text-3')}>
-                      <span className="text-caption tabular-nums mr-1 text-text-3">{e.id}</span>
-                      {e.name}
-                      {/* The active letter, on the WIDE rail only. On a phone the chip is 112px
-                          and the mockup draws just `E1 Gomb`, with the running variant named in
-                          full on the hero right above it. On lg the rail is a 27-row list where
-                          this letter is the only per-element state in view, and the hero can only
-                          speak for the one element that is open. */}
-                      {e.live ? (
-                        <span className="text-caption tabular-nums ml-1 hidden text-text-3 lg:inline">
-                          · {styles.data?.styles[e.id] ?? '·'}
-                        </span>
-                      ) : null}
-                    </span>
-                  </Pressable>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/*
-          NO `aria-live` here, and it had one for an afternoon.
-
-          Measured: the section's text content is the whole workspace — the heading, all five
-          variant labels, every demo's own button text and every "Make active". A polite live region
-          re-announces its ENTIRE contents when they change, so picking a variant would have read
-          about eighty words aloud. The result is already announced properly by the toast, which
-          carries `role="status"` and says one sentence: "E1 now uses variant C".
-        */}
-        <section className="flex min-w-0 flex-1 flex-col gap-group">
-          <div className="flex items-center gap-tight">
-            <span
-              aria-hidden
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-chip bg-accent-subtle text-accent"
-            >
-              <Palette className="size-icon-m" strokeWidth={2} />
-            </span>
-            {/* The heading names the SECTION, not the element. `Button` over `E1` here repeated
-                the identity the hero states two blocks above ("GOMB · E1") and left the list of
-                five variants under it unnamed. */}
-            <h2 className="text-title-3 min-w-0 flex-1 truncate text-text-1">
-              {t('studio.variants')}
-            </h2>
-            {!entry.live ? (
-              <span className="text-micro shrink-0 rounded-chip bg-surface-2 px-2 py-0.5 text-text-3">
-                {t('studio.inertShort')}
-              </span>
-            ) : null}
-          </div>
-
-          {!entry.live ? (
-            <Surface>
-              <p className="text-body-s measure text-text-2">{t('studio.inertExplain')}</p>
-            </Surface>
           ) : null}
 
-          {/* THE SENTENCE THE INTRO LOST, PUT WHERE THE CONSEQUENCE IS.
-              `studio.intro` used to carry it four lines above the fold — "this applies to every
-              user on their next load, with no redeploy" — where it was skimmed once and never
-              again. It is a real and slightly alarming fact about the buttons directly below, so
-              it sits with them: DESIGN §6.4, say the consequence before the action, not in a
-              paragraph at the top of the page. */}
-          {entry.live ? <p className="text-caption measure text-text-3">{t('studio.commitNote')}</p> : null}
+          {styles.isPending ? (
+            <Skeleton className="h-5 w-40" />
+          ) : (
+            <p className="text-body-m text-text-1">{active ? entry.variants[active] : '·'}</p>
+          )}
+        </section>
 
-          <ul className="flex flex-col gap-group">
+        {/* The rail — a radiogroup: one element is open. It saves nothing. */}
+        <div className="lg:hidden">
+          <ChipRow label={t('studio.elementList')} role="radiogroup" scroll="bleed">
+            {CATALOG.map((e) => (
+              <Chip
+                key={e.id}
+                role="radio"
+                selected={e.id === selected}
+                aria-label={optionName(e)}
+                onClick={() => setSelected(e.id)}
+              >
+                {`${e.id} ${e.name}`}
+              </Chip>
+            ))}
+          </ChipRow>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-6">
+        {/* Desktop (R21): the same choice as a 27-row column beside the workspace; a live entry
+            also shows its active letter, the only per-element state in view up here. */}
+        <RowStack
+          as="div"
+          role="radiogroup"
+          aria-label={t('studio.elementList')}
+          className="hidden lg:flex lg:w-64 lg:shrink-0 lg:self-start"
+        >
+          {CATALOG.map((e) => (
+            <ListRow
+              key={e.id}
+              role="radio"
+              aria-checked={e.id === selected}
+              aria-label={optionName(e)}
+              tone={e.id === selected ? 'default' : 'muted'}
+              title={`${e.id} ${e.name}`}
+              value={e.live ? (styles.data?.styles[e.id] ?? '·') : undefined}
+              onClick={() => setSelected(e.id)}
+            />
+          ))}
+        </RowStack>
+
+        <Section
+          title={t('studio.variants')}
+          trailing={!entry.live ? <span className="text-micro text-text-2">{t('studio.inertShort')}</span> : undefined}
+          className="min-w-0 flex-1"
+        >
+          {/* Say the consequence before the action — or, for an element nothing reads, why every
+              action below is off. */}
+          <p className="text-cap text-text-2">{entry.live ? t('studio.commitNote') : t('studio.inertExplain')}</p>
+
+          <RowStack open close>
             {VARIANTS.map((v) => {
-              if (styles.isPending) {
-                return (
-                  <li key={v}>
-                    <Skeleton className="h-28 w-full rounded-card" />
-                  </li>
-                );
-              }
               const isActive = v === active;
               const saving = setVariant.isPending && setVariant.variables?.variant === v;
               return (
-                <li key={v}>
-                  <Surface
-                    as="article"
-                    className={cn(
-                      'flex items-stretch gap-group',
-                      isActive && 'border-accent bg-accent-subtle',
-                    )}
-                  >
-                    {/* The stage. The SAME override the playground uses, around the SAME
-                        component: what is pressed here is what ships, not a rendering of it.
-                        It clips, deliberately — a wide demo cropped by the stage edge still shows
-                        the motion, and letting it set the row height would make five rows of five
-                        different heights. */}
-                    <Surface
-                      elevation="inset"
-                      rim={false}
-                      pad="none"
-                      className="grid w-2/5 shrink-0 place-items-center overflow-hidden p-2"
-                    >
-                      {previewable ? (
-                        <VariantOverride styles={{ [entry.id]: v }}>
-                          <Demo id={entry.id} />
-                        </VariantOverride>
-                      ) : (
-                        // The full "no live preview" sentence is on the hero, where there is room
-                        // for it. Repeating it five times in a 100px stage would be five walls of
-                        // text nobody reads.
-                        <span className="text-micro uppercase tabular-nums text-text-3">{v}</span>
-                      )}
-                    </Surface>
-
-                    <div className="flex min-w-0 flex-1 flex-col gap-tight lg:flex-row lg:items-center lg:justify-between">
-                      <div className="flex min-w-0 flex-col gap-tight">
-                        <div className="flex flex-wrap items-center gap-tight">
-                          <span className="text-micro uppercase text-text-3">
-                            {v} · {entry.variants[v]}
-                          </span>
-                          {isActive ? (
-                            <span className="text-micro inline-flex items-center gap-1 rounded-chip bg-accent-subtle px-2 py-0.5 text-accent">
-                              <Check className="size-icon-s" aria-hidden />
-                              {t('studio.active')}
-                            </span>
-                          ) : null}
-                        </div>
-                        {/* The rule runs the width of the text block, as the mockup draws it. At
-                            32px it was a stub hanging off the label rather than a division of the
-                            card — and it is the line the one-sentence description sits under once
-                            the catalogue carries one (see the handover note). */}
-                        <span aria-hidden className="h-px w-full rounded-chip bg-border-token" />
-                      </div>
-
-                      <Pressable
-                        variant={isActive ? 'secondary' : 'primary'}
-                        density="compact"
-                        className="self-start lg:self-auto"
-                        disabled={!entry.live || isActive || setVariant.isPending}
-                        onClick={() => choose(v)}
-                      >
-                        {saving ? (
-                          <Loader2 className="size-icon-s animate-spin motion-reduce:animate-none" aria-hidden />
-                        ) : isActive ? (
-                          <Check className="size-icon-s" aria-hidden />
-                        ) : null}
-                        {isActive ? t('studio.isActive') : t('studio.makeActive')}
-                      </Pressable>
+                <div key={v} aria-current={isActive || undefined} className="flex items-end gap-4 pt-3 pb-4">
+                  <span className="flex h-11 w-12 shrink-0 items-center">
+                    <Numeral size="num" value={v} tone={isActive ? 'ink' : 'pending'} dot={isActive} />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="flex h-5 items-baseline justify-between gap-4">
+                      <span className={cn('text-eyebrow min-w-0 truncate', isActive ? 'text-text-1' : 'text-text-2')}>
+                        {entry.variants[v]}
+                      </span>
+                      {isActive ? <span className="text-micro shrink-0 text-text-2">{t('studio.active')}</span> : null}
                     </div>
-                  </Surface>
-                </li>
+                    <div className="flex h-11 items-center justify-between gap-4">
+                      {styles.isPending ? (
+                        <Skeleton className="h-11 flex-1" />
+                      ) : (
+                        <>
+                          {previewable ? (
+                            <div className="flex h-11 min-w-0 max-w-[142px] flex-1 items-center overflow-hidden">
+                              <UnlitPills>
+                                <VariantOverride styles={{ [entry.id]: v }}>
+                                  <Demo id={entry.id} />
+                                </VariantOverride>
+                              </UnlitPills>
+                            </div>
+                          ) : null}
+                          {isActive ? (
+                            <span className="text-body-m ml-auto flex shrink-0 items-center text-text-2">
+                              <CheckMark done className="-mr-1" />
+                              {t('studio.isActive')}
+                            </span>
+                          ) : (
+                            <TextLink
+                              text="body"
+                              className="ml-auto shrink-0"
+                              disabled={!entry.live || setVariant.isPending}
+                              busy={saving}
+                              onClick={() => choose(v)}
+                            >
+                              {t('studio.makeActive')}
+                            </TextLink>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </ul>
+          </RowStack>
 
-          {styles.isError ? (
-            <EmptyState icon={Palette} title={t('studio.loadFailed')} body={t('studio.loadFailedBody')} />
-          ) : null}
-        </section>
+          {styles.isError ? <EmptyState title={t('studio.loadFailed')} body={t('studio.loadFailedBody')} /> : null}
+        </Section>
       </div>
-    </div>
+    </Screen>
   );
 }

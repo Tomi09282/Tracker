@@ -13,13 +13,13 @@
     "minutesShort": "min",
     "dismiss": "Dismiss",
     "close": "Close",
-    "prevMonth": "Previous month",
-    "nextMonth": "Next month",
     "add": "Add",
     "delete": "Delete",
     "undo": "Undo",
-    "undone": "Undone",
-    "copy": "Copy"
+    "copy": "Copy",
+    "clearSearch": "Clear search",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "auth": {
     "emailValid": "The e-mail address looks valid",
@@ -52,8 +52,9 @@
   },
   "nav": {
     "nutritionShort": "Food",
+    "calendar": "Calendar",
     "profile": "Profile",
-    "home": "Home",
+    "today": "Today",
     "library": "Exercises",
     "settings": "Settings",
     "admin": "Admin",
@@ -69,84 +70,145 @@
     "compose": "Publishing",
     "composeProfile": "Public profile",
     "styleStudio": "Style studio",
-    "playground": "Playground"
+    "playground": "Playground",
+    "clients": "Clients",
+    "desk": "Desk",
+    "moderation": "Moderation",
+    "accounts": "Accounts",
+    "switch": {
+      "user": "Member",
+      "trainer": "Coach",
+      "userName": "Back to member view",
+      "trainerName": "Back to coach view"
+    }
   },
   "home": {
     "greeting": "Hi there!",
     "todayTitle": "Today's workout",
     "emptyTitle": "Nothing scheduled today",
     "emptyBody": "If you have an active plan, today's session shows up here.",
-    "browseLibrary": "Browse exercises",
     "inProgress": "Workout in progress",
     "resume": "Resume",
     "start": "Start",
     "done": "Done",
     "restDay": "Rest day",
-    "exerciseCount": "{{count}} exercises",
-    "nothingScheduled": "Nothing scheduled",
-    "weeklyWorkouts": "Weekly workouts"
+    "exerciseCount": "{{count}} exercises"
+  },
+  "today": {
+    "hero": {
+      "label": "Today",
+      "earned": "So far today",
+      "done": "done",
+      "half": "halfway",
+      "left": "to go",
+      "onlyWorkout": "One item today: your workout",
+      "perfect": "Perfect day",
+      "sr": "Today {{done}} of {{total}} done",
+      "perfectPays": "+{{coins}} coins at day close"
+    },
+    "ledger": {
+      "coins": "coins",
+      "level": "level",
+      "levelBar": "Level progress"
+    },
+    "coinUnit": "coins",
+    "coins": "{{value}} coins",
+    "tomorrow": "Tomorrow: {{name}}",
+    "failed": "That didn't work. Please try again.",
+    "habits": {
+      "title": "Habits",
+      "all": "All",
+      "emptyTitle": "No habits yet",
+      "emptyBody": "Start with one, water for example.",
+      "first": "First habit",
+      "pays": "+{{coins}} coins / day · {{mult}} after {{days}} days"
+    },
+    "habit": {
+      "done": "Done",
+      "pending": "Not done yet today",
+      "clean": "Clean for {{count}} days",
+      "relapsed": "{{count}} relapse today",
+      "skipped": "Skipped",
+      "weekly": "{{count}}× a week · {{done}}/{{count}} this week",
+      "days": "days",
+      "weeks": "weeks",
+      "freezes": "{{count}} freezes",
+      "addOne": "{{name}}: {{count}}/{{target}}, tap to add one",
+      "relapseAsk": "Log the relapse? It costs coins and resets the streak.",
+      "relapseConfirm": "Yes, I relapsed",
+      "relapseLogged": "Relapse logged"
+    },
+    "tasks": {
+      "title": "Tasks",
+      "capture": "Capture",
+      "doneToday": "Done today · {{count}}",
+      "emptyTitle": "Nothing to do",
+      "emptyBody": "Capture anything, with its deadline.",
+      "pays": "+{{min}}–{{max}} coins per task"
+    },
+    "task": {
+      "low": "Low",
+      "mid": "Medium",
+      "high": "High",
+      "today": "today",
+      "todayAt": "today {{time}}",
+      "doneAt": "done {{time}}",
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly",
+      "every": {
+        "mon": "every Monday",
+        "tue": "every Tuesday",
+        "wed": "every Wednesday",
+        "thu": "every Thursday",
+        "fri": "every Friday",
+        "sat": "every Saturday",
+        "sun": "every Sunday"
+      }
+    },
+    "librarySub": "Library · search by muscle and equipment"
   },
   "settings": {
     "title": "Settings",
     "account": "Account",
-    "appearance": "Appearance",
-    "themePacks": "Theme packs",
-    "accentDefault": "Default",
-    "accentCustom": "Custom color",
-    "contrastRatioPass": "Contrast: {{ratio}}:1 — clears the 4.5:1 minimum.",
-    "contrastRatioFail": "Contrast: {{ratio}}:1 — below the 4.5:1 minimum. Pick a higher-contrast color.",
-    "contrastInvalid": "Enter a valid hex color (#RRGGBB).",
-    "previewTitle": "Live preview",
-    "previewBody": "The whole app repaints as you choose.",
-    "gradientPreview": "Gradient preview",
-    "gradient": {
-      "title": "Gradient",
-      "linear": "Linear",
-      "radial": "Radial",
-      "angle": "Angle",
-      "addStop": "Add stop",
-      "reset": "Reset",
-      "stopColor": "Stop {{n}} color",
-      "stopPosition": "Stop {{n}} position",
-      "removeStop": "Remove stop {{n}}"
-    },
     "cues": {
-      "title": "Sound and vibration",
       "speech": "Spoken cues",
       "speechHint": "It announces the round and the rest.",
       "tone": "Beep",
       "toneHint": "A short tone for the countdown.",
       "haptics": "Vibration",
       "hapticsHint": "A buzz when a set is checked.",
-      "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left."
+      "hapticsUnavailable": "This device cannot vibrate — on iPhone the beep is the only non-visual cue left.",
+      "row": "Workout cues",
+      "sound": "Sound"
     },
-    "openAdmin": "Open the admin area",
     "equipment": "Equipment",
     "equipmentHint": "What you can actually reach. Your plan is built around it.",
     "equipmentSaved": "Equipment saved",
+    "equipmentCount": "{{count}} selected",
     "displayName": "Display name",
     "displayNameHint": "Your coach sees this instead of your e-mail address.",
     "displayNamePlaceholder": "How others see you",
-    "transparency": "Translucent surfaces",
-    "transparencyHint": "The glass effect on cards and bars. Follows your system setting by default.",
-    "transparencySystem": "System",
-    "transparencyFull": "Always",
-    "transparencyNone": "Never",
-    "saveTheme": "Save theme",
-    "themeSaveError": "Saving the theme failed — your choice is still here, try again.",
     "role": {
       "user": "Member",
       "coach": "Coach",
       "admin": "Admin"
     },
-    "themePack": {
-      "midnight": "Midnight",
-      "solar": "Solar",
-      "forest": "Forest",
-      "neon": "Neon",
-      "mono": "Mono",
-      "aurora": "Aurora",
-      "ember": "Ember"
+    "views": {
+      "title": "Views",
+      "coach": "Coach view",
+      "admin": "Admin view"
+    },
+    "day": {
+      "title": "Day and time zone",
+      "zone": "Time zone",
+      "zoneLimit": "Can be changed once a day",
+      "start": "Day start",
+      "saved": "Saved",
+      "explain": "New day at {{start}} · yesterday stays editable until {{settle}}.",
+      "search": "Search",
+      "noResults": "No results",
+      "failed": "That didn't work. Please try again."
     }
   },
   "library": {
@@ -179,22 +241,18 @@
   },
   "admin": {
     "eyebrow": "Administration",
-    "title": "Overview",
-    "users": "Users",
-    "exercises": "Exercises",
-    "media": "Media files",
     "moderation": "Moderation queue",
     "pendingCount": "{{count}} waiting",
-    "queueEmptyTitle": "Nothing to moderate",
+    "queueEmptyTitle": "No submissions waiting",
     "queueEmptyBody": "Every submitted exercise has been decided.",
     "approve": "Approve",
     "reject": "Reject",
     "reason": "Reason",
     "forbiddenTitle": "Not authorised",
     "forbiddenBody": "This page is available to administrators only.",
-    "footer": "{{sessions}} active sessions · {{events}} audit events in the last 24 hours",
     "marketplace": {
       "title": "Marketplace reports",
+      "report": "Report",
       "emptyTitle": "Nothing to decide",
       "emptyBody": "When somebody reports a post or a profile, it appears here.",
       "openLive": "Open the live page",
@@ -202,13 +260,12 @@
       "snapshotTruncated": "The text was longer; the copy is truncated.",
       "reporters": "{{count}} different reporters",
       "decide": "Decide",
-      "upholdAndRemove": "Uphold and remove",
+      "upholdAndRemove": "Uphold and take down",
       "reject": "Reject",
-      "cancel": "Cancel",
-      "removalReason": "Reason for removal",
+      "removalReason": "Reason for taking down",
       "removalReasonHint": "This goes into the audit log. The author does not see it.",
       "resolutionNote": "Internal note",
-      "reasonRequired": "A removal needs a reason.",
+      "reasonRequired": "Taking it down needs a reason.",
       "status": {
         "open": "Open",
         "triaged": "Triaged",
@@ -226,12 +283,11 @@
         "ip_infringement": "Copyright",
         "spam": "Spam",
         "other": "Other"
-      }
+      },
+      "reportersOne": "{{count}} different reporter"
     },
     "styleStudio": "Style studio",
-    "sections": "Sections",
     "section": {
-      "overview": "Overview",
       "accounts": "Accounts",
       "moderation": "Moderation",
       "marketplace": "Marketplace"
@@ -246,16 +302,16 @@
     "reviewGoneBody": "Somebody decided it in the meantime. Refresh the list.",
     "reasonHint": "The author reads this on their own exercise.",
     "refreshQueue": "Refresh the queue",
-    "unit": {
-      "user": "User",
-      "exercise": "Exercise",
-      "media": "Media file"
-    },
+    "unit": {},
     "legend": {
       "members": "Members",
       "coaches": "Coaches",
       "admins": "Admins"
-    }
+    },
+    "pendingShown": "{{shown}} / {{total}} waiting",
+    "queueCapped": "You see the first {{count}} submissions. The next ones follow as you decide.",
+    "decideFailed": "The decision did not go through. Try again.",
+    "decideOffline": "You are offline, the decision did not go through."
   },
   "muscle": {
     "chest": "Chest",
@@ -367,7 +423,8 @@
       "addMeal": "Add a meal",
       "mealDefault": "Meal",
       "draftNote": "This plan is still a draft — the client cannot see it until you activate it.",
-      "activate": "Activate"
+      "activate": "Activate",
+      "itemLine": "{{grams}}g · {{kcal}} kcal · {{protein}}g P"
     },
     "profileFull": "Full questionnaire",
     "profileIncomplete": "Incomplete",
@@ -379,7 +436,12 @@
       "plans": "Plans"
     },
     "equipmentHint": "The kit this client can reach. They are notified when you change it.",
-    "equipmentSaved": "Equipment saved"
+    "equipmentSaved": "Equipment saved",
+    "account": {
+      "owned": "The client owns their account",
+      "pending": "The handover is still pending"
+    },
+    "moreFlagged": "+{{count}} more areas to protect"
   },
   "onboarding": {
     "stepOf": "Step {{current}} of {{total}}",
@@ -500,8 +562,7 @@
     "sessionsPerWeekHint": "We spread the weekly load across this many days."
   },
   "workout": {
-    "noneTitle": "No workout running",
-    "noneBody": "Start today's session, or do a freestyle workout.",
+    "loadFailed": "That didn't work. Please try again.",
     "freestyle": "Freestyle",
     "sets": "Sets",
     "exercises": "Exercises",
@@ -526,7 +587,6 @@
     },
     "restOverSpoken": "Rest over",
     "recordSpoken": "New record",
-    "holdToCheck": "Hold to record",
     "undo": "Undo",
     "seconds": "sec",
     "metres": "m",
@@ -573,7 +633,14 @@
       "offline": "No connection",
       "failed": "Could not record"
     },
-    "withdrawn": "Withdrawn"
+    "withdrawn": "Withdrawn",
+    "finish": {
+      "open": "Finish",
+      "title": "Finish workout",
+      "summary": "{{done}} logged · {{left}} to go",
+      "complete": "Finish",
+      "abandon": "Abandon"
+    }
   },
   "plans": {
     "eyebrow": "Authoring",
@@ -581,7 +648,6 @@
     "templates": "Templates",
     "clientPlans": "Client plans",
     "newName": "New plan name",
-    "create": "Create",
     "emptyTitle": "No plans yet",
     "emptyBody": "Build a template once, then hand it to any client.",
     "dayCount": "{{count}} days",
@@ -598,8 +664,13 @@
     "needsStart": "Activating needs a start date",
     "addExercise": "Exercise",
     "findExercise": "Find an exercise",
+    "pickerNoMuscles": "No muscles listed",
+    "pickerEmpty": "No results",
+    "pickerEmptyHint": "Try another word; English names match too.",
+    "pickerError": "The exercises could not be loaded.",
     "removeExercise": "Remove exercise",
     "deleteBlock": "Delete block",
+    "addBlock": "Add block",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "rounds": "{{n}} rounds",
@@ -753,15 +824,19 @@
       "open": "Open",
       "targetCaption": "target {{value}}"
     },
-    "macroTargetShort": "target"
+    "macroTargetShort": "target",
+    "unitKcal": "kcal",
+    "unitG": "g",
+    "slash": "/",
+    "resultMeta": "{{kcal}} kcal · {{protein}} g P /100 g"
   },
   "coins": {
     "title": "Coins",
     "balanceLabel": "{{count}} coins",
     "tab": {
-      "store": "Store",
       "achievements": "Achievements",
-      "statement": "Statement"
+      "statement": "Statement",
+      "overview": "Overview"
     },
     "owned": "Owned",
     "storeEmptyTitle": "The store is empty",
@@ -775,8 +850,6 @@
     "noHistoryTitle": "Nothing yet",
     "noHistoryBody": "Coins appear here as you earn and spend them.",
     "balanceCaption": "Your balance",
-    "weekCaption": "This week",
-    "spentCaption": "Spent",
     "storeSection": "Available",
     "item": {
       "theme": {
@@ -788,6 +861,52 @@
           "title": "Ember",
           "description": "A single warm accent."
         }
+      }
+    },
+    "debtCaption": "In debt",
+    "spendable": "Spendable: {{count}} coins",
+    "debtNotice": "You are {{count}} coins in debt. New credits pay this off first; until then you cannot redeem anything.",
+    "level": {
+      "label": "Level",
+      "xp": "{{xp}} / {{next}} XP",
+      "toNext": "{{count}} XP to level {{level}}.",
+      "toNextAz": "{{count}} XP to level {{level}}."
+    },
+    "week": {
+      "title": "This week",
+      "capLine": "Daily cap {{cap}} coins · yesterday closes at {{time}}."
+    },
+    "day": {
+      "today": "Today · {{date}}",
+      "yesterday": "Yesterday · {{date}}"
+    },
+    "reason": {
+      "workout": {
+        "completed": "Workout done"
+      },
+      "day": {
+        "kcal_hit": "Calorie goal",
+        "kcal_over": "Penalty · calories over",
+        "perfect": "Perfect day"
+      },
+      "task": {
+        "done": "Task done",
+        "overdue": "Penalty · overdue task"
+      },
+      "habit": {
+        "done": "Habit done",
+        "clean_day": "Clean day",
+        "missed": "Penalty · habit missed"
+      },
+      "streak": {
+        "milestone": "Streak milestone"
+      },
+      "reversal": {
+        "credit": "Reversal",
+        "debit": "Reversal"
+      },
+      "reward": {
+        "redeem": "Reward redeemed"
       }
     }
   },
@@ -985,43 +1104,363 @@
     "variants": "Variants",
     "commitNote": "What you pick here applies to every user on their next load — no code change, no redeploy."
   },
-  "adminMetrics": {
-    "title": "Metrics",
-    "window": "last {{days}} days",
-    "loggedPeople": "People who logged",
-    "loggedPeopleSub": "today: {{today}}",
-    "signups": "Signups",
-    "activeCoaches": "Active coaches",
-    "activeCoachesSub": "{{withRole}} hold the coach role",
-    "coinVelocity": "Coin movement",
-    "coinVelocitySub": "units moved, sign dropped",
-    "completedWorkouts": "Completed workouts",
-    "cardHint": "The figure covers the selected window.",
-    "clock": {
-      "local_date": "user's own day",
-      "utc": "UTC"
-    },
-    "notEnough": "Not enough data to chart yet ({{count}} day(s)). Three days of measurements are needed."
-  },
   "adminUsers": {
     "title": "Accounts",
     "search": "Search by email",
     "noneTitle": "No matches",
-    "noneBody": "Try a fragment of the email address.",
+    "noneBody": "Try another word or filter.",
     "disabled": "disabled",
     "mustChange": "password reset",
-    "moreMatches": "There are more matches than fit on a page — narrow the search.",
     "col": {
       "email": "Email",
       "role": "Role",
       "clients": "Clients",
-      "created": "Joined"
+      "created": "Joined",
+      "name": "Name"
     },
     "role": {
-      "user": "User",
+      "user": "Member",
       "coach": "Coach",
       "admin": "Admin"
+    },
+    "searchPlaceholder": "Search by name or email",
+    "filter": {
+      "role": "Role",
+      "state": "Status",
+      "sort": "Sort",
+      "all": "All",
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "count": "{{count}} accounts",
+    "countOne": "{{count}} account",
+    "more": "More",
+    "failedTitle": "Could not load",
+    "failedBody": "The accounts are not available right now. Check your connection and try again.",
+    "failedDetailBody": "The account is not available right now. Check your connection and try again.",
+    "failedLedgerBody": "The ledger is not available right now. Check your connection and try again.",
+    "goneTitle": "This account was not found",
+    "goneBody": "It may have been deleted in the meantime. Go back to the list of accounts.",
+    "account": "Account",
+    "readOnly": "read-only",
+    "state": {
+      "active": "active"
+    },
+    "you": "you",
+    "disabledNotice": "Disabled",
+    "sec": {
+      "account": "Account",
+      "coach": "Coach side",
+      "activity": "Activity",
+      "audit": "Log"
+    },
+    "actions": "Actions",
+    "lastLogin": "Last sign-in",
+    "openSessions": "Open sessions",
+    "lockout": {
+      "label": "Lock-out",
+      "none": "none",
+      "until": "locked until {{time}}",
+      "failed": "{{count}} failed sign-ins",
+      "failedOne": "{{count}} failed sign-in",
+      "reset": "Lift the lock-out",
+      "nothing": "nothing locked",
+      "message": "{{name}} can try to sign in again.",
+      "confirm": "Lift"
+    },
+    "mustChangeLabel": "Password change",
+    "mustChangeYes": "required",
+    "mustChangeNo": "not required",
+    "tier": "Plan",
+    "subscription": "Subscription",
+    "sub": {
+      "active": "active",
+      "trialing": "trial",
+      "past_due": "payment due",
+      "canceled": "canceled",
+      "none": "none"
+    },
+    "profile": "Profile",
+    "profileState": "Status",
+    "profileVerified": "verified",
+    "profilePublished": "published",
+    "profileUnpublished": "not published",
+    "profileRemoved": "taken down",
+    "posts": "Posts",
+    "openReports": "Open reports",
+    "countsOnly": "counts only",
+    "act": {
+      "workouts": "Workouts",
+      "nutrition": "Food log",
+      "measurements": "Measurements",
+      "photos": "Photos"
+    },
+    "privacy": "The content is private: an admin sees only the count.",
+    "auditLast": "last 5 events",
+    "actorSystem": "System",
+    "audit": {
+      "user": {
+        "role": {
+          "change": "Role changed"
+        },
+        "disable": "Account disabled",
+        "enable": "Account enabled",
+        "name": {
+          "change": "Name changed"
+        },
+        "lockout": {
+          "reset": "Lock-out lifted"
+        },
+        "sessions": {
+          "revoke": "Signed out everywhere"
+        },
+        "password": {
+          "force": "Password change required"
+        },
+        "credentials": {
+          "change": "Password changed"
+        }
+      },
+      "coin": {
+        "admin": {
+          "adjust": "Coin adjustment"
+        }
+      },
+      "other": "Other event"
+    },
+    "coin": {
+      "head": "Coins",
+      "balance": "balance",
+      "fullLedger": "Full ledger",
+      "entries": "{{count}} entries",
+      "entriesOne": "{{count}} entry",
+      "reason": {
+        "admin": {
+          "credit": "Admin adjustment",
+          "debit": "Admin adjustment"
+        },
+        "store": {
+          "purchase": "Purchase"
+        },
+        "achievement": {
+          "reward": "Achievement reward"
+        },
+        "focus": {
+          "finish": "Focus block"
+        },
+        "habit": {
+          "relapse": "Relapse"
+        }
+      },
+      "title": "Coin adjustment",
+      "direction": "Direction",
+      "credit": "Credit",
+      "debit": "Debit",
+      "amount": "Amount",
+      "unit": "coins",
+      "balanceLabel": "Balance:",
+      "note": "Note",
+      "record": "Record"
+    },
+    "reason": "Reason",
+    "reasonHint": "Required. It goes into the audit log.",
+    "nameSheet": {
+      "title": "Edit name",
+      "label": "Display name",
+      "hint": "This is how the user sees themselves. The email address cannot be changed.",
+      "invalid": "The name must be 2 to 120 characters long."
+    },
+    "roleSheet": {
+      "about": {
+        "user": "Own workouts, meals, progress",
+        "coach": "Clients and plans",
+        "admin": "Full admin access"
+      },
+      "current": "Current · {{text}}",
+      "password": "Your own password",
+      "passwordHint": "You can grant admin rights only by entering your own password."
+    },
+    "disable": {
+      "title": "Disable account",
+      "message": "{{name}} will not be able to sign in, and their open sessions end.",
+      "link": "Disable",
+      "hint": "Cannot sign in, sessions end. A reason is required."
+    },
+    "enable": {
+      "title": "Enable account",
+      "message": "{{name}} can sign in again.",
+      "link": "Enable",
+      "hint": "Can sign in again. A reason is required to enable.",
+      "adminMessage": "{{name}} can sign in again and gets the admin role back. Enter your own password to confirm.",
+      "passwordHint": "A disabled admin can only be enabled with your own password."
+    },
+    "signout": {
+      "sheetTitle": "Sign out",
+      "title": "Sign out everywhere",
+      "open": "{{count}} open sessions",
+      "openOne": "{{count}} open session",
+      "none": "no open sessions",
+      "message": "All sessions of {{name}} end; they have to sign in again.",
+      "selfMessage": "All your sessions end, on this device too. You will have to sign in again.",
+      "confirm": "Sign out"
+    },
+    "password": {
+      "sheetTitle": "Password change",
+      "force": "Require a password change",
+      "forceSub": "They must set a new password at the next sign-in.",
+      "message": "{{name}} must set a new password at the next sign-in; their sessions end.",
+      "selfMessage": "You must set a new password at the next sign-in; your sessions end.",
+      "confirm": "Require"
+    },
+    "selfNote": "You cannot change your own account here.",
+    "err": {
+      "generic": "That did not work. Try again.",
+      "stepUp": "Enter your own password.",
+      "password": "Wrong password.",
+      "forbidden": "You are not allowed to do this.",
+      "gone": "This account no longer exists.",
+      "insufficient": "The balance cannot go below zero.",
+      "self": "You cannot do this to your own account.",
+      "conflict": "The account changed in the meantime. Check it and try again.",
+      "rate": "Too many requests. Wait a moment.",
+      "invalid": "This cannot be saved as it is. Check the fields.",
+      "offline": "You are offline, so the change was not saved."
+    },
+    "replayed": {
+      "disable": "This account was already disabled, so nothing changed.",
+      "enable": "This account was already enabled, so nothing changed."
     }
+  },
+  "adminRules": {
+    "title": "Rules",
+    "defaults": "Defaults",
+    "version": "Version {{version}}",
+    "intro": "The rules apply to every user.",
+    "coin": "coins",
+    "section": {
+      "habit": "Habits",
+      "task": "Tasks",
+      "workout": "Workout",
+      "focus": "Focus",
+      "challenge": "Challenge",
+      "kcal": "Calories",
+      "perfectDay": "Perfect day",
+      "streak": "Streak multipliers",
+      "freeze": "Freezes",
+      "dailyCap": "Daily cap",
+      "save": "Save"
+    },
+    "rule": {
+      "habitSuccess": {
+        "title": "Completion",
+        "sub": "default for a new habit, coins"
+      },
+      "habitPenalty": {
+        "title": "Missed",
+        "sub": "penalty, coins"
+      },
+      "badHabitCleanDay": {
+        "title": "Clean day",
+        "sub": "for a bad habit, coins"
+      },
+      "badHabitRelapseFactor": {
+        "title": "Relapse",
+        "sub": "penalty multiplier"
+      },
+      "badHabitRelapseDailyCap": {
+        "title": "Relapse cap",
+        "sub": "per habit per day, coins"
+      },
+      "partialHabitMin": {
+        "title": "Partial completion",
+        "sub": "pays pro rata from here"
+      },
+      "taskLow": {
+        "title": "Low"
+      },
+      "taskMid": {
+        "title": "Medium"
+      },
+      "taskHigh": {
+        "title": "High"
+      },
+      "taskLate": {
+        "title": "Done late",
+        "sub": "what it pays after the due date"
+      },
+      "taskOverdue": {
+        "title": "Overdue task",
+        "sub": "one-time penalty, coins"
+      },
+      "workoutComplete": {
+        "title": "Full workout",
+        "sub": "per workout, coins"
+      },
+      "workoutFull": {
+        "title": "Counts as full",
+        "sub": "share of the sets"
+      },
+      "workoutHalf": {
+        "title": "Partial workout",
+        "sub": "half credit from this share"
+      },
+      "focusPerHour": {
+        "title": "Per hour",
+        "sub": "pro rata"
+      },
+      "focusCheckin": {
+        "title": "Check-in",
+        "sub": "bonus · “Still on it?”"
+      },
+      "challenge": {
+        "title": "Daily challenge",
+        "sub": "default for a new challenge"
+      },
+      "kcalHit": {
+        "title": "Goal met"
+      },
+      "kcalMissed": {
+        "title": "Goal exceeded",
+        "sub": "penalty"
+      },
+      "perfectDay": {
+        "title": "Bonus",
+        "sub": "habits, tasks, workout, calories"
+      },
+      "streakTier": {
+        "title": "From day {{days}}",
+        "sub": "multiplier · rounded to whole coins"
+      },
+      "milestone": {
+        "title": "{{days}}-day milestone",
+        "sub": "bonus, coins"
+      },
+      "freezeEvery": {
+        "title": "Frequency",
+        "sub": "1 freeze every this many days"
+      },
+      "maxFreezes": {
+        "title": "At most",
+        "sub": "in reserve"
+      },
+      "dailyCap": {
+        "title": "Earnings per day",
+        "sub": "per user"
+      }
+    },
+    "unit": {
+      "pct": "%",
+      "days": "days",
+      "count": "pcs"
+    },
+    "savedValue": "saved {{value}}",
+    "changes": "{{count}} unsaved",
+    "note": "Note",
+    "noteHint": "Goes into the audit log with version {{version}}.",
+    "appliesFrom": "Applies from the next day close.",
+    "failed": "That didn't work. Please try again.",
+    "stale": "The change did not go through. Reload to see where things actually stand.",
+    "savedToast": "Saved"
   },
   "public": {
     "specialty": {
@@ -1039,6 +1478,671 @@
       "senior": "Senior",
       "youth": "Youth",
       "calisthenics": "Calisthenics"
+    }
+  },
+  "habits": {
+    "title": "Habits",
+    "today": "Today",
+    "todaySr": "{{done}} of {{count}} habits done today",
+    "longestLive": "Longest live streak",
+    "good": "Good habits",
+    "bad": "Bad habits",
+    "new": "New habit",
+    "unitDay": "days",
+    "unitWeek": "weeks",
+    "freezes": "Freezes: {{count}}",
+    "scheduleDaily": "Daily",
+    "perWeek": "{{count}}× a week",
+    "doneAt": "done {{time}}",
+    "reminderAt": "reminder {{time}}",
+    "weekDone": "{{done}}/{{target}} this week",
+    "cleanFor": "Clean for {{count}} days",
+    "relapseToday": "{{count}} relapse today · {{coins}} coins",
+    "skipped": "Skipped",
+    "freezeRule": "{{every}}-day streak = 1 freeze, at most {{max}}",
+    "archivedCount": "Archived habits · {{count}}",
+    "emptyTitle": "No habits yet",
+    "emptyBody": "Start with one, water for example.",
+    "first": "First habit",
+    "failed": "That did not work. Please try again.",
+    "detail": {
+      "streak": "Streak",
+      "best": "Longest {{count}} days",
+      "notYet": "Not done yet today",
+      "doneAt": "Done · {{time}}",
+      "coins": "{{coins}} coins",
+      "doneToday": "Done for today",
+      "relapse": "I relapsed",
+      "relapseBody": "Record the relapse? It costs coins and resets the streak.",
+      "relapseYes": "Yes, I relapsed",
+      "weeks": "Last 12 weeks",
+      "thisWeek": "this week",
+      "keyStreak": "streak",
+      "keyDone": "done",
+      "keyMissed": "missed",
+      "keyToday": "today",
+      "stripSr": "Last 12 weeks: {{done}} of {{count}} days done",
+      "coinsLabel": "Coins",
+      "coinsNote": "total, 12 weeks",
+      "coinsSr": "{{coins}} coins in 12 weeks",
+      "daysLabel": "Days",
+      "daysNote": "done · 12 weeks",
+      "daysSr": "{{done}} of {{count}} days done",
+      "history": "History",
+      "milestone": "{{count}}-day bonus",
+      "freezeEarned": "+1 freeze",
+      "settings": "Settings",
+      "reminder": "Reminder",
+      "archive": "Archive",
+      "archiveTitle": "Archive it?",
+      "archiveBody": "The habit leaves the daily list; its history stays.",
+      "restore": "Restore"
+    },
+    "outcome": {
+      "done": "Done",
+      "clean": "Clean",
+      "relapse": "Relapse",
+      "missed": "Missed",
+      "skipped": "Skipped",
+      "frozen": "Missed · a freeze kept the streak"
+    },
+    "form": {
+      "editTitle": "Edit habit",
+      "kind": "Type",
+      "kindGood": "Good habit",
+      "kindBad": "Bad habit",
+      "name": "Name",
+      "nameRequired": "Give the habit a name",
+      "schedule": "Schedule",
+      "weekdays": "Set days",
+      "timesPerWeek": "N× a week",
+      "perWeek": "How many times a week?",
+      "perWeekHint": "Checked when Sunday closes. No deduction for a skipped day.",
+      "weekendHint": "Weekends do not count and cost nothing.",
+      "pickDay": "Choose at least one day",
+      "target": "Daily target",
+      "unit": "Unit",
+      "unitPlaceholder": "e.g. glass",
+      "success": "Coins / completion",
+      "successBad": "Coins / clean day",
+      "penalty": "Deduction per miss",
+      "penaltyBad": "Deduction base",
+      "max": "at most {{count}}",
+      "min": "At least 1",
+      "reminder": "Reminder time",
+      "reminderHint": "Only on scheduled days, and only until it is ticked.",
+      "badExplain": "A bad habit counts every day. If you do not relapse, the day close pays the coins. A relapse costs double and resets the streak.",
+      "create": "Create"
+    },
+    "gone": "This habit is not available"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "tab": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "overdue": "Overdue",
+      "anytime": "Anytime",
+      "done": "Done"
+    },
+    "overdueCharged": "Overdue: {{n}} · {{coins}} coins deducted",
+    "overdueCount": "Overdue: {{n}}",
+    "overdueOpen": "View",
+    "todayHead": "Today, {{date}}",
+    "add": "New task",
+    "doneToday": "Done today",
+    "lateRule": "Completed late, a task pays half.",
+    "dueToday": "today",
+    "priority": {
+      "low": "Low",
+      "mid": "Medium",
+      "high": "High"
+    },
+    "priorityValue": "{{label}} · {{coins}}",
+    "repeat": {
+      "daily": "daily",
+      "weekly": "weekly",
+      "monthly": "monthly"
+    },
+    "repeatKind": {
+      "none": "None",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "repeatLabel": "Repeat",
+    "repeatInterval": "Every how many days?",
+    "repeatMonthDay": "Which day of the month?",
+    "repeatNeedsDue": "A repeating task needs a deadline",
+    "summary": {
+      "everyDay": "Every day",
+      "everyN": "Every {{n}} days",
+      "weekdays": "Weekdays",
+      "weekly": "Every {{days}}",
+      "monthly": "Monthly on day {{day}}"
+    },
+    "newTitle": "New task",
+    "editTitle": "Edit task",
+    "fieldTitle": "Title",
+    "priorityLabel": "Priority",
+    "dueLabel": "Deadline",
+    "due": {
+      "none": "None",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "date": "Date"
+    },
+    "date": "Date",
+    "dueTime": "Due time",
+    "notes": "Note",
+    "optional": "optional",
+    "create": "Create",
+    "titleRequired": "Give the task a title",
+    "dateRequired": "Choose a day",
+    "deleteTitle": "Delete it?",
+    "deleteBody": "The task disappears from the list.",
+    "emptyTitle": "No tasks",
+    "emptyBody": "Capture anything, with a deadline.",
+    "failed": "Something went wrong. Try again."
+  },
+  "capture": {
+    "title": "Anything on your mind?",
+    "what": "What is it?",
+    "example": "e.g. call mum · dinner on Friday",
+    "when": "When?",
+    "atTime": "At a time",
+    "allDay": "All day",
+    "textRequired": "Type something, or close it."
+  },
+  "challenges": {
+    "title": "Today’s draw",
+    "pool": "Challenges",
+    "rule": "Once a day, required: pick one.",
+    "options": "Three options",
+    "reroll": "Reroll",
+    "rerollsLeft": "{{count}} left today",
+    "noPick": "Until you pick, it comes back every time you open the app.",
+    "take": "I’ll take this one",
+    "state": {
+      "accepted": "accepted",
+      "done": "done"
+    },
+    "failed": "That didn’t work. Try again.",
+    "noZone": "The daily draw starts once your day and time zone are set.",
+    "emptyTitle": "No challenges yet",
+    "emptyBody": "The daily draw picks from your own challenges.",
+    "poolRule": "A higher weight comes up more often.",
+    "active": "Active",
+    "archived": "Archived",
+    "archive": "Archive",
+    "restore": "Restore",
+    "weight": "weight {{count}}",
+    "category": {
+      "discipline": "Discipline",
+      "movement": "Movement",
+      "mind": "Mind",
+      "connection": "Connection",
+      "food": "Food"
+    },
+    "new": "New challenge",
+    "limit": "You can have at most {{count}} active challenges.",
+    "deleteAsk": "The tasks it became are kept.",
+    "form": {
+      "editTitle": "Edit challenge",
+      "name": "Name",
+      "nameRequired": "Give the challenge a name",
+      "category": "Category",
+      "points": "Coins / completion",
+      "weight": "Weight",
+      "max": "at most {{count}}",
+      "create": "Create"
+    },
+    "today": {
+      "title": "Daily draw",
+      "hint": "Tap one: it becomes today’s mission.",
+      "reroll": "Reroll · {{count}}",
+      "picked": "Today’s challenge · {{coins}} coins"
+    },
+    "starter": {
+      "add": "Add starter challenges",
+      "s01": "Make your bed in the morning",
+      "s02": "Ten minutes of tidying",
+      "s03": "A twenty-minute walk",
+      "s04": "Ten push-ups",
+      "s05": "Read ten pages",
+      "s06": "Five minutes of quiet breathing",
+      "s07": "Call a friend",
+      "s08": "Send a kind message",
+      "s09": "Drink two glasses of water",
+      "s10": "Cook at home today"
+    }
+  },
+  "rewards": {
+    "title": "Rewards",
+    "available": "available",
+    "new": "New reward",
+    "spendable": "Spendable",
+    "coinUnit": "coins",
+    "xpNote": "Redeeming does not lower your XP or level.",
+    "shop": "Reward shop",
+    "byCost": "by cost",
+    "status": {
+      "ok": "redeemable",
+      "cooldown": "resting · {{count}} more days",
+      "redeemed": "redeemed",
+      "short": "{{count}} more coins"
+    },
+    "once": "one-time",
+    "redeemedCount": "redeemed {{count}}×",
+    "redeem": "Redeem",
+    "progressSr": "Progress to the cost of {{name}}",
+    "confirmBody": "Redeem it for {{count}} coins?",
+    "confirmYes": "Redeem",
+    "failed": "That did not work. Try again.",
+    "emptyTitle": "The shop is empty",
+    "emptyBody": "Set yourself goals: a film 600, new clothes 2000, a trip 5000. You redeem them with your coins.",
+    "archivedCount": "Archived rewards · {{count}}",
+    "edit": "Edit",
+    "price": "Price",
+    "many": "repeatedly",
+    "onceValue": "once",
+    "days": "{{count}} days",
+    "noLimit": "no limit",
+    "redeemedSoFar": "Redeemed so far",
+    "times": "{{count}}×",
+    "statusOk": "Redeemable",
+    "afterRedeem": "{{spendable}} coins to spend, {{after}} after",
+    "redeemCost": "Redeem · {{count}} coins",
+    "redemptions": "Redemptions",
+    "fulfilled": "Fulfilled",
+    "costLine": "{{count}} coins",
+    "notYet": "not received yet",
+    "fulfilledNote": "Fulfilled is only your own mark: it moves no coins.",
+    "archive": "Archive",
+    "archiveNote": "It leaves the shop; the redemptions stay.",
+    "archiveTitle": "Archive it?",
+    "archiveBody": "The reward leaves the shop; the redemptions stay.",
+    "restore": "Restore",
+    "form": {
+      "editTitle": "Edit reward",
+      "name": "Name",
+      "description": "Description",
+      "cost": "Price (coins)",
+      "costHint": "Small 80–150 · medium 300–600 · large 1500+",
+      "repeatable": "Redeemable",
+      "many": "Repeatedly",
+      "once": "Once",
+      "cooldown": "Rest between two redemptions",
+      "days": "days",
+      "cooldownHint": "0 = no limit",
+      "create": "Create",
+      "nameRequired": "Give the reward a name",
+      "costMin": "At least 1 coin",
+      "costMax": "At most {{count}} coins"
+    },
+    "gone": "This reward is not available"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "weekLine": "{{month}} · week {{week}}",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "busyDay": "something planned",
+    "addEvent": "Event",
+    "addTask": "Task",
+    "allDay": "All day",
+    "aboutMinutes": "~{{count}} min",
+    "exerciseCount": "{{count}} exercises",
+    "workoutDone": "Done",
+    "coins": "+{{coins}} coins",
+    "workoutTag": "Workout",
+    "restDay": "Rest day – no workout scheduled.",
+    "nothing": "Nothing on this day.",
+    "failed": "That did not work.",
+    "tasks": "Tasks",
+    "openCount": "{{count}} open",
+    "noTasks": "No tasks for this day.",
+    "due": "Due {{when}}",
+    "anytime": "Anytime",
+    "taskDone": "{{title}} done",
+    "recurring": "recurring",
+    "repeat": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "rule": {
+      "daily": "every day",
+      "everyN": "every {{count}} days",
+      "weekly": "every {{days}}",
+      "weeklyTitle": "Every week on {{days}}",
+      "monthly": "every month on day {{day}}",
+      "yearly": "every year on {{date}}",
+      "on": {
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday",
+        "sun": "Sunday"
+      }
+    },
+    "reminder": {
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} d",
+      "and": "and",
+      "before": "{{list}} before",
+      "atStart": "at the start"
+    },
+    "detail": {
+      "edit": "Edit",
+      "details": "Details",
+      "notes": "Notes",
+      "bell": "A notice under the bell",
+      "until": "Until {{date}}",
+      "remaining": "{{count}} more",
+      "delete": "Delete event",
+      "deleteTitle": "Delete this event?",
+      "deleteAll": "Every occurrence is deleted.",
+      "missing": "This event cannot be found."
+    },
+    "form": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "name": "Name",
+      "kind": "Timing",
+      "atTime": "At a time",
+      "allDay": "All day",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "duration": "Duration",
+      "minutes": "{{count}} min",
+      "hours": "{{count}} h",
+      "days": "{{count}} d",
+      "location": "Place",
+      "repeat": "Repeat",
+      "noRepeat": "Does not repeat",
+      "repeatKind": {
+        "none": "None",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "repeatDays": "Days",
+      "until": "Last date",
+      "reminder": "Reminder",
+      "atStart": "At start",
+      "notes": "Notes",
+      "optional": "optional",
+      "titleRequired": "Give the event a name",
+      "dateRequired": "Choose a date",
+      "startRequired": "Set a start time",
+      "spanInvalid": "At most 14 days, after the start",
+      "untilInvalid": "The last date cannot be before the first",
+      "refused": "This event cannot be saved like this."
+    },
+    "capture": {
+      "where": "Where to?",
+      "task": "Task",
+      "event": "Event",
+      "reminderHint": "Reminder 1 hour before"
+    },
+    "next": {
+      "title": "Next"
+    }
+  },
+  "progressDays": {
+    "tab": "Days",
+    "week": {
+      "label": "This week",
+      "caption": "avg {{avg}} / day · last week {{prev}}"
+    },
+    "coins": "coins",
+    "weeks": {
+      "label": "Weeks",
+      "title": "Week {{week}}",
+      "perfect": "perfect days: {{count}}",
+      "penalties": "penalties: {{count}}"
+    },
+    "legend": {
+      "done": "done",
+      "partial": "partly",
+      "missed": "missed"
+    },
+    "kcal": {
+      "target": "goal {{kcal}} kcal",
+      "over": "over goal: {{n}}",
+      "ofBack": "of {{n}} days",
+      "ofFront": "of {{n}} days",
+      "perDay": "{{coins}} coins per day"
+    },
+    "failed": "That did not work. Please try again."
+  },
+  "focus": {
+    "title": "Focus",
+    "what": "What are you working on?",
+    "duration": "Duration",
+    "checkin": "Check-in",
+    "none": "None",
+    "minutes": "{{n}} min",
+    "hours": "{{n}} h",
+    "rule": "Expected +{{coins}} coins: {{perHour}} per hour, +{{perCheckin}} per check-in.",
+    "ruleNoCheckin": "Expected +{{coins}} coins: {{perHour}} per hour.",
+    "start": "Start focus",
+    "noZone": "Set your time zone first.",
+    "limit": "You have reached today's number of focus blocks.",
+    "startFailed": "Could not start. Try again.",
+    "failed": "Could not load focus.",
+    "live": "In focus",
+    "planned": "Next block",
+    "ended": "Time is up",
+    "left": "{{min}} min {{sec}} s left",
+    "progress": "{{done}} / {{of}} min",
+    "checkinAsk": "Still on it? Check in and get +{{coins}} coins.",
+    "checkinCta": "I'm on it",
+    "finish": "Finish",
+    "giveUp": "Give up",
+    "giveUpTitle": "Give up this block?",
+    "giveUpBody": "A block you give up earns no coins.",
+    "writeFailed": "That did not work. Try again.",
+    "doneTitle": "Focus done",
+    "doneMeta": "{{span}} · without giving up",
+    "unitMin": "min",
+    "coins": "Coins",
+    "credited": "credited",
+    "coinsPlus": "+{{n}} coins",
+    "every": "every {{n}} min",
+    "level": "Level",
+    "sum": "{{min}} min × {{perHour}} coins/h = {{a}} · {{n}} check-ins × {{p}} = {{b}}",
+    "sumNoCheckin": "{{min}} min × {{perHour}} coins/h = {{a}}",
+    "capped": "The daily coin cap or the daily focus limit paid less.",
+    "todayMinutes": "{{n}} min today"
+  },
+  "adminPosts": {
+    "view": {
+      "label": "Marketplace view",
+      "reports": "Reports",
+      "posts": "Posts"
+    },
+    "search": "Title or @author",
+    "stateLabel": "State",
+    "state": {
+      "all": "All",
+      "draft": "Draft",
+      "live": "Live",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down"
+    },
+    "more": "More",
+    "countOf": "{{shown}} / {{total}} posts",
+    "reportCount": "Reports: {{count}}",
+    "emptyTitle": "No posts yet",
+    "emptyBody": "When a coach publishes a post or saves a draft, it appears here.",
+    "noMatchBody": "Try another word or pick another state.",
+    "errorTitle": "Could not load",
+    "errorBody": "The marketplace is not available right now. Check your connection and try again.",
+    "detail": {
+      "title": "Post",
+      "goneTitle": "This post was not found",
+      "goneBody": "It may no longer exist, or the link is wrong.",
+      "privateDraft": "Not public · only the author sees it.",
+      "authorOff": "The author is disabled, so the post is not shown.",
+      "notShown": "The post is not shown on the public page right now.",
+      "profileOff": "The author’s profile was taken down, so the post is not shown."
+    },
+    "facts": {
+      "title": "Details",
+      "readOnly": "read only",
+      "kind": "Kind",
+      "time": "Time",
+      "capacity": "Capacity",
+      "seats": "{{count}} seats",
+      "price": "Price"
+    },
+    "author": {
+      "title": "Author",
+      "disabled": "Disabled"
+    },
+    "timeline": {
+      "title": "Status",
+      "created": "Created",
+      "published": "Published",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down",
+      "reason": "Reason: {{reason}}",
+      "notPublished": "Not published yet."
+    },
+    "removed": {
+      "reason": "Reason"
+    },
+    "restore": {
+      "action": "Restore",
+      "hint": "The post will show on the public page again.",
+      "title": "Restore the post?",
+      "message": "The post will show again on the public page, on the author’s profile and in the marketplace.",
+      "messageHidden": "The post is restored, but it still does not show on the public page: because of the author or their profile."
+    },
+    "body": {
+      "title": "Text",
+      "full": "Full text"
+    },
+    "media": {
+      "title": "Media",
+      "count": "{{count}} images",
+      "cover": "Cover",
+      "nth": "Image {{n}}"
+    },
+    "reports": {
+      "title": "Reports",
+      "open": "{{count}} open",
+      "closed": "{{count}} closed",
+      "both": "{{open}} open / {{closed}} closed",
+      "severity": "Severity",
+      "upholdAndTakeDown": "Uphold and take down",
+      "upheld": "Upheld",
+      "rejected": "Rejected"
+    },
+    "manage": {
+      "title": "Manage",
+      "postSub": "Disappears from the public page. Can be restored.",
+      "profileSub": "Their posts disappear too. Cannot be undone.",
+      "draftNote": "A draft is not public, so there is nothing to take down."
+    },
+    "takedown": {
+      "post": {
+        "title": "Take down post",
+        "message": "The post disappears from the public page. You can restore it later."
+      },
+      "profile": {
+        "title": "Take down author profile",
+        "message": "The profile and its posts disappear from the public page. This cannot be undone here."
+      },
+      "both": {
+        "title": "Take down post and author profile together",
+        "message": "The post and the author’s profile both disappear from the public page. The post can be restored later, the profile not here."
+      },
+      "report": {
+        "title": "Uphold and take down",
+        "message": "The report is upheld and the post disappears from the public page. You can restore it later."
+      },
+      "reason": "Reason for taking down",
+      "reasonHint": "Required. It goes into the audit log; the author does not see it."
+    },
+    "openPost": "Open post"
+  },
+  "adminStats": {
+    "title": "Statistics",
+    "window": "Time window",
+    "days": "{{count}} days",
+    "details": "Details",
+    "detailsSub": "Users, activity, coins, marketplace",
+    "errorTitle": "Could not load",
+    "errorBody": "The statistics are not available right now. Check your connection and try again.",
+    "panel": {
+      "users": "Users in total",
+      "new7d": "New in 7 days",
+      "activeCoaches": "Active coaches",
+      "workouts": "Workouts today\n/ 7 days",
+      "pending": "Waiting for review",
+      "openReports": "Open reports",
+      "curve": "People logging · {{count}} days",
+      "curveToday": "{{count}} today"
+    },
+    "section": {
+      "users": "Users",
+      "activity": "Activity",
+      "coins": "Coins",
+      "marketplace": "Marketplace",
+      "coaches": "Coaches",
+      "system": "System"
+    },
+    "users": {
+      "unit": "users",
+      "signups": "New sign-ups",
+      "disabled": "Disabled"
+    },
+    "activity": {
+      "people": "people logging · {{count}} days",
+      "today": "Logged today",
+      "workouts": "Completed workouts",
+      "nutrition": "Nutrition log",
+      "note": "There is no real daily active user count: the product stores no last login. The figure counts the people who logged something that day."
+    },
+    "coins": {
+      "moved": "coins moved · {{count}} days",
+      "minted": "Issued",
+      "mintedSub": "credits",
+      "spent": "Spent",
+      "spentSub": "redemptions, purchases",
+      "integrity": "Integrity check",
+      "integritySub": "wallet = ledger · receipt = purchase",
+      "integrityOk": "All good",
+      "integrityDrift": "Mismatch"
+    },
+    "market": {
+      "unit": "posts",
+      "published": "Published",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "withdrawn": "Withdrawn",
+      "removed": "Taken down",
+      "openReports": "Open reports",
+      "resolved": "Resolved reports"
+    },
+    "coaches": {
+      "withClients": "coaches with clients",
+      "perCoach": "Clients / coach",
+      "perCoachSub": "average of active links",
+      "links": "Active links"
+    },
+    "system": {
+      "sessions": "active sessions",
+      "audit": "Audit events",
+      "auditSub": "24 hours"
     }
   }
 }

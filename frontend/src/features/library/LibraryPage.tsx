@@ -1,33 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
-import { Check, Dumbbell, Funnel, Search, X } from 'lucide-react';
-import { cn } from '../../lib/cn';
+import { Search, X } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
-import { FeedbackField } from '../../ui/feedback/variants/E7Field';
+import { TextLink } from '../../ui/primitives/TextLink';
+import { SearchField } from '../../ui/primitives/SearchField';
+import { ChipRow, Chip } from '../../ui/primitives/ChipRow';
+import { Segmented, type SegmentedOption } from '../../ui/feedback/variants/E6Segmented';
 import { EmptyState } from '../../ui/feedback/EmptyState';
 import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { SectionHeader } from '../../ui/data/SectionHeader';
+import { Rule } from '../../ui/data/Rule';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { UserPhoto } from '../../ui/media/UserPhoto';
 import { useExercises, useTaxonomies, type ExerciseFilters, type Taxonomy } from './useExercises';
 import { MuscleMap } from '../../ui/muscle-map/MuscleMap';
-import { SectionHeader } from '../../ui/data/SectionHeader';
-
-const DIFFICULTY_DOT: Record<string, string> = {
-  beginner: 'bg-success',
-  intermediate: 'bg-warning',
-  advanced: 'bg-danger',
-};
-
-/**
- * ONE row geometry, named once.
- *
- * The skeleton and the real row have to agree exactly or the swap shifts the list — which is the
- * only thing a skeleton is for. They disagreed by nothing before because both were hand-written;
- * the thumbnail is landscape now (80x56 rather than a 64px square), so the two strings would have
- * had to be edited in lockstep. This is that lockstep.
- */
-const ROW = 'flex h-[88px] items-center gap-3 px-3';
-const THUMB = 'h-14 w-20 shrink-0 rounded-field';
+import { musclesOnSide, type MuscleSide } from '../../ui/muscle-map/figure';
 
 /** Debounce so typing does not fire a request per keystroke. */
 function useDebounced<T>(value: T, ms: number) {
@@ -39,27 +29,28 @@ function useDebounced<T>(value: T, ms: number) {
   return debounced;
 }
 
-/* ONE shape, no variants. The tail used to drop the meta bar, which gave the three appended rows a
-   different silhouette from the six above them — and a skeleton whose whole job is "nothing will
-   move when this resolves" cannot have two heights. */
-function RowSkeleton() {
-  return (
-    <Surface as="li" pad="none" className={ROW}>
-      <Skeleton className={THUMB} />
-      <div className="min-w-0 flex-1">
-        <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="mt-2 h-3 w-1/3" />
-      </div>
-    </Surface>
-  );
-}
+/** Widths of the chip-strip placeholders: four words of different length, 24 apart. */
+const CHIP_SKELETON = ['w-10', 'w-28', 'w-32', 'w-16'] as const;
 
 /**
- * Exercise library — [[55-Screens/library]].
+ * Exercise library — the muscle selector of the Edzés tab (owner decision D2), frames
+ * `library-1` (nothing chosen), `library-2` (front, "Mell") and `library-3` (back, "Széles hátizom").
  *
- * Three ways in: type the name, tap a muscle on the body, tap a muscle-group chip. What the
- * redesign changed is what is NOT here any more — the second chip strip, the `Keresés` label
- * above a field that already carries a magnifier, and the label-shaped result rows.
+ * Three ways in, as before: tap a muscle on the figure, tap a muscle word in the strip, or type a
+ * name behind the header glyph. The composition is the frame's (`figma-build/app/library-1.body.js`):
+ *
+ *   header (root, y 72)                       the title and ONE trailing glyph: search
+ *   stage (y 152, 364 high, no surface)       the figure on the right, head on the stage top - 24,
+ *                                             right hand on the gutter, the box bleeding to the
+ *                                             screen edge; on the left the eyebrow, then the hint OR
+ *                                             the chosen muscle as the screen's subject line with
+ *                                             "Szűrők törlése"; the Elöl / Hátul switch at the bottom
+ *   16, strong rule, 4, the chip strip, 4     the same filter as the figure, scoped to the side shown
+ *   the rows                                  the 48 pt still column, text at x 88; the cell stays
+ *                                             empty without an upload (the list API carries no
+ *                                             equipment key, so no still is guessed)
+ *
+ * No pill on this screen: lime is the lit muscle, the chosen chip's mark and the lit tab.
  */
 export function LibraryPage() {
   const { t, i18n } = useTranslation();
@@ -70,17 +61,9 @@ export function LibraryPage() {
   const debouncedSearch = useDebounced(search, 300);
 
   /*
-   * ═══ WHY THERE IS NO `equipment` HERE ANY MORE ═════════════════════════════════════════════
-   *
-   * Two identical horizontal chip strips stacked, told apart only by an 11px label, is the
-   * data-field problem in miniature — and cutting one is what buys this screen its air. So the
-   * `ESZKÖZ` strip is gone and the screen sends no equipment filter at all.
-   *
-   * `ExerciseFilters.equipment` stays in `useExercises`, alongside `difficulty`, `type` and
-   * `mine`, which no screen has ever exposed either: that interface is the API's surface, not
-   * this screen's control set. It is NOT wired to a control that half-works — the ambiguity the
-   * spec refuses is a filter that exists in the UI and does nothing, and there is now none.
-   * The open question (a filter sheet behind the funnel badge) is recorded in the screen note.
+   * No `equipment` filter: the strip was cut in August and the screen sends none.
+   * `ExerciseFilters.equipment` stays in `useExercises` (with `difficulty`, `type`, `mine`): that
+   * interface is the API's surface, not this screen's control set.
    */
   const filters: ExerciseFilters = useMemo(
     () => ({ q: debouncedSearch || undefined, muscle }),
@@ -108,261 +91,218 @@ export function LibraryPage() {
     return () => io.disconnect();
   }, [query]);
 
+  /* ── Pulse page state (view only; nothing here reaches the URL, R20) ─────────────────────── */
+
+  // Every screen that shows the figure opens on the front.
+  const [side, setSide] = useState<MuscleSide>('front');
+  // The search line is behind the header glyph (the frames draw only the glyph). A typed term
+  // keeps it open, so a filter that is narrowing the list can never be hidden.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchShown = searchOpen || search !== '';
+
+  const toggleMuscle = (slug: string) => setMuscle((cur) => (cur === slug ? undefined : slug));
+  const clearAll = () => {
+    setSearch('');
+    setMuscle(undefined);
+  };
+
+  const sides: SegmentedOption<MuscleSide>[] = [
+    { value: 'front', label: t('muscleMap.front') },
+    { value: 'back', label: t('muscleMap.back') },
+  ];
+
+  // The strip is scoped to the side shown, as the frames draw it: front 13 words, back 11.
+  // `full-body` has no region on either side and stays on both.
+  const onSide = musclesOnSide(side);
+  const chips = taxonomies.data?.muscles.filter((m) => onSide.includes(m.slug) || m.slug === 'full-body');
+
+  // The subject line: the taxonomy's name, or the map's own label while the taxonomy is still on
+  // its way (a tap on the figure can land before it answers).
+  const chosen = muscle ? taxonomies.data?.muscles.find((m) => m.slug === muscle) : undefined;
+  const subject = muscle ? (chosen ? nameOf(chosen) : t(`muscle.${muscle}`, { defaultValue: muscle })) : null;
+
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-6">
-      <h1 className="text-display text-text-1">{t('nav.library')}</h1>
-
-      {/* ── finding something ──────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-group">
-        {/*
-          ═══ THE MAP IS THE ANCHOR ════════════════════════════════════════════════════════════
-          The reversible direction of the map (owner requirement 21): the detail screen READS it
-          to show what an exercise targets, here the same component WRITES a filter.
-
-          It stands first because it is the only non-text control on the screen and it states the
-          premise — you can find an exercise by pointing at yourself — before a character is typed.
-          Behind a disclosure it was one grey row that read as a footnote.
-
-          Its regions are 9–33px, below the 44px floor. What licenses that is unchanged: the
-          IZOMCSOPORT chip row below does the identical filtering at full size and must stay
-          reachable (see 55-Screens/library.md).
-        */}
-        {/* BOUNDED, because the figure has no opinion about how tall it should be.
-            In its default mode the svg is `h-auto w-full`, so a 343px-wide card renders a 693px
-            figure — measured: 85% of an 812px viewport, with the search field starting at 831px,
-            entirely below the fold. An anchor that pushes the screen's primary control off the
-            screen is not an anchor.
-
-            `fill` is the mode built for this: the svg becomes `h-0 flex-1` and takes the leftover
-            height of a bounded flex column, letting the viewBox pick the width so the proportions
-            survive. The cap is viewport-relative because the constraint is "leave room for the
-            search field and the first chips", which is a fraction of the screen and not a number
-            of pixels; the floor stops it collapsing to a sliver in landscape. */}
-        <Surface className="flex max-h-[42svh] min-h-[15rem] flex-col">
-          <MuscleMap
-            fill
-            selected={muscle}
-            onSelect={(slug) => setMuscle((cur) => (cur === slug ? undefined : slug))}
+    <Screen top="root">
+      <ScreenHeader
+        kind="root"
+        title={t('nav.library')}
+        // Closed: the frames' search glyph. Open and empty: the same place closes the line (one
+        // glass on screen, the field's own). A typed term keeps the line open, so the header
+        // control would do nothing - it steps aside and the field's clear control is the way out.
+        trailing={
+          !searchShown ? (
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('library.search')}
+              aria-expanded={false}
+              onClick={() => setSearchOpen(true)}
+            >
+              <Search />
+            </Pressable>
+          ) : search === '' ? (
+            <Pressable
+              variant="link"
+              shape="icon"
+              aria-label={t('common.close')}
+              aria-expanded
+              onClick={() => setSearchOpen(false)}
+            >
+              <X />
+            </Pressable>
+          ) : undefined
+        }
+      >
+        {searchShown ? (
+          <SearchField
+            // Opened by the glyph: the caret goes where the user is about to type.
+            autoFocus={searchOpen}
+            label={t('library.search')}
+            placeholder={t('library.searchPlaceholder')}
+            clearLabel={t('library.clearSearch')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-        </Surface>
+        ) : null}
+      </ScreenHeader>
 
-        <FeedbackField
-          /*
-           * The visible `Keresés` label is hidden, not deleted. The placeholder is a full
-           * sentence about what to type, the field carries a magnifier, and the screen's `h1`
-           * three lines up says `Gyakorlatok` — a fourth statement of the same word was the
-           * densest thing in the old top third. `sr-only` keeps the input NAMED for anyone who
-           * hears the page instead of seeing it, which is the half that actually mattered.
-           *
-           * `labelHidden` and not `className="[&>label]:sr-only"`, which is what this was. That
-           * selector needed the label to be a DIRECT child of the field's root, and it stopped
-           * being one the moment `Field` grew an obligation-marker row to lay the label out
-           * against — so the hack silently detached and `Keresés` came back, visible, above the
-           * input. A prop the component owns cannot be broken by the component's own layout.
-           */
-          labelHidden
-          label={t('library.search')}
-          placeholder={t('library.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          type="search"
-          inputMode="search"
-          leading={<Search className="size-icon-m" strokeWidth={2} />}
-          trailing={
-            search ? (
-              /*
-               * The DISC is the affordance, and it is not the tap target. `ghost` alone left a
-               * bare stroked × floating on the field's fill — over the aurora there is nothing
-               * behind it and nothing that reads as a button before it is touched. The mockup
-               * draws a filled neutral circle roughly two-fifths of the field's height with a
-               * dark × in it, so the fill goes on an inner span and the 44px `icon` box stays
-               * transparent: the Switch idiom (§5.4), a graphic at the size people expect inside
-               * a target that clears the floor. Not `bg-surface-2` — `--field-bg` IS `surface-2`,
-               * so that disc would be invisible on the very field it sits in.
-               */
-              <Pressable
-                shape="icon"
-                variant="ghost"
-                aria-label={t('library.clearSearch')}
-                onClick={() => setSearch('')}
-              >
-                <span
-                  aria-hidden
-                  className="grid size-6 place-items-center rounded-chip bg-text-3 text-surface-1"
-                >
-                  <X className="size-icon-s" strokeWidth={2.5} />
-                </span>
-              </Pressable>
-            ) : undefined
-          }
-        />
+      <div className="flex flex-col gap-4">
+        {/* ── the stage: the figure and the selection, no surface ──────────────────────────── */}
+        {/* 364 high as drawn; on a short phone (under 784 pt) it gives way down to 260 so the
+            muscle words and the first row stay on the first screen, and the figure scales with it. */}
+        <div className="relative flex h-[clamp(260px,calc(100dvh-420px),364px)] flex-col justify-between">
+          {/* FIRST in the DOM: the figure's regions are the first buttons named after a muscle,
+              before the chips (the capture scripts click "Mell" / "Széles hátizom" nth 0). Its
+              regions are smaller than 44 pt; the chip strip below is the full-size path to the
+              same filter (the documented exception, MuscleMap.tsx). */}
+          <MuscleMap
+            sideControl="none"
+            side={side}
+            selected={muscle}
+            onSelect={toggleMuscle}
+            className="absolute right-[-24px] top-[-24px] w-[calc(clamp(260px,calc(100dvh-420px),364px)*195/364)]"
+          />
 
-        {/* ── the muscle-group strip: the same filter, at 44px ─────────────────────────────── */}
-        <div className="flex flex-col gap-tight">
-          {/* The heading is passed as a child and not as `title`: this one is an 11px caps
-              eyebrow over a chip strip, not the component's default `text-title-2` h2. */}
-          <SectionHeader icon={Funnel}>
-            <h2 className="text-micro uppercase text-text-2">{t('library.muscle')}</h2>
-          </SectionHeader>
-
-          {/*
-            Horizontal chip row. `overflow-x-auto` on its own container, never on the page — wide
-            content scrolls inside itself and the body never scrolls sideways. It bleeds to both
-            screen edges so the chips fading off the right advertise that there are more.
-          */}
-          <div className="-mx-4 flex gap-tight overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
-            {taxonomies.data
-              ? taxonomies.data.muscles.map((opt) => {
-                  const active = muscle === opt.slug;
-                  return (
-                    <Pressable
-                      key={opt.slug}
-                      shape="chip"
-                      density="compact"
-                      variant={active ? 'primary' : 'secondary'}
-                      aria-pressed={active}
-                      className="shrink-0"
-                      icon={
-                        active ? <Check className="size-icon-s" strokeWidth={2.5} aria-hidden /> : undefined
-                      }
-                      onClick={() => setMuscle(active ? undefined : opt.slug)}
-                    >
-                      {nameOf(opt)}
-                    </Pressable>
-                  );
-                })
-              : // Placeholders at chip height, so the strip does not appear from nothing and
-                // push the whole result list down once the taxonomy request lands.
-                Array.from({ length: 4 }, (_, i) => (
-                  <Skeleton key={i} className="h-[var(--control-h)] w-28 shrink-0 rounded-chip" />
-                ))}
+          <div className="flex max-w-[calc(100%-138px)] flex-col gap-4 self-start">
+            <SectionHeader rule={false} title={t('library.muscle')} />
+            {subject ? (
+              <div className="flex flex-col items-start">
+                <p className="text-display-xl text-text-1">{subject}</p>
+                {/* Clears the MUSCLE only; a typed term stays (the empty state clears both). */}
+                <TextLink text="body" lead={<X />} onClick={() => setMuscle(undefined)}>
+                  {t('library.clearFilters')}
+                </TextLink>
+              </div>
+            ) : (
+              <p className="max-w-[156px] text-body text-text-2">{t('muscleMap.filterHint')}</p>
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* ── what was found ─────────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-group">
-        <div className="flex min-h-[var(--target-min)] items-center justify-between gap-tight">
-          <p className="text-body-s text-text-2">
+          <Segmented
+            label={t('muscleMap.viewLabel')}
+            options={sides}
+            value={side}
+            onChange={setSide}
+            className="self-start"
+          />
+        </div>
+
+        {/* ── the filter and what it found, under one rule ─────────────────────────────────── */}
+        <div className="flex flex-col gap-1">
+          <Rule strong />
+
+          {chips ? (
+            <ChipRow label={t('library.muscle')} scroll="bleed">
+              {chips.map((opt) => (
+                <Chip key={opt.slug} selected={muscle === opt.slug} onClick={() => toggleMuscle(opt.slug)}>
+                  {nameOf(opt)}
+                </Chip>
+              ))}
+            </ChipRow>
+          ) : (
+            // Word-sized blocks where the strip will be, so the rows do not jump when it lands.
+            <div aria-hidden className="flex h-11 items-center gap-6">
+              {CHIP_SKELETON.map((w) => (
+                <Skeleton key={w} className={`h-4 shrink-0 ${w}`} />
+              ))}
+            </div>
+          )}
+
+          {/* The count is not drawn in any frame; it stays for assistive tech (it counts the rows
+              loaded so far, never a total). */}
+          <p className="sr-only" role="status">
             {query.isPending ? t('common.loading') : t('library.count', { count: rows.length })}
           </p>
-          {/* Clears the MUSCLE filter and leaves the search text alone — the two are different
-              questions, and one button that wiped both would make the strip unusable for anyone
-              who typed first. */}
-          {muscle ? (
-            <Pressable
-              shape="chip"
-              density="compact"
-              variant="primary"
-              onClick={() => setMuscle(undefined)}
-            >
-              {t('library.clearFilters')}
-            </Pressable>
+
+          {query.isPending ? (
+            <RowStack as="div">
+              {Array.from({ length: 6 }, (_, i) => (
+                <ListRowSkeleton key={i} sub leadSlot index={i} />
+              ))}
+            </RowStack>
+          ) : rows.length === 0 ? (
+            <EmptyState
+              title={t('library.emptyTitle')}
+              body={t('library.emptyBody')}
+              action={
+                // Only when something is actually filtering: an empty catalogue is not offered a
+                // control that would change nothing.
+                search || muscle ? (
+                  <TextLink text="body" onClick={clearAll}>
+                    {t('library.clearFilters')}
+                  </TextLink>
+                ) : undefined
+              }
+            />
+          ) : (
+            <RowStack>
+              {rows.map((row) => {
+                const sub = [
+                  row.difficulty ? t(`library.difficulty.${row.difficulty}`) : null,
+                  row.exercise_type ? t(`library.type.${row.exercise_type}`) : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
+                return (
+                  <ListRow
+                    key={row.id}
+                    to={`/library/${row.id}`}
+                    title={row.name}
+                    sub={sub || undefined}
+                    chevron
+                    // The frames' 48 pt still column (x 24, text at x 88, rows 68): a real upload
+                    // when the exercise has one; otherwise the cell stays EMPTY, as the frame's
+                    // "Rope Jumping · no still" row draws it. The list answer carries no equipment
+                    // key (R-S-library-02), so no equipment still is guessed and no square is drawn.
+                    lead={
+                      row.thumb_key ? (
+                        <UserPhoto src={`/api/v1/media/${row.thumb_key}`} alt="" ratio={1} desaturate className="w-12" />
+                      ) : (
+                        <span aria-hidden className="block size-12" />
+                      )
+                    }
+                    // Honest about fallback content rather than passing English off as translated.
+                    trailing={
+                      row.translated === 0 && lang !== 'en' ? <span className="text-micro text-text-2">en</span> : undefined
+                    }
+                  />
+                );
+              })}
+            </RowStack>
+          )}
+
+          <div ref={sentinel} aria-hidden className="h-px" />
+
+          {query.isFetchingNextPage ? (
+            // The tail: the same rows again, so the list above never moves while a page loads.
+            <RowStack as="div">
+              {Array.from({ length: 3 }, (_, i) => (
+                <ListRowSkeleton key={i} sub leadSlot index={i} />
+              ))}
+            </RowStack>
           ) : null}
         </div>
-
-        {query.isPending ? (
-          <ul className="flex flex-col gap-tight">
-            {Array.from({ length: 6 }, (_, i) => (
-              <RowSkeleton key={i} />
-            ))}
-          </ul>
-        ) : rows.length === 0 ? (
-          <EmptyState
-            icon={Dumbbell}
-            title={t('library.emptyTitle')}
-            body={t('library.emptyBody')}
-            action={
-              // Only when something is actually filtering. A genuinely empty catalogue must not
-              // be offered a button that would change nothing.
-              search || muscle ? (
-                <Pressable
-                  variant="primary"
-                  onClick={() => {
-                    setSearch('');
-                    setMuscle(undefined);
-                  }}
-                >
-                  {t('library.clearFilters')}
-                </Pressable>
-              ) : undefined
-            }
-          />
-        ) : (
-          <ul className="flex flex-col gap-tight">
-            {rows.map((row) => (
-              <li key={row.id}>
-                {/* The card IS the link: one tap target for the whole row, and `interactive`
-                    carries the hover and the focus ring that a `div` wrapping an `a` would have
-                    had to re-declare. */}
-                <Surface as={Link} to={`/library/${row.id}`} pad="none" interactive className={ROW}>
-                  {/* The box is reserved whether or not an image exists, so an arriving thumb
-                      cannot shift the row it sits in. Landscape, because a movement photograph
-                      is landscape and a square crop cut the barbell off at both ends. */}
-                  <span
-                    className={cn(
-                      THUMB,
-                      'grid place-items-center overflow-hidden bg-surface-2',
-                    )}
-                  >
-                    {row.thumb_key ? (
-                      <img
-                        src={`/api/v1/media/${row.thumb_key}`}
-                        alt=""
-                        width={80}
-                        height={56}
-                        loading="lazy"
-                        className="h-14 w-20 object-cover"
-                      />
-                    ) : (
-                      <Dumbbell className="size-icon-l text-text-3" strokeWidth={1.5} aria-hidden />
-                    )}
-                  </span>
-
-                  <span className="min-w-0 flex-1">
-                    <span className="text-body-strong block truncate text-text-1">{row.name}</span>
-                    <span className="text-caption mt-1 flex items-center gap-tight text-text-3">
-                      {row.difficulty ? (
-                        <span className="inline-flex items-center gap-tight">
-                          <span
-                            aria-hidden
-                            className={cn(
-                              'inline-block size-1.5 rounded-chip',
-                              DIFFICULTY_DOT[row.difficulty],
-                            )}
-                          />
-                          {t(`library.difficulty.${row.difficulty}`)}
-                        </span>
-                      ) : null}
-                      {/* The dot binds the two words into one clause about the exercise. Parted
-                          by 8px alone they read as two unrelated labels. The `EN` pill stays
-                          separated by the gap — its own container already fences it off. */}
-                      {row.difficulty && row.exercise_type ? <span aria-hidden>·</span> : null}
-                      {row.exercise_type ? <span>{t(`library.type.${row.exercise_type}`)}</span> : null}
-                      {/* Honest about fallback content rather than passing English off as
-                          translated — the API tells us, so the UI can too. */}
-                      {row.translated === 0 && lang !== 'en' ? (
-                        <span className="text-micro uppercase rounded-chip bg-surface-2 px-1.5">en</span>
-                      ) : null}
-                    </span>
-                  </span>
-                </Surface>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div ref={sentinel} aria-hidden className="h-1" />
-
-        {query.isFetchingNextPage ? (
-          // The tail: identical geometry again, so the list above never moves while a page loads.
-          <ul className="flex flex-col gap-tight">
-            {Array.from({ length: 3 }, (_, i) => (
-              <RowSkeleton key={i} />
-            ))}
-          </ul>
-        ) : null}
       </div>
-    </div>
+    </Screen>
   );
 }

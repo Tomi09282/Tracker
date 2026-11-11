@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-03",
+  "from": "S-workout",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/primitives/ChipRow.tsx or E6Segmented (lane SEL / G-inputs)",
+  "need": "The exercise switcher: one scrolling row, items 32 apart, count (data 13/18) OVER the name (body-m), a 2 pt INK mark under the current name, the last item cut by the screen edge, aria-current.",
+  "evidence": "workout-1.json \"Gyakorlatok\" 24,617 (items 24 / 232 / 366, h 68); pair picture",
+  "proposedApi": "<ChipRow scroll tone=\"ink\" countPlacement=\"above\" /> or a Segmented layout=\"scroll\"",
+  "proposedPatch": null,
+  "interim": "WorkoutPlayer.tsx lays out Pressable variant=\"link\" items with h-[68px] flex-col items-start gap-0.5 pt-3 through className",
+  "status": "open",
+  "resolution": null
+}

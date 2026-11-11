@@ -1,0 +1,1 @@
+check-aurora: 9 backdrop mount(s), no ancestor paints over any of them

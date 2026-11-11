@@ -49,10 +49,26 @@ const idParam = z.coerce.number().int().positive();
 
 /* ── the conversation list ───────────────────────────────────────────────────────────────────── */
 
+/**
+ * Which side of the relationship the list is for. Optional: absent means both, as before.
+ *
+ * An account can be a coach to some people and a client of someone else (the role ladder stacks),
+ * and the trainer view must list only the threads where the caller IS the coach. This is a FILTER
+ * on the caller's own rows, never a grant: both sides stay bound to `req.user.id` in the SQL, so
+ * no value of `side` can reach a conversation the caller is not a member of.
+ */
+const ListQuery = z.object({ side: z.enum(['coach', 'client']).optional() }).strict();
+
 router.get(
   '/conversations',
   requireAuth,
   asyncRoute(async (req, res) => {
+    const { side } = ListQuery.parse(req.query);
+    // ONE statement for all three cases, the side chosen by BINDING, not by building SQL: the side
+    // that is filtered out is bound as NULL, and `c.coach_id = NULL` is never true. The caller's
+    // id is the only other value either column is ever compared with.
+    const asCoach = side === 'client' ? null : req.user.id;
+    const asClient = side === 'coach' ? null : req.user.id;
     const conversations = await db.all(
       // The unread count is a correlated subquery over `messages_unread_idx`, which is partial —
       // read and deleted messages are not in the B-tree at all, so this cannot count them even by
@@ -72,7 +88,7 @@ router.get(
         WHERE (c.coach_id = ? OR c.client_id = ?)
         ORDER BY c.last_message_at DESC NULLS LAST, c.id DESC
         LIMIT 100`,
-      [req.user.id, req.user.id, req.user.id, req.user.id],
+      [req.user.id, req.user.id, asCoach, asClient],
     );
     res.json({ conversations });
   }),

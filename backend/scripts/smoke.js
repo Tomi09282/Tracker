@@ -44,6 +44,20 @@ let failed = 0;
  * gates and coherence triggers still police it. The body goes through the REAL parser: a
  * hand-built tree would let the assertions pass over a document the product cannot produce.
  */
+/** One planted statement against the server's own database file (the triggers still police it). */
+async function plantSql(sql, ...params) {
+  const { default: Database } = await import('better-sqlite3-multiple-ciphers');
+  const { deriveDbKeyHex } = await import('../src/lib/dbkey.js');
+  const conn = new Database(process.env.DB_PATH);
+  try {
+    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
+    conn.pragma('busy_timeout = 5000');
+    return conn.prepare(sql).run(...params);
+  } finally {
+    conn.close();
+  }
+}
+
 async function seedPublicCorpus() {
   try {
     const { default: Database } = await import('better-sqlite3-multiple-ciphers');
@@ -241,6 +255,16 @@ async function call(path, { method = 'GET', body, jar, headers = {}, csrf = true
     /* not every response carries a body */
   }
   return { res, json };
+}
+
+// --- SMOKE_ONLY=admin-posts (node scripts/smoke-run.mjs --only=admin-posts) -----------------------
+// Runs ONE self-contained section against the fresh throwaway database and exits: the mutant runner
+// (scripts/mutants-admin-posts.mjs) needs a fast loop, and the section registers its own accounts.
+if (process.env.SMOKE_ONLY === 'admin-posts') {
+  const { adminPostsSmoke } = await import('./smoke/admin-posts.js');
+  await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
+  console.log(`\n${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} (admin-posts only) - ${passed} passed, ${failed} failed`);
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 // --- health & shape ------------------------------------------------------------------------
@@ -510,6 +534,29 @@ await call('/api/v1/auth/login', { method: 'POST', body: { email: EMAIL, passwor
 // --- exercise library ------------------------------------------------------------------------
 const seeded = process.env.SMOKE_ACCOUNTS ? JSON.parse(process.env.SMOKE_ACCOUNTS).accounts : null;
 
+// SMOKE_ONLY=admin-accounts runs ONLY the account-admin section against a freshly seeded server and
+// exits. scripts/verify-admin-accounts.mjs uses it to run that section against copies of the backend
+// with a defect planted in each, and to prove every check can fail.
+if (process.env.SMOKE_ONLY === 'admin-accounts' && seeded) {
+  const { adminAccountsSmoke } = await import('./smoke/admin-accounts.js');
+  await adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  console.log(`
+${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} failed (admin-accounts only)`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
+// SMOKE_ONLY=admin-polish runs ONLY the B-admin-polish regressions (the security review of the admin
+// v2 backend) - the section that was proven red on the code before the package.
+if (process.env.SMOKE_ONLY === 'admin-polish' && seeded) {
+  const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
+  await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  const { adminPolish2Smoke } = await import('./smoke/admin-polish-2.js');
+  await adminPolish2Smoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  console.log(`
+${failed === 0 ? 'SMOKE OK' : 'SMOKE FAILED'} - ${passed} passed, ${failed} failed (admin-polish only)`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 if (!seeded) {
   check('exercise suite: privileged accounts available', false, 'SMOKE_ACCOUNTS missing — run via npm run smoke');
 } else {
@@ -595,6 +642,51 @@ if (!seeded) {
     const { res, json } = await call('/api/v1/exercises?q=tarkora&lang=hu', { jar: coachJar });
     check('search folds Hungarian diacritics', res.status === 200 && json?.exercises?.some((e) => e.id === privateId),
       `${json?.exercises?.length ?? 0} hits`);
+  }
+  {
+    // The list carries each row's muscles ({ slug, role }) for the plan editor's picker map. Primary
+    // first, then secondary, each in the taxonomy's sort order - and the order must hold even
+    // though rear-delts (40) sorts BEFORE triceps (60): the role outranks the sort order.
+    const { res, json } = await call('/api/v1/exercises?q=tarkora&lang=hu', { jar: coachJar });
+    const row = json?.exercises?.find((e) => e.id === privateId);
+    check('list rows carry muscles as [{slug, role}]',
+      res.status === 200 && Array.isArray(row?.muscles) && row.muscles.every((m) => Object.keys(m).sort().join() === 'role,slug'),
+      JSON.stringify(row?.muscles));
+    check('list muscles: primary first, even when a secondary sorts earlier in the taxonomy',
+      JSON.stringify(row?.muscles) === JSON.stringify([{ slug: 'triceps', role: 'primary' }, { slug: 'rear-delts', role: 'secondary' }]),
+      JSON.stringify(row?.muscles));
+  }
+  {
+    // Order inside the two groups follows the taxonomy (chest 10 < lats 100; biceps 50 < abs 80),
+    // not the order the muscles were sent in. And an exercise without muscles answers [], never null.
+    const mk = (name, muscles) => call('/api/v1/exercises', {
+      method: 'POST', jar: coachJar, body: { name, difficulty: 'beginner', exercise_type: 'strength', ...(muscles ? { muscles } : {}) },
+    });
+    const { json: many } = await mk('Smoke Muscle Order Probe', [
+      { slug: 'abs', role: 'secondary' }, { slug: 'lats', role: 'primary' },
+      { slug: 'biceps', role: 'secondary' }, { slug: 'chest', role: 'primary' },
+    ]);
+    const { json: none } = await mk('Smoke Muscle Empty Probe', null);
+    const { json: list } = await call('/api/v1/exercises?mine=1&sort=name&lang=en', { jar: coachJar });
+    const rows = list?.exercises ?? [];
+    check('list muscles: each group follows the taxonomy sort order',
+      JSON.stringify(rows.find((e) => e.id === many?.id)?.muscles) === JSON.stringify([
+        { slug: 'chest', role: 'primary' }, { slug: 'lats', role: 'primary' },
+        { slug: 'biceps', role: 'secondary' }, { slug: 'abs', role: 'secondary' },
+      ]), JSON.stringify(rows.find((e) => e.id === many?.id)?.muscles));
+    const empty = rows.find((e) => e.id === none?.id);
+    check('an exercise without muscles answers muscles: []', !!empty && Array.isArray(empty.muscles) && empty.muscles.length === 0, JSON.stringify(empty?.muscles));
+    check('the muscle subquery does not duplicate rows', new Set(rows.map((e) => e.id)).size === rows.length, `${rows.length} rows`);
+    // Paged walk (limit 1): the keyset cursor must still visit every row exactly once.
+    const seen = [];
+    let cursor = null;
+    for (let i = 0; i < 6; i += 1) {
+      const { json: page } = await call(`/api/v1/exercises?mine=1&sort=name&lang=en&limit=1${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`, { jar: coachJar });
+      seen.push(...(page?.exercises ?? []).map((e) => e.id));
+      cursor = page?.nextCursor;
+      if (!cursor) break;
+    }
+    check('paging with muscles visits every row once', seen.length === rows.length && new Set(seen).size === seen.length, `${seen.length} of ${rows.length}`);
   }
   {
     // FTS5 syntax in user input must be inert, not a query language.
@@ -4322,13 +4414,21 @@ if (seeded) {
   }
 
   // --- the store ---------------------------------------------------------------------------------
-  let aurora = null;
-  let ember = null;
+  // Migration 030 retired the only two items the app sold (the Aurora / Ember theme packs), so the
+  // store a fresh database ships is EMPTY. smoke-run seeds two probe items (seed-smoke-store.mjs)
+  // so the money route below keeps its five passes; verify-030 proves the retirement itself.
+  let probeA = null;
+  let probeB = null;
   {
     const { res, json } = await call('/api/v1/coins/store', { jar: rich });
-    aurora = (json?.items ?? []).find((i) => i.sku === 'theme.aurora');
-    ember = (json?.items ?? []).find((i) => i.sku === 'theme.ember');
-    check('the store lists the premium packs, unowned', res.status === 200 && aurora?.owned === 0 && ember?.owned === 0, `${json?.items?.length} items`);
+    probeA = (json?.items ?? []).find((i) => i.sku === 'smoke.probe-a');
+    probeB = (json?.items ?? []).find((i) => i.sku === 'smoke.probe-b');
+    check('the store lists the two probe items, unowned', res.status === 200 && probeA?.owned === 0 && probeB?.owned === 0, `${json?.items?.length} items`);
+    check(
+      'and no retired theme pack is offered (030)',
+      res.status === 200 && !(json?.items ?? []).some((i) => i.sku.startsWith('theme.')),
+      (json?.items ?? []).map((i) => i.sku).join(', '),
+    );
   }
 
   // --- the admin adjustment, which is the only way coins enter --------------------------------
@@ -4405,37 +4505,37 @@ if (seeded) {
   // --- the purchase ------------------------------------------------------------------------------
   {
     // FORGE: the client sends the price it wants to pay.
-    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'cheapbuy001', expected_price_minor: aurora.priceMinor, price_minor: 1 },
+    const { res } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'cheapbuy001', expected_price_minor: probeA.priceMinor, price_minor: 1 },
     });
     check('FORGE: sending a price alongside the agreement -> 400', res.status === 400, `status ${res.status}`);
   }
   {
     // FORGE: the agreement itself is wrong. It can only make the purchase FAIL.
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
       method: 'POST', jar: rich, body: { idempotency_key: 'wrongprice1', expected_price_minor: 1 },
     });
     const wallet = await call('/api/v1/coins/wallet', { jar: rich });
-    check('FORGE: disagreeing about the price -> 409 with the real one, nothing charged', res.status === 409 && json?.priceMinor === aurora.priceMinor && wallet.json?.balanceMinor === 100000, `status ${res.status}, priceMinor ${json?.priceMinor}`);
+    check('FORGE: disagreeing about the price -> 409 with the real one, nothing charged', res.status === 409 && json?.priceMinor === probeA.priceMinor && wallet.json?.balanceMinor === 100000, `status ${res.status}, priceMinor ${json?.priceMinor}`);
   }
   let receipt = null;
   {
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeA.priceMinor },
     });
     receipt = json;
     check(
       'a purchase debits exactly the item price and grants the entitlement',
-      res.status === 200 && json?.pricePaidMinor === aurora.priceMinor
-        && json.balanceMinor === 100000 - aurora.priceMinor && Number.isInteger(json.entitlementId),
+      res.status === 200 && json?.pricePaidMinor === probeA.priceMinor
+        && json.balanceMinor === 100000 - probeA.priceMinor && Number.isInteger(json.entitlementId),
       `status ${res.status}, paid ${json?.pricePaidMinor}, balance ${json?.balanceMinor}`,
     );
   }
   {
     // REPLAY: byte-identical except for `replayed`. This is the defect the review found in every
     // candidate — a fresh path reporting a JS variable and a replay path reporting the stored row.
-    const { res, json } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: aurora.priceMinor },
+    const { res, json } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeA.priceMinor },
     });
     const differing = Object.keys({ ...receipt, ...json }).filter((k) => k !== 'replayed' && JSON.stringify(receipt[k]) !== JSON.stringify(json[k]));
     check(
@@ -4446,12 +4546,12 @@ if (seeded) {
   }
   {
     const wallet = await call('/api/v1/coins/wallet', { jar: rich });
-    check('and the replay charged nothing', wallet.json?.balanceMinor === 100000 - aurora.priceMinor, `${wallet.json?.balanceMinor}`);
+    check('and the replay charged nothing', wallet.json?.balanceMinor === 100000 - probeA.priceMinor, `${wallet.json?.balanceMinor}`);
   }
   {
     // REPLAY, THIRD CASE: same key, different ITEM.
-    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: ember.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeB.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyaurora01', expected_price_minor: probeB.priceMinor },
     });
     check('REPLAY: the same key for a different item -> 409, not somebody else\'s receipt', res.status === 409, `status ${res.status}`);
   }
@@ -4464,14 +4564,14 @@ if (seeded) {
     check('NAMESPACE: the same client key on another endpoint is a real, separate operation', res.status === 200 && json?.replayed === false, `status ${res.status}, replayed ${json?.replayed}`);
   }
   {
-    const { res } = await call(`/api/v1/coins/store/${aurora.id}/purchase`, {
-      method: 'POST', jar: rich, body: { idempotency_key: 'buyagain001', expected_price_minor: aurora.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeA.id}/purchase`, {
+      method: 'POST', jar: rich, body: { idempotency_key: 'buyagain001', expected_price_minor: probeA.priceMinor },
     });
     check('buying what you already own -> 409', res.status === 409, `status ${res.status}`);
   }
   {
-    const { res } = await call(`/api/v1/coins/store/${ember.id}/purchase`, {
-      method: 'POST', jar: poor, body: { idempotency_key: 'poorbuy0001', expected_price_minor: ember.priceMinor },
+    const { res } = await call(`/api/v1/coins/store/${probeB.id}/purchase`, {
+      method: 'POST', jar: poor, body: { idempotency_key: 'poorbuy0001', expected_price_minor: probeB.priceMinor },
     });
     check('buying with an empty wallet -> 409', res.status === 409, `status ${res.status}`);
   }
@@ -4495,12 +4595,12 @@ if (seeded) {
 
     await call(`/api/v1/admin/users/${raceId}/coins`, {
       method: 'POST', jar: adminJar,
-      body: { amount_minor: aurora.priceMinor, note: 'exactly one purchase', idempotency_key: `race-${stamp}`.slice(0, 60) },
+      body: { amount_minor: probeA.priceMinor, note: 'exactly one purchase', idempotency_key: `race-${stamp}`.slice(0, 60) },
     });
 
     const [a, b] = await Promise.all([
-      call(`/api/v1/coins/store/${aurora.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceaurora1', expected_price_minor: aurora.priceMinor } }),
-      call(`/api/v1/coins/store/${ember.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceember01', expected_price_minor: ember.priceMinor } }),
+      call(`/api/v1/coins/store/${probeA.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceaurora1', expected_price_minor: probeA.priceMinor } }),
+      call(`/api/v1/coins/store/${probeB.id}/purchase`, { method: 'POST', jar: raceJar, body: { idempotency_key: 'raceember01', expected_price_minor: probeB.priceMinor } }),
     ]);
     const wallet = await call('/api/v1/coins/wallet', { jar: raceJar });
     const won = [a, b].filter((r) => r.res.status === 200).length;
@@ -4533,18 +4633,27 @@ if (seeded) {
   }
 
   // --- THE THEME IS THE THING THE COINS BOUGHT ----------------------------------------------------
+  //
+  // Since 030 no premium pack is on sale or wearable: Aurora and Ember are retired, so every
+  // account gets the same 404 for them that an unknown pack gets, and the roster lists the five
+  // free packs only. The owner-can-apply path is verify-019's (on the 029 schema it was built for).
   {
     const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'aurora', accent: null, gradient: null } });
-    check('IDOR: applying a theme you have not bought -> 404, not 403', res.status === 404, `status ${res.status}`);
+    check('IDOR: applying a premium theme you have not bought -> 404, not 403', res.status === 404, `status ${res.status}`);
   }
   {
     const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: poor, body: { pack: 'nosuchpack', accent: null, gradient: null } });
     check('and an unknown pack answers IDENTICALLY, so the paid catalogue cannot be enumerated', res.status === 404, `status ${res.status}`);
   }
   {
-    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: rich, body: { pack: 'aurora', accent: null, gradient: null } });
+    const { json } = await call('/api/v1/me/theme', { jar: rich });
+    const keys = (json?.packs ?? []).map((p) => p.key);
+    check('the roster lists the five free packs and no retired one (030)', keys.length === 5 && !keys.includes('aurora') && !keys.includes('ember'), keys.join(', '));
+  }
+  {
+    const { res } = await call('/api/v1/me/theme', { method: 'PUT', jar: rich, body: { pack: 'solar', accent: null, gradient: null } });
     const read = await call('/api/v1/me/theme', { jar: rich });
-    check('the buyer CAN apply it', res.status === 200 && read.json?.theme?.pack === 'aurora', `status ${res.status}, pack ${read.json?.theme?.pack}`);
+    check('a free pack applies', res.status === 200 && read.json?.theme?.pack === 'solar', `status ${res.status}, pack ${read.json?.theme?.pack}`);
   }
 
   // --- AN ACHIEVEMENT IS ACTUALLY EARNABLE ------------------------------------------------------
@@ -4591,6 +4700,9 @@ if (seeded) {
       method: 'POST', jar: lifter, body: { title: 'coin probe' },
     });
     const logId = started.json?.logId;
+    // B-lifeos-polish (security review LifeOS 08): a freestyle session counts once it ran ten
+    // minutes (or a working set was done) — planted: the session began twelve minutes ago.
+    await plantSql('UPDATE workout_logs SET started_at = started_at - 720 WHERE id = ?', logId);
     const finished = await call(`/api/v1/workouts/${logId}/finish`, { method: 'POST', jar: lifter, body: {} });
     await new Promise((r) => setTimeout(r, 900));
 
@@ -4619,6 +4731,7 @@ if (seeded) {
     const second = await call('/api/v1/workouts/start', {
       method: 'POST', jar: lifter, body: { title: 'coin probe 2' },
     });
+    await plantSql('UPDATE workout_logs SET started_at = started_at - 720 WHERE id = ?', second.json?.logId);
     await call(`/api/v1/workouts/${second.json?.logId}/finish`, { method: 'POST', jar: lifter, body: {} });
     await new Promise((r) => setTimeout(r, 900));
 
@@ -5573,6 +5686,211 @@ if (seeded) {
       `${cross.res.status} / ${bare.res.status}`,
     );
   }
+}
+
+// --- stacked roles: /me answers the ladder, the chat list filters by side, records is coach-only ---
+//
+// One account, one stored role; what stacks is the permission (requireCoach admits an admin). /me
+// spells the ladder out as `roles` so the app can offer a view switcher — and the view itself never
+// reaches the server (check-routes asserts that). The trainer view lists only coach-side threads
+// through `?side=coach`, a FILTER on the caller's own rows. Placed last, before logout, because it
+// links the second coach to the first as a client — no earlier section sees that link.
+{
+  const member = new Jar();
+  const coachA = new Jar();
+  const dual = new Jar();
+  const admin = new Jar();
+  const pupil = new Jar();
+  const memberEmail = `roles-member-${stamp}@example.com`;
+  const pupilEmail = `roles-pupil-${stamp}@example.com`;
+
+  await call('/api/v1/auth/register', { method: 'POST', body: { email: memberEmail, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: memberEmail, password: PASSWORD }, jar: member });
+  await call('/api/v1/auth/register', { method: 'POST', body: { email: pupilEmail, password: PASSWORD } });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: pupilEmail, password: PASSWORD }, jar: pupil });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach.email, password: seeded.coach.password }, jar: coachA });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.coach2.email, password: seeded.coach2.password }, jar: dual });
+  await call('/api/v1/auth/login', { method: 'POST', body: { email: seeded.admin.email, password: seeded.admin.password }, jar: admin });
+
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const ladder = [
+    ['user', member, ['user']],
+    ['coach', coachA, ['user', 'coach']],
+    ['admin', admin, ['user', 'coach', 'admin']],
+  ];
+  for (const [role, who, roles] of ladder) {
+    const { res, json } = await call('/api/v1/auth/me', { jar: who });
+    check(
+      `/me of the ${role} account keeps role '${role}' and answers roles ${JSON.stringify(roles)}`,
+      res.status === 200 && json?.user?.role === role && same(json?.user?.roles, roles),
+      `status ${res.status}, role ${json?.user?.role}, roles ${JSON.stringify(json?.user?.roles)}`,
+    );
+  }
+  {
+    const { res, json } = await call('/api/v1/auth/me', {
+      method: 'PATCH', jar: coachA, body: { displayName: 'Roles Coach' },
+    });
+    check(
+      'PATCH /me answers the same shape, roles included',
+      res.status === 200 && json?.user?.role === 'coach' && same(json?.user?.roles, ['user', 'coach']),
+      `status ${res.status}, roles ${JSON.stringify(json?.user?.roles)}`,
+    );
+  }
+
+  // The dual account: coach of `pupil`, and at the same time a client of coach A.
+  const meId = async (who) => (await call('/api/v1/auth/me', { jar: who })).json?.user?.id;
+  const dualId = await meId(dual);
+  const { json: codeA } = await call('/api/v1/invite-codes', { method: 'POST', jar: coachA, body: { kind: 'multi', max_uses: 5 } });
+  const joinedA = await call('/api/v1/join', { method: 'POST', jar: dual, body: { code: codeA?.code } });
+  const { json: codeD } = await call('/api/v1/invite-codes', { method: 'POST', jar: dual, body: { kind: 'multi', max_uses: 5 } });
+  const joinedD = await call('/api/v1/join', { method: 'POST', jar: pupil, body: { code: codeD?.code } });
+  const linkOf = async (coachJar, email) =>
+    ((await call('/api/v1/clients', { jar: coachJar })).json?.clients ?? []).find((c) => c.email === email)?.link_id;
+  const linkAsClient = await linkOf(coachA, seeded.coach2.email);
+  const linkAsCoach = await linkOf(dual, pupilEmail);
+  check(
+    'the dual fixture holds: the second coach is a client of the first and the coach of a pupil',
+    joinedA.res.status < 300 && joinedD.res.status < 300 && linkAsClient > 0 && linkAsCoach > 0,
+    `${joinedA.res.status} / ${joinedD.res.status}, links ${linkAsClient} / ${linkAsCoach}`,
+  );
+  const opened = [
+    await call('/api/v1/conversations', { method: 'POST', jar: coachA, body: { coach_client_id: linkAsClient } }),
+    await call('/api/v1/conversations', { method: 'POST', jar: dual, body: { coach_client_id: linkAsCoach } }),
+  ];
+  const [asClientId, asCoachId] = opened.map((o) => o.json?.conversation?.id);
+
+  const list = async (query) => {
+    const { res, json } = await call(`/api/v1/conversations${query}`, { jar: dual });
+    return { status: res.status, rows: json?.conversations ?? [] };
+  };
+  {
+    const both = await list('');
+    const ids = both.rows.map((c) => c.id);
+    check(
+      'no side lists both threads, as before',
+      both.status === 200 && ids.includes(asClientId) && ids.includes(asCoachId),
+      `status ${both.status}, ids ${ids}`,
+    );
+  }
+  {
+    const coachSide = await list('?side=coach');
+    check(
+      'side=coach lists only the threads where the caller is the coach',
+      coachSide.status === 200 && coachSide.rows.length > 0
+        && coachSide.rows.every((c) => c.coach_id === dualId)
+        && coachSide.rows.some((c) => c.id === asCoachId) && !coachSide.rows.some((c) => c.id === asClientId),
+      `status ${coachSide.status}, ${coachSide.rows.map((c) => `${c.id}:${c.coach_id}`)}`,
+    );
+  }
+  {
+    const clientSide = await list('?side=client');
+    check(
+      'side=client lists only the threads where the caller is the client',
+      clientSide.status === 200 && clientSide.rows.length > 0
+        && clientSide.rows.every((c) => c.client_id === dualId)
+        && clientSide.rows.some((c) => c.id === asClientId) && !clientSide.rows.some((c) => c.id === asCoachId),
+      `status ${clientSide.status}, ${clientSide.rows.map((c) => `${c.id}:${c.client_id}`)}`,
+    );
+  }
+  {
+    // The filter is the caller's OWN rows narrowed — it never widens. A member with no coach side
+    // asking for it gets an empty list, not someone else's threads.
+    const { res, json } = await call('/api/v1/conversations?side=coach', { jar: pupil });
+    check(
+      'a member asking for side=coach gets an empty list, never another account\'s threads',
+      res.status === 200 && (json?.conversations ?? []).length === 0,
+      `status ${res.status}, ${(json?.conversations ?? []).length} rows`,
+    );
+  }
+  {
+    const bad = await call('/api/v1/conversations?side=admin', { jar: dual });
+    const extra = await call('/api/v1/conversations?side=coach&view=admin', { jar: dual });
+    const twice = await call('/api/v1/conversations?side=coach&side=client', { jar: dual });
+    check(
+      'side outside the enum, an unknown query key, and a repeated side are each a 400',
+      bad.res.status === 400 && extra.res.status === 400 && twice.res.status === 400,
+      `${bad.res.status} / ${extra.res.status} / ${twice.res.status}`,
+    );
+  }
+
+  // Records is a coach read now, like its siblings: a member is refused outright.
+  {
+    const { res, json } = await call(`/api/v1/clients/${linkAsCoach}/records`, { jar: member });
+    check(
+      'GET /clients/:id/records refuses a member with 403',
+      res.status === 403 && json?.code === 'forbidden',
+      `status ${res.status}, code ${json?.code}`,
+    );
+  }
+  {
+    const { res, json } = await call(`/api/v1/clients/${linkAsCoach}/records`, { jar: dual });
+    check(
+      'and its own coach still reads it',
+      res.status === 200 && Array.isArray(json?.records),
+      `status ${res.status}`,
+    );
+  }
+
+  // Leave nothing behind for a later section to trip on: the two links are archived.
+  await call(`/api/v1/clients/${linkAsClient}/archive`, { method: 'POST', jar: coachA });
+  await call(`/api/v1/clients/${linkAsCoach}/archive`, { method: 'POST', jar: dual });
+}
+
+// --- LifeOS core (migration 031) -------------------------------------------------------------
+// The five passes (forge / replay / race / IDOR / extremes) for every Phase-2 endpoint, in their own
+// file so the LifeOS phases add sections without growing this one. Last before logout: it plants
+// past days into the smoke database, which no earlier section must see.
+if (seeded) {
+  const { lifeosCoreSmoke } = await import('./smoke/lifeos-core.js');
+  await lifeosCoreSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  // Phase 3 (migration 032): habits, tasks and the full day close, the same five passes.
+  const { lifeosHabitsTasksSmoke } = await import('./smoke/lifeos-habits-tasks.js');
+  await lifeosHabitsTasksSmoke({ call, check, Jar, stamp, PASSWORD });
+  // Phase 4 (migration 033): the daily challenge draw and the reward shop, the same five passes.
+  const { lifeosRewardsChallengesSmoke } = await import('./smoke/lifeos-rewards-challenges.js');
+  await lifeosRewardsChallengesSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  const { lifeosCalendarSmoke } = await import('./smoke/lifeos-calendar.js');
+  await lifeosCalendarSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  const { lifeosFocusSmoke } = await import('./smoke/lifeos-focus.js');
+  await lifeosFocusSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  // B-lifeos-polish: the security review's regressions and the polish round's fields.
+  const { lifeosPolishSmoke } = await import('./smoke/lifeos-polish.js');
+  await lifeosPolishSmoke({ call, check, Jar, stamp, PASSWORD });
+
+  // B-admin-accounts: the account list, the inspect read and the four account writes, five passes each.
+  const { adminAccountsSmoke } = await import('./smoke/admin-accounts.js');
+  await adminAccountsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+}
+
+// --- admin marketplace posts (package B-admin-posts) ------------------------------------------
+// The five passes for the list, the inspect page, restore and the admin picture route, plus the
+// visibility gap (a disabled or demoted author vanishes from every public read). Self-contained.
+{
+  const { adminPostsSmoke } = await import('./smoke/admin-posts.js');
+  await adminPostsSmoke({ call, check, Jar, stamp, PASSWORD });
+}
+
+// --- admin security regressions (package B-admin-polish) ----------------------------------------
+// The security review of the admin v2 backend: the enable step-up for admins, sign-out that ends a
+// live access token, canonical ids, invisible names, clean reasons. Five passes where they apply.
+if (seeded) {
+  const { adminPolishSmoke } = await import('./smoke/admin-polish.js');
+  await adminPolishSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
+  // round 2: the backend items of the S-admin-accounts screen review (NAPLO filter, step-up 401
+  // reason, ledger 404)
+  const { adminPolish2Smoke } = await import('./smoke/admin-polish-2.js');
+  await adminPolish2Smoke({ call, check, Jar, seeded, stamp, PASSWORD });
+}
+
+// --- admin statistics (package B-admin-stats) --------------------------------------------------
+// GET /admin/statistics and the panel on GET /admin/stats. Last of all: it plants a fixture into the
+// database and waits out the cache TTL once (about a minute).
+{
+  const { adminStatisticsSmoke } = await import('./smoke/admin-statistics.js');
+  await adminStatisticsSmoke({ call, check, Jar, seeded, stamp, PASSWORD });
 }
 
 // --- logout --------------------------------------------------------------------------------

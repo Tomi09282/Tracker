@@ -1,0 +1,161 @@
+{
+  "about": "S-admin-moderation - Moderacio (the compact STATISZTIKA panel above the queue) and the Statistics page. Captured LIVE against a scratch backend (own port, throwaway encrypted DB seeded by seed:dev-users, seed:exercises and seed:demo): `node scripts/pulse-shot.mjs --package S-admin-moderation --live --api http://localhost:3923 --serve . --port 5223`. The empty queue, the error and the loading state are edits or stubs over / instead of the live answers; nothing is recorded into the freeze and no write is ever fired. Account A = admin@.",
+  "states": {
+    "moderation": {
+      "frame": "admin-v2/admin-moderation-v2",
+      "title": "Moderacio - panel, 3 varakozik",
+      "account": "A",
+      "route": "/admin",
+      "height": 1168,
+      "reach": "live",
+      "why": "the panel (six figures, the 30-day curve, the Reszletek / Szabalyok doors) over the live queue of the scratch DB",
+      "arrived": {
+        "text": {
+          "key": "adminStats.details"
+        }
+      }
+    },
+    "moderation-empty": {
+      "frame": "admin-v2/admin-moderation-v2-empty",
+      "title": "Moderacio - ures sor",
+      "account": "A",
+      "route": "/admin",
+      "height": 1112,
+      "reach": "fixture",
+      "why": "nothing waits: the panel's pending figure is 0 and the queue answers an empty list - no count on the head, the shield and the display title",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/stats",
+          "edits": [
+            {
+              "pointer": "/panel/moderationPending",
+              "value": 0
+            },
+            {
+              "pointer": "/moderation/pending",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "edits": [
+            {
+              "pointer": "/queue",
+              "value": []
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "admin.queueEmptyTitle"
+        }
+      }
+    },
+    "moderation-error": {
+      "frame": null,
+      "title": "Moderacio - a sor nem toltheto be",
+      "account": "A",
+      "route": "/admin",
+      "height": 1010,
+      "reach": "fixture",
+      "why": "GET /admin/moderation fails: the queue says so in one line with a retry, never the false 'nothing waits'",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/moderation",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/moderation",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "adminStats.errorTitle"
+        }
+      }
+    },
+    "statistics": {
+      "frame": "admin-v2/admin-statistics-1",
+      "title": "Statisztika - 30 nap",
+      "account": "A",
+      "route": "/admin/stats",
+      "height": 2588,
+      "reach": "live",
+      "why": "the six blocks on the scratch DB, window 30 days",
+      "arrived": {
+        "text": {
+          "key": "adminStats.section.system"
+        }
+      }
+    },
+    "statistics-error": {
+      "frame": "admin-v2/admin-statistics-2",
+      "title": "Statisztika - hiba",
+      "account": "A",
+      "route": "/admin/stats",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /admin/statistics fails: the full-page state with the one lime pill 'Ujra'",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/admin/statistics",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/admin/statistics",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "adminStats.errorTitle"
+        }
+      }
+    },
+    "statistics-forbidden": {
+      "frame": null,
+      "title": "Statisztika - nem admin",
+      "account": "M",
+      "route": "/admin/stats",
+      "height": 874,
+      "reach": "live",
+      "why": "a member opens the address: the refusal, and no statistics request",
+      "stubs": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/me/prefs",
+          "status": 204,
+          "why": "the shell stores the view it believes the address belongs to; the capture writes nothing and the page does not read the answer"
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "admin.forbiddenTitle"
+        }
+      }
+    }
+  }
+}

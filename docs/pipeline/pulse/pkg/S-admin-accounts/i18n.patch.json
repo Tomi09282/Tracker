@@ -1,0 +1,1298 @@
+{
+  "package": "S-admin-accounts",
+  "base": "966b625",
+  "namespaces": [
+    "adminUsers"
+  ],
+  "set": [
+    {
+      "key": "adminUsers.searchPlaceholder",
+      "hu": "Keresés névben vagy e-mailben",
+      "en": "Search by name or email",
+      "de": "Nach Name oder E-Mail suchen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the search line (name AND e-mail now)"
+    },
+    {
+      "key": "adminUsers.filter.role",
+      "hu": "Szerep",
+      "en": "Role",
+      "de": "Rolle",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the label of the role filter line"
+    },
+    {
+      "key": "adminUsers.filter.state",
+      "hu": "Állapot",
+      "en": "Status",
+      "de": "Status",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the label of the state filter line"
+    },
+    {
+      "key": "adminUsers.filter.sort",
+      "hu": "Rendezés",
+      "en": "Sort",
+      "de": "Sortierung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the label of the sort line"
+    },
+    {
+      "key": "adminUsers.filter.all",
+      "hu": "Mind",
+      "en": "All",
+      "de": "Alle",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the first word of the role and state lines"
+    },
+    {
+      "key": "adminUsers.filter.active",
+      "hu": "Aktív",
+      "en": "Active",
+      "de": "Aktiv",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: state filter (noun form, as the frame sets it)"
+    },
+    {
+      "key": "adminUsers.filter.disabled",
+      "hu": "Letiltott",
+      "en": "Disabled",
+      "de": "Deaktiviert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: state filter"
+    },
+    {
+      "key": "adminUsers.col.name",
+      "hu": "Név",
+      "en": "Name",
+      "de": "Name",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the first sort key"
+    },
+    {
+      "key": "adminUsers.count",
+      "hu": "{{count}} fiók",
+      "en": "{{count}} accounts",
+      "de": "{{count}} Konten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the count line (size of the whole filtered set)"
+    },
+    {
+      "key": "adminUsers.countOne",
+      "hu": "{{count}} fiók",
+      "en": "{{count}} account",
+      "de": "{{count}} Konto",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the count line for exactly one"
+    },
+    {
+      "key": "adminUsers.more",
+      "hu": "Továbbiak",
+      "en": "More",
+      "de": "Weitere",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: the paging row \"Továbbiak 8 / 19\""
+    },
+    {
+      "key": "adminUsers.failedTitle",
+      "hu": "Nem sikerült betölteni",
+      "en": "Could not load",
+      "de": "Laden fehlgeschlagen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (error state): the same words for the account list and page"
+    },
+    {
+      "key": "adminUsers.failedBody",
+      "hu": "A fiókok most nem érhetők el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "en": "The accounts are not available right now. Check your connection and try again.",
+      "de": "Die Konten sind gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (error state), worded for the account list"
+    },
+    {
+      "key": "adminUsers.failedDetailBody",
+      "hu": "A fiók most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "en": "The account is not available right now. Check your connection and try again.",
+      "de": "Das Konto ist gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (error state), worded for the account page"
+    },
+    {
+      "key": "adminUsers.failedLedgerBody",
+      "hu": "A napló most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "en": "The ledger is not available right now. Check your connection and try again.",
+      "de": "Das Protokoll ist gerade nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (error state), worded for the coin ledger"
+    },
+    {
+      "key": "adminUsers.goneTitle",
+      "hu": "Ez a fiók nem található",
+      "en": "This account was not found",
+      "de": "Dieses Konto wurde nicht gefunden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): GET /admin/users/:id answered 404 (or a malformed id in the address)"
+    },
+    {
+      "key": "adminUsers.goneBody",
+      "hu": "Lehet, hogy közben törölték. Térj vissza a fiókok listájához.",
+      "en": "It may have been deleted in the meantime. Go back to the list of accounts.",
+      "de": "Es wurde möglicherweise inzwischen gelöscht. Geh zurück zur Kontenliste.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the 404 state of the account page"
+    },
+    {
+      "key": "adminUsers.account",
+      "hu": "Fiók",
+      "en": "Account",
+      "de": "Konto",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the back label of the coin ledger page and the name of the identity block"
+    },
+    {
+      "key": "adminUsers.readOnly",
+      "hu": "csak olvasható",
+      "en": "read-only",
+      "de": "schreibgeschützt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the lock mark beside the e-mail"
+    },
+    {
+      "key": "adminUsers.state.active",
+      "hu": "aktív",
+      "en": "active",
+      "de": "aktiv",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the state word of the hero line \"EDZŐ · AKTÍV\""
+    },
+    {
+      "key": "adminUsers.you",
+      "hu": "te",
+      "en": "you",
+      "de": "du",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3b-own: \"ADMIN · AKTÍV · TE\""
+    },
+    {
+      "key": "adminUsers.disabledNotice",
+      "hu": "Letiltva",
+      "en": "Disabled",
+      "de": "Deaktiviert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3a-disabled: the first word of the banner \"Letiltva · indok · dátum\""
+    },
+    {
+      "key": "adminUsers.sec.account",
+      "hu": "Fiók",
+      "en": "Account",
+      "de": "Konto",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: section head"
+    },
+    {
+      "key": "adminUsers.sec.coach",
+      "hu": "Edzői oldal",
+      "en": "Coach side",
+      "de": "Coach-Seite",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: section head"
+    },
+    {
+      "key": "adminUsers.sec.activity",
+      "hu": "Tevékenység",
+      "en": "Activity",
+      "de": "Aktivität",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: section head"
+    },
+    {
+      "key": "adminUsers.sec.audit",
+      "hu": "Napló",
+      "en": "Log",
+      "de": "Protokoll",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: section head"
+    },
+    {
+      "key": "adminUsers.actions",
+      "hu": "Műveletek",
+      "en": "Actions",
+      "de": "Aktionen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: section head"
+    },
+    {
+      "key": "adminUsers.lastLogin",
+      "hu": "Utolsó belépés",
+      "en": "Last sign-in",
+      "de": "Letzte Anmeldung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: FIÓK row"
+    },
+    {
+      "key": "adminUsers.openSessions",
+      "hu": "Nyitott munkamenet",
+      "en": "Open sessions",
+      "de": "Offene Sitzungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: FIÓK row"
+    },
+    {
+      "key": "adminUsers.lockout.label",
+      "hu": "Kizárás",
+      "en": "Lock-out",
+      "de": "Sperre",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: FIÓK row"
+    },
+    {
+      "key": "adminUsers.lockout.none",
+      "hu": "nincs",
+      "en": "none",
+      "de": "keine",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the value when nothing is locked"
+    },
+    {
+      "key": "adminUsers.lockout.until",
+      "hu": "zárolva {{time}}-ig",
+      "en": "locked until {{time}}",
+      "de": "gesperrt bis {{time}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the lock-out value and the sub line of \"Kizárás feloldása\""
+    },
+    {
+      "key": "adminUsers.lockout.failed",
+      "hu": "{{count}} hibás belépés",
+      "en": "{{count}} failed sign-ins",
+      "de": "{{count}} fehlgeschlagene Anmeldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): failed logins counted but no wait running (the server clears both)"
+    },
+    {
+      "key": "adminUsers.lockout.failedOne",
+      "hu": "{{count}} hibás belépés",
+      "en": "{{count}} failed sign-in",
+      "de": "{{count}} fehlgeschlagene Anmeldung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): exactly one failed login"
+    },
+    {
+      "key": "adminUsers.lockout.reset",
+      "hu": "Kizárás feloldása",
+      "en": "Lift the lock-out",
+      "de": "Sperre aufheben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: MŰVELETEK row and its sheet title"
+    },
+    {
+      "key": "adminUsers.lockout.nothing",
+      "hu": "nincs zárolás",
+      "en": "nothing locked",
+      "de": "nichts gesperrt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the dimmed row's sub line"
+    },
+    {
+      "key": "adminUsers.lockout.message",
+      "hu": "{{name}} újra próbálkozhat a belépéssel.",
+      "en": "{{name}} can try to sign in again.",
+      "de": "{{name}} kann sich wieder anmelden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the confirmation sheet of \"Kizárás feloldása\""
+    },
+    {
+      "key": "adminUsers.lockout.confirm",
+      "hu": "Feloldás",
+      "en": "Lift",
+      "de": "Aufheben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the action of that sheet"
+    },
+    {
+      "key": "adminUsers.mustChangeLabel",
+      "hu": "Jelszócsere",
+      "en": "Password change",
+      "de": "Passwortwechsel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: FIÓK row"
+    },
+    {
+      "key": "adminUsers.mustChangeYes",
+      "hu": "kötelező",
+      "en": "required",
+      "de": "erforderlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the value when a change is forced"
+    },
+    {
+      "key": "adminUsers.mustChangeNo",
+      "hu": "nem kötelező",
+      "en": "not required",
+      "de": "nicht erforderlich",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the value when it is not"
+    },
+    {
+      "key": "adminUsers.tier",
+      "hu": "Csomag",
+      "en": "Plan",
+      "de": "Paket",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: EDZŐI OLDAL row"
+    },
+    {
+      "key": "adminUsers.subscription",
+      "hu": "Előfizetés",
+      "en": "Subscription",
+      "de": "Abo",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: EDZŐI OLDAL row"
+    },
+    {
+      "key": "adminUsers.sub.active",
+      "hu": "aktív",
+      "en": "active",
+      "de": "aktiv",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the subscription status"
+    },
+    {
+      "key": "adminUsers.sub.trialing",
+      "hu": "próbaidőszak",
+      "en": "trial",
+      "de": "Testphase",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): subscription status trialing"
+    },
+    {
+      "key": "adminUsers.sub.past_due",
+      "hu": "fizetésre vár",
+      "en": "payment due",
+      "de": "Zahlung fällig",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): subscription status past_due"
+    },
+    {
+      "key": "adminUsers.sub.canceled",
+      "hu": "lemondva",
+      "en": "canceled",
+      "de": "gekündigt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): subscription status canceled"
+    },
+    {
+      "key": "adminUsers.sub.none",
+      "hu": "nincs",
+      "en": "none",
+      "de": "keine",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a coach with no subscription row"
+    },
+    {
+      "key": "adminUsers.profile",
+      "hu": "Profil",
+      "en": "Profile",
+      "de": "Profil",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: PIACTÉR row",
+      "untranslated": {
+        "reason": "the same word in Hungarian and in German"
+      }
+    },
+    {
+      "key": "adminUsers.profileState",
+      "hu": "Állapot",
+      "en": "Status",
+      "de": "Status",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: PIACTÉR row"
+    },
+    {
+      "key": "adminUsers.profileVerified",
+      "hu": "ellenőrzött",
+      "en": "verified",
+      "de": "verifiziert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the profile state"
+    },
+    {
+      "key": "adminUsers.profilePublished",
+      "hu": "közzétett",
+      "en": "published",
+      "de": "veröffentlicht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a published, unverified profile"
+    },
+    {
+      "key": "adminUsers.profileUnpublished",
+      "hu": "nem közzétett",
+      "en": "not published",
+      "de": "nicht veröffentlicht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a profile that is not published"
+    },
+    {
+      "key": "adminUsers.profileRemoved",
+      "hu": "levéve",
+      "en": "taken down",
+      "de": "entfernt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a profile an admin took down"
+    },
+    {
+      "key": "adminUsers.posts",
+      "hu": "Bejegyzések",
+      "en": "Posts",
+      "de": "Beiträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: PIACTÉR row"
+    },
+    {
+      "key": "adminUsers.openReports",
+      "hu": "Nyitott bejelentés",
+      "en": "Open reports",
+      "de": "Offene Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: PIACTÉR row (the door to Piactér filtered to the author)"
+    },
+    {
+      "key": "adminUsers.countsOnly",
+      "hu": "csak darabszám",
+      "en": "counts only",
+      "de": "nur Anzahlen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: TEVÉKENYSÉG head note"
+    },
+    {
+      "key": "adminUsers.act.workouts",
+      "hu": "Edzések",
+      "en": "Workouts",
+      "de": "Trainings",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: TEVÉKENYSÉG row"
+    },
+    {
+      "key": "adminUsers.act.nutrition",
+      "hu": "Étkezési napló",
+      "en": "Food log",
+      "de": "Ernährungstagebuch",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: TEVÉKENYSÉG row"
+    },
+    {
+      "key": "adminUsers.act.measurements",
+      "hu": "Mérések",
+      "en": "Measurements",
+      "de": "Messungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: TEVÉKENYSÉG row"
+    },
+    {
+      "key": "adminUsers.act.photos",
+      "hu": "Fotók",
+      "en": "Photos",
+      "de": "Fotos",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: TEVÉKENYSÉG row"
+    },
+    {
+      "key": "adminUsers.privacy",
+      "hu": "A tartalom privát: az admin csak a darabszámot látja.",
+      "en": "The content is private: an admin sees only the count.",
+      "de": "Der Inhalt ist privat: Admins sehen nur die Anzahl.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the quiet note under TEVÉKENYSÉG"
+    },
+    {
+      "key": "adminUsers.auditLast",
+      "hu": "utolsó 5 esemény",
+      "en": "last 5 events",
+      "de": "letzte 5 Ereignisse",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ head note"
+    },
+    {
+      "key": "adminUsers.actorSystem",
+      "hu": "Rendszer",
+      "en": "System",
+      "de": "System",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the actor of an event no admin caused"
+    },
+    {
+      "key": "adminUsers.audit.user.role.change",
+      "hu": "Szerepkör módosítva",
+      "en": "Role changed",
+      "de": "Rolle geändert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (the audit action user.role.change; the server sends no detail)"
+    },
+    {
+      "key": "adminUsers.audit.user.disable",
+      "hu": "Fiók letiltva",
+      "en": "Account disabled",
+      "de": "Konto deaktiviert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.disable)"
+    },
+    {
+      "key": "adminUsers.audit.user.enable",
+      "hu": "Fiók engedélyezve",
+      "en": "Account enabled",
+      "de": "Konto aktiviert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.enable)"
+    },
+    {
+      "key": "adminUsers.audit.user.name.change",
+      "hu": "Név módosítva",
+      "en": "Name changed",
+      "de": "Name geändert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.name.change)"
+    },
+    {
+      "key": "adminUsers.audit.user.lockout.reset",
+      "hu": "Kizárás feloldva",
+      "en": "Lock-out lifted",
+      "de": "Sperre aufgehoben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.lockout.reset)"
+    },
+    {
+      "key": "adminUsers.audit.user.sessions.revoke",
+      "hu": "Kijelentkeztetés mindenhonnan",
+      "en": "Signed out everywhere",
+      "de": "Überall abgemeldet",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.sessions.revoke)"
+    },
+    {
+      "key": "adminUsers.audit.user.password.force",
+      "hu": "Jelszócsere előírva",
+      "en": "Password change required",
+      "de": "Passwortwechsel erzwungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.password.force)"
+    },
+    {
+      "key": "adminUsers.audit.user.credentials.change",
+      "hu": "Jelszó módosítva",
+      "en": "Password changed",
+      "de": "Passwort geändert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (user.credentials.change)"
+    },
+    {
+      "key": "adminUsers.audit.coin.admin.adjust",
+      "hu": "Érme-korrekció",
+      "en": "Coin adjustment",
+      "de": "Münzkorrektur",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: NAPLÓ event (coin.admin.adjust)"
+    },
+    {
+      "key": "adminUsers.coin.head",
+      "hu": "Érme",
+      "en": "Coins",
+      "de": "Münzen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the eyebrow of the ÉRME ledger head (the own word of the wallet is the plural \"Érmék\")"
+    },
+    {
+      "key": "adminUsers.coin.balance",
+      "hu": "egyenleg",
+      "en": "balance",
+      "de": "Guthaben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the note of the ÉRME ledger head"
+    },
+    {
+      "key": "adminUsers.coin.fullLedger",
+      "hu": "Teljes napló",
+      "en": "Full ledger",
+      "de": "Vollständiges Protokoll",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the door to the coin ledger (and that page's title)"
+    },
+    {
+      "key": "adminUsers.coin.entries",
+      "hu": "{{count}} tétel",
+      "en": "{{count}} entries",
+      "de": "{{count}} Einträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the door's value"
+    },
+    {
+      "key": "adminUsers.coin.entriesOne",
+      "hu": "{{count}} tétel",
+      "en": "{{count}} entry",
+      "de": "{{count}} Eintrag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the door's value for exactly one entry"
+    },
+    {
+      "key": "adminUsers.coin.reason.admin.credit",
+      "hu": "Admin-korrekció",
+      "en": "Admin adjustment",
+      "de": "Admin-Korrektur",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: a ledger line of an admin credit"
+    },
+    {
+      "key": "adminUsers.coin.reason.admin.debit",
+      "hu": "Admin-korrekció",
+      "en": "Admin adjustment",
+      "de": "Admin-Korrektur",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: a ledger line of an admin debit"
+    },
+    {
+      "key": "adminUsers.coin.reason.store.purchase",
+      "hu": "Vásárlás",
+      "en": "Purchase",
+      "de": "Kauf",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): ledger reason store.purchase (the wallet bundle has no word for it)"
+    },
+    {
+      "key": "adminUsers.coin.reason.achievement.reward",
+      "hu": "Eredmény jutalma",
+      "en": "Achievement reward",
+      "de": "Erfolgsbelohnung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): ledger reason achievement.reward"
+    },
+    {
+      "key": "adminUsers.coin.reason.focus.finish",
+      "hu": "Fókuszblokk",
+      "en": "Focus block",
+      "de": "Fokusblock",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): ledger reason focus.finish"
+    },
+    {
+      "key": "adminUsers.coin.reason.habit.relapse",
+      "hu": "Visszaesés",
+      "en": "Relapse",
+      "de": "Rückfall",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): ledger reason habit.relapse"
+    },
+    {
+      "key": "adminUsers.coin.title",
+      "hu": "Érme-korrekció",
+      "en": "Coin adjustment",
+      "de": "Münzkorrektur",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the sheet title and the MŰVELETEK row"
+    },
+    {
+      "key": "adminUsers.coin.direction",
+      "hu": "Irány",
+      "en": "Direction",
+      "de": "Richtung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the accessible name of the Jóváírás / Levonás switch"
+    },
+    {
+      "key": "adminUsers.coin.credit",
+      "hu": "Jóváírás",
+      "en": "Credit",
+      "de": "Gutschrift",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: switch cell"
+    },
+    {
+      "key": "adminUsers.coin.debit",
+      "hu": "Levonás",
+      "en": "Debit",
+      "de": "Abbuchung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: switch cell"
+    },
+    {
+      "key": "adminUsers.coin.amount",
+      "hu": "Összeg",
+      "en": "Amount",
+      "de": "Betrag",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the accessible name of the stepper"
+    },
+    {
+      "key": "adminUsers.coin.unit",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the unit after the figure and in the balance preview"
+    },
+    {
+      "key": "adminUsers.coin.balanceLabel",
+      "hu": "Egyenleg:",
+      "en": "Balance:",
+      "de": "Guthaben:",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the balance preview \"Egyenleg: 640 → 590 érme\""
+    },
+    {
+      "key": "adminUsers.coin.note",
+      "hu": "Megjegyzés",
+      "en": "Note",
+      "de": "Notiz",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the required note field"
+    },
+    {
+      "key": "adminUsers.coin.record",
+      "hu": "Rögzítés",
+      "en": "Record",
+      "de": "Erfassen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2d-coins: the pill"
+    },
+    {
+      "key": "adminUsers.reason",
+      "hu": "Indok",
+      "en": "Reason",
+      "de": "Grund",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2c-disable: the required reason field (disable and enable)"
+    },
+    {
+      "key": "adminUsers.reasonHint",
+      "hu": "Kötelező. Az audit naplóba kerül.",
+      "en": "Required. It goes into the audit log.",
+      "de": "Pflichtfeld. Kommt ins Audit-Protokoll.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2c-disable and 2d-coins: the hint under the reason and note fields"
+    },
+    {
+      "key": "adminUsers.nameSheet.title",
+      "hu": "Név szerkesztése",
+      "en": "Edit name",
+      "de": "Name bearbeiten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2a-name: the sheet title and the MŰVELETEK row"
+    },
+    {
+      "key": "adminUsers.nameSheet.label",
+      "hu": "Megjelenített név",
+      "en": "Display name",
+      "de": "Anzeigename",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2a-name: the field label"
+    },
+    {
+      "key": "adminUsers.nameSheet.hint",
+      "hu": "A felhasználó így látja magát. Az e-mail-cím nem módosítható.",
+      "en": "This is how the user sees themselves. The email address cannot be changed.",
+      "de": "So sieht sich die Person selbst. Die E-Mail-Adresse kann nicht geändert werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2a-name: the hint"
+    },
+    {
+      "key": "adminUsers.nameSheet.invalid",
+      "hu": "A névnek 2 és 120 karakter közöttinek kell lennie.",
+      "en": "The name must be 2 to 120 characters long.",
+      "de": "Der Name muss 2 bis 120 Zeichen lang sein.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a name the server would refuse (api.md: 2..120 code points)"
+    },
+    {
+      "key": "adminUsers.roleSheet.about.user",
+      "hu": "Saját edzés, étkezés, haladás",
+      "en": "Own workouts, meals, progress",
+      "de": "Eigenes Training, Ernährung, Fortschritt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the option line of Tag"
+    },
+    {
+      "key": "adminUsers.roleSheet.about.coach",
+      "hu": "Kliensek és tervek",
+      "en": "Clients and plans",
+      "de": "Klienten und Pläne",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the option line of Edző"
+    },
+    {
+      "key": "adminUsers.roleSheet.about.admin",
+      "hu": "Teljes admin-hozzáférés",
+      "en": "Full admin access",
+      "de": "Voller Admin-Zugriff",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the option line of Admin"
+    },
+    {
+      "key": "adminUsers.roleSheet.current",
+      "hu": "Jelenlegi · {{text}}",
+      "en": "Current · {{text}}",
+      "de": "Aktuell · {{text}}",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the current role's line"
+    },
+    {
+      "key": "adminUsers.roleSheet.password",
+      "hu": "A saját jelszavad",
+      "en": "Your own password",
+      "de": "Dein eigenes Passwort",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the step-up field (only when granting admin)"
+    },
+    {
+      "key": "adminUsers.roleSheet.passwordHint",
+      "hu": "Admin jogot csak a saját jelszavad megadásával adhatsz.",
+      "en": "You can grant admin rights only by entering your own password.",
+      "de": "Admin-Rechte kannst du nur mit deinem eigenen Passwort vergeben.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2b-role: the step-up hint"
+    },
+    {
+      "key": "adminUsers.disable.title",
+      "hu": "Fiók letiltása",
+      "en": "Disable account",
+      "de": "Konto deaktivieren",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2c-disable: the ConfirmSheet title"
+    },
+    {
+      "key": "adminUsers.disable.message",
+      "hu": "{{name}} nem tud majd belépni, a nyitott munkamenetei megszűnnek.",
+      "en": "{{name}} will not be able to sign in, and their open sessions end.",
+      "de": "{{name}} kann sich nicht mehr anmelden, die offenen Sitzungen enden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2c-disable: the sentence"
+    },
+    {
+      "key": "adminUsers.disable.link",
+      "hu": "Letiltás",
+      "en": "Disable",
+      "de": "Deaktivieren",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-2c-disable and detail-1: the danger link"
+    },
+    {
+      "key": "adminUsers.disable.hint",
+      "hu": "Nem tud belépni, a munkamenetei megszűnnek. Indok kell.",
+      "en": "Cannot sign in, sessions end. A reason is required.",
+      "de": "Kann sich nicht anmelden, Sitzungen enden. Ein Grund ist nötig.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the line under the danger link"
+    },
+    {
+      "key": "adminUsers.enable.title",
+      "hu": "Fiók engedélyezése",
+      "en": "Enable account",
+      "de": "Konto aktivieren",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the enable sheet (owner decision: a reason is required; frame 3a draws only the link) - the disable sheet's layout"
+    },
+    {
+      "key": "adminUsers.enable.message",
+      "hu": "{{name}} újra beléphet.",
+      "en": "{{name}} can sign in again.",
+      "de": "{{name}} kann sich wieder anmelden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the enable sheet's sentence"
+    },
+    {
+      "key": "adminUsers.enable.link",
+      "hu": "Engedélyezés",
+      "en": "Enable",
+      "de": "Aktivieren",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3a-disabled: the end action"
+    },
+    {
+      "key": "adminUsers.enable.hint",
+      "hu": "Újra beléphet. Az engedélyezéshez indok kell.",
+      "en": "Can sign in again. A reason is required to enable.",
+      "de": "Kann sich wieder anmelden. Zum Aktivieren ist ein Grund nötig.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3a-disabled: the line under the end action"
+    },
+    {
+      "key": "adminUsers.signout.sheetTitle",
+      "hu": "Kijelentkeztetés",
+      "en": "Sign out",
+      "de": "Abmelden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the title of the sign-out-everywhere sheet: the row title is cut with an ellipsis in the sheet header"
+    },
+    {
+      "key": "adminUsers.signout.title",
+      "hu": "Kijelentkeztetés mindenhonnan",
+      "en": "Sign out everywhere",
+      "de": "Überall abmelden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: MŰVELETEK row and its sheet title"
+    },
+    {
+      "key": "adminUsers.signout.open",
+      "hu": "{{count}} nyitott munkamenet",
+      "en": "{{count}} open sessions",
+      "de": "{{count}} offene Sitzungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the row's sub line"
+    },
+    {
+      "key": "adminUsers.signout.openOne",
+      "hu": "{{count}} nyitott munkamenet",
+      "en": "{{count}} open session",
+      "de": "{{count}} offene Sitzung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): exactly one open session"
+    },
+    {
+      "key": "adminUsers.signout.none",
+      "hu": "nincs nyitott munkamenet",
+      "en": "no open sessions",
+      "de": "keine offenen Sitzungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3a-disabled: the row's sub line"
+    },
+    {
+      "key": "adminUsers.signout.message",
+      "hu": "{{name}} minden munkamenete megszűnik, újra be kell lépnie.",
+      "en": "All sessions of {{name}} end; they have to sign in again.",
+      "de": "Alle Sitzungen von {{name}} enden; die Person muss sich neu anmelden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the confirmation sheet"
+    },
+    {
+      "key": "adminUsers.signout.selfMessage",
+      "hu": "Minden munkameneted megszűnik, ezen az eszközön is. Újra be kell lépned.",
+      "en": "All your sessions end, on this device too. You will have to sign in again.",
+      "de": "Alle deine Sitzungen enden, auch auf diesem Gerät. Du musst dich neu anmelden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the same sheet on your own account (the server signs you out too)"
+    },
+    {
+      "key": "adminUsers.signout.confirm",
+      "hu": "Kijelentkeztetés",
+      "en": "Sign out",
+      "de": "Abmelden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the action of that sheet"
+    },
+    {
+      "key": "adminUsers.password.sheetTitle",
+      "hu": "Jelszócsere",
+      "en": "Password change",
+      "de": "Passwortwechsel",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the title of the force-password-change sheet: the row title does not fit the sheet header on one line"
+    },
+    {
+      "key": "adminUsers.password.force",
+      "hu": "Jelszócsere kötelező",
+      "en": "Require a password change",
+      "de": "Passwortwechsel erzwingen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: MŰVELETEK row and its sheet title"
+    },
+    {
+      "key": "adminUsers.password.forceSub",
+      "hu": "A következő belépéskor új jelszót kell megadnia.",
+      "en": "They must set a new password at the next sign-in.",
+      "de": "Beim nächsten Anmelden muss ein neues Passwort gesetzt werden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-1: the row's sub line"
+    },
+    {
+      "key": "adminUsers.password.message",
+      "hu": "{{name}} a következő belépéskor új jelszót kell, hogy megadjon; a munkamenetei megszűnnek.",
+      "en": "{{name}} must set a new password at the next sign-in; their sessions end.",
+      "de": "{{name}} muss beim nächsten Anmelden ein neues Passwort setzen; die Sitzungen enden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the confirmation sheet"
+    },
+    {
+      "key": "adminUsers.password.selfMessage",
+      "hu": "A következő belépéskor új jelszót kell megadnod; a munkameneteid megszűnnek.",
+      "en": "You must set a new password at the next sign-in; your sessions end.",
+      "de": "Du musst beim nächsten Anmelden ein neues Passwort setzen; deine Sitzungen enden.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the same sheet on your own account"
+    },
+    {
+      "key": "adminUsers.password.confirm",
+      "hu": "Előírás",
+      "en": "Require",
+      "de": "Erzwingen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): the action of that sheet"
+    },
+    {
+      "key": "adminUsers.selfNote",
+      "hu": "A saját fiókodat itt nem módosíthatod.",
+      "en": "You cannot change your own account here.",
+      "de": "Dein eigenes Konto kannst du hier nicht ändern.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-account-detail-3b-own: the quiet lock line"
+    },
+    {
+      "key": "adminUsers.err.generic",
+      "hu": "Nem sikerült. Próbáld újra.",
+      "en": "That did not work. Try again.",
+      "de": "Das hat nicht geklappt. Versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a failed write (network, 5xx)"
+    },
+    {
+      "key": "adminUsers.err.stepUp",
+      "hu": "Add meg a saját jelszavad.",
+      "en": "Enter your own password.",
+      "de": "Gib dein eigenes Passwort ein.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): POST role answered 401 step_up_required"
+    },
+    {
+      "key": "adminUsers.err.password",
+      "hu": "Hibás jelszó.",
+      "en": "Wrong password.",
+      "de": "Falsches Passwort.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): POST role answered 401 (the step-up password was wrong)"
+    },
+    {
+      "key": "adminUsers.err.forbidden",
+      "hu": "Ehhez nincs jogosultságod.",
+      "en": "You are not allowed to do this.",
+      "de": "Dazu hast du keine Berechtigung.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 403"
+    },
+    {
+      "key": "adminUsers.err.gone",
+      "hu": "Ez a fiók már nem található.",
+      "en": "This account no longer exists.",
+      "de": "Dieses Konto gibt es nicht mehr.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 404"
+    },
+    {
+      "key": "adminUsers.err.insufficient",
+      "hu": "Az egyenleg nem mehet nulla alá.",
+      "en": "The balance cannot go below zero.",
+      "de": "Das Guthaben darf nicht unter null fallen.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a debit the server refuses (409 insufficient); also shown before the tap"
+    },
+    {
+      "key": "adminUsers.err.self",
+      "hu": "Ezt a saját fiókodon nem teheted meg.",
+      "en": "You cannot do this to your own account.",
+      "de": "Das kannst du bei deinem eigenen Konto nicht tun.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 409 cannot_*"
+    },
+    {
+      "key": "adminUsers.err.conflict",
+      "hu": "A fiók állapota közben megváltozott. Nézd át, és próbáld újra.",
+      "en": "The account changed in the meantime. Check it and try again.",
+      "de": "Das Konto hat sich inzwischen geändert. Prüfe es und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 409"
+    },
+    {
+      "key": "adminUsers.err.rate",
+      "hu": "Túl sok kérés. Várj egy kicsit.",
+      "en": "Too many requests. Wait a moment.",
+      "de": "Zu viele Anfragen. Warte einen Moment.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 429"
+    },
+    {
+      "key": "adminUsers.err.invalid",
+      "hu": "Ez így nem menthető. Ellenőrizd a mezőket.",
+      "en": "This cannot be saved as it is. Check the fields.",
+      "de": "So lässt sich das nicht speichern. Prüfe die Felder.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn state (no frame): a write answered 400"
+    }
+  ],
+  "change": [
+    {
+      "key": "adminUsers.role.user",
+      "hu": {
+        "from": "Felhasználó",
+        "to": "Tag"
+      },
+      "en": {
+        "from": "User",
+        "to": "Member"
+      },
+      "de": {
+        "from": "Nutzer",
+        "to": "Mitglied"
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2: roles read Tag / Edző / Admin (the words of the bottom bar's switch cells); the list said \"Felhasználó\""
+    },
+    {
+      "key": "adminUsers.noneBody",
+      "hu": {
+        "from": "Próbáld meg az e-mail cím egy részletével.",
+        "to": "Próbálj másik szót vagy szűrőt."
+      },
+      "en": {
+        "from": "Try a fragment of the email address.",
+        "to": "Try another word or filter."
+      },
+      "de": {
+        "from": "Versuche es mit einem Teil der E-Mail-Adresse.",
+        "to": "Versuche ein anderes Wort oder einen anderen Filter."
+      },
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-accounts-v2 (no match state is not drawn): the list now has a name search and two filters, not only an e-mail search"
+    }
+  ],
+  "remove": [
+    {
+      "key": "adminUsers.moreMatches",
+      "reason": "the page-cap note is gone: \"Továbbiak\" pages the whole result (read only by the old UserSearch.tsx, deleted here)"
+    }
+  ]
+}

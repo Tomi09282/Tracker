@@ -1,0 +1,13 @@
+{
+  "id": "R-S-tasks-fix-02",
+  "from": "S-tasks-fix",
+  "kind": "backend",
+  "blocking": false,
+  "target": "backend GET /api/v1/tasks (B-habits-tasks) + frontend/src/lib/lifeos-api.ts TasksResponse",
+  "need": "GET /tasks carries the task rule figures in force: `rules: { taskLow, taskMid, taskHigh }` (points, the PointRules keys; e.g. 5 / 10 / 20), so task-form's Fontosság reads 'Alacsony · 5 / Közepes · 10 / Fontos · 20' for a user who has no task yet. Review S-tasks finding 3: today the values are read from the user's own tasks, so a new user sees the words alone. The full rule set is admin-only (GET /admin/rules), and hard-coding the defaults in the client would lie after an admin changes them. Same family as S-ma's R-S-ma-03 (the rule figures on GET /lifeos/today) - one backend change can serve both.",
+  "evidence": ".pulse/review/S-tasks/REVIEW.md finding 3; .pulse/review/S-tasks/live/task-form.live.png",
+  "clientReady": "features/tasks/tasksData.ts priorityValues already reads data.rules.taskLow / taskMid / taskHigh when present (integers >= 0, points x 100 = minor) and falls back to the tasks' own values, so the field needs no frontend change beyond adding `rules?` to TasksResponse.",
+  "interim": "The words alone for a priority no task shows yet (never a guessed number).",
+  "status": "open",
+  "resolution": "Not applied at merge-S-tasks-fix: backend change (B lane); still open, forwarded to the orchestrator together with R-S-ma-03."
+}

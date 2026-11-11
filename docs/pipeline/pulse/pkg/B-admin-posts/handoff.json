@@ -1,0 +1,40 @@
+{
+  "id": "B-admin-posts",
+  "status": "done",
+  "base": "pulse-int e2e1e4a (merged, already up to date)",
+  "migration": "none - 036 is NOT used. The 021/022 triggers allow clearing removed_at/removed_by/removal_reason in one UPDATE (api.md section 8).",
+  "newRoutes": [
+    "GET /admin/marketplace/posts",
+    "GET /admin/marketplace/posts/:publicId",
+    "POST /admin/marketplace/posts/:publicId/restore",
+    "GET /admin/marketplace/media/:key"
+  ],
+  "changedRoutes": [
+    "POST /admin/marketplace/remove: answer now {removed, replayed, target:{kind,id}, state:'removed'}; per-admin limiter added (also on GET /admin/marketplace/reports and POST /admin/marketplace/reports/:id/resolve)"
+  ],
+  "newAuditAction": "marketplace.moderation.restore (one writer: restoreRemovedPostTx)",
+  "security": [
+    "VISIBILITY GAP FIXED: PUBLIC_POST and PUBLIC_PROFILE require the author to be an enabled coach/admin; covers feed, post, search, directory, profile + grid, public media; fileReportTx composes the same constants",
+    "draft rule: a never-published post shows metadata only (bodyWithheld, mediaWithheld); search is column-filtered to the title so a draft body is not searchable; the admin picture route refuses a never-published post's pictures",
+    "reports never carry reporter identity",
+    "restore: named IMMEDIATE tx, DB-side admin re-check under the write lock, guard inside the UPDATE, one audit row, 409 not_removed for replay/race"
+  ],
+  "tests": {
+    "smoke": "999 passed, 0 failed (812 before + 187 in scripts/smoke/admin-posts.js); alone: node scripts/smoke-run.mjs --only=admin-posts",
+    "mutants": "node scripts/mutants-admin-posts.mjs: 26 planted defects, 26 killed, 0 survived",
+    "check:all": "green on a fresh DB migrated to 35 + seed:dev-users",
+    "frontend": "npm run build green; verify:gates 78 passed 0 failed 7 dormant (no frontend file changed)"
+  },
+  "sharedFileEdits": [
+    "backend/server.js (import + app.use for adminPostRoutes)",
+    "backend/src/db/index.js (3 facade lines)",
+    "backend/src/db/worker.js (import of PUBLIC_POST/PUBLIC_PROFILE, export * from tx/admin-posts.js, fileReportTx predicate now composes the shared constants)",
+    "backend/scripts/smoke.js (SMOKE_ONLY=admin-posts hook + the section call before logout)",
+    "backend/scripts/smoke-run.mjs (--only=<section> flag)",
+    "backend/scripts/brain-gen.mjs (router list: src/public/admin-posts.js is not named *routes.js so the cross-check cannot notice it)"
+  ],
+  "forTheIntegrator": [
+    "docs/brain was NOT regenerated (233 endpoints now; the other brain notes differ only by date): run npm run brain:gen once after all three backend lanes merged",
+    "no i18n.patch.json: backend only. Frontend lane needs ONE new Hungarian string for a disabled author (the frame says the post is still visible; it no longer is)"
+  ]
+}

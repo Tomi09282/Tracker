@@ -4,68 +4,46 @@
 // on. Wrapping a sync call in a Promise changes nothing — the work has to leave the main
 // thread. Each worker owns exactly one encrypted connection; connections cannot be shared
 // across threads.
-import { readFileSync, mkdirSync } from 'node:fs';
+//
+// The connection, the statement cache and rethrow live in ./conn.js (package B0), shared with the
+// named transactions in ./tx/<domain>.js. Piscina resolves a task by EXPORT NAME on this module, so
+// every transaction in tx/*.js is re-exported below under the exact name the facade passes.
+import { readFileSync } from 'node:fs';
 import { EXPORT_TABLES, UNLINK_BEFORE_DELETE } from './gdpr.js';
-import { dirname } from 'node:path';
 import { randomBytes } from 'node:crypto';
-import Database from 'better-sqlite3-multiple-ciphers';
-import { deriveDbKeyHex } from '../lib/dbkey.js';
+import { getDb, stmt, rethrow, closeDb } from './conn.js';
+// The ONE public-visibility predicate (pure strings, binds nothing). The report lookup below must
+// see exactly what a reader sees, so it composes the shared constants instead of keeping a copy
+// that can drift - it had: the copy lacked the author-standing clause (package B-admin-posts).
+import { PUBLIC_POST, PUBLIC_PROFILE } from '../public/visibility.js';
 
-let db;
-
-function getDb() {
-  if (db) return db;
-  // better-sqlite3 does not create missing parent directories — a fresh checkout would
-  // otherwise die with SQLITE_CANTOPEN at boot.
-  mkdirSync(dirname(process.env.DB_PATH), { recursive: true });
-  const conn = new Database(process.env.DB_PATH);
-  try {
-    // hexkey with a scrypt-derived raw key: no passphrase quoting pitfalls, our own strong KDF
-    // instead of the library default, and one master secret can serve several databases by
-    // varying the salt.
-    conn.pragma(`hexkey='${deriveDbKeyHex(process.env.DB_MASTER_KEY, process.env.DB_KEY_SALT)}'`);
-    // busy_timeout BEFORE any statement and before the WAL switch: at boot several workers
-    // open lazily at once and the journal_mode change needs a lock. With the default timeout
-    // of 0 a contending worker throws SQLITE_BUSY instead of waiting.
-    conn.pragma('busy_timeout = 5000');
-    conn.prepare('SELECT 1').get(); // wrong key surfaces as SQLITE_NOTADB right here
-    conn.pragma('journal_mode = WAL');
-    conn.pragma('synchronous = NORMAL');
-    conn.pragma('foreign_keys = ON');
-  } catch (err) {
-    conn.close(); // don't leak the handle; a later call retries with a fresh connection
-    throw err;
-  }
-  // Publish only after every pragma succeeded. Caching a half-configured connection (say, with
-  // foreign_keys still OFF) would silently corrupt integrity on every subsequent call.
-  db = conn;
-  return db;
-}
-
-const statements = new Map();
-function stmt(sql) {
-  let s = statements.get(sql);
-  if (!s) {
-    s = getDb().prepare(sql);
-    statements.set(sql, s);
-  }
-  return s;
-}
+export { getDb, stmt, rethrow } from './conn.js';
+export * from './tx/lifeos.js';
+export * from './tx/lifeos-habits.js';
+export * from './tx/lifeos-tasks.js';
+export * from './tx/lifeos-rewards.js';
+export * from './tx/lifeos-events.js';
+export * from './tx/lifeos-focus.js';
+export * from './tx/lifeos-stats.js';
+export * from './tx/admin-accounts.js';
+export * from './tx/admin-posts.js';
 
 /**
- * Re-throw a SQLite error in a form that survives the worker boundary.
- *
- * better-sqlite3 attaches its detail to `code` and to non-enumerable Error fields, and the
- * structured clone that carries an error out of a worker keeps almost none of it — the caller
- * sees a bare `{ code: 'SQLITE_ERROR' }` with no message and no statement. That turns a typo in
- * a query into a blind hunt, which cost real time three separate times before this existed.
+ * Shutdown, part one: close THIS worker's connection before the pool terminates it (see
+ * db/index.js and conn.js closeDb). The facade runs one of these per worker at once; the barrier on the shared
+ * counter keeps each worker inside its own call until all of them have arrived, so no worker takes
+ * two and none is skipped. Bounded at two seconds: a worker still busy elsewhere closes when its
+ * queued call reaches it, and a pool that cannot close cleanly is still terminated.
  */
-function rethrow(err, sql) {
-  const wrapped = new Error(
-    `${err?.code ?? 'SQLITE_ERROR'}: ${err?.message ?? 'unknown'}${sql ? ` — while running: ${sql.replace(/\s+/g, ' ').slice(0, 200)}` : ''}`,
-  );
-  wrapped.code = err?.code ?? 'SQLITE_ERROR';
-  throw wrapped;
+export function closeConnection({ shared, threads }) {
+  const counter = new Int32Array(shared);
+  Atomics.add(counter, 0, 1);
+  Atomics.notify(counter, 0);
+  const deadline = Date.now() + 2000;
+  for (let seen = Atomics.load(counter, 0); seen < threads && Date.now() < deadline; seen = Atomics.load(counter, 0)) {
+    Atomics.wait(counter, 0, seen, 50);
+  }
+  return closeDb();
 }
 
 export function all({ sql, params = [] }) {
@@ -1415,6 +1393,11 @@ export function adminAdjustCoinsTx({
     if (!actor || actor.role !== 'admin') return { outcome: 'forbidden' };
     if (actor.session_version !== actorSessionVersion) return { outcome: 'forbidden' };
 
+    // An admin does not adjust their OWN wallet (owner, 2026-11-03). Checked right after the actor is
+    // known and before anything else, so the refusal cannot be mistaken for a replay or a missing
+    // wallet, and it holds under the write lock like every other guard here.
+    if (actorUserId === targetUserId) return { outcome: 'self' };
+
     current = 'SELECT the prior adjustment (idempotency)';
     const prior = stmt(
       `SELECT id, amount_minor, note FROM coin_ledger
@@ -1444,7 +1427,9 @@ export function adminAdjustCoinsTx({
       return { outcome: 'out_of_bounds', maxMinor: reason.max_minor };
     }
 
-    if (wallet.balance_minor + amountMinor < 0) {
+    // Only a DEBIT must be covered. Since 031 a balance can be below zero (LifeOS penalties, plan
+    // L3), and a support credit to somebody in debt must land even when it does not clear the debt.
+    if (amountMinor < 0 && wallet.balance_minor + amountMinor < 0) {
       return { outcome: 'insufficient', balanceMinor: wallet.balance_minor, amountMinor };
     }
 
@@ -1460,10 +1445,10 @@ export function adminAdjustCoinsTx({
          FROM coin_wallets w
          JOIN users a ON a.id = ? AND a.role = 'admin'
                      AND a.session_version = ? AND a.disabled_at IS NULL
-        WHERE w.user_id = ? AND w.balance_minor + ? >= 0`,
+        WHERE w.user_id = ? AND (? > 0 OR w.balance_minor + ? >= 0)`,
     ).run(
       amountMinor, amountMinor, writeUid, requestId, note ?? null,
-      actorUserId, actorSessionVersion, targetUserId, amountMinor,
+      actorUserId, actorSessionVersion, targetUserId, amountMinor, amountMinor,
     );
     if (moved.changes === 0) {
       // Nothing was written, so committing nothing is a no-op. Every predicate was established
@@ -2765,15 +2750,14 @@ export function fileReportTx({
              FROM coach_posts p
              JOIN coach_profiles c ON c.user_id = p.author_user_id
             WHERE p.public_id = ?
-              AND p.published_at IS NOT NULL AND p.deleted_at IS NULL AND p.removed_at IS NULL
-              AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+              AND ${PUBLIC_POST}`,
         ).get(publicId)
       : stmt(
           `SELECT NULL AS postId, c.user_id AS profileId, c.user_id AS authorId,
                   substr(c.bio_src, 1, 4000) AS snapshot,
                   CASE WHEN length(c.bio_src) > 4000 THEN 1 ELSE 0 END AS truncated
              FROM coach_profiles c
-            WHERE c.handle = ? AND c.published_at IS NOT NULL AND c.removed_at IS NULL`,
+            WHERE c.handle = ? AND ${PUBLIC_PROFILE}`,
         ).get(handle);
     if (!subject) return { outcome: 'missing' };
     if (subject.authorId === reporterId) return { outcome: 'self_report' };
@@ -3041,7 +3025,7 @@ export function removeSubjectTx({
  * moment ago would still be acting on a token that says otherwise, and the operations here decide
  * who may do everything else.
  */
-export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requestId, ip = null }) {
+export function setAccountDisabledTx({ actorId, targetId, disabled, reason, stepUp = false, requestId, ip = null }) {
   const conn = getDb();
   let current = null;
 
@@ -3075,7 +3059,14 @@ export function setAccountDisabledTx({ actorId, targetId, disabled, reason, requ
     // disable must not rewrite when the account was actually stopped.
     if (disabled === (target.disabledAt !== null)) return view(true);
 
-    if (disabled && (!reason || reason.trim().length === 0)) return { outcome: 'needs_reason' };
+    // A reason is required in BOTH directions (owner, 2026-11-03): disabling and enabling are each a
+    // judgement about a person, and the audit row is where the next admin reads why.
+    if (!reason || reason.trim().length === 0) return { outcome: 'needs_reason' };
+
+    // Bringing back an ADMIN hands over everything a grant does, so it carries the grant's step-up
+    // (B-admin-polish; security review admin v2, attack 06): the route verified the actor's own
+    // password, and the role is checked HERE, under the write lock, not from a read before it.
+    if (!disabled && target.role === 'admin' && stepUp !== true) return { outcome: 'step_up_required' };
 
     // No last-admin count here either, for the same reason and with the same evidence — see the
     // note in setUserRoleTx. An admin cannot disable themselves, and a disabled account is refused
@@ -3348,6 +3339,13 @@ function hasSeat(coachId, clientId) {
     `SELECT 1 FROM coach_clients WHERE coach_id = ? AND client_id = ? AND status = 'active'`,
   ).get(coachId, clientId);
   if (alreadyActive) return true;
+
+  // AN ADMIN ACTING AS A TRAINER IS SEAT-EXEMPT (owner, economy sheet 2026-10-18). Roles stack on
+  // one account (plan R1), so an admin opens the trainer view without a coach_subscriptions row;
+  // without this the free tier's cap would refuse the product's own operators. Read from the
+  // database under the caller's write lock, never from a token.
+  const coach = stmt(`SELECT role FROM users WHERE id = ? AND disabled_at IS NULL`).get(coachId);
+  if (coach?.role === 'admin') return true;
 
   const tier = stmt(
     `SELECT t.client_cap AS cap

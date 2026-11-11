@@ -1,0 +1,68 @@
+warning: in the working copy of 'frontend/src/ui/tokens/fonts.css', LF will be replaced by CRLF the next time Git touches it
+codemod F1.4 — verify against HEAD (the counts below are the RENAMED tokens)
+  scope: 133 tracked .ts / .tsx files under frontend/src
+  148 class token(s) in 51 file(s): text-body 54 · text-display 22 · text-micro 72
+  where they sit: 138 in a string literal · 2 in a template string · 0 in JSX text · 8 in a comment
+    comment  frontend/src/features/coaching/ClientDetailPage.tsx:116: bucket and would drop `text-micro-legacy`. */}
+    comment  frontend/src/features/coins/CoinsPage.tsx:282: `text-micro-legacy` and its tracking — `text-title-2` set in caps has none. */}
+    comment  frontend/src/features/marketplace/PostPage.tsx:185: makes Space Grotesk opt-in for big numbers. Not the display SIZE: `text-display-legacy` is
+    comment  frontend/src/features/plans/PlanListPage.tsx:41: * It used to be a map of hand-written class strings at `text-micro-legacy px-2 py-1`; the recipe is
+    comment  frontend/src/features/workout/WorkoutPlayer.tsx:461: `ism.` is an abbreviation whose full stop disappears into an uppercase run. `text-micro-legacy`
+    comment  frontend/src/lib/cn.ts:18: *   cn('text-micro-legacy uppercase',      'text-text-3')  ->  'uppercase text-text-3'
+    comment  frontend/src/ui/data/SummaryTile.tsx:31: * It also drops the step to `text-micro-legacy`, because DESIGN.md §2 owns uppercase labels there and
+    comment  frontend/src/ui/feedback/variants/E12E16.tsx:543: {/* `text-body-legacy`, not `text-body-s`: the scale reserves 13px for CONTROL labels and dense
+  by the expression they are part of:
+    115  a plain className="…" literal
+     15  an argument of cn()
+      8  a comment
+      4  an object map of class strings
+      3  a conditional expression
+      2  a template string (a className={…} expression)
+      1  an argument of […].join()
+    expr     frontend/src/features/admin/AdminMetrics.tsx:74 — a template string (a className={…} expression)
+    expr     frontend/src/features/auth/AuthPage.tsx:142 — a conditional expression
+    expr     frontend/src/features/auth/AuthPage.tsx:143 — a conditional expression
+    expr     frontend/src/features/chat/ChatPanel.tsx:280 — an argument of cn()
+    expr     frontend/src/features/chat/NotificationBell.tsx:54 — an argument of cn()
+    expr     frontend/src/features/coaching/ClientDetailPage.tsx:117 — a template string (a className={…} expression)
+    expr     frontend/src/features/coaching/Monogram.tsx:30 — an object map of class strings
+    expr     frontend/src/features/library/ExerciseDetailPage.tsx:236 — an argument of cn()
+    expr     frontend/src/features/marketplace/MarketplacePage.tsx:144 — an argument of […].join()
+    expr     frontend/src/features/nutrition/NutritionPage.tsx:170 — an argument of cn()
+    expr     frontend/src/features/workout/SetRow.tsx:354 — an argument of cn()
+    expr     frontend/src/ui/TokenProof.tsx:19 — an object map of class strings
+    expr     frontend/src/ui/TokenProof.tsx:23 — an object map of class strings
+    expr     frontend/src/ui/TokenProof.tsx:26 — an object map of class strings
+    expr     frontend/src/ui/data/DataTable.tsx:99 — an argument of cn()
+    expr     frontend/src/ui/data/SummaryTile.tsx:175 — a conditional expression
+    expr     frontend/src/ui/feedback/variants/E10Tabs.tsx:453 — an argument of cn()
+    expr     frontend/src/ui/feedback/variants/E12E16.tsx:858 — an argument of cn()
+    expr     frontend/src/ui/feedback/variants/E2CopyButton.tsx:454 — an argument of cn()
+    expr     frontend/src/ui/feedback/variants/E4Toggle.tsx:404 — an argument of cn()
+    expr     frontend/src/ui/feedback/variants/E5Checkbox.tsx:343 — an argument of cn()
+    expr     frontend/src/ui/feedback/variants/E8E9.tsx:601 — an argument of cn()
+    expr     frontend/src/ui/nav/BottomNav.tsx:178 — an argument of cn()
+    expr     frontend/src/ui/primitives/Field.tsx:116 — an argument of cn()
+    expr     frontend/src/ui/shell/CommandPalette.tsx:199 — an argument of cn()
+  names built at run time: none (no `text-${…}`, no `'text-' + …`, no joined `text-` prefix)
+  the bare names 'body' / 'display' / 'micro' as string literals (17) — each must be unrelated to a class:
+    bare     frontend/src/app/AppLayout.tsx:51: * The base colour is not lost; `src/index.css` already paints `--surface-0` on `body`.
+    bare     frontend/src/features/marketplace/MarketplacePage.tsx:64: * chips already inherit from `body` — and writing `text-on-accent-subtle` here would collapse the
+    bare     frontend/src/features/onboarding/OnboardingPage.tsx:57: const STEPS = ['goal', 'schedule', 'equipment', 'body', 'limitations'] as const;
+    bare     frontend/src/features/onboarding/OnboardingPage.tsx:660: {step === 'body' ? (
+    bare     frontend/src/features/progress/ProgressPage.tsx:74: const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
+    bare     frontend/src/features/progress/ProgressPage.tsx:74: const [tab, setTab] = useState<'body' | 'photos' | 'sharing'>('body');
+    bare     frontend/src/features/progress/ProgressPage.tsx:96: {(['body', 'photos', 'sharing'] as const).map((key) => (
+    bare     frontend/src/features/progress/ProgressPage.tsx:123: {tab === 'body' ? <BodyTab /> : null}
+    bare     frontend/src/features/workout/useWorkout.ts:175: * `body` goes into the queue exactly as it is, `write_uid` and all. That key was minted
+    bare     frontend/src/lib/api.ts:46: interface ApiOptions extends Omit<RequestInit, 'body'> {
+    bare     frontend/src/lib/cn.ts:39: * re-uses their names (`body`, `display`, `micro`) with other metrics. The ten leave this list and
+    bare     frontend/src/lib/cn.ts:39: * re-uses their names (`body`, `display`, `micro`) with other metrics. The ten leave this list and
+    bare     frontend/src/lib/cn.ts:39: * re-uses their names (`body`, `display`, `micro`) with other metrics. The ten leave this list and
+    bare     frontend/src/lib/cn.ts:47: 'display',
+    bare     frontend/src/lib/cn.ts:50: 'body',
+    bare     frontend/src/lib/cn.ts:59: 'micro',
+    bare     frontend/src/ui/shell/AuroraBackdrop.tsx:4: * AN ELEMENT, NOT A BODY BACKGROUND, and the difference is the entire effect. `body` already
+  51 file(s) of the scope differ from HEAD: 50 differ by the rename alone (undoing the suffix gives back the old bytes)
+    also edited by hand, not by this script: frontend/src/lib/cn.ts
+  no un-renamed token is left in the scope

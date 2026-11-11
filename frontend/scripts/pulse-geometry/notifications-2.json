@@ -1,0 +1,1028 @@
+{
+ "key": "notifications-2",
+ "frame": {
+  "id": "88:478",
+  "name": "Értesítések — üres",
+  "width": 402,
+  "height": 874,
+  "page": "70:3",
+  "pageName": "member",
+  "fill": {
+   "hex": "#0b0d0a",
+   "opacity": 1
+  },
+  "clipsContent": true
+ },
+ "source": {
+  "fileKey": "SkWidL9kDDWhBip7cUCFtr",
+  "method": "get_metadata + use_figma (checksums verified)"
+ },
+ "nodes": [
+  {
+   "id": "88:479",
+   "name": "Content",
+   "type": "FRAME",
+   "x": 0,
+   "y": 0,
+   "w": 402,
+   "h": 874,
+   "depth": 1,
+   "parentId": "88:478",
+   "opacity": 1
+  },
+  {
+   "id": "88:480",
+   "name": "Header",
+   "type": "FRAME",
+   "x": 24,
+   "y": 64,
+   "w": 354,
+   "h": 82,
+   "depth": 2,
+   "parentId": "88:479",
+   "opacity": 1
+  },
+  {
+   "id": "88:481",
+   "name": "Bar",
+   "type": "FRAME",
+   "x": 24,
+   "y": 64,
+   "w": 354,
+   "h": 44,
+   "depth": 3,
+   "parentId": "88:480",
+   "opacity": 1
+  },
+  {
+   "id": "88:482",
+   "name": "Button/back",
+   "type": "FRAME",
+   "x": 24,
+   "y": 64,
+   "w": 76,
+   "h": 44,
+   "depth": 4,
+   "parentId": "88:481",
+   "opacity": 1
+  },
+  {
+   "id": "88:483",
+   "name": "chevron-left",
+   "type": "FRAME",
+   "x": 24,
+   "y": 74,
+   "w": 12,
+   "h": 24,
+   "depth": 5,
+   "parentId": "88:482",
+   "opacity": 1
+  },
+  {
+   "id": "88:484",
+   "name": "glyph/back",
+   "type": "FRAME",
+   "x": 16,
+   "y": 74,
+   "w": 24,
+   "h": 24,
+   "depth": 6,
+   "parentId": "88:483",
+   "opacity": 1,
+   "clipsContent": true
+  },
+  {
+   "id": "88:485",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 25,
+   "y": 80,
+   "w": 6,
+   "h": 12,
+   "depth": 7,
+   "parentId": "88:484",
+   "opacity": 1,
+   "strokeWeight": 1.75,
+   "stroke": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   },
+   "strokeAlign": "CENTER"
+  },
+  {
+   "id": "88:486",
+   "name": "Kezdőlap",
+   "type": "TEXT",
+   "x": 42,
+   "y": 76,
+   "w": 58,
+   "h": 20,
+   "depth": 5,
+   "parentId": "88:482",
+   "opacity": 1,
+   "text": {
+    "characters": "Kezdőlap",
+    "fontFamily": "Big Shoulders Display",
+    "fontStyle": "Bold",
+    "fontSize": 16,
+    "lineHeightPx": 20,
+    "letterSpacing": 0.96,
+    "letterSpacingPercent": 6,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 42.7,
+     "y": 76.5,
+     "w": 55.9,
+     "h": 15.6
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:487",
+   "name": "Értesítések",
+   "type": "TEXT",
+   "x": 24,
+   "y": 112,
+   "w": 354,
+   "h": 34,
+   "depth": 3,
+   "parentId": "88:480",
+   "opacity": 1,
+   "text": {
+    "characters": "Értesítések",
+    "fontFamily": "Big Shoulders Display",
+    "fontStyle": "Bold",
+    "fontSize": 32,
+    "lineHeightPx": 34,
+    "letterSpacing": 0.32,
+    "letterSpacingPercent": 1,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 25.5,
+     "y": 110.1,
+     "w": 128.3,
+     "h": 31.2
+    }
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:488",
+   "name": "Stat/Olvasatlan",
+   "type": "FRAME",
+   "x": 24,
+   "y": 178,
+   "w": 143,
+   "h": 130,
+   "depth": 2,
+   "parentId": "88:479",
+   "opacity": 1
+  },
+  {
+   "id": "88:491",
+   "name": "Numeral slot",
+   "type": "FRAME",
+   "x": 24,
+   "y": 178,
+   "w": 54,
+   "h": 100,
+   "depth": 3,
+   "parentId": "88:488",
+   "opacity": 1
+  },
+  {
+   "id": "88:489",
+   "name": "Num/0",
+   "type": "FRAME",
+   "x": 24,
+   "y": 178,
+   "w": 54,
+   "h": 102,
+   "depth": 4,
+   "parentId": "88:491",
+   "opacity": 1
+  },
+  {
+   "id": "88:490",
+   "name": "0",
+   "type": "TEXT",
+   "x": 19.1,
+   "y": 176.4,
+   "w": 63,
+   "h": 108,
+   "depth": 5,
+   "parentId": "88:489",
+   "opacity": 1,
+   "text": {
+    "characters": "0",
+    "fontFamily": "Big Shoulders Display",
+    "fontStyle": "Black",
+    "fontSize": 124,
+    "lineHeightPx": 108,
+    "letterSpacing": -1.24,
+    "letterSpacingPercent": -1,
+    "color": "#858c79",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 24,
+     "y": 178,
+     "w": 53,
+     "h": 101.7
+    }
+   },
+   "fill": {
+    "hex": "#858c79",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:492",
+   "name": "olvasatlan értesítés",
+   "type": "TEXT",
+   "x": 24,
+   "y": 286,
+   "w": 143,
+   "h": 22,
+   "depth": 3,
+   "parentId": "88:488",
+   "opacity": 1,
+   "text": {
+    "characters": "olvasatlan értesítés",
+    "fontFamily": "Geist",
+    "fontStyle": "Regular",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 24.7,
+     "y": 291.4,
+     "w": 141.5,
+     "h": 11.8
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:493",
+   "name": "List · empty",
+   "type": "FRAME",
+   "x": 24,
+   "y": 340,
+   "w": 354,
+   "h": 111,
+   "depth": 2,
+   "parentId": "88:479",
+   "opacity": 1
+  },
+  {
+   "id": "88:494",
+   "name": "Rule/section",
+   "type": "RECTANGLE",
+   "x": 24,
+   "y": 340,
+   "w": 354,
+   "h": 1,
+   "depth": 3,
+   "parentId": "88:493",
+   "opacity": 1,
+   "fill": {
+    "hex": "#ffffff",
+    "opacity": 0.14
+   }
+  },
+  {
+   "id": "88:495",
+   "name": "Empty state",
+   "type": "FRAME",
+   "x": 24,
+   "y": 365,
+   "w": 354,
+   "h": 86,
+   "depth": 3,
+   "parentId": "88:493",
+   "opacity": 1
+  },
+  {
+   "id": "88:496",
+   "name": "Text",
+   "type": "FRAME",
+   "x": 24,
+   "y": 365,
+   "w": 354,
+   "h": 86,
+   "depth": 4,
+   "parentId": "88:495",
+   "opacity": 1
+  },
+  {
+   "id": "88:497",
+   "name": "Nincs értesítés",
+   "type": "TEXT",
+   "x": 24,
+   "y": 365,
+   "w": 354,
+   "h": 34,
+   "depth": 5,
+   "parentId": "88:496",
+   "opacity": 1,
+   "text": {
+    "characters": "Nincs értesítés",
+    "fontFamily": "Big Shoulders Display",
+    "fontStyle": "Bold",
+    "fontSize": 32,
+    "lineHeightPx": 34,
+    "letterSpacing": 0.32,
+    "letterSpacingPercent": 1,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "UPPER",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 25.5,
+     "y": 363.1,
+     "w": 174.1,
+     "h": 31.2
+    }
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:498",
+   "name": "Ha üzenetet kapsz vagy válto",
+   "type": "TEXT",
+   "x": 24,
+   "y": 407,
+   "w": 312,
+   "h": 44,
+   "depth": 5,
+   "parentId": "88:496",
+   "opacity": 1,
+   "text": {
+    "characters": "Ha üzenetet kapsz vagy változik a terved, itt jelenik meg.",
+    "fontFamily": "Geist",
+    "fontStyle": "Regular",
+    "fontSize": 16,
+    "lineHeightPx": 22,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "HEIGHT",
+    "ink": {
+     "x": 25.2,
+     "y": 412.4,
+     "w": 301,
+     "h": 36.2
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:499",
+   "name": "Bottom fade",
+   "type": "RECTANGLE",
+   "x": 0,
+   "y": 744,
+   "w": 402,
+   "h": 130,
+   "depth": 1,
+   "parentId": "88:478",
+   "opacity": 1,
+   "gradient": {
+    "type": "LINEAR",
+    "opacity": 1,
+    "stops": [
+     {
+      "hex": "#0b0d0a",
+      "alpha": 0,
+      "position": 0
+     },
+     {
+      "hex": "#0b0d0a",
+      "alpha": 1,
+      "position": 0.28
+     },
+     {
+      "hex": "#0b0d0a",
+      "alpha": 1,
+      "position": 1
+     }
+    ]
+   },
+   "absolute": true
+  },
+  {
+   "id": "88:500",
+   "name": "Tab bar",
+   "type": "FRAME",
+   "x": 10,
+   "y": 782,
+   "w": 382,
+   "h": 56,
+   "depth": 1,
+   "parentId": "88:478",
+   "opacity": 1,
+   "absolute": true
+  },
+  {
+   "id": "88:501",
+   "name": "Tab/home",
+   "type": "FRAME",
+   "x": 10,
+   "y": 782,
+   "w": 76.4,
+   "h": 56,
+   "depth": 2,
+   "parentId": "88:500",
+   "opacity": 1
+  },
+  {
+   "id": "88:502",
+   "name": "Icon/tab2-home",
+   "type": "RECTANGLE",
+   "x": 32.2,
+   "y": 786,
+   "w": 32,
+   "h": 32,
+   "depth": 3,
+   "parentId": "88:501",
+   "opacity": 1,
+   "image": true
+  },
+  {
+   "id": "88:503",
+   "name": "Kezdőlap",
+   "type": "TEXT",
+   "x": 23.7,
+   "y": 820,
+   "w": 49,
+   "h": 14,
+   "depth": 3,
+   "parentId": "88:501",
+   "opacity": 1,
+   "text": {
+    "characters": "Kezdőlap",
+    "fontFamily": "Geist",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 14,
+    "letterSpacing": 0.11,
+    "letterSpacingPercent": 1,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 24.6,
+     "y": 823,
+     "w": 47,
+     "h": 9.7
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:504",
+   "name": "Tab/training",
+   "type": "FRAME",
+   "x": 86.4,
+   "y": 782,
+   "w": 76.4,
+   "h": 56,
+   "depth": 2,
+   "parentId": "88:500",
+   "opacity": 1
+  },
+  {
+   "id": "88:505",
+   "name": "Icon/tab2-training",
+   "type": "RECTANGLE",
+   "x": 108.6,
+   "y": 786,
+   "w": 32,
+   "h": 32,
+   "depth": 3,
+   "parentId": "88:504",
+   "opacity": 1,
+   "image": true
+  },
+  {
+   "id": "88:506",
+   "name": "Edzés",
+   "type": "TEXT",
+   "x": 108.6,
+   "y": 820,
+   "w": 32,
+   "h": 14,
+   "depth": 3,
+   "parentId": "88:504",
+   "opacity": 1,
+   "text": {
+    "characters": "Edzés",
+    "fontFamily": "Geist",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 14,
+    "letterSpacing": 0.11,
+    "letterSpacingPercent": 1,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 109.5,
+     "y": 823,
+     "w": 30.3,
+     "h": 8.1
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:507",
+   "name": "Tab/nutrition",
+   "type": "FRAME",
+   "x": 162.8,
+   "y": 782,
+   "w": 76.4,
+   "h": 56,
+   "depth": 2,
+   "parentId": "88:500",
+   "opacity": 1
+  },
+  {
+   "id": "88:508",
+   "name": "Icon/tab2-nutrition",
+   "type": "RECTANGLE",
+   "x": 185,
+   "y": 786,
+   "w": 32,
+   "h": 32,
+   "depth": 3,
+   "parentId": "88:507",
+   "opacity": 1,
+   "image": true
+  },
+  {
+   "id": "88:509",
+   "name": "Étkezés",
+   "type": "TEXT",
+   "x": 180,
+   "y": 820,
+   "w": 42,
+   "h": 14,
+   "depth": 3,
+   "parentId": "88:507",
+   "opacity": 1,
+   "text": {
+    "characters": "Étkezés",
+    "fontFamily": "Geist",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 14,
+    "letterSpacing": 0.11,
+    "letterSpacingPercent": 1,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 180.9,
+     "y": 821,
+     "w": 40.2,
+     "h": 10.1
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:510",
+   "name": "Tab/progress",
+   "type": "FRAME",
+   "x": 239.2,
+   "y": 782,
+   "w": 76.4,
+   "h": 56,
+   "depth": 2,
+   "parentId": "88:500",
+   "opacity": 1
+  },
+  {
+   "id": "88:511",
+   "name": "Icon/tab2-progress",
+   "type": "RECTANGLE",
+   "x": 261.4,
+   "y": 786,
+   "w": 32,
+   "h": 32,
+   "depth": 3,
+   "parentId": "88:510",
+   "opacity": 1,
+   "image": true
+  },
+  {
+   "id": "88:512",
+   "name": "Haladás",
+   "type": "TEXT",
+   "x": 255.9,
+   "y": 820,
+   "w": 43,
+   "h": 14,
+   "depth": 3,
+   "parentId": "88:510",
+   "opacity": 1,
+   "text": {
+    "characters": "Haladás",
+    "fontFamily": "Geist",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 14,
+    "letterSpacing": 0.11,
+    "letterSpacingPercent": 1,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 256.8,
+     "y": 823,
+     "w": 41,
+     "h": 8.2
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:513",
+   "name": "Tab/profile",
+   "type": "FRAME",
+   "x": 315.6,
+   "y": 782,
+   "w": 76.4,
+   "h": 56,
+   "depth": 2,
+   "parentId": "88:500",
+   "opacity": 1
+  },
+  {
+   "id": "88:514",
+   "name": "Icon/tab2-profile",
+   "type": "RECTANGLE",
+   "x": 337.8,
+   "y": 786,
+   "w": 32,
+   "h": 32,
+   "depth": 3,
+   "parentId": "88:513",
+   "opacity": 1,
+   "image": true
+  },
+  {
+   "id": "88:515",
+   "name": "Profil",
+   "type": "TEXT",
+   "x": 339.8,
+   "y": 820,
+   "w": 28,
+   "h": 14,
+   "depth": 3,
+   "parentId": "88:513",
+   "opacity": 1,
+   "text": {
+    "characters": "Profil",
+    "fontFamily": "Geist",
+    "fontStyle": "Medium",
+    "fontSize": 11,
+    "lineHeightPx": 14,
+    "letterSpacing": 0.11,
+    "letterSpacingPercent": 1,
+    "color": "#a9b09d",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 340.7,
+     "y": 823.1,
+     "w": 26.6,
+     "h": 8
+    }
+   },
+   "fill": {
+    "hex": "#a9b09d",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:516",
+   "name": "StatusBar",
+   "type": "FRAME",
+   "x": 0,
+   "y": 0,
+   "w": 402,
+   "h": 62,
+   "depth": 1,
+   "parentId": "88:478",
+   "opacity": 1,
+   "absolute": true
+  },
+  {
+   "id": "88:517",
+   "name": "time",
+   "type": "TEXT",
+   "x": 52,
+   "y": 21,
+   "w": 36,
+   "h": 21,
+   "depth": 2,
+   "parentId": "88:516",
+   "opacity": 1,
+   "text": {
+    "characters": "9:41",
+    "fontFamily": "Inter",
+    "fontStyle": "Semi Bold",
+    "fontSize": 17,
+    "lineHeightPx": null,
+    "letterSpacing": 0,
+    "letterSpacingPercent": 0,
+    "color": "#f2f5ea",
+    "colorOpacity": 1,
+    "case": "ORIGINAL",
+    "align": "LEFT",
+    "autoResize": "WIDTH_AND_HEIGHT",
+    "ink": {
+     "x": 52.9,
+     "y": 25.5,
+     "w": 32.3,
+     "h": 12.7
+    }
+   },
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:518",
+   "name": "DynamicIsland",
+   "type": "RECTANGLE",
+   "x": 138,
+   "y": 11,
+   "w": 126,
+   "h": 37,
+   "depth": 2,
+   "parentId": "88:516",
+   "opacity": 1,
+   "fill": {
+    "hex": "#000000",
+    "opacity": 1
+   },
+   "cornerRadius": 18.5
+  },
+  {
+   "id": "88:519",
+   "name": "signal-wifi-battery",
+   "type": "FRAME",
+   "x": 292,
+   "y": 24,
+   "w": 78,
+   "h": 13,
+   "depth": 2,
+   "parentId": "88:516",
+   "opacity": 1,
+   "clipsContent": true
+  },
+  {
+   "id": "88:520",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 292,
+   "y": 32.5,
+   "w": 3.2,
+   "h": 4.5,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:521",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 296.8,
+   "y": 29.8,
+   "w": 3.2,
+   "h": 7.2,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:522",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 301.6,
+   "y": 27.2,
+   "w": 3.2,
+   "h": 9.8,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:523",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 306.4,
+   "y": 24.5,
+   "w": 3.2,
+   "h": 12.5,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:524",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 318,
+   "y": 26.6,
+   "w": 13,
+   "h": 3.9,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:525",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 320.6,
+   "y": 30.3,
+   "w": 7.8,
+   "h": 2.8,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:526",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 322.9,
+   "y": 33.9,
+   "w": 3.2,
+   "h": 2.4,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:527",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 339.5,
+   "y": 24.5,
+   "w": 25,
+   "h": 12,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "strokeWeight": 1,
+   "stroke": {
+    "hex": "#f2f5ea",
+    "opacity": 0.35
+   },
+   "strokeAlign": "CENTER"
+  },
+  {
+   "id": "88:528",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 341.5,
+   "y": 26.5,
+   "w": 21,
+   "h": 8,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   }
+  },
+  {
+   "id": "88:529",
+   "name": "Vector",
+   "type": "VECTOR",
+   "x": 366,
+   "y": 28.6,
+   "w": 1.4,
+   "h": 3.8,
+   "depth": 3,
+   "parentId": "88:519",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 0.4
+   }
+  },
+  {
+   "id": "88:530",
+   "name": "HomeIndicator",
+   "type": "RECTANGLE",
+   "x": 131.5,
+   "y": 861,
+   "w": 139,
+   "h": 5,
+   "depth": 1,
+   "parentId": "88:478",
+   "opacity": 1,
+   "fill": {
+    "hex": "#f2f5ea",
+    "opacity": 1
+   },
+   "cornerRadius": 3,
+   "absolute": true
+  }
+ ]
+}

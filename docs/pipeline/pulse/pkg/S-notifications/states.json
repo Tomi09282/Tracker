@@ -1,0 +1,587 @@
+{
+  "about": "S-notifications - the frames and the undrawn states of Értesítések (/notifications, PLAN 4.1 rule 7). Replay only: M (user@) for every list state, N (demo.nagy.balazs@) for the empty frame. Nothing is written live: the mark-read POST the page fires on opening is the declared default stub (204) of pulse-frames.json, or a per-state stub below. The recorded M inbox holds eight rows of kinds no server code writes (streak, coins, plan, nutrition ...); every list state therefore replaces the list with rows of the two kinds the server really writes (backend/src/db/worker.js:941 chat.message - title = the sender e-mail local part, no body, link /chat/<id>; :3880 profile.equipment_changed - the fixed title and body, link /settings), with the frame's ages against the freeze instant 2026-10-15T15:08:35Z. A chat row carries no body key: the server writes no body (null) and the recordings only ever hold a string there, so pulse-fixture-check refuses null; the page reads a missing body exactly as null (no sub line). Such states are matched-fixture at best.",
+  "overrides": {
+    "notifications-1": {
+      "why": "The recording of M holds kinds the server never writes; the frame draws six rows of the two real kinds (2 unread, 4 read). The edit replaces the list with them. The back control is now named by the parent (nav.home, as the frame draws KEZDŐLAP), and the tab bar has a Kezdőlap link too, so the old arrival 'Vissza' no longer exists: the page has arrived when the pill has left busy (the stubbed mark-read answered and the refetch returned the same unread rows).",
+      "reach": "fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": null,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": null,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "notifications.markAllRead"
+        },
+        "disabled": false
+      }
+    },
+    "notifications-2": {
+      "why": "The recording of N is the empty list itself. The old arrival 'Vissza' no longer exists (the back control is named nav.home): the caption under the numeral proves the page.",
+      "arrived": {
+        "text": {
+          "key": "notifications.unreadLabel"
+        }
+      }
+    }
+  },
+  "states": {
+    "notifications-settled": {
+      "title": "Értesítések - megnyitás után (a jelölés után, ugyanabban a látogatásban)",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The same visit one round trip after the automatic mark-read: the numeral still says 2 (frozen arrival), the pill is gone, every row is read and the Korábbiak section is gone (one ruled list). The stubbed POST fires the label; the refetch after it returns the list with the two unread rows read.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1792076715,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1792069235,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ],
+          "after": "mark"
+        },
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": null,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": null,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stubs": [
+        {
+          "method": "POST",
+          "path": "/api/v1/notifications/read",
+          "status": 204,
+          "label": "mark",
+          "why": "the automatic mark-read; the page does not read the answer"
+        }
+      ],
+      "arrived": {
+        "absent": {
+          "role": "button",
+          "name": {
+            "key": "notifications.markAllRead"
+          }
+        }
+      }
+    },
+    "notifications-only-unread": {
+      "title": "Értesítések - csak olvasatlan sorok (nincs Korábbiak)",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "Arrival with the two unread rows and nothing older: one ruled list, no Korábbiak section.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": null,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": null,
+                  "created_at": 1792069115
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "notifications.markAllRead"
+        },
+        "disabled": false
+      }
+    },
+    "notifications-nothing-unread": {
+      "title": "Értesítések - érkezés, minden olvasott",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "Arrival with rows but nothing unread: the numeral 0 at the off level, the caption, no pill, one ruled list of read rows, no section.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1792076715,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1792069235,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "absent": {
+          "role": "button",
+          "name": {
+            "key": "notifications.markAllRead"
+          }
+        }
+      }
+    },
+    "notifications-error": {
+      "title": "Értesítések - a lista nem töltődött be",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "GET /notifications fails (the query retries twice first): no numeral and no caption (unknown is not zero), the strong rule, the generic error line as the display title and Újra as a text link.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/notifications",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "auth.errors.generic"
+        }
+      }
+    },
+    "notifications-offline": {
+      "title": "Értesítések - kapcsolat nélkül (a gomb letiltva)",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The frame-1 list, then the connection drops: the shell strip, the list stays, the pill stays visible but disabled (the quiet grey primary). The automatic mark-read already fired once online (stub).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": null,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": null,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "notifications.markAllRead"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "notifications.markAllRead"
+        },
+        "disabled": true
+      }
+    },
+    "notifications-mark-failed": {
+      "title": "Értesítések - a jelölés nem sikerült",
+      "account": "M",
+      "route": "/notifications",
+      "height": 874,
+      "reach": "fixture",
+      "why": "The automatic mark-read answers 500: no message exists for it (none is invented), the pill returns to idle and enabled, the rows keep their dots.",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/notifications",
+          "edits": [
+            {
+              "pointer": "/notifications",
+              "value": [
+                {
+                  "id": 106,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": null,
+                  "created_at": 1792076595
+                },
+                {
+                  "id": 105,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": null,
+                  "created_at": 1792069115
+                },
+                {
+                  "id": 104,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791990515,
+                  "created_at": 1791986915
+                },
+                {
+                  "id": 103,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1791817715,
+                  "created_at": 1791814115
+                },
+                {
+                  "id": 102,
+                  "type": "profile.equipment_changed",
+                  "title": "Felszerelés frissítve",
+                  "body": "Az edződ módosította az eszközeidet.",
+                  "link_path": "/settings",
+                  "read_at": 1791040115,
+                  "created_at": 1791036515
+                },
+                {
+                  "id": 101,
+                  "type": "chat.message",
+                  "title": "kovacs.peter",
+                  "link_path": "/chat/12",
+                  "read_at": 1790348915,
+                  "created_at": 1790345315
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "stubs": [
+        {
+          "method": "POST",
+          "path": "/api/v1/notifications/read",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/v1/notifications/read",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "notifications.markAllRead"
+        },
+        "disabled": false
+      }
+    }
+  },
+  "unreachable": {
+    "notifications-loading": "No step or fixture field holds a GET open in pulse-shot (no hold / delay): the loading layout (header, numeral skeleton, two row skeletons in a status list) is verified by code review only - verdict structure.",
+    "notifications-new-on-poll": "A new row arriving on the 60 s poll is hook-owned and composes exactly as notifications-1 (an unread row on top, auto-marked); not captured."
+  }
+}

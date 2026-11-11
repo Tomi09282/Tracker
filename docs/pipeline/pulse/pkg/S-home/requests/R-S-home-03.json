@@ -1,0 +1,14 @@
+{
+  "id": "R-S-home-03",
+  "from": "S-home",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (targets probe) / frontend/src/ui/primitives/TextLink.tsx",
+  "need": "The targets probe measures a TextLink's layout box (\"Újra\" 30 x 44, the row's \"Indítás\" 41 x 44) and fails the state, while the kit gives every link an invisible hit layer of at least 44 x 44 (kit/actions.md 'Hit floor'). Either the probe should measure the hit layer, or the kit should widen the box.",
+  "evidence": ".pulse/shots/S-home/home-week-error.probe.json and home-several.probe.json, probes.targets.small",
+  "proposedApi": null,
+  "proposedPatch": null,
+  "interim": "the two links are the kit's TextLink unchanged; the two states are reported with this one probe open",
+  "status": "open",
+  "resolution": null
+}

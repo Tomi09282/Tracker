@@ -1,13 +1,19 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from './AppLayout';
+import { PublicLayout } from './PublicLayout';
 import { RequireAuth } from './RequireAuth';
 import { ScreenSkeleton } from '../ui/feedback/ScreenSkeleton';
-import { AuthPage } from '../features/auth/AuthPage';
-import { HomePage } from '../features/home/HomePage';
 
-// Route-level splitting from day one. The library screen pulls in the muscle-map SVG and the
-// search UI, none of which the auth screens or the home screen need.
+// Route-level splitting from day one, and for EVERY screen: the sign-in screen no longer ships
+// inside the first bundle of a member who is already signed in, and Home no longer ships inside
+// the first bundle of a visitor who has only come to sign in. The two were the last eager pages.
+const AuthPage = lazy(() =>
+  import('../features/auth/AuthPage').then((m) => ({ default: m.AuthPage })),
+);
+const TodayPage = lazy(() =>
+  import('../features/today/TodayPage').then((m) => ({ default: m.TodayPage })),
+);
 const LibraryPage = lazy(() =>
   import('../features/library/LibraryPage').then((m) => ({ default: m.LibraryPage })),
 );
@@ -44,6 +50,27 @@ const StyleStudioPage = lazy(() =>
 const AdminPage = lazy(() =>
   import('../features/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 );
+const AdminAccountsPage = lazy(() =>
+  import('../features/admin/AdminAccountsPage').then((m) => ({ default: m.AdminAccountsPage })),
+);
+const AccountDetailPage = lazy(() =>
+  import('../features/admin/accounts/AccountDetailPage').then((m) => ({ default: m.AccountDetailPage })),
+);
+const AccountCoinsPage = lazy(() =>
+  import('../features/admin/accounts/AccountCoinsPage').then((m) => ({ default: m.AccountCoinsPage })),
+);
+const AdminPostDetailPage = lazy(() =>
+  import('../features/admin/marketplace/PostDetailPage').then((m) => ({ default: m.PostDetailPage })),
+);
+const AdminMarketplacePage = lazy(() =>
+  import('../features/admin/AdminMarketplacePage').then((m) => ({ default: m.AdminMarketplacePage })),
+);
+const RulesPage = lazy(() =>
+  import('../features/admin/RulesPage').then((m) => ({ default: m.RulesPage })),
+);
+const StatisticsPage = lazy(() =>
+  import('../features/admin/StatisticsPage').then((m) => ({ default: m.StatisticsPage })),
+);
 const PlaygroundPage = lazy(() =>
   import('../features/playground/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
 );
@@ -52,6 +79,9 @@ const NutritionPage = lazy(() =>
 );
 const ProgressPage = lazy(() =>
   import('../features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
+);
+const DaysPage = lazy(() =>
+  import('../features/progress/DaysPage').then((m) => ({ default: m.DaysPage })),
 );
 const CoinsPage = lazy(() =>
   import('../features/coins/CoinsPage').then((m) => ({ default: m.CoinsPage })),
@@ -77,30 +107,66 @@ const CoachProfilePage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('../features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
+const EquipmentPage = lazy(() =>
+  import('../features/settings/EquipmentSection').then((m) => ({ default: m.EquipmentPage })),
+);
+const DaySettingsPage = lazy(() =>
+  import('../features/settings/DaySettingsPage').then((m) => ({ default: m.DaySettingsPage })),
+);
+const TasksPage = lazy(() => import('../features/tasks/TasksPage').then((m) => ({ default: m.TasksPage })));
+const CalendarPage = lazy(() => import('../features/calendar/CalendarPage').then((m) => ({ default: m.CalendarPage })));
+const EventDetailPage = lazy(() =>
+  import('../features/calendar/EventDetailPage').then((m) => ({ default: m.EventDetailPage })),
+);
+const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) => ({ default: m.HabitsPage })));
+const HabitDetailPage = lazy(() =>
+  import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+);
+const ChallengesPage = lazy(() =>
+  import('../features/challenges/ChallengesPage').then((m) => ({ default: m.ChallengesPage })),
+);
+const ChallengePoolPage = lazy(() =>
+  import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
+);
+const FocusPage = lazy(() => import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })));
+const RewardsPage = lazy(() => import('../features/rewards/RewardsPage').then((m) => ({ default: m.RewardsPage })));
+const RewardDetailPage = lazy(() =>
+  import('../features/rewards/RewardDetailPage').then((m) => ({ default: m.RewardDetailPage })),
+);
 
 const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
 
 export const router = createBrowserRouter([
-  { path: '/login', element: <AuthPage mode="login" /> },
-  { path: '/register', element: <AuthPage mode="register" /> },
+  // ── THE SCREENS OF A VISITOR: ONE LAYOUT, NO SESSION ────────────────────────────────────────
+  //
+  // `PublicLayout` draws the shell these screens share (the status-bar mask, a Dock that stands
+  // above the home indicator) and reads no session. It is a layout route with no path: the URLs
+  // are exactly what they were.
+  {
+    element: <PublicLayout />,
+    children: [
+      { path: '/login', element: suspended(<AuthPage mode="login" />) },
+      { path: '/register', element: suspended(<AuthPage mode="register" />) },
 
-  // ── THE PUBLIC MARKETPLACE, OUTSIDE RequireAuth ─────────────────────────────────────────────
-  //
-  // These were first written as children of the authenticated layout, and the whole surface was
-  // defeated at the client: the server served `/api/v1/public/*` to anybody, and the app bounced
-  // every visitor to /login before a request was ever made. Measured — a browser with its cookies
-  // cleared landed on the login screen.
-  //
-  // That is worth stating rather than quietly fixing, because it is the shape of the mistake: the
-  // BACKEND had six allowlisted public routes, a gate forbidding `req.user`, and sixteen assertions
-  // proving anonymous access — and one line of routing made all of it unreachable. A guarantee is
-  // only as public as its least public layer.
-  //
-  // No AppLayout either: the nav is for people with an account, and a bottom bar full of tabs that
-  // demand a login is a worse first impression than no bar at all.
-  { path: '/m', element: suspended(<MarketplacePage />) },
-  { path: '/m/p/:publicId', element: suspended(<PostPage />) },
-  { path: '/m/c/:handle', element: suspended(<CoachProfilePage />) },
+      // ── THE PUBLIC MARKETPLACE, OUTSIDE RequireAuth ─────────────────────────────────────────────
+      //
+      // These were first written as children of the authenticated layout, and the whole surface was
+      // defeated at the client: the server served `/api/v1/public/*` to anybody, and the app bounced
+      // every visitor to /login before a request was ever made. Measured — a browser with its cookies
+      // cleared landed on the login screen.
+      //
+      // That is worth stating rather than quietly fixing, because it is the shape of the mistake: the
+      // BACKEND had six allowlisted public routes, a gate forbidding `req.user`, and sixteen assertions
+      // proving anonymous access — and one line of routing made all of it unreachable. A guarantee is
+      // only as public as its least public layer.
+      //
+      // No AppLayout either: the nav is for people with an account, and a bottom bar full of tabs that
+      // demand a login is a worse first impression than no bar at all.
+      { path: '/m', element: suspended(<MarketplacePage />) },
+      { path: '/m/p/:publicId', element: suspended(<PostPage />) },
+      { path: '/m/c/:handle', element: suspended(<CoachProfilePage />) },
+    ],
+  },
   {
     path: '/',
     element: (
@@ -109,19 +175,47 @@ export const router = createBrowserRouter([
       </RequireAuth>
     ),
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: suspended(<TodayPage />) },
       { path: 'notifications', element: suspended(<NotificationsPage />) },
+      { path: 'habits', element: suspended(<HabitsPage />) },
+      { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+      { path: 'tasks', element: suspended(<TasksPage />) },
+      { path: 'focus', element: suspended(<FocusPage />) },
+      { path: 'challenges', element: suspended(<ChallengesPage />) },
+      { path: 'challenges/pool', element: suspended(<ChallengePoolPage />) },
       { path: 'library', element: suspended(<LibraryPage />) },
       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
       { path: 'nutrition', element: suspended(<NutritionPage />) },
+      { path: 'calendar', element: suspended(<CalendarPage />) },
+      { path: 'calendar/events/:id', element: suspended(<EventDetailPage />) },
       { path: 'progress', element: suspended(<ProgressPage />) },
+      { path: 'progress/days', element: suspended(<DaysPage />) },
       { path: 'coins', element: suspended(<CoinsPage />) },
+      { path: 'rewards', element: suspended(<RewardsPage />) },
+      { path: 'rewards/:id', element: suspended(<RewardDetailPage />) },
       { path: 'compose', element: suspended(<ComposePage />) },
       { path: 'compose/profile', element: suspended(<ProfileEditorPage />) },
       { path: 'compose/posts/:publicId', element: suspended(<PostEditorPage />) },
       { path: 'settings', element: suspended(<SettingsPage />) },
+      { path: 'settings/equipment', element: suspended(<EquipmentPage />) },
+      { path: 'settings/day', element: suspended(<DaySettingsPage />) },
       { path: 'playground', element: suspended(<PlaygroundPage />) },
       { path: 'admin', element: suspended(<AdminPage />) },
+      // The admin bar's Fiókok and Piactér tabs (design round A): sections of /admin that became
+      // routes, so each has a URL, a lit tab and a way in from the bar.
+      { path: 'admin/accounts', element: suspended(<AdminAccountsPage />) },
+      // An account's page, pushed from a row of Fiókok, and its whole coin ledger (S-admin-accounts).
+      { path: 'admin/accounts/:id', element: suspended(<AccountDetailPage />) },
+      { path: 'admin/accounts/:id/coins', element: suspended(<AccountCoinsPage />) },
+      { path: 'admin/marketplace', element: suspended(<AdminMarketplacePage />) },
+      // The admin's inspect page of one marketplace post, pushed from Piactér > Posztok (S-admin-posts).
+      { path: 'admin/marketplace/posts/:publicId', element: suspended(<AdminPostDetailPage />) },
+      // LifeOS Phase 2: the admin-global point rules, pushed from Moderáció's "Szabályok" door row
+      // (design round A: a door, not a tab — the admin bar keeps Moderáció lit).
+      { path: 'admin/rules', element: suspended(<RulesPage />) },
+      // The detailed statistics, pushed from Moderáció's "Részletek" door row (the Moderáció tab
+      // stays lit; `?days=7|30|90` is the window).
+      { path: 'admin/stats', element: suspended(<StatisticsPage />) },
       // Its own route rather than a tab on the admin page: the studio is a full-width workspace
       // with its own list column, and folding it into a tab would force both into one layout.
       { path: 'admin/styles', element: suspended(<StyleStudioPage />) },
@@ -142,3 +236,28 @@ export const router = createBrowserRouter([
   // Every unknown path lands somewhere real rather than on a blank screen.
   { path: '*', element: <Navigate to="/" replace /> },
 ]);
+
+// ── THE SIGN-IN CHUNK IS WARMED, SO IT IS THERE WHEN THE NETWORK IS NOT ─────────────────────────
+//
+// Splitting AuthPage out of the first bundle (above) has one offline cost. A signed-in member who
+// opens the app with no signal is sent to /login by RequireAuth (the session read fails), and the
+// service worker caches hashed chunks only on first use (public/sw.js) - so a member who never
+// visited /login had no AuthPage chunk on disk, and the router showed its default "Failed to fetch
+// dynamically imported module" screen instead of the sign-in form (sweep B, row 7). Base shipped
+// AuthPage eagerly and never hit this.
+//
+// The fix keeps the split: once the first paint is done and the page is idle, the same module is
+// imported once in the background. Vite resolves it to the same hashed chunk the lazy route uses,
+// so the request goes through the service worker and lands in its cache like any visited page.
+// A failure here is silent: it only means the chunk is fetched later, on demand, as before.
+if (typeof window !== 'undefined') {
+  const warmSignIn = () => {
+    void import('../features/auth/AuthPage').catch(() => {});
+  };
+  const whenIdle = () => {
+    if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(warmSignIn, { timeout: 5000 });
+    else window.setTimeout(warmSignIn, 2000);
+  };
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, { once: true });
+}

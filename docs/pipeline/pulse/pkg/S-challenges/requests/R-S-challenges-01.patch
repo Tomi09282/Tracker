@@ -1,0 +1,77 @@
+diff --git a/frontend/scripts/check-nav-active.mjs b/frontend/scripts/check-nav-active.mjs
+index 8b7a133..e022ee6 100644
+--- a/frontend/scripts/check-nav-active.mjs
++++ b/frontend/scripts/check-nav-active.mjs
+@@ -83,6 +83,8 @@ const EXPECT_BY_VIEW = {
+     ['/habits', '/'],
+     ['/habits/7', '/'],
+     ['/tasks', '/'],
++    ['/challenges', '/'],
++    ['/challenges/pool', '/'],
+     ['/workout', '/workout'],
+     ['/workout/42', '/workout'],
+     ['/library', '/workout'],
+diff --git a/frontend/scripts/check-nav.mjs b/frontend/scripts/check-nav.mjs
+index 13e42b9..3185b89 100644
+--- a/frontend/scripts/check-nav.mjs
++++ b/frontend/scripts/check-nav.mjs
+@@ -89,6 +89,7 @@ const NO_INBOUND_BY_DESIGN = new Map([
+   ['/compose/posts/:publicId', { reason: 'reached by tapping a post in the compose desk' }],
+   ['/onboarding', { reason: 'sent to a new client by their coach; not a destination anyone browses to' }],
+   ['/playground', { reason: 'an internal QA surface, reachable from the command palette on the desktop where QA happens' }],
++  ['/challenges', { reason: 'MAI DOBÁS is pushed from Ma: a tap on an option of NAPI DOBÁS (frame lifeos/ma-4, features/challenges/TodayDraw.tsx on TodayPage) opens /challenges?option=<id>, a link this literal scan reads as /challenges?option=:param' }],
+   [
+     '/m',
+     {
+diff --git a/frontend/src/app/navTabs.ts b/frontend/src/app/navTabs.ts
+index 71fa271..9330ab2 100644
+--- a/frontend/src/app/navTabs.ts
++++ b/frontend/src/app/navTabs.ts
+@@ -135,7 +135,7 @@ export const NAV_TABS: Record<NavView, readonly NavTabSpec[]> = {
+   user: [
+     // `end` stops `/` prefix-matching every route below it — and it also stops onboarding from
+     // lighting anything. `owns` is the exception list `end` cannot express.
+-    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks'] },
++    { key: 'home', to: '/', icon: 'home', labelKey: 'nav.today', end: true, owns: ['/onboarding', '/notifications', '/habits', '/tasks', '/challenges'] },
+     { key: 'training', to: '/workout', icon: 'training', labelKey: 'nav.workout', owns: ['/library'] },
+     { key: 'nutrition', to: '/nutrition', icon: 'nutrition', labelKey: 'nav.nutritionShort' },
+     { key: 'progress', to: '/progress', icon: 'progress', labelKey: 'nav.progress' },
+diff --git a/frontend/src/app/routeMeta.ts b/frontend/src/app/routeMeta.ts
+index 736ac7a..0bbb623 100644
+--- a/frontend/src/app/routeMeta.ts
++++ b/frontend/src/app/routeMeta.ts
+@@ -62,6 +62,8 @@ export const ROUTE_META = {
+   '/habits': { parent: '/', parentLabelKey: 'habits.today' },
+   '/habits/:id': { parent: '/habits', parentLabelKey: 'habits.title' },
+   '/tasks': { parent: '/', parentLabelKey: 'tasks.tab.today' },
++  '/challenges': { parent: '/', parentLabelKey: 'nav.today' },
++  '/challenges/pool': { parent: '/challenges', parentLabelKey: 'challenges.title' },
+   '/notifications': {
+     parent: '/',
+     parentLabelKey: 'nav.today',
+diff --git a/frontend/src/app/router.tsx b/frontend/src/app/router.tsx
+index 7d7a905..0022bd2 100644
+--- a/frontend/src/app/router.tsx
++++ b/frontend/src/app/router.tsx
+@@ -103,6 +103,12 @@ const HabitsPage = lazy(() => import('../features/habits/HabitsPage').then((m) =
+ const HabitDetailPage = lazy(() =>
+   import('../features/habits/HabitDetailPage').then((m) => ({ default: m.HabitDetailPage })),
+ );
++const ChallengesPage = lazy(() =>
++  import('../features/challenges/ChallengesPage').then((m) => ({ default: m.ChallengesPage })),
++);
++const ChallengePoolPage = lazy(() =>
++  import('../features/challenges/ChallengePoolPage').then((m) => ({ default: m.ChallengePoolPage })),
++);
+ 
+ const suspended = (node: React.ReactNode) => <Suspense fallback={<ScreenSkeleton />}>{node}</Suspense>;
+ 
+@@ -150,6 +156,8 @@ export const router = createBrowserRouter([
+       { path: 'habits', element: suspended(<HabitsPage />) },
+       { path: 'habits/:id', element: suspended(<HabitDetailPage />) },
+       { path: 'tasks', element: suspended(<TasksPage />) },
++      { path: 'challenges', element: suspended(<ChallengesPage />) },
++      { path: 'challenges/pool', element: suspended(<ChallengePoolPage />) },
+       { path: 'library', element: suspended(<LibraryPage />) },
+       { path: 'library/:id', element: suspended(<ExerciseDetailPage />) },
+       { path: 'nutrition', element: suspended(<NutritionPage />) },

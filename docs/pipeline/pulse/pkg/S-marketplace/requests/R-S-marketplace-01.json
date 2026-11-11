@@ -1,0 +1,11 @@
+{
+  "id": "R-S-marketplace-01",
+  "from": "S-marketplace",
+  "kind": "owner",
+  "blocking": false,
+  "target": "frontend/src/features/marketplace/MarketplacePage.tsx (owned by S-marketplace)",
+  "what": "The lead post's caption. Both frames set the lead's kicker (PROGRAM · ONLINE), its title, the coach with the tick and the price (45 000 Ft) under the cover (y 386-496); PLAN 4.3 / work-packages say 'Lead post: cover only (Q4 default)', so the built screen shows the cover alone and everything under it stands 126 pt higher than the frames. Measured on the built app: cover only = 2 of 36 frame nodes matched in marketplace-1 (every feed node off by exactly dy -126, x and size within 2 pt); with the caption = 31 of 36 matched, 0 unmatched, the rest width-only (marketplace-2: 2 of 28 -> 24 of 28).",
+  "how": "If the owner wants the frames' caption: `git apply docs/pipeline/pulse/pkg/S-marketplace/lead-caption.option.patch` on this file (34 lines, kit type tokens only, no new data, no new copy - kind label, city name, title, coach, VerifiedBadge, the formatted price split into figure + unit), rebuild, re-capture marketplace-1 / -2. The whole caption stays inside the one lead link.",
+  "interim": "Cover only, as the plan says. Pictures for the decision: .pulse/pairs/S-marketplace/pair-marketplace-1.overview.png (cover only) next to option-lead-caption-pair-marketplace-1.overview.png (with the caption); same for marketplace-2.",
+  "then": "Apply the patch, re-capture, update handoff.json verdicts and the deviations row 1."
+}

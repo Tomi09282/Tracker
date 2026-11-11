@@ -1,0 +1,14 @@
+{
+  "id": "R-S-day-settings-01",
+  "from": "S-day-settings",
+  "kind": "nav",
+  "blocking": true,
+  "target": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs",
+  "need": "The route /settings/day for the pushed 'Nap és időzóna' page (frame lifeos/settings-day-v2; plan Phase 2 'prefs/timezone', Profile v2 row 'Nap és időzóna (/settings/day, P2)'). Three data lines, as R-S-settings-01 did for /settings/equipment: the lazy route (DaySettingsPage is exported from features/settings/DaySettingsPage.tsx), its routeMeta row (parent /settings, parentLabelKey nav.profile - the header draws '< PROFIL' and the Profil tab stays lit by prefix) and the EXPECT row ['/settings/day', '/settings'] of check-nav-active. The door is the literal to=\"/settings/day\" on Profil's row (this package's shared.patch on SettingsPage.tsx).",
+  "evidence": "kepernyok-2x/lifeos/settings-day-v2@2x.png; figma-build/lifeos/settings-day-v2.body.js (screenHead('push', 'Nap és időzóna', { parent: 'Profil' })); captures .pulse/pairs/S-day-settings/ with the patch applied in the slot",
+  "proposedApi": "{ path: 'settings/day', element: suspended(<DaySettingsPage />) } + ROUTE_META['/settings/day'] = { parent: '/settings', parentLabelKey: 'nav.profile' }",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-day-settings/requests/R-S-day-settings-01.patch",
+  "interim": "Applied to the slot's working tree only (never committed there), so the page is built and captured. Merged WITHOUT it, the Profil row would open the not-found fallback: merge together with this package.",
+  "status": "merged",
+  "resolution": "Applied by the integrator in the same squash merge as pulse/S-day-settings (merge-S-day-settings); the patch is kept here."
+}

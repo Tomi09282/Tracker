@@ -1,0 +1,41 @@
+{
+  "id": "S-rewards",
+  "title": "LifeOS Phase 4 screen package: Jutalmak at /rewards (pushed from Profil, Profil lit), one reward at /rewards/:id and the create / edit sheet, built 1:1 to design round B's lifeos/rewards-1 (ELKÖLTHETŐ hero, JUTALOMBOLT by cost with the 4 pt progress to each cost and the status line with the quiet Beváltás link), reward-detail (description, ÁR hero, the terms rows, the status line, the one pill Beváltás · N érme, BEVÁLTÁSOK with the Teljesítve check, Archiválás) and reward-form (Név, Leírás, Ár (érme) + hint, Beváltható Többször / Egyszer, Pihenő NumberStepper, Létrehozás) on the B-rewards-challenges API (GET /rewards, GET /rewards/:id, POST /rewards, PATCH /rewards/:id, archive / restore, redeem, redemptions/:id/fulfilled); Profil's JUTALMAK ledger row with 'N elérhető' is handed in for SettingsPage.tsx",
+  "screens": ["rewards", "reward-detail", "reward-form"],
+  "owns": [
+    "frontend/src/features/rewards/**",
+    "docs/pipeline/pulse/pkg/S-rewards/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": ["frontend/src/i18n/hu.json", "frontend/src/i18n/en.json", "frontend/src/i18n/de.json"],
+    "requests": {
+      "R-S-rewards-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/scripts/check-nav-active.mjs (the /rewards and /rewards/:id routes, parent Profil = '/settings', the profile tab lit)",
+      "R-S-rewards-02": "frontend/src/features/settings/SettingsPage.tsx (S-settings): the JUTALMAK ledger row 'N elérhető' -> /rewards, shown once GET /rewards answers"
+    }
+  },
+  "frames": ["lifeos/rewards-1", "lifeos/reward-detail", "lifeos/reward-form"],
+  "inventory": "docs/brain/58-Pulse/Screens/rewards.md does not exist: TRACKER-mockups/5-pulse/figma-build/lifeos/README-jutalmak-ermek-admin.md (rewards-1 / reward-detail / reward-form rows, the C5 copy list) and docs/pipeline/pulse/pkg/B-rewards-challenges/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/rewards",
+  "dependsOn": ["B-rewards-challenges", "B-core"],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 4)",
+  "i18nNamespaces": ["rewards"],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-rewards-challenges' Phase-4 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-rewards-challenges first; the slot holds it applied and uncommitted. rewardsApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 033: every capture answers GET /rewards and GET /rewards/:id with contract bodies (states.json) - matched-fixture at best until recorded."
+}

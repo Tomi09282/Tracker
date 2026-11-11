@@ -1,0 +1,42 @@
+diff --git a/frontend/package.json b/frontend/package.json
+index ee43c55..f74ecab 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -6,7 +6,7 @@
+   "scripts": {
+     "dev": "vite",
+     "check:tokens": "node scripts/check-tokens.mjs",
+-    "build": "npm run check:tokens && npm run check:i18n && npm run check:nav && npm run check:nav-active && npm run check:interval && npm run check:elements && npm run check:autosave && npm run check:type-scale && npm run check:canvas && npm run check:aurora && npm run check:safe-area && npm run verify:outbox && tsc -b && vite build",
++    "build": "npm run check:tokens && npm run check:i18n && npm run check:nav && npm run check:nav-active && npm run check:interval && npm run check:elements && npm run check:autosave && npm run check:type-scale && npm run check:canvas && npm run check:assets && npm run check:aurora && npm run check:safe-area && npm run verify:outbox && tsc -b && vite build",
+     "preview": "vite preview",
+     "check:i18n": "node scripts/check-i18n.mjs",
+     "check:interval": "node scripts/check-interval.mjs",
+@@ -19,6 +19,8 @@
+     "verify:nav-gate": "node scripts/verify-nav-gate.mjs",
+     "check:aurora": "node scripts/check-aurora.mjs",
+     "check:canvas": "node scripts/check-canvas.mjs",
++    "check:assets": "node scripts/check-assets.mjs",
++    "assets:pulse": "node scripts/build-pulse-assets.mjs",
+     "check:type-scale": "node scripts/check-type-scale.mjs",
+     "check:nav-active": "node scripts/check-nav-active.mjs"
+   },
+diff --git a/frontend/vite.config.ts b/frontend/vite.config.ts
+index c05e41c..1402d1d 100644
+--- a/frontend/vite.config.ts
++++ b/frontend/vite.config.ts
+@@ -8,6 +8,15 @@ export default defineConfig({
+   resolve: {
+     alias: { '@': path.resolve(import.meta.dirname, 'src') },
+   },
++  build: {
++    // Vite turns every imported asset under 4 kB into a base64 string INSIDE the JavaScript. 23 of
++    // the 49 Pulse images are that small, and one module the whole app loads imports them all:
++    // left alone, about 68 kB of images would ride in a shared chunk on every screen, where no
++    // request can cache them and the service worker never sees them. So a Pulse image is always a
++    // file; every other asset keeps the default. `check:assets` cannot see the bundle — this line
++    // is the whole guard, and `grep data:image dist/assets/*.js` is how it is checked.
++    assetsInlineLimit: (file) => (/[\\/]assets[\\/]pulse[\\/]/.test(file) ? false : undefined),
++  },
+   server: {
+     port: 5173,
+     strictPort: true,

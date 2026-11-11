@@ -1,29 +1,27 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Coins,
-  Trophy,
-  Store,
-  Lock,
-  CircleCheck,
-  ChevronLeft,
-  Palette,
-  Sparkles,
-  Flame,
-  Tag,
-  Rainbow,
-  FileText,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Check, Lock } from 'lucide-react';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Segmented } from '../../ui/feedback/variants/E6Segmented';
 import { Pressable } from '../../ui/primitives/Pressable';
-import { Surface } from '../../ui/primitives/Surface';
-import { SummaryTile } from '../../ui/data/SummaryTile';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { SectionHeader } from '../../ui/data/SectionHeader';
-import { Gauge } from '../../ui/feedback/Gauge';
+import { RowStack } from '../../ui/data/RowStack';
+import { ListRow, ListRowSkeleton } from '../../ui/data/ListRow';
+import { LedgerRow } from '../../ui/data/LedgerRow';
+import { SegmentBar } from '../../ui/data/SegmentBar';
+import { Rule } from '../../ui/data/Rule';
 import { EmptyState } from '../../ui/feedback/EmptyState';
-import { useElementVariant } from '../../ui/feedback/ElementStyleProvider';
-import { useMotionSafe } from '../../ui/feedback/useMotionSafe';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { Pic } from '../../ui/media/Pic';
+import { cn } from '../../lib/cn';
 import { CoinBalance } from './CoinBalance';
+import { WeekColumns } from './WeekColumns';
+import type { WeekColumn } from './WeekColumns';
+import { groupByDay, hungarianArticleIsAz, localDayKey, previousDayKey, readLevel, signed } from './statement';
+import type { LedgerRead, WalletRead } from './statement';
 import {
   useWallet,
   useLedger,
@@ -34,205 +32,169 @@ import {
   toCoins,
 } from './useCoins';
 import type { StoreItem } from './useCoins';
-import { Skeleton } from '../../ui/feedback/ScreenSkeleton';
 
 /**
- * The coin screen: balance, store, achievements, statement.
+ * The coin screen: balance, level, this week, achievements, statement — design round B of the
+ * LifeOS effort (coins-1v2 / coins-1v2-debt / coins-2v2), on the approved coins-1 / -2 / -3 kit.
  *
- * ═══ THE ANCHOR IS A RING, AND THE RING IS WHY THE HEADER GOT EMPTIED ══════════════════════════
+ * ═══ THE COMPOSITION (figma-build/lifeos/coins-1v2.part.js, coins-2v2.part.js) ═════════════════
  *
- * The old screen reported on the same wallet in four places: a coin cluster in the header, a
- * transient delta chip beside it, a pending strip and a helper line at the bottom. Four readouts
- * of one number is how a wallet ends up reading as a form. They are all gone; the ring holds the
- * balance and its caption slot holds the delta.
+ *   Screen top="push"          the pushed header at y 64, blocks 32 apart, side 24
+ *   ScreenHeader kind="push"   "‹ PROFIL" (the way back is the history, as before) + ÉRMÉK
+ *   CoinBalance                the one hero: EGYENLEGED (or TARTOZÁS), the giant figure, the coin
+ *                              stack, "Elkölthető: N érme"
+ *   NoticeLine warn            only below zero: what the debt means
+ *   the view                   the three-cell switch on its hairline, then the chosen view:
+ *     Áttekintés               SZINT (level figure, mono XP, the XP SegmentBar, what is missing)
+ *                              closed by the strong rule · EZEN A HÉTEN with the week's net and
+ *                              the day columns · the daily-cap line · the store, when it has items
+ *     Eredmények               the achievements, as coins-2
+ *     Kimutatás                the statement grouped by day, newest first, the day's net on the
+ *                              eyebrow's baseline (24 between the switch and the first day, 24
+ *                              between two days, each later day opened by the strong rule)
  *
- * A ring rather than a big number because a balance is a COUNTABLE QUANTITY WITH A SPENDABLE
- * RELATIONSHIP to the prices right underneath it — which is exactly the shape a ring reads as.
- * The arc's referent is the share of lifetime earnings still held, and when the server cannot
- * supply that denominator the ring draws a quiet full track with no arc: see `Wallet` in
- * `useCoins.ts` for why a made-up sweep is the one thing forbidden here.
+ * Nothing is enclosed: rows on the gutter with one hairline between two neighbours (`RowStack`).
+ * A tab is a filter, not a new screen: the header and the balance stay put, the choice is local
+ * state and always opens on Áttekintés (R20).
  *
- * ═══ WHAT IT REFUSES TO DO ═════════════════════════════════════════════════════════════════════
+ * ═══ THE GAME IS SHOWN, AND IT IS SHOWN HONESTLY ═══════════════════════════════════════════════
  *
- * There is no "coins remaining until X", no countdown to an offer and no daily-login reward. Each
- * is a mechanic for making somebody open an app they did not want to open, and this is a training
- * product: the coins exist to recognise work that already happened. The screen shows what you
- * have, what it buys and what you earned it for.
+ * The owner reversed the earlier "no streak / XP / level" record (ADR-0022, 2026-10-17): coins,
+ * XP and levels are part of the product now, and this page is where they are read. What still
+ * holds is that every figure here is the server's: the level and the XP bar, the week, the cap
+ * and the settle time come from GET /coins/wallet; a field an older server does not send is not
+ * drawn, never invented as a zero. A balance below zero is shown as debt, in so many words.
  *
  * ═══ AND WHAT IT SHOWS THAT IS UNCOMFORTABLE ═══════════════════════════════════════════════════
  *
- * The statement includes SPENDING, in full, with what it went on. A wallet UI that shows earnings
- * prominently and buries the debits is a wallet UI that is managing the user rather than informing
- * them.
+ * The statement includes SPENDING and PENALTIES, in full, with what they were for. A wallet UI
+ * that shows earnings prominently and buries the debits is a wallet UI that is managing the user
+ * rather than informing them.
  */
-const TABS = ['store', 'achievements', 'statement'] as const;
+const TABS = ['overview', 'achievements', 'statement'] as const;
 type CoinTab = (typeof TABS)[number];
 
 export function CoinsPage() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<CoinTab>('store');
+  const [tab, setTab] = useState<CoinTab>('overview');
   const wallet = useWallet();
 
-  const balanceMinor = wallet.data?.balanceMinor ?? 0;
+  const read = wallet.data as WalletRead | undefined;
+  // What a purchase can use: the server's spendable when it sends one (max(0, balance)).
+  const spendableMinor = read?.spendableMinor ?? Math.max(0, read?.balanceMinor ?? 0);
+  const debtCoins = read && read.balanceMinor < 0 ? Math.abs(toCoins(read.balanceMinor)) : null;
 
-  // The arc's referent, or nothing at all. `lifetimeEarnedMinor` is server-computed and is not
-  // sent yet, so today this is always 0 and the ring is a bare track — deliberately. A balance
-  // divided by a page of history is not a share of anything.
-  const lifetime = wallet.data?.lifetimeEarnedMinor ?? 0;
-  const share = lifetime > 0 ? balanceMinor / lifetime : 0;
-
-  // Arrow keys move between tabs. `role="tab"` without them is a tablist a keyboard user has to
-  // tab through one pill at a time, which is the shape the previous implementation shipped.
-  const move = (dir: 1 | -1) => {
-    const i = TABS.indexOf(tab);
-    setTab(TABS[(i + dir + TABS.length) % TABS.length] as CoinTab);
-  };
+  const switcher = (
+    <Segmented
+      layout="cells"
+      label={t('coins.title')}
+      value={tab}
+      onChange={setTab}
+      options={TABS.map((key) => ({ value: key, label: t(`coins.tab.${key}`) }))}
+    />
+  );
 
   return (
-    <div className="col-mobile screen-x flex flex-col gap-section py-4">
-      {/* The header carries the way OUT and nothing else. /coins is entered from the profile
-          stack, so the bottom nav keeps Profil lit and this control is the exit. */}
-      <header className="flex items-center gap-tight">
-        <Pressable
-          variant="secondary"
-          shape="icon"
-          aria-label={t('common.back')}
-          onClick={() => history.back()}
-          icon={<ChevronLeft className="size-icon-l" aria-hidden />}
-        />
-        <h1 className="text-title-1 flex-1 text-center text-text-1">{t('coins.title')}</h1>
-        {/* Balances the back control so the title is centred on the SCREEN rather than on the
-            space left over beside a button. */}
-        <span aria-hidden className="size-11 shrink-0" />
-      </header>
+    <Screen top="push">
+      {/* /coins is entered from the profile stack (the bar keeps Profil lit), and from the desktop
+          command palette: the way back is the history, not a fixed link to one parent. */}
+      <ScreenHeader kind="push" title={t('coins.title')} back={{ onClick: () => history.back(), label: t('nav.profile') }} />
 
-      <div className="flex justify-center">
-        <Gauge value={share} label={t('coins.title')} className="size-44">
-          {wallet.isLoading ? (
-            // Chip-shaped, sized to the figure it replaces, so nothing moves on the swap.
-            <Skeleton className="h-9 w-28 rounded-chip" />
-          ) : wallet.isError ? (
-            // A FAILED FETCH RENDERS NO FIGURE. Not a zero. A zero balance and an unknown balance
-            // are different facts, and a wallet that shows 0 when it simply could not reach the
-            // server has told the user something false about their money.
-            <Coins className="size-icon-l text-text-3" aria-hidden />
-          ) : (
-            <CoinBalance balanceMinor={balanceMinor} />
-          )}
-        </Gauge>
-      </div>
+      <CoinBalance
+        state={wallet.isLoading ? 'loading' : wallet.isError ? 'error' : 'ready'}
+        balanceMinor={read?.balanceMinor}
+        spendableMinor={read?.spendableMinor}
+      />
 
-      {/* THE RING'S TWO FLOWS — what came in, what went out — which is what makes the arc above
-          coherent rather than ornamental. Readouts, not filters: the spec is explicit that putting
-          navigation behind them would turn a summary into a menu.
+      {debtCoins !== null ? (
+        <NoticeLine tone="warn" role="status">
+          {t('coins.debtNotice', { count: debtCoins })}
+        </NoticeLine>
+      ) : null}
 
-          Skeletons until the server actually computes the figures. See `Wallet` in useCoins.ts:
-          the one thing forbidden here is deriving them from the capped ledger page. */}
-      <div className="grid grid-cols-2 gap-group">
-        {wallet.isLoading || wallet.data?.weekEarnedMinor === undefined ? (
-          <>
-            <Skeleton className="h-22 rounded-card" />
-            <Skeleton className="h-22 rounded-card" />
-          </>
-        ) : (
-          <>
-            <SummaryTile
-              icon={Flame}
-              layout="row"
-              // A STRING, not a number: `SummaryTile` routes a numeric value through `CountUp`,
-              // which would render `180` and drop the `+` the mockup draws. The sign is the half
-              // of this tile that says which direction the money moved.
-              value={`+${toCoins(wallet.data.weekEarnedMinor)}`}
-              caption={t('coins.weekCaption')}
-            />
-            <SummaryTile
-              icon={Tag}
-              layout="row"
-              // Numeric, so it still counts up — and bare, with no minus sign, exactly as drawn.
-              // "Elköltve" already says the direction; a `−250` under that caption would read as
-              // money coming back.
-              value={toCoins(wallet.data.spentMinor ?? 0)}
-              caption={t('coins.spentCaption')}
-            />
-          </>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-group">
-        {/* A tab is a filter, not a new screen: the header and the ring stay put. */}
-        <div
-          role="tablist"
-          aria-label={t('coins.title')}
-          className="flex gap-1 rounded-chip bg-surface-2 p-1"
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowRight') {
-              e.preventDefault();
-              move(1);
-            }
-            if (e.key === 'ArrowLeft') {
-              e.preventDefault();
-              move(-1);
-            }
-          }}
-        >
-          {TABS.map((key) => (
-            <Pressable
-              key={key}
-              id={`coins-tab-${key}`}
-              role="tab"
-              aria-selected={tab === key}
-              // Only the selected tab points at a panel, because only the selected panel is in the
-              // DOM. An `aria-controls` naming an id that does not exist is not a harmless extra
-              // attribute — it is a broken reference a screen reader tries to follow.
-              aria-controls={tab === key ? `coins-panel-${key}` : undefined}
-              tabIndex={tab === key ? 0 : -1}
-              variant={tab === key ? 'secondary' : 'ghost'}
-              shape="chip"
-              density="compact"
-              className="flex-1"
-              onClick={() => setTab(key)}
-            >
-              {t(`coins.tab.${key}`)}
-            </Pressable>
-          ))}
+      {tab === 'overview' ? <OverviewTab switcher={switcher} wallet={read} spendableMinor={spendableMinor} /> : null}
+      {tab === 'achievements' ? (
+        <div className="flex flex-col gap-group">
+          {switcher}
+          <AchievementsTab />
         </div>
+      ) : null}
+      {tab === 'statement' ? <StatementTab switcher={switcher} today={read?.today ?? null} /> : null}
+    </Screen>
+  );
+}
 
-        <div
-          id={`coins-panel-${tab}`}
-          role="tabpanel"
-          aria-labelledby={`coins-tab-${tab}`}
-          className="flex flex-col gap-group"
-        >
-          {tab === 'store' ? <StoreTab balanceMinor={balanceMinor} /> : null}
-          {tab === 'achievements' ? <AchievementsTab /> : null}
-          {tab === 'statement' ? <StatementTab /> : null}
-        </div>
+/* ── OVERVIEW ───────────────────────────────────────────────────────────────────────────────── */
+
+function OverviewTab({ switcher, wallet, spendableMinor }: { switcher: ReactNode; wallet: WalletRead | undefined; spendableMinor: number }) {
+  const { t, i18n } = useTranslation();
+  const level = readLevel(wallet);
+
+  // The week as the server sends it (Monday..Sunday of the logical week); [] before a zone is
+  // known, and absent from an older server — then the section is not drawn.
+  const week = wallet?.week ?? [];
+  const dayLabel = new Intl.DateTimeFormat(i18n.language, { weekday: 'short', timeZone: 'UTC' });
+  const dayName = new Intl.DateTimeFormat(i18n.language, { weekday: 'long', timeZone: 'UTC' });
+  const columns: WeekColumn[] = week.map((d) => {
+    const when = new Date(`${d.date}T00:00:00Z`);
+    return {
+      coins: d.future ? null : toCoins(d.netMinor),
+      label: dayLabel.format(when),
+      name: dayName.format(when),
+      today: d.date === wallet?.today,
+    };
+  });
+  const weekNet = columns.reduce((sum, c) => sum + (c.coins ?? 0), 0);
+  const xpLine = level ? t('coins.level.xp', { xp: level.xp, next: level.next }) : '';
+
+  return (
+    <div className="flex flex-col gap-section">
+      <div className="flex flex-col">
+        {switcher}
+        {level ? (
+          // The level ledger: the kit row (eyebrow, mono XP from x 112, the num figure on the edge),
+          // then 12 under it the XP bar — ten segments of the level's span — and 12 under that what
+          // is still missing; the strong rule 20 under the line closes the ledger.
+          <RowStack close>
+            <div>
+              <LedgerRow label={t('coins.level.label')} note={<span className="text-data text-text-2">{xpLine}</span>} value={level.level} />
+              <div className="flex flex-col gap-3 pb-5 pt-3">
+                <SegmentBar label={xpLine} segments={level.segments.map((state) => ({ state }))} />
+                <p className="text-cap text-text-3">
+                  {t(hungarianArticleIsAz(level.level + 1) ? 'coins.level.toNextAz' : 'coins.level.toNext', {
+                    count: level.missing,
+                    level: level.level + 1,
+                  })}
+                </p>
+              </div>
+            </div>
+          </RowStack>
+        ) : null}
       </div>
+
+      {columns.length > 0 ? (
+        <section aria-labelledby="coins-week" className="flex flex-col gap-group">
+          <SectionHeader
+            rule={false}
+            title={t('coins.week.title')}
+            titleId="coins-week"
+            trailing={<span className="text-data text-text-1">{signed(weekNet)}</span>}
+          />
+          <WeekColumns days={columns} label={t('coins.week.title')} />
+          {wallet?.dailyEarnCapMinor !== undefined && wallet.settleTime ? (
+            <p className="text-cap text-text-3">{t('coins.week.capLine', { cap: toCoins(wallet.dailyEarnCapMinor), time: wallet.settleTime })}</p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {/* The store stays reachable (Q4: nothing a user can do today disappears). With the theme
+          packs delisted (030) it is empty, and an empty store draws nothing at all. */}
+      <StoreTab balanceMinor={spendableMinor} />
     </div>
   );
 }
 
 /* ── STORE ──────────────────────────────────────────────────────────────────────────────────── */
-
-/**
- * The row glyph: the item's own where the client knows the SKU, its FAMILY where it does not.
- *
- * The family rule alone is what keeps an unlisted SKU from rendering a blank square — that is the
- * property this function exists for and the lookup does not weaken it, because the map is only
- * ever consulted first. What it fixes is that under the family rule alone both theme packs wore
- * the same palette glyph, so the one visual difference between the two rows was the word on them;
- * the mockup gives each item its own mark.
- */
-const ITEM_ICON: Record<string, LucideIcon> = {
-  'theme.aurora': Rainbow,
-  'theme.ember': Flame,
-  // Drawn as the third row of 05-coins.webp. Not seeded yet; harmless until it is.
-  'feature.weekly_report': FileText,
-};
-
-function itemIcon(sku: string): LucideIcon {
-  return ITEM_ICON[sku] ?? (sku.startsWith('theme.') ? Palette : Sparkles);
-}
 
 function StoreTab({ balanceMinor }: { balanceMinor: number }) {
   const { t } = useTranslation();
@@ -257,107 +219,88 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
 
   if (store.isLoading) {
     return (
-      <div className="flex flex-col gap-group">
+      <RowStack as="div" role="status" aria-label={t('common.loading')}>
         {[0, 1, 2].map((i) => (
-          // Card-shaped and card-tall: the real row is an icon holder plus two lines of text.
-          <Skeleton key={i} className="h-[76px] rounded-card" />
+          <ListRowSkeleton key={i} sub index={i} />
         ))}
-      </div>
+      </RowStack>
     );
   }
 
-  const items = store.data?.items ?? [];
-  if (items.length === 0) {
-    return <EmptyState icon={Store} title={t('coins.storeEmptyTitle')} body={t('coins.storeEmptyBody')} />;
+  // A failed read keeps the empty copy it always had (there is no error copy for the store).
+  if (store.isError) {
+    return <EmptyState title={t('coins.storeEmptyTitle')} body={t('coins.storeEmptyBody')} />;
   }
 
+  const items = store.data?.items ?? [];
+  // Q2: the theme packs are delisted on the server (migration 030, owner ruling 2026-10-17), so
+  // GET /coins/store no longer returns them at all. The filter stays as a display belt for an
+  // older server: a theme pack the member does not own is never offered. An EMPTY store draws
+  // nothing — no section label, no empty-state block: there is nothing to say about a shop that
+  // has nothing in it, and the frames draw no such state.
+  const listed = items.filter((i) => !(i.sku.startsWith('theme.') && i.owned !== 1));
+  if (listed.length === 0) return null;
+
   return (
-    <>
-      {/* The section the tray's `Bolt` pill opens, named. Only over a POPULATED list: the two
-          early returns above own the loading and empty branches, and `EmptyState` already carries
-          the same storefront glyph plus its own title, so a header above it would say the section
-          name twice.
-          Sentence case, though the mockup draws MEGVÁSÁROLHATÓ in caps: that is the pre-redesign
-          uppercase eyebrow `SectionHeader` exists to replace, and DESIGN.md §2 keeps caps on
-          `text-micro` and its tracking — `text-title-2` set in caps has none. */}
-      <SectionHeader icon={Store} title={t('coins.storeSection')} />
-      <ul className="flex flex-col gap-group">
-        {items.map((item) => {
+    <section className="flex flex-col gap-group">
+      <SectionHeader rule={false} title={t('coins.storeSection')} />
+      <RowStack close>
+        {listed.map((item) => {
           const owned = item.owned === 1;
           const affordable = balanceMinor >= item.priceMinor;
-          const Icon = itemIcon(item.sku);
+          // SINGLE-FLIGHT. While one purchase is settling every OTHER price goes inert, so a second
+          // tap cannot start a second money-class write behind the first. The tapped one shows busy.
+          // NOT disabled when unaffordable: it answers 409 with the real numbers, which is how the
+          // user learns how many coins short they are. Disabling it would hide that.
+          const busy = pending === item.id;
+          const inert = pending !== null && pending !== item.id;
+          const coin = <Pic slot="coin" width={20} />;
           return (
-            <Surface as="li" key={item.id} className="flex items-center gap-group">
-              <span
-                aria-hidden
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-field bg-accent-subtle text-accent"
-              >
-                <Icon className="size-icon-m" strokeWidth={2} />
-              </span>
-
-              <span className="min-w-0 flex-1">
-                {/* THE CATALOGUE IS SEEDED IN ENGLISH. `coin_store_items` holds one title and one
-                    description per SKU ("A cold northern gradient set."), so trusting the API put
-                    English product copy on a Hungarian screen — the exact outcome coins.md's
-                    [!warning] says must not ship. Resolving the SKU to a local string is the half
-                    of its two options that needs no backend change.
-                    The `coins.item.` prefix is written out so check-i18n can see these keys, and
-                    `defaultValue` is what keeps a SKU the bundle has never heard of rendering the
-                    server's own title instead of a raw dotted key — same technique, same reason,
-                    as the achievement titles below. */}
-                <span className="text-body-strong block truncate text-text-1">
-                  {t(`coins.item.${item.sku}.title`, { defaultValue: item.title })}
-                </span>
-                {item.description ? (
-                  <span className="text-caption block truncate text-text-3">
-                    {t(`coins.item.${item.sku}.description`, { defaultValue: item.description })}
+            <ListRow
+              key={item.id}
+              // THE CATALOGUE IS SEEDED IN ENGLISH: the SKU resolves to a local string, and
+              // `defaultValue` keeps a SKU the bundle has never heard of on the server's own words
+              // instead of a raw dotted key. The `coins.item.` prefix is written out so check-i18n
+              // can see these keys.
+              title={t(`coins.item.${item.sku}.title`, { defaultValue: item.title })}
+              sub={item.description ? t(`coins.item.${item.sku}.description`, { defaultValue: item.description }) : undefined}
+              trailing={
+                owned ? (
+                  <span className="flex h-11 items-center gap-1.5 text-cap text-text-2">
+                    <Check className="size-4 shrink-0 text-accent" strokeWidth={2.5} aria-hidden />
+                    {t('coins.owned')}
                   </span>
-                ) : null}
-              </span>
-
-              {owned ? (
-                <span className="text-body-s flex shrink-0 items-center gap-tight text-success">
-                  <CircleCheck className="size-icon-s" aria-hidden />
-                  {t('coins.owned')}
-                </span>
-              ) : (
-                <Pressable
-                  variant={affordable ? 'primary' : 'secondary'}
-                  shape="chip"
-                  density="compact"
-                  className="shrink-0"
-                  busy={pending === item.id}
-                  // SINGLE-FLIGHT. While one purchase is settling every OTHER price button goes
-                  // inert, so a second tap cannot start a second money-class write behind the
-                  // first. The tapped one shows busy instead, which is where the user is looking.
-                  disabled={pending !== null && pending !== item.id}
-                  // NOT disabled when unaffordable. A control that cannot succeed is worse than
-                  // none, and this one CAN — it answers 409 with the real numbers, which is how the
-                  // user learns how many coins short they are. Disabling it would hide that.
-                  onClick={() => buy(item)}
-                  icon={<Coins className="size-icon-s" aria-hidden />}
-                >
-                  {toCoins(item.priceMinor)}
-                </Pressable>
-              )}
-            </Surface>
+                ) : undefined
+              }
+              control={
+                owned ? undefined : affordable ? (
+                  <Pressable variant="primary" size="sm" icon={coin} busy={busy} disabled={inert} onClick={() => buy(item)}>
+                    {toCoins(item.priceMinor)}
+                  </Pressable>
+                ) : (
+                  <TextLink text="data" lead={coin} busy={busy} disabled={inert} onClick={() => buy(item)}>
+                    {toCoins(item.priceMinor)}
+                  </TextLink>
+                )
+              }
+            />
           );
         })}
-      </ul>
+      </RowStack>
 
-      {/* The server's answer, verbatim, including the ones that are refusals. A purchase screen
-          that swallows a 409 leaves the user tapping a button that appears to do nothing. */}
+      {/* The server's answer, including the ones that are refusals. A purchase screen that
+          swallows a 409 leaves the user tapping a control that appears to do nothing. */}
       {purchase.isError ? (
-        <p className="text-body-s text-warning" role="alert">
+        <NoticeLine tone="warn" role="alert">
           {t('coins.purchaseRefused')}
-        </p>
+        </NoticeLine>
       ) : null}
       {purchase.data?.replayed ? (
-        <p className="text-body-s text-text-3" role="status">
+        <NoticeLine tone="info" role="status">
           {t('coins.alreadyProcessed')}
-        </p>
+        </NoticeLine>
       ) : null}
-    </>
+    </section>
   );
 }
 
@@ -366,16 +309,14 @@ function StoreTab({ balanceMinor }: { balanceMinor: number }) {
 function AchievementsTab() {
   const { t } = useTranslation();
   const achievements = useAchievements();
-  const variant = useElementVariant('E26');
-  const motionSafe = useMotionSafe();
 
   if (achievements.isLoading) {
     return (
-      <div className="flex flex-col gap-tight">
+      <RowStack as="div" role="status" aria-label={t('common.loading')}>
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-[68px] rounded-card" />
+          <ListRowSkeleton key={i} sub leadSlot index={i} />
         ))}
-      </div>
+      </RowStack>
     );
   }
 
@@ -384,118 +325,112 @@ function AchievementsTab() {
 
   return (
     <>
-      <p className="text-body-s text-text-2">
-        {t('coins.unlockedCount', { done: unlocked.length, total: all.length })}
-      </p>
+      <SectionHeader rule={false} title={t('coins.unlockedCount', { done: unlocked.length, total: all.length })} />
 
-      <ul className="flex flex-col gap-tight">
+      <RowStack close>
         {all.map((a) => {
           const done = a.unlockId !== null;
           return (
-            <Surface as="li" key={a.key} className="flex items-center gap-group">
-              <span
-                aria-hidden
-                className={`inline-flex size-11 shrink-0 items-center justify-center rounded-field ${
-                  done ? 'bg-accent-subtle text-accent' : 'bg-surface-2 text-text-3'
-                }`}
-              >
-                <Trophy
-                  className={`size-icon-m ${
-                    // E26-A flame-flicker, and ONLY when motion is allowed. A permanently animating
-                    // icon on a list of a dozen is a battery cost and a distraction.
-                    done && variant === 'A' && motionSafe ? 'animate-pulse' : ''
-                  }`}
-                  strokeWidth={2}
-                />
-              </span>
-
-              <span className="min-w-0 flex-1">
-                <span
-                  className={`text-body-strong block truncate ${done ? 'text-text-1' : 'text-text-3'}`}
-                >
-                  {/* A LITERAL PREFIX, not t(a.titleKey). The server sends the full dotted
-                      string and using it directly works — but nothing static can then see that
-                      these keys are referenced, so check-i18n reports seven live strings as dead.
-                      An exemption list would have silenced it; that is how NATIVE_LABELS ended up
-                      guarding nothing for two phases. Writing the prefix here keeps the gate
-                      honest and makes the relationship legible to a reader too. */}
-                  {t(`achievement.${a.key}`, { defaultValue: a.key })}
+            <ListRow
+              key={a.key}
+              // A 48 pt slot keeps the 68 pt row and the text edge; the 56 pt medal is hung 7 / 4
+              // out of it so its INK starts on the gutter and fills the slot (coins-2 body.js).
+              // Earned = the lit medal; not yet = the same medal at rest, dimmed.
+              lead={
+                <span className="relative block size-12">
+                  <Pic slot="medal" width={56} lit={done} className={cn('absolute -left-[7px] -top-1', !done && 'opacity-45')} />
                 </span>
-                <span className="text-caption block text-text-3">
-                  {/* WHAT IT PAID YOU, if you have it; what it PAYS, if you do not. Two different
-                      numbers on purpose — a retuned reward must not rewrite somebody's history. */}
-                  {done
-                    ? t('coins.paidYou', { count: toCoins(a.paidMinor ?? 0) })
-                    : t('coins.pays', { count: toCoins(a.rewardMinor) })}
-                </span>
-              </span>
-
-              {!done ? <Lock className="size-icon-s shrink-0 text-text-3" aria-hidden /> : null}
-            </Surface>
+              }
+              // A LITERAL PREFIX, not t(a.titleKey): nothing static could then see that these keys
+              // are referenced, and check-i18n would report seven live strings as dead.
+              title={t(`achievement.${a.key}`, { defaultValue: a.key })}
+              // WHAT IT PAID YOU, if you have it; what it PAYS, if you do not. Two different numbers
+              // on purpose — a retuned reward must not rewrite somebody's history.
+              sub={done ? t('coins.paidYou', { count: toCoins(a.paidMinor ?? 0) }) : t('coins.pays', { count: toCoins(a.rewardMinor) })}
+              tone={done ? 'default' : 'muted'}
+              trailing={done ? undefined : <Lock className="size-4 text-text-3" aria-hidden />}
+            />
           );
         })}
-      </ul>
+      </RowStack>
 
-      {/* Stated rather than left to be discovered. Someone looking at a locked list deserves to
-          know nothing is expected of them here — the app awards these, they are not claimed. */}
-      <p className="text-caption measure text-text-3">{t('coins.awardedNote')}</p>
+      {/* Stated rather than left to be discovered: the app awards these, they are not claimed. */}
+      <p className="text-cap text-text-3">{t('coins.awardedNote')}</p>
     </>
   );
 }
 
 /* ── STATEMENT ──────────────────────────────────────────────────────────────────────────────── */
 
-function StatementTab() {
-  const { t } = useTranslation();
+function StatementTab({ switcher, today }: { switcher: ReactNode; today: string | null }) {
+  const { t, i18n } = useTranslation();
   const ledger = useLedger();
 
   if (ledger.isLoading) {
     return (
-      <Surface pad="none" className="flex flex-col gap-tight p-[var(--card-pad)]">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-10 rounded-field" />
-        ))}
-      </Surface>
+      <div className="flex flex-col gap-6">
+        {switcher}
+        <RowStack as="div" role="status" aria-label={t('common.loading')}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <ListRowSkeleton key={i} sub index={i} />
+          ))}
+        </RowStack>
+      </div>
     );
   }
 
-  const entries = ledger.data?.entries ?? [];
+  const entries = (ledger.data?.entries ?? []) as LedgerRead[];
   if (entries.length === 0) {
-    return <EmptyState icon={Coins} title={t('coins.noHistoryTitle')} body={t('coins.noHistoryBody')} />;
+    return (
+      <div className="flex flex-col gap-group">
+        {switcher}
+        <EmptyState title={t('coins.noHistoryTitle')} body={t('coins.noHistoryBody')} />
+      </div>
+    );
   }
 
+  // "Ma" and "Tegnap" are the wallet's LOGICAL today when the server knows it, else the browser's
+  // calendar day.
+  const todayKey = today ?? localDayKey(Date.now() / 1000);
+  const yesterdayKey = previousDayKey(todayKey);
+  const dateLabel = new Intl.DateTimeFormat(i18n.language, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const headOf = (date: string) => {
+    const label = dateLabel.format(new Date(`${date}T00:00:00Z`));
+    if (date === todayKey) return t('coins.day.today', { date: label });
+    if (date === yesterdayKey) return t('coins.day.yesterday', { date: label });
+    return label;
+  };
+
   return (
-    // ONE surface with hairlines between the rows, not one card per movement. A statement is a
-    // single continuous document; twelve bordered cards make twelve unrelated objects out of it,
-    // and at that density the borders carry more ink than the numbers do.
-    <Surface as="ul" pad="none" className="flex flex-col">
-      {entries.map((e, i) => (
-        <li
-          key={e.id}
-          className={`flex items-center gap-group px-[var(--card-pad)] py-3 ${
-            i > 0 ? 'border-t-[length:var(--border-width)] border-[var(--card-border)]' : ''
-          }`}
-        >
-          <span className="min-w-0 flex-1">
-            <span className="text-body-s block truncate text-text-1">{e.reasonLabel}</span>
-            <span className="text-caption block truncate text-text-3">
-              {new Date(e.createdAt * 1000).toLocaleDateString()}
-              {e.note ? ` · ${e.note}` : ''}
-            </span>
-          </span>
-          {/* Earning is accent, spending is plain. Spending is NOT danger-coloured: buying
-              something you chose to buy is not an error, and colouring it like one would make the
-              statement feel like a list of mistakes. */}
-          <span
-            className={`text-body-strong shrink-0 tabular-nums ${
-              e.amountMinor > 0 ? 'text-accent' : 'text-text-2'
-            }`}
-          >
-            {e.amountMinor > 0 ? '+' : ''}
-            {toCoins(e.amountMinor)}
-          </span>
-        </li>
+    // One continuous document: day groups 24 apart, no closing rule — the shell's fade cuts the
+    // list at the bar, which says there is more below.
+    <div className="flex flex-col gap-6">
+      {switcher}
+      {groupByDay(entries).map((day, index) => (
+        <section key={day.date} aria-label={headOf(day.date)} className="flex flex-col gap-2">
+          {index > 0 ? <Rule strong /> : null}
+          <SectionHeader rule={false} title={headOf(day.date)} trailing={<span className="text-data text-text-1">{signed(day.netCoins)}</span>} />
+          <RowStack>
+            {day.entries.map((e) => {
+              const coins = toCoins(e.amountMinor);
+              return (
+                <ListRow
+                  key={e.id}
+                  // A LITERAL PREFIX so check-i18n sees the keys; a reason the bundle does not know
+                  // keeps the server's own words.
+                  title={t(`coins.reason.${e.reasonKey}`, { defaultValue: e.reasonLabel })}
+                  // What the movement was for: the workout's title on a LifeOS award, the server's
+                  // note on any other movement. A LifeOS note ("capped") is bookkeeping, not copy.
+                  sub={(e.refType === 'coin_event' ? e.sourceTitle : e.note) ?? undefined}
+                  // Earning is lit, spending and penalties are plain ink. A debit is NOT danger:
+                  // buying something you chose to buy is not an error.
+                  trailing={<span className={cn('text-data-l', coins > 0 ? 'text-accent' : 'text-text-1')}>{signed(coins)}</span>}
+                />
+              );
+            })}
+          </RowStack>
+        </section>
       ))}
-    </Surface>
+    </div>
   );
 }

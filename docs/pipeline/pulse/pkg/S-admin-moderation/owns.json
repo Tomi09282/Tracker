@@ -1,0 +1,21 @@
+{
+  "id": "S-admin-moderation",
+  "decision": "owner decisions of 2026-11-03 (.pulse/owner-answers.md): (3) statistics are a compact panel at the top of Moderacio (6 numbers + one 30-day curve) with a door row to a detailed Statistics page; frames admin-moderation-v2, admin-moderation-v2-empty, admin-statistics-1, admin-statistics-2 (TRACKER-mockups/5-pulse/figma-build/admin-v2/DESIGN-NOTES.md). Frontend half: reads GET /admin/stats (panel) and GET /admin/statistics (B-admin-stats).",
+  "owns": [
+    "frontend/src/features/admin/AdminPage.tsx",
+    "frontend/src/features/admin/StatsPanel.tsx",
+    "frontend/src/features/admin/StatisticsPage.tsx",
+    "frontend/src/features/admin/statisticsModel.ts",
+    "frontend/src/features/admin/DayBars.tsx",
+    "frontend/src/features/admin/ModerationQueue.tsx",
+    "docs/pipeline/pulse/pkg/S-admin-moderation/**"
+  ],
+  "sharedEdits": [
+    "frontend/src/app/router.tsx (lazy route /admin/stats)",
+    "frontend/src/app/routeMeta.ts (ROUTE_META row for /admin/stats)",
+    "frontend/src/app/navTabs.ts (moderation tab owns[] gains /admin/stats)",
+    "frontend/src/ui/data/Numeral.tsx + frontend/src/ui/tokens/tokens.css + frontend/src/lib/cn.ts + frontend/scripts/check-type-scale.mjs (two numeral steps the frames draw: stat 56, hero 80)",
+    "frontend/src/i18n/*.json via i18n.patch.json"
+  ],
+  "notes": "AdminPage.tsx loses the UserSplit block and the footer sentence (admin-moderation-v2). The compact panel and the Statistics page read the two B-admin-stats endpoints; no backend file is touched."
+}

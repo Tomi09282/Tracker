@@ -1,0 +1,528 @@
+{
+  "package": "S-admin-moderation",
+  "base": "966b625",
+  "namespaces": [
+    "adminStats",
+    "admin"
+  ],
+  "set": [
+    {
+      "key": "adminStats.title",
+      "hu": "Statisztika",
+      "en": "Statistics",
+      "de": "Statistik",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: the panel's eyebrow and the Statistics page's title (frame admin-statistics-1)"
+    },
+    {
+      "key": "adminStats.window",
+      "hu": "Időablak",
+      "en": "Time window",
+      "de": "Zeitraum",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: aria-label of the 7 / 30 / 90 switch"
+    },
+    {
+      "key": "adminStats.days",
+      "hu": "{{count}} nap",
+      "en": "{{count}} days",
+      "de": "{{count}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: the window switch cells and the \"30 nap\" sub lines"
+    },
+    {
+      "key": "adminStats.details",
+      "hu": "Részletek",
+      "en": "Details",
+      "de": "Details",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: door row to /admin/stats"
+    },
+    {
+      "key": "adminStats.detailsSub",
+      "hu": "Felhasználók, aktivitás, érme, piactér",
+      "en": "Users, activity, coins, marketplace",
+      "de": "Nutzer, Aktivität, Münzen, Marktplatz",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: the door row's one-line sub"
+    },
+    {
+      "key": "adminStats.errorTitle",
+      "hu": "Nem sikerült betölteni",
+      "en": "Could not load",
+      "de": "Laden fehlgeschlagen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (right): the error title; also the panel's failed line (undrawn)"
+    },
+    {
+      "key": "adminStats.errorBody",
+      "hu": "A statisztika most nem érhető el. Ellenőrizd a kapcsolatot, és próbáld újra.",
+      "en": "The statistics are not available right now. Check your connection and try again.",
+      "de": "Die Statistik ist gerade nicht verfügbar. Prüfe deine Verbindung und versuche es erneut.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-2 (right): the error body"
+    },
+    {
+      "key": "adminStats.panel.users",
+      "hu": "Felhasználó összesen",
+      "en": "Users in total",
+      "de": "Nutzer gesamt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the first figure"
+    },
+    {
+      "key": "adminStats.panel.new7d",
+      "hu": "Új 7 napban",
+      "en": "New in 7 days",
+      "de": "Neu in 7 Tagen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the second figure"
+    },
+    {
+      "key": "adminStats.panel.activeCoaches",
+      "hu": "Aktív edző",
+      "en": "Active coaches",
+      "de": "Aktive Trainer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the third figure"
+    },
+    {
+      "key": "adminStats.panel.workouts",
+      "hu": "Edzés ma\n/ 7 nap",
+      "en": "Workouts today\n/ 7 days",
+      "de": "Training heute\n/ 7 Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the fourth figure; the line break is the frame's (design note 7: a two-line key)"
+    },
+    {
+      "key": "adminStats.panel.pending",
+      "hu": "Várakozó moderáció",
+      "en": "Waiting for review",
+      "de": "Wartet auf Prüfung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the fifth figure"
+    },
+    {
+      "key": "adminStats.panel.openReports",
+      "hu": "Nyitott jelentés",
+      "en": "Open reports",
+      "de": "Offene Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: caption of the sixth figure"
+    },
+    {
+      "key": "adminStats.panel.curve",
+      "hu": "Aktív naplózók · {{count}} nap",
+      "en": "People logging · {{count}} days",
+      "de": "Protokollierende · {{count}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: the curve's caption"
+    },
+    {
+      "key": "adminStats.panel.curveToday",
+      "hu": "{{count}} ma",
+      "en": "{{count}} today",
+      "de": "{{count}} heute",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-moderation-v2: \"9 ma\" on the curve's head, the figure in ink"
+    },
+    {
+      "key": "adminStats.section.users",
+      "hu": "Felhasználók",
+      "en": "Users",
+      "de": "Nutzer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.section.activity",
+      "hu": "Aktivitás",
+      "en": "Activity",
+      "de": "Aktivität",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.section.coins",
+      "hu": "Érme",
+      "en": "Coins",
+      "de": "Münzen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.section.marketplace",
+      "hu": "Piactér",
+      "en": "Marketplace",
+      "de": "Marktplatz",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.section.coaches",
+      "hu": "Edzők",
+      "en": "Coaches",
+      "de": "Trainer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.section.system",
+      "hu": "Rendszer",
+      "en": "System",
+      "de": "System",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: block label"
+    },
+    {
+      "key": "adminStats.users.unit",
+      "hu": "felhasználó",
+      "en": "users",
+      "de": "Nutzer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the users figure"
+    },
+    {
+      "key": "adminStats.users.signups",
+      "hu": "Új regisztráció",
+      "en": "New sign-ups",
+      "de": "Neue Registrierungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line with day bars"
+    },
+    {
+      "key": "adminStats.users.disabled",
+      "hu": "Letiltott",
+      "en": "Disabled",
+      "de": "Gesperrt",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.activity.people",
+      "hu": "naplózó ember · {{count}} nap",
+      "en": "people logging · {{count}} days",
+      "de": "Protokollierende · {{count}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the activity figure"
+    },
+    {
+      "key": "adminStats.activity.today",
+      "hu": "Naplózók ma",
+      "en": "Logged today",
+      "de": "Heute protokolliert",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.activity.workouts",
+      "hu": "Befejezett edzés",
+      "en": "Completed workouts",
+      "de": "Abgeschlossene Trainings",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line with day bars"
+    },
+    {
+      "key": "adminStats.activity.nutrition",
+      "hu": "Táplálkozás-napló",
+      "en": "Nutrition log",
+      "de": "Ernährungstagebuch",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line with day bars"
+    },
+    {
+      "key": "adminStats.activity.note",
+      "hu": "Nincs valódi napi aktív felhasználó: a termék nem tárol utolsó belépést. A szám azokat számolja, akik aznap naplóztak valamit.",
+      "en": "There is no real daily active user count: the product stores no last login. The figure counts the people who logged something that day.",
+      "de": "Es gibt keine echte tägliche Nutzerzahl: Das Produkt speichert keinen letzten Login. Die Zahl zählt die Personen, die an dem Tag etwas protokolliert haben.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: the honesty note under the activity block"
+    },
+    {
+      "key": "adminStats.coins.moved",
+      "hu": "érme forgalom · {{count}} nap",
+      "en": "coins moved · {{count}} days",
+      "de": "Münzumsatz · {{count}} Tage",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the coin figure"
+    },
+    {
+      "key": "adminStats.coins.minted",
+      "hu": "Kibocsátás",
+      "en": "Issued",
+      "de": "Ausgegeben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.coins.mintedSub",
+      "hu": "jóváírás",
+      "en": "credits",
+      "de": "Gutschriften",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: its sub line"
+    },
+    {
+      "key": "adminStats.coins.spent",
+      "hu": "Költés",
+      "en": "Spent",
+      "de": "Ausgaben",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.coins.spentSub",
+      "hu": "beváltás, vásárlás",
+      "en": "redemptions, purchases",
+      "de": "Einlösungen, Käufe",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: its sub line"
+    },
+    {
+      "key": "adminStats.coins.integrity",
+      "hu": "Integritás ellenőrzés",
+      "en": "Integrity check",
+      "de": "Integritätsprüfung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.coins.integritySub",
+      "hu": "tárca = főkönyv · nyugta = vásárlás",
+      "en": "wallet = ledger · receipt = purchase",
+      "de": "Wallet = Hauptbuch · Beleg = Kauf",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: its sub line"
+    },
+    {
+      "key": "adminStats.coins.integrityOk",
+      "hu": "Rendben",
+      "en": "All good",
+      "de": "In Ordnung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: the verdict (an ink dot, not green)"
+    },
+    {
+      "key": "adminStats.coins.integrityDrift",
+      "hu": "Eltérés",
+      "en": "Mismatch",
+      "de": "Abweichung",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: the verdict when the reconciliation finds a difference (integrity.ok false), a warn dot"
+    },
+    {
+      "key": "adminStats.market.unit",
+      "hu": "poszt",
+      "en": "posts",
+      "de": "Beiträge",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the post figure"
+    },
+    {
+      "key": "adminStats.market.published",
+      "hu": "Közzétett",
+      "en": "Published",
+      "de": "Veröffentlicht",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: split legend (live)"
+    },
+    {
+      "key": "adminStats.market.scheduled",
+      "hu": "Ütemezett",
+      "en": "Scheduled",
+      "de": "Geplant",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: split legend for a post whose publish time is still ahead (the frame groups the posts in three)"
+    },
+    {
+      "key": "adminStats.market.draft",
+      "hu": "Piszkozat",
+      "en": "Draft",
+      "de": "Entwurf",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: split legend"
+    },
+    {
+      "key": "adminStats.market.withdrawn",
+      "hu": "Visszavonva",
+      "en": "Withdrawn",
+      "de": "Zurückgezogen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "undrawn: split legend for a post its author withdrew (the frame groups the posts in three)"
+    },
+    {
+      "key": "adminStats.market.removed",
+      "hu": "Levéve",
+      "en": "Taken down",
+      "de": "Abgenommen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: split legend (an admin's take-down)"
+    },
+    {
+      "key": "adminStats.market.openReports",
+      "hu": "Nyitott jelentés",
+      "en": "Open reports",
+      "de": "Offene Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.market.resolved",
+      "hu": "Elintézett jelentés",
+      "en": "Resolved reports",
+      "de": "Erledigte Meldungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.coaches.withClients",
+      "hu": "edző ügyféllel",
+      "en": "coaches with clients",
+      "de": "Trainer mit Klienten",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the \"2 / 3\" fraction"
+    },
+    {
+      "key": "adminStats.coaches.perCoach",
+      "hu": "Ügyfél / edző",
+      "en": "Clients / coach",
+      "de": "Klienten / Trainer",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.coaches.perCoachSub",
+      "hu": "aktív kapcsolatok átlaga",
+      "en": "average of active links",
+      "de": "Durchschnitt der aktiven Verbindungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: its sub line"
+    },
+    {
+      "key": "adminStats.coaches.links",
+      "hu": "Aktív kapcsolat",
+      "en": "Active links",
+      "de": "Aktive Verbindungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.system.sessions",
+      "hu": "aktív munkamenet",
+      "en": "active sessions",
+      "de": "aktive Sitzungen",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: unit under the sessions figure"
+    },
+    {
+      "key": "adminStats.system.audit",
+      "hu": "Auditesemény",
+      "en": "Audit events",
+      "de": "Audit-Ereignisse",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: line"
+    },
+    {
+      "key": "adminStats.system.auditSub",
+      "hu": "24 óra",
+      "en": "24 hours",
+      "de": "24 Stunden",
+      "copy": "proposed",
+      "visible": true,
+      "source": "frame admin-statistics-1: its sub line"
+    }
+  ],
+  "change": [
+    {
+      "key": "admin.queueEmptyTitle",
+      "hu": {
+        "from": "Nincs mit moderálni",
+        "to": "Nincs várakozó beküldés"
+      },
+      "en": {
+        "from": "Nothing to moderate",
+        "to": "No submissions waiting"
+      },
+      "de": {
+        "from": "Nichts zu moderieren",
+        "to": "Keine wartenden Einsendungen"
+      },
+      "copy": "fix",
+      "source": "frame admin-moderation-v2-empty: the owner's title NINCS VÁRAKOZÓ BEKÜLDÉS (design note: decide which copy wins - the frame wins)"
+    }
+  ],
+  "remove": [
+    {
+      "key": "admin.footer",
+      "reason": "its only consumer, the UserSplit block / ledger line / footer of AdminPage.tsx, is dropped by this package (admin-moderation-v2)"
+    },
+    {
+      "key": "admin.users",
+      "reason": "its only consumer, the UserSplit block / ledger line / footer of AdminPage.tsx, is dropped by this package (admin-moderation-v2)"
+    },
+    {
+      "key": "admin.unit.user",
+      "reason": "its only consumer, the UserSplit block / ledger line / footer of AdminPage.tsx, is dropped by this package (admin-moderation-v2)"
+    },
+    {
+      "key": "admin.unit.exercise",
+      "reason": "its only consumer, the UserSplit block / ledger line / footer of AdminPage.tsx, is dropped by this package (admin-moderation-v2)"
+    },
+    {
+      "key": "admin.unit.media",
+      "reason": "its only consumer, the UserSplit block / ledger line / footer of AdminPage.tsx, is dropped by this package (admin-moderation-v2)"
+    }
+  ]
+}

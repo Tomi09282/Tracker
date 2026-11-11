@@ -1,0 +1,38 @@
+{
+  "id": "B-admin-polish",
+  "decision": "backend fix round after the independent security review of the admin v2 backend (.pulse/review/security-admin-v2: FINDINGS.md was never written, the findings were derived from the raw attack outputs attacks/out-01..08.txt) and the backend items of the S-admin-* screen reviews (none existed at fix time); owner decisions 2026-11-03 unchanged; ROUND 2 (2026-11-05): the backend items of .pulse/review/S-admin-accounts/REVIEW.md (#2 NAPLO filter, #9c step-up 401 refresh+replay, #11 ledger 404) - S-admin-posts / S-admin-moderation had no REVIEW.md, security FINDINGS.md still absent",
+  "owns": [
+    "backend/scripts/smoke/admin-polish.js",
+    "backend/src/admin/params.js",
+    "backend/src/lib/reason-text.js",
+    "docs/pipeline/pulse/pkg/B-admin-polish/**",
+    "backend/scripts/smoke/admin-polish-2.js"
+  ],
+  "sharedEdits": {
+    "decision": "small edits to files owned by the closed admin lanes / the integrator, each listed so the integrator can resolve conflicts",
+    "files": [
+      "backend/src/admin/routes.js (B-admin-accounts): strict ids on role/disable/enable/moderation, reasonText on the reasons, the enable step-up for admins",
+      "backend/src/admin/accounts.js (B-admin-accounts): idParams imported from admin/params.js, two route comments",
+      "backend/src/db/tx/admin-accounts.js (B-admin-accounts): liveSessions/lastWatermark - sign-out-all and force-password-change are replays only when no access token can be alive",
+      "backend/src/db/worker.js (integrator): setAccountDisabledTx takes stepUp and refuses to re-enable an admin without it (4 lines)",
+      "backend/src/coins/routes.js (B-admin-accounts): strict idParam, reasonText note",
+      "backend/src/public/moderation.js (B-admin-posts): strict report id",
+      "backend/src/lib/display-name.js (B-admin-accounts): hasInvisible refinement",
+      "backend/scripts/smoke.js (integrator): SMOKE_ONLY=admin-polish hook and the section call before the statistics section",
+      "backend/scripts/smoke/admin-accounts.js (B-admin-accounts): the ZWJ name probe and the flagged-replay check follow the fix (see api.md, Proof)",
+      "backend/scripts/verify-admin-accounts.mjs (B-admin-accounts): two EnableBody anchors, mutant 2 expects the search check",
+      "ROUND 2: backend/src/db/tx/admin-accounts.js (B-admin-accounts): the NAPLO read in adminAccountDetailQuery lists only the account actions (one AND a.action IN (...) of literals)",
+      "ROUND 2: backend/src/lib/http.js (integrator): new export sendStepUpFailed (401 invalid credentials + reason step_up_failed)",
+      "ROUND 2: backend/src/admin/routes.js (B-admin-accounts): role grant and enable step-up failures use sendStepUpFailed (2 lines + import)",
+      "ROUND 2: backend/src/privacy/routes.js: /me/delete wrong password uses sendStepUpFailed (1 line + import)",
+      "ROUND 2: backend/src/coins/routes.js (B-admin-accounts): GET /admin/coins/ledger 404 for an unknown user_id; user_id / actor_id use idString",
+      "ROUND 2: frontend/src/lib/api.ts (integrator): apiWithRefresh does not refresh on a 401 with reason step_up_required / step_up_failed (STEP_UP_REASONS, 1 condition)",
+      "ROUND 2: backend/scripts/smoke.js (integrator): adminPolish2Smoke called next to adminPolishSmoke (SMOKE_ONLY=admin-polish and the full run)"
+    ]
+  },
+  "handIn": {},
+  "notInScope": [
+    "the screens (S-admin-accounts, S-admin-posts, S-admin-moderation)",
+    "owner design decisions (listed in the report instead)"
+  ]
+}

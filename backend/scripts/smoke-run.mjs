@@ -13,10 +13,13 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const limitsMode = process.argv.includes('--limits');
+// --only=<section>: run ONE self-contained section of scripts/smoke.js (see SMOKE_ONLY there).
+const only = process.argv.find((a) => a.startsWith('--only='))?.slice('--only='.length) ?? '';
 const suite = limitsMode ? 'scripts/smoke-limits.js' : 'scripts/smoke.js';
 
 const dir = mkdtempSync(path.join(tmpdir(), 'tracker-smoke-'));
-const port = 3100 + Math.floor(Math.random() * 400);
+// SMOKE_PORT pins the port (a lane agent runs on its own); the default stays a random one.
+const port = Number(process.env.SMOKE_PORT) || 3100 + Math.floor(Math.random() * 400);
 
 const childEnv = {
   ...process.env,
@@ -29,7 +32,10 @@ const childEnv = {
   SMOKE_BASE: `http://localhost:${port}`,
 };
 
-const server = spawn(process.execPath, ['server.js'], { env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
+// SMOKE_SERVER lets scripts/verify-admin-accounts.mjs boot a copy of the backend with a defect planted
+// in it; the seed scripts below keep using the real src (they only create accounts).
+const serverEntry = process.env.SMOKE_SERVER || 'server.js';
+const server = spawn(process.execPath, [serverEntry], { env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
 let serverErr = '';
 server.stderr.on('data', (c) => {
   serverErr += c.toString();
@@ -85,8 +91,9 @@ if (!up) {
 
   // Taxonomy labels beyond English, plus German switched on. This is application DATA in the
   // same sense migrations are: without it the suite cannot tell a working fallback chain from a
-  // broken one, because every language would look equally untranslated.
-  for (const step of ['scripts/seed-taxonomy-i18n.mjs', 'scripts/seed-smoke-languages.mjs']) {
+  // broken one, because every language would look equally untranslated. The store probes give the
+  // purchase route something to sell now that 030 has retired the only real items.
+  for (const step of ['scripts/seed-taxonomy-i18n.mjs', 'scripts/seed-smoke-languages.mjs', 'scripts/seed-smoke-store.mjs']) {
     const code = await new Promise((resolve) => {
       // stdout is inherited on purpose. A silent setup step that quietly did nothing is how the
       // language checks came to fail with a message about German that had nothing to do with the
@@ -101,7 +108,7 @@ if (!up) {
   }
 
   const runner = spawn(process.execPath, [suite], {
-    env: { ...childEnv, SMOKE_ACCOUNTS: seeded },
+    env: { ...childEnv, SMOKE_ACCOUNTS: seeded, ...(only ? { SMOKE_ONLY: only } : {}) },
     stdio: 'inherit',
   });
   runner.on('exit', (code) => cleanup(code ?? 1));

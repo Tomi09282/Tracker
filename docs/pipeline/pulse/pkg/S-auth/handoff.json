@@ -1,0 +1,122 @@
+{
+  "id": "S-auth",
+  "branch": "pulse/S-auth",
+  "verifiedOn": "pulse-redesign fbad98c (the re-sync onto 2b3b6a2 stopped: F16:2 edited the two owned files - see blocked)",
+  "captures": "C:/Users/Petike/Documents/Cursor/tracker/.pulse/shots/S-auth (replay; variants .en .de .w360 .w430 .rm .live); pairs in .pulse/pairs/S-auth",
+  "frames": {
+    "auth-1": {
+      "verdict": "matched",
+      "how": "replay, signed out, no fixture; geometry probe green (21 of 21 compared layers matched, 0 deviating, 0 style mismatches; the reveal eye matched since G-shell glyph=field)",
+      "unmatched": []
+    },
+    "auth-2": {
+      "verdict": "structure",
+      "why": "reached on the recording (values typed by the capture, focus taken off by a click on the wordmark) and identical on the tile except two items, but the geometry probe is not green, so it is not claimed as matched",
+      "probeRed": [
+        "Hint - password rule: the probe measures the text run (321 wide) against the frame's fixed 354 box; x, y, size and line agree within 0.5 pt (a measurement difference, not a layout one)",
+        "the 14 Disc ellipses: the Field draws the masked value as bullet glyphs (F12, measured there: pitch 11.0 = 11.0, disc 5.5 vs 6)"
+      ]
+    }
+  },
+  "states": {
+    "auth-login-autofilled": {
+      "verdict": "structure",
+      "why": "no frame (a swap of auth-1); composed from the kit, reached and arrived on the recording"
+    },
+    "auth-login-revealed": {
+      "verdict": "structure",
+      "why": "no frame; the reveal control pressed, the value in plain text"
+    },
+    "auth-login-required": {
+      "verdict": "structure",
+      "why": "no frame; both inline errors (danger line + message), the hero gives up 8 pt"
+    },
+    "auth-login-format": {
+      "verdict": "structure",
+      "why": "no frame; the format error under the e-mail field"
+    },
+    "auth-login-invalid": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "inventory frame 3 (not drawn in Figma): the 401 is a mutation-outcome fixture; the alert line (NoticeLine compact, danger) 20 above the pill"
+    },
+    "auth-login-ratelimited": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "429 fixture; the two-line alert grows the footer upward"
+    },
+    "auth-login-generic": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "500 fixture"
+    },
+    "auth-register-pristine": {
+      "verdict": "structure",
+      "why": "no frame (the pristine swap of auth-2)"
+    },
+    "auth-register-taken": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "409 conflict fixture; footer grows by 40, the hero gives up 20 (the frame's documented swap)"
+    },
+    "auth-register-ratelimited": {
+      "verdict": "matched-fixture",
+      "frameless": true,
+      "why": "429 fixture; the longest line of the alert slot"
+    },
+    "auth-login-offline": {
+      "verdict": "structure",
+      "why": "no frame; the app-level offline strip (not S-auth's) pushes the screen down and the hero gives up height"
+    },
+    "busy": {
+      "verdict": "structure",
+      "why": "a request in flight cannot be held by the capture tool; the pill shows the kit's three dots and the form is inert (code unchanged)"
+    }
+  },
+  "probes": {
+    "allStates": "fonts, pill (one), boxed (none), overflow (360 / 402 / 430), targets (44), focus walk (8 stops, all visible), reduced motion (no running loop) pass on all 13 states in hu; geometry red only on auth-2 (above) and on the en / de captures of both frames (other strings, expected)",
+    "languages": "hu, en, de captured for all 13 states: no overflow, no truncation, no key path on screen (_contact.en-1.png, _contact.de-1.png)"
+  },
+  "inventory": "every state's control inventory equals its baseline (pulse-shot: inventory = baseline, 13 of 13)",
+  "ledger": [
+    {
+      "line": "aria-label 2 -> 1",
+      "reason": "the back control's accessible name is now given as ScreenHeader's back.label (bare), which writes the aria-label inside the shared header; the control, its name and its role (button) are unchanged - inventory = baseline"
+    }
+  ],
+  "budget": {
+    "before": 16,
+    "after": 0,
+    "file": "deleted (check-pulse --fix-down S-auth)"
+  },
+  "requests": [
+    "R-S-auth-01 (resolved by G-shell 8827841)"
+  ],
+  "deviationsQ4": [],
+  "removedNotControls": [
+    "the envelope and lock glyphs inside the login fields (decoration only; the inventory note says they need not survive; not in the frames)"
+  ],
+  "proposedCopy": [],
+  "i18n": "no patch: every string is an existing auth.* / offline.* key",
+  "liveSmoke": {
+    "result": "auth-1 and auth-register-pristine rendered against the live backend (signed out), no undeclared error",
+    "writes": []
+  },
+  "notes": [
+    "The hero stage is the frame's flexible element: it gives up height in 4 pt steps (at most 80) to keep 20 pt between the form and the docked footer, measured on the live layout (formRef / footRef / body ResizeObserver).",
+    "The kit's Screen pads for the Dock with 48 pt of air where the auth frames keep 20: on auth-2 (register with the rule hint) the page can scroll by 8 pt at 402 x 874; at scroll 0 every box is where the frame draws it. The frame also removes the dock fade on this screen; the kit Dock always draws it (it starts 48 above the footer and only touches content once an alert line is up).",
+    "Small phones: on a viewport too short for form + footer even with the full 80 pt squeeze (360 x 640 with the iPhone insets, the offline strip, alert lines, inline errors) the footer is in the page flow under the form instead of docked; the page scrolls to reach the language row."
+  ],
+  "lastBuild": "pulse-verify (S-auth-fix final): build green in 13 s - 13 of 13 captured (replay)",
+  "fixRound": {
+    "id": "S-auth-fix",
+    "branch": "pulse/S-auth-fix",
+    "review": ".pulse/review/S-auth/REVIEW.md",
+    "blocking1": "fixed - small phones: when the hero squeeze (max 80) cannot keep CLEAR between the form and the docked footer, the footer leaves the Dock and follows the form in the page flow (mt-8), so the page scrolls and nothing is drawn over a field. The decision is computed from the form end at rest and the docked footer top derived from the viewport (no feedback loop). Checked at 360 x 640 insets 62/34 and 360 x 667 insets 20/0 on all 13 states, offline line included: no overlap; at 402 x 874 every state stays docked exactly as before.",
+    "minor2": "fixed upstream - reveal glyph 20 pt text-2 on the right edge (G-shell glyph=field), matched by the probe",
+    "minor3": "not changed - text line boxes 0.5 pt high (within tolerance, not visible)",
+    "observation4": "not changed - values carrying over /register -> /login is pre-existing behaviour outside the frames",
+    "captures": ".pulse/shots/S-auth-fix (402), /narrow (360x640 62/34), /se (360x667 20/0), /final (final pulse-verify run)",
+    "pairs": ".pulse/pairs/S-auth-fix"
+  }
+}

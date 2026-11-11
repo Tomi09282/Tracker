@@ -1,0 +1,14 @@
+{
+  "id": "R-S-exercise-detail-02",
+  "from": "S-exercise-detail",
+  "kind": "ui-prop",
+  "blocking": false,
+  "target": "frontend/src/ui/shell/ScreenHeader.tsx (F11): text-wrap: balance on the display title",
+  "need": "exercise-detail-1 breaks the h1 \"KÖZEPES FOGÁSÚ / FEKVENYOMÁS RÚDDAL\" (app-kit comment: the forced break stands for CSS text-wrap: balance); the natural wrap at 354 pt puts FEKVENYOMÁS on the first line (geometry: line 1 334 pt wide).",
+  "evidence": ".pulse/shots/S-exercise-detail/exercise-detail-1.geometry.json (Title matched after the interim); figma-build/app/exercise-detail-1.body.js step 1",
+  "proposedApi": "balance the h1 by default (text-wrap: balance on the title element) for every kind, or a boolean prop",
+  "proposedPatch": null,
+  "interim": "the page passes title={<span className=\"block text-balance\">{exercise.name}</span>}",
+  "status": "open",
+  "resolution": null
+}

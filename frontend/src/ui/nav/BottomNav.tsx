@@ -1,202 +1,272 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
-import { isTabActive } from '../../app/navTabs';
-import type { LucideIcon } from 'lucide-react';
+import { Undo2 } from 'lucide-react';
+import { isSwitch, isTabActive, NAV_TABS, type NavView } from '../../app/navTabs';
+import type { NavIconKey, SwitchIconKey } from '../../assets/pulse';
 import { cn } from '../../lib/cn';
-import { useElementVariant } from '../feedback/ElementStyleProvider';
-import { PILL_MAX_TABS } from '../../app/navTabs';
+import { NavIcon } from './NavIcon';
 
-export interface NavTab {
-  to: string;
-  icon: LucideIcon;
-  label: string;
-  end?: boolean;
-  badge?: number;
-  /** Route prefixes this tab owns for the ACTIVE state only. See `navTabs.ts`. */
-  owns?: readonly string[];
-}
+/** One cell of the bar, resolved: the label is a string, not a key. */
+export type NavTab =
+  | {
+      kind?: 'tab';
+      /** The React key, and a name a specimen's `force` may use. Unique within a bar. */
+      key: string;
+      to: string;
+      /** Which raster draws the cell (`assets/pulse/navIcons.ts`). */
+      icon: NavIconKey;
+      label: string;
+      end?: boolean;
+      /** Route prefixes this tab owns for the ACTIVE state only. See `navTabs.ts`. */
+      owns?: readonly string[];
+    }
+  | {
+      /** A way back to another view: never lit, never `aria-current`. See `navTabs.ts`. */
+      kind: 'switch';
+      key: string;
+      to: string;
+      icon: SwitchIconKey;
+      /** The visible label: the destination role ("Tag", "Edző"). */
+      label: string;
+      /** The accessible name: the whole phrase ("Vissza: tag nézet"). */
+      name: string;
+    };
 
 /**
- * The app's ONLY primary navigation (owner requirement 12, Bible LAYOUT LAW).
- *
- * TWO SHAPES, AND THE COUNT PICKS ONE.
- *
- * Up to five tabs the bar is a detached floating pill, inset from all three edges — the shape
- * `v4-vegleges/sotet/02-workout-player.png` shows for a member. At six and seven it becomes a
- * full-width slab pinned to the bottom, which is what `.../11-admin-attekintes.png` shows for an
- * admin, labels truncated and all. Both approved mockups are right; they are drawing different
- * roles. Seven pill cells do not fit a 320px phone once you subtract margins on both sides; seven
- * full-width cells do, at 44px each with 12px to spare.
- *
- * THERE IS NO CLAMP ANY MORE.
- *
- * This component used to end its tab list with `slice(0, 5)`, and the reason was real: a sixth
- * tab was once pushed by accident and the clamp swallowed it, so an admin saw five tabs and
- * `/admin` was not among them. But a clamp hides exactly the failure it was written to catch —
- * the tab vanished silently instead of the build breaking. The count now lives in
- * `app/navTabs.ts` and `check-nav.mjs` asserts it, so the failure is loud and this renders
- * whatever it is given.
- *
- * THE SAFE AREA IS EXPLICIT NOW, AND HAS TO BE.
- *
- * The old bar was `inset-x-0` with no horizontal inset and it was fine — but only by accident:
- * `max-w-md` plus `mx-auto` capped the row at 448px and centred it, so on a notched phone in
- * landscape the outer tabs never reached the cutout. Removing that cap to let seven cells span the
- * width also removes the accident. `check-safe-area` inspects `top-0` and `bottom-0` only, so it
- * would not have said a word.
+ * A view's tab table, resolved in the current language. The app's layout and the kit specimens
+ * read the same table, so a specimen cannot drift from the bar it shows.
  */
-export function BottomNav({ tabs }: { tabs: readonly NavTab[] }) {
+export function useNavTabs(view: NavView): NavTab[] {
   const { t } = useTranslation();
-  const variant = useElementVariant('E11');
-  const { pathname } = useLocation();
+  return useMemo(
+    () =>
+      NAV_TABS[view].map(
+        (spec): NavTab =>
+          isSwitch(spec)
+            ? { kind: 'switch', key: spec.key, to: spec.to, icon: spec.icon, label: t(spec.labelKey), name: t(spec.nameKey) }
+            : { key: spec.key, to: spec.to, icon: spec.icon, label: t(spec.labelKey), end: spec.end, owns: spec.owns },
+      ),
+    [view, t],
+  );
+}
 
-  /*
-   * ACTIVE MEANS "YOU ARE SOMEWHERE THIS TAB OWNS", not "the URL equals this tab's `to`".
-   *
-   * `NavLink` answers the second question, which is the right one for navigation and the wrong one
-   * for belonging. Measured: on `/library/:id` — an exercise detail page, reached by tapping a tab
-   * — every cell in the bar rendered idle, and on `/compose` the coach's own desk lit nothing
-   * either, because `/coach` does not prefix-match `/compose`. A bar with nothing active has
-   * stopped answering the only question it exists to answer.
-   *
-   * The prefix test is boundary-aware: `/coin` must not match `/coins`, and `/m` must not match
-   * `/measurements`. So a prefix counts only when the path ends there or continues with a slash.
-   *
-   * AND THIS IS WHY THE LINK IS A PLAIN `Link` NOW.
-   *
-   * Wrapping `NavLink` and OR-ing its `isActive` with the ownership test fixed the pixels and left
-   * the semantics wrong: `aria-current` is `NavLink`'s to give, and it withholds it whenever its
-   * own match fails. So on `/library` the bar showed EDZÉS lit while announcing no current page at
-   * all — sighted and screen-reader users reading two different bars off the same markup, which is
-   * worse than the blank bar it replaced because only one of the two audiences can see the bug.
-   * Once the component owns the answer, it has to own the attribute that reports it.
+export interface BottomNavProps {
+  tabs: readonly NavTab[];
+  /**
+   * Places the bar and its fade at the bottom of the nearest POSITIONED ancestor instead of the
+   * viewport. For the kit specimens and the playground demo, where several bars share one page:
+   * the ancestor is the "phone" (`relative`), and it may stand in for the device by setting
+   * `--tabbar-offset` / `--fade-h` (the frames: 36 / 130).
    */
-  // The rule itself lives in `navTabs.ts`, which is the pure module a gate can import — see
-  // `isTabActive` there and `check-nav-active.mjs`. This component renders the answer; it does not
-  // own it, because a rule nothing can assert over is a rule that drifts.
-  const isActive = (tab: NavTab) => isTabActive(tab, pathname);
+  inline?: boolean;
+  /**
+   * The pathname the bar answers for, instead of the current location. Specimens only: it is what
+   * lets one page show several bars, each with another tab lit.
+   */
+  at?: string;
+  /**
+   * Specimens only: holds the cell named (by its `key` or its `to`) in a state that needs a finger
+   * (`pressed`) or a keyboard (`focus`), with the same declarations as the real `:active` /
+   * `:focus-visible`.
+   */
+  force?: { pressed?: string; focus?: string };
+  className?: string;
+}
 
-  const pill = tabs.length <= PILL_MAX_TABS;
+/* Icon size by tab count (kit `tabBar`): 32, and 28 once seven cells share the width — the values
+   of `--tab-icon` / `--tab-icon-dense`. An `<img>` needs them as attributes, so they are numbers. */
+const ICON = 32;
+const ICON_DENSE = 28;
 
-  return (
+/* The bar's own side inset (frame `bars`): 10 for the member's five, 12 for six, 8 for seven —
+   and 12 (`--tabbar-inset-4`) for four cells and for EVERY bar that opens with a switch column, so
+   "↩ Tag" is centred on x 44 in the trainer and in the admin view, at 402 and at 360. `max()`
+   with the device inset: in landscape the cutout is on a side edge. */
+const INSET = {
+  4: 'ps-[max(var(--tabbar-inset-4),env(safe-area-inset-left))] pe-[max(var(--tabbar-inset-4),env(safe-area-inset-right))]',
+  5: 'ps-[max(var(--tabbar-inset-5),env(safe-area-inset-left))] pe-[max(var(--tabbar-inset-5),env(safe-area-inset-right))]',
+  6: 'ps-[max(var(--tabbar-inset-6),env(safe-area-inset-left))] pe-[max(var(--tabbar-inset-6),env(safe-area-inset-right))]',
+  7: 'ps-[max(var(--tabbar-inset-7),env(safe-area-inset-left))] pe-[max(var(--tabbar-inset-7),env(safe-area-inset-right))]',
+} as const;
+
+const insetFor = (count: number, switches: number) =>
+  switches > 0 || count <= 4 ? INSET[4] : count >= 7 ? INSET[7] : count === 6 ? INSET[6] : INSET[5];
+
+/* A state a specimen holds still: the same declarations as the real ones on the cell. */
+const FORCED_FOCUS =
+  'data-[force=focus]:outline-2 data-[force=focus]:outline-[var(--focus-ring)] data-[force=focus]:-outline-offset-2';
+
+/* Pressed: the icon dims to 60 %, in `instant`. Nothing moves. */
+const PRESSED = cn(
+  'transition-opacity duration-[var(--duration-instant)] ease-[var(--ease-standard)] motion-reduce:transition-none',
+  'group-active:opacity-[var(--pressed-opacity)] group-data-[force=pressed]:opacity-[var(--pressed-opacity)]',
+);
+
+const CELL = 'group flex h-full min-w-[var(--target-min)] flex-col items-center justify-center gap-0.5';
+
+/**
+ * The app's ONLY primary navigation: the Pulse tab bar.
+ *
+ * ═══ WHAT IT IS (kit `tabBar` + `chrome`, frame `bars` of design round A) ═════════════════════
+ *
+ * No surface, no border, no capsule: cells standing on the canvas, over a fade.
+ *
+ *   bar       56 high (`--nav-h`), `--tabbar-offset` above the screen bottom (inset + 2): y 782-838
+ *             on the frames. The `<nav>` itself paints nothing.
+ *   cells     4 to 7. A member's bar: equal cells on the width left by the side inset (10 / 12 / 8
+ *             for 5 / 6 / 7). A role bar: the SWITCH column first — 64 pt per switch cell from
+ *             inset 12 — then equal destination cells on what is left (trainer 104.7, admin 83.3
+ *             on 402). The WHOLE cell is the target, 56 high and never under 44 wide
+ *   switch    a way back to another view, not a place: the idle raster at full strength, a 12 pt
+ *             return glyph in ink before the destination role ("↩ Tag"). Never lit, never
+ *             `aria-current`; its accessible name is the whole phrase ("Vissza: tag nézet")
+ *   divider   1 pt, white 14 % (`hair-strong`), 32 high at y 12, after the switch column
+ *   icon      a raster, 32 pt (28 at seven), 2 pt above the label (`NavIcon`)
+ *   label     `tab` (Geist Medium 11 / 14, text-2), sentence case; lit: `tab-on` (SemiBold,
+ *             text-1). The one place where selection changes weight: the cells are fixed, so
+ *             nothing shifts
+ *   fade      a SIBLING layer behind the bar, not its background: the canvas rising from nothing
+ *             to solid over the first 28 % of `--fade-h` (130 pt). It takes no taps
+ *
+ * ═══ ONE EXPRESSION FOR THE LIT STATE AND `aria-current` ═══════════════════════════════════════
+ *
+ * `isTabActive` (in `navTabs.ts`, the pure module the gates import) answers "is the user inside
+ * what this tab owns" — and answers false for a switch, always. The raster a sighted user sees,
+ * the weight of the label and the attribute a screen reader reads come from that one result.
+ *
+ * ═══ THERE IS NO CLAMP, AND THE HORIZONTAL SAFE AREA IS EXPLICIT ═══════════════════════════════
+ *
+ * The bar renders what it is given; the counts are declared in `navTabs.ts` and asserted by
+ * `check-nav.mjs`, which also holds this file to both side insets.
+ *
+ * ═══ DESKTOP ═══════════════════════════════════════════════════════════════════════════════════
+ *
+ * From `lg` the bar keeps the dock it had (R21): the same cells, content-width and centred, the
+ * icon beside its label.
+ */
+export function BottomNav({ tabs, inline = false, at, force, className }: BottomNavProps) {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const pathname = at ?? location.pathname;
+
+  const switches = tabs.filter(isSwitch).length;
+  const count = tabs.length;
+  const iconSize = count >= 7 ? ICON_DENSE : ICON;
+  const forcedFor = (tab: NavTab) => {
+    const names = [tab.key, tab.to];
+    if (force?.pressed !== undefined && names.includes(force.pressed)) return 'pressed';
+    if (force?.focus !== undefined && names.includes(force.focus)) return 'focus';
+    return undefined;
+  };
+
+  const bar = (
     <nav
       aria-label={t('nav.primary')}
       className={cn(
-        'fixed bottom-0 z-[var(--z-nav)]',
-        'bg-[var(--nav-bg)] backdrop-blur-[var(--nav-blur)]',
-        // Horizontal safe area on both shapes. `max()` rather than a bare `env()` because the
-        // inset is 0 on every device without a cutout, and a pill still wants its own margin
-        // there — see .screen-x, which solves the same problem the same way.
-        'ps-[max(0px,env(safe-area-inset-left))] pe-[max(0px,env(safe-area-inset-right))]',
-        pill
-          ? [
-              // Detached: floats above the content with air on all three sides, on every width.
-              'inset-x-[max(var(--nav-dock-offset),env(safe-area-inset-left))]',
-              'bottom-[calc(var(--nav-dock-offset)+env(safe-area-inset-bottom))]',
-              'rounded-chip border border-[var(--surface-border)] px-2',
-              // Desktop keeps the same pill, centred and content-width rather than stretched.
-              'lg:inset-x-auto lg:left-1/2 lg:w-auto lg:-translate-x-1/2',
-            ]
-          : [
-              // Pinned: edge to edge, sitting on the bottom with the inset reserved below it.
-              'inset-x-0 border-t border-[var(--surface-border)]',
-              'pb-[env(safe-area-inset-bottom)]',
-              // At six or seven tabs the desktop dock would have to grow unbounded, so desktop
-              // keeps the slab too rather than becoming a very wide pill.
-              'lg:pb-0',
-            ],
+        // The nav is the strip the bar stands in. It takes no taps itself: only the cells do, so
+        // the side insets and (on a desktop) everything beside the dock let a tap through.
+        'pointer-events-none z-[var(--z-nav)] mx-auto h-[var(--nav-h)] max-w-[var(--screen-max)]',
+        inline
+          ? 'absolute inset-x-0 bottom-[var(--tabbar-offset)]'
+          : 'fixed inset-x-0 bottom-[var(--tabbar-offset)] lg:max-w-none',
+        insetFor(count, switches),
+        className,
       )}
     >
       <ul
+        data-kit="tabBar"
+        data-tabs={count}
+        data-switches={switches || undefined}
         className={cn(
-          'flex items-stretch justify-around',
-          // `mx-auto max-w-md` on the pill only. On the slab it would re-introduce the very cap
-          // that has to go: seven cells centred inside 448px are 64px each while the screen is
-          // 393px wide, which overflows rather than fits.
-          pill && 'mx-auto max-w-md lg:max-w-none lg:gap-1',
+          'pointer-events-auto mx-auto flex h-full w-full items-stretch',
+          !inline && 'lg:w-fit lg:max-w-none lg:gap-2',
         )}
       >
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const active = isActive(tab);
+        {tabs.map((tab, index) => {
+          const forced = forcedFor(tab);
 
-          // `min-w-0` below because `flex-1` alone does not make a flex item shrinkable: the
-          // default `min-width: auto` floors it at its content width. Measured at 360px — the five
-          // links came to 79+95+89+53+65 = 381px, so "Tervek" ran 21px past the viewport,
-          // unreadable and only half tappable. With the floor removed the cells are equal, and
-          // that is what makes six and seven of them possible at all.
+          if (isSwitch(tab)) {
+            return (
+              <li key={tab.key} className={cn('w-16 flex-none', !inline && 'lg:w-auto')}>
+                <Link
+                  to={tab.to}
+                  aria-label={tab.name}
+                  data-part="switch"
+                  data-force={forced}
+                  className={cn(CELL, !inline && 'lg:flex-row lg:gap-2 lg:px-4', 'focus-visible:-outline-offset-2', FORCED_FOCUS)}
+                >
+                  <NavIcon icon={tab.icon} size={iconSize} lit={false} className={PRESSED} />
+                  <span className="flex max-w-full items-center gap-0.5">
+                    {/* Lucide `undo-2`, 12 pt, stroke 2.5, in ink: the glyph is what says "back". */}
+                    <Undo2 aria-hidden className="size-3 shrink-0 text-text-1" strokeWidth={2.5} />
+                    <span className="truncate text-tab text-text-2">{tab.label}</span>
+                  </span>
+                </Link>
+              </li>
+            );
+          }
+
+          // The ONE answer: it lights the raster, weights the label and sets `aria-current`.
+          const active = isTabActive(tab, pathname);
+          // The hairline stands on the left edge of the first destination after the switches.
+          const divider = switches > 0 && index === switches;
+
+          // `min-w-0`, because `flex-1` alone does not make a flex item shrinkable: the default
+          // `min-width: auto` floors it at its content width, and seven labels do not fit 360.
           return (
-            <li key={tab.to} className={cn('min-w-0 flex-1', pill && 'lg:flex-none')}>
+            <li key={tab.key} className={cn('relative min-w-0 flex-1', !inline && 'lg:flex-none')}>
+              {divider ? (
+                <span aria-hidden data-part="switchDivider" className="absolute top-3 left-0 h-8 w-px bg-hair-strong" />
+              ) : null}
               <Link
                 to={tab.to}
-                // The whole point of computing `active` here: the attribute a screen reader reads
-                // and the colour a sighted user sees now come from one expression.
                 aria-current={active ? 'page' : undefined}
+                data-part="tab"
+                data-force={forced}
                 className={cn(
-                  // The bar is 64px tall; the link fills it, so the whole cell is tappable
-                  // rather than just the icon.
-                  'flex h-[var(--nav-h)] min-w-[var(--target-min)] flex-col items-center',
-                  // No horizontal padding on the narrowest phones: the cells are equal width and
-                  // the whole cell is the tap target, so the padding bought nothing and cost 8px
-                  // of label. The truncate below is the safety net — and at seven tabs it is not
-                  // a safety net any more but the expected result, which the admin mockup draws.
-                  'justify-center gap-1 px-0 sm:px-3',
-                  pill && 'lg:flex-row lg:gap-2 lg:px-4',
-                  'transition-colors duration-[var(--duration-base)] ease-[var(--ease-standard)]',
-                  active ? 'text-[var(--nav-fg-active)]' : 'text-[var(--nav-fg-idle)]',
+                  CELL,
+                  !inline && 'lg:flex-row lg:gap-2 lg:px-4',
+                  // The ring is drawn inside the cell: the cells touch, and an outset ring would be
+                  // cut by the neighbour and by the screen edge.
+                  'focus-visible:-outline-offset-2',
+                  FORCED_FOCUS,
                 )}
               >
-                <span className="relative inline-flex items-center justify-center">
-                  {/* A — the active indicator is a background pill at 12% accent, drawn
-                      behind the icon rather than around the whole cell: a full-cell
-                      highlight fights the 64px bar height and reads as a button, not a tab.
-                      B — a dot below the icon instead, for a lighter bar.
-                      C — the icon itself thickens when active, with no separate marker. */}
-                  {active && variant === 'A' ? (
-                    <span
-                      aria-hidden
-                      className="absolute -inset-x-3 -inset-y-1 rounded-chip bg-accent-subtle"
-                    />
-                  ) : null}
-                  {active && variant === 'B' ? (
-                    <span
-                      aria-hidden
-                      className="absolute -bottom-1.5 size-1 rounded-chip bg-accent"
-                    />
-                  ) : null}
-                  <Icon
-                    // 24px, per the Bible. The previous build shipped 20 and it read as timid.
-                    size={24}
-                    strokeWidth={active && variant === 'C' ? 2.75 : 2}
-                    aria-hidden
-                    className="relative transition-[stroke-width] duration-[var(--duration-fast)]"
-                  />
-                  {typeof tab.badge === 'number' && tab.badge > 0 ? (
-                    <span
-                      className={cn(
-                        'absolute -right-2 -top-1 min-w-4 rounded-chip px-1',
-                        'text-micro tabular-nums bg-danger text-on-danger',
-                        variant === 'D' && 'animate-[badge-pop_var(--duration-base)_var(--ease-standard)]',
-                      )}
-                    >
-                      {tab.badge > 99 ? '99+' : tab.badge}
-                    </span>
-                  ) : null}
+                <NavIcon icon={tab.icon} size={iconSize} lit={active} className={PRESSED} />
+                {/* Sentence case, as written in the bundle: the same `nav.*` strings are the
+                    accessible names of these links. `truncate` is the safety net of the seventh
+                    cell on a 360 pt phone. */}
+                <span
+                  className={cn('max-w-full truncate', active ? 'text-tab-on text-text-1' : 'text-tab text-text-2')}
+                >
+                  {tab.label}
                 </span>
-                {/* CAPS, and the tracking is the argument. `--text-micro` carries +0.06em for
-                    exactly this use (DESIGN.md §2, "eyebrows and uppercase labels"), so at sentence
-                    case the letter-spacing was doing nothing but loosening a row that did not need
-                    loosening. Every mockup draws the bar in caps.
-                    A TRANSFORM, not a change to the strings: the same `nav.*` values are the
-                    accessible names of these links and of the command palette's entries, and an
-                    all-caps accessible name is spelled out letter by letter by some screen
-                    readers. */}
-                <span className="text-micro max-w-full truncate uppercase">{tab.label}</span>
               </Link>
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+
+  // The fade: the canvas rising behind the bar. Decoration — hidden from assistive technology and
+  // from the pointer.
+  const fade = (
+    <div
+      aria-hidden
+      data-part="bottomFade"
+      className={cn(
+        'pointer-events-none z-[var(--z-nav)] h-[var(--fade-h)] bg-[image:var(--nav-fade)]',
+        inline ? 'absolute inset-x-0 bottom-0' : 'fixed inset-x-0 bottom-0',
+      )}
+    />
+  );
+
+  return (
+    <>
+      {fade}
+      {bar}
+    </>
   );
 }

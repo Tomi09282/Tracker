@@ -1,0 +1,18 @@
+{
+  "package": "S-habits",
+  "base": "05b830a",
+  "namespaces": [
+    "habits"
+  ],
+  "set": [
+    {
+      "key": "habits.gone",
+      "hu": "Ez a szokás nem érhető el",
+      "en": "This habit is not available",
+      "de": "Diese Gewohnheit ist nicht verfügbar",
+      "copy": "proposed",
+      "visible": true,
+      "source": "fix round (review S-habits D7): /habits/:id answered 404 (missing or another account's habit); the app's existing not-available form (plans.missingTitle 'Ez a terv nem érhető el', postGoneTitle, coachGoneTitle)"
+    }
+  ]
+}

@@ -1,0 +1,1058 @@
+{
+  "about": "S-nutrition - the drawn data of nutrition-1 / nutrition-2 and the undrawn states of /nutrition (PLAN 4.1 rule 7). Account M (user@) in replay only: every state is an edit list over the recorded GET /api/v1/nutrition-log/2026-10-09 (Friday 9 October, the frames day: targets 2600 / 180 / 290 / 70 and the day name Edzesnap - pentek are recorded as drawn). Nothing is written on any account. The frames third group (Egyéb) is null-labelled in the product; the fixture check only admits types the recordings of the same endpoint carry, and no recording of 2026-10-09 has a null meal_label, so those two rows carry the label as the string Egyéb - the words the page prints for a null label (nutrition.unlabelled), the same pixels.",
+  "overrides": {
+    "nutrition-1": {
+      "why": "the frame is Friday 9 October with eleven logged foods in three groups (1840 kcal); the freeze day is a rest Thursday with nothing logged. The page clock is the frames day and the recorded Friday log takes the frames rows and totals (proposed to INT as scripts/fixtures/nutrition-1.json, request R-S-nutrition-02; until then it lives here).",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": [
+                {
+                  "id": 900,
+                  "meal_label": "Reggeli",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Zabpehely",
+                  "grams": 60,
+                  "kcal": 222,
+                  "protein_g": 8,
+                  "carb_g": 36,
+                  "fat_g": 4,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 901,
+                  "meal_label": "Reggeli",
+                  "food_id": 125,
+                  "plan_day_id": 5,
+                  "name": "Tejsavó fehérjepor, vanília",
+                  "grams": 30,
+                  "kcal": 114,
+                  "protein_g": 23,
+                  "carb_g": 2,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 902,
+                  "meal_label": "Reggeli",
+                  "food_id": 117,
+                  "plan_day_id": 5,
+                  "name": "Banán",
+                  "grams": 120,
+                  "kcal": 107,
+                  "protein_g": 1,
+                  "carb_g": 27,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 903,
+                  "meal_label": "Reggeli",
+                  "food_id": 119,
+                  "plan_day_id": 5,
+                  "name": "Görög joghurt, natúr",
+                  "grams": 100,
+                  "kcal": 133,
+                  "protein_g": 9,
+                  "carb_g": 4,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 904,
+                  "meal_label": "Reggeli",
+                  "food_id": 126,
+                  "plan_day_id": 5,
+                  "name": "Méz, akác",
+                  "grams": 30,
+                  "kcal": 91,
+                  "protein_g": 0,
+                  "carb_g": 24,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 905,
+                  "meal_label": "Ebéd",
+                  "food_id": 1,
+                  "plan_day_id": 5,
+                  "name": "Csirkemell filé, nyers",
+                  "grams": 180,
+                  "kcal": 198,
+                  "protein_g": 41,
+                  "carb_g": 0,
+                  "fat_g": 3,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 906,
+                  "meal_label": "Ebéd",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Basmati rizs, főtt",
+                  "grams": 220,
+                  "kcal": 286,
+                  "protein_g": 6,
+                  "carb_g": 62,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 907,
+                  "meal_label": "Ebéd",
+                  "food_id": 121,
+                  "plan_day_id": 5,
+                  "name": "Brokkoli, párolt",
+                  "grams": 150,
+                  "kcal": 53,
+                  "protein_g": 4,
+                  "carb_g": 10,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 908,
+                  "meal_label": "Ebéd",
+                  "food_id": 127,
+                  "plan_day_id": 5,
+                  "name": "Olívaolaj",
+                  "grams": 20,
+                  "kcal": 177,
+                  "protein_g": 0,
+                  "carb_g": 0,
+                  "fat_g": 20,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 909,
+                  "meal_label": "Egyéb",
+                  "food_id": 128,
+                  "plan_day_id": 5,
+                  "name": "Túró, félzsíros",
+                  "grams": 235,
+                  "kcal": 237,
+                  "protein_g": 29,
+                  "carb_g": 8,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 910,
+                  "meal_label": "Egyéb",
+                  "food_id": 106,
+                  "plan_day_id": 5,
+                  "name": "Teljes kiőrlésű kenyér",
+                  "grams": 90,
+                  "kcal": 222,
+                  "protein_g": 7,
+                  "carb_g": 37,
+                  "fat_g": 2,
+                  "fiber_g": 0
+                }
+              ]
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            },
+            {
+              "pointer": "/totals/fiber_g",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": {
+          "key": "nutrition.searchPlaceholder"
+        }
+      }
+    },
+    "nutrition-2": {
+      "why": "the same day as nutrition-1, and the pick of the frame: Csirkemell, bor nelkul, nyers at 180 g (the base script took the first csirke hit, Csirkecomb, at 100 g - _subcheck wrongItem). Both foods are in the recorded q=csirke answer.",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "reach": "fixture",
+      "drawn": "fixture",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": [
+                {
+                  "id": 900,
+                  "meal_label": "Reggeli",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Zabpehely",
+                  "grams": 60,
+                  "kcal": 222,
+                  "protein_g": 8,
+                  "carb_g": 36,
+                  "fat_g": 4,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 901,
+                  "meal_label": "Reggeli",
+                  "food_id": 125,
+                  "plan_day_id": 5,
+                  "name": "Tejsavó fehérjepor, vanília",
+                  "grams": 30,
+                  "kcal": 114,
+                  "protein_g": 23,
+                  "carb_g": 2,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 902,
+                  "meal_label": "Reggeli",
+                  "food_id": 117,
+                  "plan_day_id": 5,
+                  "name": "Banán",
+                  "grams": 120,
+                  "kcal": 107,
+                  "protein_g": 1,
+                  "carb_g": 27,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 903,
+                  "meal_label": "Reggeli",
+                  "food_id": 119,
+                  "plan_day_id": 5,
+                  "name": "Görög joghurt, natúr",
+                  "grams": 100,
+                  "kcal": 133,
+                  "protein_g": 9,
+                  "carb_g": 4,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 904,
+                  "meal_label": "Reggeli",
+                  "food_id": 126,
+                  "plan_day_id": 5,
+                  "name": "Méz, akác",
+                  "grams": 30,
+                  "kcal": 91,
+                  "protein_g": 0,
+                  "carb_g": 24,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 905,
+                  "meal_label": "Ebéd",
+                  "food_id": 1,
+                  "plan_day_id": 5,
+                  "name": "Csirkemell filé, nyers",
+                  "grams": 180,
+                  "kcal": 198,
+                  "protein_g": 41,
+                  "carb_g": 0,
+                  "fat_g": 3,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 906,
+                  "meal_label": "Ebéd",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Basmati rizs, főtt",
+                  "grams": 220,
+                  "kcal": 286,
+                  "protein_g": 6,
+                  "carb_g": 62,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 907,
+                  "meal_label": "Ebéd",
+                  "food_id": 121,
+                  "plan_day_id": 5,
+                  "name": "Brokkoli, párolt",
+                  "grams": 150,
+                  "kcal": 53,
+                  "protein_g": 4,
+                  "carb_g": 10,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 908,
+                  "meal_label": "Ebéd",
+                  "food_id": 127,
+                  "plan_day_id": 5,
+                  "name": "Olívaolaj",
+                  "grams": 20,
+                  "kcal": 177,
+                  "protein_g": 0,
+                  "carb_g": 0,
+                  "fat_g": 20,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 909,
+                  "meal_label": "Egyéb",
+                  "food_id": 128,
+                  "plan_day_id": 5,
+                  "name": "Túró, félzsíros",
+                  "grams": 235,
+                  "kcal": 237,
+                  "protein_g": 29,
+                  "carb_g": 8,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 910,
+                  "meal_label": "Egyéb",
+                  "food_id": 106,
+                  "plan_day_id": 5,
+                  "name": "Teljes kiőrlésű kenyér",
+                  "grams": 90,
+                  "kcal": 222,
+                  "protein_g": 7,
+                  "carb_g": 37,
+                  "fat_g": 2,
+                  "fiber_g": 0
+                }
+              ]
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            },
+            {
+              "pointer": "/totals/fiber_g",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": {
+              "key": "nutrition.searchPlaceholder"
+            },
+            "text": "csirke"
+          },
+          "arrived": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "^Csirkemell, bőr nélkül"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "^Csirkemell, bőr nélkül"
+            }
+          },
+          "arrived": {
+            "role": [
+              "spinbutton",
+              "textbox"
+            ],
+            "name": {
+              "key": "nutrition.grams"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": [
+              "spinbutton",
+              "textbox"
+            ],
+            "name": {
+              "key": "nutrition.grams"
+            },
+            "text": "180"
+          },
+          "arrived": {
+            "text": "297"
+          }
+        }
+      ],
+      "opened": {
+        "role": [
+          "textbox",
+          "searchbox",
+          "combobox"
+        ],
+        "name": {
+          "key": "nutrition.searchPlaceholder"
+        }
+      },
+      "arrived": {
+        "role": [
+          "spinbutton",
+          "textbox"
+        ],
+        "name": {
+          "key": "nutrition.grams"
+        }
+      }
+    }
+  },
+  "states": {
+    "nutrition-morning": {
+      "title": "Étkezés - target, nothing logged yet",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": []
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 0
+            },
+            {
+              "pointer": "/totals/fiber_g",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "nutrition.emptyTitle"
+        }
+      }
+    },
+    "nutrition-over": {
+      "title": "Étkezés - over target (warning, never danger)",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/totals/kcal",
+              "value": 3200
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 150
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 305
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 60
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "text": {
+          "hu": "3200",
+          "en": "3,200",
+          "de": "3.200"
+        }
+      }
+    },
+    "nutrition-no-target": {
+      "title": "Étkezés - no target for the date",
+      "account": "N",
+      "route": "/nutrition",
+      "height": 874,
+      "reach": "seed",
+      "clock": "2026-10-15T15:00:00+02:00",
+      "arrived": {
+        "text": {
+          "key": "nutrition.noTargetToday"
+        }
+      },
+      "why": "demo.nagy.balazs@ has no diet plan: the recorded day of the freeze (Thursday 15 October) answers targets: null, so the state needs no fixture (a null targets cannot be an edit: no recording of 2026-10-09 carries it). Nothing logged that day: the log is the empty state."
+    },
+    "nutrition-error": {
+      "title": "Étkezés - the day read fails (kept as today: 0, A mai nap, empty log, no retry)",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/nutrition-log/2026-10-09",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "nutrition.totals"
+        }
+      }
+    },
+    "nutrition-results": {
+      "title": "Étkezés - search results (2b, undrawn)",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 874,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": [
+                {
+                  "id": 900,
+                  "meal_label": "Reggeli",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Zabpehely",
+                  "grams": 60,
+                  "kcal": 222,
+                  "protein_g": 8,
+                  "carb_g": 36,
+                  "fat_g": 4,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 901,
+                  "meal_label": "Reggeli",
+                  "food_id": 125,
+                  "plan_day_id": 5,
+                  "name": "Tejsavó fehérjepor, vanília",
+                  "grams": 30,
+                  "kcal": 114,
+                  "protein_g": 23,
+                  "carb_g": 2,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 902,
+                  "meal_label": "Reggeli",
+                  "food_id": 117,
+                  "plan_day_id": 5,
+                  "name": "Banán",
+                  "grams": 120,
+                  "kcal": 107,
+                  "protein_g": 1,
+                  "carb_g": 27,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 903,
+                  "meal_label": "Reggeli",
+                  "food_id": 119,
+                  "plan_day_id": 5,
+                  "name": "Görög joghurt, natúr",
+                  "grams": 100,
+                  "kcal": 133,
+                  "protein_g": 9,
+                  "carb_g": 4,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 904,
+                  "meal_label": "Reggeli",
+                  "food_id": 126,
+                  "plan_day_id": 5,
+                  "name": "Méz, akác",
+                  "grams": 30,
+                  "kcal": 91,
+                  "protein_g": 0,
+                  "carb_g": 24,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 905,
+                  "meal_label": "Ebéd",
+                  "food_id": 1,
+                  "plan_day_id": 5,
+                  "name": "Csirkemell filé, nyers",
+                  "grams": 180,
+                  "kcal": 198,
+                  "protein_g": 41,
+                  "carb_g": 0,
+                  "fat_g": 3,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 906,
+                  "meal_label": "Ebéd",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Basmati rizs, főtt",
+                  "grams": 220,
+                  "kcal": 286,
+                  "protein_g": 6,
+                  "carb_g": 62,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 907,
+                  "meal_label": "Ebéd",
+                  "food_id": 121,
+                  "plan_day_id": 5,
+                  "name": "Brokkoli, párolt",
+                  "grams": 150,
+                  "kcal": 53,
+                  "protein_g": 4,
+                  "carb_g": 10,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 908,
+                  "meal_label": "Ebéd",
+                  "food_id": 127,
+                  "plan_day_id": 5,
+                  "name": "Olívaolaj",
+                  "grams": 20,
+                  "kcal": 177,
+                  "protein_g": 0,
+                  "carb_g": 0,
+                  "fat_g": 20,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 909,
+                  "meal_label": "Egyéb",
+                  "food_id": 128,
+                  "plan_day_id": 5,
+                  "name": "Túró, félzsíros",
+                  "grams": 235,
+                  "kcal": 237,
+                  "protein_g": 29,
+                  "carb_g": 8,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 910,
+                  "meal_label": "Egyéb",
+                  "food_id": 106,
+                  "plan_day_id": 5,
+                  "name": "Teljes kiőrlésű kenyér",
+                  "grams": 90,
+                  "kcal": 222,
+                  "protein_g": 7,
+                  "carb_g": 37,
+                  "fat_g": 2,
+                  "fiber_g": 0
+                }
+              ]
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            },
+            {
+              "pointer": "/totals/fiber_g",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": {
+              "key": "nutrition.searchPlaceholder"
+            },
+            "text": "csirke"
+          },
+          "arrived": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "^Csirkemell, bőr nélkül"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": [
+          "button",
+          "option"
+        ],
+        "name": {
+          "re": "^Csirkecomb"
+        }
+      }
+    },
+    "nutrition-picked-invalid": {
+      "title": "Étkezés - picked food, grams invalid (0 kcal, no tick, pill disabled)",
+      "account": "M",
+      "route": "/nutrition",
+      "height": 1204,
+      "reach": "fixture",
+      "clock": "2026-10-09T15:00:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/nutrition-log/2026-10-09",
+          "edits": [
+            {
+              "pointer": "/items",
+              "value": [
+                {
+                  "id": 900,
+                  "meal_label": "Reggeli",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Zabpehely",
+                  "grams": 60,
+                  "kcal": 222,
+                  "protein_g": 8,
+                  "carb_g": 36,
+                  "fat_g": 4,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 901,
+                  "meal_label": "Reggeli",
+                  "food_id": 125,
+                  "plan_day_id": 5,
+                  "name": "Tejsavó fehérjepor, vanília",
+                  "grams": 30,
+                  "kcal": 114,
+                  "protein_g": 23,
+                  "carb_g": 2,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 902,
+                  "meal_label": "Reggeli",
+                  "food_id": 117,
+                  "plan_day_id": 5,
+                  "name": "Banán",
+                  "grams": 120,
+                  "kcal": 107,
+                  "protein_g": 1,
+                  "carb_g": 27,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 903,
+                  "meal_label": "Reggeli",
+                  "food_id": 119,
+                  "plan_day_id": 5,
+                  "name": "Görög joghurt, natúr",
+                  "grams": 100,
+                  "kcal": 133,
+                  "protein_g": 9,
+                  "carb_g": 4,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 904,
+                  "meal_label": "Reggeli",
+                  "food_id": 126,
+                  "plan_day_id": 5,
+                  "name": "Méz, akác",
+                  "grams": 30,
+                  "kcal": 91,
+                  "protein_g": 0,
+                  "carb_g": 24,
+                  "fat_g": 0,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 905,
+                  "meal_label": "Ebéd",
+                  "food_id": 1,
+                  "plan_day_id": 5,
+                  "name": "Csirkemell filé, nyers",
+                  "grams": 180,
+                  "kcal": 198,
+                  "protein_g": 41,
+                  "carb_g": 0,
+                  "fat_g": 3,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 906,
+                  "meal_label": "Ebéd",
+                  "food_id": 108,
+                  "plan_day_id": 5,
+                  "name": "Basmati rizs, főtt",
+                  "grams": 220,
+                  "kcal": 286,
+                  "protein_g": 6,
+                  "carb_g": 62,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 907,
+                  "meal_label": "Ebéd",
+                  "food_id": 121,
+                  "plan_day_id": 5,
+                  "name": "Brokkoli, párolt",
+                  "grams": 150,
+                  "kcal": 53,
+                  "protein_g": 4,
+                  "carb_g": 10,
+                  "fat_g": 1,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 908,
+                  "meal_label": "Ebéd",
+                  "food_id": 127,
+                  "plan_day_id": 5,
+                  "name": "Olívaolaj",
+                  "grams": 20,
+                  "kcal": 177,
+                  "protein_g": 0,
+                  "carb_g": 0,
+                  "fat_g": 20,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 909,
+                  "meal_label": "Egyéb",
+                  "food_id": 128,
+                  "plan_day_id": 5,
+                  "name": "Túró, félzsíros",
+                  "grams": 235,
+                  "kcal": 237,
+                  "protein_g": 29,
+                  "carb_g": 8,
+                  "fat_g": 10,
+                  "fiber_g": 0
+                },
+                {
+                  "id": 910,
+                  "meal_label": "Egyéb",
+                  "food_id": 106,
+                  "plan_day_id": 5,
+                  "name": "Teljes kiőrlésű kenyér",
+                  "grams": 90,
+                  "kcal": 222,
+                  "protein_g": 7,
+                  "carb_g": 37,
+                  "fat_g": 2,
+                  "fiber_g": 0
+                }
+              ]
+            },
+            {
+              "pointer": "/totals/kcal",
+              "value": 1840
+            },
+            {
+              "pointer": "/totals/protein_g",
+              "value": 128
+            },
+            {
+              "pointer": "/totals/carb_g",
+              "value": 210
+            },
+            {
+              "pointer": "/totals/fat_g",
+              "value": 52
+            },
+            {
+              "pointer": "/totals/fiber_g",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": [
+              "textbox",
+              "searchbox",
+              "combobox"
+            ],
+            "name": {
+              "key": "nutrition.searchPlaceholder"
+            },
+            "text": "csirke"
+          },
+          "arrived": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "^Csirkemell, bőr nélkül"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": [
+              "button",
+              "option"
+            ],
+            "name": {
+              "re": "^Csirkemell, bőr nélkül"
+            }
+          },
+          "arrived": {
+            "role": [
+              "spinbutton",
+              "textbox"
+            ],
+            "name": {
+              "key": "nutrition.grams"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": [
+              "spinbutton",
+              "textbox"
+            ],
+            "name": {
+              "key": "nutrition.grams"
+            },
+            "text": "0"
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "common.add"
+            },
+            "disabled": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.add"
+        },
+        "disabled": true
+      }
+    }
+  }
+}

@@ -29,6 +29,22 @@ export function sendError(res, status, code, message) {
   res.status(status).json({ error: message, code, requestId: res.locals.requestId });
 }
 
+/**
+ * A step-up password (the admin grant, re-enabling an admin, deleting one's own account) that is
+ * not the signed-in person's own. Still the generic 401 "invalid credentials", plus
+ * `reason: 'step_up_failed'`: the SESSION is fine (requireAuth already passed), so the client must
+ * not answer this 401 with a token refresh and a replay of the same POST - that posted every wrong
+ * password twice and spent two of the actor's write budget per mistake.
+ */
+export function sendStepUpFailed(res) {
+  res.status(401).json({
+    error: 'invalid credentials',
+    code: ERR.UNAUTHORIZED,
+    reason: 'step_up_failed',
+    requestId: res.locals.requestId,
+  });
+}
+
 /** Attaches a request id and a child logger to every request, before anything can fail. */
 export function requestContext(logger) {
   return (req, res, next) => {

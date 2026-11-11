@@ -1,0 +1,14 @@
+{
+  "id": "R-S-library-02",
+  "from": "S-library",
+  "kind": "backend",
+  "blocking": false,
+  "target": "backend list endpoint GET /api/v1/exercises (+ ExerciseRow in frontend/src/features/library/useExercises.ts, frozen)",
+  "need": "library-1..3 draw each row with a 48 pt equipment still (src/assets/pulse slots equip-*, EQUIPMENT_STILL map in slots.ts). The list answer has no equipment key, so the page draws text-only rows (DEV-1).",
+  "evidence": ".pulse/geometry/library-1.json rows Image/equip-*; .pulse/rec/user/GET_exercises_3b6b0c0fb9.json (no equipment field)",
+  "proposedApi": "add the exercise's primary equipment slug (e.g. primary_equipment: string | null) to each list row; then ListRow lead = <Pic slot={EQUIPMENT_STILL[slug]} width={48} /> when the map has a still, and leadSlot on the others so every row keeps the x 88 text edge",
+  "proposedPatch": null,
+  "interim": "every row keeps the 48 pt still column with the text at x 88 (frame's 'no still' row); the cell stays empty without an upload; nothing faked (S-library-fix)",
+  "status": "open",
+  "resolution": null
+}

@@ -1,0 +1,11 @@
+{
+  "package": "F13",
+  "base": "36434a2fb0445bbd3eab98f82d558b941e59cf2d",
+  "namespaces": ["common", "offline", "palette"],
+  "set": [],
+  "change": [],
+  "remove": [
+    { "key": "common.undone", "reason": "its only consumer was the E15 variant D morph in ui/feedback/variants/E12E16.tsx (this package); Toast is one Pulse look with letter C's behaviour, where Undo closes the line" }
+  ],
+  "copyQuestions": []
+}

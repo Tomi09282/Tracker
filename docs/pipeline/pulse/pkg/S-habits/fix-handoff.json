@@ -1,0 +1,29 @@
+{
+  "package": "S-habits-fix",
+  "fixes": "S-habits (review .pulse/review/S-habits/REVIEW.md)",
+  "branch": "pulse/S-habits-fix",
+  "slot": "tracker-wt/slot-25 (port 5225)",
+  "findings": {
+    "D1 tab bar": "not this package: the 6-tab bar arrives with S-calendar in this run",
+    "D2 list 20 pt long (blocking)": "fixed - two causes: (1) the dataL streak figure was a plain 20 pt line box; FigUnit now trims figure and unit to cap / baseline (text-box: trim-both cap alphabetic), as figUnit's numeral(…,'dataL') is ink-tight; (2) the good habit's lead <button> was inline, so the inline-block setCheck stood on a text line and the lead was ~49 tall instead of 44 (this, not the multiplier, made Olvasás / Nyújtás / Futás long; Víz's PartialRing lead was a flex box, which is why Víz alone matched); the button and the archived lead wrapper are flex now. Row dividers at 2x, app / frame: 554/554, 788/788, 918/918, 1074/1076, 1268/1270, 1502/1504, 1632/1634",
+    "D3 multiplier under Víz and Dohányzás": "Dohányzás fixed: a bad habit's row draws its streak alone, as the frames and Ma's TodayHabits do (its page still shows the multiplier in the hero). Víz stays: the server pays x1.25 from day 7 (api.md) and Víz has 9 days; the fixture cannot drop it without contradicting the rules (DEV-b)",
+    "D4 NAPOK 69/77 · 90 %": "stays (DEV-c): totals count settled days of the 12 weeks; with today unsettled the window holds 77, so the frame's 78 is not a server state",
+    "D5 reminder empty": "stays a capture limit: tried a type step into the native time input (InputTime) - Input.insertText does not reach its segments (not-arrived on 07:30), reverted in 4ac8ebc; needs digit keys in pulse-shot's press step (request in forOrchestrator)",
+    "D6 no way in": "resolved by S-ma (merged): Ma's SZOKÁSOK head and 'Összes ›' link to /habits, and '‹ MA' now leads to the Ma page",
+    "D7 404 says try again": "fixed: habits.gone 'Ez a szokás nem érhető el' (en 'This habit is not available', de 'Diese Gewohnheit ist nicht verfügbar'), the app's existing not-available form (plans.missingTitle, marketplace.postGoneTitle); proposed copy; new state habit-gone",
+    "D8 detail 1-2 px": "not touched (invisible at 1x)",
+    "D9 status bar": "capture insets, not a finding"
+  },
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-habits/i18n.patch.json (1 key, habits.gone, base 05b830a; apply: node scripts/pulse-i18n.mjs apply S-habits --ref pulse/S-habits-fix)"
+  ],
+  "proposedCopy": [
+    "habits.gone: Ez a szokás nem érhető el / This habit is not available / Diese Gewohnheit ist nicht verfügbar (for copy-to-approve.md)"
+  ],
+  "deviations": [
+    "DEV-b narrowed: the multiplier appears only on good habits' rows; Víz keeps x1,25 (server rule from day 7)",
+    "DEV-c unchanged",
+    "DEV-i: a missing / foreign habit says 'Ez a szokás nem érhető el' with the link back to Szokások (no retry)"
+  ],
+  "pictures": ".pulse/pairs/S-habits-fix/"
+}

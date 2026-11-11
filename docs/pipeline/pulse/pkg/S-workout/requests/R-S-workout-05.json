@@ -1,0 +1,14 @@
+{
+  "id": "R-S-workout-05",
+  "from": "S-workout",
+  "kind": "gate",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs probes (DEFAULT_BOXED_ALLOW, targets)",
+  "need": "Two probe readings that are the kit, not the screen: (1) the kit setCheck ring (CheckMark todo, a 24 pt bordered circle) counts as a boxed surface - setCheck is not in boxedAllow; (2) a TextLink (\"Újra\" 25 pt, \"Időzítő\" 42 pt) is reported under 44 although its invisible ::after layer gives it the 44 pt target (the probe reads the element box).",
+  "evidence": ".pulse/shots/S-workout/workout-1.probe.json boxed[setCheck]; workout-error.probe.json targets[Újra]",
+  "proposedApi": "add setCheck to boxedAllow; measure a textLink target with its ::after layer",
+  "proposedPatch": null,
+  "interim": "none needed - listed as kit readings in handoff.json",
+  "status": "open",
+  "resolution": null
+}

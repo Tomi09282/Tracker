@@ -1,0 +1,162 @@
+{
+  "package": "S-progress-days",
+  "base": "1b7759f",
+  "namespaces": [
+    "progressDays"
+  ],
+  "set": [
+    {
+      "key": "progressDays.tab",
+      "hu": "Napok",
+      "en": "Days",
+      "de": "Tage",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days page switch \"Test · Napok · Fotók · Megosztás\" (Napok lit); also the door on /progress"
+    },
+    {
+      "key": "progressDays.week.label",
+      "hu": "Ezen a héten",
+      "en": "This week",
+      "de": "Diese Woche",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days hero eyebrow \"EZEN A HÉTEN\" (en / de as coins.week.title)"
+    },
+    {
+      "key": "progressDays.coins",
+      "hu": "érme",
+      "en": "coins",
+      "de": "Münzen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days hero unit \"érme\" (en / de as adminRules.coin)"
+    },
+    {
+      "key": "progressDays.week.caption",
+      "hu": "átlag {{avg}} / nap · előző hét {{prev}}",
+      "en": "avg {{avg}} / day · last week {{prev}}",
+      "de": "Ø {{avg}} / Tag · Vorwoche {{prev}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days hero caption \"átlag 70 / nap · előző hét 339\""
+    },
+    {
+      "key": "progressDays.weeks.label",
+      "hu": "Hetek",
+      "en": "Weeks",
+      "de": "Wochen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days section \"HETEK\""
+    },
+    {
+      "key": "progressDays.weeks.title",
+      "hu": "{{week}}. hét",
+      "en": "Week {{week}}",
+      "de": "KW {{week}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days week rows \"42. hét\""
+    },
+    {
+      "key": "progressDays.weeks.perfect",
+      "hu": "{{count}} tökéletes nap",
+      "en": "perfect days: {{count}}",
+      "de": "perfekte Tage: {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days week row sub \"okt. 12–18. · 1 tökéletes nap\""
+    },
+    {
+      "key": "progressDays.weeks.penalties",
+      "hu": "{{count}} büntetés",
+      "en": "penalties: {{count}}",
+      "de": "Strafen: {{count}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days week row sub \"szept. 21–27. · 3 büntetés\""
+    },
+    {
+      "key": "progressDays.legend.done",
+      "hu": "teljesítve",
+      "en": "done",
+      "de": "erledigt",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days SZOKÁSOK legend \"teljesítve\" (also the screen-reader word of a lit segment)"
+    },
+    {
+      "key": "progressDays.legend.partial",
+      "hu": "részben",
+      "en": "partly",
+      "de": "teilweise",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days SZOKÁSOK legend \"részben\""
+    },
+    {
+      "key": "progressDays.legend.missed",
+      "hu": "kihagyva",
+      "en": "missed",
+      "de": "verpasst",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days SZOKÁSOK legend \"kihagyva\""
+    },
+    {
+      "key": "progressDays.kcal.target",
+      "hu": "cél {{kcal}} kcal",
+      "en": "goal {{kcal}} kcal",
+      "de": "Ziel {{kcal}} kcal",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days KALÓRIA trailing \"cél 2200 kcal\""
+    },
+    {
+      "key": "progressDays.kcal.over",
+      "hu": "{{n}} nap a cél fölött",
+      "en": "over goal: {{n}}",
+      "de": "über dem Ziel: {{n}}",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days KALÓRIA caption \"4 nap a cél fölött\" (the warn part)"
+    },
+    {
+      "key": "progressDays.kcal.ofBack",
+      "hu": "a {{n}}-ból",
+      "en": "of {{n}} days",
+      "de": "von {{n}} Tagen",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days KALÓRIA caption \"a 13-ból\" (back-vowel suffix: 3, 6, 8, 20, 30, 60, 80 …)"
+    },
+    {
+      "key": "progressDays.kcal.ofFront",
+      "hu": "a {{n}}-ből",
+      "en": "of {{n}} days",
+      "de": "von {{n}} Tagen",
+      "copy": "fix",
+      "visible": true,
+      "source": "the same caption for a number read with a front-vowel suffix (\"a 14-ből\"): Hungarian grammar of the frame's \"a 13-ból\", not new copy"
+    },
+    {
+      "key": "progressDays.kcal.perDay",
+      "hu": "{{coins}} érme naponta",
+      "en": "{{coins}} coins per day",
+      "de": "{{coins}} Münzen pro Tag",
+      "copy": "inventory",
+      "visible": true,
+      "source": "lifeos/progress-days KALÓRIA caption \"−10 érme naponta\""
+    },
+    {
+      "key": "progressDays.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That did not work. Please try again.",
+      "de": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "copy": "existing-literal",
+      "visible": true,
+      "source": "the danger line of a failed GET /lifeos/stats; the same sentence as habits.failed / settings.day.failed"
+    }
+  ]
+}

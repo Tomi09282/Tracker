@@ -1,0 +1,13 @@
+{
+  "id": "R-S-focus-02",
+  "from": "S-focus",
+  "kind": "decision",
+  "blocking": false,
+  "target": "frontend/src/features/today/TodayPage.tsx (S-ma, merged in 179ff81)",
+  "need": "Ma's FÓKUSZ block (frame lifeos/ma-1, y 1576: FÓKUSZ · 'ma 50 perc' · the row 'Mélymunka – szakdolgozat / Következő blokk · 25 perc · +8 érme / 14:00 ›') is built and exported as TodayFocus from features/focus/TodayFocus.tsx. The patch mounts it in TodayPage after FELADATOK and before TÁPLÁLKOZÁS (NAPI DOBÁS, Phase 4, will sit before it): one import, `<TodayFocus focus={day.focus} />` inside the block that has `day`, and the header comment moves FÓKUSZ from NOT YET to the composition. It reads GET /lifeos/today's Phase-6 `focus` field (B-focus); before B-focus is merged the field is absent and the component draws nothing.",
+  "evidence": "kepernyok-2x/lifeos/ma-1@2x.png y 1576-1693; .pulse/geometry/lifeos/ma-1.json nodes \"Fókusz\", \"Row/Mélymunka – szakdolgozat\"; docs/pipeline/pulse/pkg/B-focus/api.md \"GET /lifeos/today (Phase-6 field)\"",
+  "proposedApi": "<TodayFocus focus={day.focus} />  (focus: TodayFocus | null | undefined from lib/lifeos-api.ts)",
+  "proposedPatch": "docs/pipeline/pulse/pkg/S-focus/requests/R-S-focus-02.patch",
+  "interim": "Applied in the slot working tree (never committed there) and captured as state ma-focus. Unmounted, /focus is reached by URL only.",
+  "status": "open"
+}

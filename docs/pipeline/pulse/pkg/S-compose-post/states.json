@@ -1,0 +1,386 @@
+{
+  "about": "S-compose-post - the frame data of compose-post-1 / -2 and the undrawn states of the Poszt szerkesztő (/compose/posts/:publicId, URL only on a phone, owner answer Q5; PLAN 4.1 rule 7). Account C. compose-post-1 runs on the sandbox draft post ({draftPost}); its title is a fixture edit of the recorded GET and the autosave receipt comes from two keystrokes whose PUT is answered from the recorded GET of the same post (no recording of the PUT exists; the page does not read the PUT answer beyond success). Nothing is written live by these captures: publish / withdraw / restore are never fired, and the autosave PUTs are answered in the browser.",
+  "overrides": {
+    "compose-post-1": {
+      "why": "The sandbox draft is titled \"PULSE homokozó – piszkozat borítóval\" (the sandbox script finds it by that name, so it is never renamed live); the frame reads \"Téli tömegelő – piszkozat\" (115 left). The receipt \"Automatikus mentés · Mentve 09:40\" exists only after an autosave: one character typed and removed again, each PUT answered from the recorded GET of the same post, the clock at 09:40. The body is the recorded one, character for character the frame's. Verdict cap matched-fixture. The cover is not masked: since fix round 2 the picture is drawn whole at its own 4:3 shape inside the 16:9 slot (320 x 240, 18 pt above and 23 pt below the slot), as the frame draws it.",
+      "reach": "fixture",
+      "clock": "2026-10-15T09:40:00+02:00",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/compose/posts/{draftPost}",
+          "edits": [
+            {
+              "pointer": "/post/title",
+              "value": "Téli tömegelő – piszkozat"
+            }
+          ]
+        },
+        {
+          "method": "PUT",
+          "path": "/api/v1/compose/posts/{draftPost}",
+          "from": {
+            "path": "/api/v1/compose/posts/{draftPost}"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.body"
+            },
+            "text": "x",
+            "clear": false
+          },
+          "arrived": {
+            "text": {
+              "hu": "19896 karakter maradt",
+              "en": "19896 characters left",
+              "de": "Noch 19896 Zeichen"
+            }
+          }
+        },
+        {
+          "advance": 1700,
+          "arrived": {
+            "text": {
+              "key": "compose.autosave.label"
+            }
+          }
+        },
+        {
+          "press": "Backspace",
+          "arrived": {
+            "text": {
+              "hu": "19897 karakter maradt",
+              "en": "19897 characters left",
+              "de": "Noch 19897 Zeichen"
+            }
+          }
+        },
+        {
+          "advance": 1700,
+          "arrived": {
+            "text": {
+              "key": "compose.autosave.label"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "heading",
+            "name": {
+              "key": "compose.editPost"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.body"
+            }
+          }
+        },
+        {
+          "advance": 6000,
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "compose.publish"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "compose.postTitle"
+        }
+      }
+    },
+    "compose-post-2": {
+      "why": "the frame script as it is, with its arrived clause by key so the en / de captures arrive too",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "compose.createDraft"
+        }
+      }
+    }
+  },
+  "states": {
+    "post-draft-recorded": {
+      "account": "C",
+      "route": "/compose/posts/{draftPost}",
+      "height": 1244,
+      "reach": "sandbox",
+      "title": "Poszt szerkesztő — a homokozó piszkozata, ahogy felvették",
+      "why": "the recording as it is: the sandbox title, no receipt yet (nothing autosaved), the cover crop",
+      "arrived": {
+        "role": "textbox",
+        "name": {
+          "key": "compose.postTitle"
+        }
+      }
+    },
+    "post-draft-nocover": {
+      "account": "C",
+      "route": "/compose",
+      "height": 1244,
+      "reach": "seed",
+      "title": "Poszt szerkesztő — piszkozat borító nélkül (a feltöltés: képleírás + Kép választása)",
+      "why": "the seeded draft \"Téli tömegelő – piszkozat\" has no cover: the cover block is the alt field and the file pick. Reached from the desk by the row's name (no id in the route). Captured at 1244 so the desk row is above the tab bar when it is clicked",
+      "steps": [
+        {
+          "click": {
+            "role": "link",
+            "name": {
+              "re": "^Téli tömegelő"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.coverAlt"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.chooseCover"
+        }
+      }
+    },
+    "post-public": {
+      "account": "C",
+      "route": "/compose",
+      "height": 1244,
+      "reach": "seed",
+      "title": "Poszt szerkesztő — közzétett bejegyzés (nincs pill, csak a Levétel sor)",
+      "why": "a published post: the publish pill is gone and the quiet Levétel row with its reassurance is the only lifecycle control. Reached from the desk by the row's name",
+      "steps": [
+        {
+          "click": {
+            "role": "link",
+            "name": {
+              "re": "^Őszi erőblokk"
+            }
+          },
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.postTitle"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "re": "^(Levétel|Take down|Zurückziehen)"
+        }
+      }
+    },
+    "post-autosave-failed": {
+      "account": "C",
+      "route": "/compose/posts/{draftPost}",
+      "height": 1244,
+      "reach": "fixture",
+      "title": "Poszt szerkesztő — az automatikus mentés nem sikerült",
+      "why": "one character typed; the PUT answers 500 with an empty body: the danger notice line stays until the next success, the error toast is the frozen hook's",
+      "fixtures": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/compose/posts/{draftPost}",
+          "status": 500
+        }
+      ],
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.body"
+            },
+            "text": "x",
+            "clear": false
+          },
+          "arrived": {
+            "text": {
+              "hu": "19896 karakter maradt",
+              "en": "19896 characters left",
+              "de": "Noch 19896 Zeichen"
+            }
+          }
+        },
+        {
+          "advance": 1700,
+          "arrived": {
+            "text": {
+              "key": "compose.autosave.failed"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.autosave.failed"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/compose/posts/*",
+            "method": "PUT",
+            "status": 500
+          }
+        ]
+      }
+    },
+    "post-dirty": {
+      "account": "C",
+      "route": "/compose/posts/{draftPost}",
+      "height": 874,
+      "reach": "sandbox",
+      "title": "Poszt szerkesztő — piszkos (a fejléc szava Mentés, a cím üres: az automatikus mentés áll)",
+      "why": "the title emptied: autosave stays off (a title is the floor), the save word reads Mentés in full ink, the title hint reads 140 left. Nothing is sent",
+      "steps": [
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.postTitle"
+            },
+            "text": ""
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "compose.save"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "hu": "140 karakter maradt",
+          "en": "140 characters left",
+          "de": "Noch 140 Zeichen"
+        }
+      }
+    },
+    "post-gone": {
+      "account": "C",
+      "route": "/compose/posts/zzzzzzzzzzzz",
+      "height": 874,
+      "reach": "seed",
+      "title": "Poszt szerkesztő — nem érhető el",
+      "why": "an id nobody owns: 404, the EmptyState as the page's h1 under the header's back link",
+      "arrived": {
+        "role": "heading",
+        "name": {
+          "key": "compose.postGoneTitle"
+        }
+      },
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/compose/posts/zzzzzzzzzzzz",
+            "status": 404
+          }
+        ]
+      }
+    },
+    "post-new-event": {
+      "account": "C",
+      "route": "/compose/posts/new",
+      "height": 874,
+      "reach": "seed",
+      "title": "Új bejegyzés — Esemény választva",
+      "why": "the Esemény word is drawn and chosen as today; no date field is added (PLAN 4.3)",
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "marketplace.kind.event"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "marketplace.kind.event"
+            },
+            "checked": true
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "compose.createDraft"
+        }
+      }
+    },
+    "post-offline": {
+      "account": "C",
+      "route": "/compose/posts/{draftPost}",
+      "height": 874,
+      "reach": "sandbox",
+      "title": "Poszt szerkesztő — offline (a mentés függőben: Mentés…, + a shell offline sora)",
+      "why": "the network cut, one character typed into the title: TanStack Query holds the PUT while offline (networkMode online), so the autosave line reads Mentés… and stays; the shell offline line shows; nothing queues beyond the paused request (base build: the same). The character goes into the title (the text field centre sits under the tab bar once the offline line pushes the page down at 874)",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.body"
+            }
+          }
+        },
+        {
+          "type": {
+            "role": "textbox",
+            "name": {
+              "key": "compose.postTitle"
+            },
+            "text": "x",
+            "clear": false
+          },
+          "arrived": {
+            "text": {
+              "hu": "103 karakter maradt",
+              "en": "103 characters left",
+              "de": "Noch 103 Zeichen"
+            }
+          }
+        },
+        {
+          "advance": 1700,
+          "arrived": {
+            "text": {
+              "key": "compose.autosave.saving"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "compose.autosave.saving"
+        }
+      }
+    }
+  },
+  "notCapturable": {
+    "post-loading": "the capture tool cannot hold a recorded answer back (no delayed GET); the skeleton is checked in code: the real push header with Bejegyzés szerkesztése, then blocks where the type, the title and the text will be, no radius, no cover block",
+    "post-stale-sheet": "the 409 { reason: 'stale', post } is a mutation-outcome body outside the recorded error envelope - pulse-fixture-check refuses it (request R-S-compose-post-01); the Sheet is checked in code",
+    "post-refusals": "quota / profile_not_published / needs_guidelines / too_new / kind_shape are POST bodies outside the recorded error envelope (R-S-compose-post-01); the warn NoticeLine is checked in code",
+    "post-taken-down": "no recording holds a post with deletedAt set and a fixture may not give it a type never recorded; the Visszaállítás row (subLines 2) is checked in code",
+    "post-removed": "no recording holds a post with removedAt set (same reason); the danger NoticeLine + read-only fields are checked in code",
+    "post-cover-upload": "a file chooser cannot be driven by accessible name; FilePick's busy label (Feltöltés…) and the cover failure line are checked in code",
+    "post-counter-tones": "a 18 000+ character body cannot be typed by a step (insertText of a literal); the counter colour (text-3 / warning past 90 % / danger past the cap, COUNTER_CLASS on the screen-owned span) is checked in code"
+  }
+}

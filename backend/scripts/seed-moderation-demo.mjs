@@ -34,7 +34,7 @@ const [coach] = await db.all("SELECT id FROM users WHERE email = 'coach@tracker.
 await db.run(
   `INSERT INTO exercises (name, normalized_name, description, instructions, owner_id, status,
                           difficulty, exercise_type, submitted_at)
-   VALUES (?, ?, ?, ?, ?, 'pending_review', 'intermediate', 'strength', datetime('now'))`,
+   VALUES (?, ?, ?, ?, ?, 'pending_review', 'intermediate', 'strength', unixepoch())`,
   [
     NAME,
     NAME.toLowerCase(),

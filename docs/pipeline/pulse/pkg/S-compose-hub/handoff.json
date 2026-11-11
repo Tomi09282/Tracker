@@ -1,0 +1,113 @@
+{
+  "package": "S-compose-hub",
+  "branch": "pulse/S-compose-hub",
+  "verifiedOn": "pulse/S-compose-hub = pulse-redesign 9031d39 + the S-compose-hub commits; no hand-in file (no i18n, variants or shared change)",
+  "door": "URL only on a phone (owner answer Q5): /compose has no new door",
+  "handIn": [],
+  "files": {
+    "frontend/src/features/compose/ComposePage.tsx": "render rewritten on the kit: Screen push; ScreenHeader identity (Monogram 28, name, @handle, the bare status TextLink = Dot + word + chevron, aria-haspopup=dialog, the first button named Élő) or ScreenHeader root when there is no profile / it was taken down; the gate as ONE NoticeLine (+ the gate pill: accept guidelines / create profile); the hero = giant Numeral roll + unit 8 after the ink, the local StateSplit (4 rows, pitch 29, hairlines, Dot levels live / half / off, data-l counts, zeros text-3, last baseline on the numeral baseline), ProgressBar ink (warn at 0 left) + the quota sentence with the count in text-1 (no copy change), the ONE lime pill PressableLink /compose/posts/new; Section Bejegyzések (trailing TextLink Új bejegyzés only when a gate holds the pill) with ChipRow wrap of Segment hug mark=ink (Több is a non-selecting segment), RowStack of ListRow (title, Dot + kind · state caption, chevron), list skeleton, EmptyState for an empty desk and for a filter without match (Összes mutatása as a TextLink); Sheet Profil with RowStack of two ListRows (edit -> /compose/profile with chevron; unpublish danger / publish default, busy) + wentDark NoticeLine + refusal NoticeLine. Loading = blocks at the final geometry; error = EmptyState h1. Hooks, queries, mutations, STATES, stateOf, counts, blocker, blocked, PRIMARY/ALL_FILTERS unchanged; ARC_COLOR, SELECTED_CHIP and quotaFill (their readers are gone) removed.",
+    "docs/pipeline/pulse/pkg/S-compose-hub/budget.json": "deleted by check-pulse --fix-down (79 -> 0)",
+    "docs/pipeline/pulse/pkg/S-compose-hub/states.json": "overrides compose-hub-1 / -2 (fixture: sandbox row dropped, two titles as drawn, publishedToday 1) + 8 undrawn states + notCapturable",
+    "docs/pipeline/pulse/pkg/S-compose-hub/states.pending.json": "5 undrawn states waiting on R-S-compose-hub-02 (a schema-valid null is refused by the checker); captured ad hoc",
+    "docs/pipeline/pulse/pkg/S-compose-hub/requests/": "R-S-compose-hub-01 (POST outcome fixtures for the sheet), R-S-compose-hub-02 (null edits)"
+  },
+  "verdicts": {
+    "compose-hub-1": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-compose-hub/compose-hub-1.png",
+      "pair": ".pulse/pairs/S-compose-hub/compose-hub-1.pair.png",
+      "fixture": "states.json overrides.compose-hub-1 (pulse-fixture-check OK)",
+      "geometry": "77 compared, 65 matched, 11 deviating = width only (the title and the post titles / captions are fixed 354 / 327 / 313 boxes in Figma against hugging text; dy -0.5), 1 unmatched (glyph/down: the status chevron svg is not reported as its own box; it stands at the edge in the pair), 0 style mismatches"
+    },
+    "compose-hub-2": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-compose-hub/compose-hub-2.png",
+      "pair": ".pulse/pairs/S-compose-hub/compose-hub-2.pair.png",
+      "fixture": "states.json overrides.compose-hub-2",
+      "geometry": "89 compared, 75 matched, 13 deviating = the same width-only set + the two sheet row titles (fixed 325 / 352 boxes), 1 unmatched (glyph/down), 0 style mismatches"
+    },
+    "hub-recorded": {
+      "verdict": "structure",
+      "note": "the recording as is: 6 posts with the sandbox draft first, Élő 4 / Piszkozat 2, Ma még 10"
+    },
+    "hub-filter-expanded": {
+      "verdict": "structure",
+      "note": "Több opens Levett / Eltávolított; five words wrap to a second 44 line; Több is gone"
+    },
+    "hub-filter-live-empty": {
+      "verdict": "structure",
+      "note": "Élő chosen, no row: EmptyState + Összes mutatása, the hero keeps 5"
+    },
+    "hub-empty": {
+      "verdict": "structure",
+      "note": "0 with four quiet zeros, EmptyState without action, the pill stays"
+    },
+    "hub-gate-age": {
+      "verdict": "structure",
+      "note": "NoticeLine with the date; no pill anywhere; Új bejegyzés is the section text link"
+    },
+    "hub-quota-used": {
+      "verdict": "structure",
+      "note": "Ma még 0 (ink), the meter full in the warning colour"
+    },
+    "hub-error": {
+      "verdict": "structure",
+      "note": "403: EmptyState h1, no retry, no back"
+    },
+    "hub-hidden": {
+      "verdict": "structure",
+      "note": "Rejtve with the off dot (captured ad hoc, R-S-compose-hub-02)"
+    },
+    "hub-hidden-sheet": {
+      "verdict": "structure",
+      "note": "the sheet reads Profil közzététele in ink (ad hoc)"
+    },
+    "hub-gate-guidelines": {
+      "verdict": "structure",
+      "note": "NoticeLine + the Elfogadom (1.0) pill takes the lime slot (ad hoc)"
+    },
+    "hub-gate-noprofile": {
+      "verdict": "structure",
+      "note": "no identity row, NoticeLine, Profil létrehozása pill link (ad hoc)"
+    },
+    "hub-takedown": {
+      "verdict": "structure",
+      "note": "danger NoticeLine, no action, no identity row (ad hoc)"
+    },
+    "hub-loading": {
+      "verdict": "structure",
+      "note": "not capturable (no held answer); code only"
+    },
+    "sheet-unpublished": {
+      "verdict": "structure",
+      "note": "not capturable (R-S-compose-hub-01); code only"
+    },
+    "sheet-refusal": {
+      "verdict": "structure",
+      "note": "not capturable (R-S-compose-hub-01); code only, version / when now passed"
+    },
+    "sheet-busy": {
+      "verdict": "structure",
+      "note": "not capturable; ListRow busy"
+    }
+  },
+  "probes": {
+    "targets": "fails on the filter word Élő: its button box is 39.7 x 44 (the Segment hug face reaches 8 past a 24 pt word; the 44 floor is an ::after layer the probe does not read) - kit level, same cause as R-S-home-03; passes in German",
+    "inventory": "compose-hub-1 / -2 against the baseline: only the fixture-retitled / dropped post links differ (-3 +2); every control keeps its role and name (Élő status button, Mind / Piszkozat / Élő / Több with aria-pressed, the Új bejegyzés link)",
+    "w360": "every package state captured at 360 x 640: the split, the unit and Eltávolított fit; nothing overflows (.pulse/pairs/S-compose-hub/_contact-w360.png)",
+    "de": "the package states in German (.pulse/pairs/S-compose-hub/_contact-de.png); the two frame states assert the Hungarian literal Új bejegyzés and do not arrive in de by design"
+  },
+  "deviations": [
+    "Q4 kept behaviour: unpublishing the profile from the sheet has no confirmation (the screen note forbids one; the kit rule destructive = ConfirmSheet is not applied here)",
+    "Q4 kept behaviour: the sheet stays open after publish / unpublish so the wentDark / refusal line is read where it was raised",
+    "Q4 undrawn: the gate (guidelines / too new / no profile / takedown) is one NoticeLine between the title and the hero; a gate with its own action takes the lime pill and Új bejegyzés becomes the trailing TextLink of the Bejegyzések head (also for the account blocker, which draws no notice)",
+    "Q4 undrawn: with no profile or after a takedown the identity row is absent and the title stands alone (ScreenHeader root on the push grid)",
+    "Q4 undrawn: a withdrawn or removed post caption carries the off dot (the frame draws only live and draft rows)",
+    "fix while rewriting: the sheet refusal line now passes version / when to compose.reason.* so no raw {{version}} / {{when}} prints",
+    "dropped old decoration: kind glyph tiles, section glyph tile, gate glyphs, globe / eye-off, the success wash of live rows, the Gauge donut (screen note: safe to drop)",
+    "the filter is ChipRow + Segment mark=ink (the kit Chip only has the lime mark; the frame and the kit chipRow({ink:true}) draw the ink mark); Több is a non-selecting Segment without aria-pressed",
+    "StateSplit is local to the page (_kit-gaps: frame-specific, local until a second screen wants it), built from Rule, Dot and the cap / data-l type steps",
+    "the unit stands 8 after the numeral ink as drawn (Numeral unit = 6), placed as a sibling with ml-2"
+  ],
+  "copyQuestions": []
+}

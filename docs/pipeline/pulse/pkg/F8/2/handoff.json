@@ -1,0 +1,46 @@
+{
+  "package": "F8",
+  "stage": "2",
+  "lane": "SEL - selection, stage 2 (ChipRow / Chip, Toggle, Switch, CheckMark, CopyButton skin; delta E2)",
+  "branch": "pulse/F8s2 (pulse/F8 is kept at the same commit: the tools resolve F8:2 / F8.2 to pulse/F8)",
+  "verifiedOn": "pulse-redesign 98ee504 merged into the slot (fc4f567); variants.json applied by pulse-sync",
+  "handIn": ["docs/pipeline/pulse/pkg/F8/2/variants.json"],
+  "files": {
+    "frontend/src/ui/primitives/ChipRow.tsx": "NEW: ChipRow (data-kit chipRow; one line that scrolls inside itself, or wrap; role group / radiogroup; disabled) and Chip (the Segment face with a lime mark; aria-pressed by default, aria-checked for role checkbox / radio; busy, failed, disabled 40 %); a chip alone keeps its 8 either side as padding",
+    "frontend/src/ui/primitives/Toggle.tsx": "rebuilt on Chip: role=checkbox + aria-checked kept, props on / label / onToggle kept, disabled and busy added",
+    "frontend/src/ui/primitives/Switch.tsx": "restyled in place to uiSwitch: 48 x 28 track radius 14, knob 22 at 3, on accent + accent-fg knob, off surface-3 + text-2 knob, no shadow, disabled 40 %; nothing slides (track colour and two knobs cross-fade in --duration-fast); 48 x 44 target with -my-2 so the layout is the track; focus ring around the track; role=switch kept; data-force added for the specimen; data-kit uiSwitch on the track",
+    "frontend/src/ui/primitives/CheckMark.tsx": "NEW: setCheck - 44 frame, 24 ring 1.5 edge / bare Lucide tick 24 stroke 2.5 accent, cross-fade; aria-hidden, the host carries role and state",
+    "frontend/src/ui/feedback/variants/E2CopyButton.tsx": "one Pulse look: Pressable link/icon with the copy glyph (iconBtn), busy = three dots after 120 ms, done = tick in accent 2 s, refused = warning glyph in danger 3.2 s, glyph swap = opacity ignite; live regions kept; E2 no longer read; additive props disabled, demo, data-force",
+    "frontend/src/ui/feedback/variants/E6Segmented.tsx": "Segment: additive prop mark ('ink' | 'accent'); an accent (chip) segment dims itself when disabled",
+    "frontend/src/features/playground/kit/selection.tsx": "stage-2 specimens: the four board cells verbatim (chipRow filter, chipRow wrap, uiSwitch rows, setCheck rows) plus pressed / focus / busy / failed / disabled cells for chips, switches, radio rows with CheckMark and the CopyButton, and the coach-dashboard-2 code row",
+    "docs/pipeline/pulse/kit/selection.md": "section 'Stage 2' with the final API and numbers",
+    "docs/pipeline/pulse/pkg/F8/1/*": "the stage-1 hand-in files (shared.patch, variants.json, handoff.json), moved from pkg/F8/ because they are merged and the tools would re-apply them",
+    "docs/pipeline/pulse/pkg/F8/budget.json": "deleted by check-pulse --fix-down F8: E2CopyButton (17), Switch (4), Toggle (2) count nothing any more (23 -> 0, the done signal)",
+    "docs/pipeline/pulse/pkg/F8/states.json": "the F8-kit capture state (/playground board, 1300 x 5094, replay)"
+  },
+  "build": "pulse-verify --package F8 (7 states, replay): build green in 16 s, 7 of 7 captured, .pulse/shots/F8s2",
+  "sweep": {
+    "states": "F8-kit, settings-1, settings-2, onboarding-1, progress-1, progress-3, coach-dashboard-2",
+    "inventoryDiffs": {
+      "settings-1, settings-2": "-11: the theme picker removed by F1.1 (the baseline is the base build) - same as stage 1",
+      "onboarding-1, progress-1, progress-3, coach-dashboard-2": "= baseline"
+    },
+    "intendedDifferences": [
+      "every Toggle (settings equipment, onboarding sex / multi choices, progress sharing, client equipment card) is a word with a lime mark instead of a primary / secondary chip pill with a check glyph; alone in a gap-tight row its words stand 24 apart and the first stands 8 in",
+      "every Switch (cue settings) is the 48 x 28 Pulse switch (accent / surface-3, 22 knob, no shadow) instead of 44 x 24 with a shadowed knob, and its knob no longer slides",
+      "the join-code and temporary-account copy buttons (coach dashboard) are the bare copy glyph; after a copy the tick is lime instead of a green-tinted box, and the glyph no longer flips or shakes"
+    ]
+  },
+  "kitBoard": {
+    "how": "pulse-verify --package F8 F8-kit (replay), tiled by pkg/_int/kit-board-tiles.mjs into .pulse/pairs/F8/s2-board/, cells paired in .pulse/pairs/F8/s2-chipRow-board.pair.png and s2-uiSwitch-setCheck-board.pair.png",
+    "result": "all four stage-2 board cells land on the Figma cells: chip words 24 apart with lime marks the width of the word at y 37, the wrap breaks after Kábel as drawn; switch rows 56 (64 with the sub line), track 48 x 28 on the right edge; set rows 64 with the 44 frame on the right edge; remaining pixel difference is text rasterisation (see differences)"
+  },
+  "states": "scratch harness (.pulse/pairs/F8/s2-states/main.tsx renders the lane's stage-2 specimens with the slot's src): stage2-specimens@2x.png; keyboard-walk.json = real Tab + Space in headless Chrome: every chip, toggle and switch shows a solid 2 px lime ring 2 off (the switch's on the track), Space flips aria-pressed / aria-checked and the mark / knob",
+  "copy": "no visible string added; the playground specimens use the board's sample words; CopyButton keeps common.copy / common.retry",
+  "requests": [
+    "S-library / S-marketplace / S-compose-*: filter chips -> ChipRow + Chip (kit/selection.md)",
+    "S-settings / S-coach-*: equipment Toggles -> inside ChipRow wrap (removes the 8 pt first-word inset)",
+    "S-workout / S-onboarding: the set check and the radio mark -> CheckMark"
+  ],
+  "status": "handoff"
+}

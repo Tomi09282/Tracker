@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-02",
+  "from": "S-admin",
+  "kind": "bug",
+  "blocking": false,
+  "target": "frontend/scripts/pulse-shot.mjs (scroll step) and pulse-frames.json (admin-2, admin-3)",
+  "need": "admin-2 and admin-3 are drawn SCROLLED (the switch at y 72; header and figures above the frame). The capture makes a viewport of the frame's height, so the page cannot scroll there and the app draws the header above the switch (404 pt lower). A 'scroll: { y: 404 }' step (or 'align target to the top inset') would let the frame states themselves be compared.",
+  "evidence": "admin-2 / admin-3 geometry: every matched node is dy 403.2-404.7 off (.pulse/pairs/S-admin/admin-2.geometry.json, admin-3.geometry.json); with the 404 offset removed every node is within 1 pt (handoff.json).",
+  "proposedApi": "steps: [{ scroll: { y: 404 } }] in pulse-frames.json admin-2 / admin-3",
+  "interim": "states.json adds admin-2-tall / admin-3-tall (the same states 404 pt taller); the pairs are cut from them at y 403. Nothing waits for this.",
+  "status": "open",
+  "resolution": null
+}

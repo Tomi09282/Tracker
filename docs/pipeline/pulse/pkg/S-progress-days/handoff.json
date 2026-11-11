@@ -1,0 +1,65 @@
+{
+  "package": "S-progress-days",
+  "branch": "pulse/S-progress-days",
+  "base": "1b7759f",
+  "slot": "tracker-wt/slot-22 (new worktree)",
+  "build": "pulse-verify --package S-progress-days --port 5188: build green (all gates + tsc -b + vite build), 6 of 6 captured (replay), on pulse-redesign 1b7759f with B-focus' lifeos-api.ts (its shared.patch, identical diff), this package's i18n.patch.json and R-S-progress-days-01 applied in the working tree; German: 4 of 4 page states captured, every string fits. verify-gates --allow-dirty: 78 passed, 0 failed, 7 dormant.",
+  "frames": {
+    "lifeos/progress-days": {
+      "state": "progress-days",
+      "verdict": "matched-fixture",
+      "why": "Header + four-cell switch, EZEN A HÉTEN 490 érme + caption, the 14 day columns (bars, −20 / +157 / +40, labels, today dot), HETEK (4 rows), SZOKÁSOK (window, 4 rows with streak, ×1,25, the 13-cell bars, closing rule, legend), KALÓRIA (target, gridlines, dashed target, line, warn dots, axis, caption) land on the frame. Geometry: 175 compared, 150 matched, 17 deviating, 0 style mismatches, 8 unmatched; every deviating content node is dy <= 1 pt with only a WIDTH difference (the frame's fill-width text boxes vs the app's hugging text); the rest is the tab bar (5 tabs vs the frame's 6). GET /lifeos/stats is a contract body (dev backend has no migration 035) type-checked against LifeosStatsResponse.",
+      "capture": ".pulse/shots/S-progress-days/progress-days.png",
+      "pairs": [
+        ".pulse/pairs/S-progress-days/progress-days.pair-1.png",
+        ".pulse/pairs/S-progress-days/progress-days.pair-2.png",
+        ".pulse/pairs/S-progress-days/progress-days.overview.png"
+      ]
+    }
+  },
+  "extraStates": {
+    "progress-days-failed": {
+      "note": "GET /lifeos/stats 500: header + switch, the danger NoticeLine with \"Újra\"",
+      "picture": ".pulse/pairs/S-progress-days/app-progress-days-failed.png"
+    },
+    "progress-days-not-started": {
+      "note": "started false (no zone): the door row \"Nap és időzóna ›\" to /settings/day (existing copy)",
+      "picture": ".pulse/pairs/S-progress-days/app-progress-days-not-started.png"
+    },
+    "progress-door": {
+      "note": "/progress: the Haladás switch with four cells, Test lit",
+      "picture": ".pulse/pairs/S-progress-days/app-progress-door.png"
+    },
+    "progress-door-open": {
+      "note": "click Napok on /progress -> /progress/days, Napok selected",
+      "picture": ".pulse/pairs/S-progress-days/app-progress-door-open.png"
+    },
+    "progress-days-back": {
+      "note": "click Fotók on /progress/days -> /progress with Fotók selected (the boxed probe there is S-progress's own lime FilePick pill)",
+      "picture": ".pulse/pairs/S-progress-days/app-progress-days-back.png"
+    }
+  },
+  "notCaptured": {
+    "loading": "the skeleton (eyebrow, giant, caption, the 122 pt column zone, HETEK rows) cannot be held by the capture tool (no delayed fixture); checked in code only"
+  },
+  "fixtureCheck": "pulse-fixture-check: 4 problems = the 4 contract bodies of GET /lifeos/stats (R26: the dev backend has no migration 035). The bodies type-check against LifeosStatsResponse (tsc --strict on a generated file, excess properties included): 4 bodies OK. To be turned into edit lists once the integrator records GET /lifeos/stats for account M on a backend with 035.",
+  "ledger": "pulse-ledger S-progress-days: empty - nothing counted was lost",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-progress-days/work-package.json (add to work-packages.json; the slot carries it in its working tree only)",
+    "docs/pipeline/pulse/pkg/S-progress-days/i18n.patch.json (17 progressDays.* keys, hu / en / de; no proposed copy)",
+    "docs/pipeline/pulse/pkg/S-progress-days/requests/R-S-progress-days-01.json + .patch (route /progress/days, check-nav-active EXPECT row, the Napok door in ProgressPage.tsx) - blocking, applies on pulse-redesign 1b7759f",
+    "docs/pipeline/pulse/pkg/S-progress-days/states.json (6 package states)"
+  ],
+  "dependsOn": "merge B-focus first (its shared.patch = the Phase-6 block of frontend/src/lib/lifeos-api.ts: LifeosStatsResponse, HabitCellState). Imports S-habits' MultiplierLine / FreezeLine (merged).",
+  "deviations": [
+    "DEV-a: the tab bar has 5 tabs with Kezdőlap; the frame draws round B's 6-tab user bar (Ma ... Naptár) - INT / P1-nav / S-ma own it. Under /progress/days the Haladás tab is lit.",
+    "DEV-b: undrawn states built from the kit: loading skeleton, failed read (danger line + Újra), LifeOS not started (the \"Nap és időzóna\" door row, existing copy), no live habit (SZOKÁSOK left out), no kcal data and no target (KALÓRIA left out), a day before the start / in the future (label only, no bar).",
+    "DEV-c: the figures over the day bars follow the frame's choice as a rule: the best day, every day that lost coins, and today; every column carries its date and figure for a screen reader.",
+    "DEV-d: a week row shows ONE fact after its range, as the frame does: the perfect days if any, otherwise the penalties if any.",
+    "DEV-e: habit cells skipped / open / lapsed / none / relapse are drawn at the \"off\" level (the kit SegmentBar has three levels; the legend names three). Their screen-reader word is the legend word of the drawn level.",
+    "DEV-f: \"a 13-ból\" counts trackedDays (days with kcal data), which equals the window in the frame; the elative suffix follows Hungarian vowel harmony (a 14-ből) through a second key (copy \"fix\").",
+    "DEV-g: GET /lifeos/days is not read: GET /lifeos/stats carries every block of this frame in one settled snapshot.",
+    "DEV-h: Napok is its own route; going back to Fotók / Megosztás passes the view in location state so ProgressPage opens on it (request R-S-progress-days-01)."
+  ],
+  "status": "handoff"
+}

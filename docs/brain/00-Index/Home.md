@@ -7,6 +7,16 @@ tags: [index]
 > [!tip] Resuming?
 > Start at [[Next Session]] — it names the one task to do first.
 
+> [!important] The visual design changed on 2026-10-11 — Pulse is the design of record
+> The owner dropped the liquid-glass look. Every screen is now drawn in Figma in **Pulse V1
+> "Open Field"**; none of it is implemented yet. Start at [[58-Pulse/0000 Index]]; the decision is
+> [[60-Decisions/0020-pulse-replaces-liquid-glass]]. The `55-Screens` notes still describe what
+> each screen does, but no longer what it looks like.
+
+> [!important] LifeOS is being ported into TRACKER (plan approved 2026-10-17)
+> Habits, tasks, day close, calendar, focus and a coin / XP economy, plus stackable roles with a
+> view switcher. The plan and the live progress table: [[59-LifeOS/0000 Index]].
+
 # TRACKER Brain
 
 Coach-client workout & nutrition tracking platform. This vault is a **mirror** of
@@ -29,6 +39,8 @@ phase) — edit in the repo, never here.
 - [[40-Pipeline/Phase-1/Phase Report|Pipeline]] — per-phase artifacts, PVP logs, reports
 - [[50-UX-Concepts/UX Base Pack|UX base pack]] — shell behaviour: offline, palette, haptics, toasts
 - [[50-UX-Concepts/Theme Engine|UX concepts]] — theme engine, feedback variants, muscle map
+- [[58-Pulse/0000 Index|Pulse design]] — the design of record: rules, screens, frames
+- [[59-LifeOS/0000 Index|LifeOS port]] — the approved plan and where each step stands
 - [[60-Decisions/0000 Index|Decisions (ADR)]] — why things are the way they are
 
 ## Phase status

@@ -1,0 +1,95 @@
+{
+  "package": "S-day-settings",
+  "base": "cee908f",
+  "namespaces": [
+    "settings"
+  ],
+  "set": [
+    {
+      "key": "settings.day.title",
+      "hu": "Nap és időzóna",
+      "en": "Day and time zone",
+      "de": "Tag und Zeitzone",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/settings-day-v2 page title and nezetek/settings-v2-2 Profil row 'Nap és időzóna' (design rounds A and B, approved by the owner)"
+    },
+    {
+      "key": "settings.day.zone",
+      "hu": "Időzóna",
+      "en": "Time zone",
+      "de": "Zeitzone",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/settings-day-v2 section eyebrow 'Időzóna'; also the zone sheet's title and the row's accessible name"
+    },
+    {
+      "key": "settings.day.zoneLimit",
+      "hu": "Naponta egyszer módosítható",
+      "en": "Can be changed once a day",
+      "de": "Einmal am Tag änderbar",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/settings-day-v2 sub line of the zone row (plan: a zone change at most once per 24 h; PATCH /me/prefs 409 TIMEZONE_TOO_SOON); also the zone sheet's line when the server refuses with TIMEZONE_TOO_SOON"
+    },
+    {
+      "key": "settings.day.start",
+      "hu": "Napkezdés",
+      "en": "Day start",
+      "de": "Tagesbeginn",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/settings-day-v2 section eyebrow 'Napkezdés'; also the segmented switch's accessible name"
+    },
+    {
+      "key": "settings.day.saved",
+      "hu": "Mentve",
+      "en": "Saved",
+      "de": "Gespeichert",
+      "copy": "inventory",
+      "source": "lifeos/settings-day-v2 head status '● Mentve'; the same word as compose.saved / compose.autosave.saved in hu.json"
+    },
+    {
+      "key": "settings.day.explain",
+      "hu": "Új nap {{start}}-kor · a tegnapi {{settle}}-ig még módosítható.",
+      "en": "New day at {{start}} · yesterday stays editable until {{settle}}.",
+      "de": "Neuer Tag um {{start}} · der gestrige Tag bleibt bis {{settle}} änderbar.",
+      "copy": "proposed",
+      "visible": true,
+      "source": "lifeos/settings-day-v2 explanation line 'Új nap 04:00-kor · a tegnapi 10:00-ig még módosítható.' (README-jutalmak-ermek-admin.md: settles open question 10; plan L4, day D settles at start(D+1) + 6 h)"
+    },
+    {
+      "key": "settings.day.search",
+      "hu": "Keresés",
+      "en": "Search",
+      "de": "Suche",
+      "copy": "inventory",
+      "source": "the zone sheet's search field (label and placeholder); the same strings as library.search in hu / en / de"
+    },
+    {
+      "key": "settings.day.noResults",
+      "hu": "Nincs találat",
+      "en": "No results",
+      "de": "Keine Treffer",
+      "copy": "inventory",
+      "source": "the zone sheet when the search matches no zone; the same strings as library.emptyTitle in hu / en / de"
+    },
+    {
+      "key": "settings.day.failed",
+      "hu": "Nem sikerült a művelet. Próbáld újra.",
+      "en": "That didn't work. Please try again.",
+      "de": "Das hat nicht geklappt. Bitte versuche es erneut.",
+      "copy": "inventory",
+      "source": "a failed read of /me/prefs (with 'Újra') and a failed write (day start or zone); the same strings as auth.errors.generic in hu / en / de"
+    }
+  ],
+  "change": [],
+  "remove": [],
+  "copyQuestions": [
+    {
+      "where": "zone sheet (opened by the zone row's chevron)",
+      "frame": "lifeos/settings-day-v2",
+      "note": "The frame draws the row's chevron but not what it opens. Built as the kit's picker grammar (SelectSheet): sheet titled 'Időzóna', the search field, every IANA zone as a radio row (place name from the zone database in English, e.g. 'Budapest', 'Buenos Aires'; offset 'GMT+2'). No new words beyond 'Keresés' / 'Nincs találat'. Localized city names do not exist on the platform and are not invented."
+    }
+  ]
+}

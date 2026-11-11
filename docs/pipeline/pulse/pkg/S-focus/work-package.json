@@ -1,0 +1,59 @@
+{
+  "id": "S-focus",
+  "title": "LifeOS Phase 6 screen package: Fókusz at /focus (pushed from Ma, Ma lit) - the setup (frame lifeos/focus-1: Min dolgozol?, IDŐTARTAM words with start -> end, ELLENŐRZÉS words, the reward rule, the docked pill Fókusz indítása), the running block (focus-2: live dot + FÓKUSZBAN, the title, the G-lifeos fixed-width Countdown, the progress line, ELLENŐRZÉS n / m with Rajta vagyok, Befejezés / Feladás docked) and the finished block (focus-3: KÉSZ FÓKUSZ, the minutes figure, the ledger ÉRME / ELLENŐRZÉS / SZINT, the sum line, Bezárás) on the B-focus API (GET /focus/current, POST /focus, /focus/:id/checkin, /finish, /cancel); a client timer runs only while the page is open (no push); TodayFocus, the Ma page's FÓKUSZ section, is exported for S-ma to mount",
+  "screens": [
+    "focus"
+  ],
+  "owns": [
+    "frontend/src/features/focus/**",
+    "docs/pipeline/pulse/pkg/S-focus/**"
+  ],
+  "mustNotTouch": [
+    "frontend/src/ui/**",
+    "frontend/src/app/**",
+    "frontend/src/lib/**",
+    "frontend/src/i18n/**",
+    "frontend/src/assets/**",
+    "frontend/src/index.css",
+    "frontend/index.html",
+    "frontend/public/**",
+    "frontend/package.json",
+    "frontend/scripts/**",
+    "frontend/src/features/playground/**",
+    "frontend/src/features/**/use*.ts",
+    "backend/**"
+  ],
+  "handIn": {
+    "i18n.patch.json": [
+      "frontend/src/i18n/hu.json",
+      "frontend/src/i18n/en.json",
+      "frontend/src/i18n/de.json"
+    ],
+    "requests": {
+      "R-S-focus-01": "frontend/src/app/router.tsx, frontend/src/app/routeMeta.ts, frontend/src/app/navTabs.ts, frontend/scripts/check-nav-active.mjs (the /focus route, parent Ma = nav.today, the home tab owning /focus)",
+      "R-S-focus-02": "frontend/src/features/today/TodayPage.tsx (S-ma): mount TodayFocus (the FÓKUSZ section) after FELADATOK, before TÁPLÁLKOZÁS",
+      "R-S-focus-03": "frontend/src/ui/data/Numeral.tsx: Fraction complete prop (kit decision, no patch)"
+    }
+  },
+  "frames": [
+    "lifeos/focus-1",
+    "lifeos/focus-2",
+    "lifeos/focus-3"
+  ],
+  "inventory": "docs/brain/58-Pulse/Screens/focus.md does not exist: the frame README figma-build/lifeos/README-naptar-fokusz-kihivas.md (focus-1..3 rows, the C5 copy list) and docs/pipeline/pulse/pkg/B-focus/api.md are the inventory",
+  "account": "user@tracker.local",
+  "route": "/focus",
+  "dependsOn": [
+    "B-focus",
+    "G-lifeos",
+    "B-core"
+  ],
+  "size": "M",
+  "parallelGroup": "LifeOS screen lane (approved plan phase 6)",
+  "i18nNamespaces": [
+    "focus"
+  ],
+  "liveWrites": [],
+  "notes": "Proposed by the package itself (the orchestrator's task named the id; work-packages.json had no entry): the slot carries this entry in its WORKING TREE only, never committed; the integrator adds it at merge. Builds against B-focus' Phase-6 block of frontend/src/lib/lifeos-api.ts (its shared.patch) - merge B-focus first; the slot holds it applied and uncommitted. focusApi.ts holds the hooks under a non-use* file name, so the frozen features/**/use*.ts glob needs no exception. The running dev backend has no migration 035: every capture answers GET /focus/current with a contract body checked against FocusCurrentResponse - matched-fixture at best until recorded. TodayFocus is exported for S-ma (Ma's FÓKUSZ section, R-S-focus-02).",
+  "wave": 7
+}

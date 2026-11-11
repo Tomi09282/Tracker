@@ -1,0 +1,18 @@
+{
+  "package": "F17",
+  "what": "Stage-1 acceptance: the [S1] rows of PLAN.md 5.2, run by INT on pulse-int",
+  "tree": "pulse-int @ 2b3b6a2",
+  "ranAt": "2026-10-15",
+  "verdict": "accepted",
+  "opens": ["S-home", "S-auth"],
+  "detail": "docs/pipeline/pulse/pkg/_int/F17.md",
+  "rows": {
+    "1": { "result": "pass", "evidence": "verify:gates 77 passed / 0 failed / 4 dormant on a clean tree, all 20 check:pulse rule ids probed, tree back byte for byte; build green (pulse-verify, 16 s)" },
+    "2": { "result": "pass", "scope": "stage-1 components", "evidence": "kit-board 1300 x 5094 tiled against _components-1..4 (6 tiles, difference share 0.0589); NOT-IN-KIT cells are stage 2 only (searchField F12:2, chipRow / uiSwitch / setCheck F8:2, chatMsg F13); mannequin regions F15:1", "notes": ["inputField specimen copy differs from the board (error line, password placeholder) - existing hu.json strings; S-auth decides on the screen"] },
+    "3": { "result": "pass", "evidence": "fonts.check true for Big Shoulders Display Variable and Geist Variable; Geist Mono latin loaded (latin-ext unloaded until used); F1.2 glyph/tnum result on record; 4 preload tags with hashed names; session 121.5 KB, worst case 127.4 KB < 150 KB; no Inter / Space Grotesk in dist" },
+    "4": { "result": "pass", "evidence": "check:assets 49 files from 35 sources, 840,748 B, 8 assertions; mix-blend- 0 in src; no Pulse image inlined in a JS chunk" },
+    "5": { "result": "pass", "deferred": ["pushed header at 64: no product route mounts ScreenHeader push before its S-package; measured at that merge and in F18"], "evidence": "51 route/role rows: bar 782-838, tabs 5/6/7, no computed background, one lit tab with aria-current=page and the right one; fade 744-874 solid from 780.4; 360 / 430 / insets 0 (bar bottom 864) clean; desktop dock at 1280 for M/C/A; idle /workout -> /library (coach, admin)", "notes": ["player exercise strip carries a second aria-current=true on /workout with a running session (WorkoutPlayer.tsx:552) - S-workout"] },
+    "6": { "result": "pass", "evidence": "freeze + 59-state baseline, contact sheet checked by F3.D-freeze; replay sweep 56 of 60, the 4 misses are the by-design fixtures/override of S-workout, S-onboarding, S-style-studio; inventory diffs only settings-1/-2 (F1.1), style-studio-1 (dormant labels incl. E6 by F8), workout-3 (D2 redirect)" },
+    "7": { "result": "pass", "evidence": "user@ (server pref aurora) with and without stale tracker.theme on 6 screens: identical Pulse tokens (#0b0d0a / #cbff2e), 0 requests to /me/theme; 'me/theme' in no file of src or dist" }
+  }
+}

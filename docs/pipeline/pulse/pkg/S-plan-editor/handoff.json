@@ -1,0 +1,157 @@
+{
+  "package": "S-plan-editor",
+  "branch": "pulse/S-plan-editor",
+  "verifiedOn": "pulse/S-plan-editor = pulse-redesign 277d804 + the S-plan-editor commits (merge 5c888e1), i18n.patch.json applied by pulse-sync",
+  "handIn": [
+    "docs/pipeline/pulse/pkg/S-plan-editor/i18n.patch.json"
+  ],
+  "files": {
+    "frontend/src/features/plans/PlanEditorPage.tsx": "render rewritten on the kit; everything above the return (hooks, the ten mutations, drafts, move, the undo machinery, save) unchanged. Screen push + ScreenHeader push (back + parent from routeMeta, the Mentés pill as the one lime pill, disabled = the kit's grey) with the title block as its children: Field variant=title (the plan name) and the meta line (6 pt lime Dot for an active plan only, the status word as a cap TextLink with a chevron opening the Sheet, the revision in mono). The cycle: SectionHeader rule=false (eyebrow + training-day count with the figure in ink, split out of the translated string) over SegmentBar slots (num numerals over one 6 pt bar; half = training, off = rest / empty, on = the open day; an empty slot is a 24 pt plus). Start-date warning = NoticeLine danger. Days: closed days are RowStack open runs of ListRow (Monogram 28 day numeral in the lead slot, ink / pending; name, sr-only 'N. nap'; mono start time or 'nincs időpont'; the disclosure chevron and the 16 pt dangerQuiet trash on the 44 pt column grid that overhangs the gutter by 16); the ONE open day is a section: SectionHeader (eyebrow 'N. nap' + mono start time, chevron + danger trash) and the 48 pt display-xl name as the accessible toggle; blocks are SectionHeader h3 sections with four glyph columns (ArrowUp / ArrowDown / collapse / trash), the exercise rows in a RowStack (mono target line, trash; selecting a row reveals its two arrows), a superset / circuit indented 20 behind one 2 pt edge line, '+ Gyakorlat' as a body TextLink, the picker (Field + RowStack close of result rows with the kit-missing mono note and the area flag in micro warning / danger, Mégse); the add-block group = strong rule + three '+' TextLinks. Plan foot: RowStack open close of two 64 pt rows (copy glyph lead), the clone panel inside it, cycleGrew as NoticeLine warn, the cycle-full sentence or the '+ Nap hozzáadása' link. Status Sheet = ChipRow wrap of four Chips. Loading = two Skeleton blocks; not available = EmptyState h1.",
+    "docs/pipeline/pulse/pkg/S-plan-editor/budget.json": "deleted by check-pulse --fix-down (70 -> 0)",
+    "docs/pipeline/pulse/pkg/S-plan-editor/states.json": "overrides of plan-editor-2 (select the superset's first row; two name edits) and plan-editor-3 (picker data edits) + 11 extra states + notCapturable (loading, new draft, the live mutations)",
+    "docs/pipeline/pulse/pkg/S-plan-editor/i18n.patch.json": "set plans.addBlock (proposed, NOT visible: the aria-label of the add-block group)",
+    "docs/pipeline/pulse/pkg/S-plan-editor/requests/R-S-plan-editor-01.json": "a numeric scroll step for pulse-shot (frame 3 is scrolled by 240)"
+  },
+  "verdicts": {
+    "plan-editor-1": {
+      "verdict": "matched",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-1.png",
+      "pair": ".pulse/pairs/S-plan-editor/plan-editor-1.pair.png",
+      "tiles": [
+        ".pulse/pairs/S-plan-editor/plan-editor-1.tile-1.png"
+      ],
+      "geometry": "94 compared, 79 matched, 15 deviating, 0 unmatched; no box off by more than 1 pt in x / y: the 15 are widths only (Figma's fixed 202 / 290 pt text boxes against text that hugs its words) with dy -0.5. 8 style flags = the export reporting the first run of a mixed-ink line ('4 edzésnap': the 4 in ink, the word in text-2, as drawn) and 'UPPER' on the digits of the day numerals (no effect on digits)."
+    },
+    "plan-editor-2": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-2.png",
+      "pair": ".pulse/pairs/S-plan-editor/plan-editor-2.pair.png",
+      "tiles": [
+        ".pulse/pairs/S-plan-editor/plan-editor-2.tile-1.png",
+        ".pulse/pairs/S-plan-editor/plan-editor-2.tile-2.png",
+        ".pulse/pairs/S-plan-editor/plan-editor-2.tile-3.png"
+      ],
+      "fixture": "states.json overrides.plan-editor-2: /exercises/13/name 'Bicepszhajlítás kézisúlyzóval', /exercises/14/name 'Arcig húzás' over the recording of GET /plans/1 (pulse-fixture-check OK); one added step selects that row",
+      "geometry": "168 compared, 137 matched, 31 deviating, 0 unmatched. Beyond 1 pt: the four 'Link/Gyakorlat' boxes, which the probe pairs by name with the wrong one of four identical links (dy -193 / -177 / +61), and 'Link/Kör' dx -1.7 (the three add-block words are 24 apart in both; Geist's advance of 'Szuperszett' is 1.3 narrower). Everything else is the hugging-width difference of frame 1."
+    },
+    "plan-editor-3": {
+      "verdict": "matched-fixture",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-3-tall.png (rows 240..1114 = .pulse/pairs/S-plan-editor/plan-editor-3.app-scrolled-240.png)",
+      "pair": ".pulse/pairs/S-plan-editor/plan-editor-3.pair.png",
+      "tiles": [
+        ".pulse/pairs/S-plan-editor/plan-editor-3.tile-1.png"
+      ],
+      "fixture": "states.json overrides.plan-editor-3 / states.plan-editor-3-tall: the three drawn result names, the stabilising-only knee conflict (warning ink), one missing kit item on the third, the other 21 results removed (pulse-fixture-check OK)",
+      "geometry": "the frame-size capture is 240 pt off (the frame is the page scrolled by 240 and a step cannot scroll by a number: R-S-plan-editor-01), so its probe lists every box at dy +239.5..+243 - one constant shift, nothing else. The pair is cut from the tall capture: every row, glyph column, the field with its lime focus line, the three result rows with the flags, Mégse and the second block coincide with the frame. Remaining: the frame draws the status bar over the scrolled page, the cut-out shows the strip there (the app's status-bar mask sits at the top of the 1114 viewport, not of the cut); the frame draws the lime caret, the capture has the caret hidden."
+    },
+    "plan-editor-empty": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-empty.png",
+      "note": "no frame; sandbox plan 11 recorded read-only; live smoke ok"
+    },
+    "plan-editor-template": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-template.png",
+      "note": "no frame; scratch plan 10 recorded read-only (no flags in the picker for a template); a 30-character day name ellipsizes in the 48 pt line, as the prep asked"
+    },
+    "plan-editor-status-sheet": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-status-sheet.png"
+    },
+    "plan-editor-renamed": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-renamed.png",
+      "note": "the Mentés pill lit (the one lime pill), the title's 2 pt lime focus line"
+    },
+    "plan-editor-offline": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-offline.png"
+    },
+    "plan-editor-block-collapsed": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-block-collapsed.png"
+    },
+    "plan-editor-clone-open": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-clone-open.png"
+    },
+    "plan-editor-missing": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-missing.png"
+    },
+    "plan-editor-needs-start": {
+      "verdict": "structure",
+      "capture": ".pulse/shots/S-plan-editor/plan-editor-needs-start.png"
+    }
+  },
+  "probes": "fonts, pill (at most one lime pill), boxed surfaces, overflow, 44 pt targets, reduced motion and the focus walk pass on all 13 states (main run with --focus-walk); no probe fails at --width 360 / 430 or under --reduced-motion; --scroll-end: the last content (the cycle-full sentence) ends at 734 above the bar at 782 on plan-editor-2. The only failing probe is geometry, explained per frame above.",
+  "variants": {
+    "en": "6 of 13 captured (.pulse/shots/S-plan-editor/lang-en): the base layout (renamed / status sheet / clone / empty / missing / needs-start) in English, no key path, no overflow. The 7 that fail are the frame scripts addressing Hungarian names ('Edzéstervek', '^Felsőtest – húzás 5. nap'): the scripts, not the page.",
+    "de": "same as en (.pulse/shots/S-plan-editor/lang-de)",
+    "width-360": "13 of 13, no probe fails (.pulse/shots/S-plan-editor/width-360)",
+    "width-430": "13 of 13, no probe fails (.pulse/shots/S-plan-editor/width-430)",
+    "reduced-motion": "13 of 13, no probe fails",
+    "scroll-end": "12 of 13: plan-editor-block-collapsed.end fails because at 874 the first block's collapse glyph lies under the floating tab bar and the tool's click lands on a tab (it navigates and fires unrecorded GETs) - a capture limitation; the same state passes at its own height"
+  },
+  "inventory": {
+    "plan-editor-1": "the seven day rows are renamed from '<name> N. nap · <time>' to '<name> N. nap <time>' (the separator dot is gone with the caption it separated; the numeral replaced the visible 'N. nap')",
+    "plan-editor-2": "the same renames; the open day's toggle is the display name ('<name> N. nap', aria-label) instead of the card header; Feljebb / Lejjebb of the selected row are present because the frame's state selects it; the superset names are the fixture's",
+    "plan-editor-3": "the same renames; the result rows follow the fixture; their accessible names now read the kit note before the area flag, as drawn"
+  },
+  "ledger": [
+    {
+      "line": "door to=/coach/plans 1 -> 0",
+      "reason": "the back link is ScreenHeader kind=push, reading routeMeta '/coach/plans/:id' -> '/coach/plans' with plans.title; same target, verified by every frame capture arriving on the link 'Edzéstervek'"
+    },
+    {
+      "line": "aria aria-pressed 2 -> 0",
+      "reason": "the strip's aria-pressed is passed as SegmentSlot.pressed and written by SegmentBar; the status chips' by Chip selected - both still in the rendered DOM"
+    },
+    {
+      "line": "focus-visible: 4 -> 0",
+      "reason": "the four belonged to the hand-rolled title input; the name is Field variant=title now, whose focus is the 2 pt lime line, and every button takes the global ring (focus walk: every stop shows focus)"
+    }
+  ],
+  "budget": "70 -> 0, budget.json deleted",
+  "requests": [
+    "R-S-plan-editor-01 (numeric scroll step, open, not blocking)"
+  ],
+  "deviations": [
+    "Q4 (behaviour kept, not drawn): '+ Nap hozzáadása' (body TextLink with a plus) replaces the cycle-full sentence while a slot is free; the clone panel (hint, client rows, 'Másolat sablonként' link) opens under the Klónozás row; the cycleGrew warning is a NoticeLine under the plan foot; the start-date warning is a danger NoticeLine under the strip; the status sheet is a Sheet of four Chips; an empty slot of the strip is a 24 pt plus over the off segment; the empty plan is EmptyState in place of the day list.",
+    "The open day's chevron in its head row is pointer-only (aria-hidden, out of the tab order): the display name below it is the one accessible toggle, so a keyboard user meets one control, not two.",
+    "An exercise row is selected by a tap or by KEYBOARD focus; pointer focus no longer selects (with the old focus + toggle pair a mouse press focused-and-selected the row and the click then unselected it - the first capture of frame 2 failed exactly so).",
+    "The status dot is drawn for 'Aktív' only (the frame's one case); draft / paused / ended show the word alone.",
+    "Toast placement is untouched (F13's host); the page passes no placement."
+  ],
+  "copy": {
+    "proposed": [
+      {
+        "key": "plans.addBlock",
+        "hu": "Blokk hozzáadása",
+        "visible": false
+      }
+    ],
+    "copyQuestions": []
+  },
+  "liveSmoke": {
+    "command": "node scripts/pulse-verify.mjs --package S-plan-editor --port 5187 --no-build --live --smoke --out .pulse/shots/S-plan-editor/live-smoke",
+    "result": "4 of 4 captured live (plan-editor-1, -empty, -missing, -needs-start), no undeclared error",
+    "writes": "none. GET /plans/10 and GET /plans/11 were recorded read-only (--record --only-missing). No mutation was run live: every mutating state is listed in states.json notCapturable with its sandbox object (scratch plan 10)."
+  },
+  "build": "pulse-verify: build green in 15 s · 13 of 13 captured (replay)",
+  "fixRound": {
+    "id": "S-plan-editor-fix",
+    "branch": "pulse/S-plan-editor-fix",
+    "review": ".pulse/review/S-plan-editor/REVIEW.md",
+    "findings": {
+      "2": "fixed: the copy-forward row title takes two lines (ListRow lines={2})",
+      "3": "fixed: the picker scroller is capped at 200 (3.5 rows of 57) and carries the closing rule itself; fx-p4-picker shows the half row and the rule above Mégse",
+      "4": "no change needed: the input value is text-body = 400 (tokens.css --text-body--font-weight); the 500 flag is the geometry probe pairing the frame node \"Value\" with the listRow \"Guggolás\" (the input value is not a DOM text node); the scrolled pair shows the same weight",
+      "5": "fixed: the not-available page carries ScreenHeader kind=push (EDZÉSTERVEK back link)",
+      "1-blocking": "fixed: a cycle > 7 days uses a 7.5-slot pitch (page-local class on the kit slots until R-S-plan-editor-fix-01 makes perView fractional in the kit), the strip feathers at the edge with more days behind it, and the lit slot is brought to the middle of the strip whenever it is within one slot of an edge (sideways scroll of the strip only). Evidence .pulse/pairs/S-plan-editor-fix/live/fx-p5*.png, p5-*.before-after.png"
+    },
+    "deviations": [
+      "Interim until R-S-plan-editor-fix-01: PlanEditorPage sets [&_[data-kit=segSlot]]:!w-[calc(100%/7.5)] on SegmentBar for cycle_days > 7; drop it when the kit honours perView={7.5}."
+    ]
+  }
+}

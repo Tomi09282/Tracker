@@ -1,0 +1,46 @@
+{
+  "id": "B-core",
+  "decision": "approved plan C:/Users/Petike/.claude/plans/abundant-booping-willow.md, Phase 2 'Core' (= the plan's B0 + B-core); owner 2026-10-17 (gamification ban reversed, one currency) and 2026-10-18 (design round B and the economy sheet approved), .pulse/owner-answers.md last two sections",
+  "owns": [
+    "backend/package.json",
+    "backend/server.js",
+    "backend/scripts/check-admin-audit.mjs",
+    "backend/scripts/check-gdpr.mjs",
+    "backend/scripts/check-route-tx.mjs",
+    "backend/scripts/check-worker-tx.mjs",
+    "backend/scripts/lib/worker-sources.mjs",
+    "backend/scripts/smoke.js",
+    "backend/scripts/smoke/lifeos-core.js",
+    "backend/scripts/verify-030.mjs",
+    "backend/scripts/verify-031.mjs",
+    "backend/scripts/verify-gates.mjs",
+    "backend/scripts/verify-lifeos-rules.mjs",
+    "backend/src/coins/routes.js",
+    "backend/src/db/conn.js",
+    "backend/src/db/gdpr.js",
+    "backend/src/db/index.js",
+    "backend/src/db/migrations/031_lifeos_core.sql",
+    "backend/src/db/tx/lifeos.js",
+    "backend/src/db/worker.js",
+    "backend/src/lifeos/**",
+    "backend/src/logs/routes.js",
+    "backend/src/nutrition/daySql.js",
+    "backend/src/nutrition/routes.js",
+    "backend/src/plans/occurrences.js",
+    "backend/src/plans/schedule.js",
+    "docs/brain/58-Pulse/Feature inventory.md",
+    "docs/brain/60-Decisions/0022-lifeos-gamification-and-one-currency.md",
+    "docs/pipeline/pulse/pkg/B-core/**"
+  ],
+  "handIn": {
+    "shared.patch": [
+      "frontend/src/lib/lifeos-api.ts"
+    ]
+  },
+  "notInScope": [
+    "habits, tasks, the full day close, recurring tasks (Phase 3: migration 032); challenges and rewards (Phase 4: 033, incl. the reward.redeem reason and its ref-truthful clause); calendar / reminders (Phase 5: 034); focus (Phase 6: 035)",
+    "every LifeOS screen (Ma, Szabályok, Nap és időzóna, Érmék v2) - the frontend lanes, against api.md and lifeos-api.ts",
+    "the 409 TIMEZONE_REQUIRED refusal on LifeOS creates: Phase 2 has no LifeOS create endpoint (habits / tasks / events arrive in Phases 3-5)",
+    "work-packages.json entry - the integrator's, at merge (as for B-roles / B-equipment / B-q2)"
+  ]
+}

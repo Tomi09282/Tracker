@@ -1,0 +1,246 @@
+{
+  "package": "F2",
+  "stage": "a",
+  "pulseStage": "built-on-a-copy",
+  "inputs": {
+    "src/ui/tokens/tokens.css": "4fac4d9163539be92ed0a6e0ca29b8f5854b526674f87e034290348fff3ca558",
+    "src/lib/cn.ts": "c68bfe67be96527d985d4115a1807be41d98b44bb9e6fad650fc02d2be2fe6fa",
+    "src/index.css": "aea80697146c7a880a1f5f549ad1abf81fead0093c8ebc6bb59a164be267be64",
+    "index.html": "caae7d4109beda5d707e18da096747bddeef5631aa51f7af5dbbd6b39c9ab6ad",
+    "public/manifest.webmanifest": "db41114f68e55f97d1e3d55aee489a23aeb0e0d362ac1783725457496a4c4583"
+  },
+  "workingTreeUntouched": true,
+  "ok": true,
+  "checks": [
+    {
+      "id": "baseline-canvas-tree",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "none — the stage as it is",
+      "expected": "exit 0",
+      "exit": 0,
+      "ok": true,
+      "said": "check-canvas: OK — #0B0D10 in all four places (--surface-0, theme-color, manifest theme_color and background_color)"
+    },
+    {
+      "id": "baseline-type-tree",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "tree",
+      "defect": "none — the stage as it is",
+      "expected": "exit 0",
+      "exit": 0,
+      "ok": true,
+      "said": "check-type-scale: OK — 10 step(s), declared and merged alike"
+    },
+    {
+      "id": "baseline-type-pulse",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "none — the stage as it is",
+      "expected": "exit 0",
+      "exit": 0,
+      "ok": true,
+      "said": "check-type-scale: OK — 26 step(s), declared and merged alike; bound: 5 display, 3 mono, 4 upper case"
+    },
+    {
+      "id": "canvas-manifest-background",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "background_color of the manifest changed alone",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-canvas: 1 problem(s) `background_color` is #0B0D1A (public/manifest.webmanifest:12), and `--surface-0` is #0B0D10"
+    },
+    {
+      "id": "canvas-manifest-theme",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "theme_color of the manifest changed alone",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-canvas: 1 problem(s) `theme_color` is #0B0D1A (public/manifest.webmanifest:11), and `--surface-0` is #0B0D10"
+    },
+    {
+      "id": "canvas-meta",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "<meta name=\"theme-color\"> of index.html changed alone",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-canvas: 1 problem(s) `<meta name=\"theme-color\">` is #0B0D1A (index.html:9), and `--surface-0` is #0B0D10"
+    },
+    {
+      "id": "canvas-token-alone",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "--surface-0 changed in :root and none of the three copies followed (the slip commit F1.3 can make)",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-canvas: 3 problem(s) `<meta name=\"theme-color\">` is #0B0D10 (index.html:9), and `--surface-0` is #0B0D1A (src/ui/tokens/tokens.css:227). On a phone the browser chrome and the overscroll area flash the other colour until the stylesheet lands. The token is the source: set the copy to #0B0D1A — or, if the canvas really changed, change all four. `theme_color` is #0B0D10 (public/manifest.webmanifest:11), and `--surface-0` is #0B0D1A (src/ui/tokens/tokens.css:227). On a phone the title bar and the task-switcher card of the installed app keep the other colour. The token is the source: set the copy to #0B0D1A — or, if the canvas really changed, change all four. `background_color`"
+    },
+    {
+      "id": "canvas-meta-deleted",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "the theme-color meta tag deleted",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "index.html has 0 `<meta name=\"theme-color\">` tag(s); there must be exactly one"
+    },
+    {
+      "id": "canvas-not-hex",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "--surface-0 written as rgb() instead of a hex literal",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "`--surface-0` is `rgb(11 13 10)` (src/ui/tokens/tokens.css:227) — the canvas must be a hex literal"
+    },
+    {
+      "id": "canvas-conditional-root",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "every rule of tokens.css wrapped in @media, so no unconditional :root declares the canvas",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "declares no `--surface-0` in an unconditional `:root` rule"
+    },
+    {
+      "id": "canvas-layered-root",
+      "gate": "scripts/check-canvas.mjs",
+      "stage": "tree",
+      "defect": "CONTROL — every rule of tokens.css wrapped in @layer: :root is still unconditional",
+      "expected": "exit 0 (control)",
+      "exit": 0,
+      "ok": true,
+      "said": "check-canvas: OK — #0B0D10 in all four places"
+    },
+    {
+      "id": "type-step-not-listed",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "tree",
+      "defect": "a step declared in tokens.css without a cn.ts entry",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "`text-probe` is declared in src/ui/tokens/tokens.css but not listed in src/lib/cn.ts"
+    },
+    {
+      "id": "type-entry-not-declared",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "tree",
+      "defect": "a cn.ts entry with no step declared",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "`probe` is listed in src/lib/cn.ts but no --text-probe exists in src/ui/tokens/tokens.css"
+    },
+    {
+      "id": "type-fluid-step-unlisted",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "tree",
+      "defect": "--text-giant: min(124px, 31vw) declared, cn.ts untouched (the old gate skipped it and stayed green)",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "`text-giant` is declared in src/ui/tokens/tokens.css but not listed in src/lib/cn.ts. Any cn() call that puts it beside an ink token will silently drop it — the element renders at the inherited size. Add 'giant' to TYPE_STEPS. See ADR-0019. `--text-giant` is `min(124px, 31vw)` (src/ui/tokens/tokens.css:21) — a type step must be a plain length"
+    },
+    {
+      "id": "type-giant-as-min",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "--text-giant written as min(7.75rem, 31vw), cn.ts entry present",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) `--text-giant` is `min(7.75rem, 31vw)` (src/ui/tokens/tokens.css:21) — a type step must be a plain length"
+    },
+    {
+      "id": "type-eyebrow-not-display",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": ".text-eyebrow dropped from the display-face rule of the binding",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) `text-eyebrow` is the display face in the ramp, and the type-binding block (src/index.css:205) does not give `.text-eyebrow` `font-family: var(--font-display)`"
+    },
+    {
+      "id": "type-eyebrow-not-upper",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": ".text-eyebrow dropped from the upper-case rule of the binding",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) `text-eyebrow` is upper case in the ramp, and the type-binding block (src/index.css:205) does not give `.text-eyebrow` `text-transform: uppercase`"
+    },
+    {
+      "id": "type-micro-not-mono",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": ".text-micro dropped from the mono rule of the binding",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) `text-micro` is the mono face in the ramp, and the type-binding block (src/index.css:205) does not give `.text-micro` `font-family: var(--font-mono)`"
+    },
+    {
+      "id": "type-body-bound-display",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "a body-face step (.text-body) added to the display-face rule of the binding",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) The type-binding block (src/index.css:205) gives `.text-body` `font-family: var(--font-display)`, and the ramp does not"
+    },
+    {
+      "id": "type-binding-deleted",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "the whole type-binding block deleted while the Pulse ramp is declared",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) The Pulse ramp is declared (`text-giant`, `text-num`, `text-display-xl`, `text-eyebrow`, `text-data-l`, `text-data`) and there is no type-binding block"
+    },
+    {
+      "id": "type-binding-unlayered",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "the type-binding block moved out of @layer components to the top level",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) The type-binding block (src/index.css:208) is not directly inside `@layer components` (found: no layer at all)"
+    },
+    {
+      "id": "type-binding-end-marker",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "the type-binding:end marker deleted",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) The type-binding markers are not one pair"
+    },
+    {
+      "id": "type-pulse-step-not-listed",
+      "gate": "scripts/check-type-scale.mjs",
+      "stage": "pulse",
+      "defect": "'eyebrow' removed from TYPE_STEPS while --text-eyebrow stays declared and bound",
+      "expected": "exit 1",
+      "exit": 1,
+      "ok": true,
+      "said": "check-type-scale: 1 problem(s) `text-eyebrow` is declared in src/ui/tokens/tokens.css but not listed in src/lib/cn.ts"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "element": "E7",
+    "live": false,
+    "reason": "one Pulse look — FeedbackField (variants/E7Field.tsx) is the underline Field with a busy / valid mark on the line's end and no longer reads its letter"
+  },
+  {
+    "element": "E14",
+    "live": false,
+    "reason": "one Pulse look — Sheet (variants/E14E20.tsx) is the kit's bottomSheet (surface-2, top radius 28, hairline edge, 60 % scrim, no blur, no shadow; grabber drag kept from letter A) and no longer reads its letter"
+  }
+]

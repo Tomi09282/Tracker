@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
-import { Dumbbell, Mail, Lock, Eye, EyeOff, Check, AlertCircle, ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import { Pressable } from '../../ui/primitives/Pressable';
+import { TextLink } from '../../ui/primitives/TextLink';
 import { Field } from '../../ui/primitives/Field';
-import { Surface } from '../../ui/primitives/Surface';
+import { NoticeLine } from '../../ui/feedback/NoticeLine';
+import { Pic } from '../../ui/media/Pic';
+import { Screen } from '../../ui/shell/Screen';
+import { ScreenHeader } from '../../ui/shell/ScreenHeader';
+import { Dock } from '../../ui/shell/Dock';
 import { LanguageToggle } from '../../ui/nav/LanguageToggle';
 import { ApiError } from '../../lib/api';
 import { useLogin, useRegister } from './useSession';
 import { useAppName } from '../../lib/useAppName';
-import { AuroraBackdrop } from '../../ui/shell/AuroraBackdrop';
 
 const schema = z.object({
   email: z.string().trim().min(1).pipe(z.email()),
@@ -23,20 +27,91 @@ type FormValues = z.infer<typeof schema>;
 /** The same rule the form validates with, reused for the live tick. One definition, not two. */
 const emailLooksValid = (value: string) => schema.shape.email.safeParse(value ?? '').success;
 
+/*
+ * The geometry of the frames `auth-1` / `auth-2` (figma-build/app/auth-1.body.js), in pt.
+ *
+ * The footer is docked to the bottom and grows UPWARD when the alert line appears; the form hangs
+ * under the wordmark. The hero stage between them is the one flexible element: it gives up exactly
+ * what keeps CLEAR between the last line of the form and the first line of the footer, in 4 pt steps,
+ * at most SQUEEZE_MAX. At rest (both frames) it gives up nothing. Past SQUEEZE_MAX the footer leaves
+ * the dock and follows the form (small phones, see useFooterFit).
+ */
+const STAGE_H = 236; // the stage under the 44 pt top row: y 108 - 344
+const HERO_H = 320; // the still at rest: 250 x 320, from y 32
+const HERO_RATIO = 692 / 884; // the still's width : height
+const HERO_LIFT = 76; // the still starts 76 above the stage (y 32), 72 once squeezed (y 36)
+const CLEAR = 20;
+const SQUEEZE_STEP = 4;
+const SQUEEZE_MAX = 80;
+
 /**
- * Auth screen — [[55-Screens/login]] and [[55-Screens/register]].
+ * What the hero stage gives up so the form never runs under the docked footer — the frame's own
+ * `squeeze` rule, measured on the live layout — and whether the footer can stay docked at all.
  *
- * One vertically centred column, capped narrow, nothing else on the page: no nav, no header, no
- * marketing. It is the first screen most people ever see of the product, so it carries a second
- * job the form does not — saying what this is — and that is what the oversized brand mark is for.
- * A bare form floating in the middle of a dark page reads as a dialog, not as a product.
+ * The form's end is taken at rest (its measured end plus what is already given up) and the docked
+ * footer's top is computed from the viewport, the footer's height and the dock's bottom distance,
+ * so neither answer depends on the mode it selects: no feedback, no flicker.
  *
- * The app name comes from the server config, never from a string in this bundle.
+ * When even the full squeeze does not make room (a short phone, the offline strip, an alert line,
+ * inline errors) the footer stops docking: it follows the form in the page's flow and the page
+ * scrolls. A fixed footer over the fields is never an option.
+ */
+function useFooterFit() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const footRef = useRef<HTMLDivElement>(null);
+  const current = useRef({ squeeze: 0, docked: true });
+  /** The docked footer's bottom distance from the viewport bottom, read while it is docked. */
+  const dockGap = useRef(0);
+  const [fit, setFit] = useState({ squeeze: 0, docked: true });
+
+  const measure = useCallback(() => {
+    const form = formRef.current;
+    const foot = footRef.current;
+    if (!form || !foot) return;
+    const viewportH = document.documentElement.clientHeight;
+    const footBox = foot.getBoundingClientRect();
+    if (current.current.docked) dockGap.current = viewportH - footBox.bottom;
+    // The footer is fixed when docked (viewport coordinates); the form scrolls (document coordinates).
+    const formEnd = form.getBoundingClientRect().bottom + window.scrollY + current.current.squeeze;
+    const footTop = viewportH - dockGap.current - footBox.height;
+    const need = Math.ceil((formEnd + CLEAR - footTop) / SQUEEZE_STEP) * SQUEEZE_STEP;
+    const next = { squeeze: Math.min(SQUEEZE_MAX, Math.max(0, need)), docked: need <= SQUEEZE_MAX };
+    if (next.squeeze !== current.current.squeeze || next.docked !== current.current.docked) {
+      current.current = next;
+      setFit(next);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (formRef.current) observer.observe(formRef.current);
+    // The footer node changes with the mode, so the observer is set up again for each one.
+    if (footRef.current) observer.observe(footRef.current);
+    // Something above the screen can push the form down without resizing it — the app-level
+    // offline strip takes room at the top — so the page's own height is watched too.
+    observer.observe(document.body);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [measure, fit.docked]);
+
+  return { formRef, footRef, ...fit };
+}
+
+/**
+ * Auth screen — frames `auth-1` (Belépés) and `auth-2` (Regisztráció), inventory
+ * `docs/brain/58-Pulse/Screens/auth.md`.
  *
- * The two modes are ONE component because they are one form, but they are not one drawing: the
- * mockups differ on the field glyphs, on where the submit button sits and on the wordmark's ink,
- * and each of those differences is spec'd on both sides rather than being an image accident. They
- * are branched on `mode` below, each with the reason.
+ * ONE layout for both modes, so /login and /register feel like one place: the chalk hands glow out
+ * of the black (the screen's one image), the app name is the wordmark (live text from the server,
+ * never baked into artwork), two underline fields, and a footer docked to the bottom — the alert
+ * line, the ONE lime pill, the switch line, the language switch. Nothing is boxed.
+ *
+ * In content the modes differ in five things only: the subtitle, the rule hint (register), the
+ * button label, the switch line and the back control (register).
  */
 export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   const { t } = useTranslation();
@@ -86,213 +161,130 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     }
   });
 
-  /* One primary action, visually dominant. Declared once and placed twice: `/login` draws it as
-     the last row INSIDE the card, `/register`'s mockup lifts it out to its own block below. */
-  const submit = (
-    <Pressable type="submit" variant="primary" busy={busy} className="w-full">
-      {mode === 'login' ? t('auth.login') : t('auth.register')}
-    </Pressable>
+  const formId = useId();
+  const { formRef, footRef, squeeze, docked } = useFooterFit();
+  const heroH = HERO_H - squeeze;
+  const heroW = Math.round(heroH * HERO_RATIO);
+  const heroTop = squeeze ? HERO_LIFT - 4 : HERO_LIFT;
+
+  const footer = (
+    <div ref={footRef} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
+          {formError ? (
+            <NoticeLine tone="danger" role="alert" compact>
+              {formError}
+            </NoticeLine>
+          ) : null}
+          <Pressable type="submit" form={formId} variant="primary" size="lg" busy={busy} className="w-full">
+            {mode === 'login' ? t('auth.login') : t('auth.register')}
+          </Pressable>
+        </div>
+        <p className="flex items-center gap-1.5">
+          <span className="text-body text-text-2">{mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}</span>
+          {/* Its OWN keys, not the button's: this link navigates, it does not create an account. */}
+          <TextLink text="body" to={mode === 'login' ? '/register' : '/login'}>
+            {mode === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
+          </TextLink>
+        </p>
+      </div>
+      <LanguageToggle />
+    </div>
   );
 
   return (
-    // `relative` so the back control can be pinned to the column's own top-left without joining
-    // the flow — the column has to stay vertically centred whether or not that control is there.
-    <main className="screen-x relative flex min-h-dvh flex-col items-center justify-center py-8">
-      <AuroraBackdrop />
+    <Screen as="main" top="push" gap="none">
+      {/* The top row: 44 high on both modes, so the hero and the wordmark stand at the same height.
+          On /register it holds the back control (icon only, its name is the action). */}
+      <ScreenHeader
+        kind="push"
+        back={
+          mode === 'register'
+            ? { onClick: () => void navigate('/login'), label: t('auth.backToLogin'), bare: true }
+            : undefined
+        }
+      />
 
-      {mode === 'register' ? (
-        /* The one control above the hero, and the only way back that is not the switch link at
-           the bottom. `left-0` is the inner edge of the screen gutter (an absolute box resolves
-           against the padding box), so it lines up with the card without repeating `screen-x`;
-           `safe-top` keeps it clear of the notch, which a bare `top-0` would sit under. */
-        <div className="safe-top absolute left-0 top-0">
-          <Pressable
-            variant="ghost"
-            shape="icon"
-            aria-label={t('auth.backToLogin')}
-            onClick={() => void navigate('/login')}
-          >
-            <ChevronLeft className="size-icon-m" aria-hidden />
-          </Pressable>
-        </div>
-      ) : null}
-
-      <div className="flex w-full max-w-[400px] flex-col gap-section">
-        {/* ── the mark ──────────────────────────────────────────────────────────────────────
-            One large thing where there used to be three small ones stacked tightly. The ring is
-            a separate element rather than a border so it can sit OUTSIDE the disc with a gap —
-            a border would eat into the fill and read as a heavy edge instead of an echo. */}
-        <div className="flex flex-col items-center gap-tight">
-          <span
-            aria-hidden
-            className="relative inline-flex size-28 items-center justify-center rounded-chip bg-[var(--accent-200)] text-[var(--surface-0)]"
-          >
-            <span className="absolute -inset-2 rounded-chip border border-[var(--accent-border)]" />
-            <Dumbbell size={56} strokeWidth={2} />
-          </span>
-          {/* `min-h` holds the line before the name arrives from the server, so the column below
-              does not jump when it lands.
-              The ink differs by mode, and the mockups are explicit about it: sampled off the
-              images, /login's wordmark is the accent tint that echoes the disc while /register's
-              is plain white. On the register column the accent is spent on ONE thing — the
-              submit button — and a third accent-coloured element weakens its claim. */}
-          <h1
-            className={
-              mode === 'login'
-                ? 'text-display mt-4 min-h-10 text-center text-accent'
-                : 'text-display mt-4 min-h-10 text-center text-text-1'
-            }
-          >
-            {appName}
-          </h1>
-          <p className="text-body text-center text-text-2">
-            {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
-          </p>
-        </div>
-
-        {/* ── the form ──────────────────────────────────────────────────────────────────────
-            The `<form>` is the outer element rather than the card, because on /register the
-            submit button leaves the card and still has to submit it.
-            `inert` while busy, not just a disabled button: the spec's busy state is "the whole
-            form is inert for the duration", and without it the inputs and the reveal toggle stay
-            live under the spinner — a value edited mid-flight is not the value being sent. */}
-        <form
-          onSubmit={onSubmit}
-          noValidate
-          inert={busy || undefined}
-          aria-busy={busy || undefined}
-          className="flex flex-col gap-group"
-        >
-          {/* `finish="glass"` because this is the one panel on the page and there is nothing to
-              scroll behind it — the cost that makes `veil` the default everywhere else does not
-              apply to a single static card. */}
-          <Surface finish="glass" className="flex flex-col gap-4">
-            <Field
-              label={t('auth.email')}
-              placeholder={t('auth.emailPlaceholder')}
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              /* Login only. The login mockup draws an envelope and a lock on the leading edge and
-                 its spec names both; the register mockup draws both inputs plain, with the value
-                 starting at the normal padding and the only in-field glyphs trailing. */
-              leading={mode === 'login' ? <Mail className="size-icon-m" /> : undefined}
-              /* The tick is a FORMAT check and must never mean more than that. If it appeared only
-                 for addresses that already have accounts it would be a user-enumeration oracle —
-                 the same reason the failure copy never says which of the two fields was wrong.
-                 The verdict is drawn inside a filled disc, which is the defined treatment for a
-                 field verdict (catalog E7 draws its own in a round badge), not a loose tick. */
-              trailing={
-                emailValid ? (
-                  <span
-                    className="flex size-[var(--target-min)] items-center justify-center"
-                    title={t('auth.emailValid')}
-                  >
-                    <span className="flex size-6 items-center justify-center rounded-full bg-success text-on-success">
-                      <Check className="size-icon-s" strokeWidth={3} aria-hidden />
-                    </span>
-                    <span className="sr-only">{t('auth.emailValid')}</span>
-                  </span>
-                ) : undefined
-              }
-              /* Says what to change. `auth.errors.generic` is a sentence about a failed network
-                 call and belongs to the banner below; under an input it tells the user nothing.
-                 The two client-side outcomes are separated because they need different actions:
-                 an empty field wants a value, a malformed one wants a correction. */
-              error={
-                errors.email &&
-                (emailValue?.trim()
-                  ? t('auth.errors.emailFormat')
-                  : t('auth.errors.emailRequired'))
-              }
-              {...field('email')}
-            />
-
-            <Field
-              label={t('auth.password')}
-              placeholder={t('auth.passwordPlaceholder')}
-              type={revealed ? 'text' : 'password'}
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              hint={mode === 'register' ? t('auth.passwordRules') : undefined}
-              leading={mode === 'login' ? <Lock className="size-icon-m" /> : undefined}
-              /* The accessible name CHANGES with state — one fixed label would announce the wrong
-                 thing half the time. `aria-pressed` says which state it is in. */
-              trailing={
-                <Pressable
-                  variant="ghost"
-                  shape="icon"
-                  aria-pressed={revealed}
-                  aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
-                  onClick={() => setRevealed((v) => !v)}
-                >
-                  {/* The GLYPH reports the current state (masked = crossed-out eye), which is what
-                      both mockups draw; the LABEL above names the action. They are deliberately
-                      answering different questions, so the two do not track each other. */}
-                  {revealed ? (
-                    <Eye className="size-icon-m" aria-hidden />
-                  ) : (
-                    <EyeOff className="size-icon-m" aria-hidden />
-                  )}
-                </Pressable>
-              }
-              error={errors.password && t('auth.errors.passwordRequired')}
-              {...field('password')}
-            />
-
-            {formError ? (
-              <p
-                role="alert"
-                className="text-body-s flex items-center gap-tight rounded-field border border-[var(--danger-border)] bg-[var(--danger-subtle)] px-3 py-2 text-text-1"
-              >
-                <AlertCircle className="size-icon-s shrink-0 text-[var(--danger)]" aria-hidden />
-                {formError}
-              </p>
-            ) : null}
-
-            {mode === 'login' ? submit : null}
-          </Surface>
-
-          {/* On /register the card ends after the fields and the button is its own block, edge to
-              edge with the card rather than inset by its padding. `gap-group` is the step the
-              mockup measures at — `gap-section` would open twice that. */}
-          {mode === 'register' ? submit : null}
-        </form>
-
-        {/* ── the way out ───────────────────────────────────────────────────────────────── */}
-        <div className="flex flex-col items-center gap-4">
-          <p className="text-body-s text-center text-text-2">
-            {mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}{' '}
-            <Link
-              to={mode === 'login' ? '/register' : '/login'}
-              className="inline-flex min-h-[var(--target-min)] items-center text-accent underline-offset-4 hover:underline"
-            >
-              {/* Its OWN keys, not the submit button's. This control navigates; it does not
-                  create an account. "Létrehozom a fiókom" is right on the button that does the
-                  thing and a promise this link cannot keep. */}
-              {mode === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
-            </Link>
-          </p>
-
-          <LanguageToggle />
-        </div>
+      {/* The hero stage: the still floats in the black, centred on the screen axis, from y 32 —
+          over the top row, and past the stage's own bottom by 8. It is the flexible element. */}
+      <div aria-hidden className="relative" style={{ height: STAGE_H - squeeze }}>
+        <span className="absolute left-1/2 block -translate-x-1/2" style={{ top: -heroTop }}>
+          <Pic slot="hero-chalk" width={heroW} priority bleed className="block" />
+        </span>
       </div>
 
-      {/*
-        THREE THINGS THE MOCKUP DRAWS THAT ARE NOT HERE, AND WHY.
+      {/* The wordmark. `min-h` holds its line while the name is on its way from the server, so the
+          form below never moves when it lands — and stays blank if it never arrives. */}
+      <div className="flex flex-col gap-1">
+        <h1 className="text-display-xl min-h-12 text-text-1">{appName}</h1>
+        <p className="text-body text-text-2">{mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}</p>
+      </div>
 
-        `Elfelejtetted a jelszavad?` — there is no `/forgot-password` route and no endpoint behind
-        it. `Adatvédelem · Felhasználási feltételek` — neither document exists and neither has a
-        destination. A dead link on the login screen is worse than no link: it is the first
-        promise the product makes, and it breaks on the first tap. They land when the flow does.
+      {/* The form. `inert` while busy, not just a busy button: the whole form is inert for the
+          duration — a value edited mid-flight is not the value being sent. The footer's pill
+          submits it through `form`, so the switch link and the language switch stay live. */}
+      <form
+        ref={formRef}
+        id={formId}
+        onSubmit={onSubmit}
+        noValidate
+        inert={busy || undefined}
+        aria-busy={busy || undefined}
+        className="mt-8 flex flex-col gap-5"
+      >
+        <Field
+          label={t('auth.email')}
+          placeholder={t('auth.emailPlaceholder')}
+          type="email"
+          autoComplete="email"
+          inputMode="email"
+          /* A FORMAT check and never more: if it appeared only for addresses that have accounts it
+             would be a user-enumeration oracle. The frame's 16 pt tick in `success`, its ink on
+             the right edge; the words are for screen readers. */
+          trailing={
+            emailValid ? (
+              <span title={t('auth.emailValid')} className="flex w-3.5 text-success [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[2.25]">
+                <Check aria-hidden />
+                <span className="sr-only">{t('auth.emailValid')}</span>
+              </span>
+            ) : undefined
+          }
+          /* Says what to change: an empty field wants a value, a malformed one a correction. */
+          error={errors.email && (emailValue?.trim() ? t('auth.errors.emailFormat') : t('auth.errors.emailRequired'))}
+          {...field('email')}
+        />
 
-        The password reveal toggle in the mockup IS built, because it is real: client-side only,
-        no route, no endpoint, nothing to wait for.
+        <Field
+          label={t('auth.password')}
+          placeholder={t('auth.passwordPlaceholder')}
+          type={revealed ? 'text' : 'password'}
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          /* Register only, and in `text-2`: it is the only place the rule is ever stated. */
+          hint={mode === 'register' ? t('auth.passwordRules') : undefined}
+          hintTone="plain"
+          trailing={
+            <Pressable
+              variant="link"
+              shape="icon"
+              glyph="field"
+              aria-pressed={revealed}
+              aria-label={revealed ? t('auth.hidePassword') : t('auth.showPassword')}
+              onClick={() => setRevealed((v) => !v)}
+            >
+              {/* The GLYPH reports the current state (masked = crossed-out eye); the LABEL names
+                  the action. They answer different questions, so they do not track each other. */}
+              {revealed ? <Eye /> : <EyeOff />}
+            </Pressable>
+          }
+          error={errors.password && t('auth.errors.passwordRequired')}
+          {...field('password')}
+        />
+      </form>
 
-        `/register`'s strength meter and its two live requirement rows are still missing. Both are
-        new SHARED components by the spec's own reasoning (the rules have to be one definition, or
-        a future password-change screen grows a second copy that drifts), so they are not this
-        file's to add.
-      */}
-    </main>
+      {/* The footer: [alert line, 20 above the pill] → the ONE pill → the switch line → the language
+          switch. Docked to the bottom while there is room for it (it grows upward); on a phone too
+          short for form and footer it follows the form and the page scrolls (useFooterFit). */}
+      {docked ? <Dock as="footer">{footer}</Dock> : <footer className="mt-8">{footer}</footer>}
+    </Screen>
   );
 }

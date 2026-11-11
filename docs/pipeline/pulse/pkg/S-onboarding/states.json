@@ -1,0 +1,696 @@
+{
+  "about": "S-onboarding - the frame states and the undrawn states of the Onboarding questionnaire (/onboarding, URL only: nothing links here, check-nav lists it as no-inbound-by-design). All three frames are drawn for a MEMBER (five tabs, Kezdőlap lit, frame-1 the returning member with the knee limitation and the note 'Térdsérülés után óvatosan a mély guggolásokkal.'). That is user@ (M): its recording holds exactly that note, the knee limitation, Izomtömeg, Haladó and 70 minutes. M's saved step is 0, so the frames are reached on M's recording with edits of /profile/step (and frame-3 its refused POST). The freeze's account C (coach, six tabs, no limitation) stays as the extra state onboarding-step5-coach. Nothing is written live: every PATCH / POST is a fixture answer (PATCH /onboarding 200 {} as in S-settings settings-2; a refusal in the error envelope). Capture limits: the tool cannot hold a request open, so 'saving' (the 700 ms debounce + request) and 'finish busy' are not captured (structure, handoff.json). A PATCH answered 200 {} leaves the hook's cache with profile undefined (useDraftSave setQueryData res.profile), so a state that must keep the recorded answers after a change answers the PATCH 500 instead (the save-failed line is then part of that state).",
+  "overrides": {
+    "onboarding-1": {
+      "account": "M",
+      "reach": "fixture",
+      "why": "frame-1 is drawn for the returning member: M's recording has the drawn note, the knee limitation and five tabs. One edit opens the form on 5/5 (M's saved step is 0). M's recorded severity is 'avoid' (Kerülendő); the frame ticks 'caution' (Óvatosan) - the edit /profile/limitations/0/severity 'caution' is refused by pulse-fixture-check (no recording of GET /onboarding holds 'caution'), so the recorded value stays and the tick stands on the third row instead of the second (request R-S-onboarding-01).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "onboarding.finish"
+        }
+      }
+    },
+    "onboarding-2": {
+      "account": "M",
+      "fixture": null,
+      "reach": "fixture",
+      "why": "frame-2 is the first step with Izomtömeg just answered and saved. M's recording is on step 0 with 'muscle' (Izomtömeg) already its goal, so the script taps Izomtömeg (the answer stays), lets the 700 ms autosave run and the PATCH /onboarding is answered 200 {} by a fixture: nothing reaches the server. The radio is addressed by the start of its name in hu / en / de (the row reads its label and its hint).",
+      "fixtures": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/onboarding",
+          "status": 200,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "re": "^(Izomtömeg|Muscle|Muskelaufbau) "
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "re": "^(Izomtömeg|Muscle|Muskelaufbau) "
+            },
+            "checked": true
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "onboarding.saved"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.next"
+        }
+      }
+    },
+    "onboarding-3": {
+      "account": "M",
+      "fixture": null,
+      "reach": "fixture",
+      "why": "frame-3 is step 2 after a refused 'Kész': M's recording already holds Haladó (intermediate) and 70 minutes; the form opens on 5/5 (/profile/step 8), the script taps Kész, and POST /onboarding/complete answers 400 'incomplete: sessions_per_week' in the API's error envelope (backend onboarding/routes.js:235) - the page jumps to step 2, marks the field and names it in the alert line. The frame draws the sessions field EMPTY; the edit /profile/sessions_per_week null is refused by pulse-fixture-check (no recording holds null there), so the field shows M's recorded 4 with its error under it (request R-S-onboarding-01).",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/onboarding/complete",
+          "status": 400,
+          "body": {
+            "error": "incomplete: sessions_per_week",
+            "code": "validation_error",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "onboarding.finish"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.requiredField"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding/complete",
+            "status": 400
+          }
+        ],
+        "console": [
+          "400"
+        ]
+      },
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.next"
+        }
+      }
+    }
+  },
+  "states": {
+    "onboarding-step1-recorded": {
+      "title": "Onboarding - 1/5, M's recording as it is (nothing saved in this visit)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1060,
+      "reach": "seed",
+      "why": "the first step on arrival: the status line is empty (its 20 pt kept), Vissza is drawn disabled; frame-2 minus the save",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "common.next"
+        }
+      }
+    },
+    "onboarding-step5-coach": {
+      "title": "Onboarding - 5/5, the coach's recording (nothing ticked, six tabs)",
+      "account": "C",
+      "route": "/onboarding",
+      "height": 1036,
+      "reach": "seed",
+      "why": "the freeze's original onboarding-1 capture: C has a finished questionnaire with no limitation, so the step has no severity block; the coach's six-tab bar",
+      "arrived": {
+        "role": "button",
+        "name": {
+          "key": "onboarding.finish"
+        }
+      }
+    },
+    "onboarding-step4-body": {
+      "title": "Onboarding - 4/5, body data (one Vissza from 5/5)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1300,
+      "reach": "fixture",
+      "why": "step 4 is not framed; going back saves nothing",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.body.title"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "onboarding.birthYear"
+        }
+      }
+    },
+    "onboarding-step3-equipment": {
+      "title": "Onboarding - 3/5, place and equipment (two Vissza from 5/5)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1300,
+      "reach": "fixture",
+      "why": "step 3 is not framed; going back saves nothing",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.body.title"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.equipment.title"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "onboarding.equipmentHint"
+        }
+      }
+    },
+    "onboarding-step2-recorded": {
+      "title": "Onboarding - 2/5, M's answers (three Vissza from 5/5, nothing refused)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1292,
+      "reach": "fixture",
+      "why": "step 2 answered: both numbers with their bounds tick and hint, no alert",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.body.title"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.equipment.title"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.schedule.title"
+            }
+          }
+        }
+      ],
+      "arrived": {
+        "text": {
+          "key": "onboarding.sessionsPerWeekHint"
+        }
+      }
+    },
+    "onboarding-imperial-save-failed": {
+      "title": "Onboarding - 4/5, imperial units chosen, the save refused",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1300,
+      "reach": "fixture",
+      "why": "the units choice converts and re-labels height and weight (stored metric); the PATCH is answered 500 so the recorded answers stay in the cache (a 200 {} would empty them) - the save-error line stands in the status slot",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/onboarding",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "common.back"
+            }
+          },
+          "arrived": {
+            "text": {
+              "key": "onboarding.step.body.title"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "key": "onboarding.unit.imperial"
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "key": "onboarding.unit.imperial"
+            },
+            "checked": true
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "onboarding.heightIn"
+        }
+      }
+    },
+    "onboarding-three-areas-save-failed": {
+      "title": "Onboarding - 5/5, three areas ticked (three severity blocks), the save refused",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1700,
+      "reach": "fixture",
+      "why": "step 5 grows by one severity block per ticked area (a fresh tick starts on Óvatosan); no recording holds a second body area, so the two extra areas are ticked by the script; the PATCH is answered 500 so the recorded answers stay - the save-error line stands in the status slot",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/onboarding",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "checkbox",
+            "name": {
+              "key": "onboarding.area.shoulder"
+            }
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": {
+              "key": "onboarding.area.shoulder"
+            },
+            "checked": true
+          }
+        },
+        {
+          "click": {
+            "role": "checkbox",
+            "name": {
+              "key": "onboarding.area.lower-back"
+            }
+          },
+          "arrived": {
+            "role": "checkbox",
+            "name": {
+              "key": "onboarding.area.lower-back"
+            },
+            "checked": true
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "radiogroup",
+        "name": {
+          "key": "onboarding.area.lower-back"
+        }
+      }
+    },
+    "onboarding-refused-all-four": {
+      "title": "Onboarding - Kész refused with all four required answers missing",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1060,
+      "reach": "fixture",
+      "why": "the longest alert (four field names, wraps to two lines); the page jumps to the first step that can fix it (goal)",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/onboarding/complete",
+          "status": 400,
+          "body": {
+            "error": "incomplete: primary_goal, experience, sessions_per_week, training_location",
+            "code": "validation_error",
+            "requestId": "pulse-fixture"
+          }
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "onboarding.finish"
+            }
+          },
+          "arrived": {
+            "role": "alert"
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding/complete",
+            "status": 400
+          }
+        ],
+        "console": [
+          "400"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "onboarding.step.goal.title"
+        }
+      }
+    },
+    "onboarding-finish-failed": {
+      "title": "Onboarding - Kész fails for another reason (server error): stays, silent, as today",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1284,
+      "reach": "fixture",
+      "why": "today a non-validation failure of the finish shows nothing and keeps the page (no copy exists, R22); the pill is usable again",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "edits": [
+            {
+              "pointer": "/profile/step",
+              "value": 8
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/onboarding/complete",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "steps": [
+        {
+          "click": {
+            "role": "button",
+            "name": {
+              "key": "onboarding.finish"
+            }
+          },
+          "arrived": {
+            "role": "button",
+            "name": {
+              "key": "onboarding.finish"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding/complete",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "text": {
+          "key": "onboarding.step.limitations.title"
+        }
+      }
+    },
+    "onboarding-offline": {
+      "title": "Onboarding - offline, an answer given (the save fails, the answer stays)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 1060,
+      "reach": "seed",
+      "why": "the shell's offline line, and the autosave error in the status slot after an answer; the answer stays selected and is re-sent with the next change",
+      "steps": [
+        {
+          "offline": true,
+          "arrived": {
+            "text": {
+              "key": "offline.title"
+            }
+          }
+        },
+        {
+          "click": {
+            "role": "radio",
+            "name": {
+              "re": "^(Erő|Strength|Kraft) "
+            }
+          },
+          "arrived": {
+            "role": "radio",
+            "name": {
+              "re": "^(Erő|Strength|Kraft) "
+            },
+            "checked": true
+          }
+        },
+        {
+          "advance": 900,
+          "arrived": {
+            "text": {
+              "key": "onboarding.saveError"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding",
+            "failed": true
+          }
+        ],
+        "console": [
+          "ERR_INTERNET_DISCONNECTED",
+          "Failed to fetch",
+          "ERR_"
+        ]
+      },
+      "arrived": {
+        "role": "radio",
+        "name": {
+          "re": "^(Erő|Strength|Kraft) "
+        },
+        "checked": true
+      }
+    },
+    "onboarding-load-failed": {
+      "title": "Onboarding - the questionnaire could not be read (the skeleton stays, as today)",
+      "account": "M",
+      "route": "/onboarding",
+      "height": 874,
+      "reach": "fixture",
+      "why": "today a failed GET /onboarding leaves the screen skeleton (no error copy exists, R22); built from the kit skeleton inside the shell",
+      "fixtures": [
+        {
+          "method": "GET",
+          "path": "/api/v1/onboarding",
+          "status": 500,
+          "body": {}
+        }
+      ],
+      "expect": {
+        "requests": [
+          {
+            "path": "/api/v1/onboarding",
+            "status": 500
+          }
+        ],
+        "console": [
+          "500"
+        ]
+      },
+      "arrived": {
+        "role": "link",
+        "name": {
+          "key": "nav.today"
+        }
+      }
+    }
+  }
+}

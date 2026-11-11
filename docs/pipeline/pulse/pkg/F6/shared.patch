@@ -1,0 +1,34 @@
+diff --git a/frontend/src/ui/tokens/tokens.css b/frontend/src/ui/tokens/tokens.css
+index f9f2bec..e988645 100644
+--- a/frontend/src/ui/tokens/tokens.css
++++ b/frontend/src/ui/tokens/tokens.css
+@@ -760,6 +760,29 @@
+ 
+ /* F6 — actions: control(), Pressable, TextLink */
+ /* lane:F6 */
++:root {
++  /* How long an idle pill waits before its glow starts to breathe (Pulse System 2.4, "Resting
++     pulse … starts after 1.5 s"). A delay, not a duration: nothing eases over it. */
++  --delay-rest: 1500ms;
++}
++@theme inline {
++  /* `animate-pulse-rest` — `animate-pulse-glow` with its start delay. On the glow layer of the
++     lime pill (`control()`, variant `primary`, size `lg` / `sm`), and nowhere else. */
++  --animate-pulse-rest: pulse-glow var(--duration-ambient) var(--ease-standard) var(--delay-rest) infinite alternate;
++
++  /* `animate-busy-1/2/3` — the three dots of a busy control (`Pressable`). One triangle wave of
++     opacity, 100 → 30 → 100 %, on the ambient loop; the second and third dot start mid-cycle (a
++     negative delay), at exactly the 60 % and 30 % they are drawn with. So the first frame of the
++     loop IS the drawing, and the peak then travels left to right. Opacity only. */
++  --animate-busy-1: busy-dot var(--duration-ambient) var(--ease-linear) infinite;
++  --animate-busy-2: busy-dot var(--duration-ambient) var(--ease-linear) calc(var(--duration-ambient) * -5 / 7) infinite;
++  --animate-busy-3: busy-dot var(--duration-ambient) var(--ease-linear) calc(var(--duration-ambient) * -1 / 2) infinite;
++
++  @keyframes busy-dot {
++    0%, 100% { opacity: 1; }
++    50% { opacity: 0.3; }
++  }
++}
+ /* /lane:F6 */
+ 
+ /* F8 — selection: BadgeCount, Segmented, ChipRow, Toggle, Switch, CheckMark, LanguageToggle */

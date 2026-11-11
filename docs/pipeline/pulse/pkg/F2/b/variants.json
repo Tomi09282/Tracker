@@ -1,0 +1,16 @@
+[
+  { "element": "E1", "live": false, "reason": "playground only — FeedbackButton (variants/E1Button.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E3", "live": false, "reason": "playground only — IconButton (variants/E3IconButton.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E4", "live": false, "reason": "playground only — Toggle (variants/E4Toggle.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E5", "live": false, "reason": "playground only — Checkbox (variants/E5Checkbox.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E8", "live": false, "reason": "playground only — Select (variants/E8E9.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E9", "live": false, "reason": "playground only — DatePicker (variants/E8E9.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E10", "live": false, "reason": "playground only — Tabs (variants/E10Tabs.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E12", "live": false, "reason": "playground only — InteractiveCard (variants/E12E16.tsx) is mounted by /playground and by no product screen; the Toast beside it (E15) is the product's" },
+  { "element": "E13", "live": false, "reason": "playground only — SwipeItem (variants/E14E20.tsx) is mounted by /playground and by no product screen; the Sheet beside it (E14) is the product's" },
+  { "element": "E16", "live": false, "reason": "playground only — Progress (variants/E12E16.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E17", "live": false, "reason": "playground only — Slider (variants/E17E19.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E18", "live": false, "reason": "playground only — SkeletonBlock (variants/E17E19.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E19", "live": false, "reason": "playground only — PullToRefresh (variants/E17E19.tsx) is mounted by /playground and by no product screen" },
+  { "element": "E20", "live": false, "reason": "playground only — Fab (variants/E14E20.tsx) is mounted by /playground and by no product screen" }
+]

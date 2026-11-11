@@ -1,0 +1,13 @@
+{
+  "id": "R-S-admin-01",
+  "from": "S-admin",
+  "kind": "ui-component",
+  "blocking": false,
+  "target": "frontend/src/ui/data/SortKeys.tsx (new)",
+  "need": "admin-3 draws sortable column labels above the account rows: Geist Mono micro upper case, 44 pt targets, 20 apart, the sorted key in text-1 with a 12 pt direction arrow, the others text-2, one static trailing label (KLIENSEK) in text-3 ending on the gutter. No kit part draws this (_kit-gaps.md row SortKeys, not built by G-data / G-inputs).",
+  "evidence": ".pulse/geometry/admin-3.json nodes E-mail 24,258 / Szerepkör 90,258 / Regisztrált 179,258 / glyph arrowDown 267,260 12x12 / Column Kliensek static label 317,258; .pulse/pairs/S-admin/admin-3.pair.png",
+  "proposedApi": "<SortKeys label={t('adminUsers.title')} keys={[{ key: 'email', label }, …]} value={{ key, dir }} onSort={(key) => …} trailing={t('adminUsers.col.clients')} />",
+  "interim": "UserSearch.tsx composes it from Pressable variant=link (tone default / quiet, aria-pressed) with the label in a text-micro upper-case span and a lucide ArrowUp / ArrowDown at size-3; the pair matches the frame within 1 pt. Nothing waits for this.",
+  "status": "open",
+  "resolution": null
+}

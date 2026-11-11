@@ -38,6 +38,9 @@ import { requireAuth, requireCoach } from '../auth/middleware.js';
 import { normalizeText, toFtsQuery } from '../lib/normalize.js';
 import { resolveLang, languages } from '../lib/lang.js';
 import { evaluateInBackground } from '../coins/achievements.js';
+import { DAY_TARGETS_SQL } from './daySql.js';
+import { localDateInfo } from '../plans/schedule.js';
+import { addDaysToKey } from '../lifeos/dates.js';
 
 const router = Router();
 
@@ -998,6 +1001,18 @@ router.post(
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
     const b = parsed.data;
 
+    // NO FUTURE DAYS. A meal logged for tomorrow is not a record of what was eaten, and since
+    // migration 031 the day's kcal outcome pays or costs coins at the LifeOS day close — a future
+    // entry would be a way to pre-load the outcome of a day that has not happened. "Today" is the
+    // user's own calendar date from user_prefs.timezone (UTC while none is set), the same date the
+    // workout log uses. Validation, so 400, with nothing written. While no zone is stored the
+    // server only knows the UTC date, and anyone east of UTC is already living "tomorrow" — so the
+    // fallback admits one day ahead rather than refusing a real breakfast.
+    const today = await localDateInfo(req.user.id);
+    if (b.local_date > (today.zoned ? today.date : addDaysToKey(today.date, 1))) {
+      return sendError(res, 400, ERR.VALIDATION, 'that day has not happened yet');
+    }
+
     const lang = await resolveLang(req);
     const { fallback } = await languages();
 
@@ -1107,21 +1122,10 @@ router.get(
     // The active plan's target for this calendar date. `julianday` differences give whole days
     // regardless of DST, which is the same arithmetic src/plans/schedule.js performs — this query
     // is its SQL shadow and the two are asserted equal in the probe.
-    const [targets] = await db.all(
-      `SELECT d.id AS plan_day_id, d.name AS day_name,
-              d.kcal_target_x10 / 10.0     AS kcal_target,
-              d.protein_mg_target / 1000.0 AS protein_g_target,
-              d.carb_mg_target / 1000.0    AS carb_g_target,
-              d.fat_mg_target / 1000.0     AS fat_g_target
-         FROM nutrition_plans p
-         JOIN nutrition_plan_days d
-           ON d.plan_id = p.id
-          AND d.day_index = CAST((julianday(?) - julianday(p.starts_on)) AS INTEGER) % p.cycle_days
-        WHERE p.client_user_id = ? AND p.status = 'active' AND p.archived_at IS NULL
-          AND p.starts_on IS NOT NULL AND p.starts_on <= ?
-        ORDER BY p.id DESC LIMIT 1`,
-      [date, req.user.id, date],
-    );
+    // The SQL is shared with the LifeOS day close (./daySql.js), which reads the same target to decide
+    // the kcal outcome; kcal_target_x10 is its integer form and stays off this response.
+    const [row] = await db.all(DAY_TARGETS_SQL, [date, req.user.id, date]);
+    const targets = row ? (({ kcal_target_x10: _x10, ...rest }) => rest)(row) : undefined;
 
     res.json({ date, items, totals, targets: targets ?? null });
   }),

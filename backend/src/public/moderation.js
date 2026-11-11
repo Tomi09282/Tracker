@@ -19,6 +19,7 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
+import { idParams } from '../admin/params.js';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import * as db from '../db/index.js';
 import { ERR, sendError, asyncRoute } from '../lib/http.js';
@@ -47,6 +48,11 @@ const reportIpLimiter = limiter(60);
 const reportAccountLimiter = limiter(40, (req) => `rep:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 const adminReadLimiter = limiter(600);
 const adminWriteLimiter = limiter(120);
+// The ACCOUNT tier (package B-admin-posts). The two above are per IP and stop one machine; they do
+// not stop one compromised admin session spread over a phone, a laptop and a VPN, and a take-down
+// is the most visible thing an admin can do. Same key shape as admin/routes.js.
+const adminReadAccountLimiter = limiter(300, (req) => `mod-r:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
+const adminWriteAccountLimiter = limiter(60, (req) => `mod-w:${req.user?.id ?? ipKeyGenerator(req.ip)}`);
 
 const REPORT_OUTCOMES = {
   missing: 404,
@@ -143,6 +149,7 @@ router.get(
   requireAuth,
   requireAdmin,
   adminReadLimiter,
+  adminReadAccountLimiter,
   asyncRoute(async (req, res) => {
     // A READ, and it still re-checks. The moderation queue carries what a reporter saw and which
     // account it names; a role revoked thirty seconds ago must not still open it, and this one
@@ -205,8 +212,10 @@ router.post(
   requireAuth,
   requireAdmin,
   adminWriteLimiter,
+  adminWriteAccountLimiter,
   asyncRoute(async (req, res) => {
-    const id = z.object({ id: z.coerce.number().int().min(1) }).strict().safeParse(req.params);
+    // A canonical decimal id (admin/params.js); z.coerce read '0x10' as 16 and ' 5' as 5.
+    const id = idParams.safeParse(req.params);
     if (!id.success) return sendError(res, 404, ERR.NOT_FOUND, 'not found');
     const parsed = resolveBody.safeParse(req.body);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
@@ -248,6 +257,7 @@ router.post(
   requireAuth,
   requireAdmin,
   adminWriteLimiter,
+  adminWriteAccountLimiter,
   asyncRoute(async (req, res) => {
     const parsed = removeBody.safeParse(req.body);
     if (!parsed.success) return sendError(res, 400, ERR.VALIDATION);
@@ -262,7 +272,17 @@ router.post(
     });
 
     if (result.outcome !== 'applied') return sendModerationOutcome(res, result);
-    res.json({ removed: true, replayed: result.replayed });
+    // What was taken down, echoed so the inspect page can refresh itself: a post by its public id,
+    // a profile by its handle. The state is always 'removed' (a repeat is replayed: true and keeps
+    // the first remover and reason).
+    res.json({
+      removed: true,
+      replayed: result.replayed,
+      target: parsed.data.post_id !== null
+        ? { kind: 'post', id: parsed.data.post_id }
+        : { kind: 'profile', id: parsed.data.handle },
+      state: 'removed',
+    });
   }),
 );
 

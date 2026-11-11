@@ -1,0 +1,14 @@
+{
+  "id": "R-S-library-01",
+  "from": "S-library",
+  "kind": "fixture",
+  "blocking": false,
+  "target": "frontend/scripts/fixtures/library-1.json, library-2.json, library-3.json + frontend/scripts/pulse-frames.json (library-1..3: \"fixture\", \"reach\": \"fixture\", and \"opened\" / \"arrived\" naming the search glyph button)",
+  "need": "The frames draw hand-picked rows, not the A-Z top of the seed; and on the Pulse page the search line is behind the header glyph, so the frame scripts' opened / arrived (a visible textbox named Keresés) no longer hold.",
+  "evidence": "docs/pipeline/pulse/pkg/S-library/states.json overrides.library-1..3; .pulse/pairs/S-library/library-N.pair.png",
+  "proposedApi": "copy overrides.library-N.fixtures of states.json verbatim into scripts/fixtures/library-N.json { state, what, why, fixtures }; in pulse-frames.json set the override's opened / arrived / steps (names by i18n key)",
+  "proposedPatch": null,
+  "interim": "the package overrides in states.json feed every S-library run",
+  "status": "open",
+  "resolution": null
+}

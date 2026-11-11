@@ -1,0 +1,123 @@
+/* ui/tokens/fonts.css — the three Pulse faces, declared by hand.
+ *
+ * ═══ DECLARED HERE, SWITCHED ON IN tokens.css ══════════════════════════════════════════════════
+ *
+ * These rules only DECLARE the faces. `--font-display`, `--font-body` and `--font-mono` in
+ * `tokens.css` name them, and a browser fetches a font file only when rendered text asks for its
+ * family AND contains a character inside its `unicode-range` — so an English screen never downloads
+ * a `latin-ext` file it does not need, and the mono face costs nothing until a figure is set in it.
+ * The four files nearly every Hungarian screen needs (both subsets of the display and the text
+ * face) are preloaded by the hook in `vite.config.ts`.
+ *
+ * ═══ WHY NOT THE PACKAGES' OWN CSS ═════════════════════════════════════════════════════════════
+ *
+ * `@fontsource*` ship ready-made `@font-face` rules, and the two faces this file replaces were
+ * imported that way. Two things in them are fixed and wrong for Pulse:
+ *
+ *   - `font-display: swap` on every face. Pulse places its numerals by measured ink in a very
+ *     condensed display face; under `swap` they paint first in a much wider system fallback and
+ *     then reflow. The display face therefore BLOCKS (an invisible numeral for a moment instead of
+ *     a wrong one that jumps). The text and mono faces keep `swap`: late text in the
+ *     wrong face is still readable text.
+ *   - every subset is declared (Cyrillic, Vietnamese, symbols). The product ships Hungarian,
+ *     English and German: `latin` and `latin-ext` are the whole need. `latin-ext` is not optional —
+ *     ő and ű (U+0151, U+0171, and their capitals) live there, and "Kezdőlap" is on the tab bar.
+ *
+ * A `@font-face` descriptor cannot take `var()`, so neither can be overridden from outside; the
+ * rules are written here instead. The packages stay the source of the BINARIES: every `url()` is a
+ * package path that the bundler resolves, hashes and emits — nothing is copied into the repository,
+ * and the strict CSP (`font-src 'self'`) is met because the files are served from this origin.
+ *
+ * ═══ WHAT MUST STAY EQUAL TO THE PACKAGE ════════════════════════════════════════════════════════
+ *
+ * The family names are the packages' own (`… Variable` for the two variable builds, the plain name
+ * for the static one), and each `unicode-range` is copied from the package's rule for the same
+ * file: the range describes what is INSIDE that file, so a range that drifts from it either skips a
+ * glyph the file has or requests a file for a glyph it lacks. `docs/pipeline/pulse/pkg/_int/proofs/
+ * F1.2/glyph-check.mjs` compares the rules with the installed packages, reads the binaries and
+ * measures the faces in a real browser. Run it again after any upgrade of the three packages.
+ *
+ * Weights in use: display 700 and 900 (one variable file covers both); text 400, 500, 600 (one
+ * variable file); mono 500 only (a static file — the variable build would be twice the bytes for
+ * one weight). No italic is declared: Pulse draws none.
+ *
+ * ═══ WHAT THE CHECK FOUND — READ THIS BEFORE SETTING A NUMBER IN THE DISPLAY FACE ═══════════════
+ *
+ * All three faces carry ő ű Ő Ű. Geist puts its figures on one advance under `tabular-nums`; Geist
+ * Mono's are on one advance by nature.
+ *
+ * BIG SHOULDERS DISPLAY HAS NO TABULAR FIGURES. Its substitution table has no `tnum` feature, so
+ * `tabular-nums` does nothing in this face: "1" is about half as wide as "0". A number that stays
+ * as it is reads exactly as the frames draw it (they were set with the same proportional figures).
+ * A number that CHANGES on screen — a countdown, a rolling count — jumps sideways on every tick
+ * unless its component gives each digit a fixed-width cell. The utility class cannot do that.
+ * (The numbers are in `proofs/F1.2/README.md`; the family's successor package is the same.)
+ */
+
+/* ── display: Big Shoulders Display (variable, 100-900) ─────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Big Shoulders Display Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-ext-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Big Shoulders Display Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/big-shoulders-display/files/big-shoulders-display-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ── text: Geist (variable, 100-900) ────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ── mono: Geist Mono (static, 500) ─────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('@fontsource/geist-mono/files/geist-mono-latin-ext-500-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('@fontsource/geist-mono/files/geist-mono-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

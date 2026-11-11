@@ -1,0 +1,16 @@
+{
+  "id": "S-admin-fix",
+  "decision": "frontend fix round for the three admin screens after the independent pair-picture reviews (.pulse/review/S-admin-accounts, S-admin-posts, S-admin-moderation) and the frontend consequences of the backend fix round (B-admin-polish). Owner decisions 2026-11-03 unchanged.",
+  "owns": [
+    "frontend/src/features/admin/**",
+    "docs/pipeline/pulse/pkg/S-admin-fix/**"
+  ],
+  "sharedEdits": {
+    "decision": "small edits in integrator-owned files, listed in the report",
+    "files": [
+      "frontend/src/i18n/hu.json, en.json, de.json (through i18n.patch.json, applied with pulse-i18n)",
+      "docs/pipeline/pulse/deviations.md (next DEV numbers)"
+    ]
+  },
+  "notInScope": ["any backend file"]
+}
