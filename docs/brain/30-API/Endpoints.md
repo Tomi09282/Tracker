@@ -1,15 +1,15 @@
 ---
 type: api-index
 title: API surface
-count: 229
+count: 239
 tags: [api, moc, generated]
 ---
 
-# API surface — 229 endpoints
+# API surface — 239 endpoints
 
 > [!info] Generated file
 > Written by `backend/scripts/brain-gen.mjs` from the LIVE schema and the mounted routers.
-> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-11-03.
+> Do not hand-edit — run `npm run brain:gen` instead. Last generated: 2026-11-08.
 
 Guards are read from the middleware actually mounted on each route, so this cannot claim a
 protection the code does not have.
@@ -18,6 +18,10 @@ protection the code does not have.
 |---|---|---|
 | GET | `/api/v1/admin/coins/audit` | `requireAuth` |
 | GET | `/api/v1/admin/coins/ledger` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/media/:key` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/posts` | `requireAuth` |
+| GET | `/api/v1/admin/marketplace/posts/:publicId` | `requireAuth` |
+| POST | `/api/v1/admin/marketplace/posts/:publicId/restore` | `requireAuth` |
 | POST | `/api/v1/admin/marketplace/remove` | `requireAuth` |
 | GET | `/api/v1/admin/marketplace/reports` | `requireAuth` |
 | POST | `/api/v1/admin/marketplace/reports/:id/resolve` | `requireAuth` |
@@ -27,12 +31,18 @@ protection the code does not have.
 | POST | `/api/v1/admin/moderation/:id` | `requireAuth` |
 | GET | `/api/v1/admin/rules` | `requireAuth` |
 | PUT | `/api/v1/admin/rules` | `requireAuth` |
+| GET | `/api/v1/admin/statistics` | `requireAuth` |
 | GET | `/api/v1/admin/stats` | `requireAuth` |
 | GET | `/api/v1/admin/users` | `requireAuth` |
+| GET | `/api/v1/admin/users/:id` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/coins` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/disable` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/enable` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/force-password-change` | `requireAuth` |
+| PATCH | `/api/v1/admin/users/:id/name` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/reset-lockout` | `requireAuth` |
 | POST | `/api/v1/admin/users/:id/role` | `requireAuth` |
+| POST | `/api/v1/admin/users/:id/signout-all` | `requireAuth` |
 | POST | `/api/v1/auth/change-credentials` | `requireAuth` |
 | POST | `/api/v1/auth/login` | — |
 | POST | `/api/v1/auth/logout` | — |
