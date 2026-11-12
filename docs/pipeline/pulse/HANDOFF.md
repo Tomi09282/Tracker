@@ -9,10 +9,10 @@ PR #6).
 | Branch | What | State |
 |---|---|---|
 | `master` | Everything: coach tooling, Pulse redesign, LifeOS, Admin v2, Hungarian + German exercise texts | `ad3637e`. The only long-lived branch. |
-| `pulse/X-exercise-i18n` (remote) | The old exercise-translation branch | **Stale, do not merge.** Its content reached `master` through PR #2 (a cherry-pick onto the current tree). Safe to delete. |
 | `restyle/ux-engine-2.0` (remote) | An older restyle line | Not touched by this work. |
 
-`pulse-redesign` and the four `work/*` branches (`work/exercise-i18n`, `work/admin-v2-closing`,
+`pulse-redesign`, `pulse/X-exercise-i18n` (its content reached `master` through PR #2, a cherry-pick onto the
+current tree) and the four `work/*` branches (`work/exercise-i18n`, `work/admin-v2-closing`,
 `work/verify-015-isolation`, `work/profile-h1`) are merged (PRs #2–#6) and deleted.
 `MASTER-MERGE.md` describes a local merge branch prepared on 2026-10-18; it is historical and was not used — the
 merge was done through PR #6 instead.
